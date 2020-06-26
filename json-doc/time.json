@@ -142,7 +142,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "the string of the date to compare or an object of this class"
+                    "description": "allowed comparators '>','>=', '<','<=', '='"
                 },
                 {
                     "name": "comparator",
@@ -151,8 +151,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "allowed comparators '>','>=', '<','<=', '='"
+                    "default_name": ""
                 }
             ]
         },
@@ -186,8 +185,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "the string of the date to compare or an object of this class"
+                    "default_name": ""
                 }
             ]
         },
@@ -221,8 +219,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "the string of the date to compare or an object of this class"
+                    "default_name": ""
                 }
             ]
         },
@@ -256,8 +253,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "the string of the date to compare or an object of this class"
+                    "default_name": ""
                 }
             ]
         },

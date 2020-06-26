@@ -469,7 +469,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The view to be rendered"
+                    "description": "The data model to fill the view with"
                 },
                 {
                     "name": "model",
@@ -478,8 +478,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The data model to fill the view with"
+                    "default_name": ""
                 }
             ]
         },
@@ -537,8 +536,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The request path <em>(e.g books\/466565 or xml\/books\/48465)<\/em>"
+                    "default_name": ""
                 },
                 {
                     "name": "post",
@@ -590,8 +588,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "name If .php is ommited it will be added"
+                    "default_name": ""
                 }
             ]
         },
@@ -625,8 +622,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The javascript chain to add"
+                    "default_name": ""
                 }
             ]
         },
@@ -1948,8 +1944,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "name"
+                    "default_name": ""
                 }
             ]
         },

@@ -310,8 +310,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Configuration array"
+                    "default_name": ""
                 }
             ]
         },

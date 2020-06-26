@@ -2,7 +2,6 @@
     "doc": {
         "description": "A class for managing users",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Authentication",
@@ -873,7 +872,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "user User ID"
+                    "description": "Type of the message"
                 },
                 {
                     "name": "message",
@@ -883,7 +882,7 @@
                     "has_default": true,
                     "default": "hotlink",
                     "default_name": "",
-                    "description": "Type of the message"
+                    "description": "Timestamp of the expiration date"
                 },
                 {
                     "name": "exp",
@@ -892,8 +891,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Timestamp of the expiration date"
+                    "default_name": ""
                 }
             ]
         },

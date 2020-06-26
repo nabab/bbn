@@ -2,7 +2,6 @@
     "doc": {
         "description": "This class generates PDF with the mPDF class",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Dec 14, 2012, 04:23:55 +0000",
             "category": "Appui",
@@ -416,11 +415,11 @@
         "add_fonts": {
             "name": "add_fonts",
             "summary": "Adds custom fonts",
-            "description": "$pdf->add_fonts([\n 'dawningofanewday' => [\n   'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n  ]\n]);",
+            "description": "*\n$pdf->add_fonts([\n 'dawningofanewday' => [\n   'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n  ]\n]);",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>$pdf-&gt;add_fonts([\n'dawningofanewday' =&gt; [\n'R' =&gt; BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n]\n]);<\/p>"
+                    "content": "<p>*\n$pdf-&gt;add_fonts([\n'dawningofanewday' =&gt; [\n'R' =&gt; BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n]\n]);<\/p>"
                 }
             ],
             "file": "bbn\\file\\pdf",

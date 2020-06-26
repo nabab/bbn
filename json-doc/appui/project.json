@@ -433,8 +433,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The repository's name (code) or the repository's configuration"
+                    "default_name": ""
                 }
             ]
         },
@@ -574,8 +573,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The repository's name (code)"
+                    "default_name": ""
                 }
             ]
         },
@@ -643,8 +641,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The repository's name (code)"
+                    "default_name": ""
                 }
             ]
         },
@@ -678,8 +675,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The real file's path"
+                    "default_name": ""
                 }
             ]
         },

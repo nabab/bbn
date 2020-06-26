@@ -1033,12 +1033,15 @@ class str
   {
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
-    foreach ( $args as $a ){
+    foreach ($args as $a) {
       if (\is_array($a)) {
-        x::log($args, 'check_name_args');
-        x::log(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20), 'check_name_args');
+        foreach ($a as $b) {
+          if (!self::check_name($b)) {
+            return false;
+          }
+        }
       }
-      if ( !\is_string($a) ){
+      if (!\is_string($a)) {
         return false;
       }
       return \preg_match('/^[A-z]{1}[A-z0-9_]*$/', $a);

@@ -2,7 +2,6 @@
     "doc": {
         "description": "Documentation block parser",
         "tags": {
-            "author": "Mirko Argentino <mirko@bbn.solutions>",
             "copyright": "BBN Solutions",
             "category": "Parsers",
             "version": "1.0"

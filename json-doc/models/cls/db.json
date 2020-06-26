@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "Basic object Class\nThis class implements basic functions and vars",
+        "description": "Basic object Class\n *\n *\nThis class implements basic functions and vars",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Generic classes",
@@ -520,11 +519,11 @@
     "namespaceName": "bbn\\models\\cls",
     "shortName": "db",
     "summary": "Basic object Class",
-    "description": "This class implements basic functions and vars",
+    "description": "*\n *\nThis class implements basic functions and vars",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>This class implements basic functions and vars<\/p>"
+            "content": "<p><em>\n<\/em>\nThis class implements basic functions and vars<\/p>"
         }
     ]
 }

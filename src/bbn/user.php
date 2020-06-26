@@ -534,12 +534,9 @@ class user extends models\cls\basic
           ], [
             $p['id'] => $id_session
           ]) ){
-            x::log($this->id, 'user_login');
+            x::log("Problem updating for user {$this->id}", 'user_login');
             //die(var_dump($this->session));
           }
-        }
-        else{
-          x::log("Pas besoin", 'user_login');
         }
       }
       else{
@@ -589,14 +586,14 @@ class user extends models\cls\basic
   public function check_attempts(): bool
   {
     if ( !isset($this->cfg) ){
-      x::log("Checking attempts without user config", 'user_login');
+      //x::log("Checking attempts without user config", 'user_login');
       return false;
     }
     if ( isset($this->cfg['num_attempts']) && $this->cfg['num_attempts'] > $this->class_cfg['max_attempts'] ){
-      x::log("Checking attempts maxed out!", 'user_login');
+      //x::log("Checking attempts maxed out!", 'user_login');
       return false;
     }
-    x::log("Checking attempts ok", 'user_login');
+    //x::log("Checking attempts ok", 'user_login');
     return true;
   }
 
@@ -1008,7 +1005,7 @@ class user extends models\cls\basic
   {
     if ( !$this->error ){
       $this->error = $err;
-      \bbn\x::log($this->get_error(), 'user_login');
+      //\bbn\x::log($this->get_error(), 'user_login');
       //die(var_dump($err));
     }
     return $this;
@@ -1244,11 +1241,11 @@ class user extends models\cls\basic
        $id = $this->get_session('id');
        if ($id_session && $id) {
          $this->_sess_info($id_session);
-         x::log([$this->sess_cfg, $this->_get_session('fingerprint'), $this->get_print($this->_get_session('fingerprint'))], 'user_login');
+         //x::log([$this->sess_cfg, $this->_get_session('fingerprint'), $this->get_print($this->_get_session('fingerprint'))], 'user_login');
          if (isset($this->sess_cfg['fingerprint']) &&
              ($this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
          ) {
-           x::log("THe auth should have worked for id $id", 'user_login');
+           //x::log("THe auth should have worked for id $id", 'user_login');
            $this
              ->_authenticate($id)
              ->_user_info()
@@ -1260,7 +1257,7 @@ class user extends models\cls\basic
          }
        }
        else {
-         x::log([$id_session, $id], 'user_login');
+         //x::log([$id_session, $id], 'user_login');
          $this->set_error(15);
        }
      }

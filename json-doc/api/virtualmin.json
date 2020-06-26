@@ -125,7 +125,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "file cache"
+                    "description": "name"
                 },
                 {
                     "name": "arguments",
@@ -134,8 +134,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "name"
+                    "default_name": ""
                 }
             ]
         },

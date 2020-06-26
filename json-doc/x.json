@@ -2,7 +2,6 @@
     "doc": {
         "description": "A container of tools.",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "license": "http:\/\/opensource.org\/licenses\/MIT MIT",
@@ -133,8 +132,12 @@
         "log": {
             "name": "log",
             "summary": "Saves logs to a file.",
-            "description": "```php\n\\bbn\\x::log('My text', 'FileName');\n```",
+            "description": "*\n```php\n\\bbn\\x::log('My text', 'FileName');\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::log('My text', 'FileName');"
@@ -166,7 +169,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Item to log."
+                    "description": "Filename, default: \"misc\"."
                 },
                 {
                     "name": "file",
@@ -175,8 +178,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "misc",
-                    "default_name": "",
-                    "description": "Filename, default: \"misc\"."
+                    "default_name": ""
                 }
             ]
         },
@@ -211,7 +213,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The text to save."
+                    "description": "The file's name, default: \"misc\"."
                 },
                 {
                     "name": "errstr",
@@ -220,8 +222,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The file's name, default: \"misc\"."
+                    "default_name": ""
                 },
                 {
                     "name": "errfile",
@@ -475,11 +476,15 @@
         "merge_objects": {
             "name": "merge_objects",
             "summary": "Returns to a merged object from two objects.",
-            "description": "```php\nclass A {\n public $a = 10;\n public $b = 20;\n};\nclass B {\n public $c = 30;\n public $d = 40;\n};\n$obj1 = new A;\n$obj2 = new B;\n\\bbn\\x::merge_objects($obj1, $obj2);\n\/\/ object {'a': 10, 'b': 20, 'c': 30, 'd': 40}\n```",
+            "description": "*\n```php\nclass A {\n public $a = 10;\n public $b = 20;\n};\n   *\nclass B {\n public $c = 30;\n public $d = 40;\n};\n   *\n$obj1 = new A;\n$obj2 = new B;\n   *\n\\bbn\\x::merge_objects($obj1, $obj2);\n\/\/ object {'a': 10, 'b': 20, 'c': 30, 'd': 40}\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "class A {\n public $a = 10;\n public $b = 20;\n};\nclass B {\n public $c = 30;\n public $d = 40;\n};\n$obj1 = new A;\n$obj2 = new B;\n\\bbn\\x::merge_objects($obj1, $obj2);\n\/\/ object {'a': 10, 'b': 20, 'c': 30, 'd': 40}"
+                    "content": "class A {\n public $a = 10;\n public $b = 20;\n};\n   *\nclass B {\n public $c = 30;\n public $d = 40;\n};\n   *\n$obj1 = new A;\n$obj2 = new B;\n   *\n\\bbn\\x::merge_objects($obj1, $obj2);\n\/\/ object {'a': 10, 'b': 20, 'c': 30, 'd': 40}"
                 }
             ],
             "file": "bbn\\x",
@@ -508,7 +513,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The first object to merge."
+                    "description": "The second object to merge."
                 },
                 {
                     "name": "o2",
@@ -517,16 +522,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The second object to merge."
+                    "default_name": ""
                 }
             ]
         },
         "merge_arrays": {
             "name": "merge_arrays",
             "summary": "Returns to a merged array from two or more arrays.",
-            "description": "```php\n\\bbn\\x::merge_arrays([1, 'Test'], [2, 'Example']);\n\/\/ array [1, 'Test', 2, 'Example']\n```",
+            "description": "*\n```php\n\\bbn\\x::merge_arrays([1, 'Test'], [2, 'Example']);\n\/\/ array [1, 'Test', 2, 'Example']\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::merge_arrays([1, 'Test'], [2, 'Example']);\n\/\/ array [1, 'Test', 2, 'Example']"
@@ -558,7 +566,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The first array to merge."
+                    "description": "The second array to merge."
                 },
                 {
                     "name": "a2",
@@ -567,16 +575,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The second array to merge."
+                    "default_name": ""
                 }
             ]
         },
         "to_object": {
             "name": "to_object",
             "summary": "Converts a JSON string or an array into an object.",
-            "description": "```php\n\\bbn\\x::to_object([[1, 'Test'], [2, 'Example']]);\n\/\/ object {[1, 'Test'], [2, 'Example']}\n```",
+            "description": "*\n```php\n\\bbn\\x::to_object([[1, 'Test'], [2, 'Example']]);\n\/\/ object {[1, 'Test'], [2, 'Example']}\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::to_object([[1, 'Test'], [2, 'Example']]);\n\/\/ object {[1, 'Test'], [2, 'Example']}"
@@ -607,16 +618,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The array or JSON to convert."
+                    "default_name": ""
                 }
             ]
         },
         "to_array": {
             "name": "to_array",
             "summary": "Converts a JSON string or an object into an array.",
-            "description": "```php\n$file = new stdClass();\n$file->foo = \"bar\";\n$file->bar = \"foo\";\necho \\bbn\\x::to_array($file);\n\/* array [\n    'foo' => 'bar',\n    'bar' => 'foo'\n]\n```",
+            "description": "*\n```php\n$file = new stdClass();\n$file->foo = \"bar\";\n$file->bar = \"foo\";\necho \\bbn\\x::to_array($file);\n\/* array [\n    'foo' => 'bar',\n    'bar' => 'foo'\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$file = new stdClass();\n$file->foo = \"bar\";\n$file->bar = \"foo\";\necho \\bbn\\x::to_array($file);\n\/* array [\n    'foo' => 'bar',\n    'bar' => 'foo'\n]"
@@ -647,8 +661,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The object or JSON to convert."
+                    "default_name": ""
                 }
             ]
         },
@@ -689,11 +702,15 @@
         "indent_json": {
             "name": "indent_json",
             "summary": "Indents a flat JSON string to make it human-readable.",
-            "description": "```php\necho \\bbn\\x::indent_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}');\n\/\n{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"isAlive\": true,\n  \"age\": 25\n}\n```",
+            "description": "*\n```php\necho \\bbn\\x::indent_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}');\n\/*\n{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"isAlive\": true,\n  \"age\": 25\n}\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "echo \\bbn\\x::indent_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}');\n\/\n{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"isAlive\": true,\n  \"age\": 25\n}"
+                    "content": "echo \\bbn\\x::indent_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}');\n\/*\n{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"isAlive\": true,\n  \"age\": 25\n}"
                 }
             ],
             "file": "bbn\\x",
@@ -721,8 +738,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The original JSON string to process."
+                    "default_name": ""
                 }
             ]
         },
@@ -757,7 +773,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "An object or array to clean."
+                    "description": "space If \"true\" the spaces are removed, default: \"false\"."
                 },
                 {
                     "name": "remove_space",
@@ -766,8 +782,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "space If \"true\" the spaces are removed, default: \"false\"."
+                    "default_name": ""
                 }
             ]
         },
@@ -802,7 +817,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The original array."
+                    "description": "Alias for the index."
                 },
                 {
                     "name": "keyname",
@@ -812,7 +827,7 @@
                     "has_default": true,
                     "default": "value",
                     "default_name": "",
-                    "description": "Alias for the index."
+                    "description": "Alias for the value."
                 },
                 {
                     "name": "valname",
@@ -821,19 +836,18 @@
                     "required": false,
                     "has_default": true,
                     "default": "text",
-                    "default_name": "",
-                    "description": "Alias for the value."
+                    "default_name": ""
                 }
             ]
         },
         "is_assoc": {
             "name": "is_assoc",
             "summary": "Checks if the given array is associative.",
-            "description": "```php\n\\bbn\\\\x::is_assoc(['id' => 0, 'name' => 'Allison']);\n\\bbn\\\\x::is_assoc(['Allison', 'John', 'Bert']);\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 2 => \"Bert\"]);\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 3 => \"Bert\"]);\n\/\/ boolean true\n\/\/ boolean false\n\/\/ boolean false\n\/\/ boolean true\n```",
+            "description": "```php\n\\bbn\\\\x::is_assoc(['id' => 0, 'name' => 'Allison']);\n   *\n\\bbn\\\\x::is_assoc(['Allison', 'John', 'Bert']);\n   *\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 2 => \"Bert\"]);\n   *\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 3 => \"Bert\"]);\n   *\n\/\/ boolean true\n\/\/ boolean false\n\/\/ boolean false\n\/\/ boolean true\n```",
             "description_parts": [
                 {
                     "type": "code",
-                    "content": "\\bbn\\\\x::is_assoc(['id' => 0, 'name' => 'Allison']);\n\\bbn\\\\x::is_assoc(['Allison', 'John', 'Bert']);\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 2 => \"Bert\"]);\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 3 => \"Bert\"]);\n\/\/ boolean true\n\/\/ boolean false\n\/\/ boolean false\n\/\/ boolean true"
+                    "content": "\\bbn\\\\x::is_assoc(['id' => 0, 'name' => 'Allison']);\n   *\n\\bbn\\\\x::is_assoc(['Allison', 'John', 'Bert']);\n   *\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 2 => \"Bert\"]);\n   *\n\\bbn\\\\x::is_assoc([0 => \"Allison\", 1 => \"John\", 3 => \"Bert\"]);\n   *\n\/\/ boolean true\n\/\/ boolean false\n\/\/ boolean false\n\/\/ boolean true"
                 }
             ],
             "file": "bbn\\x",
@@ -861,8 +875,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The array to check."
+                    "default_name": ""
                 }
             ]
         },
@@ -1013,11 +1026,11 @@
         "build_options": {
             "name": "build_options",
             "summary": "Returns the HTML code for creating the &lt;option&gt; tag(s) based on an array.",
-            "description": "If the array is indexed, the index will be used as value\n```php\n\\bbn\\x::build_options(['yes', 'no']);\n\/\/ string \"<option value=\"yes\">yes<\/option>;<option value=\"no\">no<\/option>\"\n\\bbn\\x::build_options(['yes', 'no'], 'no');\n\/\/ string \"<option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\n\\bbn\\x::build_options(['yes', 'no'], 'no', 'LabelForEmpty');\n\/\/ string \"<option value=\"\">LabelForEmpty<\/option><option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\n\\bbn\\x::dump(\\bbn\\x::build_options([3 => \"Allison\", 4 => \"Mike\", 5 => \"Andrew\"], 5, 'Who?'));\n\/\/ string \"<option  value=\"\">Who?<\/option><option  value=\"3\">Allison<\/option><option  value=\"4\">Mike<\/option><option  value=\"5\"  selected=\"selected\">Andrew<\/option>\"\n```",
+            "description": "If the array is indexed, the index will be used as value\n   *\n```php\n\\bbn\\x::build_options(['yes', 'no']);\n\/\/ string \"<option value=\"yes\">yes<\/option>;<option value=\"no\">no<\/option>\"\n\\bbn\\x::build_options(['yes', 'no'], 'no');\n\/\/ string \"<option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\n\\bbn\\x::build_options(['yes', 'no'], 'no', 'LabelForEmpty');\n\/\/ string \"<option value=\"\">LabelForEmpty<\/option><option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\n\\bbn\\x::dump(\\bbn\\x::build_options([3 => \"Allison\", 4 => \"Mike\", 5 => \"Andrew\"], 5, 'Who?'));\n\/\/ string \"<option  value=\"\">Who?<\/option><option  value=\"3\">Allison<\/option><option  value=\"4\">Mike<\/option><option  value=\"5\"  selected=\"selected\">Andrew<\/option>\"\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>If the array is indexed, the index will be used as value<\/p>"
+                    "content": "<p>If the array is indexed, the index will be used as value\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -1050,7 +1063,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The source array for the options"
+                    "description": "The selected value"
                 },
                 {
                     "name": "selected",
@@ -1060,7 +1073,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The selected value"
+                    "description": "label A label for empty value"
                 },
                 {
                     "name": "empty_label",
@@ -1069,16 +1082,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "label A label for empty value"
+                    "default_name": ""
                 }
             ]
         },
         "to_keypair": {
             "name": "to_keypair",
             "summary": "Converts a numeric array into an associative one, alternating key and value.",
-            "description": "```php\n\\bbn\\x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);\n\/\/ string ['Test' => 'TestFile', 'Example' => 'ExampleFile']\n```",
+            "description": "*\n```php\n\\bbn\\x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);\n\/\/ string ['Test' => 'TestFile', 'Example' => 'ExampleFile']\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);\n\/\/ string ['Test' => 'TestFile', 'Example' => 'ExampleFile']"
@@ -1110,7 +1126,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The array. It must contain an even number of values"
+                    "description": "If false no index protection will be performed"
                 },
                 {
                     "name": "protected",
@@ -1119,8 +1135,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 1,
-                    "default_name": "",
-                    "description": "If false no index protection will be performed"
+                    "default_name": ""
                 }
             ]
         },
@@ -1155,7 +1170,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A multidimensional array"
+                    "description": "Where to check the property value from"
                 },
                 {
                     "name": "key",
@@ -1164,16 +1179,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Where to check the property value from"
+                    "default_name": ""
                 }
             ]
         },
         "min_with_key": {
             "name": "min_with_key",
             "summary": "Returns the minimum value of an index from a multidimensional array.",
-            "description": "```php\n\\bbn\\x::min_with_key([\n ['age' => 1, 'name' => 'Michelle'],\n ['age' => 8, 'name' => 'John'],\n ['age' => 45, 'name' => 'Sarah'],\n ['age' => 45, 'name' => 'Camilla'],\n ['age' => 2, 'name' => 'Allison']\n], 'age');\n\/\/ int  1\n```",
+            "description": "*\n```php\n\\bbn\\x::min_with_key([\n ['age' => 1, 'name' => 'Michelle'],\n ['age' => 8, 'name' => 'John'],\n ['age' => 45, 'name' => 'Sarah'],\n ['age' => 45, 'name' => 'Camilla'],\n ['age' => 2, 'name' => 'Allison']\n], 'age');\n\/\/ int  1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::min_with_key([\n ['age' => 1, 'name' => 'Michelle'],\n ['age' => 8, 'name' => 'John'],\n ['age' => 45, 'name' => 'Sarah'],\n ['age' => 45, 'name' => 'Camilla'],\n ['age' => 2, 'name' => 'Allison']\n], 'age');\n\/\/ int  1"
@@ -1205,7 +1223,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A multidimensional array."
+                    "description": "The index where to search."
                 },
                 {
                     "name": "key",
@@ -1214,16 +1232,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The index where to search."
+                    "default_name": ""
                 }
             ]
         },
         "debug": {
             "name": "debug",
             "summary": "Gets the backtrace and dumps or logs it into a file.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\x::debug());\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\x::debug());\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\x::debug());"
@@ -1262,11 +1283,15 @@
         "map": {
             "name": "map",
             "summary": "Applies the given function at all levels of a multidimensional array (if defined param $item).",
-            "description": "```php\n$ar = [\n       ['age' => 45,\n         'name' => 'John',\n         'children' => [\n           ['age' => 8, 'name' => 'Carol'],\n           ['age' => 24, 'name' => 'Jack'],\n         ]\n       ],\n       ['age' => 44, 'name' => 'Benjamin'],\n       ['age' => 60, 'name' => 'Paul', 'children' =>\n         [\n           ['age' => 36, 'name' => 'Mike'],\n           ['age' => 46, 'name' => 'Alan', 'children' =>\n             ['age' => 8, 'name' => 'Allison'],\n           ]\n         ]\n       ]\n     ];\n\\bbn\\x::hdump(\\bbn\\x::map(function($a){\n if ( $a['age']>20){\n   $a['name'] = 'Mr. '.$a['name'];\n }\n return $a;\n}, $ar,'children'));\n\/* array [\n           [\n             \"age\"  =>  45,\n             \"name\"  =>  \"Mr.  John\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  8,\n                 \"name\"  =>  \"Carol\",\n               ],\n               [\n                 \"age\"  =>  24,\n                 \"name\"  =>  \"Mr.  Jack\",\n               ],\n             ],\n           ],\n           [\n             \"age\"  =>  44,\n             \"name\"  =>  \"Mr.  Benjamin\",\n           ],\n           [\n             \"age\"  =>  60,\n             \"name\"  =>  \"Mr.  Paul\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  36,\n                 \"name\"  =>  \"Mr.  Mike\",\n               ],\n               [\n                 \"age\"  =>  46,\n                 \"name\"  =>  \"Mr.  Alan\",\n                 \"children\"  =>  [\n                   \"age\"  =>  8,\n                   \"name\"  =>  \"Allison\",\n                 ],\n               ],\n           ],\n         ]\n```",
+            "description": "*\n```php\n$ar = [\n       ['age' => 45,\n         'name' => 'John',\n         'children' => [\n           ['age' => 8, 'name' => 'Carol'],\n           ['age' => 24, 'name' => 'Jack'],\n         ]\n       ],\n       ['age' => 44, 'name' => 'Benjamin'],\n       ['age' => 60, 'name' => 'Paul', 'children' =>\n         [\n           ['age' => 36, 'name' => 'Mike'],\n           ['age' => 46, 'name' => 'Alan', 'children' =>\n             ['age' => 8, 'name' => 'Allison'],\n           ]\n         ]\n       ]\n     ];\n\\bbn\\x::hdump(\\bbn\\x::map(function($a){\n if ( $a['age']>20){\n   $a['name'] = 'Mr. '.$a['name'];\n }\n return $a;\n}, $ar,'children'));\n\/* array [\n           [\n             \"age\"  =>  45,\n             \"name\"  =>  \"Mr.  John\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  8,\n                 \"name\"  =>  \"Carol\",\n               ],\n               [\n                 \"age\"  =>  24,\n                 \"name\"  =>  \"Mr.  Jack\",\n               ],\n             ],\n           ],\n           [\n             \"age\"  =>  44,\n             \"name\"  =>  \"Mr.  Benjamin\",\n           ],\n           [\n             \"age\"  =>  60,\n             \"name\"  =>  \"Mr.  Paul\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  36,\n                 \"name\"  =>  \"Mr.  Mike\",\n               ],\n               [\n                 \"age\"  =>  46,\n                 \"name\"  =>  \"Mr.  Alan\",\n                 \"children\"  =>  [\n                   \"age\"  =>  8,\n                   \"name\"  =>  \"Allison\",\n                 ],\n               ],\n           ],\n         ]\n   *\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "$ar = [\n       ['age' => 45,\n         'name' => 'John',\n         'children' => [\n           ['age' => 8, 'name' => 'Carol'],\n           ['age' => 24, 'name' => 'Jack'],\n         ]\n       ],\n       ['age' => 44, 'name' => 'Benjamin'],\n       ['age' => 60, 'name' => 'Paul', 'children' =>\n         [\n           ['age' => 36, 'name' => 'Mike'],\n           ['age' => 46, 'name' => 'Alan', 'children' =>\n             ['age' => 8, 'name' => 'Allison'],\n           ]\n         ]\n       ]\n     ];\n\\bbn\\x::hdump(\\bbn\\x::map(function($a){\n if ( $a['age']>20){\n   $a['name'] = 'Mr. '.$a['name'];\n }\n return $a;\n}, $ar,'children'));\n\/* array [\n           [\n             \"age\"  =>  45,\n             \"name\"  =>  \"Mr.  John\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  8,\n                 \"name\"  =>  \"Carol\",\n               ],\n               [\n                 \"age\"  =>  24,\n                 \"name\"  =>  \"Mr.  Jack\",\n               ],\n             ],\n           ],\n           [\n             \"age\"  =>  44,\n             \"name\"  =>  \"Mr.  Benjamin\",\n           ],\n           [\n             \"age\"  =>  60,\n             \"name\"  =>  \"Mr.  Paul\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  36,\n                 \"name\"  =>  \"Mr.  Mike\",\n               ],\n               [\n                 \"age\"  =>  46,\n                 \"name\"  =>  \"Mr.  Alan\",\n                 \"children\"  =>  [\n                   \"age\"  =>  8,\n                   \"name\"  =>  \"Allison\",\n                 ],\n               ],\n           ],\n         ]"
+                    "content": "$ar = [\n       ['age' => 45,\n         'name' => 'John',\n         'children' => [\n           ['age' => 8, 'name' => 'Carol'],\n           ['age' => 24, 'name' => 'Jack'],\n         ]\n       ],\n       ['age' => 44, 'name' => 'Benjamin'],\n       ['age' => 60, 'name' => 'Paul', 'children' =>\n         [\n           ['age' => 36, 'name' => 'Mike'],\n           ['age' => 46, 'name' => 'Alan', 'children' =>\n             ['age' => 8, 'name' => 'Allison'],\n           ]\n         ]\n       ]\n     ];\n\\bbn\\x::hdump(\\bbn\\x::map(function($a){\n if ( $a['age']>20){\n   $a['name'] = 'Mr. '.$a['name'];\n }\n return $a;\n}, $ar,'children'));\n\/* array [\n           [\n             \"age\"  =>  45,\n             \"name\"  =>  \"Mr.  John\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  8,\n                 \"name\"  =>  \"Carol\",\n               ],\n               [\n                 \"age\"  =>  24,\n                 \"name\"  =>  \"Mr.  Jack\",\n               ],\n             ],\n           ],\n           [\n             \"age\"  =>  44,\n             \"name\"  =>  \"Mr.  Benjamin\",\n           ],\n           [\n             \"age\"  =>  60,\n             \"name\"  =>  \"Mr.  Paul\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  36,\n                 \"name\"  =>  \"Mr.  Mike\",\n               ],\n               [\n                 \"age\"  =>  46,\n                 \"name\"  =>  \"Mr.  Alan\",\n                 \"children\"  =>  [\n                   \"age\"  =>  8,\n                   \"name\"  =>  \"Allison\",\n                 ],\n               ],\n           ],\n         ]\n   *"
                 }
             ],
             "file": "bbn\\x",
@@ -1321,8 +1346,12 @@
         "find": {
             "name": "find",
             "summary": "Returns the array's first index, which satisfies the 'where' condition.",
-            "description": "```php\n\\bbn\\x::hdump(\\bbn\\x::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['id' => 4]));\n\/\/ int 3\n\\bbn\\x::hdump(\\bbn\\x::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert', 'fname' => 'Taylor']));\n\/\/ int 1\n```",
+            "description": "*\n```php\n\\bbn\\x::hdump(\\bbn\\x::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['id' => 4]));\n\/\/ int 3\n\\bbn\\x::hdump(\\bbn\\x::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert', 'fname' => 'Taylor']));\n\/\/ int 1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::hdump(\\bbn\\x::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['id' => 4]));\n\/\/ int 3\n\\bbn\\x::hdump(\\bbn\\x::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert', 'fname' => 'Taylor']));\n\/\/ int 1"
@@ -1354,7 +1383,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The search within the array"
+                    "description": "The where condition"
                 },
                 {
                     "name": "where",
@@ -1363,8 +1392,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The where condition"
+                    "default_name": ""
                 },
                 {
                     "name": "from",
@@ -1524,8 +1552,12 @@
         "get_row": {
             "name": "get_row",
             "summary": "Returns the first row of an array to satisfy the where parameters ({@link find()).",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\x::get_row([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert']));\n\/\/ array [ \"id\" => 2, \"name\" => \"Albert\", \"fname\" => \"Taylor\", ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\x::get_row([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert']));\n\/\/ array [ \"id\" => 2, \"name\" => \"Albert\", \"fname\" => \"Taylor\", ]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\x::get_row([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert']));\n\/\/ array [ \"id\" => 2, \"name\" => \"Albert\", \"fname\" => \"Taylor\", ]"
@@ -1557,7 +1589,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The array"
+                    "description": "The where condition"
                 },
                 {
                     "name": "where",
@@ -1566,16 +1598,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The where condition"
+                    "default_name": ""
                 }
             ]
         },
         "get_field": {
             "name": "get_field",
             "summary": "Returns the first value of a specific field of an array.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\x::get_row([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert'],'id'));\n\/\/ int 2\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\x::get_row([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert'],'id'));\n\/\/ int 2\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\x::get_row([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert'],'id'));\n\/\/ int 2"
@@ -1607,7 +1642,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The array"
+                    "description": "The where condition"
                 },
                 {
                     "name": "where",
@@ -1617,7 +1652,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The where condition"
+                    "description": "The field where to look for"
                 },
                 {
                     "name": "field",
@@ -1626,19 +1661,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The field where to look for"
+                    "default_name": ""
                 }
             ]
         },
         "pick": {
             "name": "pick",
             "summary": "Returns a reference to a subarray targeted by an array $keys.",
-            "description": "```php\n$ar = [\n 'session' => [\n   'user' => [\n     'profile' => [\n       'admin' => [\n         'email' => 'test@test.com'\n       ]\n     ]\n   ]\n ]\n];\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin', 'email']));\n\/\/ string test@test.com\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin']));\n\/\/ [\"email\"  =>  \"test@test.com\",]\n```",
+            "description": "*\n```php\n$ar = [\n 'session' => [\n   'user' => [\n     'profile' => [\n       'admin' => [\n         'email' => 'test@test.com'\n       ]\n     ]\n   ]\n ]\n];\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin', 'email']));\n\/\/ string test@test.com\n   *\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin']));\n\/\/ [\"email\"  =>  \"test@test.com\",]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "$ar = [\n 'session' => [\n   'user' => [\n     'profile' => [\n       'admin' => [\n         'email' => 'test@test.com'\n       ]\n     ]\n   ]\n ]\n];\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin', 'email']));\n\/\/ string test@test.com\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin']));\n\/\/ [\"email\"  =>  \"test@test.com\",]"
+                    "content": "$ar = [\n 'session' => [\n   'user' => [\n     'profile' => [\n       'admin' => [\n         'email' => 'test@test.com'\n       ]\n     ]\n   ]\n ]\n];\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin', 'email']));\n\/\/ string test@test.com\n   *\n\\bbn\\x::hdump(\\bbn\\x::pick($ar,['session', 'user', 'profile', 'admin']));\n\/\/ [\"email\"  =>  \"test@test.com\",]"
                 }
             ],
             "file": "bbn\\x",
@@ -1684,8 +1722,12 @@
         "sort": {
             "name": "sort",
             "summary": "Sorts the items of an array.",
-            "description": "```php\n$var = [3, 2, 5, 6, 1];\n\\bbn\\x::sort($var);\n\\bbn\\x::hdump($var);\n\/\/ array [1,2,3,5,6]\n```",
+            "description": "*\n```php\n$var = [3, 2, 5, 6, 1];\n\\bbn\\x::sort($var);\n\\bbn\\x::hdump($var);\n\/\/ array [1,2,3,5,6]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$var = [3, 2, 5, 6, 1];\n\\bbn\\x::sort($var);\n\\bbn\\x::hdump($var);\n\/\/ array [1,2,3,5,6]"
@@ -1716,16 +1758,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "array The reference of the array to sort"
+                    "default_name": ""
                 }
             ]
         },
         "sort_by": {
             "name": "sort_by",
             "summary": "Sorts the items of an indexed array based on a given $key.",
-            "description": "```php\n $v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];\n \\bbn\\x::sort_by($v,'name','desc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'name','asc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'age','asc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'age','desc');\n \\bbn\\x::hdump($v);\n```",
+            "description": "*\n```php\n $v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];\n \\bbn\\x::sort_by($v,'name','desc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'name','asc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'age','asc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'age','desc');\n \\bbn\\x::hdump($v);\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];\n \\bbn\\x::sort_by($v,'name','desc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'name','asc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'age','asc');\n \\bbn\\x::hdump($v);\n \\bbn\\x::sort_by($v,'age','desc');\n \\bbn\\x::hdump($v);"
@@ -1757,7 +1802,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The array of data to sort"
+                    "description": "The key to sort by"
                 },
                 {
                     "name": "key",
@@ -1767,7 +1812,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The key to sort by"
+                    "description": "The direction of the sort ('asc'|'desc')"
                 },
                 {
                     "name": "dir",
@@ -1776,8 +1821,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The direction of the sort ('asc'|'desc')"
+                    "default_name": ""
                 }
             ]
         },
@@ -1813,11 +1857,15 @@
         "curl": {
             "name": "curl",
             "summary": "Makes a Curl call towards a URL and returns the result as a string.",
-            "description": "```php\n $url = 'https:\/\/www.omdbapi.com\/';\n $param = ['t'=>'la vita \u00e8 bella'];\n \\bbn\\x::hdump(\\bbn\\x::curl($url,$param, ['POST' => false]));\n\/\/ object {\"Title\":\"La  vita  \u00e8  bella\",\"Year\":\"1943\",\"Rated\":\"N\/A\",\"Released\":\"26  May  1943\",\"Runtime\":\"76  min\",\"Genre\":\"Comedy\",\"Director\":\"Carlo  Ludovico  Bragaglia\",\"Writer\":\"Carlo  Ludovico  Bragaglia  (story  and  screenplay)\",\"Actors\":\"Alberto  Rabagliati,  Mar\u00eda  Mercader,  Anna  Magnani,  Carlo  Campanini\",\"Plot\":\"N\/A\",\"Language\":\"Italian\",\"Country\":\"Italy\",\"Awards\":\"N\/A\",\"Poster\":\"http:\/\/ia.media-imdb.com\/images\/M\/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg\",\"Metascore\":\"N\/A\",\"imdbRating\":\"7.9\",\"imdbVotes\":\"50\",\"imdbID\":\"tt0036502\",\"Type\":\"movie\",\"Response\":\"True\"}\n```",
+            "description": "*\n```php\n $url = 'https:\/\/www.omdbapi.com\/';\n $param = ['t'=>'la vita \u00e8 bella'];\n \\bbn\\x::hdump(\\bbn\\x::curl($url,$param, ['POST' => false]));\n   *\n\/\/ object {\"Title\":\"La  vita  \u00e8  bella\",\"Year\":\"1943\",\"Rated\":\"N\/A\",\"Released\":\"26  May  1943\",\"Runtime\":\"76  min\",\"Genre\":\"Comedy\",\"Director\":\"Carlo  Ludovico  Bragaglia\",\"Writer\":\"Carlo  Ludovico  Bragaglia  (story  and  screenplay)\",\"Actors\":\"Alberto  Rabagliati,  Mar\u00eda  Mercader,  Anna  Magnani,  Carlo  Campanini\",\"Plot\":\"N\/A\",\"Language\":\"Italian\",\"Country\":\"Italy\",\"Awards\":\"N\/A\",\"Poster\":\"http:\/\/ia.media-imdb.com\/images\/M\/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg\",\"Metascore\":\"N\/A\",\"imdbRating\":\"7.9\",\"imdbVotes\":\"50\",\"imdbID\":\"tt0036502\",\"Type\":\"movie\",\"Response\":\"True\"}\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "$url = 'https:\/\/www.omdbapi.com\/';\n $param = ['t'=>'la vita \u00e8 bella'];\n \\bbn\\x::hdump(\\bbn\\x::curl($url,$param, ['POST' => false]));\n\/\/ object {\"Title\":\"La  vita  \u00e8  bella\",\"Year\":\"1943\",\"Rated\":\"N\/A\",\"Released\":\"26  May  1943\",\"Runtime\":\"76  min\",\"Genre\":\"Comedy\",\"Director\":\"Carlo  Ludovico  Bragaglia\",\"Writer\":\"Carlo  Ludovico  Bragaglia  (story  and  screenplay)\",\"Actors\":\"Alberto  Rabagliati,  Mar\u00eda  Mercader,  Anna  Magnani,  Carlo  Campanini\",\"Plot\":\"N\/A\",\"Language\":\"Italian\",\"Country\":\"Italy\",\"Awards\":\"N\/A\",\"Poster\":\"http:\/\/ia.media-imdb.com\/images\/M\/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg\",\"Metascore\":\"N\/A\",\"imdbRating\":\"7.9\",\"imdbVotes\":\"50\",\"imdbID\":\"tt0036502\",\"Type\":\"movie\",\"Response\":\"True\"}"
+                    "content": "$url = 'https:\/\/www.omdbapi.com\/';\n $param = ['t'=>'la vita \u00e8 bella'];\n \\bbn\\x::hdump(\\bbn\\x::curl($url,$param, ['POST' => false]));\n   *\n\/\/ object {\"Title\":\"La  vita  \u00e8  bella\",\"Year\":\"1943\",\"Rated\":\"N\/A\",\"Released\":\"26  May  1943\",\"Runtime\":\"76  min\",\"Genre\":\"Comedy\",\"Director\":\"Carlo  Ludovico  Bragaglia\",\"Writer\":\"Carlo  Ludovico  Bragaglia  (story  and  screenplay)\",\"Actors\":\"Alberto  Rabagliati,  Mar\u00eda  Mercader,  Anna  Magnani,  Carlo  Campanini\",\"Plot\":\"N\/A\",\"Language\":\"Italian\",\"Country\":\"Italy\",\"Awards\":\"N\/A\",\"Poster\":\"http:\/\/ia.media-imdb.com\/images\/M\/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg\",\"Metascore\":\"N\/A\",\"imdbRating\":\"7.9\",\"imdbVotes\":\"50\",\"imdbID\":\"tt0036502\",\"Type\":\"movie\",\"Response\":\"True\"}"
                 }
             ],
             "file": "bbn\\x",
@@ -1944,8 +1992,12 @@
         "get_tree": {
             "name": "get_tree",
             "summary": "Returns the given array or object as a tree structure ready for a JS tree.",
-            "description": "```php\n\\bbn\\x::hdump(\\bbn\\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* array [\n   [ \"text\" => 0, \"items\" => [ [ \"text\" => \"id: 1\", ], [ \"text\" => \"name: Andrew\", ], [ \"text\" => \"fname: Williams\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Emma\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Giorgio\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"id: 2\", ], [ \"text\" => \"name: Albert\", ], [ \"text\" => \"fname: Taylor\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Esther\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Paul\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 2, \"items\" => [ [ \"text\" => \"id: 3\", ], [ \"text\" => \"name: Mike\", ], [ \"text\" => \"fname: Smith\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Sara\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Fred\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], ]\n```",
+            "description": "*\n```php\n\\bbn\\x::hdump(\\bbn\\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* array [\n   [ \"text\" => 0, \"items\" => [ [ \"text\" => \"id: 1\", ], [ \"text\" => \"name: Andrew\", ], [ \"text\" => \"fname: Williams\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Emma\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Giorgio\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"id: 2\", ], [ \"text\" => \"name: Albert\", ], [ \"text\" => \"fname: Taylor\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Esther\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Paul\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 2, \"items\" => [ [ \"text\" => \"id: 3\", ], [ \"text\" => \"name: Mike\", ], [ \"text\" => \"fname: Smith\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Sara\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Fred\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], ]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::hdump(\\bbn\\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* array [\n   [ \"text\" => 0, \"items\" => [ [ \"text\" => \"id: 1\", ], [ \"text\" => \"name: Andrew\", ], [ \"text\" => \"fname: Williams\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Emma\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Giorgio\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"id: 2\", ], [ \"text\" => \"name: Albert\", ], [ \"text\" => \"fname: Taylor\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Esther\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Paul\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 2, \"items\" => [ [ \"text\" => \"id: 3\", ], [ \"text\" => \"name: Mike\", ], [ \"text\" => \"fname: Smith\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Sara\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Fred\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], ]"
@@ -1983,8 +2035,12 @@
         "make_tree": {
             "name": "make_tree",
             "summary": "Returns a view of an array or object as a JS tree.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* string\n   0\n     id: 1\n     name: Andrew\n     fname: Williams\n     children:\n       0\n         name: Emma\n         age: 6\n       1\n         name: Giorgio\n         age: 9\n   1\n     id: 2\n     name: Albert\n     fname: Taylor\n     children\n       0\n         name: Esther\n         age: 6\n       1\n         name: Paul\n         age: 9\n   2\n     id: 3\n     name: Mike\n     fname: Smith\n     children\n     0\n       name: Sara\n       age: 6\n     1\n       name: Fred\n       age: 9\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* string\n   0\n     id: 1\n     name: Andrew\n     fname: Williams\n     children:\n       0\n         name: Emma\n         age: 6\n       1\n         name: Giorgio\n         age: 9\n   1\n     id: 2\n     name: Albert\n     fname: Taylor\n     children\n       0\n         name: Esther\n         age: 6\n       1\n         name: Paul\n         age: 9\n   2\n     id: 3\n     name: Mike\n     fname: Smith\n     children\n     0\n       name: Sara\n       age: 6\n     1\n       name: Fred\n       age: 9\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* string\n   0\n     id: 1\n     name: Andrew\n     fname: Williams\n     children:\n       0\n         name: Emma\n         age: 6\n       1\n         name: Giorgio\n         age: 9\n   1\n     id: 2\n     name: Albert\n     fname: Taylor\n     children\n       0\n         name: Esther\n         age: 6\n       1\n         name: Paul\n         age: 9\n   2\n     id: 3\n     name: Mike\n     fname: Smith\n     children\n     0\n       name: Sara\n       age: 6\n     1\n       name: Fred\n       age: 9"
@@ -2022,11 +2078,11 @@
         "from_csv": {
             "name": "from_csv",
             "summary": "Formats a CSV line(s) and returns it as an array.",
-            "description": "Adapted from http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\n```php\n \\bbn\\x::dump(\\bbn\\x::from_csv(\n     '\"141\";\"10\/11\/2002\";\"350.00\";\"1311742251\"\n     \"142\";\"12\/12\/2002\";\"349.00\";\"1311742258\"'\n ));\n\/\/ [ [ \"141\", \"10\/11\/2002\", \"350.00\", \"1311742251\", ], [ \"142\", \"12\/12\/2002\", \"349.00\", \"1311742258\", ], ]\n```",
+            "description": "Adapted from http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\n   *\n```php\n \\bbn\\x::dump(\\bbn\\x::from_csv(\n     '\"141\";\"10\/11\/2002\";\"350.00\";\"1311742251\"\n     \"142\";\"12\/12\/2002\";\"349.00\";\"1311742258\"'\n ));\n\/\/ [ [ \"141\", \"10\/11\/2002\", \"350.00\", \"1311742251\", ], [ \"142\", \"12\/12\/2002\", \"349.00\", \"1311742258\", ], ]\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Adapted from <a href=\"http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\">http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120<\/a><\/p>"
+                    "content": "<p>Adapted from <a href=\"http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\">http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120<\/a>\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -2058,8 +2114,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The Csv string to format"
+                    "default_name": ""
                 },
                 {
                     "name": "delimiter",
@@ -2093,11 +2148,11 @@
         "to_csv": {
             "name": "to_csv",
             "summary": "Formats an array as a CSV string.",
-            "description": "Adapted from http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\n```php\n\\bbn\\x::dump(\\bbn\\x::to_csv([[\"John\", \"Mike\", \"David\", \"Clara\"],[\"White\", \"Red\", \"Green\", \"Blue\"]]));\n\/* string  John;Mike;David;Clara\n           White;Red;Green;Blue\n```",
+            "description": "Adapted from http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\n   *\n```php\n\\bbn\\x::dump(\\bbn\\x::to_csv([[\"John\", \"Mike\", \"David\", \"Clara\"],[\"White\", \"Red\", \"Green\", \"Blue\"]]));\n\/* string  John;Mike;David;Clara\n           White;Red;Green;Blue\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Adapted from <a href=\"http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\">http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120<\/a><\/p>"
+                    "content": "<p>Adapted from <a href=\"http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\">http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120<\/a>\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -2129,8 +2184,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The array to format"
+                    "default_name": ""
                 },
                 {
                     "name": "delimiter",
@@ -2157,7 +2211,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "\n",
-                    "default_name": "bbn\\PHP_EOL"
+                    "default_name": "bbn\\PHP_EOL",
+                    "description": "ll"
                 },
                 {
                     "name": "encloseAll",
@@ -2167,7 +2222,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "ll"
+                    "description": "oMysqlNull"
                 },
                 {
                     "name": "nullToMysqlNull",
@@ -2176,8 +2231,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "oMysqlNull"
+                    "default_name": ""
                 }
             ]
         },
@@ -2420,7 +2474,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The array to export"
+                    "description": "The file path"
                 },
                 {
                     "name": "file",
@@ -2430,7 +2484,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file path"
+                    "description": "titles Set it to false if you don't want the columns titles. Default true"
                 },
                 {
                     "name": "with_titles",
@@ -2439,8 +2493,7 @@
                     "required": false,
                     "has_default": true,
                     "default": true,
-                    "default_name": "",
-                    "description": "titles Set it to false if you don't want the columns titles. Default true"
+                    "default_name": ""
                 },
                 {
                     "name": "cfg",

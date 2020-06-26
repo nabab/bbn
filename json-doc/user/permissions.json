@@ -2,7 +2,6 @@
     "doc": {
         "description": "A permission system linked to options, user classes and preferences.\nFrom the moment a user or a group has a preference on an item, it is considered to have a permission. Deleting a permission deletes the preference",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Nov 24, 2016, 13:23:12 +0000",
             "category": "Authentication",
@@ -167,8 +166,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -214,8 +212,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -261,8 +258,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -308,8 +304,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -355,8 +350,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -410,8 +404,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -465,8 +458,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -650,8 +642,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -697,8 +688,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -735,8 +725,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },

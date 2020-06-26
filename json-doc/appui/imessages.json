@@ -159,7 +159,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -168,8 +168,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 },
                 {
                     "name": "simple",
@@ -213,7 +212,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "imess"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -222,8 +221,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -258,7 +256,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "imess"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -267,8 +265,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -345,8 +342,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },

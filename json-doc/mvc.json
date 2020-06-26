@@ -761,8 +761,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "The full path to the view file"
+                    "default_name": ""
                 }
             ]
         },
@@ -855,7 +854,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The database object if there is"
+                    "description": "An array of routes usually defined in \/_appui\/current\/cfg\/routes.json<\/em>"
                 },
                 {
                     "name": "routes",
@@ -864,8 +863,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "An array of routes usually defined in \/_appui\/current\/cfg\/routes.json<\/em>"
+                    "default_name": ""
                 }
             ]
         },
@@ -1404,8 +1402,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The request path <em>(e.g books\/466565 or xml\/books\/48465)<\/em>"
+                    "default_name": ""
                 },
                 {
                     "name": "post",
@@ -1689,8 +1686,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "path"
+                    "default_name": ""
                 },
                 {
                     "name": "mode",

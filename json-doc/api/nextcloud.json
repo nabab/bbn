@@ -482,7 +482,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "(both, files, dirs)"
                 },
                 {
                     "name": "type",
@@ -491,8 +492,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "both",
-                    "default_name": "",
-                    "description": "(both, files, dirs)"
+                    "default_name": ""
                 },
                 {
                     "name": "hidden",
@@ -665,7 +665,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "dirs"
                 },
                 {
                     "name": "including_dirs",
@@ -674,8 +675,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "dirs"
+                    "default_name": ""
                 },
                 {
                     "name": "hidden",

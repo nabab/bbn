@@ -2,7 +2,6 @@
     "doc": {
         "description": "Universal caching class: called once per request, it holds the cache system.",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Jan 23, 2016, 23:23:55 +0000",
             "category": "Cache",

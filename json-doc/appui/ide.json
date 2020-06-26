@@ -404,7 +404,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "type project of check"
+                    "description": "path project"
                 },
                 {
                     "name": "path",
@@ -413,8 +413,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "path project"
+                    "default_name": ""
                 },
                 {
                     "name": "repository",
@@ -505,8 +504,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The repository's name (code)"
+                    "default_name": ""
                 }
             ]
         },
@@ -540,8 +538,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The repository's name (code)"
+                    "default_name": ""
                 }
             ]
         },
@@ -860,8 +857,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The repository's name (code) or the repository's configuration"
+                    "default_name": ""
                 }
             ]
         },
@@ -895,8 +891,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "File's URL"
+                    "default_name": ""
                 }
             ]
         },
@@ -1134,8 +1129,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The file's path"
+                    "default_name": ""
                 }
             ]
         },
@@ -1172,7 +1166,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The real file\/dir's path"
+                    "description": "The type of real (file\/dir)"
                 },
                 {
                     "name": "type",
@@ -1181,8 +1175,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": "",
-                    "description": "The type of real (file\/dir)"
+                    "default_name": ""
                 }
             ]
         },
@@ -1218,8 +1211,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The real file's path"
+                    "default_name": ""
                 }
             ]
         },
@@ -1256,7 +1248,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The old file\/dir's path"
+                    "description": "The new file\/dir's path"
                 },
                 {
                     "name": "new",
@@ -1266,7 +1258,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new file\/dir's path"
+                    "description": "The type (file\/dir)"
                 },
                 {
                     "name": "type",
@@ -1275,8 +1267,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": "",
-                    "description": "The type (file\/dir)"
+                    "default_name": ""
                 }
             ]
         },
@@ -1313,7 +1304,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The old file\/dir's path"
+                    "description": "The new file\/dir's path"
                 },
                 {
                     "name": "new",
@@ -1323,7 +1314,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new file\/dir's path"
+                    "description": "The type (file\/dir)"
                 },
                 {
                     "name": "type",
@@ -1332,8 +1323,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": "",
-                    "description": "The type (file\/dir)"
+                    "default_name": ""
                 }
             ]
         },
@@ -1368,7 +1358,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The real file\/dir's path"
+                    "description": "The path type (file or dir)"
                 },
                 {
                     "name": "type",
@@ -1377,8 +1367,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": "",
-                    "description": "The path type (file or dir)"
+                    "default_name": ""
                 }
             ]
         },
@@ -1415,8 +1404,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "info for get file json"
+                    "default_name": ""
                 }
             ]
         },
@@ -1511,7 +1499,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "code option"
+                    "description": "link id option file preference"
                 }
             ]
         },
@@ -1611,8 +1599,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 10,
-                    "default_name": "",
-                    "description": "file numbers to be taken"
+                    "default_name": ""
                 }
             ]
         },
@@ -1646,8 +1633,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The real file's path"
+                    "default_name": ""
                 }
             ]
         },
@@ -1715,8 +1701,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The file's URL"
+                    "default_name": ""
                 },
                 {
                     "name": "obj",
@@ -1760,7 +1745,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file's URL"
+                    "description": "Tparameter that allows you to have all the code if it is set to true"
                 },
                 {
                     "name": "repository",
@@ -1769,8 +1754,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "Tparameter that allows you to have all the code if it is set to true"
+                    "default_name": ""
                 },
                 {
                     "name": "all",
@@ -1813,8 +1797,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "name ohf type"
+                    "default_name": ""
                 }
             ]
         },
@@ -1872,8 +1855,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "name ohf type"
+                    "default_name": ""
                 }
             ]
         },

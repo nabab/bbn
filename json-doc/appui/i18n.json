@@ -580,7 +580,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "project"
+                    "description": "option"
                 },
                 {
                     "name": "id_option",
@@ -589,8 +589,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -658,8 +657,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -746,7 +744,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "project"
+                    "description": "option"
                 },
                 {
                     "name": "id_option",
@@ -755,8 +753,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -841,8 +838,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -878,8 +874,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -913,8 +908,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },

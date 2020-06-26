@@ -3574,13 +3574,13 @@
                         "text": "is_available",
                         "value": "is_available",
                         "url": "bbn-php\/doc\/method\/appui\/planning\/is_available",
-                        "desc": ""
+                        "desc": "Checks if the staff is available on the given period"
                     },
                     {
                         "text": "is_replaced",
                         "value": "is_replaced",
                         "url": "bbn-php\/doc\/method\/appui\/planning\/is_replaced",
-                        "desc": ""
+                        "desc": "Checks if the staff event is replaced on the given day"
                     },
                     {
                         "text": "update",
@@ -4175,43 +4175,43 @@
                 "value": "compiler",
                 "text": "compiler",
                 "url": "bbn-php\/doc\/class\/cdn\/compiler",
-                "desc": "",
+                "desc": "PHP version 7",
                 "items": [
                     {
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/__construct",
-                        "desc": ""
+                        "desc": "Constructor."
                     },
                     {
                         "text": "compile",
                         "value": "compile",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/compile",
-                        "desc": ""
+                        "desc": "Returns an array of compiled codes based on a list of files."
                     },
                     {
                         "text": "css_content",
                         "value": "css_content",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/css_content",
-                        "desc": ""
+                        "desc": "Returns a string with javascript including the given CSS content in the head of the document."
                     },
                     {
                         "text": "css_links",
                         "value": "css_links",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/css_links",
-                        "desc": ""
+                        "desc": "Returns a javascript string including css files."
                     },
                     {
                         "text": "get_content",
                         "value": "get_content",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/get_content",
-                        "desc": ""
+                        "desc": "Returns the content of a file or a group of files,"
                     },
                     {
                         "text": "group_compile",
                         "value": "group_compile",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/group_compile",
-                        "desc": ""
+                        "desc": "Compiles together a group of files and returns the result as an array."
                     },
                     {
                         "text": "has_links",
@@ -4223,13 +4223,13 @@
                         "text": "js_links",
                         "value": "js_links",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/js_links",
-                        "desc": ""
+                        "desc": "Returns a javascript string invoking other javascript files."
                     },
                     {
                         "text": "minify",
                         "value": "minify",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/minify",
-                        "desc": ""
+                        "desc": "Minify the given string in the given lang (js or css)."
                     }
                 ]
             },
@@ -4739,7 +4739,7 @@
                                 "text": "delete_user",
                                 "value": "delete_user",
                                 "url": "bbn-php\/doc\/method\/db\/languages\/mysql\/delete_user",
-                                "desc": "There's an error in the query REVOKE ALL PRIVILEGES ON *."
+                                "desc": "There's an error in the query REVOKE ALL PRIVILEGES ON *.*"
                             },
                             {
                                 "text": "disable_keys",
@@ -10239,7 +10239,7 @@
         "value": "cdn",
         "text": "cdn",
         "url": "bbn-php\/doc\/class\/cdn",
-        "desc": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
+        "desc": "PHP version 7",
         "items": [
             {
                 "text": "__construct",

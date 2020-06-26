@@ -56,8 +56,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The mode as defined in self::$_modes"
+                    "default_name": ""
                 }
             ]
         },
@@ -127,8 +126,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The request path <em>(e.g books\/466565 or xml\/books\/48465)<\/em>"
+                    "default_name": ""
                 },
                 {
                     "name": "routes",

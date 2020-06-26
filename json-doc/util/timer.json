@@ -2,7 +2,6 @@
     "doc": {
         "description": "Encryption Class",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "July 11, 2013, 13:08:00 +01:00",
             "category": "Utilities",

@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "Data Class with Db and cache\nAll change of properties will be synced with the database",
+        "description": "Data Class with Db and cache\n *\n *\nAll change of properties will be synced with the database",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "July 15, 2016, 14:10:55 +0000",
             "category": "Data Observer",
@@ -1326,11 +1325,11 @@
     "namespaceName": "bbn\\models\\cls",
     "shortName": "data",
     "summary": "Data Class with Db and cache",
-    "description": "All change of properties will be synced with the database",
+    "description": "*\n *\nAll change of properties will be synced with the database",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>All change of properties will be synced with the database<\/p>"
+            "content": "<p><em>\n<\/em>\nAll change of properties will be synced with the database<\/p>"
         }
     ]
 }

@@ -72,8 +72,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Name of the method to search for to take information"
+                    "default_name": ""
                 },
                 {
                     "name": "cls",
@@ -119,8 +118,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Name of the property to be searched"
+                    "default_name": ""
                 },
                 {
                     "name": "cls",
@@ -166,8 +164,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Name of constant to search for information"
+                    "default_name": ""
                 },
                 {
                     "name": "cls",
@@ -251,7 +248,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "of the library"
+                    "description": "of the class"
                 },
                 {
                     "name": "namespace",
@@ -260,8 +257,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "of the class"
+                    "default_name": ""
                 }
             ]
         },
@@ -329,8 +325,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "name"
+                    "default_name": ""
                 }
             ]
         },
@@ -410,8 +405,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "object"
+                    "default_name": ""
                 },
                 {
                     "name": "origin",

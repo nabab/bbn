@@ -258,8 +258,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },

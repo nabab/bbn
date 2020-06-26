@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "Class text\nString manipulation class\nThis class only uses static methods and has lots of alias for the escaping methods",
+        "description": "Class text\nString manipulation class\n *\nThis class only uses static methods and has lots of alias for the escaping methods",
         "tags": {
-            "package": "bbn",
             "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
@@ -23,8 +22,12 @@
         "cast": {
             "name": "cast",
             "summary": "Converts any type of variable to a string.",
-            "description": "```php\n$st = 122\n\\bbn\\x::dump(\\bbn\\str::cast($st));\n\/\/ (string) \"122\"\n\\bbn\\x::dump(\\bbn\\str::cast(1));\n\/\/ (string) \"1\"\n```",
+            "description": "*\n```php\n$st = 122\n\\bbn\\x::dump(\\bbn\\str::cast($st));\n\/\/ (string) \"122\"\n\\bbn\\x::dump(\\bbn\\str::cast(1));\n\/\/ (string) \"1\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$st = 122\n\\bbn\\x::dump(\\bbn\\str::cast($st));\n\/\/ (string) \"122\"\n\\bbn\\x::dump(\\bbn\\str::cast(1));\n\/\/ (string) \"1\""
@@ -55,16 +58,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The item to cast."
+                    "default_name": ""
                 }
             ]
         },
         "change_case": {
             "name": "change_case",
             "summary": "Converts the case of a string.",
-            "description": "```php\n$st = 'TEST CASE';\n\\bbn\\x::dump(\\bbn\\str::change_case($st, 'lower'));\n\/\/ (string) \"test case\"\n\\bbn\\x::dump(\\bbn\\str::change_case('TEsT Case', 'upper'));\n\/\/ (string) \"TEST CASE\"\n\\bbn\\x::dump(\\bbn\\str::change_case('test case'));\n\/\/ (string) \"Test Case\"\n```",
+            "description": "*\n```php\n$st = 'TEST CASE';\n\\bbn\\x::dump(\\bbn\\str::change_case($st, 'lower'));\n\/\/ (string) \"test case\"\n\\bbn\\x::dump(\\bbn\\str::change_case('TEsT Case', 'upper'));\n\/\/ (string) \"TEST CASE\"\n\\bbn\\x::dump(\\bbn\\str::change_case('test case'));\n\/\/ (string) \"Test Case\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$st = 'TEST CASE';\n\\bbn\\x::dump(\\bbn\\str::change_case($st, 'lower'));\n\/\/ (string) \"test case\"\n\\bbn\\x::dump(\\bbn\\str::change_case('TEsT Case', 'upper'));\n\/\/ (string) \"TEST CASE\"\n\\bbn\\x::dump(\\bbn\\str::change_case('test case'));\n\/\/ (string) \"Test Case\""
@@ -98,7 +104,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The item to convert."
+                    "description": "The case to convert to (\"lower\" or \"upper\"), default being the title case."
                 },
                 {
                     "name": "case",
@@ -107,16 +113,19 @@
                     "required": false,
                     "has_default": true,
                     "default": "x",
-                    "default_name": "",
-                    "description": "The case to convert to (\"lower\" or \"upper\"), default being the title case."
+                    "default_name": ""
                 }
             ]
         },
         "escape_all_quotes": {
             "name": "escape_all_quotes",
             "summary": "Escapes all quotes (single and double) from a given string.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_dquotes('the \"Gay Pride\" is is Putin\\'s favorite'));\n\/\/ (string) \"the \\\"Gay Pride\\\" is is Putin\\'s favorite\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_dquotes('the \"Gay Pride\" is is Putin\\'s favorite'));\n\/\/ (string) \"the \\\"Gay Pride\\\" is is Putin\\'s favorite\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_dquotes('the \"Gay Pride\" is is Putin\\'s favorite'));\n\/\/ (string) \"the \\\"Gay Pride\\\" is is Putin\\'s favorite\""
@@ -149,16 +158,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_dquotes": {
             "name": "escape_dquotes",
             "summary": "Escapes the string in double quotes.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_dquotes('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_dquotes('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_dquotes('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\""
@@ -191,16 +203,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_dquote": {
             "name": "escape_dquote",
             "summary": "Synonym of \"escape_dquotes\".",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_dquote('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_dquote('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_dquote('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\""
@@ -233,16 +248,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_quote": {
             "name": "escape_quote",
             "summary": "Synonym of \"escape_dquotes\".",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_quote('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_quote('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_quote('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\""
@@ -275,16 +293,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_quotes": {
             "name": "escape_quotes",
             "summary": "Synonym of \"escape_dquotes\".",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_quotes('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_quotes('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_quotes('this is the house \"Mary\"'));\n\/\/ (string) \"this is the house \\\"Mary\\\"\""
@@ -317,16 +338,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_squotes": {
             "name": "escape_squotes",
             "summary": "Escapes the string in quotes.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_squotes(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_squotes(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_squotes(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\""
@@ -359,16 +383,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape": {
             "name": "escape",
             "summary": "Synonym of \"escape_squotes\".",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\""
@@ -401,16 +428,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_apo": {
             "name": "escape_apo",
             "summary": "Synonym of \"escape_squotes\".",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_apo(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_apo(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_apo(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\""
@@ -443,16 +473,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "escape_squote": {
             "name": "escape_squote",
             "summary": "Synonym of \"escape_squotes\".",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::escape_squote(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::escape_squote(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::escape_squote(\"Today's \\\"newspaper\\\"\"));\n\/\/ (string)  \"Today\\'s \"newspaper\"\""
@@ -485,19 +518,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 }
             ]
         },
         "clean": {
             "name": "clean",
             "summary": "Returns an expunged string of several types of character(s) depending on the configuration.",
-            "description": "```php\n$test=\"this      is\ncold\";\n\\bbn\\x::dump(\\bbn\\str::clean($test));\n\/\/ (string)  \"this is\\n cold\"\n$test1=\"this is\ncold\";\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'2nl'));\n\/* (string)\n\"this is\n cold\"\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'html'));\n\/\/ (string)  \"this is cold\"\n\\bbn\\x::dump(\\bbn\\str::clean('$x = 9993','code'));\n\/\/ (string)  \"$x=9993\"\n```",
+            "description": "*\n```php\n$test=\"this      is\ncold\";\n   *\n\\bbn\\x::dump(\\bbn\\str::clean($test));\n\/\/ (string)  \"this is\\n cold\"\n   *\n$test1=\"this is\n   *\n   *\ncold\";\n   *\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'2nl'));\n\/* (string)\n\"this is\n cold\"\n   *\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'html'));\n\/\/ (string)  \"this is cold\"\n   *\n\\bbn\\x::dump(\\bbn\\str::clean('$x = 9993','code'));\n\/\/ (string)  \"$x=9993\"\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "$test=\"this      is\ncold\";\n\\bbn\\x::dump(\\bbn\\str::clean($test));\n\/\/ (string)  \"this is\\n cold\"\n$test1=\"this is\ncold\";\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'2nl'));\n\/* (string)\n\"this is\n cold\"\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'html'));\n\/\/ (string)  \"this is cold\"\n\\bbn\\x::dump(\\bbn\\str::clean('$x = 9993','code'));\n\/\/ (string)  \"$x=9993\""
+                    "content": "$test=\"this      is\ncold\";\n   *\n\\bbn\\x::dump(\\bbn\\str::clean($test));\n\/\/ (string)  \"this is\\n cold\"\n   *\n$test1=\"this is\n   *\n   *\ncold\";\n   *\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'2nl'));\n\/* (string)\n\"this is\n cold\"\n   *\n\\bbn\\x::dump(\\bbn\\str::clean($test1,'html'));\n\/\/ (string)  \"this is cold\"\n   *\n\\bbn\\x::dump(\\bbn\\str::clean('$x = 9993','code'));\n\/\/ (string)  \"$x=9993\""
                 }
             ],
             "file": "bbn\\str",
@@ -528,7 +564,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The item to be."
+                    "description": "A selection of configuration: \"all\" (default), \"2n1\", \"html\", \"code\"."
                 },
                 {
                     "name": "mode",
@@ -537,16 +573,19 @@
                     "required": false,
                     "has_default": true,
                     "default": "all",
-                    "default_name": "",
-                    "description": "A selection of configuration: \"all\" (default), \"2n1\", \"html\", \"code\"."
+                    "default_name": ""
                 }
             ]
         },
         "cut": {
             "name": "cut",
             "summary": "Cuts a string (HTML and PHP tags stripped) to maximum length inserted.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::cut(\"<!-- HTML Document --> Example text\", 7));\n\/\/ (string) \"Example...\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::cut(\"<!-- HTML Document --> Example text\", 7));\n\/\/ (string) \"Example...\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::cut(\"<!-- HTML Document --> Example text\", 7));\n\/\/ (string) \"Example...\""
@@ -580,7 +619,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The string to be cut."
+                    "description": "The maximum string length."
                 },
                 {
                     "name": "max",
@@ -589,8 +628,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 15,
-                    "default_name": "",
-                    "description": "The maximum string length."
+                    "default_name": ""
                 }
             ]
         },
@@ -633,8 +671,12 @@
         "encode_filename": {
             "name": "encode_filename",
             "summary": "Returns a cross-platform filename for the file.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::encode_filename('test file\/,1', 15, 'txt'));\n\/\/ (string) \"test_file_1.txt\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::encode_filename('test file\/,1', 15, 'txt'));\n\/\/ (string) \"test_file_1.txt\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::encode_filename('test file\/,1', 15, 'txt'));\n\/\/ (string) \"test_file_1.txt\""
@@ -668,7 +710,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name as string."
+                    "description": "The maximum filename length (without extension), default: \"50\"."
                 },
                 {
                     "name": "maxlength",
@@ -678,7 +720,7 @@
                     "has_default": true,
                     "default": 50,
                     "default_name": "",
-                    "description": "The maximum filename length (without extension), default: \"50\"."
+                    "description": "The extension of the file."
                 },
                 {
                     "name": "extension",
@@ -688,7 +730,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The extension of the file."
+                    "description": "path Tells if the slashes (\/) are authorized in the string"
                 },
                 {
                     "name": "is_path",
@@ -697,16 +739,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "path Tells if the slashes (\/) are authorized in the string"
+                    "default_name": ""
                 }
             ]
         },
         "encode_dbname": {
             "name": "encode_dbname",
             "summary": "Returns a corrected string for database naming.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::encode_dbname('my.database_name ? test  :,; !plus'));\n\/\/ (string) \"my_database_name_test_plus\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::encode_dbname('my.database_name ? test  :,; !plus'));\n\/\/ (string) \"my_database_name_test_plus\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::encode_dbname('my.database_name ? test  :,; !plus'));\n\/\/ (string) \"my_database_name_test_plus\""
@@ -740,7 +785,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name as string."
+                    "description": "The maximum length, default: \"50\"."
                 },
                 {
                     "name": "maxlength",
@@ -749,19 +794,22 @@
                     "required": false,
                     "has_default": true,
                     "default": 50,
-                    "default_name": "",
-                    "description": "The maximum length, default: \"50\"."
+                    "default_name": ""
                 }
             ]
         },
         "file_ext": {
             "name": "file_ext",
             "summary": "Returns the file extension.",
-            "description": "```php\n\/\/ (string) \"txt\"\n\\bbn\\x::dump(str::file_ext(\"\/test\/test.txt\"));\n\/\/ (array) [ \"test\", \"txt\", ]\n\\bbn\\x::dump(\\bbn\\str::file_ext('\/home\/user\/Desktop\/test.txt', true));\n```",
+            "description": "*\n```php\n\/\/ (string) \"txt\"\n\\bbn\\x::dump(str::file_ext(\"\/test\/test.txt\"));\n\n\/\/ (array) [ \"test\", \"txt\", ]\n\\bbn\\x::dump(\\bbn\\str::file_ext('\/home\/user\/Desktop\/test.txt', true));\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\/\/ (string) \"txt\"\n\\bbn\\x::dump(str::file_ext(\"\/test\/test.txt\"));\n\/\/ (array) [ \"test\", \"txt\", ]\n\\bbn\\x::dump(\\bbn\\str::file_ext('\/home\/user\/Desktop\/test.txt', true));"
+                    "content": "\/\/ (string) \"txt\"\n\\bbn\\x::dump(str::file_ext(\"\/test\/test.txt\"));\n\n\/\/ (array) [ \"test\", \"txt\", ]\n\\bbn\\x::dump(\\bbn\\str::file_ext('\/home\/user\/Desktop\/test.txt', true));"
                 }
             ],
             "file": "bbn\\str",
@@ -790,7 +838,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file path."
+                    "description": "If \"true\" also returns the file path, default: \"false\"."
                 },
                 {
                     "name": "ar",
@@ -799,16 +847,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If \"true\" also returns the file path, default: \"false\"."
+                    "default_name": ""
                 }
             ]
         },
         "genpwd": {
             "name": "genpwd",
             "summary": "Returns a random password.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::genpwd());\n\/\/ (string) \"khc9P871w\"\n\\bbn\\x::dump(\\bbn\\str::genpwd(6, 4));\n\/\/ (string) \"dDEtxY\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::genpwd());\n\/\/ (string) \"khc9P871w\"\n\\bbn\\x::dump(\\bbn\\str::genpwd(6, 4));\n\/\/ (string) \"dDEtxY\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::genpwd());\n\/\/ (string) \"khc9P871w\"\n\\bbn\\x::dump(\\bbn\\str::genpwd(6, 4));\n\/\/ (string) \"dDEtxY\""
@@ -842,7 +893,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "max Maximum password characters, default: \"12\"."
+                    "description": "min Minimum password characters, default: \"6\"."
                 },
                 {
                     "name": "int_min",
@@ -851,16 +902,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "min Minimum password characters, default: \"6\"."
+                    "default_name": ""
                 }
             ]
         },
         "is_json": {
             "name": "is_json",
             "summary": "Checks if the string is a json string.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::is_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}'));\n\/\/ (bool) true\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::is_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}'));\n\/\/ (bool) true\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::is_json('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}'));\n\/\/ (bool) true"
@@ -891,19 +945,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string."
+                    "default_name": ""
                 }
             ]
         },
         "is_number": {
             "name": "is_number",
             "summary": "Checks if the item is a number.",
-            "description": "Can take as many arguments and will return false if one of them is not a number.\n```php\n\\bbn\\x::dump(\\bbn\\str::is_number([1, 2]));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_number(150);\n\/\/ (bool) 1\n\\bbn\\x::dump(\\bbn\\str::is_number('150'));\n\/\/ (bool)  1\n\\bbn\\x::dump(\\bbn\\str::is_number(1.5);\n\/\/ (bool) 1\n```",
+            "description": "Can take as many arguments and will return false if one of them is not a number.\n   *\n```php\n\\bbn\\x::dump(\\bbn\\str::is_number([1, 2]));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_number(150);\n\/\/ (bool) 1\n\\bbn\\x::dump(\\bbn\\str::is_number('150'));\n\/\/ (bool)  1\n\\bbn\\x::dump(\\bbn\\str::is_number(1.5);\n\/\/ (bool) 1\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Can take as many arguments and will return false if one of them is not a number.<\/p>"
+                    "content": "<p>Can take as many arguments and will return false if one of them is not a number.\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -934,11 +987,11 @@
         "is_integer": {
             "name": "is_integer",
             "summary": "Checks if the item is a integer.",
-            "description": "Can take as many arguments and will return false if one of them is not an integer or the string of an integer.\n```php\n\\bbn\\x::dump(\\bbn\\str::is_integer(13.2));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_integer(14));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_integer('14'));\n\/\/ (bool) true\n```",
+            "description": "Can take as many arguments and will return false if one of them is not an integer or the string of an integer.\n   *\n```php\n\\bbn\\x::dump(\\bbn\\str::is_integer(13.2));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_integer(14));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_integer('14'));\n\/\/ (bool) true\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Can take as many arguments and will return false if one of them is not an integer or the string of an integer.<\/p>"
+                    "content": "<p>Can take as many arguments and will return false if one of them is not an integer or the string of an integer.\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -969,8 +1022,12 @@
         "is_clean_path": {
             "name": "is_clean_path",
             "summary": "Checks if \".. \\\\\" or \"..\/\" is contained in the parameter and it will return false if true.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"\/home\/user\/Images\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"..\/home\/user\/Images\"));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"..\\\\home\\user\\Images\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"\/home\/user\/Images\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"..\/home\/user\/Images\"));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"..\\\\home\\user\\Images\"));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"\/home\/user\/Images\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"..\/home\/user\/Images\"));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_clean_path(\"..\\\\home\\user\\Images\"));\n\/\/ (bool) false"
@@ -1000,11 +1057,11 @@
         "is_decimal": {
             "name": "is_decimal",
             "summary": "Checks if the item is a decimal.",
-            "description": "Can take many arguments and it will return false if one of them is not a decimal or the string of a decimal (float).\n```php\n\\bbn\\x::dump(\\bbn\\str::is_decimal(13.2));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_decimal('13.2'));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_decimal(14));\n\/\/ (bool) false\n```",
+            "description": "Can take many arguments and it will return false if one of them is not a decimal or the string of a decimal (float).\n   *\n```php\n\\bbn\\x::dump(\\bbn\\str::is_decimal(13.2));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_decimal('13.2'));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_decimal(14));\n\/\/ (bool) false\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Can take many arguments and it will return false if one of them is not a decimal or the string of a decimal (float).<\/p>"
+                    "content": "<p>Can take many arguments and it will return false if one of them is not a decimal or the string of a decimal (float).\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -1107,8 +1164,12 @@
         "is_email": {
             "name": "is_email",
             "summary": "Checks if the string is the correct type of e-mail address.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::is_email('test@email.com'));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_email('test@email'));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_email('test@.com'));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_email('testemail.com'));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::is_email('test@email.com'));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_email('test@email'));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_email('test@.com'));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_email('testemail.com'));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::is_email('test@email.com'));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_email('test@email'));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_email('test@.com'));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::is_email('testemail.com'));\n\/\/ (bool) false"
@@ -1141,19 +1202,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "E-mail address."
+                    "default_name": ""
                 }
             ]
         },
         "is_url": {
             "name": "is_url",
             "summary": "Checks if the argument is a valid URL string.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::is_url(\"http:\/\/bbn.so\"));\n\/\/ (string) \"https:\/\/bbn.so\"\n\\bbn\\x::dump(\\bbn\\str::is_url(\"bbn.so\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::is_url(\"http:\/\/bbn.so\"));\n\/\/ (string) \"https:\/\/bbn.so\"\n   *\n\\bbn\\x::dump(\\bbn\\str::is_url(\"bbn.so\"));\n\/\/ (bool) false\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\str::is_url(\"http:\/\/bbn.so\"));\n\/\/ (string) \"https:\/\/bbn.so\"\n\\bbn\\x::dump(\\bbn\\str::is_url(\"bbn.so\"));\n\/\/ (bool) false"
+                    "content": "\\bbn\\x::dump(\\bbn\\str::is_url(\"http:\/\/bbn.so\"));\n\/\/ (string) \"https:\/\/bbn.so\"\n   *\n\\bbn\\x::dump(\\bbn\\str::is_url(\"bbn.so\"));\n\/\/ (bool) false"
                 }
             ],
             "file": "bbn\\str",
@@ -1181,19 +1245,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to perform"
+                    "default_name": ""
                 }
             ]
         },
         "is_domain": {
             "name": "is_domain",
             "summary": "Checks if the argument is a valid domain name.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::is_domain(\"http:\/\/bbn.so\"));\n\/\/ (string) false\n\\bbn\\x::dump(\\bbn\\str::is_domain(\"bbn.so\"));\n\/\/ (bool) true\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::is_domain(\"http:\/\/bbn.so\"));\n\/\/ (string) false\n   *\n\\bbn\\x::dump(\\bbn\\str::is_domain(\"bbn.so\"));\n\/\/ (bool) true\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\str::is_domain(\"http:\/\/bbn.so\"));\n\/\/ (string) false\n\\bbn\\x::dump(\\bbn\\str::is_domain(\"bbn.so\"));\n\/\/ (bool) true"
+                    "content": "\\bbn\\x::dump(\\bbn\\str::is_domain(\"http:\/\/bbn.so\"));\n\/\/ (string) false\n   *\n\\bbn\\x::dump(\\bbn\\str::is_domain(\"bbn.so\"));\n\/\/ (bool) true"
                 }
             ],
             "file": "bbn\\str",
@@ -1223,8 +1290,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to perform"
+                    "default_name": ""
                 }
             ]
         },
@@ -1267,8 +1333,12 @@
         "is_date_sql": {
             "name": "is_date_sql",
             "summary": "Checks if the argument is in a valid SQL date format.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"1999-12-05 11:10:22\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"1999-12-05\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"19-12-1999\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"1999-12-05 11:10:22\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"1999-12-05\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"19-12-1999\"));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"1999-12-05 11:10:22\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"1999-12-05\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::is_date_sql(\"19-12-1999\"));\n\/\/ (bool) false"
@@ -1308,8 +1378,12 @@
         "correct_types": {
             "name": "correct_types",
             "summary": "If it looks like an int or float type, the string variable is converted into the correct type.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::correct_types(1230));\n\/\/ (int) 1230\n\\bbn\\x::dump(\\bbn\\str::correct_types(12.30));\n\/\/ (float) 12.3\n\\bbn\\x::dump(\\bbn\\str::correct_types(\"12.3\"));\n\/\/ (float) 12.3\n\\bbn\\x::dump(\\bbn\\str::correct_types([1230]));\n\/\/ (int) [1230]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::correct_types(1230));\n\/\/ (int) 1230\n\\bbn\\x::dump(\\bbn\\str::correct_types(12.30));\n\/\/ (float) 12.3\n\\bbn\\x::dump(\\bbn\\str::correct_types(\"12.3\"));\n\/\/ (float) 12.3\n\\bbn\\x::dump(\\bbn\\str::correct_types([1230]));\n\/\/ (int) [1230]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::correct_types(1230));\n\/\/ (int) 1230\n\\bbn\\x::dump(\\bbn\\str::correct_types(12.30));\n\/\/ (float) 12.3\n\\bbn\\x::dump(\\bbn\\str::correct_types(\"12.3\"));\n\/\/ (float) 12.3\n\\bbn\\x::dump(\\bbn\\str::correct_types([1230]));\n\/\/ (int) [1230]"
@@ -1347,8 +1421,12 @@
         "parse_url": {
             "name": "parse_url",
             "summary": "Returns an array containing any of the various components of the URL that are present.",
-            "description": "```php\n\\bbn\\x::hdump(\\bbn\\str::parse_url('http:\/\/localhost\/phpmyadmin\/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');\n\/* (array)\n[\n    'scheme' => 'http',\n    'host' => 'localhost',\n    'path' => '\/phpmyadmin\/',\n    'query' => 'db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981',\n    'url' => 'http:\/\/localhost\/phpmyadmin\/',\n    'params' => [\n        'db' => 'test',\n        'table' => 'users',\n        'server' => '1',\n        'target' => '',\n        'token' => 'e45a102c5672b2b4fe84ae75d9148981',\n    ],\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::hdump(\\bbn\\str::parse_url('http:\/\/localhost\/phpmyadmin\/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');\n\/* (array)\n[\n    'scheme' => 'http',\n    'host' => 'localhost',\n    'path' => '\/phpmyadmin\/',\n    'query' => 'db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981',\n    'url' => 'http:\/\/localhost\/phpmyadmin\/',\n    'params' => [\n        'db' => 'test',\n        'table' => 'users',\n        'server' => '1',\n        'target' => '',\n        'token' => 'e45a102c5672b2b4fe84ae75d9148981',\n    ],\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::hdump(\\bbn\\str::parse_url('http:\/\/localhost\/phpmyadmin\/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');\n\/* (array)\n[\n    'scheme' => 'http',\n    'host' => 'localhost',\n    'path' => '\/phpmyadmin\/',\n    'query' => 'db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981',\n    'url' => 'http:\/\/localhost\/phpmyadmin\/',\n    'params' => [\n        'db' => 'test',\n        'table' => 'users',\n        'server' => '1',\n        'target' => '',\n        'token' => 'e45a102c5672b2b4fe84ae75d9148981',\n    ],\n]"
@@ -1381,16 +1459,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The url."
+                    "default_name": ""
                 }
             ]
         },
         "parse_path": {
             "name": "parse_path",
             "summary": "Replaces backslash with slash in a path string. Forbids the use of ..\/",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::parse_path('\\home\\user\\Desktop'));\n\/\/ (string) \"\/home\/user\/Desktop\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::parse_path('\\home\\user\\Desktop'));\n\/\/ (string) \"\/home\/user\/Desktop\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::parse_path('\\home\\user\\Desktop'));\n\/\/ (string) \"\/home\/user\/Desktop\""
@@ -1424,7 +1505,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The path."
+                    "description": "parent If true ..\/ is allowed in the path (and will become normalized)."
                 },
                 {
                     "name": "allow_parent",
@@ -1433,16 +1514,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "parent If true ..\/ is allowed in the path (and will become normalized)."
+                    "default_name": ""
                 }
             ]
         },
         "remove_accents": {
             "name": "remove_accents",
             "summary": "Replaces accented characters with their character without the accent.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::remove_accents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3\u00a0\u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::remove_accents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3\u00a0\u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::remove_accents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3\u00a0\u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\""
@@ -1475,16 +1559,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string."
+                    "default_name": ""
                 }
             ]
         },
         "check_name": {
             "name": "check_name",
             "summary": "Checks if a string complies with SQL naming convention.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::check_name(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_name(\"Pa\u00a0ul\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::check_name(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_name(\"Pa\u00a0ul\"));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::check_name(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_name(\"Pa\u00a0ul\"));\n\/\/ (bool) false"
@@ -1514,8 +1601,12 @@
         "check_filename": {
             "name": "check_filename",
             "summary": "Checks if a string doesn't contain a filesystem path.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\/\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\/\"));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\/\"));\n\/\/ (bool) false"
@@ -1545,8 +1636,12 @@
         "check_path": {
             "name": "check_path",
             "summary": "Checks if a string doesn't contain a filesystem path.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\/\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\/\"));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\str::check_filename(\"Paul\/\"));\n\/\/ (bool) false"
@@ -1576,11 +1671,11 @@
         "has_slash": {
             "name": "has_slash",
             "summary": "Checks if a string complies with SQL naming convention.",
-            "description": "Returns \"true\" if slash or backslash are present.\n```php\n\\bbn\\x::dump(\\bbn\\str::has_slash(\"Paul\"));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::has_slash(\"Paul\/\");\n\/\/ (bool) 1\n\\bbn\\x::dump(\\bbn\\str::has_slash(\"Paul\\\\\");\n\/\/ (bool) 1\n```",
+            "description": "Returns \"true\" if slash or backslash are present.\n   *\n```php\n\\bbn\\x::dump(\\bbn\\str::has_slash(\"Paul\"));\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\str::has_slash(\"Paul\/\");\n\/\/ (bool) 1\n\\bbn\\x::dump(\\bbn\\str::has_slash(\"Paul\\\\\");\n\/\/ (bool) 1\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Returns &quot;true&quot; if slash or backslash are present.<\/p>"
+                    "content": "<p>Returns &quot;true&quot; if slash or backslash are present.\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -1611,8 +1706,12 @@
         "get_numbers": {
             "name": "get_numbers",
             "summary": "Extracts all digits from a string.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\str::get_numbers(\"test 13 example 24\"));\n\/\/ (string) 1324\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\str::get_numbers(\"test 13 example 24\"));\n\/\/ (string) 1324\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\str::get_numbers(\"test 13 example 24\"));\n\/\/ (string) 1324"
@@ -1645,19 +1744,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string."
+                    "default_name": ""
                 }
             ]
         },
         "make_readable": {
             "name": "make_readable",
             "summary": "Returns the argumented value, replacing not standard objects (not stdClass) by their class name.",
-            "description": "```php\n$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n$user = \\bbn\\user::get_instance();\n$myArray = [\n 'user' => $user,\n 'obj' => $myObj,\n 'val' => 23,\n 'text' => \"Hello!\"\n];\n\\bbn\\x::hdump(\\bbn\\str::make_readable($user));\n\/\/ (string) \"appui\/user\"\n\\bbn\\x::hdump(\\bbn\\str::make_readable($myArray));\n\/* (array)\n[\n  \"user\" => \"appui\\\\user\",\n  \"obj\" => [\n            \"myProp1\" => 23,\n            \"myProp2\" => \"world\",\n            \"myProp3\" => [1, 5, 6,],\n      ],\n  \"val\" => 23,\n  \"text\" => \"Hello!\",\n]\n```",
+            "description": "*\n```php\n$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n   *\n$user = \\bbn\\user::get_instance();\n   *\n$myArray = [\n 'user' => $user,\n 'obj' => $myObj,\n 'val' => 23,\n 'text' => \"Hello!\"\n];\n   *\n\\bbn\\x::hdump(\\bbn\\str::make_readable($user));\n\/\/ (string) \"appui\/user\"\n   *\n\\bbn\\x::hdump(\\bbn\\str::make_readable($myArray));\n\/* (array)\n[\n  \"user\" => \"appui\\\\user\",\n  \"obj\" => [\n            \"myProp1\" => 23,\n            \"myProp2\" => \"world\",\n            \"myProp3\" => [1, 5, 6,],\n      ],\n  \"val\" => 23,\n  \"text\" => \"Hello!\",\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n$user = \\bbn\\user::get_instance();\n$myArray = [\n 'user' => $user,\n 'obj' => $myObj,\n 'val' => 23,\n 'text' => \"Hello!\"\n];\n\\bbn\\x::hdump(\\bbn\\str::make_readable($user));\n\/\/ (string) \"appui\/user\"\n\\bbn\\x::hdump(\\bbn\\str::make_readable($myArray));\n\/* (array)\n[\n  \"user\" => \"appui\\\\user\",\n  \"obj\" => [\n            \"myProp1\" => 23,\n            \"myProp2\" => \"world\",\n            \"myProp3\" => [1, 5, 6,],\n      ],\n  \"val\" => 23,\n  \"text\" => \"Hello!\",\n]"
+                    "content": "$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n   *\n$user = \\bbn\\user::get_instance();\n   *\n$myArray = [\n 'user' => $user,\n 'obj' => $myObj,\n 'val' => 23,\n 'text' => \"Hello!\"\n];\n   *\n\\bbn\\x::hdump(\\bbn\\str::make_readable($user));\n\/\/ (string) \"appui\/user\"\n   *\n\\bbn\\x::hdump(\\bbn\\str::make_readable($myArray));\n\/* (array)\n[\n  \"user\" => \"appui\\\\user\",\n  \"obj\" => [\n            \"myProp1\" => 23,\n            \"myProp2\" => \"world\",\n            \"myProp3\" => [1, 5, 6,],\n      ],\n  \"val\" => 23,\n  \"text\" => \"Hello!\",\n]"
                 }
             ],
             "file": "bbn\\str",
@@ -1685,19 +1787,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The item."
+                    "default_name": ""
                 }
             ]
         },
         "export": {
             "name": "export",
             "summary": "Returns a variable in a mode that is directly usable by PHP.",
-            "description": "```php\n$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n$myObj->myProp4 =\"\";\n\\bbn\\x::hdump(\\bbn\\str::export($myObj,true));\n\/*(string)\n\"{\n     \"myProp1\"  =>  23,\n     \"myProp2\"  =>  \"world\",\n     \"myProp3\"  =>  [ 1, 5, 6, ],\n}\"\n```",
+            "description": "*\n```php\n$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n$myObj->myProp4 =\"\";\n   *\n\\bbn\\x::hdump(\\bbn\\str::export($myObj,true));\n\/*(string)\n\"{\n     \"myProp1\"  =>  23,\n     \"myProp2\"  =>  \"world\",\n     \"myProp3\"  =>  [ 1, 5, 6, ],\n}\"\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n$myObj->myProp4 =\"\";\n\\bbn\\x::hdump(\\bbn\\str::export($myObj,true));\n\/*(string)\n\"{\n     \"myProp1\"  =>  23,\n     \"myProp2\"  =>  \"world\",\n     \"myProp3\"  =>  [ 1, 5, 6, ],\n}\""
+                    "content": "$myObj = new stdClass();\n$myObj->myProp1 = 23;\n$myObj->myProp2 = \"world\";\n$myObj->myProp3 = [1, 5, 6];\n$myObj->myProp4 =\"\";\n   *\n\\bbn\\x::hdump(\\bbn\\str::export($myObj,true));\n\/*(string)\n\"{\n     \"myProp1\"  =>  23,\n     \"myProp2\"  =>  \"world\",\n     \"myProp3\"  =>  [ 1, 5, 6, ],\n}\""
                 }
             ],
             "file": "bbn\\str",
@@ -1728,7 +1833,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The item to be."
+                    "description": "empty Default: \"false\"."
                 },
                 {
                     "name": "remove_empty",
@@ -1738,7 +1843,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "empty Default: \"false\"."
+                    "description": "Default: \"1\"."
                 },
                 {
                     "name": "lev",
@@ -1747,16 +1852,19 @@
                     "required": false,
                     "has_default": true,
                     "default": 1,
-                    "default_name": "",
-                    "description": "Default: \"1\"."
+                    "default_name": ""
                 }
             ]
         },
         "replace_once": {
             "name": "replace_once",
             "summary": "Replaces part of a string. If the part is not found, the method returns the string without change.",
-            "description": "```php\n\\bbn\\x::hdump(\\bbn\\str::replace_once(\"cold\",\"hot\", \"Today there is cold\"));\n\/\/ (string)  \"Today there is hot\"\n\\bbn\\x::hdump(\\bbn\\str::replace_once(\"rain\",\"hot\", \"Today there is cold\"));\n\/\/ (string)  \"Today there is cold\"\n```",
+            "description": "*\n```php\n\\bbn\\x::hdump(\\bbn\\str::replace_once(\"cold\",\"hot\", \"Today there is cold\"));\n\/\/ (string)  \"Today there is hot\"\n\\bbn\\x::hdump(\\bbn\\str::replace_once(\"rain\",\"hot\", \"Today there is cold\"));\n\/\/ (string)  \"Today there is cold\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::hdump(\\bbn\\str::replace_once(\"cold\",\"hot\", \"Today there is cold\"));\n\/\/ (string)  \"Today there is hot\"\n\\bbn\\x::hdump(\\bbn\\str::replace_once(\"rain\",\"hot\", \"Today there is cold\"));\n\/\/ (string)  \"Today there is cold\""
@@ -1790,7 +1898,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The string to search"
+                    "description": "The string to replace"
                 },
                 {
                     "name": "replace",
@@ -1800,7 +1908,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The string to replace"
+                    "description": "The string into search"
                 },
                 {
                     "name": "subject",
@@ -1809,16 +1917,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string into search"
+                    "default_name": ""
                 }
             ]
         },
         "remove_comments": {
             "name": "remove_comments",
             "summary": "Removes the comments.",
-            "description": "```php\n var_dump(\\bbn\\str::remove_comments(\"<!--this is a comment-->\"));\n \/\/ (string) \"\"\n```",
+            "description": "*\n```php\n var_dump(\\bbn\\str::remove_comments(\"<!--this is a comment-->\"));\n \/\/ (string) \"\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "var_dump(\\bbn\\str::remove_comments(\"<!--this is a comment-->\"));\n \/\/ (string) \"\""
@@ -1888,7 +1999,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The bytes"
+                    "description": "The unit you want to convert ('B', 'K', 'M', 'G', 'T')"
                 },
                 {
                     "name": "unit",
@@ -1897,8 +2008,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "B",
-                    "default_name": "",
-                    "description": "The unit you want to convert ('B', 'K', 'M', 'G', 'T')"
+                    "default_name": ""
                 },
                 {
                     "name": "stop",
@@ -1995,7 +2105,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "error"
                 },
                 {
                     "name": "return_error",
@@ -2004,8 +2115,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "error"
+                    "default_name": ""
                 }
             ]
         },
@@ -2085,7 +2195,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The markdown string"
+                    "description": "line If true the result will not contain paragraph or block element"
                 },
                 {
                     "name": "single_line",
@@ -2094,8 +2204,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "line If true the result will not contain paragraph or block element"
+                    "default_name": ""
                 }
             ]
         }
@@ -2127,11 +2236,11 @@
     "namespaceName": "bbn",
     "shortName": "str",
     "summary": "Class text",
-    "description": "String manipulation class\nThis class only uses static methods and has lots of alias for the escaping methods",
+    "description": "String manipulation class\n *\nThis class only uses static methods and has lots of alias for the escaping methods",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>String manipulation class\nThis class only uses static methods and has lots of alias for the escaping methods<\/p>"
+            "content": "<p>String manipulation class\n*\nThis class only uses static methods and has lots of alias for the escaping methods<\/p>"
         }
     ]
 }

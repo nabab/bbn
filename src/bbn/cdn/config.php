@@ -378,11 +378,9 @@ class config extends bbn\models\cls\basic
     foreach ($files as $f) {
       if (is_file($this->fpath.$this->cfg['url'].'/'.$f)) {
         $ext = bbn\str::file_ext($f);
-        if (basename($f) !== '_def.less') {
-          foreach (self::$types as $type => $extensions) {
-            if (in_array($ext, $extensions, true)) {
-              $res[$type][] = $this->sanitize($this->cfg['url'].'/'.$f);
-            }
+        foreach (self::$types as $type => $extensions) {
+          if (in_array($ext, $extensions, true)) {
+            $res[$type][] = $this->sanitize($this->cfg['url'].'/'.$f);
           }
         }
       }

@@ -229,8 +229,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The menu item's ID to link"
+                    "default_name": ""
                 }
             ]
         },
@@ -267,8 +266,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The shortcut's ID"
+                    "default_name": ""
                 }
             ]
         },
@@ -332,8 +330,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The ID of the menu's item"
+                    "default_name": ""
                 }
             ]
         },
@@ -404,8 +401,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "parent"
+                    "default_name": ""
                 },
                 {
                     "name": "cfg",
@@ -496,7 +492,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The menu's ID"
+                    "description": "The new text tp set"
                 },
                 {
                     "name": "text",
@@ -505,8 +501,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new text tp set"
+                    "default_name": ""
                 }
             ]
         },
@@ -605,7 +600,7 @@
                     "has_default": true,
                     "default": "text",
                     "default_name": "",
-                    "description": "text The key used for the text. Default: 'text'"
+                    "description": "value The key used for the value. Default 'value'"
                 },
                 {
                     "name": "k_value",
@@ -614,8 +609,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "value",
-                    "default_name": "",
-                    "description": "value The key used for the value. Default 'value'"
+                    "default_name": ""
                 }
             ]
         },
@@ -653,7 +647,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The menu's ID to clone"
+                    "description": "The new menu's name"
                 },
                 {
                     "name": "name",
@@ -662,8 +656,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new menu's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -701,7 +694,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The menu's ID to copy"
+                    "description": "menu_to The target menu's ID"
                 },
                 {
                     "name": "id_menu_to",
@@ -710,8 +703,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "menu_to The target menu's ID"
+                    "default_name": ""
                 },
                 {
                     "name": "cfg",
@@ -758,7 +750,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "bit The bit's ID to clone"
+                    "description": "menu_to The menu's ID to clone"
                 },
                 {
                     "name": "id_menu_to",
@@ -768,7 +760,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "menu_to The menu's ID to clone"
+                    "description": "of bit"
                 },
                 {
                     "name": "cfg",
@@ -777,8 +769,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "of bit"
+                    "default_name": ""
                 }
             ]
         },
@@ -870,7 +861,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The section\/link's ID"
+                    "description": "The new position."
                 },
                 {
                     "name": "pos",
@@ -879,8 +870,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new position."
+                    "default_name": ""
                 }
             ]
         },
@@ -917,7 +907,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The section\/link's ID."
+                    "description": "parent The parent's ID."
                 },
                 {
                     "name": "id_parent",
@@ -926,8 +916,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "parent The parent's ID."
+                    "default_name": ""
                 }
             ]
         },

@@ -333,7 +333,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "state"
                 },
                 {
                     "name": "new_state",
@@ -342,8 +343,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "state"
+                    "default_name": ""
                 }
             ]
         },
@@ -766,8 +766,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "email"
+                    "default_name": ""
                 }
             ]
         },
@@ -804,8 +803,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "mailing"
+                    "default_name": ""
                 }
             ]
         },
@@ -841,8 +839,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "email"
+                    "default_name": ""
                 },
                 {
                     "name": "state",

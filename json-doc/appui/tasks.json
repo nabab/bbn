@@ -2163,7 +2163,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "task The task's ID"
+                    "description": "The message to attach to track (optional)"
                 },
                 {
                     "name": "message",
@@ -2173,7 +2173,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "The message to attach to track (optional)"
+                    "description": "user The track's user. If you give 'false', it will use the current user"
                 },
                 {
                     "name": "id_user",
@@ -2182,8 +2182,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "user The track's user. If you give 'false', it will use the current user"
+                    "default_name": ""
                 }
             ]
         },

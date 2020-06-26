@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "Half ORM half DB management, the simplest class for data queries.\nHello world!",
+        "description": "Half ORM half DB management, the simplest class for data queries.\n *\nHello world!",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -68,8 +67,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to check"
+                    "default_name": ""
                 }
             ]
         },
@@ -170,8 +168,12 @@
         "__construct": {
             "name": "__construct",
             "summary": "Constructor",
-            "description": "```php\n$dbtest = new bbn\\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);\n \/\/ (void)\n```",
+            "description": "*\n```php\n$dbtest = new bbn\\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);\n \/\/ (void)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$dbtest = new bbn\\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);\n \/\/ (void)"
@@ -270,8 +272,12 @@
         "get_hash": {
             "name": "get_hash",
             "summary": "Gets the last hash created.",
-            "description": "```php\n\\bbn\\x::dump($db->get_hash());\n\/\/ (string) 3819056v431b210daf45f9b5dc2\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_hash());\n\/\/ (string) 3819056v431b210daf45f9b5dc2\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_hash());\n\/\/ (string) 3819056v431b210daf45f9b5dc2"
@@ -829,8 +835,12 @@
         "check": {
             "name": "check",
             "summary": "Checks if the database is ready to process a query.",
-            "description": "```php\nbbn\\x::dump($db->check());\n\/\/ (bool)\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->check());\n\/\/ (bool)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($db->check());\n\/\/ (bool)"
@@ -860,8 +870,12 @@
         "log": {
             "name": "log",
             "summary": "Writes in data\/logs\/db.log.",
-            "description": "```php\n$db->$db->log('test');\n```",
+            "description": "*\n```php\n$db->$db->log('test');\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db->$db->log('test');"
@@ -901,8 +915,12 @@
         "set_error_mode": {
             "name": "set_error_mode",
             "summary": "Sets the error mode.",
-            "description": "```php\n$db->set_error_mode('continue'|'die'|'stop_all|'stop');\n\/\/ (void)\n```",
+            "description": "*\n```php\n$db->set_error_mode('continue'|'die'|'stop_all|'stop');\n\/\/ (void)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db->set_error_mode('continue'|'die'|'stop_all|'stop');\n\/\/ (void)"
@@ -935,16 +953,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The error mode: \"continue\", \"die\", \"stop\", \"stop_all\"."
+                    "default_name": ""
                 }
             ]
         },
         "get_error_mode": {
             "name": "get_error_mode",
             "summary": "Gets the error mode.",
-            "description": "```php\nbbn\\x::dump($db->get_error_mode());\n\/\/ (string) stop_all\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->get_error_mode());\n\/\/ (string) stop_all\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($db->get_error_mode());\n\/\/ (string) stop_all"
@@ -974,8 +995,12 @@
         "clear_cache": {
             "name": "clear_cache",
             "summary": "Deletes a specific item from the cache.",
-            "description": "```php\nbbn\\x::dump($db->clear_cache('db_example','tables'));\n\/\/ (db)\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->clear_cache('db_example','tables'));\n\/\/ (db)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($db->clear_cache('db_example','tables'));\n\/\/ (db)"
@@ -1009,7 +1034,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "'db_name' or 'table_name'"
+                    "description": "'columns','tables' or'databases'"
                 },
                 {
                     "name": "mode",
@@ -1018,16 +1043,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "'columns','tables' or'databases'"
+                    "default_name": ""
                 }
             ]
         },
         "clear_all_cache": {
             "name": "clear_all_cache",
             "summary": "Clears the cache.",
-            "description": "```php\nbbn\\x::dump($db->clear_all_cache());\n\/\/ (db)\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->clear_all_cache());\n\/\/ (db)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($db->clear_all_cache());\n\/\/ (db)"
@@ -1057,8 +1085,12 @@
         "stop_fancy_stuff": {
             "name": "stop_fancy_stuff",
             "summary": "Stops fancy stuff.",
-            "description": "```php\n $db->stop_fancy_stuff();\n\/\/ (void)\n```",
+            "description": "*\n```php\n $db->stop_fancy_stuff();\n\/\/ (void)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db->stop_fancy_stuff();\n\/\/ (void)"
@@ -1088,8 +1120,12 @@
         "start_fancy_stuff": {
             "name": "start_fancy_stuff",
             "summary": "Starts fancy stuff.",
-            "description": "```php\n$db->start_fancy_stuff();\n\/\/ (void)\n```",
+            "description": "*\n```php\n$db->start_fancy_stuff();\n\/\/ (void)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db->start_fancy_stuff();\n\/\/ (void)"
@@ -1119,8 +1155,12 @@
         "clear": {
             "name": "clear",
             "summary": "Clear.",
-            "description": "```php\n$db->clear()\n\/\/ (void)\n```",
+            "description": "*\n```php\n$db->clear()\n\/\/ (void)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db->clear()\n\/\/ (void)"
@@ -1150,8 +1190,12 @@
         "add_statement": {
             "name": "add_statement",
             "summary": "Return an object with all the properties of the statement and where it is carried out.",
-            "description": "```php\n\\bbn\\x::dump($db->add_statement('SELECT name FROM table_users'));\n\/\/ (db)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->add_statement('SELECT name FROM table_users'));\n\/\/ (db)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->add_statement('SELECT name FROM table_users'));\n\/\/ (db)"
@@ -1333,7 +1377,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "select|insert|update|delete"
                 },
                 {
                     "name": "kind",
@@ -1343,7 +1388,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "select|insert|update|delete"
+                    "description": "before|after"
                 },
                 {
                     "name": "moment",
@@ -1353,7 +1398,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "before|after"
+                    "description": "database's table(s) name(s)"
                 },
                 {
                     "name": "tables",
@@ -1362,8 +1407,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "*",
-                    "default_name": "",
-                    "description": "database's table(s) name(s)"
+                    "default_name": ""
                 }
             ]
         },
@@ -1432,8 +1476,12 @@
         "get_foreign_keys": {
             "name": "get_foreign_keys",
             "summary": "Return an array with tables and fields related to the searched foreign key.",
-            "description": "```php\nbbn\\x::dump($db->get_foreign_keys('id', 'table_users', 'db_example'));\n\/\/ (Array)\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->get_foreign_keys('id', 'table_users', 'db_example'));\n\/\/ (Array)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($db->get_foreign_keys('id', 'table_users', 'db_example'));\n\/\/ (Array)"
@@ -1467,7 +1515,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The column's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "table",
@@ -1477,7 +1525,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database name if different from the current one"
                 },
                 {
                     "name": "db",
@@ -1486,19 +1534,18 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The database name if different from the current one"
+                    "default_name": ""
                 }
             ]
         },
         "has_id_increment": {
             "name": "has_id_increment",
             "summary": "Return true if in the table there are fields with auto-increment.",
-            "description": "Working only on mysql.\n```php\n\\bbn\\x::dump($db->has_id_increment('table_users'));\n\/\/ (bool) 1\n```",
+            "description": "Working only on mysql.\n   *\n```php\n\\bbn\\x::dump($db->has_id_increment('table_users'));\n\/\/ (bool) 1\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Working only on mysql.<\/p>"
+                    "content": "<p>Working only on mysql.\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -1532,16 +1579,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
         "modelize": {
             "name": "modelize",
             "summary": "Return the table's structure as an indexed array.",
-            "description": "```php\n\\bbn\\x::dump($db->modelize(\"table_users\"));\n\/\/ (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->modelize(\"table_users\"));\n\/\/ (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->modelize(\"table_users\"));\n\/\/ (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )"
@@ -1576,7 +1626,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "If set to true will force the modelization to reperform even if the cache exists"
                 },
                 {
                     "name": "force",
@@ -1585,8 +1635,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true will force the modelization to reperform even if the cache exists"
+                    "default_name": ""
                 }
             ]
         },
@@ -1730,8 +1779,12 @@
         "get_primary": {
             "name": "get_primary",
             "summary": "Return primary keys of a table as a numeric array.",
-            "description": "```php\n\\bbn\\x::dump($db-> get_primary('table_users'));\n\/\/ (array) [\"id\"]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db-> get_primary('table_users'));\n\/\/ (array) [\"id\"]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db-> get_primary('table_users'));\n\/\/ (array) [\"id\"]"
@@ -1764,16 +1817,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
         "get_unique_primary": {
             "name": "get_unique_primary",
             "summary": "Return the unique primary key of the given table.",
-            "description": "```php\n\\bbn\\x::dump($db->get_unique_primary('table_users'));\n\/\/ (string) id\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_unique_primary('table_users'));\n\/\/ (string) id\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_unique_primary('table_users'));\n\/\/ (string) id"
@@ -1807,16 +1863,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
         "get_unique_keys": {
             "name": "get_unique_keys",
             "summary": "Return the unique keys of a table as a numeric array.",
-            "description": "```php\n\\bbn\\x::dump($db->get_unique_keys('table_users'));\n\/\/ (array) [\"userid\", \"userdataid\"]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_unique_keys('table_users'));\n\/\/ (array) [\"userid\", \"userdataid\"]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_unique_keys('table_users'));\n\/\/ (array) [\"userid\", \"userdataid\"]"
@@ -1849,16 +1908,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
         "escape_value": {
             "name": "escape_value",
             "summary": "Return a string with quotes and percent escaped.",
-            "description": "```php\nbbn\\x::dump($db->escape_value(\"My father's job is interesting\");\n\/\/ (string) My  father\\'s  job  is  interesting\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->escape_value(\"My father's job is interesting\");\n\/\/ (string) My  father\\'s  job  is  interesting\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($db->escape_value(\"My father's job is interesting\");\n\/\/ (string) My  father\\'s  job  is  interesting"
@@ -1891,8 +1953,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to escape."
+                    "default_name": ""
                 },
                 {
                     "name": "esc",
@@ -1982,11 +2043,11 @@
         "last": {
             "name": "last",
             "summary": "Return the last query for this connection.",
-            "description": "```php\n\\bbn\\x::dump($db->last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -2014,11 +2075,11 @@
         "get_last_cfg": {
             "name": "get_last_cfg",
             "summary": "Return the last config for this connection.",
-            "description": "```php\n\\bbn\\x::dump($db->get_last_cfg());\n\/\/ (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_last_cfg());\n\/\/ (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_last_cfg());\n\/\/ (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_last_cfg());\n\/\/ (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -2046,8 +2107,12 @@
         "last_id": {
             "name": "last_id",
             "summary": "Return the last inserted ID.",
-            "description": "```php\n\\bbn\\x::dump($db->last_id());\n\/\/ (int) 26\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->last_id());\n\/\/ (int) 26\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->last_id());\n\/\/ (int) 26"
@@ -2101,8 +2166,12 @@
         "raw_query": {
             "name": "raw_query",
             "summary": "Executes the original PDO query function",
-            "description": "```php\n\\bbn\\x::dump($db->raw_query());\n\/\/ (bool)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->raw_query());\n\/\/ (bool)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->raw_query());\n\/\/ (bool)"
@@ -2130,8 +2199,12 @@
         "new_id": {
             "name": "new_id",
             "summary": "Generate a new casual id based on the max number of characters of id's column structure in the given table",
-            "description": "```php\n\\bbn\\x::dump($db->new_id('table_users', 18));\n\/\/ (int) 69991701\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->new_id('table_users', 18));\n\/\/ (int) 69991701\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->new_id('table_users', 18));\n\/\/ (int) 69991701"
@@ -2358,8 +2431,12 @@
         "get_one": {
             "name": "get_one",
             "summary": "Executes the given query with given vars, and extracts the first cell's result.",
-            "description": "```php\n\\bbn\\x::dump($db->get_one(\"SELECT name FROM table_users WHERE id>?\", 138));\n\/\/ (string) John\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_one(\"SELECT name FROM table_users WHERE id>?\", 138));\n\/\/ (string) John\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_one(\"SELECT name FROM table_users WHERE id>?\", 138));\n\/\/ (string) John"
@@ -2387,11 +2464,11 @@
         "get_var": {
             "name": "get_var",
             "summary": "Execute the given query with given vars, and extract the first cell's result.",
-            "description": "(similar to {@link get_one()})\n```php\n\\bbn\\x::dump($db->get_var(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n\/\/ (int) 123554154\n```",
+            "description": "(similar to {@link get_one()})\n   *\n```php\n\\bbn\\x::dump($db->get_var(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n\/\/ (int) 123554154\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>(similar to {@link get_one()})<\/p>"
+                    "content": "<p>(similar to {@link get_one()})\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -2420,15 +2497,15 @@
         "get_key_val": {
             "name": "get_key_val",
             "summary": "Return an array indexed on the first field of the request.",
-            "description": "The value will be an array if the request has more than two fields.\n```php\n\\bbn\\x::dump($db->get_key_val(\"SELECT name,id_group FROM table_users\"));\n\/\n(array)[\n     \"John\" => 1,\n     \"Michael\" => 1,\n     \"Barbara\" => 1\n       ]\n\\bbn\\x::dump($db->get_key_val(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/\n(array)[\n        \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n        ],\n        \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n        ]\n       ]\n```",
+            "description": "The value will be an array if the request has more than two fields.\n   *\n```php\n\\bbn\\x::dump($db->get_key_val(\"SELECT name,id_group FROM table_users\"));\n\/*\n(array)[\n     \"John\" => 1,\n     \"Michael\" => 1,\n     \"Barbara\" => 1\n       ]\n   *\n\\bbn\\x::dump($db->get_key_val(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/*\n(array)[\n        \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n        ],\n        \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n        ]\n       ]\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>The value will be an array if the request has more than two fields.<\/p>"
+                    "content": "<p>The value will be an array if the request has more than two fields.\n*<\/p>"
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_key_val(\"SELECT name,id_group FROM table_users\"));\n\/\n(array)[\n     \"John\" => 1,\n     \"Michael\" => 1,\n     \"Barbara\" => 1\n       ]\n\\bbn\\x::dump($db->get_key_val(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/\n(array)[\n        \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n        ],\n        \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n        ]\n       ]"
+                    "content": "\\bbn\\x::dump($db->get_key_val(\"SELECT name,id_group FROM table_users\"));\n\/*\n(array)[\n     \"John\" => 1,\n     \"Michael\" => 1,\n     \"Barbara\" => 1\n       ]\n   *\n\\bbn\\x::dump($db->get_key_val(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/*\n(array)[\n        \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n        ],\n        \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n        ]\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -2456,11 +2533,15 @@
         "get_col_array": {
             "name": "get_col_array",
             "summary": "Return an array with the values of single field resulting from the query.",
-            "description": "```php\n\\bbn\\x::dump($db->get_col_array(\"SELECT id FROM table_users\"));\n\/\n(array)[1, 2, 3, 4]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_col_array(\"SELECT id FROM table_users\"));\n\/*\n(array)[1, 2, 3, 4]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_col_array(\"SELECT id FROM table_users\"));\n\/\n(array)[1, 2, 3, 4]"
+                    "content": "\\bbn\\x::dump($db->get_col_array(\"SELECT id FROM table_users\"));\n\/*\n(array)[1, 2, 3, 4]"
                 }
             ],
             "file": "bbn\\db",
@@ -2487,11 +2568,15 @@
         "select": {
             "name": "select",
             "summary": "Returns the first row resulting from the query as an object.",
-            "description": "```php\n\\bbn\\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/\n(object){\n  \"name\": \"John\",\n  \"surname\": \"Smith\",\n}\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/*\n(object){\n  \"name\": \"John\",\n  \"surname\": \"Smith\",\n}\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/\n(object){\n  \"name\": \"John\",\n  \"surname\": \"Smith\",\n}"
+                    "content": "\\bbn\\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/*\n(object){\n  \"name\": \"John\",\n  \"surname\": \"Smith\",\n}"
                 }
             ],
             "file": "bbn\\db",
@@ -2523,7 +2608,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "fields",
@@ -2533,7 +2618,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -2543,7 +2628,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "order",
@@ -2553,7 +2638,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -2562,19 +2647,22 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "select_all": {
             "name": "select_all",
             "summary": "Return table's rows resulting from the query as an array of objects.",
-            "description": "```php\n\\bbn\\x::dump($db->select_all(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/\n(array)[\n       Object stdClass: df {\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         },\n       Object stdClass: df {\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n        }\n       ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->select_all(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n       Object stdClass: df {\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         },\n       Object stdClass: df {\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n        }\n       ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->select_all(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/\n(array)[\n       Object stdClass: df {\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         },\n       Object stdClass: df {\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n        }\n       ]"
+                    "content": "\\bbn\\x::dump($db->select_all(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n       Object stdClass: df {\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         },\n       Object stdClass: df {\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n        }\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -2606,7 +2694,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "fields",
@@ -2616,7 +2704,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -2626,7 +2714,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "order",
@@ -2636,7 +2724,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"limit\" condition, default: 0"
                 },
                 {
                     "name": "limit",
@@ -2646,7 +2734,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The \"limit\" condition, default: 0"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -2655,19 +2743,22 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "iselect": {
             "name": "iselect",
             "summary": "Return the first row resulting from the query as a numeric array.",
-            "description": "```php\n\\bbn\\x::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/\n(array)[\n         4,\n        \"Jack\",\n         \"Stewart\"\n       ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n         4,\n        \"Jack\",\n         \"Stewart\"\n       ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/\n(array)[\n         4,\n        \"Jack\",\n         \"Stewart\"\n       ]"
+                    "content": "\\bbn\\x::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n         4,\n        \"Jack\",\n         \"Stewart\"\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -2699,7 +2790,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "fields",
@@ -2709,7 +2800,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -2719,7 +2810,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "order",
@@ -2729,7 +2820,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -2738,19 +2829,22 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "iselect_all": {
             "name": "iselect_all",
             "summary": "Return the searched rows as an array of numeric arrays.",
-            "description": "```php\n\\bbn\\x::dump($db->iselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/\n(array)[\n         [\n           2,\n           \"John\",\n           \"Smith\",\n         ],\n         [\n           3,\n           \"Thomas\",\n           \"Jones\",\n         ]\n       ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->iselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/*\n(array)[\n         [\n           2,\n           \"John\",\n           \"Smith\",\n         ],\n         [\n           3,\n           \"Thomas\",\n           \"Jones\",\n         ]\n       ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->iselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/\n(array)[\n         [\n           2,\n           \"John\",\n           \"Smith\",\n         ],\n         [\n           3,\n           \"Thomas\",\n           \"Jones\",\n         ]\n       ]"
+                    "content": "\\bbn\\x::dump($db->iselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/*\n(array)[\n         [\n           2,\n           \"John\",\n           \"Smith\",\n         ],\n         [\n           3,\n           \"Thomas\",\n           \"Jones\",\n         ]\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -2782,7 +2876,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields's name"
                 },
                 {
                     "name": "fields",
@@ -2792,7 +2886,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -2802,7 +2896,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "| boolean The \"order\" condition, default: false"
                 },
                 {
                     "name": "order",
@@ -2812,7 +2906,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "| boolean The \"order\" condition, default: false"
+                    "description": "The \"limit\" condition, default: 0"
                 },
                 {
                     "name": "limit",
@@ -2822,7 +2916,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The \"limit\" condition, default: 0"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -2831,19 +2925,22 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "rselect": {
             "name": "rselect",
             "summary": "Return the first row resulting from the query as an indexed array.",
-            "description": "```php\n\\bbn\\x::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/\n(array) [\n         \"id\" => 4,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\"\n        ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         \"id\" => 4,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\"\n        ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/\n(array) [\n         \"id\" => 4,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\"\n        ]"
+                    "content": "\\bbn\\x::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         \"id\" => 4,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\"\n        ]"
                 }
             ],
             "file": "bbn\\db",
@@ -2875,7 +2972,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "fields",
@@ -2885,7 +2982,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -2895,7 +2992,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "order",
@@ -2905,7 +3002,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -2914,19 +3011,22 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "rselect_all": {
             "name": "rselect_all",
             "summary": "Return table's rows as an array of indexed arrays.",
-            "description": "```php\n\\bbn\\x::dump($db->rselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/\n(array) [\n         [\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         ],\n         [\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n         ]\n       ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->rselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         [\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         ],\n         [\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n         ]\n       ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->rselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/\n(array) [\n         [\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         ],\n         [\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n         ]\n       ]"
+                    "content": "\\bbn\\x::dump($db->rselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n         [\n         \"id\" => 2,\n         \"name\" => \"John\",\n         \"surname\" => \"Smith\",\n         ],\n         [\n         \"id\" => 3,\n         \"name\" => \"Thomas\",\n         \"surname\" => \"Jones\",\n         ]\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -2958,7 +3058,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "fields",
@@ -2968,7 +3068,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -2978,7 +3078,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "condition, default: false"
                 },
                 {
                     "name": "order",
@@ -2988,7 +3088,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "condition, default: false"
+                    "description": "The \"limit\" condition, default: 0"
                 },
                 {
                     "name": "limit",
@@ -2998,7 +3098,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The \"limit\" condition, default: 0"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -3007,16 +3107,19 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "select_one": {
             "name": "select_one",
             "summary": "Return a single value",
-            "description": "```php\n\\bbn\\x::dump($db->select_one(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n (string) 'Michael'\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->select_one(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n (string) 'Michael'\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->select_one(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n (string) 'Michael'"
@@ -3048,7 +3151,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The field's name"
                 },
                 {
                     "name": "field",
@@ -3058,7 +3161,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The field's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3068,7 +3171,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "order",
@@ -3078,7 +3181,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"start\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -3087,8 +3190,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
@@ -3168,8 +3270,12 @@
         "count": {
             "name": "count",
             "summary": "Return the number of records in the table corresponding to the $where condition (non mandatory).",
-            "description": "```php\n\\bbn\\x::dump($db->count('table_users', ['name' => 'John']));\n\/\/ (int) 2\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->count('table_users', ['name' => 'John']));\n\/\/ (int) 2\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->count('table_users', ['name' => 'John']));\n\/\/ (int) 2"
@@ -3204,7 +3310,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3213,23 +3319,22 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "The \"where\" condition"
+                    "default_name": ""
                 }
             ]
         },
         "select_all_by_keys": {
             "name": "select_all_by_keys",
             "summary": "Return an array indexed on the first field of the request.",
-            "description": "The value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".\n```php\n\\bbn\\x::dump($db->select_all_by_keys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/\n(array)[\n       \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n         ],\n       \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n       ]\n     ]\n```",
+            "description": "The value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".\n   *\n```php\n\\bbn\\x::dump($db->select_all_by_keys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/*\n(array)[\n       \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n         ],\n       \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n       ]\n     ]\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>The value will be an array if the request has more than two fields.\nReturn the same value as &quot;get_key_val&quot;.<\/p>"
+                    "content": "<p>The value will be an array if the request has more than two fields.\nReturn the same value as &quot;get_key_val&quot;.\n*<\/p>"
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->select_all_by_keys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/\n(array)[\n       \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n         ],\n       \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n       ]\n     ]"
+                    "content": "\\bbn\\x::dump($db->select_all_by_keys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/*\n(array)[\n       \"John\" => [\n         \"surname\" => \"Brown\",\n         \"id\" => 3\n         ],\n       \"Michael\" => [\n         \"surname\" => \"Smith\",\n         \"id\" => 4\n       ]\n     ]"
                 }
             ],
             "file": "bbn\\db",
@@ -3261,7 +3366,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The fields's name"
                 },
                 {
                     "name": "fields",
@@ -3271,7 +3376,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The fields's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3281,7 +3386,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "order",
@@ -3291,7 +3396,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition"
+                    "description": "The $limit condition, default: 0"
                 },
                 {
                     "name": "limit",
@@ -3310,16 +3415,19 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The $limit condition, default: 0"
+                    "default_name": ""
                 }
             ]
         },
         "stat": {
             "name": "stat",
             "summary": "Return an array with the count of values corresponding to the where conditions.",
-            "description": "```php\n\\bbn\\x::dump($db->stat('table_user', 'name', ['name' => '%n']));\n\/* (array)\n[\n [\n     \"num\" => 1,\n     \"name\" => \"alan\",\n ], [\n     \"num\" => 1,\n     \"name\" => \"karen\",\n ],\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->stat('table_user', 'name', ['name' => '%n']));\n\/* (array)\n[\n [\n     \"num\" => 1,\n     \"name\" => \"alan\",\n ], [\n     \"num\" => 1,\n     \"name\" => \"karen\",\n ],\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->stat('table_user', 'name', ['name' => '%n']));\n\/* (array)\n[\n [\n     \"num\" => 1,\n     \"name\" => \"alan\",\n ], [\n     \"num\" => 1,\n     \"name\" => \"karen\",\n ],\n]"
@@ -3354,7 +3462,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array."
+                    "description": "The field's name."
                 },
                 {
                     "name": "column",
@@ -3364,7 +3472,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The field's name."
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "where",
@@ -3374,7 +3482,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition."
+                    "description": "The \"order\" condition."
                 },
                 {
                     "name": "order",
@@ -3383,16 +3491,19 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "The \"order\" condition."
+                    "default_name": ""
                 }
             ]
         },
         "get_field_values": {
             "name": "get_field_values",
             "summary": "Return the unique values of a column of a table as a numeric indexed array.",
-            "description": "```php\n\\bbn\\x::dump($db->get_field_values(\"table_users\", \"surname\", [['id', '>', '2']], 1, 1));\n\/\/ (array) [\"Smiths\", \"White\"]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_field_values(\"table_users\", \"surname\", [['id', '>', '2']], 1, 1));\n\/\/ (array) [\"Smiths\", \"White\"]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_field_values(\"table_users\", \"surname\", [['id', '>', '2']], 1, 1));\n\/\/ (array) [\"Smiths\", \"White\"]"
@@ -3427,7 +3538,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The field's name"
                 },
                 {
                     "name": "field",
@@ -3437,7 +3548,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The field's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3447,7 +3558,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "order",
@@ -3456,16 +3567,19 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "The \"order\" condition"
+                    "default_name": ""
                 }
             ]
         },
         "count_field_values": {
             "name": "count_field_values",
             "summary": "Return a count of identical values in a field as array, reporting a structure type 'num' - 'val'.",
-            "description": "```php\n\\bbn\\x::dump($db->count_field_values('table_users','surname',[['name','=','John']]));\n\/\/ (array) [\"num\" => 2, \"val\" => \"John\"]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->count_field_values('table_users','surname',[['name','=','John']]));\n\/\/ (array) [\"num\" => 2, \"val\" => \"John\"]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->count_field_values('table_users','surname',[['name','=','John']]));\n\/\/ (array) [\"num\" => 2, \"val\" => \"John\"]"
@@ -3497,7 +3611,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The field's name"
                 },
                 {
                     "name": "field",
@@ -3507,7 +3621,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The field's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3517,7 +3631,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "order",
@@ -3526,19 +3640,22 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "The \"order\" condition"
+                    "default_name": ""
                 }
             ]
         },
         "get_column_values": {
             "name": "get_column_values",
             "summary": "Return a numeric indexed array with the values of the unique column ($field) from the selected $table",
-            "description": "```php\n\\bbn\\x::dump($db->get_column_values('table_users','surname',['id','>',1]));\n\/\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_column_values('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_column_values('table_users','surname',['id','>',1]));\n\/\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]"
+                    "content": "\\bbn\\x::dump($db->get_column_values('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]"
                 }
             ],
             "file": "bbn\\db",
@@ -3570,7 +3687,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The field's name"
                 },
                 {
                     "name": "field",
@@ -3580,7 +3697,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The field's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3590,7 +3707,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "order",
@@ -3599,19 +3716,18 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "The \"order\" condition"
+                    "default_name": ""
                 }
             ]
         },
         "get_values_count": {
             "name": "get_values_count",
             "summary": "Return a string with the sql query to count equal values in a field of the table.",
-            "description": "```php\n\\bbn\\x::dump($db->get_values_count('table_users','name',['surname','=','smith']));\n\/\n(string)\n  SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n    GROUP BY `name`\n    ORDER BY `name`\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_values_count('table_users','name',['surname','=','smith']));\n\/*\n(string)\n  SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n    GROUP BY `name`\n    ORDER BY `name`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_values_count('table_users','name',['surname','=','smith']));\n\/\n(string)\n  SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n    GROUP BY `name`\n    ORDER BY `name`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_values_count('table_users','name',['surname','=','smith']));\n\/*\n(string)\n  SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n    GROUP BY `name`\n    ORDER BY `name`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -3642,7 +3758,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name or a configuration array"
+                    "description": "The field's name"
                 },
                 {
                     "name": "field",
@@ -3652,7 +3768,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The field's name"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "where",
@@ -3662,7 +3778,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "order",
@@ -3671,19 +3787,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The \"order\" condition"
+                    "default_name": ""
                 }
             ]
         },
         "insert": {
             "name": "insert",
             "summary": "Inserts row(s) in a table.",
-            "description": "<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"Ted\"],\n   [\"surname\" => \"McLow\"]\n ]);\n<\/code>\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"July\"],\n   [\"surname\" => \"O'neill\"]\n ], [\n   [\"name\" => \"Peter\"],\n   [\"surname\" => \"Griffin\"]\n ], [\n   [\"name\" => \"Marge\"],\n   [\"surname\" => \"Simpson\"]\n ]);\n<\/code>",
+            "description": "*\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"Ted\"],\n   [\"surname\" => \"McLow\"]\n ]);\n<\/code>\n   *\n<code>\n$db->insert(\"table_users\", [\n   [\"name\" => \"July\"],\n   [\"surname\" => \"O'neill\"]\n ], [\n   [\"name\" => \"Peter\"],\n   [\"surname\" => \"Griffin\"]\n ], [\n   [\"name\" => \"Marge\"],\n   [\"surname\" => \"Simpson\"]\n ]);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;insert(&quot;table_users&quot;, [\n[&quot;name&quot; =&gt; &quot;Ted&quot;],\n[&quot;surname&quot; =&gt; &quot;McLow&quot;]\n]);\n<\/code>\n<code>\n$db-&gt;insert(&quot;table_users&quot;, [\n[&quot;name&quot; =&gt; &quot;July&quot;],\n[&quot;surname&quot; =&gt; &quot;O'neill&quot;]\n], [\n[&quot;name&quot; =&gt; &quot;Peter&quot;],\n[&quot;surname&quot; =&gt; &quot;Griffin&quot;]\n], [\n[&quot;name&quot; =&gt; &quot;Marge&quot;],\n[&quot;surname&quot; =&gt; &quot;Simpson&quot;]\n]);\n<\/code><\/p>"
+                    "content": "<p><em>\n<code>\n$db-&gt;insert(&quot;table_users&quot;, [\n[&quot;name&quot; =&gt; &quot;Ted&quot;],\n[&quot;surname&quot; =&gt; &quot;McLow&quot;]\n]);\n<\/code>\n<\/em>\n<code>\n$db-&gt;insert(&quot;table_users&quot;, [\n[&quot;name&quot; =&gt; &quot;July&quot;],\n[&quot;surname&quot; =&gt; &quot;O'neill&quot;]\n], [\n[&quot;name&quot; =&gt; &quot;Peter&quot;],\n[&quot;surname&quot; =&gt; &quot;Griffin&quot;]\n], [\n[&quot;name&quot; =&gt; &quot;Marge&quot;],\n[&quot;surname&quot; =&gt; &quot;Simpson&quot;]\n]);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -3715,7 +3830,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "description": "The values to insert."
                 },
                 {
                     "name": "values",
@@ -3725,7 +3840,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The values to insert."
+                    "description": "If true, controls if the row is already existing and ignores it."
                 },
                 {
                     "name": "ignore",
@@ -3734,19 +3849,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If true, controls if the row is already existing and ignores it."
+                    "default_name": ""
                 }
             ]
         },
         "insert_update": {
             "name": "insert_update",
             "summary": "If not exist inserts row(s) in a table, else update.",
-            "description": "<code>\n$db->insert_update(\n \"table_users\",\n [\n   'id' => '12',\n   'name' => 'Frank'\n ]\n);\n<\/code>",
+            "description": "*\n<code>\n$db->insert_update(\n \"table_users\",\n [\n   'id' => '12',\n   'name' => 'Frank'\n ]\n);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;insert_update(\n&quot;table_users&quot;,\n[\n'id' =&gt; '12',\n'name' =&gt; 'Frank'\n]\n);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\n$db-&gt;insert_update(\n&quot;table_users&quot;,\n[\n'id' =&gt; '12',\n'name' =&gt; 'Frank'\n]\n);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -3778,7 +3892,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "description": "The values to insert."
                 },
                 {
                     "name": "values",
@@ -3787,19 +3901,18 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The values to insert."
+                    "default_name": ""
                 }
             ]
         },
         "update": {
             "name": "update",
             "summary": "Updates row(s) in a table.",
-            "description": "<code>\n$db->update(\n \"table_users\",\n [\n   ['name' => 'Frank'],\n   ['surname' => 'Red']\n ],\n ['id' => '127']\n);\n<\/code>",
+            "description": "*\n<code>\n$db->update(\n \"table_users\",\n [\n   ['name' => 'Frank'],\n   ['surname' => 'Red']\n ],\n ['id' => '127']\n);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;update(\n&quot;table_users&quot;,\n[\n['name' =&gt; 'Frank'],\n['surname' =&gt; 'Red']\n],\n['id' =&gt; '127']\n);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\n$db-&gt;update(\n&quot;table_users&quot;,\n[\n['name' =&gt; 'Frank'],\n['surname' =&gt; 'Red']\n],\n['id' =&gt; '127']\n);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -3831,7 +3944,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "description": "The new value(s)."
                 },
                 {
                     "name": "values",
@@ -3841,7 +3954,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The new value(s)."
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "where",
@@ -3851,7 +3964,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The \"where\" condition."
+                    "description": "If IGNORE should be added to the statement"
                 },
                 {
                     "name": "ignore",
@@ -3860,19 +3973,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If IGNORE should be added to the statement"
+                    "default_name": ""
                 }
             ]
         },
         "update_ignore": {
             "name": "update_ignore",
             "summary": "If exist updates row(s) in a table, else ignore.",
-            "description": "<code>\n$db->update_ignore(\n  \"table_users\",\n  [\n    ['name' => 'Frank'],\n    ['surname' => 'Red']\n  ],\n  ['id' => '20']\n);\n<\/code>",
+            "description": "*\n<code>\n$db->update_ignore(\n  \"table_users\",\n  [\n    ['name' => 'Frank'],\n    ['surname' => 'Red']\n  ],\n  ['id' => '20']\n);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;update_ignore(\n&quot;table_users&quot;,\n[\n['name' =&gt; 'Frank'],\n['surname' =&gt; 'Red']\n],\n['id' =&gt; '20']\n);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\n$db-&gt;update_ignore(\n&quot;table_users&quot;,\n[\n['name' =&gt; 'Frank'],\n['surname' =&gt; 'Red']\n],\n['id' =&gt; '20']\n);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -3903,8 +4015,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "default_name": ""
                 },
                 {
                     "name": "values",
@@ -3913,7 +4024,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "where",
@@ -3922,19 +4034,18 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The \"where\" condition."
+                    "default_name": ""
                 }
             ]
         },
         "delete": {
             "name": "delete",
             "summary": "Deletes row(s) in a table.",
-            "description": "<code>\n$db->delete(\"table_users\", ['id' => '32']);\n<\/code>",
+            "description": "*\n<code>\n$db->delete(\"table_users\", ['id' => '32']);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;delete(&quot;table_users&quot;, ['id' =&gt; '32']);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\n$db-&gt;delete(&quot;table_users&quot;, ['id' =&gt; '32']);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -3966,7 +4077,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "where",
@@ -3976,7 +4087,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The \"where\" condition."
+                    "description": "default: false."
                 },
                 {
                     "name": "ignore",
@@ -3985,19 +4096,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "default: false."
+                    "default_name": ""
                 }
             ]
         },
         "delete_ignore": {
             "name": "delete_ignore",
             "summary": "If exist deletess row(s) in a table, else ignore.",
-            "description": "<code>\n$db->delete_ignore(\n \"table_users\",\n ['id' => '20']\n);\n<\/code>",
+            "description": "*\n<code>\n$db->delete_ignore(\n \"table_users\",\n ['id' => '20']\n);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;delete_ignore(\n&quot;table_users&quot;,\n['id' =&gt; '20']\n);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\n$db-&gt;delete_ignore(\n&quot;table_users&quot;,\n['id' =&gt; '20']\n);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -4029,7 +4139,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "where",
@@ -4038,19 +4148,18 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The \"where\" condition."
+                    "default_name": ""
                 }
             ]
         },
         "insert_ignore": {
             "name": "insert_ignore",
             "summary": "If not exist inserts row(s) in a table, else ignore.",
-            "description": "<code>\n$db->insert_ignore(\n \"table_users\",\n [\n   ['id' => '19', 'name' => 'Frank'],\n   ['id' => '20', 'name' => 'Ted'],\n ]\n);\n<\/code>",
+            "description": "*\n<code>\n$db->insert_ignore(\n \"table_users\",\n [\n   ['id' => '19', 'name' => 'Frank'],\n   ['id' => '20', 'name' => 'Ted'],\n ]\n);\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\n$db-&gt;insert_ignore(\n&quot;table_users&quot;,\n[\n['id' =&gt; '19', 'name' =&gt; 'Frank'],\n['id' =&gt; '20', 'name' =&gt; 'Ted'],\n]\n);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\n$db-&gt;insert_ignore(\n&quot;table_users&quot;,\n[\n['id' =&gt; '19', 'name' =&gt; 'Frank'],\n['id' =&gt; '20', 'name' =&gt; 'Ted'],\n]\n);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\db",
@@ -4082,7 +4191,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table name or the configuration array."
+                    "description": "The row(s) values."
                 },
                 {
                     "name": "values",
@@ -4091,8 +4200,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The row(s) values."
+                    "default_name": ""
                 }
             ]
         },
@@ -4136,8 +4244,12 @@
         "fetch": {
             "name": "fetch",
             "summary": "Return an indexed array with the first result of the query or false if there are no results.",
-            "description": "```php\n\\bbn\\x::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n\/* (array)\n[\n \"name\" => \"john\",\n 0 => \"john\",\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n\/* (array)\n[\n \"name\" => \"john\",\n 0 => \"john\",\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n\/* (array)\n[\n \"name\" => \"john\",\n 0 => \"john\",\n]"
@@ -4175,8 +4287,12 @@
         "fetchAll": {
             "name": "fetchAll",
             "summary": "Return an array of indexed array with all results of the query or false if there are no results.",
-            "description": "```php\n\\bbn\\x::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n\/* (array)\n [\n   [\n   \"surname\" => \"White\",\n   0 => \"White\",\n   \"name\" => \"Michael\",\n   1 => \"Michael\",\n   \"id\"  => 1,\n   2 => 1,\n   ],\n   [\n   \"surname\" => \"Smith\",\n   0 => \"Smith\",\n   \"name\" => \"John\",\n   1  =>  \"John\",\n   \"id\" => 2,\n   2 => 2,\n   ],\n ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n\/* (array)\n [\n   [\n   \"surname\" => \"White\",\n   0 => \"White\",\n   \"name\" => \"Michael\",\n   1 => \"Michael\",\n   \"id\"  => 1,\n   2 => 1,\n   ],\n   [\n   \"surname\" => \"Smith\",\n   0 => \"Smith\",\n   \"name\" => \"John\",\n   1  =>  \"John\",\n   \"id\" => 2,\n   2 => 2,\n   ],\n ]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n\/* (array)\n [\n   [\n   \"surname\" => \"White\",\n   0 => \"White\",\n   \"name\" => \"Michael\",\n   1 => \"Michael\",\n   \"id\"  => 1,\n   2 => 1,\n   ],\n   [\n   \"surname\" => \"Smith\",\n   0 => \"Smith\",\n   \"name\" => \"John\",\n   1  =>  \"John\",\n   \"id\" => 2,\n   2 => 2,\n   ],\n ]"
@@ -4257,8 +4373,12 @@
         "fetchObject": {
             "name": "fetchObject",
             "summary": "Return an array with stdClass object or false if no result.",
-            "description": "```php\n\\bbn\\x::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n\/\/ stdClass Object {\n                   \"id\"  =>  1,\n                   \"name\"  =>  \"John\",\n                   \"surname\"  =>  \"Smith\",\n                   }\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n\/\/ stdClass Object {\n                   \"id\"  =>  1,\n                   \"name\"  =>  \"John\",\n                   \"surname\"  =>  \"Smith\",\n                   }\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n\/\/ stdClass Object {\n                   \"id\"  =>  1,\n                   \"name\"  =>  \"John\",\n                   \"surname\"  =>  \"Smith\",\n                   }"
@@ -4353,11 +4473,11 @@
         "tfn": {
             "name": "tfn",
             "summary": "Return table's simple name.",
-            "description": "(similar to {@link table_simple_name()})\n```php\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```",
+            "description": "(similar to {@link table_simple_name()})\n   *\n```php\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>(similar to {@link table_simple_name()})<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`<\/code><\/pre>"
+                    "content": "<p>(similar to {@link table_simple_name()})\n*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4389,7 +4509,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "If set to true the returned string will be escaped."
                 },
                 {
                     "name": "escaped",
@@ -4398,19 +4518,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped."
+                    "default_name": ""
                 }
             ]
         },
         "tsn": {
             "name": "tsn",
             "summary": "Return table's simple name.",
-            "description": "(similar to {@link table_simple_name()})\n```php\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```",
+            "description": "(similar to {@link table_simple_name()})\n   *\n```php\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>(similar to {@link table_simple_name()})<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`<\/code><\/pre>"
+                    "content": "<p>(similar to {@link table_simple_name()})\n*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db-&gt;tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4442,7 +4561,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "If set to true the returned string will be escaped."
                 },
                 {
                     "name": "escaped",
@@ -4451,19 +4570,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped."
+                    "default_name": ""
                 }
             ]
         },
         "cfn": {
             "name": "cfn",
             "summary": "Return column's full name.",
-            "description": "(similar to {@link col_full_name()})\n```php\n\\bbn\\x::dump($db->cfn(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db->cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```",
+            "description": "(similar to {@link col_full_name()})\n   *\n```php\n\\bbn\\x::dump($db->cfn(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db->cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>(similar to {@link col_full_name()})<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;cfn(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db-&gt;cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`<\/code><\/pre>"
+                    "content": "<p>(similar to {@link col_full_name()})\n*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;cfn(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db-&gt;cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4495,7 +4613,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The column's name (escaped or not)."
+                    "description": "The table's name (escaped or not)."
                 },
                 {
                     "name": "table",
@@ -4505,7 +4623,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The table's name (escaped or not)."
+                    "description": "If set to true the returned string will be escaped."
                 },
                 {
                     "name": "escaped",
@@ -4514,19 +4632,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped."
+                    "default_name": ""
                 }
             ]
         },
         "csn": {
             "name": "csn",
             "summary": "Return the column's simple name.",
-            "description": "(similar to {@link col_simple_name()})\n```php\n\\bbn\\x::dump($db->csn(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db->csn(\"table_users.name\", true));\n\/\/ (string) `name`\n```",
+            "description": "(similar to {@link col_simple_name()})\n   *\n```php\n\\bbn\\x::dump($db->csn(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db->csn(\"table_users.name\", true));\n\/\/ (string) `name`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>(similar to {@link col_simple_name()})<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;csn(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db-&gt;csn(\"table_users.name\", true));\n\/\/ (string) `name`<\/code><\/pre>"
+                    "content": "<p>(similar to {@link col_simple_name()})\n*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;csn(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db-&gt;csn(\"table_users.name\", true));\n\/\/ (string) `name`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4558,7 +4675,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The column's complete name (escaped or not)"
+                    "description": "If set to true the returned string will be escaped."
                 },
                 {
                     "name": "escaped",
@@ -4567,8 +4684,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped."
+                    "default_name": ""
                 }
             ]
         },
@@ -4637,8 +4753,12 @@
         "change": {
             "name": "change",
             "summary": "Changes the database used to the given one.",
-            "description": "```php\n$db = new db();\nx::dump($db->change('db_example'));\n\/\/ (db)\n```",
+            "description": "*\n```php\n$db = new db();\nx::dump($db->change('db_example'));\n\/\/ (db)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db = new db();\nx::dump($db->change('db_example'));\n\/\/ (db)"
@@ -4671,19 +4791,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
         "escape": {
             "name": "escape",
             "summary": "Escapes names with the appropriate quotes (db, tables, columns, keys...)",
-            "description": "```php\nbbn\\x::dump($db->escape(\"table_users\"));\n\/\/ (string) `table_users`\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->escape(\"table_users\"));\n\/\/ (string) `table_users`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">bbn\\x::dump($db-&gt;escape(\"table_users\"));\n\/\/ (string) `table_users`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">bbn\\x::dump($db-&gt;escape(\"table_users\"));\n\/\/ (string) `table_users`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4713,19 +4832,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The name to escape."
+                    "default_name": ""
                 }
             ]
         },
         "table_full_name": {
             "name": "table_full_name",
             "summary": "Return table's full name.",
-            "description": "```php\nbbn\\x::dump($db->table_full_name(\"table_users\"));\n\/\/ (String) db_example.table_users\nbbn\\x::dump($db->table_full_name(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`\n```",
+            "description": "*\n```php\nbbn\\x::dump($db->table_full_name(\"table_users\"));\n\/\/ (String) db_example.table_users\nbbn\\x::dump($db->table_full_name(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">bbn\\x::dump($db-&gt;table_full_name(\"table_users\"));\n\/\/ (String) db_example.table_users\nbbn\\x::dump($db-&gt;table_full_name(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">bbn\\x::dump($db-&gt;table_full_name(\"table_users\"));\n\/\/ (String) db_example.table_users\nbbn\\x::dump($db-&gt;table_full_name(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4757,7 +4875,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name (escaped or not)."
+                    "description": "If set to true the returned string will be escaped."
                 },
                 {
                     "name": "escaped",
@@ -4766,19 +4884,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped."
+                    "default_name": ""
                 }
             ]
         },
         "is_table_full_name": {
             "name": "is_table_full_name",
             "summary": "Returns true if the string corresponds to the tipology of a table full name.",
-            "description": "(similar to {@link table_full_name()})\n```php\n\\bbn\\x::dump($db->tfn(\"table_users\"));\n\/\/ (String) db_example.table_users\n\\bbn\\x::dump($db->tfn(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`\n```",
+            "description": "(similar to {@link table_full_name()})\n   *\n```php\n\\bbn\\x::dump($db->tfn(\"table_users\"));\n\/\/ (String) db_example.table_users\n\\bbn\\x::dump($db->tfn(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>(similar to {@link table_full_name()})<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;tfn(\"table_users\"));\n\/\/ (String) db_example.table_users\n\\bbn\\x::dump($db-&gt;tfn(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`<\/code><\/pre>"
+                    "content": "<p>(similar to {@link table_full_name()})\n*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;tfn(\"table_users\"));\n\/\/ (String) db_example.table_users\n\\bbn\\x::dump($db-&gt;tfn(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4808,8 +4925,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -4852,11 +4968,11 @@
         "table_simple_name": {
             "name": "table_simple_name",
             "summary": "Return table's simple name.",
-            "description": "```php\n\\bbn\\x::dump($db->table_simple_name(\"example_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->table_simple_name(\"example.table_users\", true));\n\/\/ (string) `table_users`\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->table_simple_name(\"example_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->table_simple_name(\"example.table_users\", true));\n\/\/ (string) `table_users`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;table_simple_name(\"example_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db-&gt;table_simple_name(\"example.table_users\", true));\n\/\/ (string) `table_users`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;table_simple_name(\"example_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db-&gt;table_simple_name(\"example.table_users\", true));\n\/\/ (string) `table_users`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4888,7 +5004,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name (escaped or not)"
+                    "description": "If set to true the returned string will be escaped"
                 },
                 {
                     "name": "escaped",
@@ -4897,19 +5013,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped"
+                    "default_name": ""
                 }
             ]
         },
         "col_full_name": {
             "name": "col_full_name",
             "summary": "Return column's full name.",
-            "description": "```php\n\\bbn\\x::dump($db->col_full_name(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db->col_full_name(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->col_full_name(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db->col_full_name(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;col_full_name(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db-&gt;col_full_name(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;col_full_name(\"name\", \"table_users\"));\n\/\/ (string)  table_users.name\n\\bbn\\x::dump($db-&gt;col_full_name(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -4941,7 +5056,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The column's name (escaped or not)"
+                    "description": "The table's name (escaped or not)"
                 },
                 {
                     "name": "table",
@@ -4951,7 +5066,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name (escaped or not)"
+                    "description": "If set to true the returned string will be escaped"
                 },
                 {
                     "name": "escaped",
@@ -4960,19 +5075,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped"
+                    "default_name": ""
                 }
             ]
         },
         "col_simple_name": {
             "name": "col_simple_name",
             "summary": "Return the column's simple name.",
-            "description": "```php\n\\bbn\\x::dump($db->col_simple_name(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db->col_simple_name(\"table_users.name\", true));\n\/\/ (string) `name`\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->col_simple_name(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db->col_simple_name(\"table_users.name\", true));\n\/\/ (string) `name`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;col_simple_name(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db-&gt;col_simple_name(\"table_users.name\", true));\n\/\/ (string) `name`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;col_simple_name(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db-&gt;col_simple_name(\"table_users.name\", true));\n\/\/ (string) `name`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5004,7 +5118,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The column's complete name (escaped or not)."
+                    "description": "If set to true the returned string will be escaped."
                 },
                 {
                     "name": "escaped",
@@ -5013,16 +5127,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the returned string will be escaped."
+                    "default_name": ""
                 }
             ]
         },
         "disable_keys": {
             "name": "disable_keys",
             "summary": "Disables foreign keys constraints.",
-            "description": "```php\n\\bbn\\x::dump($db->disable_keys());\n\/\/ (db)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->disable_keys());\n\/\/ (db)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->disable_keys());\n\/\/ (db)"
@@ -5052,8 +5169,12 @@
         "enable_keys": {
             "name": "enable_keys",
             "summary": "Enables foreign keys constraints.",
-            "description": "```php\n\\bbn\\x::dump($db->enable_keys());\n\/\/ (db)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->enable_keys());\n\/\/ (db)\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->enable_keys());\n\/\/ (db)"
@@ -5083,11 +5204,15 @@
         "get_databases": {
             "name": "get_databases",
             "summary": "Return databases' names as an array.",
-            "description": "```php\n\\bbn\\x::dump($db->get_databases());\n\/\n(array)[\n     \"db_customers\",\n     \"db_clients\",\n     \"db_empty\",\n     \"db_example\",\n     \"db_mail\"\n     ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_databases());\n\/*\n(array)[\n     \"db_customers\",\n     \"db_clients\",\n     \"db_empty\",\n     \"db_example\",\n     \"db_mail\"\n     ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_databases());\n\/\n(array)[\n     \"db_customers\",\n     \"db_clients\",\n     \"db_empty\",\n     \"db_example\",\n     \"db_mail\"\n     ]"
+                    "content": "\\bbn\\x::dump($db->get_databases());\n\/*\n(array)[\n     \"db_customers\",\n     \"db_clients\",\n     \"db_empty\",\n     \"db_example\",\n     \"db_mail\"\n     ]"
                 }
             ],
             "file": "bbn\\db",
@@ -5115,11 +5240,15 @@
         "get_tables": {
             "name": "get_tables",
             "summary": "Return tables' names of a database as an array.",
-            "description": "```php\n\\bbn\\x::dump($db->get_tables('db_example'));\n\/\n(array) [\n       \"clients\",\n       \"columns\",\n       \"cron\",\n       \"journal\",\n       \"dbs\",\n       \"examples\",\n       \"history\",\n       \"hosts\",\n       \"keys\",\n       \"mails\",\n       \"medias\",\n       \"notes\",\n       \"medias\",\n       \"versions\"\n       ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_tables('db_example'));\n\/*\n(array) [\n       \"clients\",\n       \"columns\",\n       \"cron\",\n       \"journal\",\n       \"dbs\",\n       \"examples\",\n       \"history\",\n       \"hosts\",\n       \"keys\",\n       \"mails\",\n       \"medias\",\n       \"notes\",\n       \"medias\",\n       \"versions\"\n       ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_tables('db_example'));\n\/\n(array) [\n       \"clients\",\n       \"columns\",\n       \"cron\",\n       \"journal\",\n       \"dbs\",\n       \"examples\",\n       \"history\",\n       \"hosts\",\n       \"keys\",\n       \"mails\",\n       \"medias\",\n       \"notes\",\n       \"medias\",\n       \"versions\"\n       ]"
+                    "content": "\\bbn\\x::dump($db->get_tables('db_example'));\n\/*\n(array) [\n       \"clients\",\n       \"columns\",\n       \"cron\",\n       \"journal\",\n       \"dbs\",\n       \"examples\",\n       \"history\",\n       \"hosts\",\n       \"keys\",\n       \"mails\",\n       \"medias\",\n       \"notes\",\n       \"medias\",\n       \"versions\"\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -5150,16 +5279,19 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "Database name"
+                    "default_name": ""
                 }
             ]
         },
         "get_columns": {
             "name": "get_columns",
             "summary": "Return colums' structure of a table as an array indexed with the fields names.",
-            "description": "```php\n\\bbn\\x::dump($db->get_columns('table_users'));\n\/* (array)[\n           \"id\" => [\n             \"position\" => 1,\n             \"null\" => 0,\n             \"key\" => \"PRI\",\n             \"default\" => null,\n             \"extra\" => \"auto_increment\",\n             \"signed\" => 0,\n             \"maxlength\" => \"8\",\n             \"type\" => \"int\",\n           ],\n          \"name\" => [\n             \"position\" => 2,\n             \"null\" => 0,\n             \"key\" => null,\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n           \"surname\" => [\n             \"position\" => 3,\n             \"null\" => 0,\n             \"key\" => null,\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n           \"address\" => [\n             \"position\" => 4,\n             \"null\" => 0,\n             \"key\" => \"UNI\",\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n         ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_columns('table_users'));\n\/* (array)[\n           \"id\" => [\n             \"position\" => 1,\n             \"null\" => 0,\n             \"key\" => \"PRI\",\n             \"default\" => null,\n             \"extra\" => \"auto_increment\",\n             \"signed\" => 0,\n             \"maxlength\" => \"8\",\n             \"type\" => \"int\",\n           ],\n          \"name\" => [\n             \"position\" => 2,\n             \"null\" => 0,\n             \"key\" => null,\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n           \"surname\" => [\n             \"position\" => 3,\n             \"null\" => 0,\n             \"key\" => null,\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n           \"address\" => [\n             \"position\" => 4,\n             \"null\" => 0,\n             \"key\" => \"UNI\",\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n         ]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_columns('table_users'));\n\/* (array)[\n           \"id\" => [\n             \"position\" => 1,\n             \"null\" => 0,\n             \"key\" => \"PRI\",\n             \"default\" => null,\n             \"extra\" => \"auto_increment\",\n             \"signed\" => 0,\n             \"maxlength\" => \"8\",\n             \"type\" => \"int\",\n           ],\n          \"name\" => [\n             \"position\" => 2,\n             \"null\" => 0,\n             \"key\" => null,\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n           \"surname\" => [\n             \"position\" => 3,\n             \"null\" => 0,\n             \"key\" => null,\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n           \"address\" => [\n             \"position\" => 4,\n             \"null\" => 0,\n             \"key\" => \"UNI\",\n             \"default\" => null,\n             \"extra\" => \"\",\n             \"signed\" => 0,\n             \"maxlength\" => \"30\",\n             \"type\" => \"varchar\",\n           ],\n         ]"
@@ -5193,19 +5325,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
         "get_keys": {
             "name": "get_keys",
             "summary": "Return the table's keys as an array indexed with the fields names.",
-            "description": "```php\n\\bbn\\x::dump($db->get_keys(\"table_users\"));\n\/\n(array)[\n     \"keys\" => [\n       \"PRIMARY\" => [\n         \"columns\" => [\n           \"id\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n         \"unique\" => 1,\n       ],\n       \"number\" => [\n         \"columns\" => [\n           \"number\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n        \"unique\" => 1,\n       ],\n     ],\n     \"cols\" => [\n       \"id\" => [\n         \"PRIMARY\",\n       ],\n       \"number\" => [\n         \"number\",\n       ],\n     ],\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_keys(\"table_users\"));\n\/*\n(array)[\n     \"keys\" => [\n       \"PRIMARY\" => [\n         \"columns\" => [\n           \"id\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n         \"unique\" => 1,\n       ],\n       \"number\" => [\n         \"columns\" => [\n           \"number\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n        \"unique\" => 1,\n       ],\n     ],\n     \"cols\" => [\n       \"id\" => [\n         \"PRIMARY\",\n       ],\n       \"number\" => [\n         \"number\",\n       ],\n     ],\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_keys(\"table_users\"));\n\/\n(array)[\n     \"keys\" => [\n       \"PRIMARY\" => [\n         \"columns\" => [\n           \"id\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n         \"unique\" => 1,\n       ],\n       \"number\" => [\n         \"columns\" => [\n           \"number\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n        \"unique\" => 1,\n       ],\n     ],\n     \"cols\" => [\n       \"id\" => [\n         \"PRIMARY\",\n       ],\n       \"number\" => [\n         \"number\",\n       ],\n     ],\n]"
+                    "content": "\\bbn\\x::dump($db->get_keys(\"table_users\"));\n\/*\n(array)[\n     \"keys\" => [\n       \"PRIMARY\" => [\n         \"columns\" => [\n           \"id\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n         \"unique\" => 1,\n       ],\n       \"number\" => [\n         \"columns\" => [\n           \"number\",\n         ],\n         \"ref_db\" => null,\n         \"ref_table\" => null,\n         \"ref_column\" => null,\n        \"unique\" => 1,\n       ],\n     ],\n     \"cols\" => [\n       \"id\" => [\n         \"PRIMARY\",\n       ],\n       \"number\" => [\n         \"number\",\n       ],\n     ],\n]"
                 }
             ],
             "file": "bbn\\db",
@@ -5236,8 +5371,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -5308,11 +5442,11 @@
         "get_select": {
             "name": "get_select",
             "summary": "Return SQL code for row(s) SELECT.",
-            "description": "```php\n\\bbn\\x::dump($db->get_select('table_users',['name','surname']));\n\/\n(string)\n  SELECT\n   `table_users`.`name`,\n   `table_users`.`surname`\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_select('table_users',['name','surname']));\n\/*\n(string)\n  SELECT\n   `table_users`.`name`,\n   `table_users`.`surname`\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_select('table_users',['name','surname']));\n\/\n(string)\n  SELECT\n   `table_users`.`name`,\n   `table_users`.`surname`<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_select('table_users',['name','surname']));\n\/*\n(string)\n  SELECT\n   `table_users`.`name`,\n   `table_users`.`surname`<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5342,19 +5476,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The configuration array"
+                    "default_name": ""
                 }
             ]
         },
         "get_insert": {
             "name": "get_insert",
             "summary": "Returns the SQL code for an INSERT statement.",
-            "description": "```php\n\\bbn\\x::dump($db->get_insert([\n  'tables' => ['table_users'],\n  'fields' => ['name','surname']\n]));\n\/\n(string)\n INSERT INTO `db_example`.`table_users` (\n             `name`, `surname`)\n             VALUES (?, ?)\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_insert([\n  'tables' => ['table_users'],\n  'fields' => ['name','surname']\n]));\n\/*\n(string)\n INSERT INTO `db_example`.`table_users` (\n             `name`, `surname`)\n             VALUES (?, ?)\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_insert([\n  'tables' =&gt; ['table_users'],\n  'fields' =&gt; ['name','surname']\n]));\n\/\n(string)\n INSERT INTO `db_example`.`table_users` (\n             `name`, `surname`)\n             VALUES (?, ?)<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_insert([\n  'tables' =&gt; ['table_users'],\n  'fields' =&gt; ['name','surname']\n]));\n\/*\n(string)\n INSERT INTO `db_example`.`table_users` (\n             `name`, `surname`)\n             VALUES (?, ?)<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5384,19 +5517,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The configuration array"
+                    "default_name": ""
                 }
             ]
         },
         "get_update": {
             "name": "get_update",
             "summary": "Returns the SQL code for an UPDATE statement.",
-            "description": "```php\n\\bbn\\x::dump($db->get_update([\n  'tables' => ['table_users'],\n  'fields' => ['name','surname']\n]));\n\/\n(string)\n   UPDATE `db_example`.`table_users`\n   SET `table_users`.`name` = ?,\n       `table_users`.`surname` = ?\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_update([\n  'tables' => ['table_users'],\n  'fields' => ['name','surname']\n]));\n\/*\n(string)\n   UPDATE `db_example`.`table_users`\n   SET `table_users`.`name` = ?,\n       `table_users`.`surname` = ?\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_update([\n  'tables' =&gt; ['table_users'],\n  'fields' =&gt; ['name','surname']\n]));\n\/\n(string)\n   UPDATE `db_example`.`table_users`\n   SET `table_users`.`name` = ?,\n       `table_users`.`surname` = ?<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_update([\n  'tables' =&gt; ['table_users'],\n  'fields' =&gt; ['name','surname']\n]));\n\/*\n(string)\n   UPDATE `db_example`.`table_users`\n   SET `table_users`.`name` = ?,\n       `table_users`.`surname` = ?<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5426,19 +5558,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The configuration array"
+                    "default_name": ""
                 }
             ]
         },
         "get_delete": {
             "name": "get_delete",
             "summary": "Returns the SQL code for a DELETE statement.",
-            "description": "```php\n\\bbn\\x::dump($db->get_delete('table_users',['id'=>1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_delete('table_users',['id'=>1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_delete('table_users',['id'=&gt;1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_delete('table_users',['id'=&gt;1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5468,8 +5599,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The configuration array"
+                    "default_name": ""
                 }
             ]
         },
@@ -5512,11 +5642,11 @@
         "get_where": {
             "name": "get_where",
             "summary": "Return a string with 'where' conditions.",
-            "description": "```php\n\\bbn\\x::dump($db->get_where(['id' => 9], 'table_users'));\n\/\/ (string) WHERE 1 AND `table_users`.`id` = ?\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_where(['id' => 9], 'table_users'));\n\/\/ (string) WHERE 1 AND `table_users`.`id` = ?\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_where(['id' =&gt; 9], 'table_users'));\n\/\/ (string) WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_where(['id' =&gt; 9], 'table_users'));\n\/\/ (string) WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5625,11 +5755,11 @@
         "get_order": {
             "name": "get_order",
             "summary": "Get a string starting with ORDER BY with corresponding parameters to $order.",
-            "description": "```php\n\\bbn\\x::dump($db->get_order(['name' => 'DESC' ],'table_users'));\n\/\/ (string) ORDER BY `name` DESC\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_order(['name' => 'DESC' ],'table_users'));\n\/\/ (string) ORDER BY `name` DESC\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_order(['name' =&gt; 'DESC' ],'table_users'));\n\/\/ (string) ORDER BY `name` DESC<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_order(['name' =&gt; 'DESC' ],'table_users'));\n\/\/ (string) ORDER BY `name` DESC<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -5666,8 +5796,12 @@
         "get_limit": {
             "name": "get_limit",
             "summary": "Get a string starting with LIMIT with corresponding parameters to $limit.",
-            "description": "```php\n\\bbn\\x::dump($db->get_limit(3,1));\n\/\/ (string) LIMIT 1, 3\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_limit(3,1));\n\/\/ (string) LIMIT 1, 3\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_limit(3,1));\n\/\/ (string) LIMIT 1, 3"
@@ -5707,11 +5841,11 @@
         "get_create": {
             "name": "get_create",
             "summary": "Return SQL code for table creation.",
-            "description": "```php\n\\bbn\\x::dump($db->get_create(\"table_users\"));\n\/\n(string)\n   CREATE TABLE `table_users` (\n     `userid` int(11) NOT NULL,\n     `userdataid` int(11) NOT NULL,\n     `info` char(200) DEFAULT NULL,\n      PRIMARY KEY (`userid`,`userdataid`),\n      KEY `table_users_userId_userdataId_info` (`userid`,`userdataid`,`info`)\n   ) ENGINE=InnoDB DEFAULT CHARSET=utf8\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_create(\"table_users\"));\n\/*\n(string)\n   CREATE TABLE `table_users` (\n     `userid` int(11) NOT NULL,\n     `userdataid` int(11) NOT NULL,\n     `info` char(200) DEFAULT NULL,\n      PRIMARY KEY (`userid`,`userdataid`),\n      KEY `table_users_userId_userdataId_info` (`userid`,`userdataid`,`info`)\n   ) ENGINE=InnoDB DEFAULT CHARSET=utf8\n   *\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_create(\"table_users\"));\n\/\n(string)\n   CREATE TABLE `table_users` (\n     `userid` int(11) NOT NULL,\n     `userdataid` int(11) NOT NULL,\n     `info` char(200) DEFAULT NULL,\n      PRIMARY KEY (`userid`,`userdataid`),\n      KEY `table_users_userId_userdataId_info` (`userid`,`userdataid`,`info`)\n   ) ENGINE=InnoDB DEFAULT CHARSET=utf8<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_create(\"table_users\"));\n\/*\n(string)\n   CREATE TABLE `table_users` (\n     `userid` int(11) NOT NULL,\n     `userdataid` int(11) NOT NULL,\n     `info` char(200) DEFAULT NULL,\n      PRIMARY KEY (`userid`,`userdataid`),\n      KEY `table_users_userId_userdataId_info` (`userid`,`userdataid`,`info`)\n   ) ENGINE=InnoDB DEFAULT CHARSET=utf8\n   *<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db",
@@ -6029,7 +6163,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name."
+                    "description": "The key's name."
                 },
                 {
                     "name": "key",
@@ -6038,8 +6172,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The key's name."
+                    "default_name": ""
                 }
             ]
         },
@@ -6167,7 +6300,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The user's name, without params will return all privileges of all db_users"
+                    "description": "The host"
                 },
                 {
                     "name": "host",
@@ -6176,8 +6309,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The host"
+                    "default_name": ""
                 }
             ]
         },
@@ -6343,11 +6475,15 @@
         "get_row": {
             "name": "get_row",
             "summary": "Return the first row resulting from the query as an array indexed with the fields' name.",
-            "description": "```php\n\\bbn\\x::dump($db->get_row(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n\/* (array)[\n       \"id\" => 3,\n       \"name\" => \"thomas\",\n       ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_row(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n   *\n\/* (array)[\n       \"id\" => 3,\n       \"name\" => \"thomas\",\n       ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_row(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n\/* (array)[\n       \"id\" => 3,\n       \"name\" => \"thomas\",\n       ]"
+                    "content": "\\bbn\\x::dump($db->get_row(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n   *\n\/* (array)[\n       \"id\" => 3,\n       \"name\" => \"thomas\",\n       ]"
                 }
             ],
             "file": "bbn\\db",
@@ -6375,8 +6511,12 @@
         "get_rows": {
             "name": "get_rows",
             "summary": "Return an array that includes indexed arrays for every row resultant from the query.",
-            "description": "```php\n\\bbn\\x::dump($db->get_rows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2));\n\/* (array)[\n           [\n           \"id\" => 3,\n           \"name\" => \"john\",\n           ],\n           [\n           \"id\" => 4,\n           \"name\" => \"barbara\",\n           ],\n         ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_rows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2));\n\/* (array)[\n           [\n           \"id\" => 3,\n           \"name\" => \"john\",\n           ],\n           [\n           \"id\" => 4,\n           \"name\" => \"barbara\",\n           ],\n         ]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_rows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2));\n\/* (array)[\n           [\n           \"id\" => 3,\n           \"name\" => \"john\",\n           ],\n           [\n           \"id\" => 4,\n           \"name\" => \"barbara\",\n           ],\n         ]"
@@ -6407,8 +6547,12 @@
         "get_irow": {
             "name": "get_irow",
             "summary": "Return a row as a numeric indexed array.",
-            "description": "```php\n\\bbn\\x::dump($db->get_irow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n\/* (array) [\n             3,\n             \"john\",\n             \"brown\",\n            ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_irow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n\/* (array) [\n             3,\n             \"john\",\n             \"brown\",\n            ]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump($db->get_irow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n\/* (array) [\n             3,\n             \"john\",\n             \"brown\",\n            ]"
@@ -6439,11 +6583,15 @@
         "get_irows": {
             "name": "get_irows",
             "summary": "Return an array of numeric indexed rows.",
-            "description": "```php\n\\bbn\\x::dump($db->get_irows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/\n(array)[\n        [\n         3,\n        \"john\"\n        ],\n        [\n        4,\n        \"barbara\"\n       ]\n      ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_irows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/*\n(array)[\n        [\n         3,\n        \"john\"\n        ],\n        [\n        4,\n        \"barbara\"\n       ]\n      ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_irows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/\n(array)[\n        [\n         3,\n        \"john\"\n        ],\n        [\n        4,\n        \"barbara\"\n       ]\n      ]"
+                    "content": "\\bbn\\x::dump($db->get_irows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/*\n(array)[\n        [\n         3,\n        \"john\"\n        ],\n        [\n        4,\n        \"barbara\"\n       ]\n      ]"
                 }
             ],
             "file": "bbn\\db",
@@ -6471,11 +6619,15 @@
         "get_by_columns": {
             "name": "get_by_columns",
             "summary": "Return an array indexed on the searched field's in which there are all the values of the column.",
-            "description": "```php\n\\bbn\\x::dump($db->get_by_columns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/\n(array) [\n     \"name\" => [\n      \"John\",\n      \"Michael\"\n     ],\n     \"surname\" => [\n       \"Brown\",\n       \"Smith\"\n     ]\n    ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_by_columns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/*\n(array) [\n     \"name\" => [\n      \"John\",\n      \"Michael\"\n     ],\n     \"surname\" => [\n       \"Brown\",\n       \"Smith\"\n     ]\n    ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_by_columns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/\n(array) [\n     \"name\" => [\n      \"John\",\n      \"Michael\"\n     ],\n     \"surname\" => [\n       \"Brown\",\n       \"Smith\"\n     ]\n    ]"
+                    "content": "\\bbn\\x::dump($db->get_by_columns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/*\n(array) [\n     \"name\" => [\n      \"John\",\n      \"Michael\"\n     ],\n     \"surname\" => [\n       \"Brown\",\n       \"Smith\"\n     ]\n    ]"
                 }
             ],
             "file": "bbn\\db",
@@ -6503,11 +6655,15 @@
         "get_obj": {
             "name": "get_obj",
             "summary": "Return the first row resulting from the query as an object (similar to {@link get_object()}).",
-            "description": "```php\n\\bbn\\x::dump($db->get_obj(\"SELECT surname FROM table_users\"));\n\/\n(obj){\n      \"name\" => \"Smith\"\n      }\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_obj(\"SELECT surname FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"Smith\"\n      }\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_obj(\"SELECT surname FROM table_users\"));\n\/\n(obj){\n      \"name\" => \"Smith\"\n      }"
+                    "content": "\\bbn\\x::dump($db->get_obj(\"SELECT surname FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"Smith\"\n      }"
                 }
             ],
             "file": "bbn\\db",
@@ -6535,15 +6691,15 @@
         "get_object": {
             "name": "get_object",
             "summary": "Return the first row resulting from the query as an object.",
-            "description": "Synonym of get_obj.\n```php\n\\bbn\\x::dump($db->get_object(\"SELECT name FROM table_users\"));\n\/\n(obj){\n      \"name\" => \"John\"\n      }\n```",
+            "description": "Synonym of get_obj.\n   *\n```php\n\\bbn\\x::dump($db->get_object(\"SELECT name FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"John\"\n      }\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Synonym of get_obj.<\/p>"
+                    "content": "<p>Synonym of get_obj.\n*<\/p>"
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_object(\"SELECT name FROM table_users\"));\n\/\n(obj){\n      \"name\" => \"John\"\n      }"
+                    "content": "\\bbn\\x::dump($db->get_object(\"SELECT name FROM table_users\"));\n\/*\n(obj){\n      \"name\" => \"John\"\n      }"
                 }
             ],
             "file": "bbn\\db",
@@ -6571,11 +6727,15 @@
         "get_objects": {
             "name": "get_objects",
             "summary": "Return an array of stdClass objects.",
-            "description": "```php\n\\bbn\\x::dump($db->get_objects(\"SELECT name FROM table_users\"));\n\/\n(array) [\n         Object stdClass: df {\n           \"name\" => \"John\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Michael\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Thomas\",\n         },\n         Object stdClass: df {\n           \"name\" => \"William\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Jake\",\n         },\n        ]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_objects(\"SELECT name FROM table_users\"));\n   *\n\/*\n(array) [\n         Object stdClass: df {\n           \"name\" => \"John\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Michael\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Thomas\",\n         },\n         Object stdClass: df {\n           \"name\" => \"William\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Jake\",\n         },\n        ]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "\\bbn\\x::dump($db->get_objects(\"SELECT name FROM table_users\"));\n\/\n(array) [\n         Object stdClass: df {\n           \"name\" => \"John\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Michael\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Thomas\",\n         },\n         Object stdClass: df {\n           \"name\" => \"William\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Jake\",\n         },\n        ]"
+                    "content": "\\bbn\\x::dump($db->get_objects(\"SELECT name FROM table_users\"));\n   *\n\/*\n(array) [\n         Object stdClass: df {\n           \"name\" => \"John\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Michael\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Thomas\",\n         },\n         Object stdClass: df {\n           \"name\" => \"William\",\n         },\n         Object stdClass: df {\n           \"name\" => \"Jake\",\n         },\n        ]"
                 }
             ],
             "file": "bbn\\db",
@@ -8018,11 +8178,11 @@
     "namespaceName": "bbn",
     "shortName": "db",
     "summary": "Half ORM half DB management, the simplest class for data queries.",
-    "description": "Hello world!",
+    "description": "*\nHello world!",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>Hello world!<\/p>"
+            "content": "<p>*\nHello world!<\/p>"
         }
     ]
 }

@@ -2,7 +2,6 @@
     "doc": {
         "description": "Database Class",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -58,8 +57,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The string to check"
+                    "default_name": ""
                 }
             ]
         },
@@ -741,7 +739,8 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "having"
                 },
                 {
                     "name": "is_having",
@@ -750,8 +749,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "having"
+                    "default_name": ""
                 },
                 {
                     "name": "indent",
@@ -796,8 +794,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The configuration array"
+                    "default_name": ""
                 }
             ]
         },
@@ -878,11 +875,11 @@
         "get_delete": {
             "name": "get_delete",
             "summary": "Return SQL code for row(s) DELETE.",
-            "description": "```php\n\\bbn\\x::dump($db->get_delete('table_users',['id'=>1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?\n```",
+            "description": "*\n```php\n\\bbn\\x::dump($db->get_delete('table_users',['id'=>1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_delete('table_users',['id'=&gt;1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">\\bbn\\x::dump($db-&gt;get_delete('table_users',['id'=&gt;1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
                 }
             ],
             "file": "bbn\\db\\languages\\sqlite",
@@ -912,8 +909,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The configuration array"
+                    "default_name": ""
                 }
             ]
         },

@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "Creates DOM elements\nDepends on JsonSchema\\Validator\nThis class will create a DOM element.",
+        "description": "Creates DOM elements\n\nDepends on JsonSchema\\Validator\n *\n *\nThis class will create a DOM element.",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 2, 2013, 23:23:55 +0000",
             "category": "HTML",
@@ -54,8 +53,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Configuration"
+                    "default_name": ""
                 }
             ]
         },
@@ -113,8 +111,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "CSS properties\/values array"
+                    "default_name": ""
                 }
             ]
         },
@@ -738,11 +735,11 @@
     "namespaceName": "bbn\\html",
     "shortName": "element",
     "summary": "Creates DOM elements",
-    "description": "Depends on JsonSchema\\Validator\nThis class will create a DOM element.",
+    "description": "Depends on JsonSchema\\Validator\n *\n *\nThis class will create a DOM element.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>Depends on JsonSchema\\Validator\nThis class will create a DOM element.<\/p>"
+            "content": "<p>Depends on JsonSchema\\Validator\n<em>\n<\/em>\nThis class will create a DOM element.<\/p>"
         }
     ]
 }

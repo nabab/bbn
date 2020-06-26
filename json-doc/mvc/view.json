@@ -48,7 +48,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books\/466565 or html\/home)<\/em>"
+                    "description": "The parent controller<\/em>"
                 }
             ]
         },

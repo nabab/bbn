@@ -225,8 +225,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Start of time"
+                    "default_name": ""
                 },
                 {
                     "name": "start",

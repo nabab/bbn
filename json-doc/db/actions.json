@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "DB Interface\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+        "description": "DB Interface\n *\n *\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -259,11 +258,11 @@
     "namespaceName": "bbn\\db",
     "shortName": "actions",
     "summary": "DB Interface",
-    "description": "These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+    "description": "*\n *\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
+            "content": "<p><em>\n<\/em>\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
         }
     ]
 }

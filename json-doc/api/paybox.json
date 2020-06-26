@@ -2,7 +2,6 @@
     "doc": {
         "description": "A class for Paybox",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Utilities",

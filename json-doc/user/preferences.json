@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "A user's preference system linked to options and user classes\nA preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:\n- read options with the same arguments as the option class (filtered based on preference existence)\n- retrieve preference(s) for an option\n- write preference by adding to an existing set or setting a unique",
+        "description": "A user's preference system linked to options and user classes\n *\nA preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:\n- read options with the same arguments as the option class (filtered based on preference existence)\n- retrieve preference(s) for an option\n- write preference by adding to an existing set or setting a unique",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Oct 28, 2015, 10:23:55 +0000",
             "category": "Authentication",
@@ -190,8 +189,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 }
             ]
         },
@@ -229,7 +227,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "option"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -238,8 +236,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -277,7 +274,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "option"
+                    "description": "group"
                 },
                 {
                     "name": "id_group",
@@ -286,8 +283,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "group"
+                    "default_name": ""
                 }
             ]
         },
@@ -323,8 +319,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "force",
@@ -370,7 +365,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -379,8 +374,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -417,7 +411,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "group"
                 },
                 {
                     "name": "id_group",
@@ -426,8 +420,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "group"
+                    "default_name": ""
                 }
             ]
         },
@@ -1129,8 +1122,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "cfg",
@@ -1311,8 +1303,7 @@
                     "required": true,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "option"
+                    "default_name": ""
                 },
                 {
                     "name": "cfg",
@@ -1396,7 +1387,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -1405,8 +1396,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -1444,7 +1434,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "group"
                 },
                 {
                     "name": "id_group",
@@ -1453,8 +1443,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "group"
+                    "default_name": ""
                 }
             ]
         },
@@ -1582,7 +1571,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "link"
                 },
                 {
                     "name": "id_link",
@@ -1591,8 +1581,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "link"
+                    "default_name": ""
                 }
             ]
         },
@@ -1630,7 +1619,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "link"
                 },
                 {
                     "name": "id_link",
@@ -1639,8 +1628,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "link"
+                    "default_name": ""
                 }
             ]
         },
@@ -1760,7 +1748,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "group"
                 },
                 {
                     "name": "id_group",
@@ -1769,8 +1758,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "group"
+                    "default_name": ""
                 },
                 {
                     "name": "cancel",
@@ -1816,7 +1804,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -1825,8 +1814,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 },
                 {
                     "name": "cancel",
@@ -1873,7 +1861,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "usr_opt The preference's ID"
+                    "description": "The bit's values"
                 },
                 {
                     "name": "cfg",
@@ -1882,8 +1870,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's values"
+                    "default_name": ""
                 }
             ]
         },
@@ -1920,8 +1907,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's ID"
+                    "default_name": ""
                 }
             ]
         },
@@ -1958,8 +1944,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's ID"
+                    "default_name": ""
                 }
             ]
         },
@@ -1997,7 +1982,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The bit's ID"
+                    "description": "The bit's values"
                 },
                 {
                     "name": "cfg",
@@ -2006,8 +1991,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's values"
+                    "default_name": ""
                 },
                 {
                     "name": "merge_config",
@@ -2095,8 +2079,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's ID"
+                    "default_name": ""
                 },
                 {
                     "name": "with_config",
@@ -2142,7 +2125,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The preference's ID"
+                    "description": "parent The bits'parent ID"
                 },
                 {
                     "name": "id_parent",
@@ -2151,8 +2134,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "parent The bits'parent ID"
+                    "default_name": ""
                 },
                 {
                     "name": "with_config",
@@ -2198,7 +2180,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The id_options"
+                    "description": "parent The bits'parent ID"
                 },
                 {
                     "name": "id_parent",
@@ -2207,8 +2189,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "parent The bits'parent ID"
+                    "default_name": ""
                 },
                 {
                     "name": "with_config",
@@ -2254,7 +2235,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "usr_opt The preference's ID"
+                    "description": "parent The parent's ID of a bit. Default: null"
                 },
                 {
                     "name": "id_parent",
@@ -2264,7 +2245,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "parent The parent's ID of a bit. Default: null"
+                    "description": "config Set it to false if you don't want the preference's cfg field values on the results."
                 },
                 {
                     "name": "with_config",
@@ -2273,8 +2254,7 @@
                     "required": false,
                     "has_default": true,
                     "default": true,
-                    "default_name": "",
-                    "description": "config Set it to false if you don't want the preference's cfg field values on the results."
+                    "default_name": ""
                 }
             ]
         },
@@ -2348,7 +2328,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The preference's ID"
+                    "description": "config Set it to false if you don't want the preference's cfg field values on the results."
                 },
                 {
                     "name": "with_config",
@@ -2357,8 +2337,7 @@
                     "required": false,
                     "has_default": true,
                     "default": true,
-                    "default_name": "",
-                    "description": "config Set it to false if you don't want the preference's cfg field values on the results."
+                    "default_name": ""
                 }
             ]
         },
@@ -2515,7 +2494,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The bit's ID"
+                    "description": "The new position"
                 },
                 {
                     "name": "pos",
@@ -2524,8 +2503,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new position"
+                    "default_name": ""
                 }
             ]
         },
@@ -2722,8 +2700,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's ID"
+                    "default_name": ""
                 }
             ]
         },
@@ -2760,8 +2737,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The bit's ID"
+                    "default_name": ""
                 }
             ]
         },
@@ -3876,11 +3852,11 @@
     "namespaceName": "bbn\\user",
     "shortName": "preferences",
     "summary": "A user's preference system linked to options and user classes",
-    "description": "A preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:\n- read options with the same arguments as the option class (filtered based on preference existence)\n- retrieve preference(s) for an option\n- write preference by adding to an existing set or setting a unique",
+    "description": "*\nA preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:\n- read options with the same arguments as the option class (filtered based on preference existence)\n- retrieve preference(s) for an option\n- write preference by adding to an existing set or setting a unique",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>A preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:<\/p>\n<ul>\n<li>read options with the same arguments as the option class (filtered based on preference existence)<\/li>\n<li>retrieve preference(s) for an option<\/li>\n<li>write preference by adding to an existing set or setting a unique<\/li>\n<\/ul>"
+            "content": "<p>*\nA preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:<\/p>\n<ul>\n<li>read options with the same arguments as the option class (filtered based on preference existence)<\/li>\n<li>retrieve preference(s) for an option<\/li>\n<li>write preference by adding to an existing set or setting a unique<\/li>\n<\/ul>"
         }
     ]
 }

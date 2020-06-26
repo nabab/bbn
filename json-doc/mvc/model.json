@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "Model View Controller Class\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
+        "description": "Model View Controller Class\n *\n *\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "MVC",
@@ -95,7 +94,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books\/466565 or html\/home)<\/em>"
+                    "description": "The full path to the model's file"
                 },
                 {
                     "name": "info",
@@ -105,7 +104,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The full path to the model's file"
+                    "description": "The parent controller"
                 },
                 {
                     "name": "ctrl",
@@ -115,7 +114,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The parent controller"
+                    "description": "The parent MVC"
                 },
                 {
                     "name": "mvc",
@@ -124,8 +123,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The parent MVC"
+                    "default_name": ""
                 }
             ]
         },
@@ -2045,11 +2043,11 @@
     "namespaceName": "bbn\\mvc",
     "shortName": "model",
     "summary": "Model View Controller Class",
-    "description": "This class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
+    "description": "*\n *\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>This class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class<\/p>"
+            "content": "<p><em>\n<\/em>\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class<\/p>"
         }
     ]
 }

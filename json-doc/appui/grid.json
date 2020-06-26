@@ -79,7 +79,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database connection"
+                    "description": "Mandatory configuration sent by the table component (client side)"
                 },
                 {
                     "name": "post",
@@ -89,7 +89,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Mandatory configuration sent by the table component (client side)"
+                    "description": "Original table configuration (server side)"
                 },
                 {
                     "name": "cfg",
@@ -98,8 +98,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Original table configuration (server side)"
+                    "default_name": ""
                 }
             ]
         },

@@ -2,7 +2,6 @@
     "doc": {
         "description": "This class generates html form elements with a predefined configuration",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Dec 14, 2012, 04:23:55 +0000",
             "category": "Appui",

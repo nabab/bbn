@@ -2,7 +2,6 @@
     "doc": {
         "description": "File Transfer Protocol Class",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Files ressources",
@@ -105,11 +104,11 @@
         "scan": {
             "name": "scan",
             "summary": "Scans all the content from a directory, including the subdirectories",
-            "description": "<code>\nbbn\\file\\dir::scan(\"\/home\/me\");\nbbn\\file\\dir::delete(\"C:\\Documents\\Test\");\n<\/code>",
+            "description": "*\n<code>\nbbn\\file\\dir::scan(\"\/home\/me\");\nbbn\\file\\dir::delete(\"C:\\Documents\\Test\");\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\nbbn\\file\\dir::scan(&quot;\/home\/me&quot;);\nbbn\\file\\dir::delete(&quot;C:\\Documents\\Test&quot;);\n<\/code><\/p>"
+                    "content": "<p>*\n<code>\nbbn\\file\\dir::scan(&quot;\/home\/me&quot;);\nbbn\\file\\dir::delete(&quot;C:\\Documents\\Test&quot;);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\file\\ftp",
@@ -526,7 +525,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The old file full path"
+                    "description": "The new file full path"
                 },
                 {
                     "name": "new",
@@ -535,8 +534,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new file full path"
+                    "default_name": ""
                 }
             ]
         },
@@ -570,8 +568,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The file or dir relative or full path"
+                    "default_name": ""
                 }
             ]
         },

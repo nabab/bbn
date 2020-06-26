@@ -2,7 +2,6 @@
     "doc": {
         "description": "Class for Subversion usage. It will use the PHP SVN functions if available, and will try to use SVN commands through <em>system<\/em> otherwise.",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Utilities",

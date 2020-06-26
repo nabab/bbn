@@ -535,6 +535,7 @@ SQL,
         $this->libs[$info['name']][$info['internal']] = [
           'version' => $info['version'],
           'prepend' => [],
+          'git' => $info['git'],
           'name' => $info['name'],
           'path' => $path,
           'files' => []

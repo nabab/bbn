@@ -2,7 +2,6 @@
     "doc": {
         "description": "A user authentication Class",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Authentication",
@@ -373,8 +372,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new data"
+                    "default_name": ""
                 }
             ]
         },
@@ -540,8 +538,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The property to get"
+                    "default_name": ""
                 }
             ]
         },
@@ -665,8 +662,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "session If true deletes also the session information"
+                    "default_name": ""
                 }
             ]
         },

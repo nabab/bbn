@@ -2,7 +2,6 @@
     "doc": {
         "description": "HTML Class creating a form INPUT",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 2, 2013, 21:27:42 +0000",
             "category": "MVC",
@@ -181,8 +180,7 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": "",
-                        "description": "Configuration"
+                        "default_name": ""
                     }
                 ]
             },
@@ -194,8 +192,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Configuration"
+                    "default_name": ""
                 }
             ]
         },
@@ -297,8 +294,7 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": "",
-                        "description": "CSS properties\/values array"
+                        "default_name": ""
                     }
                 ]
             },
@@ -310,8 +306,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "CSS properties\/values array"
+                    "default_name": ""
                 }
             ]
         },

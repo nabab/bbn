@@ -504,8 +504,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "media"
+                    "default_name": ""
                 },
                 {
                     "name": "name",
@@ -557,8 +556,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "media"
+                    "default_name": ""
                 },
                 {
                     "name": "name",
@@ -619,8 +617,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "media"
+                    "default_name": ""
                 },
                 {
                     "name": "ref",
@@ -629,7 +626,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ame"
                 },
                 {
                     "name": "oldName",
@@ -648,8 +646,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "ame"
+                    "default_name": ""
                 },
                 {
                     "name": "title",
@@ -692,8 +689,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "media"
+                    "default_name": ""
                 },
                 {
                     "name": "name",

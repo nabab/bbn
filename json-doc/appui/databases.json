@@ -80,8 +80,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The main database connection (where options are)"
+                    "default_name": ""
                 }
             ]
         },
@@ -119,7 +118,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A string user@host"
+                    "description": "The database name"
                 },
                 {
                     "name": "db",
@@ -128,8 +127,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database name"
+                    "default_name": ""
                 }
             ]
         },
@@ -321,8 +319,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
                 }
             ]
         },
@@ -492,7 +489,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database name"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "host",
@@ -501,8 +498,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
                 }
             ]
         },
@@ -635,8 +631,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "keycol The ID of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -673,8 +668,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "keycol The ID of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -711,8 +705,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "table The table's ID."
+                    "default_name": ""
                 }
             ]
         },
@@ -749,8 +742,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "table The table's ID."
+                    "default_name": ""
                 }
             ]
         },
@@ -787,8 +779,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "keycol The ID of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -825,8 +816,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "keycol The ID of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -921,7 +911,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -930,8 +920,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1121,7 +1110,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -1130,8 +1119,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1262,7 +1250,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -1271,8 +1259,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1308,8 +1295,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1345,8 +1331,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
                 }
             ]
         },
@@ -1384,7 +1369,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -1393,8 +1378,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1432,7 +1416,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "If true will connect to the database and get its structure"
                 },
                 {
                     "name": "full",
@@ -1441,8 +1425,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If true will connect to the database and get its structure"
+                    "default_name": ""
                 }
             ]
         },
@@ -1480,7 +1463,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "host",
@@ -1490,7 +1473,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "If true will connect to the database and get its structure"
                 },
                 {
                     "name": "full",
@@ -1499,8 +1482,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If true will connect to the database and get its structure"
+                    "default_name": ""
                 }
             ]
         },
@@ -1575,7 +1557,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "db The database to which import the table (its id_parent)"
                 },
                 {
                     "name": "id_db",
@@ -1585,7 +1567,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "db The database to which import the table (its id_parent)"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "host",
@@ -1594,8 +1576,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
                 }
             ]
         },
@@ -1632,8 +1613,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The table's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1670,8 +1650,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },

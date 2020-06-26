@@ -1,8 +1,7 @@
 {
     "doc": {
-        "description": "An all-in-one hierarchical options management system\nThis class allows to:\n---------------------\n* manage a **hierarchical** table of options\n* retrieve, edit, add, remove options\n* grab a whole tree\n* apply functions on group of options\n* add user-defined properties\n* set option configuration and applies it to all its children\n* And many more...",
+        "description": "An all-in-one hierarchical options management system\n *\nThis class allows to:\n---------------------\n* manage a **hierarchical** table of options\n* retrieve, edit, add, remove options\n* grab a whole tree\n* apply functions on group of options\n* add user-defined properties\n* set option configuration and applies it to all its children\n* And many more...",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Oct 28, 2015, 10:23:55 +0000",
             "category": "Appui x",
@@ -60,8 +59,12 @@
         "__construct": {
             "name": "__construct",
             "summary": "Constructor",
-            "description": "```php\n$db = new bbn\\db();\n$opt = new bbn\\appui\\options($db);\n```",
+            "description": "*\n```php\n$db = new bbn\\db();\n$opt = new bbn\\appui\\options($db);\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "$db = new bbn\\db();\n$opt = new bbn\\appui\\options($db);"
@@ -126,7 +129,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "a database connection object"
+                    "description": "configuration array"
                 },
                 {
                     "name": "cfg",
@@ -135,8 +138,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "configuration array"
+                    "default_name": ""
                 }
             ]
         },
@@ -167,11 +169,11 @@
         "delete_cache": {
             "name": "delete_cache",
             "summary": "Deletes the options' cache, specifically for an ID or globally",
-            "description": "If specific, it will also destroy the cache of the parent\n```php\n$opt->option->delete_cache(25)\n\/\/ This is chainable\n\/\/ ->...\n```",
+            "description": "If specific, it will also destroy the cache of the parent\n   *\n```php\n$opt->option->delete_cache(25)\n\/\/ This is chainable\n\/\/ ->...\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>If specific, it will also destroy the cache of the parent<\/p>"
+                    "content": "<p>If specific, it will also destroy the cache of the parent\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -232,11 +234,15 @@
         "get_class_cfg": {
             "name": "get_class_cfg",
             "summary": "Returns the configuration array of the class with the table structure",
-            "description": "```php\nbbn\\x::dump($opt->get_class_cfg());\n\/\narray [\n  'errors' => [\n  ],\n  'table' => 'bbn_options',\n  'cols' => [\n    'id' => 'id',\n    'id_parent' => 'id_parent',\n    'id_alias' => 'id_alias',\n    'text' => 'text',\n    'code' => 'code',\n    'value' => 'value',\n    'cfg' => 'cfg'\n  ]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_class_cfg());\n\/*\narray [\n  'errors' => [\n  ],\n  'table' => 'bbn_options',\n  'cols' => [\n    'id' => 'id',\n    'id_parent' => 'id_parent',\n    'id_alias' => 'id_alias',\n    'text' => 'text',\n    'code' => 'code',\n    'value' => 'value',\n    'cfg' => 'cfg'\n  ]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->get_class_cfg());\n\/\narray [\n  'errors' => [\n  ],\n  'table' => 'bbn_options',\n  'cols' => [\n    'id' => 'id',\n    'id_parent' => 'id_parent',\n    'id_alias' => 'id_alias',\n    'text' => 'text',\n    'code' => 'code',\n    'value' => 'value',\n    'cfg' => 'cfg'\n  ]\n]"
+                    "content": "bbn\\x::dump($opt->get_class_cfg());\n\/*\narray [\n  'errors' => [\n  ],\n  'table' => 'bbn_options',\n  'cols' => [\n    'id' => 'id',\n    'id_parent' => 'id_parent',\n    'id_alias' => 'id_alias',\n    'text' => 'text',\n    'code' => 'code',\n    'value' => 'value',\n    'cfg' => 'cfg'\n  ]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -263,11 +269,11 @@
         "from_code": {
             "name": "from_code",
             "summary": "Gets an option ID from diverse combinations of elements:",
-            "description": "- A code or a serie of codes from the most specific to a child of the root\n- A code or a serie of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent\n```php\nbbn\\x::dump($opt->from_code(25));\n\/\/ (int) 25\nbbn\\x::dump($opt->from_code('bbn_ide'));\n\/\/ (int) 25\nbbn\\x::dump($opt->from_code('test', 58));\n\/\/ (int) 42\nbbn\\x::dump($opt->from_code('test', 'users', 'bbn_ide'));\n\/\/ (int) 42\n```",
+            "description": "- A code or a serie of codes from the most specific to a child of the root\n- A code or a serie of codes and an id_parent where to find the last code\n- A code alone having $this->default as parent\n   *\n```php\nbbn\\x::dump($opt->from_code(25));\n\/\/ (int) 25\nbbn\\x::dump($opt->from_code('bbn_ide'));\n\/\/ (int) 25\nbbn\\x::dump($opt->from_code('test', 58));\n\/\/ (int) 42\nbbn\\x::dump($opt->from_code('test', 'users', 'bbn_ide'));\n\/\/ (int) 42\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<ul>\n<li>A code or a serie of codes from the most specific to a child of the root<\/li>\n<li>A code or a serie of codes and an id_parent where to find the last code<\/li>\n<li>A code alone having $this-&gt;default as parent<\/li>\n<\/ul>"
+                    "content": "<ul>\n<li>A code or a serie of codes from the most specific to a child of the root<\/li>\n<li>A code or a serie of codes and an id_parent where to find the last code<\/li>\n<li>A code alone having $this-&gt;default as parent\n*<\/li>\n<\/ul>"
                 },
                 {
                     "type": "code",
@@ -382,8 +388,12 @@
         "get_root": {
             "name": "get_root",
             "summary": "Returns the ID of the root option - mother of all",
-            "description": "```php\nbbn\\x::dump($opt->get_root());\n\/\/ (int)0\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_root());\n\/\/ (int)0\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_root());\n\/\/ (int)0"
@@ -413,8 +423,12 @@
         "get_default": {
             "name": "get_default",
             "summary": "Returns the ID of the default option ($id_parent used when not provided)",
-            "description": "```php\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n$opt->set_default(5);\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 5\n$opt->set_default();\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n$opt->set_default(5);\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 5\n$opt->set_default();\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n$opt->set_default(5);\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 5\n$opt->set_default();\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0"
@@ -444,11 +458,11 @@
         "set_default": {
             "name": "set_default",
             "summary": "Makes an option act as if it was the root option",
-            "description": "It will be the default $id_parent for options requested by code\n```php\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n\/\/ Default root option\n$new = $opt->from_code('test');\n\/\/ false\n\/\/ Option not found\n$opt->set_default($new);\n\/\/ Default is now 5\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 5\nbbn\\x::dump($opt->from_code('test));\n\/\/ (int) 24\n\/\/ Returns the ID (24) of a child of option 5 with code 'test'\n$opt->set_default();\n\/\/ Default is back to root\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n```",
+            "description": "It will be the default $id_parent for options requested by code\n   *\n```php\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n\/\/ Default root option\n$new = $opt->from_code('test');\n\/\/ false\n\/\/ Option not found\n$opt->set_default($new);\n\/\/ Default is now 5\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 5\nbbn\\x::dump($opt->from_code('test));\n\/\/ (int) 24\n\/\/ Returns the ID (24) of a child of option 5 with code 'test'\n$opt->set_default();\n\/\/ Default is back to root\nbbn\\x::dump($opt->get_default());\n\/\/ (int) 0\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>It will be the default $id_parent for options requested by code<\/p>"
+                    "content": "<p>It will be the default $id_parent for options requested by code\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -489,8 +503,12 @@
         "items": {
             "name": "items",
             "summary": "Returns an array of the children's IDs of the given option sorted by order or text",
-            "description": "```php\nbbn\\x::dump($opt->tree_ids(12));\n\/\/ array [40, 41, 42, 44, 45, 43, 46, 47]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->tree_ids(12));\n\/\/ array [40, 41, 42, 44, 45, 43, 46, 47]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->tree_ids(12));\n\/\/ array [40, 41, 42, 44, 45, 43, 46, 47]"
@@ -524,19 +542,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "native_option": {
             "name": "native_option",
             "summary": "Returns an option's row as stored in its original form in the database",
-            "description": "```php\nbbn\\x::dump($opt->native_option(25));\n\/\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->native_option(25));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->native_option(25));\n\/\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n]"
+                    "content": "bbn\\x::dump($opt->native_option(25));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -567,8 +588,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
@@ -612,8 +632,12 @@
         "option_no_alias": {
             "name": "option_no_alias",
             "summary": "Returns an option's full content as an array without its values changed by id_alias",
-            "description": "```php\nbbn\\x::dump($opt->option(25));\nbbn\\x::dump($opt->option('bbn_ide'));\nbbn\\x::dump($opt->option('TEST', 58));\nbbn\\x::dump($opt->option('test3', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 31,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'id_alias' => 16,\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->option(25));\nbbn\\x::dump($opt->option('bbn_ide'));\nbbn\\x::dump($opt->option('TEST', 58));\nbbn\\x::dump($opt->option('test3', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 31,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'id_alias' => 16,\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->option(25));\nbbn\\x::dump($opt->option('bbn_ide'));\nbbn\\x::dump($opt->option('TEST', 58));\nbbn\\x::dump($opt->option('test3', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 31,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'id_alias' => 16,\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
@@ -647,8 +671,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
@@ -692,8 +715,12 @@
         "option": {
             "name": "option",
             "summary": "Returns an option's full content as an array",
-            "description": "```php\nbbn\\x::dump($opt->option(25));\nbbn\\x::dump($opt->option('bbn_ide'));\nbbn\\x::dump($opt->option('TEST', 58));\nbbn\\x::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->option(25));\nbbn\\x::dump($opt->option('bbn_ide'));\nbbn\\x::dump($opt->option('TEST', 58));\nbbn\\x::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->option(25));\nbbn\\x::dump($opt->option('bbn_ide'));\nbbn\\x::dump($opt->option('TEST', 58));\nbbn\\x::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
@@ -727,19 +754,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "options": {
             "name": "options",
             "summary": "Returns an array of options in the form id => text",
-            "description": "```php\nbbn\\x::dump($opt->options(12));\n\/\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\"\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->options(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\"\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->options(12));\n\/\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\"\n]"
+                    "content": "bbn\\x::dump($opt->options(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\"\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -770,19 +800,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "options_by_code": {
             "name": "options_by_code",
             "summary": "Returns an array of children options in the form code => text",
-            "description": "```php\nbbn\\x::dump($opt->options_by_code(12));\n\/\narray [\n  'opt21' => \"My option 21\",\n  'opt22' => \"My option 22\",\n  'opt25' => \"My option 25\",\n  'opt27' => \"My option 27\"\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->options_by_code(12));\n\/*\narray [\n  'opt21' => \"My option 21\",\n  'opt22' => \"My option 22\",\n  'opt25' => \"My option 25\",\n  'opt27' => \"My option 27\"\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->options_by_code(12));\n\/\narray [\n  'opt21' => \"My option 21\",\n  'opt22' => \"My option 22\",\n  'opt25' => \"My option 25\",\n  'opt27' => \"My option 27\"\n]"
+                    "content": "bbn\\x::dump($opt->options_by_code(12));\n\/*\narray [\n  'opt21' => \"My option 21\",\n  'opt22' => \"My option 22\",\n  'opt25' => \"My option 25\",\n  'opt27' => \"My option 27\"\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -813,16 +846,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "text_value_options": {
             "name": "text_value_options",
             "summary": "Returns an option's children array of id and text in a user-defined indexed array",
-            "description": "```php\nbbn\\x::dump($opt->text_value_option(12, 'title'));\n\/* value comes from the default argument\narray [\n  ['title' => \"My option 21\", 'value' =>  21],\n  ['title' => \"My option 22\", 'value' =>  22],\n  ['title' => \"My option 25\", 'value' =>  25],\n  ['title' => \"My option 27\", 'value' =>  27]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->text_value_option(12, 'title'));\n\/* value comes from the default argument\narray [\n  ['title' => \"My option 21\", 'value' =>  21],\n  ['title' => \"My option 22\", 'value' =>  22],\n  ['title' => \"My option 25\", 'value' =>  25],\n  ['title' => \"My option 27\", 'value' =>  27]\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->text_value_option(12, 'title'));\n\/* value comes from the default argument\narray [\n  ['title' => \"My option 21\", 'value' =>  21],\n  ['title' => \"My option 22\", 'value' =>  22],\n  ['title' => \"My option 25\", 'value' =>  25],\n  ['title' => \"My option 27\", 'value' =>  27]\n]"
@@ -857,7 +893,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The option's ID or its code if it is children of {@link default}"
+                    "description": "The text field name for text column"
                 },
                 {
                     "name": "text",
@@ -867,7 +903,7 @@
                     "has_default": true,
                     "default": "text",
                     "default_name": "",
-                    "description": "The text field name for text column"
+                    "description": "The value field name for id column"
                 },
                 {
                     "name": "value",
@@ -876,8 +912,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "value",
-                    "default_name": "",
-                    "description": "The value field name for id column"
+                    "default_name": ""
                 }
             ]
         },
@@ -911,11 +946,15 @@
         "full_options": {
             "name": "full_options",
             "summary": "Returns an array of full options arrays for a given parent",
-            "description": "```php\nbbn\\x::dump($opt->full_options(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_options(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
+                    "content": "bbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -946,19 +985,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "code_options": {
             "name": "code_options",
             "summary": "Returns an array of full options arrays for a given parent",
-            "description": "```php\nbbn\\x::dump($opt->full_options(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_options(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
+                    "content": "bbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -989,8 +1031,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
@@ -1071,11 +1112,15 @@
         "full_options_by_id": {
             "name": "full_options_by_id",
             "summary": "Returns an id-indexed array of full options arrays for a given parent",
-            "description": "```php\nbbn\\x::dump($opt->full_options(12));\n\/\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_options(12));\n\/\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
+                    "content": "bbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1106,19 +1151,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "full_options_by_code": {
             "name": "full_options_by_code",
             "summary": "Returns an id-indexed array of full options arrays for a given parent",
-            "description": "```php\nbbn\\x::dump($opt->full_options(12));\n\/\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_options(12));\n\/\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
+                    "content": "bbn\\x::dump($opt->full_options(12));\n\/*\narray [\n  21 => ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  22 => ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  25 => ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  27 => ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1149,19 +1197,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "full_options_cfg": {
             "name": "full_options_cfg",
             "summary": "Returns an id-indexed array of full options with the config in arrays for a given parent",
-            "description": "```php\nbbn\\x::dump($opt->full_options_cfg(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n  ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_options_cfg(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n  ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_options_cfg(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n  ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n]"
+                    "content": "bbn\\x::dump($opt->full_options_cfg(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n  ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1192,19 +1243,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "soptions": {
             "name": "soptions",
             "summary": "Returns an id-indexed array of options in the form id => text for a given grandparent",
-            "description": "```php\nbbn\\x::dump($opt->soptions(12));\n\/\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\",\n  31 => \"My option 31\",\n  32 => \"My option 32\",\n  35 => \"My option 35\",\n  37 => \"My option 37\"\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->soptions(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\",\n  31 => \"My option 31\",\n  32 => \"My option 32\",\n  35 => \"My option 35\",\n  37 => \"My option 37\"\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->soptions(12));\n\/\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\",\n  31 => \"My option 31\",\n  32 => \"My option 32\",\n  35 => \"My option 35\",\n  37 => \"My option 37\"\n]"
+                    "content": "bbn\\x::dump($opt->soptions(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\",\n  31 => \"My option 31\",\n  32 => \"My option 32\",\n  35 => \"My option 35\",\n  37 => \"My option 37\"\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1235,19 +1289,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "full_soptions": {
             "name": "full_soptions",
             "summary": "Returns an id-indexed array of full options arrays for a given parent",
-            "description": "```php\nbbn\\x::dump($opt->full_soptions(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 20, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 20, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 20, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 20, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"],\n  ['id' => 31, 'id_parent' => 30, 'title' => \"My option 31\", 'myProperty' =>  \"88%\"],\n  ['id' => 32, 'id_parent' => 30, 'title' => \"My option 32\", 'myProperty' =>  \"97%\"],\n  ['id' => 35, 'id_parent' => 30, 'title' => \"My option 35\", 'myProperty' =>  \"12%\"],\n  ['id' => 37, 'id_parent' => 30, 'title' => \"My option 37\", 'myProperty' =>  \"4%\"]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_soptions(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 20, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 20, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 20, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 20, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"],\n  ['id' => 31, 'id_parent' => 30, 'title' => \"My option 31\", 'myProperty' =>  \"88%\"],\n  ['id' => 32, 'id_parent' => 30, 'title' => \"My option 32\", 'myProperty' =>  \"97%\"],\n  ['id' => 35, 'id_parent' => 30, 'title' => \"My option 35\", 'myProperty' =>  \"12%\"],\n  ['id' => 37, 'id_parent' => 30, 'title' => \"My option 37\", 'myProperty' =>  \"4%\"]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_soptions(12));\n\/\narray [\n  ['id' => 21, 'id_parent' => 20, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 20, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 20, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 20, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"],\n  ['id' => 31, 'id_parent' => 30, 'title' => \"My option 31\", 'myProperty' =>  \"88%\"],\n  ['id' => 32, 'id_parent' => 30, 'title' => \"My option 32\", 'myProperty' =>  \"97%\"],\n  ['id' => 35, 'id_parent' => 30, 'title' => \"My option 35\", 'myProperty' =>  \"12%\"],\n  ['id' => 37, 'id_parent' => 30, 'title' => \"My option 37\", 'myProperty' =>  \"4%\"]\n]"
+                    "content": "bbn\\x::dump($opt->full_soptions(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 20, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 20, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 20, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 20, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"],\n  ['id' => 31, 'id_parent' => 30, 'title' => \"My option 31\", 'myProperty' =>  \"88%\"],\n  ['id' => 32, 'id_parent' => 30, 'title' => \"My option 32\", 'myProperty' =>  \"97%\"],\n  ['id' => 35, 'id_parent' => 30, 'title' => \"My option 35\", 'myProperty' =>  \"12%\"],\n  ['id' => 37, 'id_parent' => 30, 'title' => \"My option 37\", 'myProperty' =>  \"4%\"]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1278,19 +1335,18 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "tree_ids": {
             "name": "tree_ids",
             "summary": "Returns a flat array of all IDs found in a hierarchical structure (except the top one)",
-            "description": "The second parameter is private and should be left blank\n```php\nbbn\\x::dump($opt->tree_ids(12));\n\/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]\n```",
+            "description": "The second parameter is private and should be left blank\n   *\n```php\nbbn\\x::dump($opt->tree_ids(12));\n\/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>The second parameter is private and should be left blank<\/p>"
+                    "content": "<p>The second parameter is private and should be left blank\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -1326,7 +1382,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The end\/target of the path"
+                    "description": "The resulting array"
                 },
                 {
                     "name": "res",
@@ -1335,19 +1391,22 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "The resulting array"
+                    "default_name": ""
                 }
             ]
         },
         "native_tree": {
             "name": "native_tree",
             "summary": "Returns a hierarchical structure as stored in its original form in the database",
-            "description": "```php\nbbn\\x::dump($opt->native_tree(12));\n\/\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->native_tree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->native_tree(12));\n\/\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]"
+                    "content": "bbn\\x::dump($opt->native_tree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1378,19 +1437,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "tree": {
             "name": "tree",
             "summary": "Returns a simple hierarchical structure with just text, id and items",
-            "description": "```php\nbbn\\x::dump($opt->tree(12));\n\/\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->tree(12));\n\/*\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->tree(12));\n\/\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]"
+                    "content": "bbn\\x::dump($opt->tree(12));\n\/*\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1421,19 +1483,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "full_tree": {
             "name": "full_tree",
             "summary": "Returns a full hierarchical structure of options from a given option",
-            "description": "```php\nbbn\\x::dump($opt->full_tree(12));\n\/\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->full_tree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->full_tree(12));\n\/\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]"
+                    "content": "bbn\\x::dump($opt->full_tree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1464,23 +1529,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "get_cfg": {
             "name": "get_cfg",
             "summary": "Returns a formatted content of the cfg column as an array",
-            "description": "Checks if the parent option has inheritance and sets array accordingly\nParent rules will be applied if with the following inheritance values:\n- 'children': if the option is the direct parent\n- 'cascade': any level of parenthood\n```php\nbbn\\x::dump($opt->get_cfg(25));\n\/\narray [\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]\n```",
+            "description": "Checks if the parent option has inheritance and sets array accordingly\nParent rules will be applied if with the following inheritance values:\n- 'children': if the option is the direct parent\n- 'cascade': any level of parenthood\n   *\n```php\nbbn\\x::dump($opt->get_cfg(25));\n\/*\narray [\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Checks if the parent option has inheritance and sets array accordingly\nParent rules will be applied if with the following inheritance values:<\/p>\n<ul>\n<li>'children': if the option is the direct parent<\/li>\n<li>'cascade': any level of parenthood<\/li>\n<\/ul>"
+                    "content": "<p>Checks if the parent option has inheritance and sets array accordingly\nParent rules will be applied if with the following inheritance values:<\/p>\n<ul>\n<li>'children': if the option is the direct parent<\/li>\n<li>'cascade': any level of parenthood\n*<\/li>\n<\/ul>"
                 },
                 {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->get_cfg(25));\n\/\narray [\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]"
+                    "content": "bbn\\x::dump($opt->get_cfg(25));\n\/*\narray [\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1511,19 +1575,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "get_parent_cfg": {
             "name": "get_parent_cfg",
             "summary": "Returns a formatted content of the cfg column as an array from the option's parent",
-            "description": "```php\nbbn\\x::dump($opt->get_parent_cfg(42));\n\/\n[\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_parent_cfg(42));\n\/*\n[\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->get_parent_cfg(42));\n\/\n[\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]"
+                    "content": "bbn\\x::dump($opt->get_parent_cfg(42));\n\/*\n[\n  'sortable' => true,\n  'cascade' => true,\n  'id_alias' => null,\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1554,16 +1621,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "parents": {
             "name": "parents",
             "summary": "Returns an array of id_parents from the option selected to root",
-            "description": "```php\nbbn\\x::dump($opt->parents(48));\n\/\/ array [25, 12, 0]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->parents(48));\n\/\/ array [25, 12, 0]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->parents(48));\n\/\/ array [25, 12, 0]"
@@ -1597,16 +1667,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "sequence": {
             "name": "sequence",
             "summary": "Returns an array of id_parents from the selected root to the given id_option",
-            "description": "```php\nbbn\\x::dump($opt->parents(48));\n\/\/ array [0, 12, 25, 48]\nbbn\\x::dump($opt->parents(48, 12));\n\/\/ array [12, 25, 48]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->parents(48));\n\/\/ array [0, 12, 25, 48]\nbbn\\x::dump($opt->parents(48, 12));\n\/\/ array [12, 25, 48]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->parents(48));\n\/\/ array [0, 12, 25, 48]\nbbn\\x::dump($opt->parents(48, 12));\n\/\/ array [12, 25, 48]"
@@ -1641,7 +1714,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "root"
                 },
                 {
                     "name": "id_root",
@@ -1650,16 +1723,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "root"
+                    "default_name": ""
                 }
             ]
         },
         "get_id_parent": {
             "name": "get_id_parent",
             "summary": "Returns the parent option's ID",
-            "description": "```php\nbbn\\x::dump($opt->get_id_parent(48));\n\/\/ (int)25\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_id_parent(48));\n\/\/ (int)25\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_id_parent(48));\n\/\/ (int)25"
@@ -1693,19 +1769,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "parent": {
             "name": "parent",
             "summary": "Returns the parent's option as {@link option()}",
-            "description": "```php\nbbn\\x::hdump($opt->parent(42));\n\/\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```",
+            "description": "*\n```php\nbbn\\x::hdump($opt->parent(42));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::hdump($opt->parent(42));\n\/\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
+                    "content": "bbn\\x::hdump($opt->parent(42));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -1736,16 +1815,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "is_parent": {
             "name": "is_parent",
             "summary": "Return true if row with ID $id_parent is parent at any level of row with ID $id",
-            "description": "```php\nbbn\\x::dump($opt->is_parent(42, 12));\n\/\/ (bool) true\nbbn\\x::dump($opt->is_parent(42, 13));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->is_parent(42, 12));\n\/\/ (bool) true\nbbn\\x::dump($opt->is_parent(42, 13));\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->is_parent(42, 12));\n\/\/ (bool) true\nbbn\\x::dump($opt->is_parent(42, 13));\n\/\/ (bool) false"
@@ -1824,16 +1906,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "code": {
             "name": "code",
             "summary": "Returns an option's code",
-            "description": "```php\nbbn\\x::dump($opt->code(12));\n\/\/ (string) bbn_ide\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->code(12));\n\/\/ (string) bbn_ide\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->code(12));\n\/\/ (string) bbn_ide"
@@ -1867,16 +1952,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The options' ID"
+                    "default_name": ""
                 }
             ]
         },
         "text": {
             "name": "text",
             "summary": "Returns an option's text",
-            "description": "```php\nbbn\\x::dump($opt->text(12));\n\/\/ (string) BBN's own IDE\nbbn\\x::dump($opt->text('bbn_ide'));\n\/\/ (string) BBN's own IDE\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->text(12));\n\/\/ (string) BBN's own IDE\nbbn\\x::dump($opt->text('bbn_ide'));\n\/\/ (string) BBN's own IDE\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->text(12));\n\/\/ (string) BBN's own IDE\nbbn\\x::dump($opt->text('bbn_ide'));\n\/\/ (string) BBN's own IDE"
@@ -1910,8 +1998,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
@@ -1955,8 +2042,12 @@
         "itext": {
             "name": "itext",
             "summary": "Returns translation of an option's text",
-            "description": "```php\nbbn\\x::dump($opt->itext(12));\n\/\/ Result of _(\"BBN's own IDE\") with fr as locale\n\/\/ (string) L'IDE de BBN\nbbn\\x::dump($opt->itext('bbn_ide'));\n\/\/ (string) L'IDE de BBN\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->itext(12));\n\/\/ Result of _(\"BBN's own IDE\") with fr as locale\n\/\/ (string) L'IDE de BBN\nbbn\\x::dump($opt->itext('bbn_ide'));\n\/\/ (string) L'IDE de BBN\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->itext(12));\n\/\/ Result of _(\"BBN's own IDE\") with fr as locale\n\/\/ (string) L'IDE de BBN\nbbn\\x::dump($opt->itext('bbn_ide'));\n\/\/ (string) L'IDE de BBN"
@@ -1990,16 +2081,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "count": {
             "name": "count",
             "summary": "Returns the number of children for a given option",
-            "description": "```php\nbbn\\x::dump($opt->count('bbn_ide'));\n\/\/ (int) 4\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->count('bbn_ide'));\n\/\/ (int) 4\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->count('bbn_ide'));\n\/\/ (int) 4"
@@ -2033,19 +2127,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "options_by_alias": {
             "name": "options_by_alias",
             "summary": "Returns an array of options based on their id_alias",
-            "description": "```php\nbbn\\x::dump($opt->options_by_alias(36));\n\/\narray [\n  ['id' => 18, 'text' => \"My option 1\", 'code' => \"opt1\", 'myProperty' => \"50%\"],\n  ['id' => 21, 'text' => \"My option 4\", 'code' => \"opt4\", 'myProperty' => \"60%\"],\n  ['id' => 23, 'text' => \"My option 6\", 'code' => \"opt6\", 'myProperty' => \"90%\"]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->options_by_alias(36));\n\/*\narray [\n  ['id' => 18, 'text' => \"My option 1\", 'code' => \"opt1\", 'myProperty' => \"50%\"],\n  ['id' => 21, 'text' => \"My option 4\", 'code' => \"opt4\", 'myProperty' => \"60%\"],\n  ['id' => 23, 'text' => \"My option 6\", 'code' => \"opt6\", 'myProperty' => \"90%\"]\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->options_by_alias(36));\n\/\narray [\n  ['id' => 18, 'text' => \"My option 1\", 'code' => \"opt1\", 'myProperty' => \"50%\"],\n  ['id' => 21, 'text' => \"My option 4\", 'code' => \"opt4\", 'myProperty' => \"60%\"],\n  ['id' => 23, 'text' => \"My option 6\", 'code' => \"opt6\", 'myProperty' => \"90%\"]\n]"
+                    "content": "bbn\\x::dump($opt->options_by_alias(36));\n\/*\narray [\n  ['id' => 18, 'text' => \"My option 1\", 'code' => \"opt1\", 'myProperty' => \"50%\"],\n  ['id' => 21, 'text' => \"My option 4\", 'code' => \"opt4\", 'myProperty' => \"60%\"],\n  ['id' => 23, 'text' => \"My option 6\", 'code' => \"opt6\", 'myProperty' => \"90%\"]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -2076,16 +2173,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "is_sortable": {
             "name": "is_sortable",
             "summary": "Tells if an option has its config set as sortable or no",
-            "description": "```php\nbbn\\x::dump($opt->is_sortable(12));\n\/\/ (bool) false\nbbn\\x::dump($opt->is_sortable(21));\n\/\/ (bool) true\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->is_sortable(12));\n\/\/ (bool) false\nbbn\\x::dump($opt->is_sortable(21));\n\/\/ (bool) true\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->is_sortable(12));\n\/\/ (bool) false\nbbn\\x::dump($opt->is_sortable(21));\n\/\/ (bool) true"
@@ -2119,16 +2219,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "get_path_array": {
             "name": "get_path_array",
             "summary": "Returns an array of codes for each option between $id and $root without $root's code",
-            "description": "```php\nbbn\\x::dump($opt->get_path_array(48, 12));\n\/\/ array [\"path\", \"to\", \"my\", \"option\"]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_path_array(48, 12));\n\/\/ array [\"path\", \"to\", \"my\", \"option\"]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_path_array(48, 12));\n\/\/ array [\"path\", \"to\", \"my\", \"option\"]"
@@ -2163,7 +2266,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The end\/target of the path"
+                    "description": "The start\/origin of the path, {@link get_default()} if is null"
                 },
                 {
                     "name": "root",
@@ -2172,16 +2275,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The start\/origin of the path, {@link get_default()} if is null"
+                    "default_name": ""
                 }
             ]
         },
         "from_path": {
             "name": "from_path",
             "summary": "Returns the closest ID option from a _path_ of codes, with separator and optional id_parent",
-            "description": "```php\nbbn\\x::dump(\"bbn_ide|test1|test8\"));\n\/\/ (int) 36\n```",
+            "description": "*\n```php\nbbn\\x::dump(\"bbn_ide|test1|test8\"));\n\/\/ (int) 36\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump(\"bbn_ide|test1|test8\"));\n\/\/ (int) 36"
@@ -2216,7 +2322,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The path made of a concatenation of path and $sep until the target"
+                    "description": "The separator"
                 },
                 {
                     "name": "sep",
@@ -2226,7 +2332,7 @@
                     "has_default": true,
                     "default": "|",
                     "default_name": "",
-                    "description": "The separator"
+                    "description": "An optional id_parent, {@link get_default()} otherwise"
                 },
                 {
                     "name": "parent",
@@ -2235,16 +2341,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "An optional id_parent, {@link get_default()} otherwise"
+                    "default_name": ""
                 }
             ]
         },
         "to_path": {
             "name": "to_path",
             "summary": "Concatenates the codes and separator $sep of a a line of options",
-            "description": "```php\nbbn\\x::dump($opt->to_path(48, '|', 12)\n\/\/ (string) path|to|my|option\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->to_path(48, '|', 12)\n\/\/ (string) path|to|my|option\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->to_path(48, '|', 12)\n\/\/ (string) path|to|my|option"
@@ -2279,7 +2388,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The end\/target of the path"
+                    "description": "The separator"
                 },
                 {
                     "name": "sep",
@@ -2289,7 +2398,7 @@
                     "has_default": true,
                     "default": "|",
                     "default_name": "",
-                    "description": "The separator"
+                    "description": "The start\/origin of the path"
                 },
                 {
                     "name": "parent",
@@ -2298,16 +2407,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The start\/origin of the path"
+                    "default_name": ""
                 }
             ]
         },
         "add": {
             "name": "add",
             "summary": "Creates a new option or a new hierarchy by adding row(s) in the options' table",
-            "description": "```php\nbbn\\x::dump($opt->add([\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n]));\n\/\/ (int) 49  New ID\nbbn\\x::dump($opt->add([\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n  'items' => [\n    [\n      'code' => \"test\",\n      'text' => \"Test\",\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n        ]\n      ]\n    ]\n  ]\n], true, true));\n\/\/ (int) 4 Number of inserted\/modified rows\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->add([\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n]));\n\/\/ (int) 49  New ID\nbbn\\x::dump($opt->add([\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n  'items' => [\n    [\n      'code' => \"test\",\n      'text' => \"Test\",\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n        ]\n      ]\n    ]\n  ]\n], true, true));\n\/\/ (int) 4 Number of inserted\/modified rows\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->add([\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n]));\n\/\/ (int) 49  New ID\nbbn\\x::dump($opt->add([\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n  'items' => [\n    [\n      'code' => \"test\",\n      'text' => \"Test\",\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n        ]\n      ]\n    ]\n  ]\n], true, true));\n\/\/ (int) 4 Number of inserted\/modified rows"
@@ -2339,7 +2451,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option configuration"
+                    "description": "Determines if the option should be updated if it already exists"
                 },
                 {
                     "name": "force",
@@ -2349,7 +2461,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "Determines if the option should be updated if it already exists"
+                    "description": "num If set to true the function will return the number of rows inserted otherwise the ID of the newly created option"
                 },
                 {
                     "name": "return_num",
@@ -2358,16 +2470,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "num If set to true the function will return the number of rows inserted otherwise the ID of the newly created option"
+                    "default_name": ""
                 }
             ]
         },
         "set": {
             "name": "set",
             "summary": "Updates an option's row (without changing cfg)",
-            "description": "```php\nbbn\\x::dump($opt->set(12, [\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n  'cfg' => [\n    'sortable' => true,\n    'Description' => \"I am a cool option\"\n  ]\n]);\n\/\/ (int) 1\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->set(12, [\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n  'cfg' => [\n    'sortable' => true,\n    'Description' => \"I am a cool option\"\n  ]\n]);\n\/\/ (int) 1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->set(12, [\n  'id_parent' => $opt->from_code('bbn_ide'),\n  'text' => 'My new option',\n  'code' => 'new_opt',\n  'myProperty' => 'my value'\n  'cfg' => [\n    'sortable' => true,\n    'Description' => \"I am a cool option\"\n  ]\n]);\n\/\/ (int) 1"
@@ -2414,8 +2529,12 @@
         "remove": {
             "name": "remove",
             "summary": "Deletes a row from the options table, deletes the cache and fix order if needed",
-            "description": "```php\nbbn\\x::dump($opt->remove(12));\n\/\/ (int) 12 Number of options deleted\nbbn\\x::dump($opt->remove(12));\n\/\/ (bool) false The option doesn't exist anymore\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->remove(12));\n\/\/ (int) 12 Number of options deleted\nbbn\\x::dump($opt->remove(12));\n\/\/ (bool) false The option doesn't exist anymore\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->remove(12));\n\/\/ (int) 12 Number of options deleted\nbbn\\x::dump($opt->remove(12));\n\/\/ (bool) false The option doesn't exist anymore"
@@ -2446,16 +2565,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "remove_full": {
             "name": "remove_full",
             "summary": "Deletes a row from the options table, deletes the cache and fix order if needed",
-            "description": "```php\nbbn\\x::dump($opt->remove(12));\n\/\/ (int) 12 Number of options deleted\nbbn\\x::dump($opt->remove(12));\n\/\/ (bool) false The option doesn't exist anymore\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->remove(12));\n\/\/ (int) 12 Number of options deleted\nbbn\\x::dump($opt->remove(12));\n\/\/ (bool) false The option doesn't exist anymore\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->remove(12));\n\/\/ (int) 12 Number of options deleted\nbbn\\x::dump($opt->remove(12));\n\/\/ (bool) false The option doesn't exist anymore"
@@ -2486,16 +2608,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()} or the uid"
+                    "default_name": ""
                 }
             ]
         },
         "set_alias": {
             "name": "set_alias",
             "summary": "Sets the alias of an option",
-            "description": "```php\nbbn\\x::dump($opt->set_alias(26, 32));\n\/\/ (int) 1\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->set_alias(26, 32));\n\/\/ (int) 1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->set_alias(26, 32));\n\/\/ (int) 1"
@@ -2527,7 +2652,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The ID of the option to be updated"
+                    "description": "The alias' option ID"
                 },
                 {
                     "name": "alias",
@@ -2536,16 +2661,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The alias' option ID"
+                    "default_name": ""
                 }
             ]
         },
         "set_text": {
             "name": "set_text",
             "summary": "Sets the text of an option",
-            "description": "```php\nbbn\\x::dump($opt->set_text(26, \"Hello world!\"));\n\/\/ (int) 1\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->set_text(26, \"Hello world!\"));\n\/\/ (int) 1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->set_text(26, \"Hello world!\"));\n\/\/ (int) 1"
@@ -2577,7 +2705,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The ID of the option to be updated"
+                    "description": "The new text"
                 },
                 {
                     "name": "text",
@@ -2586,16 +2714,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new text"
+                    "default_name": ""
                 }
             ]
         },
         "set_code": {
             "name": "set_code",
             "summary": "Sets the code of an option",
-            "description": "```php\nbbn\\x::dump($opt->set_code(26, \"HWD\"));\n\/\/ (int) 1\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->set_code(26, \"HWD\"));\n\/\/ (int) 1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->set_code(26, \"HWD\"));\n\/\/ (int) 1"
@@ -2627,7 +2758,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The ID of the option to be updated"
+                    "description": "The new code"
                 },
                 {
                     "name": "code",
@@ -2636,16 +2767,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The new code"
+                    "default_name": ""
                 }
             ]
         },
         "order": {
             "name": "order",
             "summary": "Returns the order of an option. Updates it if a position is given, and cascades",
-            "description": "```php\nbbn\\x::dump($opt->items(20));\n\/\/ [21, 22, 25, 27]\nbbn\\x::dump($opt->order(25));\n\/\/ (int) 3\nbbn\\x::dump($opt->order(25, 2));\n\/\/ (int) 2\nbbn\\x::dump($opt->items(20));\n\/\/ [21, 25, 22, 27]\nbbn\\x::dump($opt->order(25));\n\/\/ (int) 2\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->items(20));\n\/\/ [21, 22, 25, 27]\nbbn\\x::dump($opt->order(25));\n\/\/ (int) 3\nbbn\\x::dump($opt->order(25, 2));\n\/\/ (int) 2\nbbn\\x::dump($opt->items(20));\n\/\/ [21, 25, 22, 27]\nbbn\\x::dump($opt->order(25));\n\/\/ (int) 2\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->items(20));\n\/\/ [21, 22, 25, 27]\nbbn\\x::dump($opt->order(25));\n\/\/ (int) 3\nbbn\\x::dump($opt->order(25, 2));\n\/\/ (int) 2\nbbn\\x::dump($opt->items(20));\n\/\/ [21, 25, 22, 27]\nbbn\\x::dump($opt->order(25));\n\/\/ (int) 2"
@@ -2677,7 +2811,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The ID of the option to update"
+                    "description": "The new position"
                 },
                 {
                     "name": "pos",
@@ -2686,19 +2820,22 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The new position"
+                    "default_name": ""
                 }
             ]
         },
         "set_prop": {
             "name": "set_prop",
             "summary": "Updates option's properties derivated from the value column",
-            "description": "```php\nbbn\\x::dump($opt->set_prop(12, 'myProperty', \"78%\"));\n\/\/ (int) 1\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->set_prop(9654, ['myProperty' => \"78%\"]));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\", 'myProperty2' => \"42%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->set_prop(12, 'myProperty', \"78%\"));\n\/\/ (int) 1\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->set_prop(9654, ['myProperty' => \"78%\"]));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\", 'myProperty2' => \"42%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/*\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->set_prop(12, 'myProperty', \"78%\"));\n\/\/ (int) 1\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->set_prop(9654, ['myProperty' => \"78%\"]));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\", 'myProperty2' => \"42%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]"
+                    "content": "bbn\\x::dump($opt->set_prop(12, 'myProperty', \"78%\"));\n\/\/ (int) 1\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->set_prop(9654, ['myProperty' => \"78%\"]));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\", 'myProperty2' => \"42%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/*\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -2727,7 +2864,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option to update's ID"
+                    "description": "An array of properties and values, or a string with the property's name adding as next argument the new value"
                 },
                 {
                     "name": "prop",
@@ -2736,16 +2873,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "An array of properties and values, or a string with the property's name adding as next argument the new value"
+                    "default_name": ""
                 }
             ]
         },
         "get_prop": {
             "name": "get_prop",
             "summary": "Get an option's single property",
-            "description": "```php\nbbn\\x::dump($opt->get_prop(12, 'myProperty'));\n\/\/ (int) 78\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->get_prop(12, 'myProperty'));\n\/\/ (string) \"78%\"\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_prop(12, 'myProperty'));\n\/\/ (int) 78\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->get_prop(12, 'myProperty'));\n\/\/ (string) \"78%\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_prop(12, 'myProperty'));\n\/\/ (int) 78\nbbn\\x::dump($opt->set_prop(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 1\nbbn\\x::dump($opt->get_prop(12, 'myProperty'));\n\/\/ (string) \"78%\""
@@ -2777,7 +2917,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option from which getting the property"
+                    "description": "The property's name"
                 },
                 {
                     "name": "prop",
@@ -2786,19 +2926,22 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The property's name"
+                    "default_name": ""
                 }
             ]
         },
         "unset_prop": {
             "name": "unset_prop",
             "summary": "Unset option's properties taken from the value column",
-            "description": "```php\nbbn\\x::dump($opt->unset_prop(12, 'myProperty'));\n\/\/ (int) 1\nbbn\\x::dump($opt->unset_prop(12, ['myProperty']));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->unset_prop(9654, ['myProperty']));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->unset_prop(12, ['myProperty', 'myProperty2']));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->unset_prop(12, 'myProperty'));\n\/\/ (int) 1\nbbn\\x::dump($opt->unset_prop(12, ['myProperty']));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->unset_prop(9654, ['myProperty']));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->unset_prop(12, ['myProperty', 'myProperty2']));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/*\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]\n```",
             "description_parts": [
                 {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->unset_prop(12, 'myProperty'));\n\/\/ (int) 1\nbbn\\x::dump($opt->unset_prop(12, ['myProperty']));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->unset_prop(9654, ['myProperty']));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->unset_prop(12, ['myProperty', 'myProperty2']));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]"
+                    "content": "bbn\\x::dump($opt->unset_prop(12, 'myProperty'));\n\/\/ (int) 1\nbbn\\x::dump($opt->unset_prop(12, ['myProperty']));\n\/\/ (int) 0 Already updated, no change done\nbbn\\x::dump($opt->unset_prop(9654, ['myProperty']));\n\/\/ (bool) false Option not found\nbbn\\x::dump($opt->unset_prop(12, ['myProperty', 'myProperty2']));\n\/\/ (int) 1\nbbn\\x::dump($opt->option(12));\n\/*\nBefore\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myProperty' => \"78%\",\n  'myProperty2' => \"42%\",\n  'myOtherProperty' => \"Hello\",\n]\nAfter\narray [\n  'id' => 12,\n  'id_parent' => 0,\n  'code' => 'bbn_ide',\n  'text' => 'BBN's own IDE',\n  'myOtherProperty' => \"Hello\",\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -2827,7 +2970,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option to update's ID"
+                    "description": "An array of properties and values, or a string with the property's name adding as next argument the new value"
                 },
                 {
                     "name": "prop",
@@ -2836,16 +2979,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "An array of properties and values, or a string with the property's name adding as next argument the new value"
+                    "default_name": ""
                 }
             ]
         },
         "set_cfg": {
             "name": "set_cfg",
             "summary": "Sets the cfg column of a given option in the table through an array",
-            "description": "```php\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['sortable' => true]\nbbn\\x::dump($opt->set_cfg(12, [\n  'desc' => \"I am a cool option\",\n  'sortable' => true\n]));\n\/\/ (int) 1\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['desc' => \"I am a cool option\", 'sortable' => true];\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['sortable' => true]\nbbn\\x::dump($opt->set_cfg(12, [\n  'desc' => \"I am a cool option\",\n  'sortable' => true\n]));\n\/\/ (int) 1\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['desc' => \"I am a cool option\", 'sortable' => true];\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['sortable' => true]\nbbn\\x::dump($opt->set_cfg(12, [\n  'desc' => \"I am a cool option\",\n  'sortable' => true\n]));\n\/\/ (int) 1\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['desc' => \"I am a cool option\", 'sortable' => true];"
@@ -2877,7 +3023,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option ID"
+                    "description": "The config value"
                 },
                 {
                     "name": "cfg",
@@ -2886,16 +3032,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The config value"
+                    "default_name": ""
                 }
             ]
         },
         "unset_cfg": {
             "name": "unset_cfg",
             "summary": "Unsets the cfg column (sets it to null)",
-            "description": "```php\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['desc' => \"I am a cool option\", 'sortable' => true];\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['desc' => \"I am a cool option\", 'sortable' => true];\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->get_cfg('bbn_ide'));\n\/\/ array ['desc' => \"I am a cool option\", 'sortable' => true];"
@@ -2926,8 +3075,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The option ID"
+                    "default_name": ""
                 }
             ]
         },
@@ -2967,7 +3115,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Source option ID, will be"
+                    "description": "Destination option ID, will remain after the fusion"
                 },
                 {
                     "name": "dest",
@@ -2976,16 +3124,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Destination option ID, will remain after the fusion"
+                    "default_name": ""
                 }
             ]
         },
         "move": {
             "name": "move",
             "summary": "Changes the id_parent of an option",
-            "description": "```php\nbbn\\x::dump($this->get_id_parent(21));\n\/\/ (int) 13\nbbn\\x::dump($this->move(21, 12));\n\/\/ (int) 1\nbbn\\x::dump($this->get_id_parent(21));\n\/\/ (int) 12\n```",
+            "description": "*\n```php\nbbn\\x::dump($this->get_id_parent(21));\n\/\/ (int) 13\nbbn\\x::dump($this->move(21, 12));\n\/\/ (int) 1\nbbn\\x::dump($this->get_id_parent(21));\n\/\/ (int) 12\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($this->get_id_parent(21));\n\/\/ (int) 13\nbbn\\x::dump($this->move(21, 12));\n\/\/ (int) 1\nbbn\\x::dump($this->get_id_parent(21));\n\/\/ (int) 12"
@@ -3017,7 +3168,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The option's ID"
+                    "description": "parent The new id_parent"
                 },
                 {
                     "name": "id_parent",
@@ -3026,16 +3177,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "parent The new id_parent"
+                    "default_name": ""
                 }
             ]
         },
         "fix_order": {
             "name": "fix_order",
             "summary": "Sets the order configuration for each options of a sortable given parent",
-            "description": "```php\nbbn\\x::dump($opt->items(12));\n\/\/ array [20, 22, 25, 27]\nbbn\\x::dump($opt->fix_order(12)->items(12));\n\/\/ array [25, 22, 27, 20]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->items(12));\n\/\/ array [20, 22, 25, 27]\nbbn\\x::dump($opt->fix_order(12)->items(12));\n\/\/ array [25, 22, 27, 20]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->items(12));\n\/\/ array [20, 22, 25, 27]\nbbn\\x::dump($opt->fix_order(12)->items(12));\n\/\/ array [25, 22, 27, 20]"
@@ -3082,11 +3236,11 @@
         "export": {
             "name": "export",
             "summary": "Converts an option or a hierarchy to a multi-level array with JSON values",
-            "description": "If $return is false the resulting array will be printed\n```php\n```",
+            "description": "If $return is false the resulting array will be printed\n   *\n```php\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>If $return is false the resulting array will be printed<\/p>"
+                    "content": "<p>If $return is false the resulting array will be printed\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -3146,8 +3300,12 @@
         "import": {
             "name": "import",
             "summary": "Insert into the option table an exported array of options",
-            "description": "```php\n```",
+            "description": "*\n```php\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": ""
@@ -3215,8 +3373,12 @@
         "duplicate": {
             "name": "duplicate",
             "summary": "Copies and insert an option into a target option",
-            "description": "```php\n```",
+            "description": "*\n```php\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": ""
@@ -3294,8 +3456,12 @@
         "apply": {
             "name": "apply",
             "summary": "Applies a function to children of an option and updates the database",
-            "description": "```php\n```",
+            "description": "*\n```php\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": ""
@@ -3354,8 +3520,12 @@
         "map": {
             "name": "map",
             "summary": "Applies a function to children of an option",
-            "description": "```php\n```",
+            "description": "*\n```php\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": ""
@@ -3414,8 +3584,12 @@
         "map_cfg": {
             "name": "map_cfg",
             "summary": "Applies a function to children of an option, with the cfg array included",
-            "description": "```php\n```",
+            "description": "*\n```php\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": ""
@@ -3570,8 +3744,12 @@
         "has_permission": {
             "name": "has_permission",
             "summary": "Checks whether an option has _permissions_ in its parent cfg",
-            "description": "```php\nbbn\\x::dump($opt->has_permission('bbn_ide'));\n\/\/ (bool) true\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->has_permission('bbn_ide'));\n\/\/ (bool) true\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->has_permission('bbn_ide'));\n\/\/ (bool) true"
@@ -3602,16 +3780,19 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any option(s) accepted by {@link from_code()}"
+                    "default_name": ""
                 }
             ]
         },
         "find_permissions": {
             "name": "find_permissions",
             "summary": "Returns an array of _permissions_ from origin $id",
-            "description": "```php\nbbn\\x::dump($opt->find_permissions());\n\/* Returns a full treeof permissions for all options\narray []\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->find_permissions());\n\/* Returns a full treeof permissions for all options\narray []\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "bbn\\x::dump($opt->find_permissions());\n\/* Returns a full treeof permissions for all options\narray []"
@@ -4372,11 +4553,11 @@
     "namespaceName": "bbn\\appui",
     "shortName": "options",
     "summary": "An all-in-one hierarchical options management system",
-    "description": "This class allows to:\n---------------------\n* manage a **hierarchical** table of options\n* retrieve, edit, add, remove options\n* grab a whole tree\n* apply functions on group of options\n* add user-defined properties\n* set option configuration and applies it to all its children\n* And many more...",
+    "description": "*\nThis class allows to:\n---------------------\n* manage a **hierarchical** table of options\n* retrieve, edit, add, remove options\n* grab a whole tree\n* apply functions on group of options\n* add user-defined properties\n* set option configuration and applies it to all its children\n* And many more...",
     "description_parts": [
         {
             "type": "text",
-            "content": "<h2>This class allows to:<\/h2>\n<ul>\n<li>manage a <strong>hierarchical<\/strong> table of options<\/li>\n<li>retrieve, edit, add, remove options<\/li>\n<li>grab a whole tree<\/li>\n<li>apply functions on group of options<\/li>\n<li>add user-defined properties<\/li>\n<li>set option configuration and applies it to all its children<\/li>\n<li>And many more...<\/li>\n<\/ul>"
+            "content": "<h2>*\nThis class allows to:<\/h2>\n<ul>\n<li>manage a <strong>hierarchical<\/strong> table of options<\/li>\n<li>retrieve, edit, add, remove options<\/li>\n<li>grab a whole tree<\/li>\n<li>apply functions on group of options<\/li>\n<li>add user-defined properties<\/li>\n<li>set option configuration and applies it to all its children<\/li>\n<li>And many more...<\/li>\n<\/ul>"
         }
     ]
 }

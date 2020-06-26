@@ -165,7 +165,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "chat"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -174,8 +174,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -212,7 +211,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "chat"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -221,8 +220,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -260,7 +258,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "chat"
+                    "description": "user"
                 },
                 {
                     "name": "id_user",
@@ -269,8 +267,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "user"
+                    "default_name": ""
                 }
             ]
         },
@@ -344,8 +341,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "chat"
+                    "default_name": ""
                 }
             ]
         },
@@ -382,8 +378,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "chat"
+                    "default_name": ""
                 },
                 {
                     "name": "message",

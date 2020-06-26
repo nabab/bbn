@@ -2,7 +2,6 @@
     "doc": {
         "description": "A class for dealing with directories (folders)",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Files ressources",
@@ -22,8 +21,12 @@
         "clean": {
             "name": "clean",
             "summary": "Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\""
@@ -56,19 +59,18 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The directory path."
+                    "default_name": ""
                 }
             ]
         },
         "has_file": {
             "name": "has_file",
             "summary": "Checks if the given file(s) exists in the directory.",
-            "description": "Accepts unlimited arguments (files name).\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true\n```",
+            "description": "Accepts unlimited arguments (files name).\n\t\t*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Accepts unlimited arguments (files name).<\/p>"
+                    "content": "<p>Accepts unlimited arguments (files name).\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -102,16 +104,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The directory's path."
+                    "default_name": ""
                 }
             ]
         },
         "cur": {
             "name": "cur",
             "summary": "If the directory's path starts with '.\/' returns the path without '.\/' else returns the complete path.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\""
@@ -144,8 +149,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The directory path."
+                    "default_name": ""
                 }
             ]
         },
@@ -185,7 +189,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The directory's path."
+                    "description": "If true return the hidden directories' path"
                 },
                 {
                     "name": "hidden",
@@ -194,19 +198,18 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If true return the hidden directories' path"
+                    "default_name": ""
                 }
             ]
         },
         "get_files": {
             "name": "get_files",
             "summary": "Returns an array of files contained in the given directory.",
-            "description": "Returns the full path of files.\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n```",
+            "description": "Returns the full path of files.\n\t\t*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n```",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Returns the full path of files.<\/p>"
+                    "content": "<p>Returns the full path of files.\n*<\/p>"
                 },
                 {
                     "type": "code",
@@ -239,7 +242,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The directory's path."
+                    "description": "dirs If set to true it will also returns the folders contained in the given directory."
                 },
                 {
                     "name": "including_dirs",
@@ -249,7 +252,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "dirs If set to true it will also returns the folders contained in the given directory."
+                    "description": "If set to true will also returns the hidden files contained the directory"
                 },
                 {
                     "name": "hidden",
@@ -258,8 +261,7 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true will also returns the hidden files contained the directory"
+                    "default_name": ""
                 },
                 {
                     "name": "extension",
@@ -275,8 +277,12 @@
         "delete": {
             "name": "delete",
             "summary": "Deletes the given directory and all its content.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false"
@@ -310,7 +316,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The directory path's."
+                    "description": "If set to '0' will delete only the content of the directory. Default: \"1\"."
                 },
                 {
                     "name": "full",
@@ -319,8 +325,7 @@
                     "required": false,
                     "has_default": true,
                     "default": true,
-                    "default_name": "",
-                    "description": "If set to '0' will delete only the content of the directory. Default: \"1\"."
+                    "default_name": ""
                 }
             ]
         },
@@ -357,7 +362,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The directory's path."
+                    "description": "The type or the extension of item to return ('file', 'dir', 'php', default is both)"
                 },
                 {
                     "name": "type",
@@ -367,7 +372,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The type or the extension of item to return ('file', 'dir', 'php', default is both)"
+                    "description": "If set to true will include the hidden files\/directories in the result"
                 },
                 {
                     "name": "hidden",
@@ -376,16 +381,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true will include the hidden files\/directories in the result"
+                    "default_name": ""
                 }
             ]
         },
         "mscan": {
             "name": "mscan",
             "summary": "Returns an array of indexed arrays with the 'name' of the file\/folder contained in the given directory, the 'mtime', and the 'date' of creation the file\/folder.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]"
@@ -419,7 +427,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The directory's path"
+                    "description": "The type or the extension of item to return ('file', 'dir', 'php', default is both)"
                 },
                 {
                     "name": "type",
@@ -429,7 +437,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The type or the extension of item to return ('file', 'dir', 'php', default is both)"
+                    "description": "If set to true will also return the hidden files\/folders contained in the given directory. Default=false"
                 },
                 {
                     "name": "hidden",
@@ -438,16 +446,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true will also return the hidden files\/folders contained in the given directory. Default=false"
+                    "default_name": ""
                 }
             ]
         },
         "get_tree": {
             "name": "get_tree",
             "summary": "Return an array with the tree of the folder's content.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]"
@@ -481,7 +492,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The directory's path."
+                    "description": "dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false."
                 },
                 {
                     "name": "only_dir",
@@ -491,7 +502,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false."
+                    "description": "Filter function"
                 },
                 {
                     "name": "filter",
@@ -501,7 +512,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "Filter function"
+                    "description": "If set to true will also return the hidden file(s)\/folder(s)"
                 },
                 {
                     "name": "hidden",
@@ -510,16 +521,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true will also return the hidden file(s)\/folder(s)"
+                    "default_name": ""
                 }
             ]
         },
         "create_path": {
             "name": "create_path",
             "summary": "Creates a folder with the given path.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::create_path(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::create_path(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::create_path(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\""
@@ -551,7 +565,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new directory's path."
+                    "description": "If set to true the user won't have the permissions to view the content of the folder created"
                 },
                 {
                     "name": "chmod",
@@ -560,16 +574,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": "",
-                    "description": "If set to true the user won't have the permissions to view the content of the folder created"
+                    "default_name": ""
                 }
             ]
         },
         "move": {
             "name": "move",
             "summary": "Moves a file or directory to a new location",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\"\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\"\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\""
@@ -603,7 +620,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The path of the file to move"
+                    "description": "The full name of the destination (including basename)"
                 },
                 {
                     "name": "dest",
@@ -613,7 +630,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The full name of the destination (including basename)"
+                    "description": "If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file\/folder."
                 },
                 {
                     "name": "st",
@@ -623,7 +640,7 @@
                     "has_default": true,
                     "default": "_v",
                     "default_name": "",
-                    "description": "If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file\/folder."
+                    "description": "The number of characters to use for the revision number; will be zerofilled"
                 },
                 {
                     "name": "length",
@@ -632,16 +649,19 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The number of characters to use for the revision number; will be zerofilled"
+                    "default_name": ""
                 }
             ]
         },
         "copy": {
             "name": "copy",
             "summary": "Will move the content of the given folder to a new destination. Doesn't move the hidden files.",
-            "description": "```php\n\\bbn\\x::dump(\\bbn\\file\\dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1\n```",
+            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1\n```",
             "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
                 {
                     "type": "code",
                     "content": "\\bbn\\x::dump(\\bbn\\file\\dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1"
@@ -675,7 +695,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The path of the files to move"
+                    "description": "The new destination of files"
                 },
                 {
                     "name": "dst",
@@ -684,8 +704,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The new destination of files"
+                    "default_name": ""
                 }
             ]
         },

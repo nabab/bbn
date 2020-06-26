@@ -2,7 +2,6 @@
     "doc": {
         "description": "Documentation block parser",
         "tags": {
-            "author": "Mirko Argentino <mirko@bbn.solutions>",
             "copyright": "BBN Solutions",
             "category": "Parsers",
             "version": "1.0"
@@ -14,7 +13,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/parsers\/doc.php",
     "startLine": 13,
-    "endLine": 742,
+    "endLine": 745,
     "contentConstructor": {
         "file": "bbn\\parsers\\doc",
         "returns": null
@@ -30,8 +29,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($src = '', $mode = 'vue')\n  {\n    $this->set_tags();\n    $this->set_source($src);\n  }",
-            "startLine": 618,
-            "endLine": 622,
+            "startLine": 621,
+            "endLine": 625,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -51,7 +50,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The source code or an absolute file path"
+                    "description": "The mode to use"
                 },
                 {
                     "name": "mode",
@@ -60,8 +59,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "vue",
-                    "default_name": "",
-                    "description": "The mode to use"
+                    "default_name": ""
                 }
             ]
         },
@@ -75,8 +73,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($src)\n  {\n    $this->parsed = [];\n    return $this;\n  }",
-            "startLine": 630,
-            "endLine": 634,
+            "startLine": 633,
+            "endLine": 637,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -95,8 +93,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The source code or an absolute file path"
+                    "default_name": ""
                 }
             ]
         },
@@ -110,8 +107,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($mode)\n  {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(_('Error: mode not allowed.'));\n  }",
-            "startLine": 642,
-            "endLine": 648,
+            "startLine": 645,
+            "endLine": 651,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -130,8 +127,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The mode to set"
+                    "default_name": ""
                 }
             ]
         },
@@ -145,8 +141,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( isset($matches[0]) ){\n      foreach ( $matches[0] as $match ){\n        preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);\n        $start = $match[1];\n        $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;\n        if ( $db = $this->parse_docblock(substr($this->source, $start, $length)) ){\n          $this->parsed[] = $db;\n        }\n      }\n    }\n    return $this->parsed;\n  }",
-            "startLine": 655,
-            "endLine": 668,
+            "startLine": 658,
+            "endLine": 671,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -169,8 +165,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($block)\n  {\n    $b = [\n\t\t\t'description' => '',\n\t\t\t'tags' => []\n\t\t];\n    \/\/ Remove start pattern\n    \/\/$block = trim(substr($block, 3));\n\t\t\/\/ Remove end pattern\n\t\t$block = trim(substr($block, 0, strlen($block) - 2));\n\t\t\/\/ Tags\n    $tags = $this->get_tags($block);\n    foreach ( $tags as $i => $tag ){\n\t\t\tif (\n\t\t\t\t(\n\t\t\t\t\tisset($tags[$i+1]) &&\n\t\t\t\t\t($t = $this->parse_tag(substr($block, $tag[1], $tags[$i+1][1] - $tag[1])))\n        ) ||\n\t\t\t\t($t = $this->parse_tag(substr($block, $tag[1])))\n\t\t\t){\n        if ( !empty($t['tag']) && ($t['tag'] === 'ignore') ){\n          return null;\n        }\n\t\t\t\t$b['tags'][] = $t;\n\t\t\t}\n    }\n    \/\/ Get Description\n    $b['description'] = $this->clear_text(isset($tags[0]) ? substr($block, 3, $tags[0][1]-1) : substr($block, 3));\n    return $b;\n  }",
-            "startLine": 677,
-            "endLine": 706,
+            "startLine": 680,
+            "endLine": 709,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -192,8 +188,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The docblock"
+                    "default_name": ""
                 }
             ]
         },
@@ -207,8 +202,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      'description' => $this->get_file(),\n      'methods' => $this->get_methods(),\n      'events' => $this->get_events(),\n      \/\/'todo' => $this->get_todo()\n    ];\n  }",
-            "startLine": 713,
-            "endLine": 720,
+            "startLine": 716,
+            "endLine": 723,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -231,8 +226,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($memberof = '')\n  {\n      'description' => $this->get_file($memberof),\n      'methods' => $this->get_methods($memberof),\n      'events' => $this->get_events($memberof),\n      'mixins' => $this->get_mixins($memberof),\n      'props' => $this->get_props($memberof),\n      'data' => $this->get_data($memberof),\n      'computed' => $this->get_computed($memberof),\n      'watch' => $this->get_watch($memberof),\n      'components' => $this->get_components($memberof),\n      \/\/'todo' => $this->get_todo($memberof)\n    ];\n  }",
-            "startLine": 728,
-            "endLine": 741,
+            "startLine": 731,
+            "endLine": 744,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -251,8 +246,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The parent tag name"
+                    "default_name": ""
                 }
             ]
         }

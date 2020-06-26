@@ -2,7 +2,6 @@
     "doc": {
         "description": "Generates form and its elements",
         "tags": {
-            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Dec 14, 2013, 04:23:55 +0000",
             "category": "Appui",
@@ -85,8 +84,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The default config for the elements"
+                    "default_name": ""
                 }
             ]
         },
@@ -208,8 +206,7 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": "",
-                        "description": "Configuration"
+                        "default_name": ""
                     }
                 ]
             },
@@ -221,8 +218,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Configuration"
+                    "default_name": ""
                 }
             ]
         },
@@ -324,8 +320,7 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": "",
-                        "description": "CSS properties\/values array"
+                        "default_name": ""
                     }
                 ]
             },
@@ -337,8 +332,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "CSS properties\/values array"
+                    "default_name": ""
                 }
             ]
         },
