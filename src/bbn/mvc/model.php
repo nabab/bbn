@@ -281,9 +281,18 @@ class model extends bbn\models\cls\db{
       return $this->cache_set_get(function() use($model, $data){
         return $model->get($data);
 
-      }, $cn, '', $ttl);
+      }, $cn, $ttl);
     }
     return false;
+  }
+
+  public function get_set_from_cache(\Closure $fn, $spec, $ttl): ?array
+  {
+    if ( $cn = $this->_cache_name([], $spec) ){
+      $model =& $this;
+      return $this->cache_set_get($fn, $cn, $ttl);
+    }
+    return null;
   }
 
   public function apply_locale($plugin){

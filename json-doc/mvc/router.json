@@ -1334,7 +1334,9 @@
                     "ext": "php",
                     "mode": "model",
                     "i18n": null,
-                    "checkers": []
+                    "checkers": [
+                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
+                    ]
                 },
                 "_init": {
                     "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/model\/_init.php",
@@ -1438,7 +1440,9 @@
                     "ext": "php",
                     "mode": "model",
                     "i18n": null,
-                    "checkers": []
+                    "checkers": [
+                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
+                    ]
                 },
                 "_init": {
                     "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/model\/_init.php",

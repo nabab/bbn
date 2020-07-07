@@ -19,7 +19,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/mvc\/model.php",
     "startLine": 23,
-    "endLine": 293,
+    "endLine": 302,
     "contentConstructor": {
         "file": "bbn\\mvc\\model",
         "returns": null
@@ -888,7 +888,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data = NULL, $spec = '', $ttl = 10)\n  {\n      $model =& $this;\n      return $this->cache_set_get(function() use($model, $data){\n        return $model->get($data);\n\n      }, $cn, '', $ttl);\n    }\n    return false;\n  }",
+            "code": "function(array $data = NULL, $spec = '', $ttl = 10)\n  {\n      $model =& $this;\n      return $this->cache_set_get(function() use($model, $data){\n        return $model->get($data);\n\n      }, $cn, $ttl);\n    }\n    return false;\n  }",
             "startLine": 278,
             "endLine": 287,
             "isDeprecated": false,
@@ -931,6 +931,61 @@
                 }
             ]
         },
+        "get_set_from_cache": {
+            "name": "get_set_from_cache",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc\\model",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(Closure $fn, $spec, $ttl)\n  {\n    if ( $cn = $this->_cache_name([], $spec) ){\n      $model =& $this;\n      return $this->cache_set_get($fn, $cn, $ttl);\n    }\n    return null;\n  }",
+            "startLine": 289,
+            "endLine": 296,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "Closure",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "spec",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "apply_locale": {
             "name": "apply_locale",
             "summary": "",
@@ -941,8 +996,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin)\n  {\n  }",
-            "startLine": 289,
-            "endLine": 291,
+            "startLine": 298,
+            "endLine": 300,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2004,7 +2059,7 @@
     },
     "staticProperties": [],
     "constants": null,
-    "numMethods": 48,
+    "numMethods": 49,
     "numProperties": 3,
     "numConstants": 0,
     "numStaticProperties": 0,

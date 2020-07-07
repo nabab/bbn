@@ -164,9 +164,6 @@ class x
         self::sort_by($r, 'last_date', 'DESC');
         file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
       }
-      if ( $errno > 8 ){
-        die($errstr);
-      }
     }
     return false;
   }
