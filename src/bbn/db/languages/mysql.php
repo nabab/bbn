@@ -1257,7 +1257,7 @@ MYSQL
       if ( empty($col['null']) ){
         $st .= ' NOT NULL';
       }
-      if ( $col['virtual'] ){
+      if ( !empty($col['virtual']) ){
         $st .= ' GENERATED ALWAYS AS ('.$col['generation'].') VIRTUAL';
       }
       else if ( array_key_exists('default', $col) ){
@@ -1319,7 +1319,7 @@ MYSQL
     }
     if ($model && !empty($model['keys'])) {
       $constraints = array_filter($model['keys'], function($a){
-        return !!$a['ref_table'] && isset($a['columns']) && (count($a['columns']) === 1);
+        return !empty($a['ref_table']) && isset($a['columns']) && (count($a['columns']) === 1);
       });
       if ($last = count($constraints)) {
         $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
