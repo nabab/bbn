@@ -1,3 +1,5 @@
+<p align="center"><img alt="BBN PHP" src="https://cdn.bbn.io/img/240w/php.png"></p>
+
 bbn
 ===
 
@@ -5,9 +7,17 @@ bbn
 
 ## The PHP library used by [app-UI](https://app-ui.com)
 
-### Check out the [Documentation](https://bbn.io/php)
+### You can install the library through Composer
 
-#### A library targeted at Single Page Applications that includes:
+```
+{
+  "require": {
+    "nabab/bbn": "dev/master"
+  }
+}
+```
+
+### A library targeted at Single Page Applications that includes:
 
 * An MVC framework
 * A powerful ORM supporting database structure analysis and plenty of return methods
