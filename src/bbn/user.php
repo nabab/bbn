@@ -1456,7 +1456,7 @@ class user extends models\cls\basic
        if ( !\defined('BBN_USER_PATH') ){
          define('BBN_USER_PATH', $this->path);
        }
-       if ( $create ){
+       if ( $create && !empty($this->path) && !empty($this->tmp_path) ){
          file\dir::create_path($this->path);
          file\dir::create_path($this->tmp_path);
          file\dir::delete($this->tmp_path, false);
