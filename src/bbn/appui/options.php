@@ -106,6 +106,10 @@ class options extends bbn\models\cls\db
       (!empty($it[$c['text']]) || !empty($it[$c['id_alias']])) &&
       ($parent = $this->option($it[$c['id_parent']]))
     ){
+      // If the id_parent property is a code or a sequence of codes have to set it as uid
+      if ( !\bbn\str::is_uid($it[$c['id_parent']]) ){
+        $it[$c['id_parent']] = $parent[$c['id']];
+      }
 
       // If code is empty it MUST be null
       if ( empty($it[$c['code']]) ){

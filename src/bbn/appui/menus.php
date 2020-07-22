@@ -279,7 +279,7 @@ class menus extends bbn\models\cls\basic{
 
   /**
    * Removes menu and deletes parent cache
-   * @param $id
+   * @param string $id
    * @return int|boolean
    */
   public function remove(string $id){
@@ -301,7 +301,7 @@ class menus extends bbn\models\cls\basic{
   /**
    * Add menu and delete the chache.
    *
-   * @param string|array $id_parent
+   * @param string|array $id_menu
    * @param array $cfg
    * @return null|string
    * @internal param $id
@@ -381,20 +381,21 @@ class menus extends bbn\models\cls\basic{
       ($id_opt = $this->from_path('default')) &&
       ($all = $this->pref->get_all($id_opt))
     ){
-      $id = false;
-      foreach ( $all as $a ){
-        if ( !empty($a['id_user']) ){
-          $id = $a['id_alias'];
-          break;
-        }
-        else if ( !empty($a['id_group']) ){
-          $id = $a['id_alias'];
-          break;
-        }
-        else if ( !empty($a['public']) ){
-          $id = $a['id_alias'];
-          break;
-        }
+      $id = null;
+      if ( $by_id_user = \array_filter($all, function($a){
+        return !empty($a['id_user']) && !empty($a['id_alias']);
+      }) ){
+        $id = $by_id_user[0]['id_alias'];
+      }
+      else if ( $by_id_group = \array_filter($all, function($a){
+        return !empty($a['id_group']) && !empty($a['id_alias']);
+      }) ){
+        $id = $by_id_group[0]['id_alias'];
+      }
+      else if ( $by_public = \array_filter($all, function($a){
+        return !empty($a['public']) && !empty($a['id_alias']);
+      }) ){
+        $id = $by_public[0]['id_alias'];
       }
       return $id;
     }
