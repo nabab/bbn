@@ -309,14 +309,14 @@ class menus extends bbn\models\cls\basic{
   public function add($id_menu, array $cfg = null): ?string
   {
     $id = false;
+    $id_opt = $this->from_path('menus');
     if ( \is_array($id_menu) ){
       $cfg = $id_menu;
-      $id_opt = $this->from_path('menus');
     }
-    if ( !empty($cfg) ){
-      $id = \bbn\str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg);
-    }
-    if ( !empty($id) ){
+    if (
+      !empty($cfg) &&
+      ($id = \bbn\str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg))
+    ){
       if ( \bbn\str::is_uid($id_menu) ){
         $this->delete_cache($id_menu);
       }
