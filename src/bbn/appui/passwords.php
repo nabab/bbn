@@ -38,7 +38,7 @@ class passwords extends bbn\models\cls\db
     if ($password && defined('BBN_ENCRYPTION_KEY')) {
       $arch =& $this->class_cfg['arch']['passwords'];
       $to_store = \bbn\util\enc::crypt($password, BBN_ENCRYPTION_KEY);
-      var_dump(base64_encode($to_store));
+      //var_dump(base64_encode($to_store));
       return (bool)$this->db->insert_update($this->class_cfg['table'], [
         $arch['id_option'] => $id_option,
         $arch['password'] => base64_encode($to_store)

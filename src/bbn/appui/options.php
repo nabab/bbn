@@ -180,8 +180,11 @@ class options extends bbn\models\cls\db
         $it[$c['num']] = $parent['num_children'] + 1;
       }
 
-      if ( !isset($it[$c['id_alias']]) || !bbn\str::is_uid($it[$c['id_alias']]) ){
+      if ( !isset($it[$c['id_alias']]) ){
         $it[$c['id_alias']] = null;
+      }
+      else if ( !bbn\str::is_uid($it[$c['id_alias']]) ){
+        $it[$c['id_alias']] = $this->from_code($it[$c['id_alias']]);
       }
       return true;
     }
