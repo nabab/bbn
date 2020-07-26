@@ -3203,7 +3203,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param array $order The "order" condition
    * @return array
    */
-  public function get_column_values($table, string $field = null,  array $where = [], array $order = []): ?array
+  public function get_column_values($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     $res = null;
     if ($this->check()) {
@@ -3214,7 +3214,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       else if ( \is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0) ){
         $field = 'DISTINCT '.$field;
       }
-      if ( $rows = $this->iselect_all($table, $field, $where, $order) ){
+      if ( $rows = $this->iselect_all($table, $field, $where, $order, $limit, $start) ){
         foreach ( $rows as $row ){
           $res[] = $row[0];
         }
