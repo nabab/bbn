@@ -280,6 +280,16 @@ class router
     if (!empty($o['plugin'])) {
       $plugin_root = $this->_get_alt_root($mode, $o['plugin']);
       $plugin_path = substr($path, strlen($o['plugin']) + 1);
+      /*
+      if (!$plugin_root || !$plugin_path) {
+        die(var_dump($plugin_root, $plugin_path, $o));
+        return null;
+      }
+      */
+      $plugin = $o['plugin'];
+    }
+    else {
+      $plugin = '-';
     }
     // About to define self::$_known[$mode][$path] so first check it has not already been defined
     if (!isset(self::$_known[$mode][$path])) {
@@ -528,6 +538,13 @@ class router
     }
   }
 
+  private function _get_subplugin_root($mode, $plugin, $subplugin): ?string
+  {
+    if (isset(self::$_filetypes[$mode])) {
+      return $this->plugin_path($plugin) . 'plugins/' . $subplugin . '/' . $mode . '/';
+    }
+  }
+
   private function _get_custom_root($mode, $plugin): ?string
   {
     if (isset(self::$_filetypes[$mode])) {
@@ -705,6 +722,29 @@ class router
   public function route_custom_plugin(string $path, string $mode, string $plugin): ?array
   {
     if ($root = $this->_get_custom_root($mode, $plugin)) {
+      foreach (self::$_filetypes[$mode] as $t) {
+        if (is_file($root . $path . '.' . $t)) {
+          $file = $root . $path . '.' . $t;
+          break;
+        }
+      }
+      if (!empty($file)) {
+        return $this->_set_known([
+          'file' => $file,
+          'path' => $path,
+          'ext' => $t,
+          'plugin' => $plugin,
+          'mode' => $mode,
+          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
+        ], true);
+      }
+    }
+    return null;
+  }
+
+  public function route_subplugin(string $path, string $mode, string $plugin, string $subplugin): ?array
+  {
+    if ( $root = $this->_get_subplugin_root($mode, $plugin, $subplugin) ){
       foreach (self::$_filetypes[$mode] as $t) {
         if (is_file($root . $path . '.' . $t)) {
           $file = $root . $path . '.' . $t;

@@ -175,6 +175,10 @@ class model extends bbn\models\cls\db{
     return $this->_ctrl->get_plugin_model(...\func_get_args());
   }
 
+  public function get_subplugin_model($path, $data = [], string $plugin = null, string $subplugin, $ttl = 0){
+    return $this->_ctrl->get_subplugin_model(...\func_get_args());
+  }
+
   public function has_plugin(){
     return $this->_ctrl->has_plugin(...\func_get_args());
   }

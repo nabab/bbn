@@ -5,6 +5,7 @@
 namespace bbn\appui;
 
 use bbn;
+use Exception;
 
 class dashboard {
 
@@ -126,6 +127,7 @@ class dashboard {
    * dashboard contrusctor.
    */
   public function __construct(string $id){
+    $oid = $id;
     $this->opt = bbn\appui\options::get_instance();
     $this->user = bbn\user::get_instance();
     $this->perm = bbn\user\permissions::get_instance();
@@ -142,8 +144,28 @@ class dashboard {
       $this->dashboard = $id;
     }
     else {
-      die();
+      throw new \Exception("Unable to load the dashboard using identifier: $oid");
     }
+  }
+
+  public function add(array $widget): ?string
+  {
+    if (
+      !empty($widget[$this->arch_opt['text']]) &&
+      !empty($widget[$this->arch_opt['code']]) &&
+      (!empty($widget['component']) || !empty($widget['itemComponent']))
+    ){
+      $widget[$this->arch_opt['id_parent']] = $this->dashboard;
+      $widget[$this->arch_opt['id_alias']] = $widget[$this->arch_opt['id_alias']] ?? null;
+      $widget['closable'] = $widget['closable'] ?? false;
+      $widget['observe'] = $widget['observe'] ?? false;
+      $widget['limit'] = $widget['limit'] ?? 5;
+      $widget['buttonsRight'] = $widget['buttonsRight'] ?? [];
+      $widget['buttonsLeft'] = $widget['buttonsLeft'] ?? [];
+      $widget['options'] = $widget['options'] ?? new \stdClass();
+      return $this->opt->add($widget);
+    }
+    return null;
   }
 
   /**

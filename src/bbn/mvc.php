@@ -673,6 +673,18 @@ class mvc implements mvc\api{
     return null;
   }
 
+  public function subplugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, string $subplugin, int $ttl = null): ?array
+  {
+    if ( $plugin && $subplugin && ($route = $this->router->route_subplugin(router::parse($path), 'model', $plugin, $subplugin)) ){
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
+      if ( $ttl ){
+        return $model->get_from_cache($data, '', $ttl);
+      }
+      return $model->get($data);
+    }
+    return null;
+  }
+
   /**
    * This will get a view.
    *
@@ -703,6 +715,10 @@ class mvc implements mvc\api{
 
   public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = null){
     return $this->custom_plugin_model(router::parse($path), $data, $ctrl, $this->plugin_name($plugin), $ttl);
+  }
+
+  public function get_subplugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, string $subplugin, int $ttl = null){
+    return $this->subplugin_model(router::parse($path), $data, $ctrl, $this->plugin_name($plugin), $subplugin, $ttl);
   }
 
   /**

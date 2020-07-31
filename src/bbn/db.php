@@ -723,7 +723,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     if ( !empty($res['tables']) ){
       foreach ( $res['tables'] as &$t ){
-        if (!is_string($t)){die(var_dump($t));}
+        if (!is_string($t)) {
+          die(var_dump($t));
+        }
         $t = $this->tfn($t);
       }
       unset($t);

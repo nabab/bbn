@@ -810,6 +810,10 @@ class controller implements api{
     return $this->_mvc->get_plugin_model($path, $data, $this, $plugin ?: $this->get_plugin(), $ttl);
   }
 
+  public function get_subplugin_model($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0){
+    return $this->_mvc->get_subplugin_model($path, $data, $this, $plugin ?: $this->get_plugin(), $subplugin, $ttl);
+  }
+
 /*
   public function get_php(){
     $args = $this->get_arguments(\func_get_args());
