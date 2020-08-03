@@ -35,83 +35,86 @@ class git extends \Cz\Git\GitRepository
   }
 
 	public function diff(){
-    $output = $this->extractFromCommand('git status -s');
-    if ( is_array($output) && !empty($output) ){
-      $arr = [];
+    if (is_dir($this->getRepositoryPath().'.git')) {
+      $output = $this->extractFromCommand('git status -s');
+      if ( is_array($output) && !empty($output) ){
+        $arr = [];
 
-      foreach ( $output as $i => $val ){
+        foreach ( $output as $i => $val ){
 
-        $sigle = substr($val, 0, 2);
+          $sigle = substr($val, 0, 2);
 
-        $element =[
-        	'file' => false,
-          'folder' => false,
-          'action' => false,
-          'commit' => false,
-          'added' => (strpos($val, 'A') == 0) ? true : false,
-          'other' => false
-      	];
+          $element =[
+            'file' => false,
+            'folder' => false,
+            'action' => false,
+            'commit' => false,
+            'added' => (strpos($val, 'A') == 0) ? true : false,
+            'other' => false
+          ];
 
-        // for name file
-        if ( strpos($val, '"') == 3){
-          if ( substr($val, -1, 1) === "/" ){
-            $element['folder'] = substr($val, 4);
+          // for name file
+          if ( strpos($val, '"') == 3){
+            if ( substr($val, -1, 1) === "/" ){
+              $element['folder'] = substr($val, 4);
+            }
+            else{
+              $element['file'] = substr($val, 4);
+            }
           }
           else{
-          	$element['file'] = substr($val, 4);
+            if ( substr($val, -1, 1) === "/" ){
+              $element['folder'] = substr($val, 3);
+            }
+            else{
+              $element['file'] = substr($val, 3);
+            }
           }
-        }
-        else{
-          if ( substr($val, -1, 1) === "/" ){
-            $element['folder'] = substr($val, 3);
-          }
-          else{
-          	$element['file'] = substr($val, 3);
-          }
-        }
 
-        //for action and assign value for only file
-        switch( $sigle ){
-          case '??':
-            $element['action'] = 'untracked';
-            $element['commit'] = false;
-            $element['added'] = false;
-          break;
-          case 'D ':
-            $element['action'] = 'deleted';
-            $element['commit'] = true;
-            $element['added'] = true;
-          break;
-          case ' D':
-            $element['action'] = 'deleted';
-            $element['commit'] = false;
-            $element['added'] = false;
-          break;
-          case 'R ':
-            $files = explode(' -> ', $file);
-            $element['action'] = 'renamed';
-            $elemnt['old_file'] = $files[0];
-            $elemnt['new_file'] = $files[1];
-            $element['commit'] = true;
-            $element['added'] = true;
-          break;
-          case 'M ':
-            $element['action'] = 'updated';
-            $element['commit'] = true;
-            $element['added'] = true;
-          break;
-          case ' M':
-            $element['action'] = 'update';
-            $element['commit'] = false;
-            $element['added'] = false;
-          break;
-          default:
-            $element['other'] = $sigle === "A " ? "'A ' (Only added)" : $sigle;
+          //for action and assign value for only file
+          switch( $sigle ){
+            case '??':
+              $element['action'] = 'untracked';
+              $element['commit'] = false;
+              $element['added'] = false;
+            break;
+            case 'D ':
+              $element['action'] = 'deleted';
+              $element['commit'] = true;
+              $element['added'] = true;
+            break;
+            case ' D':
+              $element['action'] = 'deleted';
+              $element['commit'] = false;
+              $element['added'] = false;
+            break;
+            case 'R ':
+              $files = explode(' -> ', $file);
+              $element['action'] = 'renamed';
+              $elemnt['old_file'] = $files[0];
+              $elemnt['new_file'] = $files[1];
+              $element['commit'] = true;
+              $element['added'] = true;
+            break;
+            case 'M ':
+              $element['action'] = 'updated';
+              $element['commit'] = true;
+              $element['added'] = true;
+            break;
+            case ' M':
+              $element['action'] = 'update';
+              $element['commit'] = false;
+              $element['added'] = false;
+            break;
+            default:
+              $element['other'] = $sigle === "A " ? "'A ' (Only added)" : $sigle;
+          }
+          $arr[]= $element;
         }
-        $arr[]= $element;
       }
+      return $arr;
     }
-    return $arr;
+    return null;
 	}
 
   public function pushInRemoteT(string $repository, string $user, string $token, string $server="github.com"){

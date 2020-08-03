@@ -489,12 +489,13 @@ JS;
     }))
 
 JS;
-        
+        $done_css = [];
         foreach ($this->cfg['content']['includes'] as $lib) {
           if (!empty($lib['css'])) {
             $code .= $this->cp->css_links(
               array_map(
-                function ($a) use ($lib) {
+                function ($a) use ($lib, &$done_css) {
+                  $done_css[] = $lib['path'].$a;
                   return $lib['path'].$a;
                 },
                 $lib['css']
@@ -502,6 +503,17 @@ JS;
               $this->cfg['test'],
               $lib['prepend']
             );
+          }
+        }
+        if (!empty($this->cfg['content']['css'])) {
+          $undone_css = [];
+          foreach ($this->cfg['content']['css'] as $css) {
+            if (!in_array($css, $done_css)) {
+              $undone_css[] = $css;
+            }
+          }
+          if (!empty($undone_css)) {
+            $code .= $this->cp->css_links($undone_css, $this->cfg['test']);
           }
         }
       }

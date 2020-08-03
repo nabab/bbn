@@ -39,7 +39,8 @@
     "phpdocumentor/reflection-docblock": "4.3.*",
     "sepia/po-parser": "dev-master",
     "tplaner/when": "3.0.0",
-    "mck89/peast": "1.10.*"
+    "mck89/peast": "1.10.*",
+    "czproject/git-php": "dev-master",
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}
