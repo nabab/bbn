@@ -45,7 +45,6 @@ class runner extends bbn\models\cls\basic
         $type = 'cron';
       }
       $pid_file = $this->get_pid_path($this->data);
-      $this->log(["PID", $pid_file, $this->data]);
 
       // Checking for the presence of the manual files
       if (
@@ -160,7 +159,7 @@ class runner extends bbn\models\cls\basic
     // Write the error log if an error is present
     if ($error = error_get_last()) {
       $this->output(_('Error'), $error);
-      bbn\x::log([$data, $error], 'cron');
+      $this->log([$data, $error]);
     }
     $ok = true;
     if (ob_get_length()) {
@@ -172,7 +171,7 @@ class runner extends bbn\models\cls\basic
       $pid_content = explode('|', $file_content);
       if ($pid_content[1] && ($pid_content[0] != BBN_PID)) {
         $this->output(_('Different processes'), $pid_content[0] . '/' . BBN_PID);
-        bbn\x::log(_('Different processes') . ': ' . $pid_content[0] . '/' . BBN_PID, 'cron');
+        $this->log(_('Different processes') . ': ' . $pid_content[0] . '/' . BBN_PID);
         $ok = false;
       }
     }
