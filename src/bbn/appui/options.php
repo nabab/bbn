@@ -2619,6 +2619,34 @@ class options extends bbn\models\cls\db
     return $this;
   }
 
+  public function get_code_path($id) {
+    $args = func_get_args();
+    $res = [];
+    while ($o = $this->native_option(...$args)) {
+      if ($o['code']) {
+        $res[] = $o['code'];
+        $args = [$this->get_id_parent($o['id'])];
+      }
+      else {
+        return null;
+      }
+    }
+    return count($res) ? array_reverse($res) : null;
+  }
+
+  public function analyze_out(array $options, array &$results = [])
+  {
+    if (empty($results)) {
+      $results = [
+        'ids' => [],
+        'aliases' => []
+      ];
+    }
+    if (isset($options['id'])) {
+
+    }
+  }
+
   /**
    * Converts an option or a hierarchy to a multi-level array with JSON values
    * If $return is false the resulting array will be printed
@@ -2632,8 +2660,9 @@ class options extends bbn\models\cls\db
    * @param boolean $return If set to true the resulting array will be returned
    * @return array|false
    */
-  public function export($id, $deep = false, $return = false){
+  public function export($id, bool $deep = false, bool $return = false, bool $aliases = false) {
     if ( ($ret = $deep ? $this->native_tree($id) : $this->native_option($id)) ){
+
       return $return ? $ret : var_export($ret, 1);
     }
     return null;
@@ -2653,7 +2682,12 @@ class options extends bbn\models\cls\db
    * @return int The number of affected rows
    */
   public function import(array $option, $id_parent = null, $force = false, $return_num = false){
-    $option['id_parent'] = $id_parent ?: $this->default;
+    if (empty($option['id_parent']) && !$id_parent && ($option['code'] === 'root')) {
+      $option['id_parent'] = $id_parent ?: $this->default;
+    }
+    else {
+      $option['id_parent'] = $id_parent ?: $this->default;
+    }
     $num = 0;
     $items = empty($option['items']) ? false : $option['items'];
 
@@ -2664,7 +2698,7 @@ class options extends bbn\models\cls\db
     $id = $this->db->last_id();
     if ( $items ){
       foreach ( $items as $it ){
-        $num += (int)$this->import($it, $id, $force);
+        $num += (int)$this->import($it, $id, $force, true);
       }
     }
     return $return_num ? $num : $id;

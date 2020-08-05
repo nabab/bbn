@@ -16,7 +16,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cdn.php",
     "startLine": 53,
-    "endLine": 674,
+    "endLine": 686,
     "contentConstructor": {
         "file": "bbn\\cdn",
         "returns": null
