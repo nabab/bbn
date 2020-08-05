@@ -3,8 +3,6 @@
 bbn
 ===
 
-<!--[![Join the chat at https://gitter.im/nabab/bbn](https://badges.gitter.im/nabab/bbn.svg)](https://gitter.im/nabab/bbn?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)-->
-
 ## The PHP library used by [app-UI](https://app-ui.com)
 
 ### You can install the library through Composer
