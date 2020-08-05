@@ -58,7 +58,6 @@ Also no testing has been implemented yet, knowledge and ressources are needed...
 
 Any help is welcome!
 
-<!-->
 Usage
 -----
 
