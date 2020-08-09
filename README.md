@@ -1,4 +1,4 @@
-<p align="center"><img alt="BBN PHP" src="https://cdn.bbn.io/img/240w/php.png"></p>
+<p align="center"><img alt="BBN PHP" src="https://bbn.io/bbn/php-title-black.png"></p>
 
 bbn
 ===
