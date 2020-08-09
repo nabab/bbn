@@ -408,7 +408,7 @@ class cdn extends models\cls\basic
         }
         readfile($file);
       }
-      exit;
+      die();
     }
     die('No cache file '.$file);
   }

@@ -12,8 +12,6 @@
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
  *
- * This cclass
- *
  * Here is an example with gMail
  * <code>
  * $mail = new mail([
@@ -46,34 +44,127 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class mail extends models\cls\basic
 {
-  private static
-    $_dest_fields = ['to', 'cc', 'bcc'],
-    $_default_template = '<!DOCTYPE html><html><head><title>{{title}}</title><meta http-equiv="Content-Type"
-content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></html>',
-    $_template_checked = false,
-    $_content = '',
-    $_hash_content;
+  /**
+   * The destination fields.
+   *
+   * @var array
+   */
+  private static $_dest_fields = ['to', 'cc', 'bcc'];
 
+  /**
+   * The default HTML template.
+   *
+   * @var string
+   */
+  private static $_default_template = <<<TEMPLATE
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{title}}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+<div>{{{text}}}</div>
+</body>
+</html>
+TEMPLATE;
+
+  /**
+   * @todo document
+   * @var boolean
+   */
+  private static $_template_checked = false;
+
+  /**
+   * The content currently set for sending by the class.
+   *
+   * @var string
+   */
+  private static $_content = '';
+
+  /**
+   * The hash of the last content sent by the class.
+   *
+   * @var string
+   */
+  private static $_hash_content;
+
+  /**
+   * @todo document
+   * 
+   * @var PHPMailer
+   */
   public $mailer;
 
-  private
-    $template,
-    $path,
-    $imap_user,
-    $imap_pass,
-    $imap_sent,
-    $imap_string,
-    $imap;
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $template;
 
-  private static function set_content($c){
-    $md5 = md5($c);
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $path;
+
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $imap_user;
+
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $imap_pass;
+
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $imap_sent;
+
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $imap_string;
+
+  /**
+   * @todo document
+   * 
+   * @var string
+   */
+  private $imap;
+
+  /**
+   * Sets the static variable content and hash_content with the given string with CSS transformed in inline style.
+   * 
+   * @param string $content
+   * @return void
+   */
+  private static function set_content(string $content){
+    $md5 = md5($content);
     if ( $md5 !== self::$_hash_content ){
       self::$_hash_content = $md5;
       $inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-      self::$_content = $inliner->convert($c);
+      self::$_content = $inliner->convert($content);
     }
   }
 
+  /**
+   * Gets once the default template in default prop or filesystem, sets props, and returns it.
+   *
+   * @return string
+   */
   private static function get_default_template(){
     if (!self::$_template_checked) {
       self::$_template_checked = true;
@@ -84,93 +175,129 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     return self::$_default_template;
   }
 
-  public function __construct($cfg){
+  /**
+   * Constructor.
+   *
+   * @param array $cfg
+   */
+  public function __construct($cfg = [])
+  {
     if ( !\defined('BBN_ADMIN_EMAIL') || !\defined('BBN_IS_DEV') ){
       die("You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...");
     }
     if ( !isset($cfg['from']) && isset($cfg['user']) ){
       $cfg['from'] = $cfg['user'];
     }
-    if ( !isset($cfg['host'], $cfg['from']) || !str::is_domain($cfg['host']) || !str::is_email($cfg['from'])){
-      die("A host name and a \"From\" eMail address must be provided");
+    if (!isset($cfg['from'])) {
+      $cfg['from'] = BBN_ADMIN_EMAIL;
     }
-    $this->mailer = new PHPMailer();
-    $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
-    if ( isset($cfg['user'], $cfg['pass']) ){
-      // SMTP connection will not close after each email sent, reduces SMTP overhead
-      $this->mailer->isSMTP();
-      if ( !empty($cfg['ssl']) ){
-        if ( \is_array($cfg['ssl']) ){
-          $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
+    if (!PHPMailer::validateAddress($cfg['from'])) {
+      die(_("A \"From\" eMail address must be provided"));
+    }
+    $has_host = !empty($cfg['host']) && str::is_domain($cfg['host']);
+    $this->mailer = new PHPMailer(true);
+    try {
+      $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
+      if ( isset($cfg['user'], $cfg['pass']) ){
+        // SMTP connection will not close after each email sent, reduces SMTP overhead
+        $this->mailer->isSMTP();
+        if ( !empty($cfg['ssl']) ){
+          if ( \is_array($cfg['ssl']) ){
+            $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
+          }
+          else{
+            $this->mailer->SMTPOptions = [
+              'verify_peer' => false,
+              'verify_peer_name' => false,
+              'verify_host' => false,
+              'allow_self_signed' => false
+            ];
+          }
         }
         else{
-          $this->mailer->SMTPOptions = [
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-            'verify_host' => false,
-            'allow_self_signed' => false
-          ];
+          $this->mailer->SMTPSecure = 'tls';
+        }
+        $this->mailer->Host = $has_host ? $cfg['host'] : 'localhost';
+        $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
+        $this->mailer->SMTPKeepAlive = true;
+        $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;
+        $this->mailer->Debugoutput = 'error_log';
+        $this->mailer->SMTPAuth = true;
+        $this->mailer->Username = $cfg['user'];
+        $this->mailer->Password = $cfg['pass'];
+        if ( !empty($cfg['imap']) ){
+          $this->set_imap($cfg);
         }
       }
-      else{
-        $this->mailer->SMTPSecure = 'tls';
-      }
-      $this->mailer->Host = $cfg['host'];
-      $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
-      $this->mailer->SMTPKeepAlive = true;
-      $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;
-      $this->mailer->Debugoutput = 'error_log';
-      $this->mailer->SMTPAuth = true;
-      $this->mailer->Username = $cfg['user'];
-      $this->mailer->Password = $cfg['pass'];
-      if ( !empty($cfg['imap']) ){
-        $this->set_imap($cfg);
-      }
+      $this->set_from($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
+      $this->set_template(isset($cfg['template']) ? $cfg['template'] : self::get_default_template());
     }
-    $this->set_from($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
-    $this->set_template(isset($cfg['template']) ? $cfg['template'] : self::get_default_template());
+    catch (\Exception $e) {
+      $this->log($this->mailer->ErrorInfo);
+    }
   }
 
-  public function set_imap($cfg){
-    if ( !isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass']) ){
+  /**
+   * Sets the IMAP configuration.
+   *
+   * @param array $cfg The configuration
+   * @return self
+   */
+  public function set_imap(array $cfg): self
+  {
+    if (!isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass'])) {
       die("You need to provide user and password for IMAP connection");
     }
     $imap_host = isset($cfg['imap_host']) ? $cfg['imap_host'] : $cfg['host'];
     $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];
     $this->imap_pass = isset($cfg['imap_pass']) ? $cfg['imap_pass'] : $cfg['pass'];
     $this->imap_sent = isset($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';
-    if ( isset($cfg['imap_port']) ){
+    if (isset($cfg['imap_port'])) {
       $imap_port = $cfg['imap_port'];
     }
-    if ( !empty($cfg['imap_ssl']) ){
-      if ( !isset($cfg['imap_port']) ){
+    if (!empty($cfg['imap_ssl'])) {
+      if (!isset($cfg['imap_port'])) {
         $imap_port = 993;
       }
       $this->imap_string = "{".$imap_host.":".$imap_port."/ssl";
     }
-    else{
-      if ( !isset($cfg['imap_port']) ){
+    else {
+      if (!isset($cfg['imap_port'])) {
         $imap_port = 143;
       }
       $this->imap_string = "{".$imap_host.":".$imap_port."/tls";
     }
-    if ( empty($cfg['valid']) ){
+    if (empty($cfg['valid'])) {
       $this->imap_string .= "/novalidate-cert";
     }
     $this->imap_string .= "}";
     return $this;
   }
 
-  public function unset_imap(){
+  /**
+   * Unset the IMAP configuration
+   *
+   * @return self
+   */
+  public function unset_imap(): self
+  {
     unset($this->imap_string, $this->imap_user, $this->imap_pass);
     return $this;
   }
 
-  public function set_from($email, $name=null){
-    if ( !str::is_email($email) ){
+  /**
+   * Set the From header together with the replyTo.
+   *
+   * @param string $email
+   * @param string $name
+   * @return self
+   */
+  public function set_from(string $email, string $name = null): self
+  {
+    if (!PHPMailer::validateAddress($email)) {
       die("The From eMail address is not valid");
     }
-    if ( !$name ){
+    if (!$name) {
       $name = $email;
     }
     $this->mailer->setFrom($email, $name);
@@ -178,12 +305,13 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     return $this;
   }
 
-  public function set_template($file){
-    if ( is_file($file) ){
+  public function set_template(string $file): self
+  {
+    if (is_file($file)) {
       $this->template = file_get_contents($file);
       $this->path = dirname($file);
     }
-    else if ( \is_string($file) ){
+    else {
       $this->template = $file;
       $this->path = BBN_DATA_PATH;
     }
@@ -197,24 +325,27 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
   public function send($cfg){
     $valid = false;
     $r = false;
-    if ( !defined('BBN_IS_PROD') || !BBN_IS_PROD ){
+    if (!defined('BBN_IS_PROD') || !BBN_IS_PROD) {
       $cfg['to'] = BBN_ADMIN_EMAIL;
       $cfg['cc'] = '';
       $cfg['bcc'] = '';
       $this->mailer->AddAddress(BBN_ADMIN_EMAIL);
       $valid = 1;
     }
-    else{
-      foreach ( self::$_dest_fields as $dest_field ){
-        if ( isset($cfg[$dest_field]) ){
-          if ( !\is_array($cfg[$dest_field]) ){
-            $cfg[$dest_field] = array_map(function($a){
-              return trim($a);
-            }, explode(";", $cfg[$dest_field]));
+    else {
+      foreach (self::$_dest_fields as $dest_field) {
+        if (isset($cfg[$dest_field])) {
+          if (!\is_array($cfg[$dest_field])) {
+            $cfg[$dest_field] = array_map(
+              function ($a) {
+                return trim($a);
+              },
+              explode(";", $cfg[$dest_field])
+            );
           }
-          foreach ( $cfg[$dest_field] as $dest ){
-            if ( PHPMailer::validateAddress($dest) ){
-              switch ( $dest_field ){
+          foreach ($cfg[$dest_field] as $dest) {
+            if (PHPMailer::validateAddress($dest)) {
+              switch ($dest_field) {
                 case "to":
                   $this->mailer->AddAddress($dest);
                   break;
@@ -227,7 +358,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
               }
               $valid = 1;
             }
-            else{
+            else {
               x::log("Adresse email invalide: ".$dest);
               $valid = false;
             }
@@ -235,31 +366,27 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
         }
       }
     }
-    if ( $valid ){
+    if ($valid) {
+      if (!empty($cfg['from'])) {
+        $this->set_from($cfg['from']);
+      }
       $ar = [];
-      if ( isset($cfg['subject']) ){
-        $ar['title'] = $cfg['subject'];
-      }
-      else if ( isset($cfg['title']) ){
-        $ar['title'] = $cfg['title'];
-      }
-      $this->mailer->Subject = isset($ar['title']) ? $ar['title'] : '';
-
-      if ( !isset($cfg['text']) ){
+      $this->mailer->Subject = $ar['title'] = $cfg['subject'] ?? ($cfg['title'] ?? '');
+      if (!isset($cfg['text'])) {
         $cfg['text'] = '';
       }
-      if ( isset($cfg['attachments']) ){
-        if ( \is_string($cfg['attachments']) ){
+      if (isset($cfg['attachments'])) {
+        if (\is_string($cfg['attachments'])) {
           $cfg['attachments'] = [$cfg['attachments']];
         }
-        foreach ( $cfg['attachments'] as $name => $att ){
-          if ( is_file($att) ){
+        foreach ($cfg['attachments'] as $name => $att) {
+          if (is_file($att)) {
             // 2nd parameter is the file's name in the mail
             $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);
           }
         }
       }
-      if ( !isset($renderer) ){
+      if (!isset($renderer)) {
         $renderer = tpl::renderer($this->template);
       }
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
@@ -268,16 +395,16 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       self::set_content($ar['text']);
       $this->mailer->msgHTML(self::$_content, $this->path, true);
       $r = $this->mailer->send();
-      if ( $r && !empty($this->imap_string) ){
+      if ($r && !empty($this->imap_string)) {
         $mail_string = $this->mailer->getSentMIMEMessage();
-        if ( !is_resource($this->imap) ){
+        if (!is_resource($this->imap)) {
           $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
         }
-        if ( !is_resource($this->imap) || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen") ){
+        if (!is_resource($this->imap) || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")) {
           $this->log(\imap_errors());
         }
       }
-      if ( !$r ){
+      if (!$r) {
         $this->log(\imap_last_error());
       }
     }

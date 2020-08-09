@@ -1262,9 +1262,9 @@ class ide {
       $project_name = $project;
     }
     // case project is not defined get default
-    elseif ( defined('BBN_PROJECT_NAME') && !empty($opt = $this->options->from_code(constant('BBN_PROJECT_NAME'), self::IDE_PROJECTS, self::BBN_APPUI)) ){
+    elseif ( defined('BBN_APP_NAME') && !empty($opt = $this->options->from_code(constant('BBN_APP_NAME'), self::IDE_PROJECTS, self::BBN_APPUI)) ){
       $this->projects = new \bbn\appui\project($this->db, $opt);
-      $project_name = constant('BBN_PROJECT_NAME');
+      $project_name = constant('BBN_APP_NAME');
     }
     $this->project = $project_name;
     if ( $project_name && !empty($this->projects) ){
@@ -1619,7 +1619,7 @@ class ide {
         if ( $preferences = $this->get_file_preferences($val) ){
           $f = array_merge($f, $preferences);
         }
-        if ( ($permissions = $this->get_file_permissions()) && (($this->project === 'apst-app') || (constant('BBN_PROJECT_NAME') === 'apst-app')) ){
+        if ( ($permissions = $this->get_file_permissions()) && (($this->project === 'apst-app') || (constant('BBN_APP_NAME') === 'apst-app')) ){
           $f = array_merge($f, $permissions);
           /*if ( $id_opt = $this->option_id() ){
             $val_opt = $this->options->option($id_opt);

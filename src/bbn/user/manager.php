@@ -548,11 +548,33 @@ You can click the following link to access directly your account:<br>
    * @param int $exp Timestamp of the expiration date
    * @return manager
    */
-  public function make_hotlink($id_user, $message='hotlink', $exp=null){
-    if ( !isset($this->messages[$message]) || empty($this->messages[$message]['link']) ){
-      die("Impossible to make hotlinks without a link configured");
+  public function make_hotlink($id_user, $message='hotlink', $exp=null): self
+  {
+    if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {
+      
+      switch ($message)
+      {
+        case 'hotlink':
+          if ($path = bbn\mvc::get_plugin_url('appui-usergroup')) {
+            $this->messages[$message]['link'] = BBN_URL.$path.'/main/profile';
+          }
+          break;
+        case 'creation':
+          if ($path = bbn\mvc::get_plugin_url('appui-core')) {
+            $this->messages[$message]['link'] = BBN_URL.$path.'/login/password/%s';
+          }
+          break;
+        case 'password':
+          if ($path = bbn\mvc::get_plugin_url('appui-core')) {
+            $this->messages[$message]['link'] = BBN_URL.$path.'/login/password/%s';
+          }
+          break;
+      }
+      if (empty($this->messages[$message]['link'])) {
+        die("Impossible to make hotlinks without a link configured");
+      }
     }
-    if ( $usr = $this->get_user($id_user) ){
+    if ($usr = $this->get_user($id_user)) {
       // Expiration date
       if ( !\is_int($exp) || ($exp < 1) ){
         $exp = time() + $this->hotlink_length;
@@ -568,7 +590,7 @@ You can click the following link to access directly your account:<br>
       $magic = $this->usrcls->make_magic_string();
       // Create hotlink
       $this->db->insert($this->class_cfg['tables']['hotlinks'], [
-        $hl['magic_string'] => $magic['hash'],
+        $hl['magic'] => $magic['hash'],
         $hl['id_user'] => $id_user,
         $hl['expire'] => date('Y-m-d H:i:s', $exp)
       ]);

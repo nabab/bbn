@@ -101,8 +101,16 @@ class options extends bbn\models\cls\db
     if ( !isset($it[$c['id_parent']]) ){
       $it[$c['id_parent']] = $this->default;
     }
+    elseif (is_array($it[$c['id_parent']])) {
+      if ($id_parent = $this->from_code(...$it[$c['id_parent']])) {
+        $it[$c['id_parent']] = $id_parent;
+      }
+      else {
+        die("Impossible to find the parent");
+      }
+    }
     // Text is required and parent exists
-    if ( isset($it[$c['id_parent']]) &&
+    if (!empty($it[$c['id_parent']]) &&
       (!empty($it[$c['text']]) || !empty($it[$c['id_alias']])) &&
       ($parent = $this->option($it[$c['id_parent']]))
     ){
@@ -158,32 +166,27 @@ class options extends bbn\models\cls\db
       }
 
       // Taking care of the config
-      if ( !isset($it[$c['cfg']]) && isset($it[$c['id']]) ){
-        $it[$c['cfg']] = $this->get_cfg($it[$c['id']]);
-      }
-      else{
-        if ( isset($it[$c['cfg']]) && bbn\str::is_json($it[$c['cfg']]) ){
-          $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
+      if (isset($it[$c['cfg']])) {
+        if (is_array($it[$c['cfg']]) && !empty($it[$c['cfg']])) {
+          $it[$c['cfg']] = json_encode($it[$c['cfg']]);
         }
-        else{
-          if ( empty($it[$c['cfg']]) || !\is_array($it[$c['cfg']]) ){
-            $it[$c['cfg']] = [];
-          }
+        if (!bbn\str::is_json($it[$c['cfg']]) || in_array($it[$c['cfg']], ['{}', '[]'], true)) {
+          $it[$c['cfg']] = null;
         }
       }
-
+      $is_sortable = $this->is_sortable($parent['id']);
       // If parent is sortable and order is not defined we define it as last
-      if ( !$this->is_sortable($parent['id']) ){
-        $it[$c['num']] = null;
+      if (isset($it[$c['num']]) && !$is_sortable ){
+        unset($it[$c['num']]);
       }
-      else if ( empty($it[$c['num']]) ){
+      else if ($is_sortable && empty($it[$c['num']])) {
         $it[$c['num']] = $parent['num_children'] + 1;
       }
 
-      if ( !isset($it[$c['id_alias']]) ){
+      if (empty($it[$c['id_alias']])) {
         $it[$c['id_alias']] = null;
       }
-      else if ( !bbn\str::is_uid($it[$c['id_alias']]) ){
+      else if (!bbn\str::is_uid($it[$c['id_alias']])) {
         $it[$c['id_alias']] = $this->from_code($it[$c['id_alias']]);
       }
       return true;
@@ -200,7 +203,7 @@ class options extends bbn\models\cls\db
   private function _set_value(array &$opt): ?array
   {
     if ( !empty($opt[$this->class_cfg['arch']['options']['value']]) && bbn\str::is_json($opt[$this->class_cfg['arch']['options']['value']]) ){
-      $val = json_decode($opt[$this->class_cfg['arch']['options']['value']], 1);
+      $val = json_decode($opt[$this->class_cfg['arch']['options']['value']], true);
       if ( bbn\x::is_assoc($val) ){
         foreach ($val as $k => $v){
           if ( !isset($opt[$k]) ){
@@ -690,6 +693,136 @@ class options extends bbn\models\cls\db
   }
 
   /**
+   * Returns an option's row as stored in its original form in the database, including cfg
+   *
+   * ```php
+   * bbn\x::dump($opt->raw_option('databases', 'appui'));
+   * /*
+   * array [
+   *   'id' => "77cea323f0ce11e897fd525400007196",
+   *   'code' => "bbn_ide",
+   *   'text' => "BBN's own IDE",
+   *   'cfg' => null,
+   *   'id_alias' => null,
+   *   'value' => "{\"num\":1}"
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false Row or false if the option cannot be found
+   */
+  public function raw_option($code = null): ?array
+  {
+    if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
+      return $this->db->rselect($this->class_cfg['table'], [], [$this->class_cfg['arch']['options']['id'] => $id]);
+    }
+    return null;
+  }
+
+  /**
+   * Returns an option's items  as stored in its original form in the database, including cfg
+   *
+   * ```php
+   * bbn\x::dump($opt->raw_options('databases', 'appui'));
+   * /*
+   * [
+   *   [
+   *      'id' => "77cea323f0ce11e897fd525400007196",
+   *      'code' => "bbn_ide",
+   *      'text' => "BBN's own IDE",
+   *      'cfg' => null,
+   *      'id_alias' => null,
+   *      'value' => "{\"num\":1}"
+   *    ], [
+   *      'id' => "77cea323f0ce11e897fd525400007196",
+   *      'code' => "bbn_ide",
+   *      'text' => "BBN's own IDE",
+   *      'cfg' => null,
+   *      'id_alias' => null,
+   *      'value' => "{\"num\":1}"
+   *    ]
+   * ] 
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false Row or false if the option cannot be found
+   */
+  public function raw_options($code = null): ?array
+  {
+    if (bbn\str::is_uid($id = $this->from_code(\func_get_args()))) {
+      $res = [];
+      if ($its = $this->items($id)) {
+        foreach ($its as $it) {
+          $res[] = $this->db->rselect($this->class_cfg['table'], [], [$this->class_cfg['arch']['options']['id'] => $it]);
+        }
+      }
+      return $res;
+    }
+    return null;
+  }
+
+  /**
+   * Returns a hierarchical structure as stored in its original form in the database
+   *
+   * ```php
+   * bbn\x::dump($opt->native_raw_tree('77cea323f0ce11e897fd525400007196'));
+   * /*
+   * array [
+   *   'id' => 12,
+   *   'code' => "bbn_ide",
+   *   'text' => "BBN's own IDE",
+   *   'id_alias' => null,
+   *   'value' => "{\"myProperty\":\"My property's value\"}",
+   *   'items' => [
+   *     [
+   *       'id' => 25,
+   *       'code' => "test",
+   *       'text' => "Test",
+   *       'id_alias' => null,
+   *       'value' => "{\"myProperty\":\"My property's value\"}",
+   *     ],
+   *     [
+   *       'id' => 26,
+   *       'code' => "test2",
+   *       'text' => "Test 2",
+   *       'id_alias' => null,
+   *       'value' => "{\"myProperty\":\"My property's value\"}",
+   *       'items' => [
+   *         [
+   *           'id' => 42,
+   *           'code' => "test8",
+   *           'text' => "Test 8",
+   *           'id_alias' => null,
+   *           'value' => "{\"myProperty\":\"My property's value\"}",
+   *         ]
+   *       ]
+   *     ],
+   *   ]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false Tree's array or false if the option cannot be found
+   */
+  public function raw_tree($code = null): ?array
+  {
+    $id = $this->from_code(\func_get_args());
+    if ( bbn\str::is_uid($id) ){
+      if ( $res = $this->raw_option($id) ){
+        $its = $this->items($id);
+        if ( \count($its) ){
+          $res['items'] = [];
+          foreach ( $its as $it ){
+            $res['items'][] = $this->raw_tree($it);
+          }
+        }
+        return $res;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns an option's full content as an array without its values changed by id_alias
    *
    * ```php
@@ -892,7 +1025,7 @@ class options extends bbn\models\cls\db
         }
         if ( !empty($cfg['schema']) ){
           if ( \is_string($cfg['schema']) ){
-            $cfg['schema'] = json_decode($cfg['schema'], 1);
+            $cfg['schema'] = json_decode($cfg['schema'], true);
           }
           foreach ( $cfg['schema'] as $s ){
             if ( !empty($s['field']) ){
@@ -1398,13 +1531,13 @@ class options extends bbn\models\cls\db
       }
       $c =& $this->class_cfg;
       $cfg = $this->db->select_one($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
-      $cfg = bbn\str::is_json($cfg) ? json_decode($cfg, 1) : [];
+      $cfg = bbn\str::is_json($cfg) ? json_decode($cfg, true) : [];
       // Looking for parent with inheritance
       $parents = array_reverse($this->parents($id));
       $last = \count($parents) - 1;
       foreach ( $parents as $i => $p ){
         $parent_cfg = $this->db->select_one($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $p]);
-        $parent_cfg = bbn\str::is_json($parent_cfg) ? json_decode($parent_cfg, 1) : [];
+        $parent_cfg = bbn\str::is_json($parent_cfg) ? json_decode($parent_cfg, true) : [];
         if ( !empty($parent_cfg['scfg']) && ($i === $last) ){
           $cfg = array_merge((array)$cfg, $parent_cfg['scfg']);
           $cfg['inherit_from'] = $p;
@@ -1962,22 +2095,30 @@ class options extends bbn\models\cls\db
     $items = !empty($it['items']) && \is_array($it['items']) ? $it['items'] : false;
     $id = null;
     if ( $this->_prepare($it) ){
-      $c =& $this->class_cfg['arch']['options'];   
-      if (
-        $force &&
-        (null !== $it[$c['code']]) &&
-        ($id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
+      $c =& $this->class_cfg['arch']['options'];
+      if ($it[$c['code']]) {
+        $id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
           $c['id_parent'] => $it[$c['id_parent']],
           $c['code'] => $it[$c['code']]
-        ]))
+        ]);
+      }
+      elseif ($it[$c['id']]) {
+        $id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
+          $c['id'] => $it[$c['id']],
+          $c['code'] => null
+        ]);
+      }
+      if (
+        $id
+        && $force
+        && (null !== $it[$c['code']])
       ){
-        
         $res = $this->db->update($this->class_cfg['table'], [
           $c['text'] => $it[$c['text']],
           $c['id_alias'] => $it[$c['id_alias']],
           $c['value'] => $it[$c['value']],
           $c['num'] => $it[$c['num']],
-          $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
+          $c['cfg'] => $it[$c['cfg']]
         ], [
           $c['id'] => $id
         ]);
@@ -1990,7 +2131,7 @@ class options extends bbn\models\cls\db
         $c['id_alias'] => $it[$c['id_alias']],
         $c['value'] => $it[$c['value']],
         $c['num'] => $it[$c['num']],
-        $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
+        $c['cfg'] => $it[$c['cfg']]
       ];
       if (!empty($it['id'])) {
         $values['id'] = $it['id'];
@@ -2625,26 +2766,49 @@ class options extends bbn\models\cls\db
     while ($o = $this->native_option(...$args)) {
       if ($o['code']) {
         $res[] = $o['code'];
-        $args = [$this->get_id_parent($o['id'])];
+        if ($o['id_parent'] === $this->default) {
+          break;
+        }
+        $args = [$o['id_parent']];
       }
       else {
         return null;
       }
     }
-    return count($res) ? array_reverse($res) : null;
+    if (end($res) === 'root') {
+      array_pop($res);
+    }
+    return count($res) ? $res : null;
   }
 
   public function analyze_out(array $options, array &$results = [])
   {
     if (empty($results)) {
-      $results = [
-        'ids' => [],
-        'aliases' => []
+      $results['options'] = [];
+      $results['ids'] = [];
+      $results['aliases'] = [];
+    }
+    if (!empty($options['id'])) {
+      $results['ids'][$options['id']] = null;
+    }
+    if (!empty($options['id_alias'])) {
+      $results['aliases'][$options['id_alias']] = [
+        'id' => null,
+        'codes' => $this->get_code_path($options['id_alias'])
       ];
     }
-    if (isset($options['id'])) {
-
+    $items = false;
+    if (!empty($options['items'])) {
+      $items = $options['items'];
+      unset($options['items']);
     }
+    $results['options'][] = $options;
+    if ($items) {
+      foreach ($items as $it) {
+        $this->analyze_out($it, $results);
+      }
+    }
+    return $results;
   }
 
   /**
@@ -2661,9 +2825,51 @@ class options extends bbn\models\cls\db
    * @return array|false
    */
   public function export($id, bool $deep = false, bool $return = false, bool $aliases = false) {
-    if ( ($ret = $deep ? $this->native_tree($id) : $this->native_option($id)) ){
-
-      return $return ? $ret : var_export($ret, 1);
+    if ( ($ret = $deep ? $this->raw_tree($id) : $this->raw_options($id)) ){
+      $ret = $this->analyze_out($ret);
+      $res = [];
+      $done = [];
+      $max = 3;
+      foreach ($ret['options'] as $i => $o) {
+        if (!$i || in_array($o['id_parent'], $done, true)) {
+          if (empty($o['id_alias'])) {
+            $res[] = $o;
+            $done[] = $o['id'];
+          }
+        }
+      }
+      while ($max && (count($res) < count($ret['options']))) {
+        foreach ($ret['options'] as $i => $o) {
+          if (!empty($o['id_alias'])
+              && !in_array($o['id'], $done, true)
+              && in_array($o['id_parent'], $done, true)
+              && in_array($o['id_alias'], $done, true)
+          ) {
+            $res[] = $o;
+            $done[] = $o['id'];
+          }
+        }
+        $max--;
+      }
+      if (count($res) < count($ret['options'])) {
+        foreach ($ret['options'] as $i => $o) {
+          if (!in_array($o['id_parent'], $done, true)) {
+            $o['id_parent'] = $this->get_code_path($o['id_parent']);
+          }
+          if (!empty($o['id_alias'])
+              && !in_array($o['id'], $done, true)
+          ) {
+            if (!in_array($o['id_alias'], $done, true)) {
+              $code_path = $this->get_code_path($o['id_alias']);
+              $o['id_alias'] = $code_path ?: $o['id_alias'];
+            }
+            $res[] = $o;
+            $done[] = $o['id'];
+          }
+        }
+        $max--;
+      }
+      return $return ? $res : var_export($res, 1);
     }
     return null;
   }
@@ -2676,29 +2882,50 @@ class options extends bbn\models\cls\db
    * ```
    *
    * @todo Usage example
-   * @param array $option An array of option(s) as export returns it
+   * @param array    $options   An array of option(s) as export returns it
    * @param int|null $id_parent The option target, if not specified {@link default}
-   * @param boolean $force If set to true and option exists it will be merged
    * @return int The number of affected rows
    */
-  public function import(array $option, $id_parent = null, $force = false, $return_num = false){
-    if (empty($option['id_parent']) && !$id_parent && ($option['code'] === 'root')) {
-      $option['id_parent'] = $id_parent ?: $this->default;
-    }
-    else {
-      $option['id_parent'] = $id_parent ?: $this->default;
-    }
+  public function import(array $options, $id_parent = null, $return_num = false){
+    $ids = [];
     $num = 0;
-    $items = empty($option['items']) ? false : $option['items'];
-
-    unset($option['id']);
-    unset($option['items']);
-    $num += (int)$this->add($option, $force);
-
-    $id = $this->db->last_id();
-    if ( $items ){
-      foreach ( $items as $it ){
-        $num += (int)$this->import($it, $id, $force, true);
+    $root_id = false;
+    foreach ($options as $i => $o) {
+      if (!$i) {
+        $o['id_parent'] = $id_parent ?: $this->default;
+        if ($o['id_alias']) {
+          $o['id_alias'] = is_array($o['id_alias']) ? $this->from_code(...$o['id_alias']) : null;
+        }
+      }
+      else if ($root_id) {
+        if (!isset($ids[$o['id_parent']])) {
+          $this->remove_full($root_id);
+          die("Error while importing: no parent");
+        }
+        $o['id_parent'] = $ids[$o['id_parent']];
+        if (!empty($o['id_alias'])) {
+          if (is_array($o['id_alias'])) {
+            $o['id_alias'] = $this->from_code(...$o['id_alias']);
+          }
+          elseif (isset($ids[$o['id_alias']])) {
+            $o['id_alias'] = $ids[$o['id_alias']];
+          }
+          elseif (!$this->option($o['id_alias'])) {
+            $o['id_alias'] = null;
+          }
+        }
+      }
+      if ($id = $this->add($o, true)) {
+        if (!$i) {
+          $root_id = $id;
+        }
+        $ids[$o['id']] = $id;
+        $num++;
+      }
+      elseif ($i) {
+        $this->remove_full($root_id);
+        var_dump($o);
+        die("Error while importing: impossible to add");
       }
     }
     return $return_num ? $num : $id;

@@ -14818,7 +14818,7 @@
                 "text": "__construct",
                 "value": "__construct",
                 "url": "bbn-php\/doc\/method\/mail\/__construct",
-                "desc": ""
+                "desc": "Constructor."
             },
             {
                 "type": "method",
@@ -14842,7 +14842,7 @@
                 "text": "set_from",
                 "value": "set_from",
                 "url": "bbn-php\/doc\/method\/mail\/set_from",
-                "desc": ""
+                "desc": "Set the From header together with the replyTo."
             },
             {
                 "type": "method",
@@ -14850,7 +14850,7 @@
                 "text": "set_imap",
                 "value": "set_imap",
                 "url": "bbn-php\/doc\/method\/mail\/set_imap",
-                "desc": ""
+                "desc": "Sets the IMAP configuration."
             },
             {
                 "type": "method",
@@ -14866,7 +14866,7 @@
                 "text": "unset_imap",
                 "value": "unset_imap",
                 "url": "bbn-php\/doc\/method\/mail\/unset_imap",
-                "desc": ""
+                "desc": "Unset the IMAP configuration"
             }
         ]
     },

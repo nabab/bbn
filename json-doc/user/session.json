@@ -557,7 +557,7 @@
     "properties": null,
     "staticProperties": {
         "fingerprint": "MNDyjg5KNyBHOowRs0Fdk6pdvTzQC6vz",
-        "name": "apst",
+        "name": "apst-app",
         "singleton_instance": {},
         "singleton_exists": 1
     },
@@ -580,7 +580,7 @@
     "isSubclassOf": false,
     "defaultProperties": {
         "fingerprint": "MNDyjg5KNyBHOowRs0Fdk6pdvTzQC6vz",
-        "name": "apst",
+        "name": "apst-app",
         "singleton_instance": {},
         "singleton_exists": 1,
         "data": null,

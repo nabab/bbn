@@ -973,7 +973,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $key)\n  {\n    if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic_string'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n    ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id,\n      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]\n    ]) ){\n      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic_string']]) ){\n        return $val['id_user'];\n      }\n    }\n    return null;\n  }",
+            "code": "function($id, $key)\n  {\n    if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n    ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id,\n      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]\n    ]) ){\n      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic']]) ){\n        return $val['id_user'];\n      }\n    }\n    return null;\n  }",
             "startLine": 746,
             "endLine": 760,
             "isDeprecated": false,
@@ -2135,7 +2135,7 @@
                 "hotlinks": {
                     "id": "id",
                     "id_user": "id_user",
-                    "magic_string": "magic_string",
+                    "magic": "magic",
                     "expire": "expire"
                 },
                 "passwords": {
@@ -2259,7 +2259,7 @@
                 "hotlinks": {
                     "id": "id",
                     "id_user": "id_user",
-                    "magic_string": "magic_string",
+                    "magic": "magic",
                     "expire": "expire"
                 },
                 "passwords": {

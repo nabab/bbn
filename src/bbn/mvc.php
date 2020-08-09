@@ -57,6 +57,7 @@ class mvc implements mvc\api{
     ],
     $_is_debug = false,
     $_app_name,
+    $_app_prefix,
     $_app_path,
     $_cur_path,
     $_lib_path,
@@ -135,6 +136,7 @@ class mvc implements mvc\api{
     if ( !self::$_app_name ){
       self::$_app_name = BBN_APP_NAME;
       self::$_app_path = BBN_APP_PATH;
+      self::$_app_prefix = BBN_APP_PREFIX;
       self::$_cur_path = BBN_CUR_PATH;
       self::$_lib_path = BBN_LIB_PATH;
       self::$_data_path = BBN_DATA_PATH;
@@ -143,6 +145,10 @@ class mvc implements mvc\api{
 
   public static function get_app_name(){
     return self::$_app_name;
+  }
+
+  public static function get_app_prefix(){
+    return self::$_app_prefix;
   }
 
   public static function get_app_path($raw = false){
@@ -180,6 +186,14 @@ class mvc implements mvc\api{
   public static function get_content_path(string $plugin = null): string
   {
     return self::$_app_name ? self::get_data_path().($plugin ? 'plugins/'.$plugin.'/' : 'content/') : '';
+  }
+
+  public static function get_plugin_url(string $plugin_name): ?string
+  {
+    if ($mvc = self::get_instance()) {
+      return $mvc->plugin_url($plugin_name);
+    }
+    return null;
   }
 
   public static function get_user_tmp_path(string $id_user = null, string $plugin = null):? string

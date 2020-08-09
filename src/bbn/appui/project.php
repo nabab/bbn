@@ -23,26 +23,25 @@ class project extends bbn\models\cls\db {
     $fs;
 
 
-   
   /**
-   * Defines the variables 
+   * Defines the variables
    *
    * @param  $id
    * @param string $name
    * @param string $lang
    * @return void
    */
-  private function set_project_info(string $id){
-    if ( $o = $this->options->option($id) ){
-      $cfg = $this->options->get_cfg($id);
+  private function set_project_info(string $id = null){
+    if ( $o = $this->options->option($id ?: $this->id) ){
+      $cfg = $this->options->get_cfg($id ?: $this->id);
       $this->name = $o['text'];
-      $this->lang = $cfg['i18n'] ?: ''; 
+      $this->lang = $cfg['i18n'] ?: '';
       $this->code = $o['code'];
       $this->option = $o;
       $this->repositories = $this->get_repositories($o['text']);
       //the id of the child option 'lang' (children of this option are all languages for which the project is configured)
       if ( !$this->id_langs = $this->options->from_code('lang', $o['code'], 'projects', 'appui') ){
-        $this->id_langs = $this->set_id_langs();
+        $this->set_id_langs();
       }
       //the id of the child option 'path'
       $this->id_path = $this->options->from_code('path', $o['code'], 'projects', 'appui') ?: null;
@@ -74,15 +73,12 @@ class project extends bbn\models\cls\db {
    * @return void
    */
   private function set_id_langs(){
-    
-    if ( empty($this->id_langs)){
-      $this->id_langs = $this->options->add(
-        [
-          'text' => 'Languages',
-          'code' => 'lang',
-          'id_parent' => $this->id,
-        ]
-      );
+    if ( empty($this->id_langs) ){
+      $this->id_langs = $this->options->add([
+        'text' => 'Languages',
+        'code' => 'lang',
+        'id_parent' => $this->id,
+      ]);
     }
   }
   /**
@@ -90,19 +86,24 @@ class project extends bbn\models\cls\db {
    *
    * @param bbn\db $db
    * @param string $id
-   */  
+   */
   public function __construct(bbn\db $db, string $id = null)
   {
     parent::__construct($db);
     $this->options = bbn\appui\options::get_instance();
     $this->fs = new \bbn\file\system();
-    if ( !empty($id) && \bbn\str::is_uid($id) ){
+    if (  \bbn\str::is_uid($id) ){
       $this->id = $id;
     }
-    else if ( empty($id) || empty(\bbn\str::is_uid($id))){
-      $id = $this->options->from_code('apst-app', 'projects', 'appui');
+    else if ( \is_string($id) ){
+      $this->id = $this->options->from_code($id, 'projects', 'appui');
     }
-    $this->set_project_info($id);
+    else if ( defined('BBN_APP_NAME') ){
+      $this->id = $this->options->from_code(BBN_APP_NAME, 'projects', 'appui');
+    }
+    if ( !empty($this->id) ){
+      $this->set_project_info($this->id);
+    }
   }
 
   public function check(){
@@ -273,16 +274,20 @@ class project extends bbn\models\cls\db {
    * @return void
    */
   public function get_app_path(){
-     if ( $this->name === 'apst-app' ){
+     if ( $this->name === BBN_APP_NAME ){
        return \bbn\mvc::get_app_path();
      }
      else{// case bbn-vue
-       $file_envinroment = \bbn\mvc::get_app_path().'cfg/environment.json';
-       if ( $this->fs->is_file($file_envinroment) ){
-         $content = json_decode($this->fs->get_contents($file_envinroment), true)[0];
+       $file_envinroment = \bbn\mvc::get_app_path().'cfg/environment';
+       if ( $this->fs->is_file($file_envinroment.'.json') ){
+         $envs = \json_decode($this->fs->get_contents($file_envinroment.'.json'), true)[0];
        }
-       if ( !empty($content) && !empty($content['app_path']) ){
-         return $content['app_path'].'src/';
+       else if ( $this->fs->is_file($file_envinroment.'.yml') ){
+        $envs = \yaml_parse($this->fs->get_contents($file_envinroment.'.yml'), true)[0];
+      }
+      
+       if ( !empty($envs) && !empty($envs['app_path']) ){
+         return $envs['app_path'].'src/';
        }
      }
    }
@@ -293,7 +298,7 @@ class project extends bbn\models\cls\db {
    * @return void
    */
   public function get_cdn_path(){
-    if ( $this->name === 'apst-app' ){
+    if ( $this->name === BBN_APP_NAME ){
       return BBN_CDN_PATH;
     }
     else{// case bbn-vue
@@ -313,7 +318,7 @@ class project extends bbn\models\cls\db {
    * @return void
    */ 
   public function get_lib_path(){
-    if ( $this->name === 'apst-app' ){
+    if ( $this->name === BBN_APP_NAME ){
       return \bbn\mvc::get_lib_path();
     }
     else {// case bbn-vue
@@ -333,7 +338,7 @@ class project extends bbn\models\cls\db {
    * @return void
    */
   public function get_data_path(string $plugin = ''){
-    if ( $this->name === 'apst-app' ){
+    if ( $this->name === BBN_APP_NAME ){
       return \bbn\mvc::get_data_path($plugin);
     }
     else {// case bbn-vue

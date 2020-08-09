@@ -69,7 +69,7 @@ class user extends models\cls\basic
       'hotlinks' => [
         'id' => 'id',
         'id_user' => 'id_user',
-        'magic_string' => 'magic_string',
+        'magic' => 'magic',
         'expire' => 'expire'
       ],
       'passwords' => [
@@ -746,13 +746,13 @@ class user extends models\cls\basic
   public function get_id_from_magic_string(string $id, string $key): ?string
   {
     if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [
-      $this->class_cfg['arch']['hotlinks']['magic_string'],
+      $this->class_cfg['arch']['hotlinks']['magic'],
       $this->class_cfg['arch']['hotlinks']['id_user'],
     ],[
       $this->class_cfg['arch']['hotlinks']['id'] => $id,
       [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]
     ]) ){
-      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic_string']]) ){
+      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic']]) ){
         return $val['id_user'];
       }
     }
