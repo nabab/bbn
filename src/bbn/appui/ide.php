@@ -2116,7 +2116,8 @@ class ide {
    *
    * @return string
    */
-  public function get_theme(){
+  public function get_theme(): string
+  {
     $opt_theme = $this->options->from_code(self::THEME, self::IDE_PATH, self::BBN_APPUI);
     $pref_arch = $this->pref->get_class_cfg();
     if ($this->pref && $this->projects) {
