@@ -1428,7 +1428,7 @@ class ide {
    * @return array|bool
    */
   public function get_repositories(string $project_name =''){
-    return $this->projects->get_repositories($project_name);
+    return $this->projects ? $this->projects->get_repositories($project_name) : null;
   }
 
   /**
@@ -1438,7 +1438,7 @@ class ide {
    * @return array|bool
    */
   public function repository($name){
-    return $this->projects->repository($name);
+    return $this->projects ? $this->projects->repository($name) : null;
   }
 
   /**
@@ -1448,7 +1448,7 @@ class ide {
    * @return void
    */
   public function repository_by_id(string $id){
-    return $this->projects->repository_by_id($id);
+    return $this->projects ? $this->projects->repository_by_id($id) : null;
   }
 
   /**
@@ -1460,7 +1460,7 @@ class ide {
    */
   public function repository_from_url(string $url, bool $obj = false){
     //search repository
-    return $this->projects->repository_from_url($url, $obj);
+    return $this->projects ? $this->projects->repository_from_url($url, $obj) : null;
   }
 
   /**
