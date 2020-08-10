@@ -2119,20 +2119,21 @@ class ide {
   public function get_theme(){
     $opt_theme = $this->options->from_code(self::THEME, self::IDE_PATH, self::BBN_APPUI);
     $pref_arch = $this->pref->get_class_cfg();
-    
-    $pref = $this->db->select_one( $pref_arch['tables']['user_options'],  $pref_arch['arch']['user_options']['id'], [
-      $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),
-      $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()
-    ]);
-    //if there is no preference, the theme value will take it from the option
-    if ( !empty($pref) ){
-      $val =  $this->db->select_one( $pref_arch['tables']['user_options_bits'],  'cfg', [
-        $pref_arch['arch']['user_options_bits']['id_user_option'] => $pref,
-        $pref_arch['arch']['user_options_bits']['id_option'] => $opt_theme,
+    if ($this->pref && $this->projects) {
+      $pref = $this->db->select_one( $pref_arch['tables']['user_options'],  $pref_arch['arch']['user_options']['id'], [
+        $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),
+        $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()
       ]);
-      $val = json_decode($val, true);
-      if ( isset($val['theme']) ){
-        return $val['theme'];
+      //if there is no preference, the theme value will take it from the option
+      if ( !empty($pref) ){
+        $val =  $this->db->select_one( $pref_arch['tables']['user_options_bits'],  'cfg', [
+          $pref_arch['arch']['user_options_bits']['id_user_option'] => $pref,
+          $pref_arch['arch']['user_options_bits']['id_option'] => $opt_theme,
+        ]);
+        $val = json_decode($val, true);
+        if ( isset($val['theme']) ){
+          return $val['theme'];
+        }
       }
     }
     return '';
