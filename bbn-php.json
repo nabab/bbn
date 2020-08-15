@@ -854,6 +854,14 @@
                     {
                         "type": "method",
                         "class": "appui\/dashboard",
+                        "text": "add",
+                        "value": "add",
+                        "url": "bbn-php\/doc\/method\/appui\/dashboard\/add",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "appui\/dashboard",
                         "text": "get_order",
                         "value": "get_order",
                         "url": "bbn-php\/doc\/method\/appui\/dashboard\/get_order",
@@ -3840,6 +3848,14 @@
                     {
                         "type": "method",
                         "class": "appui\/options",
+                        "text": "analyze_out",
+                        "value": "analyze_out",
+                        "url": "bbn-php\/doc\/method\/appui\/options\/analyze_out",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "appui\/options",
                         "text": "apply",
                         "value": "apply",
                         "url": "bbn-php\/doc\/method\/appui\/options\/apply",
@@ -4052,6 +4068,14 @@
                         "value": "get_class_cfg",
                         "url": "bbn-php\/doc\/method\/appui\/options\/get_class_cfg",
                         "desc": "Returns the configuration array of the class with the table structure"
+                    },
+                    {
+                        "type": "method",
+                        "class": "appui\/options",
+                        "text": "get_code_path",
+                        "value": "get_code_path",
+                        "url": "bbn-php\/doc\/method\/appui\/options\/get_code_path",
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -4300,6 +4324,30 @@
                         "value": "parents",
                         "url": "bbn-php\/doc\/method\/appui\/options\/parents",
                         "desc": "Returns an array of id_parents from the option selected to root"
+                    },
+                    {
+                        "type": "method",
+                        "class": "appui\/options",
+                        "text": "raw_option",
+                        "value": "raw_option",
+                        "url": "bbn-php\/doc\/method\/appui\/options\/raw_option",
+                        "desc": "Returns an option's row as stored in its original form in the database, including cfg"
+                    },
+                    {
+                        "type": "method",
+                        "class": "appui\/options",
+                        "text": "raw_options",
+                        "value": "raw_options",
+                        "url": "bbn-php\/doc\/method\/appui\/options\/raw_options",
+                        "desc": "Returns an option's items  as stored in its original form in the database, including cfg"
+                    },
+                    {
+                        "type": "method",
+                        "class": "appui\/options",
+                        "text": "raw_tree",
+                        "value": "raw_tree",
+                        "url": "bbn-php\/doc\/method\/appui\/options\/raw_tree",
+                        "desc": "Returns a hierarchical structure as stored in its original form in the database"
                     },
                     {
                         "type": "method",
@@ -10403,6 +10451,14 @@
                     {
                         "type": "method",
                         "class": "mvc\/controller",
+                        "text": "get_subplugin_model",
+                        "value": "get_subplugin_model",
+                        "url": "bbn-php\/doc\/method\/mvc\/controller\/get_subplugin_model",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "mvc\/controller",
                         "text": "get_url",
                         "value": "get_url",
                         "url": "bbn-php\/doc\/method\/mvc\/controller\/get_url",
@@ -10869,6 +10925,22 @@
                     {
                         "type": "method",
                         "class": "mvc\/model",
+                        "text": "get_set_from_cache",
+                        "value": "get_set_from_cache",
+                        "url": "bbn-php\/doc\/method\/mvc\/model\/get_set_from_cache",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "mvc\/model",
+                        "text": "get_subplugin_model",
+                        "value": "get_subplugin_model",
+                        "url": "bbn-php\/doc\/method\/mvc\/model\/get_subplugin_model",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "mvc\/model",
                         "text": "has_data",
                         "value": "has_data",
                         "url": "bbn-php\/doc\/method\/mvc\/model\/has_data",
@@ -11082,6 +11154,14 @@
                         "text": "route_custom_plugin",
                         "value": "route_custom_plugin",
                         "url": "bbn-php\/doc\/method\/mvc\/router\/route_custom_plugin",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "mvc\/router",
+                        "text": "route_subplugin",
+                        "value": "route_subplugin",
+                        "url": "bbn-php\/doc\/method\/mvc\/router\/route_subplugin",
                         "desc": ""
                     },
                     {
@@ -14976,6 +15056,14 @@
             {
                 "type": "method",
                 "class": "mvc",
+                "text": "get_app_prefix",
+                "value": "get_app_prefix",
+                "url": "bbn-php\/doc\/method\/mvc\/get_app_prefix",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "mvc",
                 "text": "get_cache_path",
                 "value": "get_cache_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_cache_path",
@@ -15128,6 +15216,14 @@
             {
                 "type": "method",
                 "class": "mvc",
+                "text": "get_plugin_url",
+                "value": "get_plugin_url",
+                "url": "bbn-php\/doc\/method\/mvc\/get_plugin_url",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "mvc",
                 "text": "get_plugin_view",
                 "value": "get_plugin_view",
                 "url": "bbn-php\/doc\/method\/mvc\/get_plugin_view",
@@ -15179,6 +15275,14 @@
                 "text": "get_routes",
                 "value": "get_routes",
                 "url": "bbn-php\/doc\/method\/mvc\/get_routes",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "mvc",
+                "text": "get_subplugin_model",
+                "value": "get_subplugin_model",
+                "url": "bbn-php\/doc\/method\/mvc\/get_subplugin_model",
                 "desc": ""
             },
             {
@@ -15395,6 +15499,14 @@
                 "text": "set_root",
                 "value": "set_root",
                 "url": "bbn-php\/doc\/method\/mvc\/set_root",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "mvc",
+                "text": "subplugin_model",
+                "value": "subplugin_model",
+                "url": "bbn-php\/doc\/method\/mvc\/subplugin_model",
                 "desc": ""
             },
             {

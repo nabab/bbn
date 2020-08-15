@@ -1308,16 +1308,24 @@ class x
    * @param array $options
    * @return mixed
    */
-  public static function curl(string $url, $param = null, array $options = ['post' => 1]){
+  public static function curl(string $url, $param = null, array $options = ['post' => 1])
+  {
     $ch = curl_init();
     self::$_last_curl = $ch;
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $defined = array_map('strtolower', array_keys($options));
+    if (!in_array('returntransfer', $defined)) {
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    }
     if (\is_object($param) ){
       $param = self::to_array($param);
     }
     if ( \defined('BBN_IS_SSL') && \defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV ){
-      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+      if (!in_array('ssl_verifypeer', $defined)) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      }
+      if (!in_array('ssl_verifyhost', $defined)) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+      }
       //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
     }
     $options = array_change_key_case($options, CASE_UPPER);
@@ -1327,28 +1335,35 @@ class x
       }
     }
     if ( $param ){
-      if ( !empty($options['POST']) ){
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+      if ( !empty($options['POST']) ) {
+        if (!in_array('url', $defined)) {
+          curl_setopt($ch, CURLOPT_URL, $url);
+        }
+        if (!in_array('postfields', $defined)) {
+          curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        }
       }
       else if ( !empty($options['DELETE']) ){
         //die($url.'?'.http_build_query($param));
-        curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');        
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        if (!in_array('url', $defined)) {
+          curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
+        }
+        if (!in_array('customrequest', $defined)) {
+          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');        
+        }
       }
-      else{
+      elseif (!in_array('url', $defined)) {
         curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
       }
     }
     else{
-      curl_setopt($ch, CURLOPT_URL, $url);
-      if ( !empty($options['DELETE']) ){
+      if (!in_array('url', $defined)) {
+        curl_setopt($ch, CURLOPT_URL, $url);
+      }
+      if ( !empty($options['DELETE']) && !in_array('customrequest', $defined)){
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       }
     }
-
     $r = curl_exec($ch);
     if ( !$r ){
       self::log(["PROBLEME AVEC L'URL $url", curl_error($ch), curl_getinfo($ch)], 'curl');
