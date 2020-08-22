@@ -94,6 +94,9 @@ class session
 
   public function __construct(array $defaults = null){
     if ( !self::singleton_exists() ){
+      if (defined('BBN_DATA_PATH')) {
+        session_save_path(BBN_DATA_PATH.'sessions');
+      }
       self::singleton_init($this);
       $this->open();
       if ( !isset($_SESSION[self::$name]) ){
