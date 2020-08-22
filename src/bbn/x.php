@@ -207,6 +207,42 @@ class x
     return true;
   }
 
+  /**
+   * Check if an array or an object has the given property.
+   *
+   * @param  array|object $obj
+   * @param  string       $prop_path
+   * @return boolean|null
+   */
+  public static function has_deep_prop(iterable $obj, array $prop_path, bool $check_empty = false): ?bool
+  {
+    $o =& $obj;
+    foreach ($prop_path as $p) {
+      if (is_array($o)) {
+        if (!\array_key_exists($p, $o)) {
+          return false;
+        }
+        if ($check_empty && !$o[$p]) {
+          return false;
+        }
+        $o =& $o[$p];
+      }
+      elseif (\is_object($o)) {
+        if (!\property_exists($o, $p)) {
+          return false;
+        }
+        if ($check_empty && !$o->$p) {
+          return false;
+        }
+        $o =& $o->$p;
+      }
+      else {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, file\system $fs = null):? string
   {
     if ( empty($format) ){

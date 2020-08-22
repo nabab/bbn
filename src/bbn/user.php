@@ -889,7 +889,7 @@ class user extends models\cls\basic
    * 
    * @return string|null
    */
-  public function get_email($usr = null): string
+  public function get_email($usr = null): ?string
   {
     if ( $this->auth ){
       if ( \is_null($usr) ){

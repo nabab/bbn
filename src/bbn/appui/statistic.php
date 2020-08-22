@@ -8,96 +8,184 @@ class statistic extends bbn\models\cls\db
 {
   use bbn\models\tts\optional;
 
-  /** @var string The default start date of the statistic */
+  /**
+   * @var string The default start date of the statistic
+   */
   protected const ODATE = '2014-01-01';
 
-  /** @var string The expression that will be used as placeholder for the timestamps */
-  private static $_placeholder = '___BBN_TST___';
-
-  /** @var array List of accepteed values for the opr option config */
+  /**
+   * @var array List of accepteed values for the opr option config
+   */
   protected static $types = ['insert', 'update', 'delete', 'restore', 'count', 'sum', 'avg'];
 
-  /** @var string The type of operation on which the statistic is done among those in self::$oprs */
-  protected $type;
+  /**
+   * @var string The type of operation on which the statistic is done among those in self::$oprs
+   */
+  protected string $type;
 
-  /** @var string The UID of the statistic's option */
-  protected $id_option;
+  /**
+   * @var string The UID of the statistic's option
+   */
+  protected string $id_option;
 
-  /** @var appui\database The DB object used to retrieve columns IDs */
-  protected $dbo;
+  /**
+   * @var appui\database The DB object used to retrieve columns IDs
+   */
+  protected bbn\appui\databases $dbo;
 
-  /** @var array The whole request config for $db */
-  protected $request;
+  /**
+   * @var array The whole request config for $db
+   */
+  protected array $request;
 
-  /** @var bool If true the statistic will show the aggregated total for each day */
-  protected $is_total = false;
+  /**
+   * @var bool If true the statistic will show the aggregated total for each day
+   */
+  protected bool $is_total = false;
 
-  /** @var array The configuration array as used in constructor */
-  protected $cfg;
+  /**
+   * @var array The configuration array as used in constructor
+   */
+  protected array $cfg;
 
-  /** @var array The history configuration of the table in $cfg */
-  protected $hcfg;
+  /**
+   * @var ?array The database configuration array ending the construction
+   */
+  protected ?array $db_cfg = null;
 
-  /** @var array The configuration from the statistic's option */
-  protected $ocfg;
+  /**
+   * @var array The history configuration of the table in $cfg
+   */
+  protected array $hcfg;
 
-  protected $inserter;
-  protected $updater;
-  protected $deleter;
+  /** 
+   * @var array The configuration from the statistic's option
+   */
+  protected array $ocfg;
 
-  private $_id_field;
+  /**
+   * @var string The configuration's code from the statistic's option
+   */
+  protected string $code;
 
-  public function __construct(bbn\db $db, string $code, array $cfg = null)
+  /**
+   * @var string The UID of the user inserting.
+   */
+  protected ?string $inserter = null;
+
+  /**
+   * @var string The UID of the user updating.
+   */
+  protected ?string $updater = null;
+
+  /**
+   * @var string The UID of the user deleting.
+   */
+  protected ?string $deleter = null;
+
+  /**
+   * @var string The UID.
+   */
+  private string $_id_field;
+
+  /**
+   * @var string The expression that will be used as placeholder for the timestamps
+   */
+  private static string $_placeholder = '___BBN_TST___';
+
+  /**
+   * Constructor.
+   *
+   * @param bbn\db $db   The database connection
+   * @param string $code The code of the option
+   * @param array  $cfg  The configuration
+   */
+  public function __construct(bbn\db $db, string $code, array $cfg)
   {
+    // Parent constructors
     parent::__construct($db);
     self::optional_init();
+    // Db ok
     if ($this->db->check()
+        // History ok
         && history::is_init()
+        // Id option corresponding to code in active statistics
         && ($this->id_option = self::get_option_id($code, 'active'))
+        // Option retrieved
         && ($this->ocfg = self::get_option($this->id_option))
+        // Right props in cfg
+        && bbn\x::has_props($cfg, ['type', 'table'], true)
+        // And right types
+        && \bbn\x::is_string($cfg['type'], $cfg['table'])
+        // Correcting case
+        && ($cfg['type'] = strtolower($cfg['type']))
+        // Type accepted
+        && (\bbn\x::indexOf(self::$types, $cfg['type']) > -1)
+        // History config retrieved
+        && ($this->hcfg = history::get_table_cfg($cfg['table']))
     ) {
-      if ($cfg &&
-          bbn\x::has_props($cfg, ['type', 'table'], true)
-          && \bbn\x::is_string($cfg['type'], $cfg['table'])
-          && ($cfg['type'] = strtolower($cfg['type']))
-          && (\bbn\x::indexOf(self::$types, $cfg['type']) > -1)
-          && ($this->hcfg = history::get_table_cfg($cfg['table']))
-      ) {
-        if ((\bbn\x::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
-          throw new \Error(_("The field parameter is mandatory for sum and avg types"));
-        }
-        $this->dbo = new \bbn\appui\databases($this->db);
-        if (isset($cfg['field'])) {
-          if (!($this->_id_field = $this->dbo->column_id($cfg['field'], $cfg['table']))) {
-            throw new \Error(_("The field parameter must be a known field of the table"));
-          }
-        }
-        if (($cfg['type'] === 'update') && empty($this->_id_field)) {
-          throw new \Error(_("The field parameter is mandatory for statistics of type update"));
-        }
-        $this->type = $cfg['type'];
-        $this->cfg = $cfg;
-        if (!empty($cfg['inserter']) && bbn\str::is_uid($cfg['inserter'])) {
-          $this->inserter = $cfg['inserter'];
-        }
-        if (!empty($cfg['updater']) && bbn\str::is_uid($cfg['updater'])) {
-          $this->updater = $cfg['updater'];
-        }
-        if (!empty($cfg['deleter']) && bbn\str::is_uid($cfg['deleter'])) {
-          $this->deleter = $cfg['deleter'];
-        }
-        $req = $this->_set_request_cfg();
-        $this->db_cfg = $this->db->process_cfg($req);
+      if ((\bbn\x::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
+        throw new \Error(_("The field parameter is mandatory for sum and avg types"));
       }
+      $this->code = $code;
+      $this->dbo = new \bbn\appui\databases($this->db);
+      if (isset($cfg['field'])) {
+        if (!($this->_id_field = $this->dbo->column_id($cfg['field'], $cfg['table']))) {
+          throw new \Error(_("The field parameter must be a known field of the table"));
+        }
+      }
+      if (($cfg['type'] === 'update') && empty($this->_id_field)) {
+        throw new \Error(_("The field parameter is mandatory for statistics of type update"));
+      }
+      $this->type = $cfg['type'];
+      $this->cfg = $cfg;
+      if (!empty($cfg['inserter']) && bbn\str::is_uid($cfg['inserter'])) {
+        $this->inserter = $cfg['inserter'];
+      }
+      if (!empty($cfg['updater']) && bbn\str::is_uid($cfg['updater'])) {
+        $this->updater = $cfg['updater'];
+      }
+      if (!empty($cfg['deleter']) && bbn\str::is_uid($cfg['deleter'])) {
+        $this->deleter = $cfg['deleter'];
+      }
+      $req = $this->_set_request_cfg();
+      $this->db_cfg = $this->db->process_cfg($req);
     }
   }
 
-  public function check()
+  /**
+   * Checks if the constructor is gone through.
+   *
+   * @return bool
+   */
+  public function check(): bool
   {
-    return !empty($this->id_option) && $this->db_cfg;
+    return !!$this->db_cfg;
   }
 
-  public function run($start, $end = null) {
+
+  /**
+   * Code getter.
+   *
+   * @return string|null
+   */
+  public function get_code(): ?string
+  {
+    if ($this->check()) {
+      return $this->code;
+    }
+    return null;
+  }
+
+  /**
+   * Run the stat
+   *
+   * @param [type] $start
+   * @param [type] $end
+   * @return void
+   */
+  public function run($start, $end = null)
+  {
     if ($this->check() && !empty($this->db_cfg['values'])) {
       if (is_string($start)) {
         $start = strtotime($start.(strlen($start) === 10 ? ' 00:00:00' : ''));
@@ -121,7 +209,7 @@ class statistic extends bbn\models\cls\db
         else {
           $vals[] = $v === self::$_placeholder ? $start : $v;
         }
-      } 
+      }
       $cfg = $this->db_cfg;
       $cfg['values'] = $vals;
       return $this->db->select_one($cfg);
@@ -131,7 +219,8 @@ class statistic extends bbn\models\cls\db
   /**
    * Update a statistic in the table bbn_statistics from the start of time
    *
-   * @param string $start Start of time
+   * @param string      $variant 
+   * @param string|null $start   Start of time
    * @return int
    */
   public function update(string $variant = null, string $start = null): ?int
@@ -166,38 +255,47 @@ class statistic extends bbn\models\cls\db
             $res = 0;
           }
           if (($res !== $last_res) || !$num) {
-            if ($this->db->count('bbn_statistics', [
+            if ($this->db->count(
+              'bbn_statistics', [
               'id_option' => $this->ocfg['id'],
               'code' => $variant,
               'day' => $real_start
-            ])) {
-              $this->db->update('bbn_statistics', [
+              ]
+            )
+            ) {
+              $this->db->update(
+                'bbn_statistics', [
                 'res' => $res
-              ], [
+                ], [
                 'id_option' => $this->ocfg['id'],
                 'code' => $variant,
                 'day' => $real_start
-              ]);
+                ]
+              );
             }
             else {
-              $this->db->insert('bbn_statistics', [
+              $this->db->insert(
+                'bbn_statistics', [
                 'id_option' => $this->ocfg['id'],
                 'code' => $variant,
                 'day' => $real_start,
                 'res' => $res
-              ]);
+                ]
+              );
             }
             $last_res = $res;
             $num++;
           }
           else {
-            $this->db->update('bbn_statistics', [
+            $this->db->update(
+              'bbn_statistics', [
               'day' => $real_start
-            ], [
+              ], [
               'id_option' => $this->ocfg['id'],
               'code' => $variant,
               'day' => $last_date
-            ]);
+              ]
+            );
           }
           $last_date = $real_start;
           $time += 24*3600;
@@ -225,7 +323,8 @@ class statistic extends bbn\models\cls\db
           'series' => []
         ];
         // All the values between start and end
-        $all = $this->db->rselect_all('bbn_statistics', ['day', 'res'], [
+        $all = $this->db->rselect_all(
+          'bbn_statistics', ['day', 'res'], [
           [
             'field' => 'id_option',
             'value' => $this->id_option
@@ -238,12 +337,14 @@ class statistic extends bbn\models\cls\db
             'operator' => '<=',
             'value' => $end
           ]
-        ], [
+          ], [
           'day' => 'ASC'
-        ]);
+          ]
+        );
         // As the row appears with its last date for value we pick the nextr row if the last row is not the last day
         $last = count($all) - 1;
-        if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect('bbn_statistics', ['day', 'res'], [
+        if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect(
+          'bbn_statistics', ['day', 'res'], [
           [
             'field' => 'id_option',
             'value' => $this->id_option
@@ -252,9 +353,11 @@ class statistic extends bbn\models\cls\db
             'operator' => '>',
             'value' => $end
           ]
-        ], [
+          ], [
           'day' => 'ASC'
-        ]))) {
+          ]
+        ))
+        ) {
           $all[] = $tmp;
           $last++;
         }
@@ -316,9 +419,11 @@ class statistic extends bbn\models\cls\db
   public function serie_values(int $values = 30, string $start = null, string $end = null): ?array
   {
     if ($res = $this->serie($values, $start, $end)) {
-      $res = array_map(function($a){
+      $res = array_map(
+        function ($a) {
 
-      }, $res);
+        }, $res
+      );
     }
     return $res;
   }
@@ -369,7 +474,8 @@ class statistic extends bbn\models\cls\db
             'labels' => [],
             'series' => []
           ];
-          if ($all = $this->db->rselect_all('bbn_statistics', ['day', 'res'], [
+          if ($all = $this->db->rselect_all(
+            'bbn_statistics', ['day', 'res'], [
             [
               'field' => 'id_option',
               'value' => $this->id_option
@@ -382,11 +488,14 @@ class statistic extends bbn\models\cls\db
               'operator' => '>=',
               'value' => $start
             ]
-          ], [
+            ], [
             'day' => 'ASC'
-          ])) {
+            ]
+          )
+          ) {
             $last = count($all) - 1;
-            if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect('bbn_statistics', ['day', 'res'], [
+            if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect(
+              'bbn_statistics', ['day', 'res'], [
               [
                 'field' => 'id_option',
                 'value' => $this->id_option
@@ -395,9 +504,11 @@ class statistic extends bbn\models\cls\db
                 'operator' => '>',
                 'value' => $end
               ]
-            ], [
+              ], [
               'day' => 'ASC'
-            ]))) {
+              ]
+            ))
+            ) {
               $all[] = $tmp;
               $last++;
             }
@@ -418,7 +529,7 @@ class statistic extends bbn\models\cls\db
                 $res['series'][$didx] = $all[$idx]['res'];
                 $didx++;
               }
-              else if (empty($this->ocfg['total'])) {
+              elseif (empty($this->ocfg['total'])) {
                 $res['labels'][$didx] = $current;
                 $res['series'][$didx] += (int)$all[$idx]['res'];
               }
@@ -518,11 +629,10 @@ class statistic extends bbn\models\cls\db
           $this->_set_fn_cfg($this->type, $cfg);
           break;
       }
-      if (
-        bbn\x::has_prop($this->cfg, 'filter', true)
-        && ($conditions = $this->db->treat_conditions($this->cfg['filter']))
-        && !empty($conditions['where']['conditions'])
-        && ($tmp2 = $this->_set_filter($conditions['where']))
+      if (bbn\x::has_prop($this->cfg, 'filter', true)
+          && ($conditions = $this->db->treat_conditions($this->cfg['filter']))
+          && !empty($conditions['where']['conditions'])
+          && ($tmp2 = $this->_set_filter($conditions['where']))
       ) {
         foreach ($tmp2['join'] as $j) {
           $cfg['join'][] = $j;
@@ -549,11 +659,13 @@ class statistic extends bbn\models\cls\db
         // Same UID
         [
           'field' => $alias.'.uid',
+          'operator' => '=',
           'exp' => 'bbn_history.uid'
         ],
         // Delete action
         [
           'field' => $alias.'.opr',
+          'operator' => 'LIKE',
           'value' => 'DELETE'
         ],
         // Performed after the INSERT
@@ -572,6 +684,7 @@ class statistic extends bbn\models\cls\db
     ];
     $cfg['where']['conditions'][] = [
       'field' => 'bbn_history.opr',
+      'operator' => 'LIKE',
       'value' => 'INSERT'
     ];
     $cfg['where']['conditions'][] = [
@@ -597,11 +710,13 @@ class statistic extends bbn\models\cls\db
         // Same UID
         [
           'field' => $alias.'.uid',
+          'operator' => '=',
           'exp' => 'bbn_history.uid'
         ],
         // Delete action
         [
           'field' => $alias.'.opr',
+          'operator' => 'LIKE',
           'value' => 'DELETE'
         ],
         // Performed after the INSERT
@@ -620,6 +735,7 @@ class statistic extends bbn\models\cls\db
     ];
     $cfg['where']['conditions'][] = [
       'field' => 'bbn_history.opr',
+      'operator' => 'LIKE',
       'value' => 'INSERT'
     ];
     $cfg['where']['conditions'][] = [
@@ -633,12 +749,15 @@ class statistic extends bbn\models\cls\db
       'on' => [
         [
           'field' => $alias1.'.uid',
+          'operator' => '=',
           'exp' => $this->cfg['table'].'.'.$this->hcfg['primary']
         ], [
           'field' => $alias1.'.opr',
+          'operator' => 'LIKE',
           'value' => 'UPDATE'
         ], [
           'field' => $alias1.'.col',
+          'operator' => '=',
           'value' => $this->_id_field
         ], [
           'field' => $alias1.'.tst',
@@ -654,12 +773,15 @@ class statistic extends bbn\models\cls\db
       'on' => [
         [
           'field' => $alias2.'.uid',
+          'operator' => '=',
           'exp' => $this->cfg['table'].'.'.$this->hcfg['primary']
         ], [
           'field' => $alias2.'.col',
+          'operator' => '=',
           'exp' => $alias1.'.col'
         ], [
           'field' => $alias2.'.opr',
+          'operator' => 'LIKE',
           'exp' => $alias1.'.opr'
         ], [
           'field' => $alias2.'.tst',
@@ -682,6 +804,7 @@ class statistic extends bbn\models\cls\db
     $cfg['fields'] = ['COUNT(DISTINCT bbn_history.uid)'];
     $cfg['where']['conditions'][] = [
       'field' => 'bbn_history.opr',
+      'operator' => 'LIKE',
       'value' => 'INSERT'
     ];
     $cfg['where']['conditions'][] = [
@@ -778,7 +901,7 @@ class statistic extends bbn\models\cls\db
             'field' => 'IFNULL('.$alias1.'.ref, '.$alias1.'.val)',
             'operator' => is_null($this->cfg['value']) ? 'isnull' : ($this->cfg['operator'] ?? '='),
             'value' => $this->cfg['value']
-      ]
+          ]
         ]
       ];
       $cfg['join'][] = $join1;
@@ -816,7 +939,16 @@ class statistic extends bbn\models\cls\db
   {
   }
 
-  private function _set_filter($conditions, $tst = 0)
+  /**
+   * Combines the history filters with config filters recursively.
+   *
+   * @todo  Useless second argument, what for?
+   * 
+   * @param array $conditions A conditions array in a conditions prop.
+   * @param int   $tst        A Timestamp.
+   * @return array|null
+   */
+  private function _set_filter(array $conditions, int $tst = 0): ?array
   {
     if (!empty($conditions['conditions'])) {
       $flt = [
@@ -825,21 +957,22 @@ class statistic extends bbn\models\cls\db
       ];
       $join = [];
       foreach ($conditions['conditions'] as $c) {
-        // Deep
         if (!empty($c['conditions'])) {
-          if ($tmp = $this->_set_filter($c['conditions'])) {
-            foreach ($tmp['join'] as $j) {
-              $join[] = $j;
+          if ($tmp = $this->_set_filter($c)) {
+            if (!empty($tmp['join'])) {
+              foreach ($tmp['join'] as $j) {
+                $join[] = $j;
+              }
             }
-            foreach ($tmp['filter'] as $f) {
-              $flt['conditions'][] = $f;
+            if (bbn\x::has_deep_prop($tmp, ['filter', 'conditions'], true)) {
+              $flt['conditions'][] = $tmp['filter'];
             }
           }
         }
         // Adding for each filter 2 alternative conditions:
         // - The value matches and has not been changed since then
         // - The value used to match but has been changed
-        else if ($id_col = $this->dbo->column_id($c['field'], $this->cfg['table'])) {
+        elseif ($id_col = $this->dbo->column_id($c['field'], $this->cfg['table'])) {
           $alias1 = bbn\str::genpwd(12);
           $alias2 = bbn\str::genpwd(12);
           $join1 = [
@@ -849,12 +982,15 @@ class statistic extends bbn\models\cls\db
             'on' => [
               [
                 'field' => $alias1.'.uid',
+                'operator' => '=',
                 'exp' => $this->cfg['table'].'.'.$this->hcfg['primary']
               ], [
                 'field' => $alias1.'.opr',
+                'operator' => 'LIKE',
                 'value' => 'UPDATE'
               ], [
                 'field' => $alias1.'.col',
+                'operator' => '=',
                 'value' => $id_col
               ], [
                 'field' => $alias1.'.tst',
@@ -870,12 +1006,15 @@ class statistic extends bbn\models\cls\db
             'on' => [
               [
                 'field' => $alias2.'.uid',
+                'operator' => '=',
                 'exp' => $this->cfg['table'].'.'.$this->hcfg['primary']
               ], [
                 'field' => $alias2.'.col',
+                'operator' => '=',
                 'exp' => $alias1.'.col'
               ], [
                 'field' => $alias2.'.opr',
+                'operator' => 'LIKE',
                 'exp' => $alias1.'.opr'
               ], [
                 'field' => $alias2.'.tst',
@@ -930,5 +1069,6 @@ class statistic extends bbn\models\cls\db
       }
       return ['join' => $join, 'filter' => $flt];
     }
+    return null;
   }
 }
