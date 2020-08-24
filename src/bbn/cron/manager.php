@@ -147,56 +147,56 @@ class manager extends bbn\models\cls\basic {
 
   /**
    * Returns a SQL date for the next event given a frequency and a time to count from (now if 0).
-   * @param $frequency
-   * @param int $from_time
+   * @param  string $frequency A string made of 1 letter (i, h, d, w, m, or y) and a number.
+   * @param  int    $from_time A SQL formatted date which will be the base of the operation.
    * @return null|string
    */
   public function get_next_date(string $frequency, int $from_time = 0): ?string
   {
-    if ( \is_string($frequency) && (\strlen($frequency) >= 2) ){
-      $time = time();
-      if ( !$from_time ){
-        $from_time = $time;
-      }
+    if (\is_string($frequency) && (\strlen($frequency) >= 2)) {
       $letter = bbn\str::change_case(substr($frequency, 0, 1), 'lower');
       $number = (int)substr($frequency, 1);
-      $unit = null;
-      if ( $number > 0 ){
-        switch ( $letter ){
-          case 'i':
-            $unit = 60;
-            break;
-          case 'h':
-            $unit = 3600;
-            break;
-          case 'd':
-            $unit = 86400;
-            break;
-          case 'w':
-          default:
-            $unit = 604800;
-            break;
+      $letters = ['y', 'm', 'w', 'd', 'h', 'i'];
+      if (in_array($letter, $letters, true) && ($number > 0)) {
+        $time = time();
+        if (!$from_time) {
+          $from_time = $time;
         }
-        $r = null;
-        if ( null !== $unit ){
-          $step = $unit * $number;
-          $r = $from_time + $step;
+        $year = date('Y', $from_time);
+        $month = date('n', $from_time);
+        $day = date('j', $from_time);
+        $hour = date('H', $from_time);
+        $minute = date('i', $from_time);
+        $second = date('s', $from_time);
+        $adders = [];
+        foreach ($letters as $lt) {
+          $adders[$lt] = 0;
         }
-        if ( $letter === 'm' ){
-          $r = mktime(date('H', $from_time), date('i', $from_time), date('s', $from_time), date('n', $from_time)+$number, date('j', $from_time), date('Y', $from_time));
-        }
-        if ( $letter === 'y' ){
-          $r = mktime(date('H', $from_time), date('i', $from_time), date('s', $from_time), date('n', $from_time)+$number, date('j', $from_time), date('Y', $from_time));
-        }
-        if ( null !== $r ){
-          if ( $r <= $time ){
-            if ($unit) {
-              $diff = $time - $r;
-              $num = floor($diff/$unit);
-              $r += ($num * $step);
-            }
-            return $this->get_next_date($frequency, $r);
+        $r = 0;
+        $step = 0;
+        while ($r <= $time) {
+          $step++;
+          if ($letter === 'w') {
+            $adders['d'] = $step * 7 * $number;
           }
+          else {
+            $adders[$letter] = $step * $number;
+          }
+          $r = mktime(
+            $hour + $adders['h'],
+            $minute + $adders['i'],
+            $second,
+            $month + $adders['m'],
+            $day + $adders['d'],
+            $year + $adders['y']
+          );
+          // We don't want it to be too old
+          if (($step === 10) && ($r < $time)) {
+            $r = $time;
+            $step = 0;
+          }
+        }
+        if ($r) {
           return date('Y-m-d H:i:s', $r);
         }
       }
