@@ -154,35 +154,36 @@ trait common {
   public function get_log_tree(array $cfg, bool $error = false)
   {
     $fs = new bbn\file\system();
-    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {
-      $fs->cd($path);
+    $fpath = !empty($cfg['fpath']) ? $cfg['fpath'] . '/' : '';
+    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path.$fpath)) {
+      $fs->cd($path.$fpath);
       $dirs = array_reverse($fs->get_files('./', true, true, null, 'cts'));
-      $tmp =& $dirs;
-      $tpath = '';
-      for ($i = 0; $i < 4; $i++) {
-        if (!count($tmp)) {
-          break;
-        }
-        else{
-          $ok = false;
-          foreach ($tmp as &$t) {
-            if (!empty($t['num'])) {
-              $tpath .= '/'.$t['name'];
-              $fs->cd($path.$tpath);
-              $t['expanded'] = true;
-              $t['items'] = array_reverse($fs->get_files('./', true, true, null, 'cts'));
-              $tmp =& $t['items'];
-              $ok = true;
-              break;
-            }
-          }
-          if (!$ok) {
-            break;
-          }
+      foreach ( $dirs as &$t ){
+        $t['numChildren'] = $t['num'] ?? 0;
+        $t['fpath'] = $fpath . $t['name'];
+        if ( isset($t['num']) ){
+          unset($t['num']);
         }
       }
       return $dirs;
     }
+  }
+
+  public function  get_log_prev_next(array $cfg): ?string
+  {
+    $fs = new bbn\file\system();
+    $fpath = $cfg['fpath'] ?: '';
+    if ( ($path = $this->get_log_path($cfg, false, true)) && $fs->is_dir($path.$fpath) ){
+      $fs->cd($path.$fpath);
+      $files = array_reverse($fs->get_files('./', true, true, null, 'cts'));
+      foreach ( $files as $i => $f ){
+        if ( $f['name'] === $cfg['filename'] ){
+          $tf = $files[$i + ($cfg['action'] === 'prev' ? 1 : -1)];
+          return $path . $fpath . (!empty($tf) ? $tf['name'] : $f['name']);
+        }
+      }
+    }
+    return null;
   }
 
   public function get_last_logs(array $cfg, bool $error = false, $start = 0, $num = 10): ?array

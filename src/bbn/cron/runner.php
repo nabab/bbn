@@ -315,8 +315,13 @@ class runner extends bbn\models\cls\basic
       if ($this->cron->get_manager()->start($cfg['id'])) {
         $this->output(_("Start time"), date('Y-m-d H:i:s'));
         $this->timer->start($cfg['file']);
+        $self = $this;
+        ob_start();
         $this->controller->reroute($cfg['file']);
         $this->controller->process();
+        if ($res = ob_get_clean()) {
+          $this->output(_("Output"), $res);
+        }
         $this->output(_("Execution time"), $this->timer->stop($cfg['file']));
         $obj = $this->controller->get_result();
         $this->output(_("Content"), $obj->content);

@@ -242,15 +242,34 @@ class statistic extends bbn\models\cls\db
       }
       if (\bbn\str::is_date_sql($real_start)) {
         $num_days = 0;
-        $num = $this->db->count('bbn_statistics', ['id_option' => $this->id_option, 'code' => $variant]);
+        $num = $this->db->count(
+          'bbn_statistics',
+          [
+            'id_option' => $this->id_option,
+            'code' => $variant
+          ]
+        );
         $today = date('Ymd');
         $last_res = null;
         $last_date = $real_start;
-        $time = mktime(12, 0, 0, (int)substr($real_start, 5, 2), (int)substr($real_start, 8, 2), (int)substr($real_start, 0, 4));
+        $time = mktime(
+          12,
+          0,
+          0,
+          (int)substr($real_start, 5, 2),
+          (int)substr($real_start, 8, 2),
+          (int)substr($real_start, 0, 4)
+        );
         $test = date('Ymd', $time);
         while ($test <= $today) {
-          $num_days++;
           $res = $this->run($real_start);
+          if ($num_days) {
+            \bbn\x::hdump($res, $this->db->get_last_values());
+          }
+          else {
+            \bbn\x::hdump($res, $this->db->last(), $this->db->get_last_values());
+          }
+          $num_days++;
           if (!$res) {
             $res = 0;
           }

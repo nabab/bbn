@@ -1047,8 +1047,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $this->start_fancy_stuff();
         }
         catch ( \PDOException $e ){
-          $this->log(["Impossible to create the connection for $engine/$db", $e]);
-          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? x::get_dump($e) : 'Impossible to create the database connection');
+          $err = _("Impossible to create the connection")." $engine/$db ".PHP_EOL
+                 ._("with the following error").PHP_EOL
+                 .$e->getMessage();
+          $this->log($err);
+          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? $err : _('Impossible to create the database connection'));
         }
       }
     }

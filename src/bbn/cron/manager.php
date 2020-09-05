@@ -162,12 +162,12 @@ class manager extends bbn\models\cls\basic {
         if (!$from_time) {
           $from_time = $time;
         }
-        $year = date('Y', $from_time);
-        $month = date('n', $from_time);
-        $day = date('j', $from_time);
-        $hour = date('H', $from_time);
-        $minute = date('i', $from_time);
-        $second = date('s', $from_time);
+        $year = intval(date('Y', $from_time));
+        $month = intval(date('n', $from_time));
+        $day = intval(date('j', $from_time));
+        $hour = intval(date('G', $from_time));
+        $minute = intval(date('i', $from_time));
+        $second = intval(date('s', $from_time));
         $adders = [];
         foreach ($letters as $lt) {
           $adders[$lt] = 0;
@@ -317,6 +317,44 @@ class manager extends bbn\models\cls\basic {
           'dir' => 'ASC'
         ]],
         'limit' => $limit
+      ]));
+    }
+    return null;
+  }
+
+  public function get_failed(): ?array
+  {
+    if ( $this->check() ){
+      return array_map(function($a){
+        $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
+        unset($a['cfg']);
+        return \bbn\x::merge_arrays($a, $cfg);
+      }, $this->db->rselect_all([
+        'table' => $this->table,
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'active',
+            'value' => 1
+          ], [
+            'field' => 'pid',
+            'operator' => 'isnotnull'
+          ], [
+            'field' => 'next',
+            'operator' => 'isnotnull'
+          ], [
+            'field' => 'NOW()',
+            'operator' => '>',
+            'exp' => "DATE_ADD(next, INTERVAL cfg->'$.timeout' SECOND)"
+          ]]
+        ],
+        'order' => [[
+          'field' => 'priority',
+          'dir' => 'ASC'
+        ], [
+          'field' => 'next',
+          'dir' => 'ASC'
+        ]]
       ]));
     }
     return null;

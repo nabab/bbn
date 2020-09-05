@@ -445,42 +445,76 @@ class system extends bbn\models\cls\basic
    */
   private function _delete(string $path, bool $full = true): bool
   {
-    if ( $this->mode !== 'nextcloud' ){
-      if ( $this->_is_dir($path) ){
+    $res = false;
+    if ($this->mode === 'nextcloud') {
+      $res = $this->obj->delete($path);
+    }
+    else {
+      if ($this->_is_dir($path)) {
         $files = $this->_get_items($path, 'both', true);
-        if ( !empty($files) ){
-          foreach ( $files as $file ){
+        if (!empty($files)) {
+          foreach ($files as $file) {
             $this->_delete($file);
           }
         }
-        if ( $full ){
-          if ( $this->mode === 'ssh' ){
-            return @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+        if ($full) {
+          if ($this->mode === 'ssh') {
+            try {
+              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+            }
+            catch (\Exception $e) {
+              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            }
           }
-          if ( $this->mode === 'ftp' ){
-            return @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          elseif ($this->mode === 'ftp') {
+            try {
+              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+            }
+            catch (\Exception $e) {
+              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            }
           }
           else{
-            return rmdir($path);
+            try {
+              $res = rmdir($path);
+            }
+            catch (\Exception $e) {
+              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            }
           }
-          return false;
         }
-        return true;
+        else {
+          $res = true;
+        }
       }
-      if ( $this->_is_file($path) ){
-        if ( $this->mode === 'ssh' ){
-          return ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
+      elseif ($this->_is_file($path)) {
+        if ($this->mode === 'ssh') {
+          try {
+            $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
+          }
+          catch (\Exception $e) {
+            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+          }
         }
-        if ( $this->mode === 'ftp' ){
-          return ftp_delete($this->obj, substr($path, strlen($this->prefix)));
+        elseif ($this->mode === 'ftp') {
+          try {
+            $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
+          }
+          catch (\Exception $e) {
+            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+          }
         }
-        return @unlink($path);
+        else {
+          try {
+            $res = unlink($path);
+          }
+          catch (\Exception $e) {
+            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+          }
+        }
       }
-      return false;
     }
-    else {
-      return $this->obj->delete($path);
-    }
+    return $res;
   }
 
   /**

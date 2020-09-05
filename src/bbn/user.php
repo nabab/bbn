@@ -513,29 +513,36 @@ class user extends models\cls\basic
    * @todo Use it only when needed!
 	 * @return self
 	 */
-  public function save_session(): self
+  public function save_session(bool $force = false): self
   {
     $id_session = $this->get_id_session();
     //die(var_dump($id_session, $this->check()));
-    if ( $this->check() ){
-      if ( $id_session ){
+    if ($this->check()) {
+      if ($id_session) {
         $p =& $this->class_cfg['arch']['sessions'];
         // It is normal this is sometimes not changing as different actions can happen in the same
         $time = time();
-        if ( empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2) ){
-          if ( !$this->db->update($this->class_cfg['tables']['sessions'], [
-            $p['id_user'] => $this->id,
-            $p['sess_id'] => $this->session->get_id(),
-            $p['ip_address'] => $this->ip_address,
-            $p['user_agent'] => $this->user_agent,
-            $p['opened'] => 1,
-            $p['last_activity'] => date('Y-m-d H:i:s', $time),
-            $p['cfg'] => json_encode($this->sess_cfg)
-          ], [
-            $p['id'] => $id_session
-          ]) ){
-            x::log("Problem updating for user {$this->id}", 'user_login');
-            //die(var_dump($this->session));
+        if ($force || empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2) ){
+          $this->sess_cfg['last_renew'] = $time;
+          if (!$this->db->update(
+            $this->class_cfg['tables']['sessions'],
+            [
+              $p['id_user'] => $this->id,
+              $p['sess_id'] => $this->session->get_id(),
+              $p['ip_address'] => $this->ip_address,
+              $p['user_agent'] => $this->user_agent,
+              $p['opened'] => 1,
+              $p['last_activity'] => date('Y-m-d H:i:s', $time),
+              $p['cfg'] => json_encode($this->sess_cfg)
+            ],
+            [$p['id'] => $id_session]
+          )
+          ) {
+            x::log(
+              "Problem updating for user {$this->id} in "
+                . (defined('BBN_KEY') ? \bbn\x::split(BBN_KEY, ':')[0] : $this->session->get_id()),
+              'user_login'
+            );
           }
         }
       }
@@ -891,15 +898,14 @@ class user extends models\cls\basic
    */
   public function get_email($usr = null): ?string
   {
-    if ( $this->auth ){
-      if ( \is_null($usr) ){
+    if ($this->auth) {
+      if (\is_null($usr)) {
         $usr = $this->get_session();
       }
-      else if ( str::is_uid($usr) ){
-        $mgr = $this->get_manager();
+      elseif (str::is_uid($usr) && ($mgr = $this->get_manager())) {
         $usr = $mgr->get_user($usr);
       }
-      if ( isset($usr[$this->class_cfg['email']]) ){
+      if (isset($usr[$this->class_cfg['email']])) {
         return $usr[$this->class_cfg['email']];
       }
     }
@@ -916,17 +922,17 @@ class user extends models\cls\basic
    */
   public function add_to_tmp(string $file, string $name = null, $move = true):? string
   {
-    if ( $this->auth ){
+    if ($this->auth) {
       $fs = new file\system();
       $path = $this->get_tmp_dir().microtime(true).'/';
-      if ( $fs->is_file($file) && $fs->create_path($path) ){
+      if ($fs->is_file($file) && $fs->create_path($path)) {
         $dest = $path.($name ?: basename($file));
-        if ( $move ){
+        if ($move) {
           if ( $fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))){
             return $dest;
           }
         }
-        else if ( $fs->copy($file, $dest) ){
+        elseif ($fs->copy($file, $dest)) {
           return $dest;
         }
       }
@@ -1285,7 +1291,7 @@ class user extends models\cls\basic
                $this->class_cfg['arch']['sessions']['cfg'],
                [$this->class_cfg['arch']['sessions']['id'] => $id_session]
              ))
-     ){
+     ) {
        /** @var string $salt */
        $salt = self::make_fingerprint();
  
@@ -1325,7 +1331,7 @@ class user extends models\cls\basic
          $this->set_error(16);
        }
      }
-     else{
+     else {
        $this->sess_cfg = json_decode($tmp, true);
      }
      return $this;

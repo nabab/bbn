@@ -817,6 +817,7 @@ class mvc implements mvc\api{
       if ( !$this->controller ){
         $this->controller = new mvc\controller($this, $this->info, $this->data, $this->obj);
       }
+      //die(var_dump($this->info));
       $this->controller->process();
     }
 	}

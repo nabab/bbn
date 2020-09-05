@@ -22,6 +22,8 @@ class observer extends bbn\models\cls\db
    */
   private static $path;
 
+  protected static $default_frequency = 60;
+
   /**
    * @var bool Indicates if the funciton set_time_limit has been executed.
    */
@@ -141,33 +143,70 @@ class observer extends bbn\models\cls\db
    * @param string $params
    * @return null|string
    */
-  private function _get_id_from_user(string $request, $params): ?string
+  private function _get_id_from_user(string $request, string $params = null): ?string
   {
-    if ( $this->id_user && $this->check() ){
-      $sql = '
-        SELECT `o`.`id`
-        FROM bbn_observers AS `o`
-          LEFT JOIN bbn_observers AS `ro`
-            ON `o`.`id_alias` = `ro`.`id`
-        WHERE `o`.`id_user` = ?
-        AND (
-          (
-            `o`.`request` LIKE ?
-            AND `o`.`params` '.($params ? 'LIKE ?' : 'IS NULL').'
-          )
-          OR (
-            `ro`.`request` LIKE ?
-            AND `ro`.`params` '.($params ? 'LIKE ?' : 'IS NULL').'
-          )
-        )';
-       $args = [hex2bin($this->id_user), $request, $request];
-       if ( $params ){
-         array_splice($args, 2, 0, $params);
-         array_push($args, $params);
-       }
-       return $this->db->get_one($sql, $args);
+    $r = null;
+    if ($this->id_user && $this->check()) {
+      $cfg = [
+        'field' => 'o.id',
+        'tables' => [
+          'o' => 'bbn_observers'
+        ],
+        'join' => [
+          [
+            'table' => 'bbn_observers',
+            'type' => 'left',
+            'alias' => 'ro',
+            'on' => [
+              [
+                'field' => 'o.id_alias',
+                'operator' => 'eq',
+                'exp' => 'ro.id'
+              ]
+            ]
+          ]
+        ],
+        'where' => [
+          [
+            'field' => 'o.id_user',
+            'value' => $this->id_user
+          ], [
+            'logic' => 'OR',
+            'conditions' => [
+              [
+                'logic' => 'AND',
+                'conditions' => [
+                  [
+                    'field' => 'o.request',
+                    'value' => $request
+                  ], [
+                    'field' => 'o.params',
+                    'operator' => $params ? 'like' : 'isnull'
+                  ]
+                ]
+              ], [
+                'logic' => 'AND',
+                'conditions' => [
+                  [
+                    'field' => 'ro.request',
+                    'value' => $request
+                  ], [
+                    'field' => 'ro.params',
+                    'operator' => $params ? 'like' : 'isnull'
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ];
+      if ($params) {
+        $cfg['where'][1]['conditions'][0]['conditions'][1]['value'] = $params;
+        $cfg['where'][1]['conditions'][1]['conditions'][1]['value'] = $params;
+      }
+      $r = $this->db->select_one($cfg);
     }
-    return null;
+    return $r;
   }
 
   /**
@@ -185,19 +224,23 @@ class observer extends bbn\models\cls\db
   /**
    * Sets the time of next execution in the observer's main row.
    *
+   * @todo Add the possibility for expression in db update/insert
+   * 
    * @param $id
    * @return bbn\db\query|int
    */
-  private function _update_next($id): bool
+  private function _update_next(string $id, int $frequency): bool
   {
-    $id_alias = $this->db->select_one('bbn_observers', 'id_alias', ['id' => $id]);
-    return $this->db->query(<<<MYSQL
-      UPDATE bbn_observers
-      SET next = NOW() + INTERVAL frequency SECOND
-      WHERE id = ?
-MYSQL
-      ,
-      hex2bin($id_alias ?: $id)) ? true : false;
+    $next = date('Y-m-d H:i:s', time() + $frequency);
+    $r = (bool)$this->db->update(
+      'bbn_observers', 
+      ['next' => $next],
+      [
+        'id' => $id,
+        'id_alias' => null
+      ]
+    );
+    return $r;
   }
 
   /**
@@ -253,6 +296,7 @@ MYSQL
       (null !== $cfg['request']) &&
       $this->check()
     ){
+      \bbn\x::log($cfg, 'observers');
       $t = new bbn\util\timer();
       $t->start();
       if ( is_string($cfg['request']) ){
@@ -272,6 +316,7 @@ MYSQL
         $request = json_encode($request);
       }
       $id_alias = $this->_get_id($request, $params);
+      \bbn\x::log([$id_alias, $this->db->last(), $request, $params], 'observers');
       //die(var_dump($id_alias, $this->db->last(), $request, $params));
       // If it is a public observer it will be the id_alias and the main observer
       if (
@@ -281,6 +326,7 @@ MYSQL
           'request' => $request,
           'params' => $params ?: null,
           'name' => $cfg['name'] ?? null,
+          'frequency' => empty($cfg['frequency']) ? self::$default_frequency : $cfg['frequency'],
           'duration' => $duration,
           'id_user' => null,
           'public' => 1,
@@ -356,19 +402,35 @@ MYSQL
    * @param $id
    * @return false|int|string
    */
-  public function get_result($id)
+  public function get_result($id): ?string
   {
-    if ( $this->check() ){
-      return $this->db->get_one(<<<MYSQL
-SELECT IFNULL(ro.`result`, o.`result`)
-FROM bbn_observers AS o
-  LEFT JOIN bbn_observers AS ro
-    ON ro.id = o.id_alias
-WHERE o.id = ?
-MYSQL
-        ,
-        hex2bin($id));
+    $r = null;
+    if ($this->check()) {
+      $r = $this->db->select_one(
+        [
+          'tables' => ['o' => 'bbn_observers'],
+          'field' => 'IFNULL(ro.`result`, o.`result`)',
+          'join' => [
+            [
+              'table' => 'bbn_observers',
+              'alias' => 'ro',
+              'type' => 'LEFT',
+              'on' => [
+                [
+                  'field' => 'o.id_alias',
+                  'operator' => '=',
+                  'exp' => 'ro.id'
+                ]
+              ],
+              'where' => [
+                'o.id' => $id
+              ]
+            ]
+          ]
+        ]
+      );
     }
+    return $r;
   }
 
   /**
@@ -380,20 +442,67 @@ MYSQL
   public function get_list(string $id_user = null): array
   {
     $field = $id_user ? 'o.id_user' : 'public';
-    $sql = <<<MYSQL
-SELECT o.id, o.id_alias,
-IFNULL(ro.request, o.request) AS request, IFNULL(ro.params, o.params) AS params,
-IFNULL(ro.id_user, o.id_user) AS id_user, IFNULL(ro.public, o.public) AS public,
-IFNULL(ro.frequency, o.frequency) AS frequency, IFNULL(ro.result, o.result) AS result,
-IFNULL(ro.next, o.next) AS next
-FROM bbn_observers AS o
-  LEFT JOIN bbn_observers AS ro
-    ON o.id_alias = ro.id
-WHERE $field = ?
-AND ((o.next < NOW() AND o.next IS NOT NULL)
-OR (ro.next < NOW() AND ro.next IS NOT NULL))
-MYSQL;
-    return $this->db->get_rows($sql, $id_user ? hex2bin($id_user) : 1);
+    $now = date('Y-m-d H:i:s');
+    return $this->db->rselect_all([
+      'tables' => ['o' => 'bbn_observers'],
+      'fields' => [
+        'o.id', 'o.id_alias',
+        'request' => 'IFNULL(ro.request, o.request)',
+        'params' => 'IFNULL(ro.params, o.params)',
+        'frequency' => 'IFNULL(ro.frequency, o.frequency)',
+        'result' => 'IFNULL(ro.result, o.result)',
+        'next' => 'IFNULL(ro.next, o.next)'
+      ],
+      'join' => [
+        [
+          'table' => 'bbn_observers',
+          'type' => 'left',
+          'alias' => 'ro',
+          'on' => [
+            [
+              'field' => 'o.id_alias',
+              'exp' => 'ro.id'
+            ]
+          ]
+        ]
+      ],
+      'where' => [
+        [
+          'field' => $id_user ? 'o.id_user' : 'o.public',
+          'operator' => '=',
+          'value' => $id_user ?: 1
+        ], [
+          'logic' => 'OR',
+          'conditions' => [
+            [
+              'logic' => 'AND',
+              'conditions' => [
+                [
+                  'field' => 'o.next',
+                  'operator' => '<',
+                  'value' => $now
+                ], [
+                  'field' => 'o.next',
+                  'operator' => 'isnotnull'
+                ]
+              ]
+            ], [
+              'logic' => 'AND',
+              'conditions' => [
+                [
+                  'field' => 'ro.next',
+                  'operator' => '<',
+                  'value' => $now
+                ], [
+                  'field' => 'ro.next',
+                  'operator' => 'isnotnull'
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]);
   }
 
   /**
@@ -440,13 +549,16 @@ MYSQL;
 
   protected function delete_old()
   {
-    $this->db->query("
-    DELETE o1
-    FROM bbn_observers AS o1
-      LEFT JOIN bbn_observers AS o2
-        ON o2.id_alias = o1.id
-    WHERE o2.id IS NULL
-    AND o1.id_user IS NULL");
+    $sql = <<<SQL
+DELETE o1
+FROM bbn_observers AS o1
+  LEFT JOIN bbn_observers AS o2
+    ON o2.id_alias = o1.id
+WHERE o2.id IS NULL
+AND o1.id_user IS NULL
+SQL;
+    $r = $this->db->query($sql);
+    return $r;
   }
 
   /**
@@ -458,9 +570,10 @@ MYSQL;
   public function observe()
   {
     if ( $this->check() ){
+      $now = date('Y-m-d H:i:s');
       $rows = $this->db->rselect_all([
         'table' => 'bbn_observers',
-        'fields' => ['id', 'id_user', 'request', 'params', 'result'],
+        'fields' => ['id', 'id_user', 'request', 'params', 'result', 'frequency'],
         'where' => [
           'conditions' => [
             [
@@ -469,7 +582,7 @@ MYSQL;
             ], [
               'field' => 'next',
               'operator' => '<',
-              'exp' => 'NOW()'
+              'value' => $now
             ]
           ]
         ]
@@ -517,7 +630,7 @@ MYSQL;
           }
         }
         // And we update the next time of execution
-        $this->_update_next($d['id']);
+        $this->_update_next($d['id'], $d['frequency']);
       }
       echo '.';
       $this->delete_old();

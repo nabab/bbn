@@ -14,7 +14,8 @@ namespace bbn;
 class cache{
 
   private static $is_init = false;
-  private static $type = false;
+  private static $type = null;
+  private static $max_wait = false;
   private static $engine;
 
   private $path;
@@ -24,8 +25,9 @@ class cache{
    * @param null $engine
    * @return int
    */
-  private static function _init($engine = null){
-    if ( !self::$is_init ){
+  private static function _init($engine = null): int
+  {
+    if (!self::$is_init) {
       self::$engine = new cache($engine);
       self::$is_init = 1;
     }
@@ -35,7 +37,8 @@ class cache{
   /**
    * @param string $type
    */
-  private static function _set_type(string $type){
+  private static function _set_type(string $type): void
+  {
     self::$type = $type;
   }
 
@@ -51,14 +54,15 @@ class cache{
    * @param bool $parent
    * @return string
    */
-  private static function _dir(string $dir, string $path, $parent = true){
-    if ( $parent ){
+  private static function _dir(string $dir, string $path, $parent = true): string
+  {
+    if ($parent) {
       $dir = dirname($dir);
     }
-    if ( empty($dir) ){
+    if (empty($dir)) {
       return $path;
     }
-    else if ( substr($dir, -1) === '/' ){
+    elseif (substr($dir, -1) === '/') {
       $dir = substr($dir, 0, -1);
     }
     return $path.self::_sanitize(str_replace('../', '', str_replace('\\', '/', $dir)));
@@ -69,8 +73,9 @@ class cache{
    * @param string $path
    * @return string
    */
-  private static function _file(string $item, string $path){
-    return self::_dir($item, $path).'/'.self::_sanitize(basename($item)).'.bbn.cache';
+  private static function _file(string $item, string $path): string
+  {
+    return self::_dir($item, $path).self::_sanitize(basename($item)).'.bbn.cache';
   }
 
   /**
@@ -79,8 +84,9 @@ class cache{
    * @param $value
    * @return string The hash
    */
-  public static function make_hash($value){
-    if ( \is_object($value) || \is_array($value) ){
+  public static function make_hash($value): string
+  {
+    if (\is_object($value) || \is_array($value)) {
       $value = serialize($value);
     }
     return md5($value);
@@ -91,7 +97,8 @@ class cache{
    * 
    * @return string The cache engine
    */
-  public static function get_type(){
+  public static function get_type(): ?string
+  {
     return self::$type;
   }
 
@@ -101,12 +108,13 @@ class cache{
    * @param string|int $ttl
    * @return int The corresponding length in seconds.
    */
-  public static function ttl($ttl){
-    if ( str::is_integer($ttl) ){
-      return $ttl;
+  public static function ttl($ttl): int
+  {
+    if (str::is_integer($ttl)) {
+      return (int)$ttl;
     }
-    if ( \is_string($ttl) ){
-      switch ( $ttl ){
+    if (\is_string($ttl)) {
+      switch ($ttl) {
         case 'xxs':
           return 30;
         case 'xs':
@@ -154,22 +162,23 @@ class cache{
    * 
    * @param string $engine The type of engine to use
    */
-  public function __construct(string $engine = null){
-
-    if ( self::$is_init ){
+  public function __construct(string $engine = null)
+  {
+    /** @todo APC doesn't work */
+    $engine = 'cache';
+    if (self::$is_init) {
       die("Only one cache object can be called. Use static function cache::get_engine()");
     }
-
-    if ( function_exists('apc_clear_cache') && (!$engine || ($engine === 'apc')) ){
+    if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {
       self::_set_type('apc');
     }
-    else if ( class_exists("Memcache") && (!$engine || ($engine === 'memcache')) ){
+    elseif ((!$engine || ($engine === 'memcache')) && class_exists("Memcache")) {
       $this->obj = new \Memcache();
-      if ( $this->obj->connect("127.0.0.1", 11211) ){
+      if ($this->obj->connect("127.0.0.1", 11211)) {
         self::_set_type('memcache');
       }
     }
-    else if ($this->path = mvc::get_cache_path()){
+    elseif ($this->path = mvc::get_cache_path()) {
       file\dir::create_path($this->path);
       self::_set_type('files');
     }
@@ -238,7 +247,8 @@ class cache{
    * @param string $st The path of the items to delete
    * @return bool|int
    */
-  public function delete_all(string $st = null){
+  public function delete_all(string $st = null): bool
+  {
     if ( self::$type === 'files' ){
       $dir = self::_dir($st, $this->path, false);
       if ( is_dir($dir) ){
@@ -273,7 +283,8 @@ class cache{
    * 
    * @return self
    */
-  public function clear(){
+  public function clear(): self
+  {
     $this->delete_all();
     return $this;
   }
@@ -383,6 +394,65 @@ class cache{
   }
 
   /**
+   * Set the cache file in a block state so other processes don't try to create it.
+   *
+   * @param string $item
+   * @return bool
+   */
+  public function block(string $item): bool
+  {
+    if (self::$type === 'files') {
+      $file = self::_file($item, $this->path);
+      if (file_exists($file) && ($t = file_get_contents($file))) {
+        $t = json_decode($t, true);
+        if (!empty($t['block'])) {
+          return false;
+        }
+      }
+      if ($dir = self::_dir($item, $this->path)) {
+        file\dir::create_path($dir);
+      }
+      if (file_put_contents(
+        $file,
+        json_encode(
+          [
+            'block' => 1,
+            'date' => date('Y-m-d H:i:s')
+          ],
+          JSON_PRETTY_PRINT
+        )
+      )
+      ) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Unset the block staate from the cache file.
+   *
+   * @param string $item
+   * @return bool
+   */
+  public function unblock(string $item): bool
+  {
+    if (self::$type === 'files') {
+      $file = self::_file($item, $this->path);
+      if (file_exists($file) && ($t = file_get_contents($file))) {
+        $t = json_decode($t, true);
+        if (!empty($t['block'])) {
+          @unlink($file);
+          return true;
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Returns the cache object (array) as stored.
    * 
    * @param string $item The name of the item
@@ -391,7 +461,7 @@ class cache{
    */
   private function get_raw(string $item, int $ttl = 0): ?array
   {
-    switch ( self::$type ){
+    switch (self::$type) {
       case 'apc':
         if (\apc_exists($item)) {
           return \apc_fetch($item);
@@ -405,9 +475,21 @@ class cache{
         break;
       case 'files':
         $file = self::_file($item, $this->path);
-        if (file_exists($file) && ($t = file_get_contents($file))) {
-          $t = json_decode($t, true);
+        if (file_exists($file) 
+            && ($t = file_get_contents($file))
+            && ($t = json_decode($t, true))
+        ) {
+          $num = 0;
+          while (is_array($t) && !empty($t['block']) && ($num < self::$max_wait)) {
+            \bbn\x::log([$item, date('Y-m-d H:i:s')], 'wait_for_cache');
+            sleep(1);
+            $num++;
+            if ($t = file_get_contents($file)) {
+              $t = json_decode($t, true);
+            }
+          }
           if ($t
+              && empty($t['block'])
               && (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
               && (!$t['expire'] || ($t['expire'] > time()))
           ) {
@@ -446,8 +528,12 @@ class cache{
   {
     $tmp = $this->get_raw($item, $ttl);
     if (!$tmp) {
-      $data = $fn();
-      $this->set($item, $data, $ttl);
+      if ($this->block($item)) {
+        $data = $fn();
+        if ($this->unblock($item)) {
+          $this->set($item, $data, $ttl);
+        }
+      }
     }
     else {
       $data = $tmp['value'];

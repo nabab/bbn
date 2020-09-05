@@ -17,16 +17,16 @@ use bbn;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if ( !\defined('BBN_FINGERPRINT') ){
+if (!defined('BBN_FINGERPRINT')) {
   die('define BBN_FINGERPRINT');
 }
-if ( !\defined('BBN_APP_NAME') ){
+if (!defined('BBN_APP_NAME')) {
   die('define BBN_APP_NAME');
 }
-if ( !\defined('BBN_SESS_LIFETIME') ){
-  die('define BBN_SESS_LIFETIME');
+if (defined('BBN_SESS_LIFETIME')  && (session_status() === PHP_SESSION_NONE)) {
+  ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
 }
-ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
+
 
 class session
 {
@@ -92,14 +92,17 @@ class session
     return $this;
   }
 
-  public function __construct(array $defaults = null){
-    if ( !self::singleton_exists() ){
-      if (defined('BBN_DATA_PATH')) {
+  public function __construct(array $defaults = null)
+  {
+    if (!self::singleton_exists()) {
+      /*
+      if (defined('BBN_DATA_PATH') && !$this->is_opened()) {
         session_save_path(BBN_DATA_PATH.'sessions');
       }
+      */
       self::singleton_init($this);
       $this->open();
-      if ( !isset($_SESSION[self::$name]) ){
+      if (!isset($_SESSION[self::$name])){
         $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
       }
       $this->id = session_id();
@@ -108,7 +111,7 @@ class session
   }
 
   protected function open(){
-    if ( session_status() == PHP_SESSION_NONE ){      
+    if (!$this->is_opened()) {
       session_start();
     }
     return $this;
@@ -119,6 +122,11 @@ class session
       session_write_close();
     }
     return $this;
+  }
+
+  public function is_opened(): bool
+  {
+    return session_status() !== PHP_SESSION_NONE;
   }
 
   public function get(){
