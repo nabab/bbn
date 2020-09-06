@@ -15,7 +15,7 @@ class cache{
 
   private static $is_init = false;
   private static $type = null;
-  private static $max_wait = false;
+  private static $max_wait = 10;
   private static $engine;
 
   private $path;
@@ -165,7 +165,7 @@ class cache{
   public function __construct(string $engine = null)
   {
     /** @todo APC doesn't work */
-    $engine = 'cache';
+    $engine = 'files';
     if (self::$is_init) {
       die("Only one cache object can be called. Use static function cache::get_engine()");
     }
@@ -179,7 +179,6 @@ class cache{
       }
     }
     elseif ($this->path = mvc::get_cache_path()) {
-      file\dir::create_path($this->path);
       self::_set_type('files');
     }
   }
@@ -482,7 +481,8 @@ class cache{
           $num = 0;
           while (is_array($t) && !empty($t['block']) && ($num < self::$max_wait)) {
             \bbn\x::log([$item, date('Y-m-d H:i:s')], 'wait_for_cache');
-            sleep(1);
+            die("BOO");
+            //sleep(1);
             $num++;
             if ($t = file_get_contents($file)) {
               $t = json_decode($t, true);

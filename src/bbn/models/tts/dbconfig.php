@@ -56,10 +56,12 @@ trait dbconfig
    * @param $id
    * @return bool
    */
-  public function exists($id){
-    return (bool)$this->db->count($this->class_table, [
+  public function exists($id): bool
+  {
+    $res = $this->db->count($this->class_table, [
       $this->class_cfg['arch'][$this->class_table_index]['id'] => $id
     ]);
+    return (bool)$res;
   }
 
   /**

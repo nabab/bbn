@@ -477,42 +477,44 @@ class dir extends bbn\models\cls\basic
 		*
 		* @param string $dir The new directory's path.
 		* @param bool $chmod If set to true the user won't have the permissions to view the content of the folder created
-		* @return string|false
+		* @return string|null
 		*/
-	public static function create_path(string $dir, $chmod=false){
+	public static function create_path(string $dir, $chmod=false): ?string
+	{
     if ( !$dir || !\is_string($dir) ){
-      return false;
-    }
-    clearstatcache();
-    if ( !is_dir($dir) ){
-      $bits = explode('/', $dir);
-      $path = empty($bits[0]) ? '/' : '';
-      foreach ( $bits as $i => $b ){
-        if ( !empty($b) ){
-          $path .= $b;
-          if (!is_dir($path)) {
+      return null;
+		}
+		$bits = [];
+		//clearstatcache();
+		$path = $dir;
+    while ( $path && !is_dir($path) ){
+			$bits[] = basename($path);
+			$path = dirname($path);
+		}
+		if (is_dir($path)) {
+			foreach (array_reverse($bits) as $b) {
+				if (!empty($b)) {
+					$path .= '/'.$b;
+					try {
+						@mkdir($path);
+					}
+					catch (\Exception $e) {
+						\bbn\x::error_log($e->getMessage());
+					}
+					if (!is_dir($path)) {
+						return null;
+					}
+					if ($chmod) {
 						try {
-							@mkdir($path);
+							chmod($path, $chmod);
 						}
 						catch (\Exception $e) {
 							\bbn\x::error_log($e->getMessage());
 						}
-            if (!is_dir($path)) {
-              return false;
-            }
-            if ($chmod) {
-							try {
-								@chmod($path, $chmod);
-							}
-							catch (\Exception $e) {
-								\bbn\x::error_log($e->getMessage());
-							}
-            }
-          }
-          $path .= '/';
-        }
-      }
-    }
+					}
+				}
+			}
+		}
     return $dir;
 	}
 
