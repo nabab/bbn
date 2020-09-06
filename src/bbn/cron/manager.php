@@ -112,11 +112,8 @@ class manager extends bbn\models\cls\basic {
     if ($cron = $this->get_cron($id_cron)) {
       if (!empty($cron['cfg']['frequency'])) {
         $time = time();
-        $start = date('Y-m-d H:i:s', $time+1);
+        $start = date('Y-m-d H:i:s', $time);
         $next = $this->get_next_date($cron['cfg']['frequency'], strtotime($cron['next'] ?: $start));
-        while ($next <= $start) {
-          $next = $this->get_next_date($cron['cfg']['frequency'], strtotime($next));
-        }
       }
       $enable = false;
       $err_mode = $this->db->get_error_mode();
@@ -156,7 +153,7 @@ class manager extends bbn\models\cls\basic {
     if (\is_string($frequency) && (\strlen($frequency) >= 2)) {
       $letter = bbn\str::change_case(substr($frequency, 0, 1), 'lower');
       $number = (int)substr($frequency, 1);
-      $letters = ['y', 'm', 'w', 'd', 'h', 'i'];
+      $letters = ['y', 'm', 'w', 'd', 'h', 'i', 's'];
       if (in_array($letter, $letters, true) && ($number > 0)) {
         $time = time();
         if (!$from_time) {
@@ -174,6 +171,23 @@ class manager extends bbn\models\cls\basic {
         }
         $r = 0;
         $step = 0;
+        if (!is_numeric($number)) {
+          \bbn\x::log($number, 'next_date');
+        }
+
+        $test = mktime(
+          $hour + ($letter === 'h' ? $number : 0),
+          $minute + ($letter === 'i' ? $number : 0),
+          $second + ($letter === 's' ? $number : 0),
+          $month + ($letter === 'm' ? $number : 0),
+          $day + ($letter === 'd' ? $number : ($letter === 'w' ? 7 * $number : 0)),
+          $year + ($letter === 'y' ? $number : 0)
+        );
+        $length = $test - $from_time;
+        if ($test < $time) {
+          $diff = $time - $test;
+          $step = floor($diff/$length);
+        }
         while ($r <= $time) {
           $step++;
           if ($letter === 'w') {
@@ -185,16 +199,11 @@ class manager extends bbn\models\cls\basic {
           $r = mktime(
             $hour + $adders['h'],
             $minute + $adders['i'],
-            $second,
+            $second + $adders['s'],
             $month + $adders['m'],
             $day + $adders['d'],
             $year + $adders['y']
           );
-          // We don't want it to be too old
-          if (($step === 10) && ($r < $time)) {
-            $r = $time;
-            $step = 0;
-          }
         }
         if ($r) {
           return date('Y-m-d H:i:s', $r);

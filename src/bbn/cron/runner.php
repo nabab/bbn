@@ -176,8 +176,6 @@ class runner extends bbn\models\cls\basic
       }
     }
     if ($ok && isset($data['type'])) {
-      // We output the ending time (as all output will be logged in the output file
-      $this->output(_('Shutdown'), date('H:i:s'));
       // Removing PID file
       if (is_file($pid)) {
         @unlink($pid);
@@ -187,14 +185,17 @@ class runner extends bbn\models\cls\basic
         ($data['type'] === 'poll')
       ) {
         $this->cron->launch_poll();
-      } else if ($data['type'] === 'cron') {
+      }
+      else if ($data['type'] === 'cron') {
         if (array_key_exists('id', $data) && bbn\str::is_uid($data['id'])) {
           $this->cron->get_manager()->finish($data['id']);
-        } else {
-          $this->output(_('Restarting task system'), date('H:i:s'));
+        }
+        else {
           $this->cron->launch_task_system();
         }
       }
+      // We output the ending time (as all output will be logged in the output file
+      $this->output(_('Shutdown'), date('H:i:s'));
     }
   }
 
