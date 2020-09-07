@@ -486,7 +486,7 @@ class dir extends bbn\models\cls\basic
 		}
 		$bits = [];
 		//clearstatcache();
-		$path = $dir;
+		$path = self::clean($dir);
     while ( $path && !is_dir($path) ){
 			$bits[] = basename($path);
 			$path = dirname($path);

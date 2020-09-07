@@ -524,7 +524,7 @@ class user extends models\cls\basic
         $time = time();
         if ($force || empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2) ){
           $this->sess_cfg['last_renew'] = $time;
-          if (!$this->db->update(
+          $this->db->update(
             $this->class_cfg['tables']['sessions'],
             [
               $p['id_user'] => $this->id,
@@ -536,14 +536,7 @@ class user extends models\cls\basic
               $p['cfg'] => json_encode($this->sess_cfg)
             ],
             [$p['id'] => $id_session]
-          )
-          ) {
-            x::log(
-              "Problem updating for user {$this->id} in "
-                . (defined('BBN_KEY') ? \bbn\x::split(BBN_KEY, ':')[0] : $this->session->get_id()),
-              'user_login'
-            );
-          }
+          );
         }
       }
       else{

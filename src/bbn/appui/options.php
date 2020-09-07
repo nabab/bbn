@@ -2158,8 +2158,8 @@ class options extends bbn\models\cls\db
             $c['text'] => $it[$c['text']],
             $c['id_alias'] => $it[$c['id_alias']],
             $c['value'] => $it[$c['value']],
-            $c['num'] => $it[$c['num']],
-            $c['cfg'] => $it[$c['cfg']]
+            $c['num'] => $it[$c['num']] ?? null,
+            $c['cfg'] => $it[$c['cfg']] ?? null
           ], [
             $c['id'] => $id
           ]);
@@ -2171,8 +2171,8 @@ class options extends bbn\models\cls\db
           $c['code'] => empty($it[$c['code']]) ? null : $it[$c['code']],
           $c['id_alias'] => $it[$c['id_alias']],
           $c['value'] => $it[$c['value']],
-          $c['num'] => $it[$c['num']],
-          $c['cfg'] => $it[$c['cfg']]
+          $c['num'] => $it[$c['num']] ?? null,
+          $c['cfg'] => $it[$c['cfg']] ?? null
         ];
         if (!empty($it['id'])) {
           $values['id'] = $it['id'];

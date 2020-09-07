@@ -481,8 +481,6 @@ class cache{
           $num = 0;
           while (is_array($t) && !empty($t['block']) && ($num < self::$max_wait)) {
             \bbn\x::log([$item, date('Y-m-d H:i:s')], 'wait_for_cache');
-            die("BOO");
-            //sleep(1);
             $num++;
             if ($t = file_get_contents($file)) {
               $t = json_decode($t, true);
