@@ -65,7 +65,17 @@ class cache{
     elseif (substr($dir, -1) === '/') {
       $dir = substr($dir, 0, -1);
     }
-    return $path.self::_sanitize(str_replace('../', '', str_replace('\\', '/', $dir)));
+    return self::_sanitize(
+      str_replace(
+        '../',
+        '', 
+        str_replace(
+          '\\',
+          '/',
+          str_replace('//', '/', $path.$dir)
+        )
+      )
+    );
   }
 
   /**

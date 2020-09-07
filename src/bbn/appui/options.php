@@ -319,7 +319,8 @@ class options extends bbn\models\cls\db
    * @param bbn\db $db a database connection object
    * @param array $cfg configuration array
    */
-  public function __construct(bbn\db $db, array $cfg=[]){
+  public function __construct(bbn\db $db, array $cfg = [])
+  {
     parent::__construct($db);
     $this->_init_class_cfg($cfg);
     self::retriever_init($this);
