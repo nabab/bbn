@@ -354,7 +354,7 @@ class manager extends bbn\models\cls\basic {
           ], [
             'field' => 'NOW()',
             'operator' => '>',
-            'exp' => "DATE_ADD(next, INTERVAL cfg->'$.timeout' SECOND)"
+            'exp' => "DATE_ADD(prev, INTERVAL cfg->'$.timeout' SECOND)"
           ]]
         ],
         'order' => [[

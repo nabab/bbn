@@ -14,6 +14,10 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
+if (!defined('BBN_X_MAX_LOG_FILE')) {
+  define('BBN_X_MAX_LOG_FILE', 1048576);
+}
+
 class x
 {
 
@@ -39,7 +43,8 @@ class x
    * @param string $name
    * @param int $i
    */
-  public static function increment(string $name = 'num', int $i = 1){
+  public static function increment(string $name = 'num', int $i = 1)
+  {
     self::_init_count($name);
     self::$_counters[$name] += $i;
   }
@@ -48,14 +53,18 @@ class x
    * @param string $name
    * @return mixed
    */
-  public static function count(string $name = 'num'){
+  public static function count(string $name = 'num', bool $delete = false)
+  {
     self::_init_count($name);
     $tmp = self::$_counters[$name];
-    unset(self::$_counters[$name]);
+    if ($delete) {
+      unset(self::$_counters[$name]);
+    }
     return $tmp;
   }
 
-  public static function count_all($delete = false){
+  public static function count_all($delete = false): array
+  {
     $tmp = self::$_counters;
     if ( $delete ){
       self::$_counters = [];
@@ -74,11 +83,9 @@ class x
    * @param string $file Filename, default: "misc".
    * @return void
    */
-  public static function log($st, $file='misc'){
+  public static function log($st, string $file = 'misc'): void
+  {
     if ( \defined('BBN_DATA_PATH') ){
-      if ( !\is_string($file) ){
-        $file = 'misc';
-      }
       $log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
       $backtrace = array_filter(debug_backtrace(), function($a){
         return $a['function'] === 'log';
@@ -94,7 +101,7 @@ class x
         }
       }
       $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
-      if ( $s > 1048576 ){
+      if ( $s > BBN_X_MAX_LOG_FILE ){
         file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
       }
@@ -111,61 +118,59 @@ class x
    * @param string $errstr The file's name, default: "misc".
    * @param $errfile
    * @param $errline
-   * @return bool
+   * @return void
    */
-  public static function log_error($errno, $errstr, $errfile, $errline){
-    if ( \defined('BBN_DATA_PATH') ){
-      if ( is_dir(BBN_DATA_PATH.'logs') ){
-        $file = BBN_DATA_PATH.'logs/_php_error.json';
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
-        foreach ($backtrace as &$b) {
-          if (!empty($b['file'])) {
-            $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
-          }
+  public static function log_error($errno, $errstr, $errfile, $errline): void
+  {
+    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
+      $file = BBN_DATA_PATH.'logs/_php_error.json';
+      $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
+      foreach ($backtrace as &$b) {
+        if (!empty($b['file'])) {
+          $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
         }
-        $r = false;
-        if ( is_file($file) ){
-          $r = json_decode(file_get_contents($file), 1);
-        }
-        if ( !$r ){
-          $r = [];
-        }
-        $t = date('Y-m-d H:i:s');
-        if ( class_exists('\\bbn\\mvc') ){
-          $mvc = mvc::get_instance();
-        }
-        $errfile = str_replace(BBN_APP_PATH, '', $errfile);
-        $idx = self::find($r, [
+      }
+      $r = false;
+      if ( is_file($file) ){
+        $r = json_decode(file_get_contents($file), 1);
+      }
+      if ( !$r ){
+        $r = [];
+      }
+      $t = date('Y-m-d H:i:s');
+      if ( class_exists('\\bbn\\mvc') ){
+        $mvc = mvc::get_instance();
+      }
+      $errfile = str_replace(BBN_APP_PATH, '', $errfile);
+      $idx = self::find($r, [
+        'type' => $errno,
+        'error' => $errstr,
+        'file' => $errfile,
+        'line' => $errline,
+        'request' => ''
+      ]);
+      if ( $idx !== false ){
+        $r[$idx]['count']++;
+        $r[$idx]['last_date'] = $t;
+        $r[$idx]['backtrace'] = $backtrace;
+      }
+      else{
+        $r[] = [
+          'first_date' => $t,
+          'last_date' => $t,
+          'count' => 1,
           'type' => $errno,
           'error' => $errstr,
           'file' => $errfile,
           'line' => $errline,
+          'backtrace' => $backtrace,
           'request' => ''
-        ]);
-        if ( $idx !== false ){
-          $r[$idx]['count']++;
-          $r[$idx]['last_date'] = $t;
-          $r[$idx]['backtrace'] = $backtrace;
-        }
-        else{
-          $r[] = [
-            'first_date' => $t,
-            'last_date' => $t,
-            'count' => 1,
-            'type' => $errno,
-            'error' => $errstr,
-            'file' => $errfile,
-            'line' => $errline,
-            'backtrace' => $backtrace,
-            'request' => ''
-            //'context' => $context
-          ];
-        }
-        self::sort_by($r, 'last_date', 'DESC');
-        file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
+          //'context' => $context
+        ];
       }
+      self::sort_by($r, 'last_date', 'DESC');
+      file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
     }
-    return false;
   }
 
   /**
@@ -243,7 +248,7 @@ class x
     return true;
   }
 
-  public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, file\system $fs = null):? string
+  public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, file\system $fs = null): ?string
   {
     if ( empty($format) ){
       $format = 'Y/m/d';
@@ -398,7 +403,8 @@ class x
    * @param array $ar The array or JSON to convert.
    * @return false | object
    */
-  public static function to_object($ar){
+  public static function to_object($ar): object
+  {
     if ( \is_string($ar) ){
       return json_decode($ar);
     }
@@ -422,7 +428,8 @@ class x
    * @param object $obj The object or JSON to convert.
    * @return false | array
    */
-  public static function to_array($obj){
+  public static function to_array($obj): array
+  {
     if ( \is_string($obj) ){
       $res = json_decode($obj, 1);
     }
@@ -435,7 +442,8 @@ class x
     return (array)$obj;
   }
 
-  public static function js_object($obj){
+  public static function js_object(iterable $obj): string
+  {
     $value_arr = [];
     $replace_keys = [];
 

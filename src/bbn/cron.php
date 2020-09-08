@@ -25,6 +25,8 @@ class cron extends models\cls\basic
 
   protected $exe_path;
 
+  protected $log_file;
+
   public function get_launcher(): ?cron\launcher
   {
     if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {
@@ -69,6 +71,9 @@ class cron extends models\cls\basic
       if (!empty($cfg['exe_path'])) {
         $this->exe_path = $cfg['exe_path'];
       }
+      if (!empty($cfg['log_file'])) {
+        $this->log_file = $cfg['log_file'];
+      }
       if ($ctrl) {
         if (empty($this->exe_path)) {
           $this->exe_path = $ctrl->plugin_url('appui-cron');
@@ -91,11 +96,15 @@ class cron extends models\cls\basic
     return $this->exe_path;
   }
 
+  public function get_log_file()
+  {
+    return $this->log_file;
+  }
+
   public function get_path(): ?string
   {
     return $this->path;
   }
-
 
   public function launch_poll()
   {

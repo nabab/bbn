@@ -43,6 +43,7 @@ class launcher extends bbn\models\cls\basic {
     if ($this->exe_path) {
       $cfg['exe_path'] = $this->exe_path;
       $log = $this->cron->get_log_path($cfg).date('Y-m-d-H-i-s').'.txt';
+      $cfg['log_file'] = $log;
       exec(sprintf('php -f router.php %s "%s" > %s 2>&1 &',
         $this->exe_path,
         bbn\str::escape_dquotes(json_encode($cfg)),

@@ -1,16 +1,14 @@
 <?php
-/*
- * Copyright (C) 2014 BBN
- *
- */
-
 namespace bbn\cron;
 
 use bbn;
 
 /**
- * Class cron
- * @package bbn\appui
+ * Cron runner.
+ * This class runs the jobs properly. It has three modalities:
+ * - `poll` will run the poller, continuously
+ * - `run_task_system` will run the task system, continuously
+ * - `run_task` will run a given task, once
  */
 class runner extends bbn\models\cls\basic
 {
@@ -37,13 +35,10 @@ class runner extends bbn\models\cls\basic
       if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\appui\\history')) {
         \bbn\appui\history::set_user(BBN_EXTERNAL_USER_ID);
       }
-      $type = $this->data['type'];
+      // only 2 types: poll or cron
+      $type = $this->data['type'] === 'poll' ? 'poll' : 'cron';
       // Removing file cache
       clearstatcache();
-      // only 2 types: poll or cron
-      if ($type !== 'poll') {
-        $type = 'cron';
-      }
       $pid_file = $this->get_pid_path($this->data);
 
       // Checking for the presence of the manual files
@@ -64,12 +59,14 @@ class runner extends bbn\models\cls\basic
       // Loooking for a running PID
       if (is_file($pid_file)) {
         [$pid, $time] = explode('|', file_get_contents($pid_file));
+        // If the process file really exists the process is ongoing and it stops
         if (file_exists('/proc/' . $pid)) {
           $this->log("There is already a process running with PID " . $pid);
           // If it's currently running we exit
           $this->output(_('Existing process'), $pid);
           exit();
-        } else {
+        }
+        else {
           // Otherwise we delete the PID file
           $this->log("DELETING FILEPID AS THE PROCESS IS DEAD " . $pid);
           $this->output(_('Dead process'), $pid);
@@ -84,11 +81,16 @@ class runner extends bbn\models\cls\basic
         // Poll case
         if ($type === 'poll') {
           $this->poll();
-        } else if ($type === 'cron') {
+        }
+        // Cron
+        else if ($type === 'cron') {
+          // Real task
           if (array_key_exists('id', $this->data)) {
             $this->output(_('Launching'), $this->data['file']);
             $this->run_task($this->data);
-          } else {
+          }
+          // Or task system
+          else {
             $this->run_task_system();
           }
         }
@@ -108,6 +110,7 @@ class runner extends bbn\models\cls\basic
     if (!empty($cfg['type']) && $cron->check()) {
       $this->controller = $cron->get_controller();
       $this->cron = $cron;
+      $this->log_file = $cron->get_log_file();
       $this->db = $this->controller->db;
       // It must be called from a plugin (appui-cron actually)
       //$this->path = BBN_DATA_PATH.'plugins/appui-cron/';
@@ -115,7 +118,6 @@ class runner extends bbn\models\cls\basic
       $this->data = $cfg;
       $this->type = $cfg['type'];
       $this->timer = new bbn\util\timer();
-      $this->output(true);
     }
   }
 
@@ -128,15 +130,18 @@ class runner extends bbn\models\cls\basic
   {
     if ($name === false) {
       echo '}' . PHP_EOL;
-    } else if ($name === true) {
+    }
+    else if ($name === true) {
       echo '{' . PHP_EOL;
-    } else if ($name) {
+    }
+    else if ($name) {
       $is_number = bbn\str::is_number($log);
       $is_boolean = \is_bool($log);
       $is_string = \is_string($log);
       if (!$is_number && !$is_boolean && !$is_string) {
         $log = bbn\x::get_dump($log);
-      } else if ($is_boolean) {
+      }
+      else if ($is_boolean) {
         $log = $log ? 'true' : 'false';
       }
       echo '  "' .
