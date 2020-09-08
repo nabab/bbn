@@ -535,12 +535,10 @@ class cache{
   public function set_get(callable $fn, string $item, int $ttl = 0)
   {
     $tmp = $this->get_raw($item, $ttl);
-    if (!$tmp) {
-      if ($this->block($item)) {
-        $data = $fn();
-        if ($this->unblock($item)) {
-          $this->set($item, $data, $ttl);
-        }
+    if (!$tmp && $this->block($item)) {
+      $data = $fn();
+      if ($this->unblock($item)) {
+        $this->set($item, $data, $ttl);
       }
     }
     else {
