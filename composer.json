@@ -42,6 +42,10 @@
     "mck89/peast": "1.10.*",
     "czproject/git-php": "dev-master"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0@dev",
+    "phuml/phuml": "dev-master"
+  },
   "autoload": {
     "psr-0": {"bbn": "src/"}
   }
