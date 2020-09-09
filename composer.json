@@ -33,6 +33,7 @@
     "pear/archive_tar": "1.4.*",
     "gettext/gettext": "4.8.1",
     "nesbot/carbon": "2.*",
+    "nikic/php-parser": "4.9.*",
     "sabre/dav": "4.0.*",
     "erusev/parsedown": "1.7.*",
     "phpdocumentor/reflection-docblock": "5.2.*",
@@ -43,7 +44,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^9.0@dev",
-    "phuml/phuml": "dev-master",
+    "bartlett/umlwriter": "dev-master",
     "phpunitgen/core": "dev-master"
   },
   "autoload": {
