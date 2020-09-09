@@ -36,7 +36,7 @@
     "nikic/php-parser": "v3.1.*",
     "sabre/dav": "4.0.*",
     "erusev/parsedown": "1.7.*",
-    "phpdocumentor/reflection-docblock": "4.3.*",
+    "phpdocumentor/reflection-docblock": "5.2.*",
     "sepia/po-parser": "dev-master",
     "tplaner/when": "3.0.0",
     "mck89/peast": "1.10.*",
