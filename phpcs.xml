@@ -57,7 +57,6 @@
 </rule>
 <rule ref="PEAR.Functions.FunctionDeclaration"/>
 <rule ref="PEAR.Functions.ValidDefaultValue"/>
-<rule ref="PEAR.NamingConventions.ValidVariableName"/>
 <rule ref="PEAR.WhiteSpace.ObjectOperatorIndent">
     <properties>
         <property name="indent" value="2"/>

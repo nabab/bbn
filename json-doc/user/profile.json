@@ -31,7 +31,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db, bbn\\user $user, array $cfg = [])\n  {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\x::merge_arrays(self::$_defaults, $cfg);\n    }\n    return $this;\n  }",
+            "code": "function(bbn\\db $db, bbn\\user $user, array $cfg = [])\n  {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\x::merge_arrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
             "startLine": 52,
             "endLine": 62,
             "isDeprecated": false,
@@ -125,7 +125,7 @@
     },
     "properties": null,
     "staticProperties": {
-        "_defaults": {
+        "default_class_cfg": {
             "table": "bbn_users_profiles",
             "cols": {
                 "id": "id",
@@ -150,7 +150,7 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
-        "_defaults": {
+        "default_class_cfg": {
             "table": "bbn_users_profiles",
             "cols": {
                 "id": "id",

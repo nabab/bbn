@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "",
+        "description": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
         "tags": []
     },
     "name": "bbn\\models\\tts\\singleton",
@@ -8,22 +8,22 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/models\/tts\/singleton.php",
-    "startLine": 12,
-    "endLine": 34,
+    "startLine": 15,
+    "endLine": 62,
     "contentConstructor": null,
     "methods": {
         "get_instance": {
             "name": "get_instance",
-            "summary": "",
+            "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\models\\tts\\singleton",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 25,
-            "endLine": 27,
+            "code": "function()\n  {\n    return self::singleton_exists() ? self::$singleton_instance : null;\n  }",
+            "startLine": 47,
+            "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -32,22 +32,25 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self",
+                null
+            ],
             "parent": false,
             "arguments": []
         },
         "singleton_exists": {
             "name": "singleton_exists",
-            "summary": "",
+            "summary": "Returns true if the instance as been initiated.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\models\\tts\\singleton",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 29,
-            "endLine": 31,
+            "code": "function()\n  {\n    return self::$singleton_exists ? true : false;\n  }",
+            "startLine": 57,
+            "endLine": 60,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -56,7 +59,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         }
@@ -64,7 +69,7 @@
     "properties": null,
     "staticProperties": {
         "singleton_instance": null,
-        "singleton_exists": null
+        "singleton_exists": false
     },
     "constants": null,
     "numMethods": 2,
@@ -83,11 +88,11 @@
     "isSubclassOf": false,
     "defaultProperties": {
         "singleton_instance": null,
-        "singleton_exists": null
+        "singleton_exists": false
     },
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
     "shortName": "singleton",
-    "summary": ""
+    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one."
 }

@@ -1292,7 +1292,7 @@
                         "text": "check",
                         "value": "check",
                         "url": "bbn-php\/doc\/method\/appui\/dbsync\/check",
-                        "desc": "Checks if the initialization has been all right"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -1356,7 +1356,7 @@
                         "text": "trigger",
                         "value": "trigger",
                         "url": "bbn-php\/doc\/method\/appui\/dbsync\/trigger",
-                        "desc": "Gets all information about a given table"
+                        "desc": ""
                     }
                 ]
             },
@@ -4936,7 +4936,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/appui\/statistic\/__construct",
-                        "desc": ""
+                        "desc": "Constructor."
                     },
                     {
                         "type": "method",
@@ -4944,7 +4944,7 @@
                         "text": "check",
                         "value": "check",
                         "url": "bbn-php\/doc\/method\/appui\/statistic\/check",
-                        "desc": ""
+                        "desc": "Checks if the constructor is gone through."
                     },
                     {
                         "type": "method",
@@ -4952,7 +4952,7 @@
                         "text": "run",
                         "value": "run",
                         "url": "bbn-php\/doc\/method\/appui\/statistic\/run",
-                        "desc": ""
+                        "desc": "Run the stat"
                     },
                     {
                         "type": "method",
@@ -5561,7 +5561,7 @@
                         "text": "has_links",
                         "value": "has_links",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/has_links",
-                        "desc": ""
+                        "desc": "Returns true if the given css code contains url parameters."
                     },
                     {
                         "type": "method",
@@ -5885,7 +5885,7 @@
                 "value": "runner",
                 "text": "runner",
                 "url": "bbn-php\/doc\/class\/cron\/runner",
-                "desc": "Class cron",
+                "desc": "Cron runner.",
                 "items": [
                     {
                         "type": "method",
@@ -10003,7 +10003,7 @@
                                 "text": "__construct",
                                 "value": "__construct",
                                 "url": "bbn-php\/doc\/method\/models\/tts\/retriever\/__construct",
-                                "desc": ""
+                                "desc": "Constructor."
                             },
                             {
                                 "type": "method",
@@ -10011,7 +10011,7 @@
                                 "text": "get_instance",
                                 "value": "get_instance",
                                 "url": "bbn-php\/doc\/method\/models\/tts\/retriever\/get_instance",
-                                "desc": ""
+                                "desc": "Returns the instance of the singleton or null."
                             },
                             {
                                 "type": "method",
@@ -10019,7 +10019,7 @@
                                 "text": "retriever_exists",
                                 "value": "retriever_exists",
                                 "url": "bbn-php\/doc\/method\/models\/tts\/retriever\/retriever_exists",
-                                "desc": ""
+                                "desc": "Returns true if an instance as been initiated."
                             }
                         ]
                     },
@@ -10036,7 +10036,7 @@
                                 "text": "get_instance",
                                 "value": "get_instance",
                                 "url": "bbn-php\/doc\/method\/models\/tts\/singleton\/get_instance",
-                                "desc": ""
+                                "desc": "Returns the instance of the singleton or null."
                             },
                             {
                                 "type": "method",
@@ -10044,7 +10044,7 @@
                                 "text": "singleton_exists",
                                 "value": "singleton_exists",
                                 "url": "bbn-php\/doc\/method\/models\/tts\/singleton\/singleton_exists",
-                                "desc": ""
+                                "desc": "Returns true if the instance as been initiated."
                             }
                         ]
                     }
@@ -13340,7 +13340,7 @@
                 "text": "set_get",
                 "value": "set_get",
                 "url": "bbn-php\/doc\/method\/cache\/set_get",
-                "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function."
+                "desc": ""
             },
             {
                 "type": "method",

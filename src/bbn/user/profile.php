@@ -22,7 +22,7 @@ class profile
 
 	protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'table' => 'bbn_users_profiles',
       'cols' => [
         'id' => 'id',
@@ -56,7 +56,7 @@ class profile
       $this->id_user = $tmp['id_user'];
       $this->db = $db;
       $this->user = $user;
-      $this->cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
+      $this->cfg = bbn\x::merge_arrays(self::$default_class_cfg, $cfg);
     }
     return $this;
 	}

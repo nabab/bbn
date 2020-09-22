@@ -407,8 +407,8 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
-        "_initiated": true,
-        "_input": "{\"_bbn\":\"public\"}",
+        "_initiated": false,
+        "_input": null,
         "_has_post": false,
         "_params": null,
         "_mode": null,

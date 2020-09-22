@@ -119,7 +119,7 @@ class file extends models\cls\basic
    *
    * ```php
    * $file = new bbn\file('C:/Test/file.txt');
-   * bbn\x::dump($file->get_size());
+   * x::dump($file->get_size());
    * // (int) 314
    * ```
    *
@@ -156,7 +156,7 @@ class file extends models\cls\basic
    *
    * ```php
    * $file = new file('C:/Test/file.txt');
-   * bbn\x::dump($file->get_extension());
+   * x::dump($file->get_extension());
    * //(string) 'txt'
    * ```
    *
@@ -252,7 +252,7 @@ class file extends models\cls\basic
    *
    * ```php
    * $file = new file('C:/Test/file.txt');
-   * bbn\x::dump($file->get_hash());
+   * x::dump($file->get_hash());
    * // (string) '9a3182g36a83adtd9c9c2l59ap2a719c'
    * ```
    *
@@ -270,11 +270,11 @@ class file extends models\cls\basic
    * Deletes the file.
    *
    * ```php
-   * bbn\x::hdump( is_file('C:/Test/file.txt') );
+   * x::hdump( is_file('C:/Test/file.txt') );
    * // (bool) true
    * $file = new file('C:/Test/file.txt');
    * $file->delete();
-   * bbn\x::hdump( is_file('C:/Test/file.txt') );
+   * x::hdump( is_file('C:/Test/file.txt') );
    * // (bool) false
    * ```
    *

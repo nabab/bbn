@@ -9,6 +9,7 @@
  */
 namespace bbn\api;
 use bbn;
+use bbn\x;
 
 class virtualmin {
   use bbn\models\tts\cache;
@@ -163,7 +164,7 @@ class virtualmin {
         $url_part .= "'";
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
-        \bbn\x::log($url_part, 'webmin');
+        x::log($url_part, 'webmin');
 
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
@@ -189,7 +190,7 @@ class virtualmin {
       $uid .= md5(json_encode($arguments));
     }
     if ( !empty($this->cache_delete($uid, $command_name)) ){
-      \bbn\x::log([$uid, $command_name], 'cache_delete');
+      x::log([$uid, $command_name], 'cache_delete');
       return true;
     }
     return false;

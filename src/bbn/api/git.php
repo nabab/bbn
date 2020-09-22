@@ -7,6 +7,7 @@
  */
 namespace bbn\api;
 use bbn;
+use bbn\x;
 use function GuzzleHttp\json_encode;
 
 class git extends \Cz\Git\GitRepository
@@ -22,7 +23,7 @@ class git extends \Cz\Git\GitRepository
     ){
       //todo ceck create repository remote with this api for github
       try{
-    		$res = \bbn\x::curl($api,json_encode($scope),[
+    		$res = x::curl($api,json_encode($scope),[
           'post' => 1,
           'HTTPHEADER' => ['Authorization: token  '.$token]
         ]);

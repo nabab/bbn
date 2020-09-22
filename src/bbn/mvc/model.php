@@ -140,11 +140,13 @@ class model extends bbn\models\cls\db{
   }
 
 
-  public function get(array $data=null){
+  public function get(array $data = null): ?array
+  {
     if ( \is_null($data) ){
       $data = [];
     }
     $this->data = $data;
+    /*
     if ( $this->_plugin ){
       $this->apply_locale($this->_plugin);
     }
@@ -156,42 +158,52 @@ class model extends bbn\models\cls\db{
         }
       }
     }
-    return bbn\mvc::include_model($this->_file, $this);
+    */
+    return bbn\mvc::include_model($this->_file, $this) ?: null;
   }
 
-  public function get_content(){
+  public function get_content(): ?string
+  {
     return $this->_ctrl->get_content(...\func_get_args());
   }
 
-  public function get_model(){
+  public function get_model(): ?array
+  {
     return $this->_ctrl->get_model(...\func_get_args());
   }
 
-  public function get_cached_model(){
+  public function get_cached_model(): ?array
+  {
     return $this->_ctrl->get_cached_model(...\func_get_args());
   }
 
-  public function get_plugin_model($path, $data = [], string $plugin = null, $ttl = 0){
+  public function get_plugin_model($path, $data = [], string $plugin = null, $ttl = 0): ?array
+  {
     return $this->_ctrl->get_plugin_model(...\func_get_args());
   }
 
-  public function get_subplugin_model($path, $data = [], string $plugin = null, string $subplugin, $ttl = 0){
+  public function get_subplugin_model($path, $data = [], string $plugin = null, string $subplugin, $ttl = 0): ?array
+  {
     return $this->_ctrl->get_subplugin_model(...\func_get_args());
   }
 
-  public function has_plugin(){
+  public function has_plugin(): bool
+  {
     return $this->_ctrl->has_plugin(...\func_get_args());
   }
 
-  public function is_plugin(){
+  public function is_plugin(): bool
+  {
     return $this->_ctrl->is_plugin(...\func_get_args());
   }
 
-  public function plugin_path(){
+  public function plugin_path(): ?string
+  {
     return $this->_ctrl->plugin_path(...\func_get_args());
   }
 
-  public function plugin_url(){
+  public function plugin_url(): ?string
+  {
     return $this->_ctrl->plugin_url(...\func_get_args());
   }
 
@@ -200,7 +212,7 @@ class model extends bbn\models\cls\db{
    *
    * @return self
    */
-  public function add_inc($name, $obj)
+  public function add_inc($name, $obj): self
   {
     $this->_mvc->add_inc($name, $obj);
     return $this;
@@ -211,7 +223,7 @@ class model extends bbn\models\cls\db{
 	 *
 	 * @return bool
 	 */
-	public function has_data($idx = null, $check_empty = false)
+	public function has_data($idx = null, $check_empty = false): bool
 	{
     if ( !\is_array($this->data) ){
       return false;
@@ -228,7 +240,7 @@ class model extends bbn\models\cls\db{
 	 * @param array $data
 	 * @return void
 	 */
-	public function set_data(array $data)
+	public function set_data(array $data): self
 	{
 		$this->data = $data;
 		return $this;
@@ -239,7 +251,7 @@ class model extends bbn\models\cls\db{
 	 *
 	 * @return void
 	 */
-	public function add_data(array $data)
+	public function add_data(array $data): self
 	{
 		$ar = \func_get_args();
 		foreach ( $ar as $d ){
@@ -250,7 +262,8 @@ class model extends bbn\models\cls\db{
 		return $this;
 	}
 
-	protected function _cache_name($data, $spec = ''){
+  protected function _cache_name($data, $spec = ''): ?string
+  {
     if ( $this->_path ){
       $cn = 'models/'.$this->_path;
       if ( $spec ){
@@ -264,6 +277,7 @@ class model extends bbn\models\cls\db{
       }
       return $cn;
     }
+    return null;
   }
 
   public function set_cache(array $data = null, $spec='', $ttl = 10){
@@ -279,21 +293,19 @@ class model extends bbn\models\cls\db{
     }
   }
 
-  public function get_from_cache(array $data = null, $spec='', $ttl = 10){
-    if ( $cn = $this->_cache_name($data, $spec) ){
-      $model =& $this;
-      return $this->cache_set_get(function() use($model, $data){
-        return $model->get($data);
-
-      }, $cn, '', $ttl);
-    }
-    return false;
+  public function get_from_cache(array $data = null, ?string $spec = '', $ttl = 10)
+  {
+    $model =& $this;
+    return $this->get_set_from_cache(function() use(&$model, $data){
+      return $model->get($data);
+    }, $data, $spec, $ttl);
+    return null;
   }
 
-  public function get_set_from_cache(\Closure $fn, $spec, $ttl): ?array
+  public function get_set_from_cache(\Closure $fn, array $data = null, $spec = '', $ttl): ?array
   {
-    if ( $cn = $this->_cache_name([], $spec) ){
-      return $this->cache_set_get($fn, $cn, $ttl);
+    if ( $cn = $this->_cache_name($data, $spec) ){
+      return $this->cache_get_set($fn, $cn, '', $ttl);
     }
     return null;
   }

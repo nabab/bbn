@@ -103,7 +103,7 @@
     "isTrait": false,
     "isAbstract": true,
     "isFinal": false,
-    "modifiers": 16,
+    "modifiers": 0,
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": [],

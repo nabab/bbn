@@ -77,7 +77,7 @@
         "get_size": {
             "name": "get_size",
             "summary": "Return the filesize in byte.",
-            "description": "*\n```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314\n```",
+            "description": "*\n```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nx::dump($file->get_size());\n\/\/ (int) 314\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -85,7 +85,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314"
+                    "content": "$file = new bbn\\file('C:\/Test\/file.txt');\nx::dump($file->get_size());\n\/\/ (int) 314"
                 }
             ],
             "file": "bbn\\file",
@@ -134,7 +134,7 @@
         "get_extension": {
             "name": "get_extension",
             "summary": "Return the extension of the file.",
-            "description": "*\n```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_extension());\n\/\/(string) 'txt'\n```",
+            "description": "*\n```php\n$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_extension());\n\/\/(string) 'txt'\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -142,7 +142,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_extension());\n\/\/(string) 'txt'"
+                    "content": "$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_extension());\n\/\/(string) 'txt'"
                 }
             ],
             "file": "bbn\\file",
@@ -200,7 +200,7 @@
         "get_hash": {
             "name": "get_hash",
             "summary": "Return the hash of the file.",
-            "description": "*\n```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+            "description": "*\n```php\n$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -208,7 +208,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
+                    "content": "$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
                 }
             ],
             "file": "bbn\\file",
@@ -233,7 +233,7 @@
         "delete": {
             "name": "delete",
             "summary": "Deletes the file.",
-            "description": "*\n```php\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+            "description": "*\n```php\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -241,7 +241,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "bbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
+                    "content": "x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
                 }
             ],
             "file": "bbn\\file",

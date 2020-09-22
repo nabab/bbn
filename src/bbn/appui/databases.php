@@ -166,7 +166,7 @@ class databases extends bbn\models\cls\cache
   public function db_id(string $db = ''): ?string
   { 
     if (($id_parent = self::get_option_id('dbs'))
-        && ($res = $this->o->from_code($db ?: $this->db->current, $id_parent))
+        && ($res = $this->o->from_code($db ?: $this->db->get_current(), $id_parent))
     ) {
       
       return $res;
@@ -355,7 +355,7 @@ class databases extends bbn\models\cls\cache
   public function full_tables(string $db = '', string $host = ''): ?array
   {
     if (!bbn\str::is_uid($db)) {
-      $db = $this->db_id($db ?: $this->db->current, $host);
+      $db = $this->db_id($db ?: $this->db->get_current(), $host);
     }
     if (bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {
       $o =& $this->o;
@@ -500,7 +500,7 @@ class databases extends bbn\models\cls\cache
     }
     $c = $this->db->csn($column);
     $t = $this->db->tsn($table);
-    if ($tmp = self::get_option_id($c, 'columns', $t, 'tables', $db ?: $this->db->current, 'dbs')) {
+    if ($tmp = self::get_option_id($c, 'columns', $t, 'tables', $db ?: $this->db->get_current(), 'dbs')) {
       $res = $tmp;
     }
     return $res;
@@ -583,7 +583,7 @@ class databases extends bbn\models\cls\cache
     if (bbn\str::is_uid($key)) {
       $res = $this->o->from_code($key, $table);
     }
-    elseif ($tmp = self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->current, 'dbs')) {
+    elseif ($tmp = self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->get_current(), 'dbs')) {
       $res = $tmp;
     }
     return $res;
@@ -1144,7 +1144,7 @@ class databases extends bbn\models\cls\cache
         'keys' => 0
       ];
       foreach ($tables as $t){
-        if ($tmp = $this->import(($db ?: $this->db->current).'.'.$t)) {
+        if ($tmp = $this->import(($db ?: $this->db->get_current()).'.'.$t)) {
           $res['tables']++;
           $res['columns'] += $tmp['columns'];
           $res['keys'] += $tmp['keys'];

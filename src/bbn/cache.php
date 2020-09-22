@@ -85,7 +85,7 @@ class cache{
    */
   private static function _file(string $item, string $path): string
   {
-    return self::_dir($item, $path).self::_sanitize(basename($item)).'.bbn.cache';
+    return self::_dir($item, $path).'/'.self::_sanitize(basename($item)).'.bbn.cache';
   }
 
   /**
@@ -352,7 +352,7 @@ class cache{
    * @param int $ttl The length in seconds during which the value will be considered as valid
    * @return bool Returns true in case of success false otherwise
    */
-  public function set(string $item, $val, $ttl = 10): bool
+  public function set(string $item, $val, int $ttl = 10, float $exec = null): bool
   {
     if ( self::$type ){
       $ttl = self::ttl($ttl);
@@ -374,17 +374,17 @@ class cache{
           ], false, $ttl);
         case 'files':
           $file = self::_file($item, $this->path);
-          if ( $dir = self::_dir($item, $this->path) ){
-            file\dir::create_path($dir);
+          if (file\dir::create_path(dirname($file))) {
+            $value = [
+              'timestamp' => microtime(1),
+              'hash' => $hash,
+              'expire' => $ttl ? time() + $ttl : 0,
+              'ttl' => $ttl,
+              'exec' => $exec,
+              'value' => $val
+            ];
+            return file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT)) ? true : false;
           }
-          $value = [
-            'timestamp' => microtime(1),
-            'hash' => $hash,
-            'expire' => $ttl ? time() + $ttl : 0,
-            'ttl' => $ttl,
-            'value' => $val
-          ];
-          return file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT)) ? true : false;
       }
     }
     return false; 
@@ -418,20 +418,16 @@ class cache{
           return false;
         }
       }
+      else {
+        $t = [];
+      }
       if ($dir = self::_dir($item, $this->path)) {
         file\dir::create_path($dir);
       }
-      if (file_put_contents(
-        $file,
-        json_encode(
-          [
-            'block' => 1,
-            'date' => date('Y-m-d H:i:s')
-          ],
-          JSON_PRETTY_PRINT
-        )
-      )
-      ) {
+      $t['block'] = 1;
+      $t['date_block'] = date('Y-m-d H:i:s');
+      $json = json_encode($t, JSON_PRETTY_PRINT);
+      if (file_put_contents($file, $json)) {
         return true;
       }
       return false;
@@ -447,6 +443,7 @@ class cache{
    */
   public function unblock(string $item): bool
   {
+    return true;
     if (self::$type === 'files') {
       $file = self::_file($item, $this->path);
       if (file_exists($file) && ($t = file_get_contents($file))) {
@@ -468,7 +465,7 @@ class cache{
    * @param int $ttl The cache length
    * @return null|array
    */
-  private function get_raw(string $item, int $ttl = 0): ?array
+  private function get_raw(string $item, int $ttl = 0, bool $force = false): ?array
   {
     switch (self::$type) {
       case 'apc':
@@ -484,20 +481,22 @@ class cache{
         break;
       case 'files':
         $file = self::_file($item, $this->path);
+        if (!file_exists($file)) {
+          $tmp_file = dirname($file).'/_'.basename($file);
+          if (file_exists($tmp_file)) {
+            $num = 0;
+            while (!file_exists($file) && ($num < self::$max_wait)) {
+              x::log([$item, $file, $tmp_file, date('Y-m-d H:i:s')], 'wait_for_cache');
+              sleep(1);
+              $num++;
+            }
+          }
+        }
         if (file_exists($file) 
             && ($t = file_get_contents($file))
             && ($t = json_decode($t, true))
         ) {
-          $num = 0;
-          while (is_array($t) && !empty($t['block']) && ($num < self::$max_wait)) {
-            \bbn\x::log([$item, date('Y-m-d H:i:s')], 'wait_for_cache');
-            $num++;
-            if ($t = file_get_contents($file)) {
-              $t = json_decode($t, true);
-            }
-          }
           if ($t
-              && empty($t['block'])
               && (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
               && (!$t['expire'] || ($t['expire'] > time()))
           ) {
@@ -532,13 +531,39 @@ class cache{
    * @param int $ttl The cache length
    * @return mixed
    */
-  public function set_get(callable $fn, string $item, int $ttl = 0)
+  public function get_set(callable $fn, string $item, int $ttl = 0)
   {
     $tmp = $this->get_raw($item, $ttl);
-    if (!$tmp && $this->block($item)) {
-      $data = $fn();
-      if ($this->unblock($item)) {
-        $this->set($item, $data, $ttl);
+    $data = null;
+    if (!$tmp) {
+      $file = self::_file($item, $this->path);
+      $tmp_file = dirname($file).'/_'.basename($file);
+      $do = false;
+      if (is_file($file)) {
+        rename($file, $tmp_file);
+        $do = true;
+      }
+      elseif (!is_file($tmp_file)) {
+        file\dir::create_path(dirname($tmp_file));
+        file_put_contents($tmp_file, ' ');
+        $do = true;
+      }
+      else {
+        return $this->get($item);
+      }
+      if ($do) {
+        $timer = new util\timer();
+        $timer->start();
+        try {
+          $data = $fn();
+        }
+        catch (\Exception $e) {
+          unlink($tmp_file);
+          die($e->getMessage());
+        }
+        $exec = $timer->stop();
+        $this->set($item, $data, $ttl, $exec);
+        unlink($tmp_file);
       }
     }
     else {

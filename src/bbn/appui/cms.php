@@ -9,6 +9,7 @@
  //the notes inserted with appui/notes have to be type 'pages'
 namespace bbn\appui;
 use bbn;
+use bbn\x;
 
 class cms extends bbn\models\cls\db
 {
@@ -21,7 +22,7 @@ class cms extends bbn\models\cls\db
 		$_events;
 	
 	protected static  
-		$_defaults = [
+		$default_class_cfg = [
 			'table' => 'bbn_events',
 			'tables' => [
 				'notes' => 'bbn_notes',
@@ -299,7 +300,7 @@ class cms extends bbn\models\cls\db
 	public function set_url($id_note, $url): ?bool
 	{	
 		$success = false;
-		$idx = \bbn\x::find($this->get_full_published(), ['url' => $url]);
+		$idx = x::find($this->get_full_published(), ['url' => $url]);
 		if ( $this->_notes->get($id_note) && empty($idx) ){
 			if ( empty($this->db->rselect([
 				'table' => $this->class_cfg['tables']['notes_url'], 

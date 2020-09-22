@@ -102,11 +102,13 @@ class session
       */
       self::singleton_init($this);
       $this->open();
-      if (!isset($_SESSION[self::$name])){
-        $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
+      if ($this->id = session_id()) {
+        if (!isset($_SESSION[self::$name])){
+          $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
+        }
+        $this->data = $_SESSION[self::$name];
+        $this->close();
       }
-      $this->id = session_id();
-      $this->fetch();
     }
   }
 

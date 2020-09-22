@@ -169,6 +169,29 @@ trait common {
     }
   }
 
+  public function get_day_logs(array $cfg): ?array
+  {
+    if ( bbn\str::is_uid($cfg['id']) && bbn\str::is_date_sql($cfg['day']) ){
+      $p = \explode('-', $cfg['day']);
+      \array_pop($p);
+      $p = \implode('/', $p).'/';
+      if (
+        ($task = $this->get_manager()->get_cron($cfg['id'])) &&
+        !empty($task['file']) &&
+        ($path = $this->get_log_path($cfg, false, true)) &&
+        ($file = $path.$p.$cfg['day'].'.json') &&
+        \is_file($file) &&
+        ($file = \json_decode(\file_get_contents($file), true))
+      ){
+        return array_reverse(array_filter($file, function($f) use($task){
+          return $f['file'] === $task['file'];
+        }));
+      }
+      return [];
+    }
+    return null;
+  }
+
   public function  get_log_prev_next(array $cfg): ?string
   {
     $fs = new bbn\file\system();

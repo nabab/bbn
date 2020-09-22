@@ -10,7 +10,7 @@ class medias extends bbn\models\cls\db
 
   protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'table' => 'bbn_medias',
       'tables' => [
         'medias' => 'bbn_medias'

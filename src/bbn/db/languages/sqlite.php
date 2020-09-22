@@ -151,7 +151,7 @@ class sqlite implements bbn\db\engines
       $db .= '.sqlite';
     }
     $info = pathinfo($db);
-    if ( ( $info['filename'] !== $this->db->current ) && file_exists($this->db->host.$db) && strpos($db, $this->qte) === false ){
+    if ( ( $info['filename'] !== $this->db->get_current() ) && file_exists($this->db->host.$db) && strpos($db, $this->qte) === false ){
       $this->db->raw_query("ATTACH '".$this->db->host.$db."' AS ".$info['filename']);
       return true;
     }
@@ -192,7 +192,7 @@ class sqlite implements bbn\db\engines
       $table = trim($bits[1]);
     }
     else{
-      $db = $this->db->current;
+      $db = $this->db->get_current();
       $table = trim($bits[0]);
     }
     if ( bbn\str::check_name($db, $table) ){
@@ -340,7 +340,7 @@ class sqlite implements bbn\db\engines
       return null;
     }
 		if ( empty($database) || !bbn\str::check_name($database) ){
-			$database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
+			$database = $this->db->get_current() === 'main' ? '' : '"'.$this->db->get_current().'".';
 		}
     else if ( $database === 'main' ){
       $database = '';
@@ -423,7 +423,7 @@ class sqlite implements bbn\db\engines
       $r = [];
       $keys = [];
       $cols = [];
-      $database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
+      $database = $this->db->get_current() === 'main' ? '' : '"'.$this->db->get_current().'".';
       if ( $indexes = $this->db->get_rows('PRAGMA index_list('.$table.')') ){
         foreach ( $indexes as $d ){
           if ( $fields = $this->db->get_rows('PRAGMA index_info('.$database.'"'.$d['name'].'")') ){
@@ -1215,8 +1215,8 @@ SQLITE
 
   public function status(string $table = '', string $database = ''){
     $cur = null;
-    if ( $database && ($this->db->current !== $database) ){
-      $cur = $this->db->current;
+    if ( $database && ($this->db->get_current() !== $database) ){
+      $cur = $this->db->get_current();
       $this->db->change($database);
     }
     //$r = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);

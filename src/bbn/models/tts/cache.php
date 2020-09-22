@@ -26,7 +26,7 @@ trait cache
   protected function _cache_name($uid, $method = ''){
     $uid = (string)$uid;
     $path = \bbn\str::is_uid($uid) ? substr($uid, 0, 3).'/'.substr($uid, 3, 3).'/'.substr($uid, 6) : $uid;
-    return $this->_cache_prefix.'/'.$path.'/'.(empty($method) ? '' : '/'.(string)$method);
+    return $this->_cache_prefix.$path.(empty($method) ? '' : '/'.(string)$method);
   }
 
   protected function cache_delete_all(){
@@ -48,8 +48,8 @@ trait cache
     return $this;
   }
 
-  protected function cache_set_get(callable $fn, $uid, $method = '', $ttl = 0){
-    return $this->cache_engine->set_get($fn, $this->_cache_name($uid, $method), $ttl);
+  protected function cache_get_set(callable $fn, $uid, $method = '', $ttl = 0){
+    return $this->cache_engine->get_set($fn, $this->_cache_name($uid, $method), $ttl);
   }
 
   protected function cache_has($uid, $method = ''){

@@ -8,6 +8,7 @@
 
 namespace bbn\appui;
 use bbn;
+use bbn\x;
 
 /**
  * Class chat
@@ -315,7 +316,7 @@ SQL;
         $files = bbn\file\dir::get_files($dir);
         foreach ( $files as $file ){
           $time = (float)basename($file, '.msg');
-          if ( (!$last || \bbn\x::compare_floats($time, $last, '>')) && ($st = file_get_contents($file)) ){
+          if ( (!$last || x::compare_floats($time, $last, '>')) && ($st = file_get_contents($file)) ){
             $enc = bbn\util\enc::crypt('test');
             $res['messages'][] = json_decode(bbn\util\enc::decrypt($st), true);
           }
@@ -373,7 +374,7 @@ SQL;
         $files = \bbn\file\dir::get_files($dir);
         foreach ( $files as $file ){
           $time = (float)basename($file, '.msg');
-          if ( \bbn\x::compare_floats($time, $moment, '<') && ($st = file_get_contents($file)) ){
+          if ( x::compare_floats($time, $moment, '<') && ($st = file_get_contents($file)) ){
             return true;
           }
         }

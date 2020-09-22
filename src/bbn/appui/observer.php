@@ -8,6 +8,7 @@
 
 namespace bbn\appui;
 use bbn;
+use bbn\x;
 
 
 /**
@@ -296,7 +297,7 @@ class observer extends bbn\models\cls\db
       (null !== $cfg['request']) &&
       $this->check()
     ){
-      \bbn\x::log($cfg, 'observers');
+      x::log($cfg, 'observers');
       $t = new bbn\util\timer();
       $t->start();
       if ( is_string($cfg['request']) ){
@@ -316,13 +317,13 @@ class observer extends bbn\models\cls\db
         $request = json_encode($request);
       }
       $id_alias = $this->_get_id($request, $params);
-      \bbn\x::log([$id_alias, $this->db->last(), $request, $params], 'observers');
+      x::log([$id_alias, $this->db->last(), $request, $params], 'observers');
       //die(var_dump($id_alias, $this->db->last(), $request, $params));
       // If it is a public observer it will be the id_alias and the main observer
       if (
         !$id_alias &&
         !empty($cfg['public']) &&
-        $this->db->insert('bbn_observers', [
+        $this->db->insert_ignore('bbn_observers', [
           'request' => $request,
           'params' => $params ?: null,
           'name' => $cfg['name'] ?? null,
@@ -342,7 +343,7 @@ class observer extends bbn\models\cls\db
         return $id_obs;
       }
       else if ( $id_alias ){
-        if ( $this->db->insert('bbn_observers', [
+        if ( $this->db->insert_ignore('bbn_observers', [
           'id_user' => $this->id_user,
           'public' => 0,
           'id_alias' => $id_alias,
@@ -353,7 +354,7 @@ class observer extends bbn\models\cls\db
         }
       }
       else{
-        if ( $this->db->insert('bbn_observers', [
+        if ( $this->db->insert_ignore('bbn_observers', [
           'request' => $request,
           'params' => $params ?: null,
           'name' => $cfg['name'] ?? null,

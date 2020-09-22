@@ -25,12 +25,14 @@ trait dbconfig
     $class_table_index;
 
   /**
-   * Sets the class configuration as defined in $this->_defaults
+   * Sets the class configuration as defined in self::default_class_cfg
    * @param array $cfg
    * @return $this
    */
   private function _init_class_cfg(array $cfg = []){
-    $cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
+    if (isset(self::$default_class_cfg)) {
+      $cfg = bbn\x::merge_arrays(self::$default_class_cfg, $cfg);
+    }
 
     if ( !isset($cfg['tables'], $cfg['table'], $cfg['arch']) ){
       die('The class '.\get_class($this).' is not configured properly to work with trait dbconfig');

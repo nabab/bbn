@@ -2,6 +2,7 @@
 
 namespace bbn\mvc;
 use bbn;
+use bbn\x;
 
 class controller implements api{
 

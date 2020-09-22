@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Created by PhpStorm.\nUser: BBN\nDate: 01\/11\/2016\nTime: 17:41",
+        "description": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
         "tags": []
     },
     "name": "bbn\\models\\tts\\retriever",
@@ -8,8 +8,8 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/models\/tts\/retriever.php",
-    "startLine": 11,
-    "endLine": 37,
+    "startLine": 13,
+    "endLine": 65,
     "contentConstructor": {
         "file": "bbn\\models\\tts\\retriever",
         "returns": null
@@ -17,16 +17,16 @@
     "methods": {
         "get_instance": {
             "name": "get_instance",
-            "summary": "",
+            "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\models\\tts\\retriever",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 25,
-            "endLine": 27,
+            "code": "function()\n  {\n    return self::$retriever_instance;\n  }",
+            "startLine": 42,
+            "endLine": 45,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -35,22 +35,25 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self",
+                null
+            ],
             "parent": false,
             "arguments": []
         },
         "retriever_exists": {
             "name": "retriever_exists",
-            "summary": "",
+            "summary": "Returns true if an instance as been initiated.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\models\\tts\\retriever",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 29,
-            "endLine": 31,
+            "code": "function()\n  {\n    return self::$retriever_exists;\n  }",
+            "startLine": 52,
+            "endLine": 55,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -59,22 +62,24 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
         "__construct": {
             "name": "__construct",
-            "summary": "",
+            "summary": "Constructor.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\models\\tts\\retriever",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 33,
-            "endLine": 35,
+            "code": "function()\n  {\n    self::retriever_init($this);\n  }",
+            "startLine": 60,
+            "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -116,12 +121,5 @@
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
     "shortName": "retriever",
-    "summary": "Created by PhpStorm.",
-    "description": "User: BBN\nDate: 01\/11\/2016\nTime: 17:41",
-    "description_parts": [
-        {
-            "type": "text",
-            "content": "<p>User: BBN\nDate: 01\/11\/2016\nTime: 17:41<\/p>"
-        }
-    ]
+    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one."
 }

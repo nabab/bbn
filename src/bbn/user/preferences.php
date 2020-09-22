@@ -35,7 +35,7 @@ class preferences extends bbn\models\cls\db
 
   protected static
 		/** @var array */
-		$_defaults = [
+		$default_class_cfg = [
 			'table' => 'bbn_users_options',
       'tables' => [
         'user_options' => 'bbn_users_options',
@@ -75,165 +75,6 @@ class preferences extends bbn\models\cls\db
 		$id_user,
 		/** @var int */
 		$id_group;
-
-  /**
-   * Sets the user variables using a user object
-   *
-   * @param bbn\user $user
-   * @return preferences
-   */
-  private function _init_user(bbn\user $user): preferences
-  {
-    $this->user = $user;
-    $this->id_user = $this->user->get_id();
-    $this->id_group = $this->user->get_group();
-    return $this;
-  }
-
-  /**
-   * Retrieves or confirm the ID of an option based on the same parameters as options::from_path
-   *
-   * @param string|null $id_option
-   * @return null|string
-   */
-  private function _get_id_option(string $id_option = null): ?string
-  {
-    if ( !$id_option && !($id_option = $this->get_current()) ){
-      return null;
-    }
-    if ( $id_option && !bbn\str::is_uid($id_option) ){
-      $id_option = $this->opt->from_path(...\func_get_args());
-    }
-    if ( $id_option && bbn\str::is_uid($id_option) ){
-      return $id_option;
-    }
-    return null;
-  }
-
-  /**
-   * Actually inserts a row into the preferences table
-   *
-   * @param string $id_option
-   * @param array $cfg
-   * @return int
-   */
-  private function _insert(string $id_option, array $cfg): int
-  {
-    $json = ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL;
-    return $this->db->insert($this->class_cfg['table'], [
-      $this->fields['id_option'] => $id_option,
-      $this->fields['num'] => $cfg[$this->fields['num']] ?? NULL,
-      $this->fields['text'] => $cfg[$this->fields['text']] ?? NULL,
-      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? NULL,
-      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? NULL,
-      $this->fields['id_user'] => $this->id_user,
-      $this->fields['cfg'] => $json
-    ]);
-  }
-
-  /**
-   * Returns preferences' IDs from the option's ID
-   *
-   * @param string $id_option
-   * @param null|string $id_user
-   * @param null|string $id_group
-   * @return array|null
-   */
-  private function _retrieve_ids(string $id_option, string $id_user = null, string $id_group = null): ?array
-  {
-    if (!$id_user && !$id_group && isset($this->id_user, $this->id_group) ){
-      $id_user = $this->id_user;
-      $id_group = $this->id_group;
-    }
-    if ( ($id_user || $id_group) && ($id_option = $this->_get_id_option($id_option)) ){
-      $cond = [
-        'logic' => 'OR',
-        'conditions' => []
-      ];
-      if ( null !== $id_user ){
-        $cond['conditions'][] = [
-          'field' => $this->fields['id_user'],
-          'value' => $id_user
-        ];
-      }
-      if ( null !== $id_group ){
-        $cond['conditions'][] = [
-          'field' => $this->fields['id_group'],
-          'value' => $id_group
-        ];
-      }
-      // Not specific to just a group or a user, so adding the public i.e. all to which the user has right
-      if ( $id_user && $id_group ){
-        $cond['conditions'][] = [
-          'field' => $this->fields['public'],
-          'value' => 1
-        ];
-      }
-      $where = [
-        'logic' => 'AND',
-        'conditions' => [[
-          'field' => $this->fields['id_option'],
-          'value' => $id_option
-        ]]
-      ];
-      if ( count($cond['conditions']) ){
-        $where['conditions'][] = $cond;
-      }
-      return $this->db->get_column_values([
-        'table' => $this->class_cfg['table'],
-        'fields' => [$this->fields['id']],
-        'where' => $where,
-        'order' => [
-          ['field' => $this->fields['num'], 'dir' => 'ASC'],
-          ['field' => $this->fields['text'], 'dir' => 'ASC']
-        ]
-      ]);
-    }
-    return null;
-  }
-
-  /**
-   * Gets the preferences which have the option's $id as id_link
-   *
-   * @param string $id_link
-   * @return array|null
-   */
-  private function _get_links(string $id_link, string $id_user = null, string $id_group = null): ?array
-  {
-    if ( $id_link = $this->_get_id_option($id_link) ){
-      $where = [
-        'logic' => 'AND',
-        'conditions' => [
-          [
-            'field' => $this->fields['id_link'],
-            'operator' => '=',
-            'value' => $id_link
-          ]
-        ]
-      ];
-      if ( null !== $id_user ){
-        $cond[$this->fields['id_user']] = $id_user;
-      }
-      if ( null !== $id_group ){
-        $cond[$this->fields['id_group']] = $id_group;
-      }
-      // Not specific
-      if ( (null === $id_user) && (null === $id_group) ){
-        $cond[$this->fields['public']] = 1;
-      }
-      $where['conditions'][] = [
-        'logic' => 'OR',
-        'conditions' => $cond
-      ];
-      return $this->db->rselect_all([
-        'tables' => [$this->class_cfg['table']],
-        'fields' => [$this->fields['id'], $this->fields['id_option']],
-        'where' => $where,
-        'order' => [$this->fields['text']]
-      ]);
-    }
-    return null;
-  }
 
   /**
    * @return preferences|null
@@ -1719,6 +1560,166 @@ class preferences extends bbn\models\cls\db
         }
       }
       return $res;
+    }
+    return null;
+  }
+
+
+  /**
+   * Sets the user variables using a user object
+   *
+   * @param bbn\user $user
+   * @return preferences
+   */
+  private function _init_user(bbn\user $user): preferences
+  {
+    $this->user = $user;
+    $this->id_user = $this->user->get_id();
+    $this->id_group = $this->user->get_group();
+    return $this;
+  }
+
+  /**
+   * Retrieves or confirm the ID of an option based on the same parameters as options::from_path
+   *
+   * @param string|null $id_option
+   * @return null|string
+   */
+  private function _get_id_option(string $id_option = null): ?string
+  {
+    if ( !$id_option && !($id_option = $this->get_current()) ){
+      return null;
+    }
+    if ( $id_option && !bbn\str::is_uid($id_option) ){
+      $id_option = $this->opt->from_path(...\func_get_args());
+    }
+    if ( $id_option && bbn\str::is_uid($id_option) ){
+      return $id_option;
+    }
+    return null;
+  }
+
+  /**
+   * Actually inserts a row into the preferences table
+   *
+   * @param string $id_option
+   * @param array $cfg
+   * @return int
+   */
+  private function _insert(string $id_option, array $cfg): int
+  {
+    $json = ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL;
+    return $this->db->insert($this->class_cfg['table'], [
+      $this->fields['id_option'] => $id_option,
+      $this->fields['num'] => $cfg[$this->fields['num']] ?? NULL,
+      $this->fields['text'] => $cfg[$this->fields['text']] ?? NULL,
+      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? NULL,
+      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? NULL,
+      $this->fields['id_user'] => $this->id_user,
+      $this->fields['cfg'] => $json
+    ]);
+  }
+
+  /**
+   * Returns preferences' IDs from the option's ID
+   *
+   * @param string $id_option
+   * @param null|string $id_user
+   * @param null|string $id_group
+   * @return array|null
+   */
+  private function _retrieve_ids(string $id_option, string $id_user = null, string $id_group = null): ?array
+  {
+    if (!$id_user && !$id_group && isset($this->id_user, $this->id_group) ){
+      $id_user = $this->id_user;
+      $id_group = $this->id_group;
+    }
+    if ( ($id_user || $id_group) && ($id_option = $this->_get_id_option($id_option)) ){
+      $cond = [
+        'logic' => 'OR',
+        'conditions' => []
+      ];
+      if ( null !== $id_user ){
+        $cond['conditions'][] = [
+          'field' => $this->fields['id_user'],
+          'value' => $id_user
+        ];
+      }
+      if ( null !== $id_group ){
+        $cond['conditions'][] = [
+          'field' => $this->fields['id_group'],
+          'value' => $id_group
+        ];
+      }
+      // Not specific to just a group or a user, so adding the public i.e. all to which the user has right
+      if ( $id_user && $id_group ){
+        $cond['conditions'][] = [
+          'field' => $this->fields['public'],
+          'value' => 1
+        ];
+      }
+      $where = [
+        'logic' => 'AND',
+        'conditions' => [[
+          'field' => $this->fields['id_option'],
+          'value' => $id_option
+        ]]
+      ];
+      if ( count($cond['conditions']) ){
+        $where['conditions'][] = $cond;
+      }
+      return $this->db->get_column_values([
+        'table' => $this->class_cfg['table'],
+        'fields' => [$this->fields['id']],
+        'where' => $where,
+        'order' => [
+          ['field' => $this->fields['num'], 'dir' => 'ASC'],
+          ['field' => $this->fields['text'], 'dir' => 'ASC']
+        ]
+      ]);
+    }
+    return null;
+  }
+
+  /**
+   * Gets the preferences which have the option's $id as id_link
+   *
+   * @param string $id_link
+   * @return array|null
+   */
+  private function _get_links(string $id_link, string $id_user = null, string $id_group = null): ?array
+  {
+    if ( $id_link = $this->_get_id_option($id_link) ){
+      $where = [
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => $this->fields['id_link'],
+            'operator' => '=',
+            'value' => $id_link
+          ]
+        ]
+      ];
+      if ( null !== $id_user ){
+        $cond[$this->fields['id_user']] = $id_user;
+      }
+      if ( null !== $id_group ){
+        $cond[$this->fields['id_group']] = $id_group;
+      }
+      // Not specific
+      if ( (null === $id_user) && (null === $id_group) ){
+        $cond[$this->fields['public']] = 1;
+      }
+      $where['conditions'][] = [
+        'logic' => 'OR',
+        'conditions' => $cond
+      ];
+      return $this->db->rselect_all([
+        'tables' => [$this->class_cfg['table']],
+        'fields' => [$this->fields['id'], $this->fields['id_option']],
+        'where' => $where,
+        'order' => [$this->fields['text']]
+      ]);
     }
     return null;
   }

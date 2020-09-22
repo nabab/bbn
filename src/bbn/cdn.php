@@ -338,7 +338,7 @@ class cdn extends models\cls\basic
             }
           }
           else{
-            \bbn\x::hdump($this->cfg);
+            //adump($this->cfg);
             die("I can't find the file $f  mmm!");
           }
         }

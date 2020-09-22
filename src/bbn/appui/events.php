@@ -11,7 +11,7 @@ class events extends bbn\models\cls\db
 
   protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'table' => 'bbn_events',
       'tables' => [
         'events' => 'bbn_events',

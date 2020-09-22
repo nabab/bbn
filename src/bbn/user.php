@@ -28,7 +28,7 @@ class user extends models\cls\basic
   protected static $un = 'bbn_user';
   
   /** @var array */
-  protected static $_defaults = [
+  protected static $default_class_cfg = [
     'errors' => [
       0 => 'login failed',
       2 => 'password sent',
@@ -220,7 +220,7 @@ class user extends models\cls\basic
 
     $f =& $this->class_cfg['fields'];
 
-    if (\bbn\x::is_cli() && isset($params['id'])) {
+    if (x::is_cli() && isset($params['id'])) {
       $this->id = $params['id'];
       $this->auth = true;
     }
@@ -1004,8 +1004,8 @@ class user extends models\cls\basic
   {
     if ( !$this->error ){
       $this->error = $err;
-      //\bbn\x::log($this->get_error(), 'user_login');
-      //die(var_dump($err));
+      //x::log($this->get_error(), 'user_login');
+      //die(x::dump($err));
     }
     return $this;
   }

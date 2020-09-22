@@ -11,7 +11,7 @@ class passwords extends bbn\models\cls\db
   private $_o;
 
 	protected static  
-		$_defaults = [
+		$default_class_cfg = [
       'table' => 'bbn_passwords',
       'tables' => [
         'passwords' => 'bbn_passwords'

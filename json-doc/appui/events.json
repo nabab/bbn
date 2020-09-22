@@ -1195,9 +1195,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
-            "startLine": 59,
-            "endLine": 63,
+            "code": "function($id)\n  {\n    $res = $this->db->count($this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n    return (bool)$res;\n  }",
+            "startLine": 61,
+            "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1206,7 +1206,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1230,8 +1232,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 69,
-            "endLine": 71,
+            "startLine": 73,
+            "endLine": 75,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1254,8 +1256,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 73,
-            "endLine": 75,
+            "startLine": 77,
+            "endLine": 79,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1271,7 +1273,7 @@
     },
     "properties": null,
     "staticProperties": {
-        "_defaults": {
+        "default_class_cfg": {
             "table": "bbn_events",
             "tables": {
                 "events": "bbn_events",
@@ -1345,7 +1347,7 @@
     "parentClass": "bbn\\models\\cls\\db",
     "isSubclassOf": false,
     "defaultProperties": {
-        "_defaults": {
+        "default_class_cfg": {
             "table": "bbn_events",
             "tables": {
                 "events": "bbn_events",

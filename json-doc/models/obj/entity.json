@@ -99,7 +99,7 @@
     "isTrait": false,
     "isAbstract": true,
     "isFinal": false,
-    "modifiers": 32,
+    "modifiers": 64,
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {

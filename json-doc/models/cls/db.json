@@ -504,7 +504,7 @@
     "isTrait": false,
     "isAbstract": true,
     "isFinal": false,
-    "modifiers": 32,
+    "modifiers": 64,
     "parentClass": "bbn\\models\\cls\\basic",
     "isSubclassOf": false,
     "defaultProperties": {

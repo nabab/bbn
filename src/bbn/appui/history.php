@@ -10,25 +10,25 @@ class history
   /** @var \bbn\db The DB connection */
   private static $db;
   /** @var array A collection of DB connections  */
-	private static $dbs = [];
+  private static $dbs = [];
   /** @var array A collection of DB connections  */
-	private static $structures = [];
+  private static $structures = [];
   /** @var databases The databases class which collects the columns IDs */
-	private static $databases_obj;
+  private static $databases_obj;
   /** @var string Name of the database where the history table is */
-	private static $admin_db = '';
+  private static $admin_db = '';
   /** @var string User's ID  */
-	private static $user;
+  private static $user;
   /** @var string Prefix of the history table */
-	private static $prefix = 'bbn_';
+  private static $prefix = 'bbn_';
   /** @var float The current date can be overwritten if this variable is set */
-	private static $date;
+  private static $date;
   /** @var boolean Set to true once the initial configuration has been checked */
   private static $ok = false;
   /** @var boolean Setting it to false avoid execution of history triggers */
-	private static $enabled = true;
+  private static $enabled = true;
   /** @var array The foregin links atytached to history UIDs' table */
-	private static $links;
+  private static $links;
 
   /** @var boolean|string The history table's name */
   public static $table_uids = false;
@@ -163,7 +163,7 @@ class history
       ($databases_obj = self::_get_databases())
     ){
       [$database, $table] = explode('.', $full_table);
-      return $databases_obj->column_id($column, $table, $database, self::$db->host);
+      return $databases_obj->column_id($column, $table, $database, self::$db->get_host());
     }
     return false;
   }
@@ -190,7 +190,7 @@ class history
         }
       }
       if ( !self::$admin_db ){
-        self::$admin_db = self::$db->current;
+        self::$admin_db = self::$db->get_current();
       }
       self::$table = self::$admin_db.'.'.self::$prefix.'history';
       self::$table_uids = self::$admin_db.'.'.self::$prefix.'history_uids';
@@ -210,24 +210,24 @@ class history
   }
 
   /**
-	 * @return void
-	 */
+   * @return void
+   */
   public static function disable(): void
   {
     self::$enabled = false;
   }
 
-	/**
-	 * @return void
-	 */
+  /**
+   * @return void
+   */
   public static function enable(): void
   {
     self::$enabled = true;
   }
 
-	/**
-	 * @return bool
-	 */
+  /**
+   * @return bool
+   */
   public static function is_enabled(): bool
   {
     return self::$ok && (self::$enabled === true);
@@ -254,7 +254,7 @@ class history
    */
   public static function check(): bool
   {
-	  return
+    return
       isset(self::$user, self::$table, self::$db) &&
       self::is_init() &&
       self::_get_db();
@@ -278,13 +278,13 @@ class history
    * @param string $id
    * @return bool
    */
-	public static function delete(string $id): bool
+  public static function delete(string $id): bool
   {
-		if ( $id && ($db = self::_get_db()) ){
+    if ( $id && ($db = self::_get_db()) ){
       return $db->delete(self::$table_uids, ['bbn_uid' => $id]);
     }
-		return false;
-	}
+    return false;
+  }
 
   /**
    * Sets the "active" column name
@@ -292,31 +292,31 @@ class history
    * @param string $column
    * @return void
    */
-	public static function set_column(string $column): void
+  public static function set_column(string $column): void
   {
-		if ( bbn\str::check_name($column) ){
-			self::$column = $column;
-		}
-	}
+    if ( bbn\str::check_name($column) ){
+      self::$column = $column;
+    }
+  }
 
-	/**
+  /**
    * Gets the "active" column name
    *
-	 * @return string the "active" column name
-	 */
-	public static function get_column(): string
+   * @return string the "active" column name
+   */
+  public static function get_column(): string
   {
     return self::$column;
-	}
+  }
 
   /**
    * @param $date
    * @return void
    */
-	public static function set_date($date): void
-	{
-		// Sets the current date
-		if ( !bbn\str::is_number($date) && !($date = strtotime($date)) ){
+  public static function set_date($date): void
+  {
+    // Sets the current date
+    if ( !bbn\str::is_number($date) && !($date = strtotime($date)) ){
       return;
     }
     $t = time();
@@ -324,60 +324,60 @@ class history
     if ( $date > $t ){
       $date = $t;
     }
-		self::$date = $date;
-	}
+    self::$date = $date;
+  }
 
-	/**
-	 * @return float
-	 */
-	public static function get_date(): ?float
-	{
-		return self::$date;
-	}
+  /**
+   * @return float
+   */
+  public static function get_date(): ?float
+  {
+    return self::$date;
+  }
 
-	/**
-	 * @return void
-	 */
-	public static function unset_date(): void
-	{
-		self::$date = null;
-	}
+  /**
+   * @return void
+   */
+  public static function unset_date(): void
+  {
+    self::$date = null;
+  }
 
   /**
    * Sets the history table name
    * @param string $db_name
    * @return void
    */
-	public static function set_admin_db(string $db_name): void
-	{
-		// Sets the history table name
-		if ( bbn\str::check_name($db_name) ){
-			self::$admin_db = $db_name;
-			self::$table = self::$admin_db.'.'.self::$prefix.'history';
-		}
-	}
+  public static function set_admin_db(string $db_name): void
+  {
+    // Sets the history table name
+    if ( bbn\str::check_name($db_name) ){
+      self::$admin_db = $db_name;
+      self::$table = self::$admin_db.'.'.self::$prefix.'history';
+    }
+  }
 
   /**
    * Sets the user ID that will be used to fill the user_id field
    * @param $user
    * @return void
    */
-	public static function set_user($user): void
-	{
-		// Sets the history table name
-		if ( bbn\str::is_uid($user) ){
-			self::$user = $user;
-		}
-	}
+  public static function set_user($user): void
+  {
+    // Sets the history table name
+    if ( bbn\str::is_uid($user) ){
+      self::$user = $user;
+    }
+  }
 
   /**
    * Gets the user ID that is being used to fill the user_id field
    * @return null|string
    */
-	public static function get_user(): ?string
-	{
-		return self::$user;
-	}
+  public static function get_user(): ?string
+  {
+    return self::$user;
+  }
 
   /**
    * @param string $table
@@ -391,7 +391,7 @@ class history
     if (
       ($db = self::_get_db()) &&
       ($dbc = self::_get_databases()) &&
-      ($id_table = $dbc->table_id($table, self::$db->current))
+      ($id_table = $dbc->table_id($table, self::$db->get_current()))
     ){
       $tab = $db->escape(self::$table);
       $tab_uids = $db->escape(self::$table_uids);
@@ -426,7 +426,7 @@ MYSQL;
     if (
       ($db = self::_get_db()) &&
       ($dbc = self::_get_databases()) &&
-      ($id_table = $dbc->table_id($table, self::$db->current))
+      ($id_table = $dbc->table_id($table, self::$db->get_current()))
     ){
       $tab = $db->escape(self::$table);
       $tab_uids = $db->escape(self::$table_uids);
@@ -625,17 +625,18 @@ MYSQL;
         $r = [];
         //die(var_dump($columns, $model['fields']));
         foreach ( $columns as $col ){
+          $tmp = null;
           if ( isset($model['fields'][$col]['id_option']) ){
-            if ($r[$col] = $db->rselect(self::$table, ['val', 'ref'], [
+            if ($tmp = $db->rselect(self::$table, ['val', 'ref'], [
               'uid' => $id,
               'col' => $model['fields'][$col]['id_option'],
               'opr' => 'UPDATE',
               ['tst', '>', $when]
             ])) {
-              $r[$col] = $r[$col]['ref'] ?: ($r[$col]['val'] ?: null);
+              $r[$col] = $tmp['ref'] ?: $tmp['val'];
             }
           }
-          if ( $r[$col] === null ){
+          if (!$tmp) {
             $r[$col] = $db->select_one($table, $col, [
               $cfg['primary'] => $id
             ]);
@@ -795,7 +796,7 @@ MYSQL;
       }
       return $r;
     }
-	}
+  }
 
   /**
    * @param string $table
@@ -822,7 +823,7 @@ MYSQL;
       $r = $db->get_rows($sql, hex2bin($id));
     }
     return $r;
-	}
+  }
 
   public static function get_column_history(string $table, string $id, string $column)
   {
@@ -883,7 +884,7 @@ MYSQL;
    * @param bool $force
    * @return null|array Table's full name
    */
-	public static function get_table_cfg(string $table, bool $force = false): ?array
+  public static function get_table_cfg(string $table, bool $force = false): ?array
   {
     // Check history is enabled and table's name correct
     if (
@@ -915,7 +916,7 @@ MYSQL;
             self::$structures[$table]['primary_type'] = $model['fields'][$primary]['type'];
             self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
             self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
-            self::$structures[$table]['id'] = $dbc->table_id($db->tsn($table), $db->current);
+            self::$structures[$table]['id'] = $dbc->table_id($db->tsn($table), $db->get_current());
             self::$structures[$table]['fields'] = array_filter($model['fields'], function($a){
               return $a['id_option'] !== null;
             });
@@ -928,9 +929,26 @@ MYSQL;
       }
     }
     return null;
-	}
+  }
+  
+  public static function get_db_cfg(string $db = null, bool $force = false): ?array
+  {
+    if ($db = self::_get_db()) {
+      $res = [];
+      $tables = $db->get_tables($db);
+      if ($tables && count($tables)) {
+        foreach ($tables as $t) {
+          if ($tmp = self::get_table_cfg($t, $force)) {
+            $res[$t] = $tmp;
+          }
+        }
+      }
+      return $res;
+    }
+    return null;
+  }
 
-	public static function is_linked(string $table): bool
+  public static function is_linked(string $table): bool
   {
     return ($db = self::_get_db()) &&
       ($ftable = $db->tfn($table)) &&
@@ -938,7 +956,7 @@ MYSQL;
   }
 
   public static function get_links(){
-	  return self::$links;
+    return self::$links;
   }
 
   /**
@@ -1282,7 +1300,7 @@ MYSQL;
               foreach ( $cfg['fields'] as $i => $idx ){
                 $csn = self::$db->csn($idx);
                 if (
-                  isset($s['fields'][$csn]) &&
+                  array_key_exists($csn, $s['fields']) &&
                   ($row[$csn] !== $cfg['values'][$i])
                 ){
                   $cfg['history'][] = [

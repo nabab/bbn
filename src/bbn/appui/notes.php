@@ -7,9 +7,10 @@
  */
 
 namespace bbn\appui;
+
 use bbn;
 
-if ( !\defined('BBN_DATA_PATH') ){
+if (!\defined('BBN_DATA_PATH')) {
   die("The constant BBN_DATA_PATH must be defined in order to use note");
 }
 
@@ -25,7 +26,7 @@ class notes extends bbn\models\cls\db
 
   protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'errors' => [
         19 => 'wrong fingerprint'
       ],
@@ -40,10 +41,10 @@ class notes extends bbn\models\cls\db
         'notes' => [
           'id' => 'id',
           'id_parent' => 'id_parent',
-					'id_alias' => 'id_alias',
+                    'id_alias' => 'id_alias',
           'id_type' => 'id_type',
           'private' => 'private',
-					'locked' => 'locked',
+                    'locked' => 'locked',
           'pinned' => 'pinned',
           'creator' => 'creator',
           'active' => 'active'
@@ -75,18 +76,20 @@ class notes extends bbn\models\cls\db
           'private' => 'private'
         ]
       ],
-			'paths' => [
-				'medias' => 'media/'
-			]
+            'paths' => [
+                'medias' => 'media/'
+            ]
     ];
 
-  public function __construct(bbn\db $db){
+  public function __construct(bbn\db $db)
+  {
     parent::__construct($db);
-    self::_init_class_cfg(self::$_defaults);
+    self::_init_class_cfg(self::$default_class_cfg);
     self::optional_init();
   }
 
-  public function get_media_instance(){
+  public function get_media_instance()
+  {
     if (!$this->medias) {
       $this->medias = new medias($this->db);
     }
@@ -95,22 +98,24 @@ class notes extends bbn\models\cls\db
 
   public function insert(string $title, string $content, string $type = null, bool $private = false, bool $locked = false, string $parent = null, string $alias = null)
   {
-		$cf =& $this->class_cfg;
-    if ( is_null($type) ){
+        $cf =& $this->class_cfg;
+    if (is_null($type)) {
       $type = self::get_option_id('personal', 'types');
     }
-    if ( ($usr = bbn\user::get_instance()) &&
-      $this->db->insert($cf['table'], [
-        $cf['arch']['notes']['id_parent'] => $parent,
-				$cf['arch']['notes']['id_alias'] => $alias,
-        $cf['arch']['notes']['id_type'] => $type,
-        $cf['arch']['notes']['private'] => !empty($private) ? 1 : 0,
-        $cf['arch']['notes']['locked'] => !empty($locked) ? 1 : 0,
-        $cf['arch']['notes']['creator'] => $usr->get_id()
-      ]) &&
-      ($id_note = $this->db->last_id()) &&
-      $this->insert_version($id_note, $title, $content)
-    ){
+    if (($usr = bbn\user::get_instance()) 
+        && $this->db->insert(
+          $cf['table'], [
+          $cf['arch']['notes']['id_parent'] => $parent,
+                $cf['arch']['notes']['id_alias'] => $alias,
+          $cf['arch']['notes']['id_type'] => $type,
+          $cf['arch']['notes']['private'] => !empty($private) ? 1 : 0,
+          $cf['arch']['notes']['locked'] => !empty($locked) ? 1 : 0,
+          $cf['arch']['notes']['creator'] => $usr->get_id()
+          ]
+        ) 
+        && ($id_note = $this->db->last_id()) 
+        && $this->insert_version($id_note, $title, $content)
+    ) {
       return $id_note;
     }
     return false;
@@ -129,17 +134,20 @@ class notes extends bbn\models\cls\db
     if ($this->check() && ($usr = bbn\user::get_instance()) && ($note = $this->get($id_note))) {
       $cf =& $this->class_cfg;
       $latest = $note['version'] ?? 0;
-      if ( !$latest || ($note['content'] !== $content) || ($note['title'] !== $title) ) {
+      if (!$latest || ($note['content'] !== $content) || ($note['title'] !== $title)) {
         $next = $latest + 1;
       }
-      if (isset($next) && $this->db->insert($cf['tables']['versions'], [
+      if (isset($next) && $this->db->insert(
+        $cf['tables']['versions'], [
         $cf['arch']['versions']['id_note'] => $id_note,
         $cf['arch']['versions']['version'] => $next,
         $cf['arch']['versions']['title'] => $title,
         $cf['arch']['versions']['content'] => $content,
         $cf['arch']['versions']['id_user'] => $usr->get_id(),
         $cf['arch']['versions']['creation'] => date('Y-m-d H:i:s')
-      ])) {
+        ]
+      )
+      ) {
         return $next;
       }
       return $latest;
@@ -150,34 +158,34 @@ class notes extends bbn\models\cls\db
   public function update(string $id, string $title, string $content, bool $private = null, bool $locked = null): ?int
   {
     $ok = null;
-    if ( $old = $this->db->rselect('bbn_notes', [], ['id' => $id]) ){  
+    if ($old = $this->db->rselect('bbn_notes', [], ['id' => $id])) {  
       bbn\x::hdump('update',$old, $id, $title, $content);    
       $ok = 0;
       $new = [];
-      if ( !\is_null($private) && ($private != $old['private']) ){
+      if (!\is_null($private) && ($private != $old['private'])) {
         $new['private'] = $private;
       }
-      if ( !\is_null($locked) && ($locked != $old['locked']) ){
+      if (!\is_null($locked) && ($locked != $old['locked'])) {
         $new['locked'] = $locked;
       }
-      if ( !empty($new) ){
+      if (!empty($new)) {
         $ok = $this->db->update('bbn_notes', $new, ['id' => $id]);
       }
-      if ( $old_v = $this->get($id) ){
+      if ($old_v = $this->get($id)) {
         $changed = false;
         $new_v = [
           'title' => $old_v['title'],
           'content' => $old_v['content']
         ];
-        if ( $title !== $old_v['title'] ){
+        if ($title !== $old_v['title']) {
           $changed = true;
           $new_v['title'] = $title;
         }
-        if ( $content !== $old_v['content'] ){
+        if ($content !== $old_v['content']) {
           $changed = true;
           $new_v['content'] = $content;
         }
-        if ( !empty($changed) ){         
+        if (!empty($changed)) {         
           $ok = $this->insert_version($id, $new_v['title'], $new_v['content']);    
         }
       }
@@ -185,39 +193,51 @@ class notes extends bbn\models\cls\db
     return $ok;
   }
 
-  public function latest($id){
+  public function latest($id)
+  {
     $cf =& $this->class_cfg;
-    return $this->db->select_one($cf['tables']['versions'], 'MAX('.$cf['arch']['versions']['version'].')', [
+    return $this->db->select_one(
+      $cf['tables']['versions'], 'MAX('.$cf['arch']['versions']['version'].')', [
       $cf['arch']['versions']['id_note'] => $id
-    ]);
+      ]
+    );
   }
 
   public function get(string $id, int $version = null, bool $simple = false):? array
   {
     $cf =& $this->class_cfg;
-    if ( !\is_int($version) ){
+    if (!\is_int($version)) {
       $version = $this->latest($id) ?: 1;
     }
-    if ($res = $this->db->rselect($cf['tables']['notes'], [], [
+    if ($res = $this->db->rselect(
+      $cf['tables']['notes'], [], [
       $cf['arch']['notes']['id'] => $id
-    ])) {
-      if ($tmp = $this->db->rselect($cf['tables']['versions'], [], [
+      ]
+    )
+    ) {
+      if ($tmp = $this->db->rselect(
+        $cf['tables']['versions'], [], [
         $cf['arch']['versions']['id_note'] => $id,
         $cf['arch']['versions']['version'] => $version
-      ])) {
+        ]
+      )
+      ) {
         $res = array_merge($res, $tmp);
       }
-      if ( $simple ){
+      if ($simple) {
         unset($res[$cf['arch']['versions']['content']]);
       }
       else {
-        if ( $medias = $this->db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
+        if ($medias = $this->db->get_column_values(
+          $cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
           $cf['arch']['nmedias']['id_note'] => $id,
           $cf['arch']['nmedias']['version'] => $version
-        ]) ){
+          ]
+        ) 
+        ) {
           $media = $this->get_media_instance();
           $res['medias'] = [];
-          foreach ( $medias as $m ) {
+          foreach ($medias as $m) {
             $res['medias'][] = $media->get_media($m, true);
           }
         }
@@ -230,10 +250,11 @@ class notes extends bbn\models\cls\db
   public function get_full(string $id, int $version = null):? array
   {
     $cf =& $this->class_cfg;
-    if ( !\is_int($version) ){
+    if (!\is_int($version)) {
       $version = $this->latest($id);
     }
-    if ( $res = $this->db->rselect([
+    if ($res = $this->db->rselect(
+      [
       'table' => $cf['table'],
       'fields' => [
         $cf['arch']['notes']['id'],
@@ -267,21 +288,24 @@ class notes extends bbn\models\cls\db
           'value' => $id
         ]]
       ]
-    ]) ){
+      ]
+    ) 
+    ) {
       $res['medias'] = $this->get_medias($id, $version);
       return $res;
     }
     return null;
   }
 
-  public function get_by_type($type = NULL, $id_user = false, $limit = 0, $start = 0){
+  public function get_by_type($type = null, $id_user = false, $limit = 0, $start = 0)
+  {
     $db =& $this->db;
     $cf =& $this->class_cfg;
     $res = [];
-    if ( !\bbn\str::is_uid($type) ){
+    if (!\bbn\str::is_uid($type)) {
       $type = $type = self::get_option_id(is_null($type) ? 'personal' : $type, 'types');
     }
-    if ( \bbn\str::is_uid($type) && is_int($limit) && is_int($start) ){
+    if (\bbn\str::is_uid($type) && is_int($limit) && is_int($start)) {
       $where = [[
         'field' => $db->cfn($cf['arch']['notes']['id_type'], $cf['table']),
         'value' => $type
@@ -292,13 +316,14 @@ class notes extends bbn\models\cls\db
         'field' => 'versions2.'.$cf['arch']['versions']['version'],
         'operator' => 'isnull'
       ]];
-      if ( \bbn\str::is_uid($id_user) ){
+      if (\bbn\str::is_uid($id_user)) {
         $where[] = [
           'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
           'value' => $id_user
         ];
       }
-      $notes = $db->rselect_all([
+      $notes = $db->rselect_all(
+        [
         'table' => $cf['table'],
         'fields' => [
           'versions1.'.$cf['arch']['versions']['id_note'],
@@ -346,16 +371,20 @@ class notes extends bbn\models\cls\db
         ]],
         'limit' => $limit,
         'start' => $start
-      ]);
-      foreach ( $notes as $note ){
-        if ( $medias = $db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
+        ]
+      );
+      foreach ($notes as $note){
+        if ($medias = $db->get_column_values(
+          $cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
           $cf['arch']['nmedias']['id_note'] => $note[$cf['arch']['versions']['id_note']],
           $cf['arch']['nmedias']['version'] => $note[$cf['arch']['versions']['version']],
-        ]) ){
+          ]
+        ) 
+        ) {
           $note['medias'] = [];
-          foreach ( $medias as $m ){
-            if ( $med = $db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
-              if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
+          foreach ($medias as $m){
+            if ($med = $db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m])) {
+              if (\bbn\str::is_json($med[$cf['arch']['medias']['content']])) {
                 $med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
               }
               $version['medias'][] = $med;
@@ -372,9 +401,10 @@ class notes extends bbn\models\cls\db
 
   public function get_versions(string $id): ?array
   {
-    if ( \bbn\str::is_uid($id) ){
+    if (\bbn\str::is_uid($id)) {
       $cf =& $this->class_cfg;
-      return $this->db->rselect_all([
+      return $this->db->rselect_all(
+        [
         'table' => $cf['tables']['versions'],
         'fields' => [
           $cf['arch']['versions']['version'],
@@ -391,18 +421,20 @@ class notes extends bbn\models\cls\db
           'field' => $cf['arch']['versions']['version'],
           'dir' => 'DESC'
         ]]
-      ]);
+        ]
+      );
     }
     return null;
   }
 
-  public function count_by_type($type = NULL, $id_user = false){
+  public function count_by_type($type = null, $id_user = false)
+  {
     $db =& $this->db;
     $cf =& $this->class_cfg;
-    if ( !\bbn\str::is_uid($type) ){
+    if (!\bbn\str::is_uid($type)) {
       $type = $type = self::get_option_id(is_null($type) ? 'personal' : $type, 'types');
     }
-    if ( \bbn\str::is_uid($type) ){
+    if (\bbn\str::is_uid($type)) {
       $where = [[
         'field' => $cf['arch']['notes']['active'],
         'value' => 1
@@ -410,19 +442,21 @@ class notes extends bbn\models\cls\db
         'field' => $cf['arch']['notes']['id_type'],
         'value' => $type
       ]];
-      if ( !empty($id_user) && \bbn\str::is_uid($id_user) ){
+      if (!empty($id_user) && \bbn\str::is_uid($id_user)) {
         $where[] = [
           'field' => $cf['arch']['notes']['creator'],
           'value' => $id_user
         ];
       }
-      return $db->select_one([
+      return $db->select_one(
+        [
         'table' => $cf['table'],
         'fields' => ['COUNT(DISTINCT '.$cf['arch']['notes']['id'].')'],
         'where' => [
           'conditions' => $where
         ]
-      ]);
+        ]
+      );
     }
     return false;
   }
@@ -432,7 +466,7 @@ class notes extends bbn\models\cls\db
     $cf =& $this->class_cfg;
     $media = $this->get_media_instance();
     // Case where we give also the version (i.e. not the latest)
-    if ( \is_array($id_note) && (count($id_note) === 2) ){
+    if (\is_array($id_note) && (count($id_note) === 2)) {
       $version = $id_note[1];
       $id_note = $id_note[0];
     }
@@ -440,11 +474,10 @@ class notes extends bbn\models\cls\db
       $version = $this->latest($id_note) ?: 1;
     }
     
-    if (
-      $this->exists($id_note) &&
-      ($id_media = $media->insert($name, $content, $title, $type, $private)) &&
-      $this->add_media_to_note($id_media, $id_note, $version)
-    ){
+    if ($this->exists($id_note) 
+        && ($id_media = $media->insert($name, $content, $title, $type, $private)) 
+        && $this->add_media_to_note($id_media, $id_note, $version)
+    ) {
       return $id_media;
     }
   
@@ -453,20 +486,23 @@ class notes extends bbn\models\cls\db
 
   public function add_media_to_note(string $id_media, string $id_note, int $version):? int
   {
-    if ( $usr = bbn\user::get_instance() ){
+    if ($usr = bbn\user::get_instance()) {
       $cf =& $this->class_cfg;
-      return $this->db->insert($cf['tables']['nmedias'], [
+      return $this->db->insert(
+        $cf['tables']['nmedias'], [
         $cf['arch']['nmedias']['id_note'] => $id_note,
         $cf['arch']['nmedias']['version'] => $version,
         $cf['arch']['nmedias']['id_media'] => $id_media,
         $cf['arch']['nmedias']['id_user'] => $usr->get_id(),
         $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
-      ]);
+        ]
+      );
     }
     return null;
   }
 
-  public function remove_media(string $id_media, string $id_note, $version = false){
+  public function remove_media(string $id_media, string $id_note, $version = false)
+  {
     $cf =& $this->class_cfg;
     if ($this->db->select_one($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media])
         && $this->exists($id_note)
@@ -484,51 +520,54 @@ class notes extends bbn\models\cls\db
     return null;
   }
 
-  public function media2version(string $id_media, string $id_note, $version = false){
+  public function media2version(string $id_media, string $id_note, $version = false)
+  {
     $cf =& $this->class_cfg;
     return !empty($id_media) &&
       $this->db->select_one($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media]) &&
       $this->exists($id_note) &&
-      $this->db->insert($cf['tables']['nmedias'], [
+      $this->db->insert(
+        $cf['tables']['nmedias'], [
         $cf['arch']['nmedias']['id_note'] => $id_note,
         $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
         $cf['arch']['nmedias']['id_media'] => $id_media,
         $cf['arch']['nmedias']['id_user'] => \bbn\user::get_instance()->get_id(),
         $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
-      ]);
+        ]
+      );
   }
 
-	public function get_medias(string $id_note, $version = false, $type = false): array
+  public function get_medias(string $id_note, $version = false, $type = false): array
   {
     $ret = [];
     $media = $this->get_media_instance();
     $cf =& $this->class_cfg;
-		if ($this->exists($id_note)) {
+    if ($this->exists($id_note)) {
       $filter = [
-				$cf['arch']['nmedias']['id_note'] => $id_note,
-				$cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
+            $cf['arch']['nmedias']['id_note'] => $id_note,
+            $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
       ];
       if ($version === true) {
         unset($filter[$cf['arch']['nmedias']['version']]);
       }
-			if ($medias = $this->db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], $filter)) {
-        foreach ( $medias as $m ){
+      if ($medias = $this->db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], $filter)) {
+        foreach ($medias as $m){
           $ret[] = $media->get_media($m, true);
         }
       }
-		}
-		return $ret;
+    }
+      return $ret;
   }
   
   public function has_medias(string $id_note, $version = false, string $id_media = ''): ?bool
   {
     $cf =& $this->class_cfg;
-		if ($this->exists($id_note)) {
+    if ($this->exists($id_note)) {
       $where = [
-        $cf['arch']['nmedias']['id_note'] => $id_note,
-        $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note)
+      $cf['arch']['nmedias']['id_note'] => $id_note,
+      $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note)
       ];
-      if ( !empty($id_media) && \bbn\str::is_uid($id_media) ){
+      if (!empty($id_media) && \bbn\str::is_uid($id_media)) {
         $where[$cf['arch']['nmedias']['id_media']] = $id_media;
       }
       return !!$this->db->count($cf['tables']['nmedias'], $where);
@@ -536,8 +575,9 @@ class notes extends bbn\models\cls\db
     return null;
   }
 
-  public function browse($cfg){
-    if ( isset($cfg['limit']) && ($user = bbn\user::get_instance()) ){
+  public function browse($cfg)
+  {
+    if (isset($cfg['limit']) && ($user = bbn\user::get_instance())) {
       /** @var bbn\db $db */
       $db =& $this->db;
       $cf =& $this->class_cfg;
@@ -627,11 +667,11 @@ class notes extends bbn\models\cls\db
           'dir' => 'DESC'
         ]]
       ];
-      if ( !empty($cfg['fields']) ){
+      if (!empty($cfg['fields'])) {
         $grid_cfg['fields'] = bbn\x::merge_arrays($grid_cfg['fields'], $cfg['fields']);
         unset($cfg['fields']);
       }
-      if ( !empty($cfg['join']) ){
+      if (!empty($cfg['join'])) {
         $grid_cfg['join'] = bbn\x::merge_arrays($grid_cfg['join'], $cfg['join']);
         unset($cfg['join']);
       }
@@ -640,8 +680,9 @@ class notes extends bbn\models\cls\db
     }
   }
 
-  public function count(){
-    if ( $user = bbn\user::get_instance() ){
+  public function count()
+  {
+    if ($user = bbn\user::get_instance()) {
       $cf =& $this->class_cfg;
       $db =& $this->db;
       $sql = "
@@ -656,14 +697,15 @@ class notes extends bbn\models\cls\db
   }
 
   /**
-   * @param string $id The note's uid
-   * @param bool $keep Set it to true if you want change active property to 0 instead of delete the row from db
+   * @param string $id   The note's uid
+   * @param bool   $keep Set it to true if you want change active property to 0 instead of delete the row from db
    * @return bool|int
    */
-  public function remove(string $id, $keep = false){
-    if ( \bbn\str::is_uid($id) ){
+  public function remove(string $id, $keep = false)
+  {
+    if (\bbn\str::is_uid($id)) {
       $cf =& $this->class_cfg;
-      if ( empty($keep) ){
+      if (empty($keep)) {
         if ($medias = $this->get_medias($id, true)) {
           foreach ($medias as $m) {
             $this->remove_media($m['id'], $id, true);
@@ -681,12 +723,12 @@ class notes extends bbn\models\cls\db
 
   public function copy(string $id, int $version = null, bool $private = null):? string
   {
-    if ( $note = $this->get_full($id, $version) ){
-      if ( $private === null ){
+    if ($note = $this->get_full($id, $version)) {
+      if ($private === null) {
         $private = $note['private'];
       }
       $id_note = $this->insert($note['title'], $note['content'], $note['type'], $private);
-      foreach ( $note['medias'] as $m ){
+      foreach ($note['medias'] as $m){
         $this->add_media_to_note($m['id'], $id, $note['version']);
       }
       return $id_note;
@@ -700,33 +742,35 @@ class notes extends bbn\models\cls\db
    * @param integer $limit
    * @return array
    */
-	public function get_medias_notes(int $start = 0, $limit ): array
+  public function get_medias_notes(int $start = 0, $limit ): array
   {
     $res = [];
     $cf =& $this->class_cfg;
-    $all = $this->db->rselect_all([
+    $all = $this->db->rselect_all(
+      [
       'table'=> $cf['tables']['medias'],
       'fields' => $cf['arch']['medias'],
       'where' => [
-        'conditions'=> [[
-          'field' => $cf['arch']['medias']['private'],
-          'value' => 0
-        ],[
-          'field' => $cf['arch']['medias']['content'],
-          'operator' => 'isnotnull'
-        ]]
+      'conditions'=> [[
+        'field' => $cf['arch']['medias']['private'],
+        'value' => 0
+      ],[
+        'field' => $cf['arch']['medias']['content'],
+        'operator' => 'isnotnull'
+      ]]
       ],
       'start'  => $start,
       'limit' => $limit
-    ]);
-    if ( !empty($all) ){
+      ]
+    );
+    if (!empty($all)) {
       $root = \bbn\mvc::get_data_path('appui-notes').'media/';
       foreach ($all as $i => $a) {
         if (bbn\str::is_json($a['content']) && ($media_obj = $this->get_media_instance())) {
           $content = json_decode($a['content'], true);
           $path = $root.$content['path'].'/';  
           $full_path =  $path.$a['id'].'/'.$a['name'];  
-          if ( file_exists($full_path)){
+          if (file_exists($full_path)) {
             $all[$i]['notes'] = $this->get_media_notes($a['id']);
             //if the media is an image it takes the thumb 60, 60 for src
             if ($media_obj->is_image($full_path) && ($thumb = $media_obj->get_thumbs($full_path))) {
@@ -749,7 +793,7 @@ class notes extends bbn\models\cls\db
    */
   public function get_media_notes(string $id_media)
   {
-  	$notes = [];
+      $notes = [];
     $cms = new \bbn\appui\cms($this->db);
     $ids = $this->db->rselect_all(
       $this->class_cfg['tables']['nmedias'], [
@@ -761,15 +805,14 @@ class notes extends bbn\models\cls\db
       ]
     );   
     
-    if ( !empty($ids) ){
-    	foreach($ids as $i){
+    if (!empty($ids)) {
+      foreach($ids as $i){
         $tmp = $this->get($i['id_note']);
         $tmp['is_published'] = $cms->is_published($i['id_note']);
         $notes[] = $tmp;
-				//return $notes;
+              //return $notes;
       }
     }
     return $notes;
   }
-  
 }

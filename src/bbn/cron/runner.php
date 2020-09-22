@@ -2,6 +2,7 @@
 namespace bbn\cron;
 
 use bbn;
+use bbn\x;
 
 /**
  * Cron runner.
@@ -63,7 +64,7 @@ class runner extends bbn\models\cls\basic
         if (file_exists('/proc/' . $pid)) {
           $this->log("There is already a process running with PID " . $pid);
           // If it's currently running we exit
-          $this->output(_('Existing process'), $pid);
+          //$this->output(_('Existing process'), $pid);
           exit();
         }
         else {
@@ -86,7 +87,7 @@ class runner extends bbn\models\cls\basic
         else if ($type === 'cron') {
           // Real task
           if (array_key_exists('id', $this->data)) {
-            $this->output(_('Launching'), $this->data['file']);
+            //$this->output(_('Launching'), $this->data['file']);
             $this->run_task($this->data);
           }
           // Or task system
@@ -119,11 +120,6 @@ class runner extends bbn\models\cls\basic
       $this->type = $cfg['type'];
       $this->timer = new bbn\util\timer();
     }
-  }
-
-  public function __destruct()
-  {
-    $this->output(false);
   }
 
   public function output($name = '', $log = ''): void
@@ -163,7 +159,7 @@ class runner extends bbn\models\cls\basic
     $file_content = @file_get_contents($pid);
     // Write the error log if an error is present
     if ($error = error_get_last()) {
-      $this->output(_('Error'), $error);
+      //$this->output(_('Error'), $error);
       $this->log([$data, $error]);
     }
     $ok = true;
@@ -199,8 +195,9 @@ class runner extends bbn\models\cls\basic
           $this->cron->launch_task_system();
         }
       }
+      //x::dump("FROM SHUTDOWN", $data);
       // We output the ending time (as all output will be logged in the output file
-      $this->output(_('Shutdown'), date('H:i:s'));
+      //$this->output(_('Shutdown'), date('H:i:s'));
     }
   }
 
@@ -234,7 +231,7 @@ class runner extends bbn\models\cls\basic
       $this->timer->start('timeout');
       $this->timer->start('users');
       $obs = new bbn\appui\observer($this->db);
-      $this->output(_('Starting poll'), date('Y-m-d H:i:s'));
+      //$this->output(_('Starting poll'), date('Y-m-d H:i:s'));
       /*
       foreach ( $admin->get_old_tokens() as $t ){
         $id_user = $admin->get_user_from_token($t['id']);
@@ -273,22 +270,22 @@ class runner extends bbn\models\cls\basic
   public function run_task_system()
   {
     if ($this->check()) {
-      $this->output(_('Start task system'), date('Y-m-d H:i:s'));
+      //$this->output(_('Start task system'), date('Y-m-d H:i:s'));
       $this->timer->start('timeout');
       $ok = true;
       while ($ok) {
         if (!$this->is_active() || !$this->is_cron_active()) {
-          $this->output(_('End'), date('Y-m-d H:i:s'));
+          //$this->output(_('End'), date('Y-m-d H:i:s'));
           if ($rows = $this->cron->get_manager()->get_running_rows()) {
             foreach ($rows as $r) {
               if (file_exists('/proc/' . $r['pid'])) {
                 exec('kill -9 ' . $r['pid']);
-                $this->output(_('Killing task'), $r['pid']);
+                //$this->output(_('Killing task'), $r['pid']);
               }
               $fpid = $this->get_pid_path(['type' => 'cron', 'id' => $r['id']]);
               if (is_file($fpid)) {
                 unlink($fpid);
-                $this->output(_('Deleting PID file'), $fpid);
+                //$this->output(_('Deleting PID file'), $fpid);
               }
               $this->cron->get_manager()->unset_pid($r['id']);
             }
@@ -302,8 +299,8 @@ class runner extends bbn\models\cls\basic
               'id' => $r['id'],
               'file' => $r['file']
             ];
-            $this->output(_('Launch'), date('Y-m-d H:i:s'));
-            $this->output(_('Execution'), $param['file']);
+            //$this->output(_('Launch'), date('Y-m-d H:i:s'));
+            //$this->output(_('Execution'), $param['file']);
             $this->cron->get_launcher()->launch($param);
           }
         }
@@ -314,30 +311,101 @@ class runner extends bbn\models\cls\basic
 
   public function run_task(array $cfg)
   {
-    if (isset($cfg['id'], $cfg['file']) && $this->check()) {
+    if (x::has_props($cfg, ['id', 'file', 'log_file'], true) && $this->check()) {
       if (!defined('BBN_EXTERNAL_USER_ID') && defined('BBN_EXTERNAL_USER_EMAIL')) {
         define('BBN_EXTERNAL_USER_ID', $this->db->select_one('bbn_users', 'id', ['email' => BBN_EXTERNAL_USER_EMAIL]));
       }
       if ($this->cron->get_manager()->start($cfg['id'])) {
-        $this->output(_("Start time"), date('Y-m-d H:i:s'));
+        $log = [
+          'start' => date('Y-m-d H:i:s'),
+          'file' => $cfg['file'],
+          'pid' => getmypid()
+        ];
+        $day = date('d');
+        $month = date('m');
+        $bits = x::split($cfg['log_file'], '/');
+        $path_elements = array_splice($bits, -5, 3);
+        $path_bits = array_splice($bits, -5);
+        $path = x::join($path_bits, '/');
+        $json_file = dirname(dirname(dirname($cfg['log_file']))).'/'.x::join($path_elements, '-').'.json';
+        array_pop($path_elements);
+        $month_file = dirname(dirname($json_file)).'/'.x::join($path_elements, '-').'.json';
+        array_pop($path_elements);
+        $year_file = dirname(dirname($month_file)).'/'.x::join($path_elements, '-').'.json';
+        if (!is_file($json_file)) {
+          $logs = [];
+        }
+        else {
+          $logs = json_decode(file_get_contents($json_file), true);
+        }
+        $idx = count($logs);
+        $logs[] = $log;
+        file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
         $this->timer->start($cfg['file']);
-        $self = $this;
-        ob_start();
         $this->controller->reroute($cfg['file']);
         $this->controller->process();
-        if ($res = ob_get_clean()) {
-          $this->output(_("Output"), $res);
+        $logs[$idx]['duration'] = $this->timer->stop($cfg['file']);
+        $content = file_get_contents($cfg['log_file']);
+        if (empty($content)) {
+          unlink($cfg['log_file']);
+          $logs[$idx]['content'] = false;
         }
-        $this->output(_("Execution time"), $this->timer->stop($cfg['file']));
-        $obj = $this->controller->get_result();
-        $this->output(_("Content"), $obj->content);
+        else {
+          $logs[$idx]['content'] = $path;
+        }
+        $logs[$idx]['end'] = date('Y-m-d H:i:s');
+        file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
+        if (!is_file($month_file)) {
+          $mlogs = [
+            'total' => 0,
+            'content' => 0,
+            'first' => $logs[$idx]['start'],
+            'last' => null,
+            'dates' => [],
+            'duration' => 0,
+            'duration_content' => 0
+          ];
+        }
+        else {
+          $mlogs = json_decode(file_get_contents($month_file), true);
+        }
+        $mlogs['total']++;
+        $mlogs['duration'] += $logs[$idx]['duration'];
+        if (!empty($content)) {
+          $mlogs['content']++;
+          $mlogs['duration_content'] += $logs[$idx]['duration'];
+        }
+        $mlogs['last'] = $logs[$idx]['start'];
+        if (!in_array($day, $mlogs['dates'])) {
+          $mlogs['dates'][] = $day;
+        }
+        file_put_contents($month_file, json_encode($mlogs, JSON_PRETTY_PRINT));
+        if (!is_file($year_file)) {
+          $ylogs = [
+            'total' => 0,
+            'content' => 0,
+            'first' => $logs[$idx]['start'],
+            'last' => null,
+            'month' => [],
+            'duration' => 0,
+            'duration_content' => 0
+          ];
+        }
+        else {
+          $ylogs = json_decode(file_get_contents($year_file), true);
+        }
+        $ylogs['total']++;
+        $ylogs['duration'] += $logs[$idx]['duration'];
+        if (!empty($content)) {
+          $ylogs['content']++;
+          $ylogs['duration_content'] += $logs[$idx]['duration'];
+        }
+        $ylogs['last'] = $logs[$idx]['start'];
+        if (!in_array($month, $ylogs['month'])) {
+          $ylogs['month'][] = $month;
+        }
+        file_put_contents($year_file, json_encode($ylogs, JSON_PRETTY_PRINT));
       }
-      else{
-        $this->output(_("The start function returned false"), $cfg['file']);
-      }
-
-    } else {
-      $this->output(_("Task unstartable"), $cfg['file']);
     }
     exit();
   }

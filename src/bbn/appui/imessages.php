@@ -23,7 +23,7 @@ class imessages extends \bbn\models\cls\db
 
   protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'table' => 'bbn_imessages',
       'tables' => [
         'imessages' => 'bbn_imessages',

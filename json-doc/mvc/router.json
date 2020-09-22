@@ -1284,16 +1284,16 @@
         },
         "get_instance": {
             "name": "get_instance",
-            "summary": "",
+            "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\mvc\\router",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 25,
-            "endLine": 27,
+            "code": "function()\n  {\n    return self::$retriever_instance;\n  }",
+            "startLine": 42,
+            "endLine": 45,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1302,22 +1302,25 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self",
+                null
+            ],
             "parent": false,
             "arguments": []
         },
         "retriever_exists": {
             "name": "retriever_exists",
-            "summary": "",
+            "summary": "Returns true if an instance as been initiated.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\mvc\\router",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 29,
-            "endLine": 31,
+            "code": "function()\n  {\n    return self::$retriever_exists;\n  }",
+            "startLine": 52,
+            "endLine": 55,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1326,7 +1329,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         }

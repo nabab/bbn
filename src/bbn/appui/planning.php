@@ -9,7 +9,7 @@ class planning {
 
   protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'table' => 'bbn_hr_planning',
       'tables' => [
         'planning' => 'bbn_hr_planning',

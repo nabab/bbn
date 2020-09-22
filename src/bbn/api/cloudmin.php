@@ -9,6 +9,7 @@
  */
 namespace bbn\api;
 use bbn;
+use bbn\x;
 
 class cloudmin{
 
@@ -166,7 +167,7 @@ class cloudmin{
         $url_part .= "'";
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
-        \bbn\x::log($url_part, 'webmin');
+        x::log($url_part, 'webmin');
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
       }

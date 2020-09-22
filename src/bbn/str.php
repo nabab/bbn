@@ -32,9 +32,9 @@ class str
    *
    * ```php
    * $st = 122
-   * \bbn\x::dump(\bbn\str::cast($st));
+   * x::dump(\bbn\str::cast($st));
    * // (string) "122"
-   * \bbn\x::dump(\bbn\str::cast(1));
+   * x::dump(\bbn\str::cast(1));
    * // (string) "1"
    * ```
    *
@@ -54,11 +54,11 @@ class str
    *
    * ```php
    * $st = 'TEST CASE';
-   * \bbn\x::dump(\bbn\str::change_case($st, 'lower'));
+   * x::dump(\bbn\str::change_case($st, 'lower'));
    * // (string) "test case"
-   * \bbn\x::dump(\bbn\str::change_case('TEsT Case', 'upper'));
+   * x::dump(\bbn\str::change_case('TEsT Case', 'upper'));
    * // (string) "TEST CASE"
-   * \bbn\x::dump(\bbn\str::change_case('test case'));
+   * x::dump(\bbn\str::change_case('test case'));
    * // (string) "Test Case"
    * ```
    *
@@ -92,7 +92,7 @@ class str
    * Escapes all quotes (single and double) from a given string.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_dquotes('the "Gay Pride" is is Putin\'s favorite'));
+   * x::dump(\bbn\str::escape_dquotes('the "Gay Pride" is is Putin\'s favorite'));
    * // (string) "the \"Gay Pride\" is is Putin\'s favorite"
    * ```
    *
@@ -109,7 +109,7 @@ class str
    * Escapes the string in double quotes.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_dquotes('this is the house "Mary"'));
+   * x::dump(\bbn\str::escape_dquotes('this is the house "Mary"'));
    * // (string) "this is the house \"Mary\""
    * ```
    *
@@ -125,7 +125,7 @@ class str
    * Synonym of "escape_dquotes".
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_dquote('this is the house "Mary"'));
+   * x::dump(\bbn\str::escape_dquote('this is the house "Mary"'));
    * // (string) "this is the house \"Mary\""
    * ```
    *
@@ -141,7 +141,7 @@ class str
    * Synonym of "escape_dquotes".
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_quote('this is the house "Mary"'));
+   * x::dump(\bbn\str::escape_quote('this is the house "Mary"'));
    * // (string) "this is the house \"Mary\""
    * ```
    *
@@ -157,7 +157,7 @@ class str
    * Synonym of "escape_dquotes".
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_quotes('this is the house "Mary"'));
+   * x::dump(\bbn\str::escape_quotes('this is the house "Mary"'));
    * // (string) "this is the house \"Mary\""
    * ```
    *
@@ -173,7 +173,7 @@ class str
    * Escapes the string in quotes.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_squotes("Today's \"newspaper\""));
+   * x::dump(\bbn\str::escape_squotes("Today's \"newspaper\""));
    * // (string)  "Today\'s "newspaper""
    * ```
    *
@@ -189,7 +189,7 @@ class str
    * Synonym of "escape_squotes".
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape("Today's \"newspaper\""));
+   * x::dump(\bbn\str::escape("Today's \"newspaper\""));
    * // (string)  "Today\'s "newspaper""
    * ```
    *
@@ -205,7 +205,7 @@ class str
    * Synonym of "escape_squotes".
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_apo("Today's \"newspaper\""));
+   * x::dump(\bbn\str::escape_apo("Today's \"newspaper\""));
    * // (string)  "Today\'s "newspaper""
    * ```
    *
@@ -221,7 +221,7 @@ class str
    * Synonym of "escape_squotes".
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::escape_squote("Today's \"newspaper\""));
+   * x::dump(\bbn\str::escape_squote("Today's \"newspaper\""));
    * // (string)  "Today\'s "newspaper""
    * ```
    *
@@ -240,7 +240,7 @@ class str
    * $test="this      is
    * cold";
    *
-   * \bbn\x::dump(\bbn\str::clean($test));
+   * x::dump(\bbn\str::clean($test));
    * // (string)  "this is\n cold"
    *
    * $test1="this is
@@ -248,15 +248,15 @@ class str
    *
    * cold";
    *
-   * \bbn\x::dump(\bbn\str::clean($test1,'2nl'));
+   * x::dump(\bbn\str::clean($test1,'2nl'));
    * /* (string)
    * "this is
    *  cold"
    *
-   * \bbn\x::dump(\bbn\str::clean($test1,'html'));
+   * x::dump(\bbn\str::clean($test1,'html'));
    * // (string)  "this is cold"
    *
-   * \bbn\x::dump(\bbn\str::clean('$x = 9993','code'));
+   * x::dump(\bbn\str::clean('$x = 9993','code'));
    * // (string)  "$x=9993"
    * ```
    *
@@ -321,7 +321,7 @@ class str
    * Cuts a string (HTML and PHP tags stripped) to maximum length inserted.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::cut("<!-- HTML Document --> Example text", 7));
+   * x::dump(\bbn\str::cut("<!-- HTML Document --> Example text", 7));
    * // (string) "Example..."
    * ```
    *
@@ -367,7 +367,7 @@ class str
    * Returns a cross-platform filename for the file.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::encode_filename('test file/,1', 15, 'txt'));
+   * x::dump(\bbn\str::encode_filename('test file/,1', 15, 'txt'));
    * // (string) "test_file_1.txt"
    * ```
    *
@@ -429,7 +429,7 @@ class str
    * Returns a corrected string for database naming.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::encode_dbname('my.database_name ? test  :,; !plus'));
+   * x::dump(\bbn\str::encode_dbname('my.database_name ? test  :,; !plus'));
    * // (string) "my_database_name_test_plus"
    * ```
    *
@@ -467,10 +467,10 @@ class str
    *
    * ```php
    * // (string) "txt"
-   * \bbn\x::dump(str::file_ext("/test/test.txt"));
+   * x::dump(str::file_ext("/test/test.txt"));
    * 
    * // (array) [ "test", "txt", ]
-   * \bbn\x::dump(\bbn\str::file_ext('/home/user/Desktop/test.txt', true));
+   * x::dump(\bbn\str::file_ext('/home/user/Desktop/test.txt', true));
    * ```
    *
    * @param string $file The file path.
@@ -496,9 +496,9 @@ class str
    * Returns a random password.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::genpwd());
+   * x::dump(\bbn\str::genpwd());
    * // (string) "khc9P871w"
-   * \bbn\x::dump(\bbn\str::genpwd(6, 4));
+   * x::dump(\bbn\str::genpwd(6, 4));
    * // (string) "dDEtxY"
    * ```
    *
@@ -543,7 +543,7 @@ class str
    * Checks if the string is a json string.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_json('{"firstName": "John", "lastName": "Smith", "age": 25}'));
+   * x::dump(\bbn\str::is_json('{"firstName": "John", "lastName": "Smith", "age": 25}'));
    * // (bool) true
    * ```
    *
@@ -565,13 +565,13 @@ class str
    * Can take as many arguments and will return false if one of them is not a number.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_number([1, 2]));
+   * x::dump(\bbn\str::is_number([1, 2]));
    * // (bool) false
-   * \bbn\x::dump(\bbn\str::is_number(150);
+   * x::dump(\bbn\str::is_number(150);
    * // (bool) 1
-   * \bbn\x::dump(\bbn\str::is_number('150'));
+   * x::dump(\bbn\str::is_number('150'));
    * // (bool)  1
-   * \bbn\x::dump(\bbn\str::is_number(1.5);
+   * x::dump(\bbn\str::is_number(1.5);
    * // (bool) 1
    * ```
    *
@@ -599,11 +599,11 @@ class str
    * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_integer(13.2));
+   * x::dump(\bbn\str::is_integer(13.2));
    * // (bool) false
-   * \bbn\x::dump(\bbn\str::is_integer(14));
+   * x::dump(\bbn\str::is_integer(14));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_integer('14'));
+   * x::dump(\bbn\str::is_integer('14'));
    * // (bool) true
    * ```
    *
@@ -630,11 +630,11 @@ class str
    * Checks if ".. \\" or "../" is contained in the parameter and it will return false if true.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_clean_path("/home/user/Images"));
+   * x::dump(\bbn\str::is_clean_path("/home/user/Images"));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_clean_path("../home/user/Images"));
+   * x::dump(\bbn\str::is_clean_path("../home/user/Images"));
    * // (bool) false
-   * \bbn\x::dump(\bbn\str::is_clean_path("..\\home\user\Images"));
+   * x::dump(\bbn\str::is_clean_path("..\\home\user\Images"));
    * // (bool) false
    * ```
    *
@@ -662,11 +662,11 @@ class str
    * Can take many arguments and it will return false if one of them is not a decimal or the string of a decimal (float).
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_decimal(13.2));
+   * x::dump(\bbn\str::is_decimal(13.2));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_decimal('13.2'));
+   * x::dump(\bbn\str::is_decimal('13.2'));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_decimal(14));
+   * x::dump(\bbn\str::is_decimal(14));
    * // (bool) false
    * ```
    *
@@ -721,13 +721,13 @@ class str
    * Checks if the string is the correct type of e-mail address.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_email('test@email.com'));
+   * x::dump(\bbn\str::is_email('test@email.com'));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_email('test@email'));
+   * x::dump(\bbn\str::is_email('test@email'));
    * // (bool) false
-   * \bbn\x::dump(\bbn\str::is_email('test@.com'));
+   * x::dump(\bbn\str::is_email('test@.com'));
    * // (bool) false
-   * \bbn\x::dump(\bbn\str::is_email('testemail.com'));
+   * x::dump(\bbn\str::is_email('testemail.com'));
    * // (bool) false
    * ```
    *
@@ -788,10 +788,10 @@ class str
    * Checks if the argument is a valid URL string.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_url("http://bbn.so"));
+   * x::dump(\bbn\str::is_url("http://bbn.so"));
    * // (string) "https://bbn.so"
    *
-   * \bbn\x::dump(\bbn\str::is_url("bbn.so"));
+   * x::dump(\bbn\str::is_url("bbn.so"));
    * // (bool) false
    * ```
    *
@@ -806,10 +806,10 @@ class str
    * Checks if the argument is a valid domain name.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_domain("http://bbn.so"));
+   * x::dump(\bbn\str::is_domain("http://bbn.so"));
    * // (string) false
    *
-   * \bbn\x::dump(\bbn\str::is_domain("bbn.so"));
+   * x::dump(\bbn\str::is_domain("bbn.so"));
    * // (bool) true
    * ```
    *
@@ -833,11 +833,11 @@ class str
    * Checks if the argument is in a valid SQL date format.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05 11:10:22"));
+   * x::dump(\bbn\str::is_date_sql("1999-12-05 11:10:22"));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05"));
+   * x::dump(\bbn\str::is_date_sql("1999-12-05"));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_date_sql("19-12-1999"));
+   * x::dump(\bbn\str::is_date_sql("19-12-1999"));
    * // (bool) false
    * ```
    *
@@ -858,13 +858,13 @@ class str
    * If it looks like an int or float type, the string variable is converted into the correct type.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::correct_types(1230));
+   * x::dump(\bbn\str::correct_types(1230));
    * // (int) 1230
-   * \bbn\x::dump(\bbn\str::correct_types(12.30));
+   * x::dump(\bbn\str::correct_types(12.30));
    * // (float) 12.3
-   * \bbn\x::dump(\bbn\str::correct_types("12.3"));
+   * x::dump(\bbn\str::correct_types("12.3"));
    * // (float) 12.3
-   * \bbn\x::dump(\bbn\str::correct_types([1230]));
+   * x::dump(\bbn\str::correct_types([1230]));
    * // (int) [1230]
    * ```
    *
@@ -914,7 +914,7 @@ class str
    * Returns an array containing any of the various components of the URL that are present.
    *
    * ```php
-   * \bbn\x::hdump(\bbn\str::parse_url('http://localhost/phpmyadmin/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');
+   * x::hdump(\bbn\str::parse_url('http://localhost/phpmyadmin/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');
    * /* (array)
    * [
    *     'scheme' => 'http',
@@ -957,7 +957,7 @@ class str
    * Replaces backslash with slash in a path string. Forbids the use of ../
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::parse_path('\home\user\Desktop'));
+   * x::dump(\bbn\str::parse_path('\home\user\Desktop'));
    * // (string) "/home/user/Desktop"
    * ```
    *
@@ -1000,7 +1000,7 @@ class str
    * Replaces accented characters with their character without the accent.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::remove_accents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
+   * x::dump(\bbn\str::remove_accents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
    * // (string) "TA¨st  FA¬lA¨  A²A¨A A¹e"
    * ```
    *
@@ -1021,9 +1021,9 @@ class str
    * Checks if a string complies with SQL naming convention.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::check_name("Paul"));
+   * x::dump(\bbn\str::check_name("Paul"));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::check_name("Pa ul"));
+   * x::dump(\bbn\str::check_name("Pa ul"));
    * // (bool) false
    * ```
    *
@@ -1053,9 +1053,9 @@ class str
    * Checks if a string doesn't contain a filesystem path.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::check_filename("Paul"));
+   * x::dump(\bbn\str::check_filename("Paul"));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::check_filename("Paul/"));
+   * x::dump(\bbn\str::check_filename("Paul/"));
    * // (bool) false
    * ```
    *
@@ -1077,9 +1077,9 @@ class str
    * Checks if a string doesn't contain a filesystem path.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::check_filename("Paul"));
+   * x::dump(\bbn\str::check_filename("Paul"));
    * // (bool) true
-   * \bbn\x::dump(\bbn\str::check_filename("Paul/"));
+   * x::dump(\bbn\str::check_filename("Paul/"));
    * // (bool) false
    * ```
    *
@@ -1108,11 +1108,11 @@ class str
    * Returns "true" if slash or backslash are present.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::has_slash("Paul"));
+   * x::dump(\bbn\str::has_slash("Paul"));
    * // (bool) false
-   * \bbn\x::dump(\bbn\str::has_slash("Paul/");
+   * x::dump(\bbn\str::has_slash("Paul/");
    * // (bool) 1
-   * \bbn\x::dump(\bbn\str::has_slash("Paul\\");
+   * x::dump(\bbn\str::has_slash("Paul\\");
    * // (bool) 1
    * ```
    *
@@ -1136,7 +1136,7 @@ class str
    * Extracts all digits from a string.
    *
    * ```php
-   * \bbn\x::dump(\bbn\str::get_numbers("test 13 example 24"));
+   * x::dump(\bbn\str::get_numbers("test 13 example 24"));
    * // (string) 1324
    * ```
    *
@@ -1166,10 +1166,10 @@ class str
    *  'text' => "Hello!"
    * ];
    *
-   * \bbn\x::hdump(\bbn\str::make_readable($user));
+   * x::hdump(\bbn\str::make_readable($user));
    * // (string) "appui/user"
    *
-   * \bbn\x::hdump(\bbn\str::make_readable($myArray));
+   * x::hdump(\bbn\str::make_readable($myArray));
    * /* (array)
    * [
    *   "user" => "appui\\user",
@@ -1218,7 +1218,7 @@ class str
    * $myObj->myProp3 = [1, 5, 6];
    * $myObj->myProp4 ="";
    *
-   * \bbn\x::hdump(\bbn\str::export($myObj,true));
+   * x::hdump(\bbn\str::export($myObj,true));
    * /*(string)
    * "{
    *      "myProp1"  =>  23,
@@ -1316,9 +1316,9 @@ class str
    * Replaces part of a string. If the part is not found, the method returns the string without change.
    *
    * ```php
-   * \bbn\x::hdump(\bbn\str::replace_once("cold","hot", "Today there is cold"));
+   * x::hdump(\bbn\str::replace_once("cold","hot", "Today there is cold"));
    * // (string)  "Today there is hot"
-   * \bbn\x::hdump(\bbn\str::replace_once("rain","hot", "Today there is cold"));
+   * x::hdump(\bbn\str::replace_once("rain","hot", "Today there is cold"));
    * // (string)  "Today there is cold"
    * ```
    *

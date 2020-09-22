@@ -7,6 +7,9 @@
  */
 namespace bbn\appui;
 
+use bbn;
+use bbn\x;
+
 class ide {
 
   use \bbn\models\tts\optional,
@@ -996,7 +999,8 @@ class ide {
    * @param string $ope The operation type (rename, copy)
    * @return bool
    */
-  private function operations(array $cfg, string $ope){
+  private function operations(array $cfg, string $ope)
+  {
     //die(var_dump($cfg, $ope));
     if ( is_string($ope) &&
       !empty($cfg['repository']) &&
@@ -1659,7 +1663,8 @@ class ide {
    * @param array $file
    * @return array|string
    */
-  public function save(array $file){
+  public function save(array $file)
+  {
     if ( $this->set_current_file($this->decipher_path($file['full_path'])) ){
       /*if ( $this->get_origin() !== 'appui-ide' ){
         die(var_dump(self::$current_file, self::$current_id));
@@ -1669,7 +1674,10 @@ class ide {
       if ( empty($file['code']) && ($file['tab'] !== '_ctrl') ){
 
         if ( @unlink(self::$current_file) ){
-          //temporaney
+          if ($file['extension'] === 'ts') {
+            @unlink(substr(self::$current_file, 0, -2).'js');
+          }
+            //temporaney
           if ( $this->get_origin() !== 'appui-ide' ){
             // Remove permissions
             $this->delete_perm();
@@ -1698,10 +1706,40 @@ class ide {
    
       if ( !file_put_contents(self::$current_file, $file['code']) ){
         return $this->error(_('Error: Save'));
-      };
+      }
+      if ($file['extension'] === 'ts') {
+        $cmd = "tsc -t 'ES2015' ";
+        if (!defined('BBN_IS_DEV') || !BBN_IS_DEV) {
+          $cmd .= '--removeComments ';
+        }
+        $error = shell_exec($cmd.escapeshellcmd(self::$current_file));
+        if ($error) {
+          return ['success' => true, 'error' => $error];
+        }
+      }
       return ['success' => true];
     }
     return $this->error(_('Error: Save'));
+  }
+
+  public function create_mvc_vue()
+  {
+    
+  }
+
+  public function create_mvc_js()
+  {
+    
+  }
+
+  public function create_mvc()
+  {
+    
+  }
+
+  public function create_action()
+  {
+    
   }
 
   /**
@@ -1710,30 +1748,46 @@ class ide {
    * @param array $cfg
    * @return bool
    */
-  public function create(array $cfg){
-    if ( !empty($cfg['repository']) &&
-      !empty($cfg['repository']['path']) &&
-      !empty($cfg['name']) &&
-      !empty($cfg['path']) &&
-      isset($cfg['is_file'], $cfg['extension'], $cfg['tab'], $cfg['tab_path'], $cfg['type'])
+  public function create(array $cfg)
+  {
+    if (x::has_deep_prop($cfg, ['repository', 'path'], true)
+        && x::has_props($cfg, ['name', 'path'], true)
+        && x::has_props($cfg, ['is_file', 'extension', 'tab', 'tab_path'])
     ){
 
       $path = $this->get_root_path($cfg['repository']['name']);
 
-      if ( ($cfg['repository']['alias_code'] === 'bbn-project') && !empty($cfg['type']) ){
-        if ( $cfg['type'] === 'components' ){
-          $path .= $cfg['path'].$cfg['name'];
-        }
-        if ( $cfg['type'] === 'mvc' ){
-          if ( $cfg['path'] === 'mvc/' ){
-            $path .= 'mvc/'.$cfg['tab_path'];
-          }
-          else{
-            $path .= 'mvc/'.$cfg['tab_path'].$cfg['path'];
-          }
-        }
-        if ( ($cfg['type'] === 'lib') || ($cfg['type'] === 'cli') ){
-          $path .= $cfg['path'];
+      if (($cfg['repository']['alias_code'] === 'bbn-project') && x::has_prop($cfg, 'template')) {
+        switch ($cfg['template']) {
+          case 'mvc_vue':
+            return;
+            break;
+          case 'mvc_js':
+            return;
+            break;
+          case 'mvc':
+            return;
+            break;
+          case 'action':
+            return;
+            break;
+          default:
+            if (!empty($cfg['type'])) {
+              if ( $cfg['type'] === 'components' ){
+                $path .= $cfg['path'].$cfg['name'];
+              }
+              if ( $cfg['type'] === 'mvc' ){
+                if ( $cfg['path'] === 'mvc/' ){
+                  $path .= 'mvc/'.$cfg['tab_path'];
+                }
+                else{
+                  $path .= 'mvc/'.$cfg['tab_path'].$cfg['path'];
+                }
+              }
+              if ( ($cfg['type'] === 'lib') || ($cfg['type'] === 'cli') ){
+                $path .= $cfg['path'];
+              }
+            }
         }
       }
       else {

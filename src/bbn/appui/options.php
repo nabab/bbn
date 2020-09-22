@@ -42,7 +42,7 @@ class options extends bbn\models\cls\db
 
   protected static
     /** @var array */
-    $_defaults = [
+    $default_class_cfg = [
       'errors' => [
       ],
       'table' => 'bbn_options',
@@ -336,31 +336,35 @@ class options extends bbn\models\cls\db
     if (!$this->is_init) {
       $this->cache_init();
       $t =& $this;
-      $this->root = $this->cache_set_get(
+      $this->root = $this->cache_get_set(
         function () use (&$t) {
-          return $t->db->select_one('bbn_options', 'id', ['id_parent' => null]);
+          return $t->db->select_one('bbn_options', 'id', ['id_parent' => null, 'code' => 'root']);
         },
         'root',
-        'init',
+        'root',
         60
       );
       if (!$this->root) {
         return false;
       }
       if (\defined('BBN_APP_NAME')) {
-        $this->default = $this->cache_set_get(
+        $this->default = $this->cache_get_set(
           function () use (&$t) {
-            $res = $t->db->select_one('bbn_options', 'id', [
-              'id_parent' => $this->root,
-              'code' => BBN_APP_NAME
-            ]);
+            $res = $t->db->select_one(
+              'bbn_options',
+              'id', 
+              [
+                'id_parent' => $this->root,
+                'code' => BBN_APP_NAME
+              ]
+            );
             if (!$res) {
               $res = $t->root;
             }
             return $res;
           },
           BBN_APP_NAME,
-          'init',
+          BBN_APP_NAME,
           60
         );
       }
@@ -1045,11 +1049,10 @@ class options extends bbn\models\cls\db
    * @param string $value The value field name for id column
    * @return array Options' list in a text/value indexed array
    */
-  public function text_value_options($id = null, string $text = 'text', string $value = 'value'): ?array
+  public function text_value_options($id, string $text = 'text', string $value = 'value'): ?array
   {
     $res = [];
-    $id = $this->from_code(...func_get_args());
-    if ( $cfg = $this->get_cfg($id) ){
+    if ($cfg = $this->get_cfg($id)) {
       if ( !empty($cfg['show_code']) || !empty($cfg['schema']) ){
         $opts = $this->full_options($id);
       }
@@ -1065,6 +1068,7 @@ class options extends bbn\models\cls\db
         if ( !empty($cfg['show_code']) ){
           $res[$i]['code'] = $o['code'];
         }
+        /*
         if ( !empty($cfg['schema']) ){
           if ( \is_string($cfg['schema']) ){
             $cfg['schema'] = json_decode($cfg['schema'], true);
@@ -1075,6 +1079,7 @@ class options extends bbn\models\cls\db
             }
           }
         }
+        */
         $i++;
       }
     }
@@ -1567,7 +1572,7 @@ class options extends bbn\models\cls\db
   public function get_cfg($code = null): ?array
   {
     if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
-      if ( $tmp = $this->cache_get($id, __METHOD__) ){
+      if ( $tmp = $this->cache_get($id, __FUNCTION__) ){
         return $tmp;
       }
       $c =& $this->class_cfg;
@@ -1630,7 +1635,7 @@ class options extends bbn\models\cls\db
       foreach ( $mandatories as $m ){
         $cfg[$m] = empty($cfg[$m]) ? null : $cfg[$m];
       }
-      $this->cache_set($id, __METHOD__, $cfg);
+      $this->cache_set($id, __FUNCTION__, $cfg);
       return $cfg;
     }
     return null;
@@ -3168,11 +3173,14 @@ class options extends bbn\models\cls\db
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function js_categories(){
+  public function js_categories($id = null){
+    if ( $tmp = $this->cache_get($id, __FUNCTION__) ){
+      return $tmp;
+    }
     $res = [
       'categories' => []
     ];
-    if ( $cats = $this->full_options(false) ){
+    if ( $cats = $this->full_options($id ?: false) ){
       foreach ( $cats as $cat ){
         if ( !empty($cat['tekname']) ){
           $res[$cat['tekname']] = $this->text_value_options($cat['id']);
@@ -3180,6 +3188,7 @@ class options extends bbn\models\cls\db
         }
       }
     }
+    $this->cache_set($id, __FUNCTION__, $res);
     return $res;
   }
 

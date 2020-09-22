@@ -66,17 +66,9 @@ abstract class cache extends bbn\models\cls\basic
 		return $this;
 	}
 
-	public function cache_set_get(callable $fn, $uid, $method = '', $data = null, $ttl = 0){
+	public function cache_get_set(callable $fn, $uid, $method = '', $ttl = 0){
 		$cn = $this->_cache_name($uid, $method);
-		if (!($tmp = $this->cacher->get_raw($cn, $ttl))) {
-			if ($data = $fn()) {
-				$this->cacher->set($cn, $data, $ttl);
-			}
-		}
-		else {
-			$data = $tmp['value'];
-		}
-		return $data ?: false;
+		return $this->cacher->get_set($fn, $cn, $ttl);
 	}
 
 	public function cache_has($uid, $method = '', $ttl = 0){

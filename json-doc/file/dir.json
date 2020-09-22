@@ -15,7 +15,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/file\/dir.php",
     "startLine": 19,
-    "endLine": 598,
+    "endLine": 611,
     "contentConstructor": null,
     "methods": {
         "clean": {
@@ -543,9 +543,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $chmod = false)\n  {\n      return false;\n    }\n    clearstatcache();\n    if ( !is_dir($dir) ){\n      $bits = explode('\/', $dir);\n      $path = empty($bits[0]) ? '\/' : '';\n      foreach ( $bits as $i => $b ){\n        if ( !empty($b) ){\n          $path .= $b;\n          if ( !is_dir($path) ){\n            if ( !mkdir($path) || !is_dir($path) ){\n              return false;\n            }\n            if ( $chmod ){\n              @chmod($path, $chmod);\n            }\n          }\n          $path .= '\/';\n        }\n      }\n    }\n    return $dir;\n  }",
+            "code": "function($dir, $chmod = false)\n  {\n    if ( !$dir || !\\is_string($dir) ){\n      return null;\n\t\t}\n\t\t$bits = [];\n\t\t\/\/clearstatcache();\n\t\t$path = self::clean($dir);\n    while ( $path && !is_dir($path) ){\n\t\t\t$bits[] = basename($path);\n\t\t\t$path = dirname($path);\n\t\t}\n\t\tif (is_dir($path)) {\n\t\t\tforeach (array_reverse($bits) as $b) {\n\t\t\t\tif (!empty($b)) {\n\t\t\t\t\t$path .= '\/'.$b;\n\t\t\t\t\ttry {\n\t\t\t\t\t\t@mkdir($path);\n\t\t\t\t\t}\n\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\\bbn\\x::error_log($e->getMessage());\n\t\t\t\t\t}\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t}\n\t\t\t\t\tif ($chmod) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tchmod($path, $chmod);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\x::error_log($e->getMessage());\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n    return $dir;\n  }",
             "startLine": 482,
-            "endLine": 506,
+            "endLine": 519,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -554,7 +554,10 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string",
+                null
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -597,8 +600,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($orig, $dest, $st = '_v', $length = 0)\n  {\n    if ( file_exists($orig) && self::create_path(\\dirname($dest)) ){\n      if ( file_exists($dest) ){\n        if ( $st === true ){\n          self::delete($dest);\n        }\n        else{\n          $i = 1;\n          while ( $i ){\n            $dir = \\dirname($dest).'\/';\n            $file_name = bbn\\str::file_ext($dest, 1);\n            $file = $file_name[0].$st;\n            if ( $length > 0 ){\n              $len = \\strlen(bbn\\str::cast($i));\n              if ( $len > $length ){\n                return false;\n              }\n              $file .= str_repeat('0', $length - $len);\n            }\n            $file .= bbn\\str::cast($i);\n            if ( !empty($file_name[1]) ){\n              $file .= '.'.$file_name[1];\n            }\n            $i++;\n            if ( !file_exists($dir.$file) ){\n              $dest = $dir.$file;\n              $i = false;\n            }\n          }\n        }\n      }\n      if ( rename($orig, $dest) ){\n        return true;\n      }\n    }\n    return false;\n  }",
-            "startLine": 528,
-            "endLine": 565,
+            "startLine": 541,
+            "endLine": 578,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -672,8 +675,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($src, $dst)\n  {\n    if ( is_file($src) ){\n      return copy($src, $dst);\n    }\n    if ( is_dir($src) && self::create_path($dst) ){\n      $files = self::get_files($src);\n      $dirs = self::get_dirs($src);\n      foreach ( $files as $f ){\n        copy($f, $dst.'\/'.basename($f));\n      }\n      foreach ( $dirs as $f ){\n        self::copy($f, $dst.'\/'.basename($f));\n      }\n      return true;\n    }\n    else{\n      return false;\n    }\n  }",
-            "startLine": 578,
-            "endLine": 597,
+            "startLine": 591,
+            "endLine": 610,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
