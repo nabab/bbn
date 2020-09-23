@@ -612,6 +612,7 @@ MYSQL
           $is_null = true;
           $is_uid = false;
           $is_date = false;
+          $is_bool = false;
           $model = null;
           if ($is_having) {
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
@@ -655,16 +656,21 @@ MYSQL
             }
             elseif ($f['value'] && str::is_uid($f['value'])) {
               $is_uid = true;
-            } elseif (\is_int($f['value']) || \is_float($f['value'])) {
+            }
+            elseif (\is_int($f['value']) || \is_float($f['value'])) {
               $is_number = true;
             }
-          } else {
+          }
+          else {
             $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
+          }
+          if (isset($f['value']) && in_array($f['value'], [1, 0, true, false], true)) {
+            // Always use LIKE as booleans and 1 and 0 are interpretated badly by MySQL
+            $is_bool = true;
           }
           switch (strtolower($f['operator'])) {
             case '=':
-              // Always use LIKE as booleans and 1 and 0 are interpretated badly by MySQL
-              if ($is_uid) {
+              if ($is_uid && $is_bool) {
                 $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
               }
               else {
@@ -674,28 +680,34 @@ MYSQL
             case '!=':
               if (isset($f['exp'])) {
                 $res .= '!= ' . $f['exp'];
-              } else {
+              }
+              else {
                 $res .= '!= ?';
               }
               break;
             case 'like':
               if (isset($f['exp'])) {
                 $res .= 'LIKE ' . $f['exp'];
-              } else {
+              }
+              else {
                 $res .= 'LIKE ?';
               }
               break;
             case 'not like':
               if (isset($f['exp'])) {
                 $res .= 'NOT LIKE ' . $f['exp'];
-              } else {
+              }
+              else {
                 $res .= 'NOT LIKE ?';
               }
               break;
             case 'eq':
             case 'is':
-              if ($is_uid) {
+              if ($is_uid && $is_bool) {
                 $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
+              }
+              elseif ($is_uid) {
+                $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
               }
               else {
                 $res .= isset($f['exp']) ? '= ' . $f['exp'] : ($is_number ? '= ?' : 'LIKE ?');
@@ -704,7 +716,7 @@ MYSQL
             case 'neq':
             case 'isnot':
               if ($is_uid) {
-                $res .= isset($f['exp']) ? 'NOT LIKE ' . $f['exp'] : 'NOT LIKE ?';
+                $res .= isset($f['exp']) ? '!= ' . $f['exp'] : '!= ?';
               }
               else {
                 $res .= isset($f['exp']) ? '!= ' . $f['exp'] : ($is_number ? '!= ?' : 'NOT LIKE ?');
@@ -788,7 +800,7 @@ MYSQL
               break;
 
             default:
-              $res .= $is_uid ? 'LIKE ?' : '= ?';
+              $res .= $is_uid && $is_bool ? 'LIKE ?' : '= ?';
               break;
           }
         }

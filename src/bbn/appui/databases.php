@@ -7,6 +7,7 @@
  */
 
 namespace bbn\appui;
+
 use bbn;
 
 class databases extends bbn\models\cls\cache
@@ -333,13 +334,16 @@ class databases extends bbn\models\cls\cache
         && ($id_parent = $this->o->from_code('tables', $db))
         && ($fo = array_values($this->o->code_options($id_parent)))
     ) {
-      $res = array_map(function ($a) {
-        return [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code']
-        ];
-      }, $fo);
+      $res = array_map(
+        function ($a) {
+          return [
+            'id' => $a['id'],
+            'text' => $a['text'],
+            'name' => $a['code']
+          ];
+        },
+        $fo
+      );
       return $res ?: [];
     }
     return null;
@@ -763,12 +767,14 @@ class databases extends bbn\models\cls\cache
    */
   public function import_host(string $host, bool $full = false): ?string
   {
-    if (!($id_host = self::get_option_id($host, 'connections'))){
-      $id_host = $this->o->add([
-        'id_parent' => self::get_option_id('connections'),
-        'text' => $host,
-        'code' => $host,
-      ]);
+    if (!($id_host = self::get_option_id($host, 'connections'))) {
+      $id_host = $this->o->add(
+        [
+          'id_parent' => self::get_option_id('connections'),
+          'text' => $host,
+          'code' => $host,
+        ]
+      );
     }
     if ($id_host && $full) {
       /** @todo but might be heavy */
@@ -789,83 +795,111 @@ class databases extends bbn\models\cls\cache
     $id_db = null;
     if ($id_dbs = self::get_option_id('dbs')) {
       if (!($id_db = $this->o->from_code($db, $id_dbs))) {
-        if ($id_db = $this->o->add([
-          'id_parent' => $id_dbs,
-          'text' => $db,
-          'code' => $db,
-        ])) {
+        if ($id_db = $this->o->add(
+          [
+            'id_parent' => $id_dbs,
+            'text' => $db,
+            'code' => $db,
+          ]
+        )
+        ) {
           $this->o->set_cfg($id_db, ['allow_children' => 1, 'show_code' => 1]);
         }
       }
       if ($id_db) {
         if (!($id_procedures = $this->o->from_code('procedures', $id_db))
-            && ($id_procedures = $this->o->add([
-              'id_parent' => $id_db,
-              'text' => _('Procedures'),
-              'code' => 'procedures',
-            ]))
+            && ($id_procedures = $this->o->add(
+              [
+                'id_parent' => $id_db,
+                'text' => _('Procedures'),
+                'code' => 'procedures',
+              ]
+            ))
         ) {
-          $this->o->set_cfg($id_procedures, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'allow_children' => 1
-          ]);
+          $this->o->set_cfg(
+            $id_procedures,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
         if (!($id_connections = $this->o->from_code('connections', $id_db))
-            && ($id_connections = $this->o->add([
-              'id_parent' => $id_db,
-              'text' => _('Connections'),
-              'code' => 'connections',
-            ]))
+            && ($id_connections = $this->o->add(
+              [
+                'id_parent' => $id_db,
+                'text' => _('Connections'),
+                'code' => 'connections',
+              ]
+            ))
         ) {
-          $this->o->set_cfg($id_connections, [
-            'show_alias' => 1,
-            'notext' => 1,
-            'id_root_alias' => self::get_option_id('connections'),
-            'root_alias' => 'Connections'
-          ]);
+          $this->o->set_cfg(
+            $id_connections,
+            [
+              'show_alias' => 1,
+              'notext' => 1,
+              'id_root_alias' => self::get_option_id('connections'),
+              'root_alias' => 'Connections'
+            ]
+          );
         }
         if (!($id_functions = $this->o->from_code('functions', $id_db))
-            && ($id_functions = $this->o->add([
-              'id_parent' => $id_db,
-              'text' => _('Function'),
-              'code' => 'functions',
-            ]))
+            && ($id_functions = $this->o->add(
+              [
+                'id_parent' => $id_db,
+                'text' => _('Function'),
+                'code' => 'functions',
+              ]
+            ))
         ) {
-          $this->o->set_cfg($id_functions, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'allow_children' => 1
-          ]);
+          $this->o->set_cfg(
+            $id_functions,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
         if (!($id_tables = $this->o->from_code('tables', $id_db))
-            && ($id_tables = $this->o->add([
-              'id_parent' => $id_db,
-              'text' => _('Tables'),
-              'code' => 'tables',
-            ]))
+            && ($id_tables = $this->o->add(
+              [
+                'id_parent' => $id_db,
+                'text' => _('Tables'),
+                'code' => 'tables',
+              ]
+            ))
         ) {
-          $this->o->set_cfg($id_tables, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'allow_children' => 1
-          ]);
+          $this->o->set_cfg(
+            $id_tables,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
-        if ( $host ){
+        if ($host) {
           $host_id = bbn\str::is_uid($host) ? $host : $this->host_id($host);
         }
         else {
           $host_id = $this->retrieve_host($id_db);
         }
         if ($host_id && $id_connections && $id_functions && $id_procedures && $id_tables) {
-          if (!$this->db->count('bbn_options', [
+          if (!$this->db->count(
+            'bbn_options', [
             'id_parent' => $id_connections,
             'id_alias' => $host_id
-          ])) {
-            $this->o->add([
+            ]
+          )
+          ) {
+            $this->o->add(
+              [
               'id_parent' => $id_connections,
               'id_alias' => $host_id
-            ]);
+              ]
+            );
           }
           if ($full) {
             if (!empty($host_id)) {
@@ -886,14 +920,20 @@ class databases extends bbn\models\cls\cache
     return $id_db;
   }
 
-  public function retrieve_host(string $id_db): ?string{
+  /**
+   * Returns the ID of the host of the given DB.
+   *
+   * @param string $id_db
+   * @return string|null
+   */
+  public function retrieve_host(string $id_db): ?string
+  {
     
     if ($this->check()
         && defined('BBN_DB_USER')
         && defined('BBN_DB_HOST')
         && ($connections = $this->o->full_options('connections', $id_db))
-    )
-    {
+    ) {
       foreach ($connections as $c) {
         if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {
           return $c['alias']['id'];

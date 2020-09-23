@@ -10,7 +10,6 @@ namespace bbn\models\tts;
 
 use bbn;
 
-
 trait dbconfig
 {
 
@@ -29,19 +28,20 @@ trait dbconfig
    * @param array $cfg
    * @return $this
    */
-  private function _init_class_cfg(array $cfg = []){
+  private function _init_class_cfg(array $cfg = [])
+  {
     if (isset(self::$default_class_cfg)) {
       $cfg = bbn\x::merge_arrays(self::$default_class_cfg, $cfg);
     }
 
-    if ( !isset($cfg['tables'], $cfg['table'], $cfg['arch']) ){
+    if (!isset($cfg['tables'], $cfg['table'], $cfg['arch'])) {
       die('The class '.\get_class($this).' is not configured properly to work with trait dbconfig');
     }
 
     $this->class_table = $cfg['table'];
     // We completely replace the table structure, no merge
-    foreach ( $cfg['arch'] as $t => $a ){
-      if ( $cfg['tables'][$t] === $cfg['table'] ){
+    foreach ($cfg['arch'] as $t => $a){
+      if ($cfg['tables'][$t] === $cfg['table']) {
         $this->class_table_index = $t;
       }
     }
@@ -60,9 +60,11 @@ trait dbconfig
    */
   public function exists($id): bool
   {
-    $res = $this->db->count($this->class_table, [
+    $res = $this->db->count(
+      $this->class_table, [
       $this->class_cfg['arch'][$this->class_table_index]['id'] => $id
-    ]);
+      ]
+    );
     return (bool)$res;
   }
 
@@ -70,13 +72,13 @@ trait dbconfig
    * Return the
    * @return mixed
    */
-  public function get_class_cfg(){
+  public function get_class_cfg()
+  {
     return $this->class_cfg;
   }
 
-  public function get_fields(){
+  public function get_fields()
+  {
     return $this->fields;
   }
-
-
 }

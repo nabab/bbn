@@ -3,7 +3,9 @@
  * @package user
  */
 namespace bbn\user;
+
 use bbn;
+
 /**
  * A user authentication Class
  *
@@ -20,7 +22,7 @@ use bbn;
 class profile
 {
 
-	protected static
+  protected static
     /** @var array */
     $default_class_cfg = [
       'table' => 'bbn_users_profiles',
@@ -31,7 +33,7 @@ class profile
       ]
     ];
 
-	protected
+  protected
     /** @var db */
     $db,
     /** @var int */
@@ -44,13 +46,14 @@ class profile
 
   /**
    * connection constructor.
-   * @param db $db
+   * @param db      $db
    * @param session $session
-   * @param array $cfg
-   * @param string $credentials
+   * @param array   $cfg
+   * @param string  $credentials
    */
-  public function __construct(bbn\db $db, bbn\user $user, array $cfg = []){
-    if ( $tmp = $user->get_profile() ){
+  public function __construct(bbn\db $db, bbn\user $user, array $cfg = [])
+  {
+    if ($tmp = $user->get_profile()) {
       $this->id = $tmp['id'];
       $this->id_group = $tmp['id_group'];
       $this->id_user = $tmp['id_user'];
@@ -59,24 +62,23 @@ class profile
       $this->cfg = bbn\x::merge_arrays(self::$default_class_cfg, $cfg);
     }
     return $this;
-	}
+  }
 
   /**
    * @return int
    */
   public function get_id()
   {
-    if ( $this->check() ){
+    if ($this->check()) {
       return $this->id;
     }
   }
 
-	/**
-	 * @return boolean
-	 */
-	public function check()
-	{
-		return $this->auth;
-	}
-
+    /**
+     * @return boolean
+     */
+  public function check()
+  {
+      return $this->auth;
+  }
 }

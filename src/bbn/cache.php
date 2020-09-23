@@ -11,7 +11,8 @@ namespace bbn;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  */
 
-class cache{
+class cache
+{
 
   private static $is_init = false;
   private static $type = null;
@@ -42,7 +43,8 @@ class cache{
     self::$type = $type;
   }
 
-  private static function _sanitize($st){
+  private static function _sanitize($st)
+  {
     $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
     $st = mb_ereg_replace("([\.]{2,})", '', $st);
     return $st;
@@ -51,7 +53,7 @@ class cache{
   /**
    * @param string $dir
    * @param string $path
-   * @param bool $parent
+   * @param bool   $parent
    * @return string
    */
   private static function _dir(string $dir, string $path, $parent = true): string
@@ -196,26 +198,25 @@ class cache{
   /**
    * Checks whether a valid cache exists for the given item.
    * 
-   * @param string $item The name of the item
-   * @param string|int $ttl The time-to-live value
+   * @param string     $item The name of the item
+   * @param string|int $ttl  The time-to-live value
    * @return bool
    */
   public function has(string $item, $ttl = 0): bool
   {
     
-    if ( self::$type ){
-      switch ( self::$type ){
+    if (self::$type) {
+      switch (self::$type){
         case 'apc':
           return apc_exists($item);
         case 'memcache':
           return $this->obj->get($item) !== $item;
         case 'files':
           $file = self::_file($item, $this->path);
-          if ( is_file($file) ){
+          if (is_file($file)) {
             $t = json_decode(file_get_contents($file), true);
-            if ( 
-              (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
-              && (!$t['expire'] || ($t['expire'] > time()))
+            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
+                && (!$t['expire'] || ($t['expire'] > time()))
             ) {
               return true;
             }
@@ -235,14 +236,14 @@ class cache{
   public function delete(string $item): bool
   {
     if (self::$type) {
-      switch ( self::$type ){
+      switch (self::$type){
         case 'apc':
           return apc_delete($item);
         case 'memcache':
           return $this->obj->delete($item);
         case 'files':
           $file = self::_file($item, $this->path);
-          if ( is_file($file) ){
+          if (is_file($file)) {
             return !!unlink($file);
           }
           return false;
@@ -258,21 +259,21 @@ class cache{
    */
   public function delete_all(string $st = null): bool
   {
-    if ( self::$type === 'files' ){
+    if (self::$type === 'files') {
       $dir = self::_dir($st, $this->path, false);
-      if ( is_dir($dir) ){
+      if (is_dir($dir)) {
         return !!file\dir::delete($dir, $dir === $this->path ? false : true);
       }
-      else if ( is_file($dir.'.bbn.cache') ){
+      elseif (is_file($dir.'.bbn.cache')) {
         return !!unlink($dir.'.bbn.cache');
       }
     }
-    else if ( self::$type ){
+    elseif (self::$type) {
       $items = $this->items($st);
       $res = 0;
-      foreach ( $items as $item ){
-        if ( !$st || strpos($item, $st) === 0 ){
-          switch ( self::$type ){
+      foreach ($items as $item){
+        if (!$st || strpos($item, $st) === 0) {
+          switch (self::$type){
             case 'apc':
               $res += (int)apc_delete($item);
               break;
@@ -306,7 +307,7 @@ class cache{
    */
   public function timestamp(string $item): ?int
   {
-    if ( $r = $this->get_raw($item) ){
+    if ($r = $this->get_raw($item)) {
       return $r['timestamp'];
     }
     return null;
@@ -320,7 +321,7 @@ class cache{
    */
   public function hash(string $item): ?string
   {
-    if ( $r = $this->get_raw($item) ){
+    if ($r = $this->get_raw($item)) {
       return $r['hash'];
     }
     return null;
@@ -329,16 +330,16 @@ class cache{
   /**
    * Checks whether or not the given item is more recent than the given timestamp.
    * 
-   * @param string $item The name of the item
+   * @param string   $item The name of the item
    * @param null|int $time The timestamp to which the item's timestamp will be compared
    * @return bool
    */
   public function is_new(string $item, int $time = null): bool
   {
-    if ( !$time ){
+    if (!$time) {
       return false;
     }
-    if ( $r = $this->get_raw($item) ){
+    if ($r = $this->get_raw($item)) {
       return $r['timestamp'] > $time;
     }
     return true;
@@ -347,31 +348,35 @@ class cache{
   /**
    * Stores the given value in the cache for as long as says the TTL.
    * 
-   * @param string $item The name of the item
+   * @param string                                  $item The name of the item
    * @param $val The value to be stored in the cache
-   * @param int $ttl The length in seconds during which the value will be considered as valid
+   * @param int                                     $ttl  The length in seconds during which the value will be considered as valid
    * @return bool Returns true in case of success false otherwise
    */
   public function set(string $item, $val, int $ttl = 10, float $exec = null): bool
   {
-    if ( self::$type ){
+    if (self::$type) {
       $ttl = self::ttl($ttl);
       $hash = self::make_hash($val);
-      switch ( self::$type ){
+      switch (self::$type){
         case 'apc':
-          return \apc_store($item, [
+          return \apc_store(
+            $item, [
             'timestamp' => microtime(1),
             'hash' => $hash,
             'ttl' => $ttl,
             'value' => $val
-          ], $ttl);
+            ], $ttl
+          );
         case 'memcache':
-          return $this->obj->set($item, [
+          return $this->obj->set(
+            $item, [
             'timestamp' => microtime(1),
             'hash' => $hash,
             'ttl' => $ttl,
             'value' => $val
-          ], false, $ttl);
+            ], false, $ttl
+          );
         case 'files':
           $file = self::_file($item, $this->path);
           if (file\dir::create_path(dirname($file))) {
@@ -383,7 +388,9 @@ class cache{
               'exec' => $exec,
               'value' => $val
             ];
-            return file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT)) ? true : false;
+            if (file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT))) {
+              return true;
+            }
           }
       }
     }
@@ -462,7 +469,7 @@ class cache{
    * Returns the cache object (array) as stored.
    * 
    * @param string $item The name of the item
-   * @param int $ttl The cache length
+   * @param int    $ttl  The cache length
    * @return null|array
    */
   private function get_raw(string $item, int $ttl = 0, bool $force = false): ?array
@@ -512,12 +519,12 @@ class cache{
    * Returns the cache value, false otherwise.
    * 
    * @param string $item The name of the item
-   * @param int $ttl The cache length
+   * @param int    $ttl  The cache length
    * @return mixed
    */
   public function get(string $item, int $ttl = 0)
   {
-    if ( $r = $this->get_raw($item, $ttl) ){
+    if ($r = $this->get_raw($item, $ttl)) {
       return $r['value'];
     }
     return false;
@@ -526,9 +533,9 @@ class cache{
   /**
    * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
    * 
-   * @param string $item The name of the item
-   * @param function $fn The function which returns the value for the cache
-   * @param int $ttl The cache length
+   * @param string   $item The name of the item
+   * @param function $fn   The function which returns the value for the cache
+   * @param int      $ttl  The cache length
    * @return mixed
    */
   public function get_set(callable $fn, string $item, int $ttl = 0)
@@ -575,9 +582,10 @@ class cache{
   /**
    * @return array|bool|false
    */
-  public function info(){
-    if ( self::$type ){
-      switch ( self::$type ){
+  public function info()
+  {
+    if (self::$type) {
+      switch (self::$type){
         case 'apc':
           return apc_cache_info();
         case 'memcache':
@@ -591,9 +599,10 @@ class cache{
   /**
    * @return array|bool|false
    */
-  public function stat(){
-    if ( self::$type ){
-      switch ( self::$type ){
+  public function stat()
+  {
+    if (self::$type) {
+      switch (self::$type){
         case 'apc':
           return apc_cache_info();
         case 'memcache':
@@ -608,25 +617,26 @@ class cache{
    * @param string $dir
    * @return array
    */
-  public function items(string $dir = ''){
-    if ( self::$type ){
-      switch ( self::$type ){
+  public function items(string $dir = '')
+  {
+    if (self::$type) {
+      switch (self::$type){
         case 'apc':
           $all = apc_cache_info();
           $list = [];
-          foreach ( $all['cache_list'] as $a ){
+          foreach ($all['cache_list'] as $a){
             array_push($list, $a['info']);
           }
           return $list;
         case 'memcache':
           $list = [];
           $allSlabs = $this->obj->getExtendedStats('slabs');
-          foreach ( $allSlabs as $server => $slabs ){
-            foreach ( $slabs as $slabId => $slabMeta ){
+          foreach ($allSlabs as $server => $slabs){
+            foreach ($slabs as $slabId => $slabMeta){
               $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);
-              foreach ( $cdump AS $keys => $arrVal ){
-                foreach ( $arrVal AS $k => $v ){
-                  if ( $k !== 'CLIENT_ERROR' ){
+              foreach ($cdump AS $keys => $arrVal){
+                foreach ($arrVal AS $k => $v){
+                  if ($k !== 'CLIENT_ERROR') {
                     echo array_push($list, $k);
                   }
                 }
@@ -636,18 +646,22 @@ class cache{
           return $list;
         case 'files':
           $cache =& $this;
-          $list = array_filter(array_map(function($a) use ($dir){
-            return ( $dir ? $dir.'/' : '' ).basename($a, '.bbn.cache');
-          }, file\dir::get_files($this->path.($dir ? '/'.$dir : ''))),
-            function($a) use ($cache){
-            // Only gives valid cache
+          $list = array_filter(
+            array_map(
+              function ($a) use ($dir) {
+                return ( $dir ? $dir.'/' : '' ).basename($a, '.bbn.cache');
+              }, file\dir::get_files($this->path.($dir ? '/'.$dir : ''))
+            ),
+            function ($a) use ($cache) {
+              // Only gives valid cache
               return $cache->has($a);
-          });
+            }
+          );
           $dirs = file\dir::get_dirs($this->path.($dir ? '/'.$dir : ''));
-          if ( \count($dirs) ){
-            foreach ( $dirs as $d ){
+          if (\count($dirs)) {
+            foreach ($dirs as $d){
               $res = $this->items($dir ? $dir.'/'.basename($d) : basename($d));
-              foreach ( $res as $r ){
+              foreach ($res as $r){
                 array_push($list, $r);
               }
             }
@@ -656,5 +670,4 @@ class cache{
       }
     }
   }
-
 }

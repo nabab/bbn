@@ -7,6 +7,7 @@
  */
 
 namespace bbn\appui;
+
 use bbn;
 use Error;
 
@@ -32,7 +33,7 @@ class mailings extends bbn\models\cls\db
    */
   private function _note(): notes
   {
-    if ( !$this->notes ){
+    if (!$this->notes) {
       $this->notes = new notes($this->db);
     }
     return $this->notes;
@@ -45,13 +46,14 @@ class mailings extends bbn\models\cls\db
    */
   private function _medias(): medias
   {
-    if ( !$this->medias ){
+    if (!$this->medias) {
       $this->medias = new medias($this->db);
     }
     return $this->medias;
   }
 
-  private static function _get_cfgs(){
+  private static function _get_cfgs()
+  {
     if (is_null(self::$_cfgs)) {
       $cfgs = self::get_options('sender');
       self::$_cfgs = [];
@@ -75,7 +77,7 @@ class mailings extends bbn\models\cls\db
   private static function _get_mailer(string $id = null): ?bbn\mail
   {
     if (!$id) {
-      if ($cfgs = self::_get_cfgs()){
+      if ($cfgs = self::_get_cfgs()) {
         $cfg = $cfgs[0];
       }
     }
@@ -93,7 +95,7 @@ class mailings extends bbn\models\cls\db
 
   public function __construct(bbn\db $db, array $cfg = null)
   {
-    if ( $db->check() ){
+    if ($db->check()) {
       self::optional_init();
       $this->get_options_text_value('text');
       $this->db = $db;
@@ -136,7 +138,7 @@ class mailings extends bbn\models\cls\db
   public function is_sending(string $id = null): bool
   {
     $cond = ['state' => 'sending'];
-    if ( $id ){
+    if ($id) {
       $cond['id'] = $id;
     }
     return $this->db->count('bbn_emailings', $cond) > 0;
@@ -151,7 +153,7 @@ class mailings extends bbn\models\cls\db
   public function is_suspended(string $id = null): bool
   {
     $cond = ['state' => 'suspended'];
-    if ( $id ){
+    if ($id) {
       $cond['id'] = $id;
     }
     return $this->db->count('bbn_emailings', $cond) > 0;
@@ -177,14 +179,15 @@ class mailings extends bbn\models\cls\db
    */
   public function get_next_mailing(): ?array
   {
-    if (
-      $this->check() &&
-      ($id = $this->db->select_one('bbn_emailings', 'id', [
-        ['state', 'LIKE', 'ready'],
-        ['sent', '<', date('Y-m-d H:i:s')],
-        ['sent', 'isnotnull']
-      ], ['sent' => 'ASC']))
-    ){
+    if ($this->check() 
+        && ($id = $this->db->select_one(
+          'bbn_emailings', 'id', [
+          ['state', 'LIKE', 'ready'],
+          ['sent', '<', date('Y-m-d H:i:s')],
+          ['sent', 'isnotnull']
+          ], ['sent' => 'ASC']
+        ))
+    ) {
       return $this->get_mailing($id);
     }
     return null;
@@ -199,7 +202,7 @@ class mailings extends bbn\models\cls\db
    */
   public function change_state(string $id, string $new_state): bool
   {
-    if ( $this->check() ){
+    if ($this->check()) {
       $cur = $this->db->select_one("bbn_emailings", 'state', ['id' => $id]);
       if (($cur === 'sent') || ($cur === 'cancelled')) {
         return false;
@@ -231,12 +234,11 @@ class mailings extends bbn\models\cls\db
    */
   public function get_mailing(string $id): ?array
   {
-    if ( $this->check() ){
+    if ($this->check()) {
       $notes = $this->_note();
-      if (
-        ($row = $this->db->rselect('bbn_emailings', [], ['id' => $id])) &&
-        ($note = $notes->get($row['id_note']))
-      ){
+      if (($row = $this->db->rselect('bbn_emailings', [], ['id' => $id])) 
+          && ($note = $notes->get($row['id_note']))
+      ) {
         return array_merge($note, $row);
       }
     }
@@ -255,7 +257,8 @@ class mailings extends bbn\models\cls\db
       $sent = 0;
       $successes = 0;
       $mailings = [];
-      foreach ( $this->db->rselect_all([
+      foreach ($this->db->rselect_all(
+        [
         'table' => 'bbn_emails',
         'fields' => ['bbn_emails.id', 'email', 'id_mailing', 'subject', 'text', 'cfg', 'status', 'delivery', 'read', 'priority'],
         'join' => [[
@@ -304,11 +307,12 @@ class mailings extends bbn\models\cls\db
         ],
         'order' => ['priority'],
         'limit' => $limit
-      ]) as $r) {
+        ]
+      ) as $r) {
         $sent++;
         $ok = false;
         $att = [];
-        if ( !empty($r['id_mailing']) ){
+        if (!empty($r['id_mailing'])) {
           if (!isset($mailings[$r['id_mailing']])) {
             $mailings[$r['id_mailing']] = $this->get_mailing($r['id_mailing']);
           }
@@ -321,7 +325,7 @@ class mailings extends bbn\models\cls\db
           $subject = $mailing['title'];
           $sender = $mailing['sender'];
           if (!empty($mailing['medias'])) {
-            foreach ( $mailing['medias'] as $a ){
+            foreach ($mailing['medias'] as $a){
               if (!empty($a['file']) && file_exists($a['file'])) {
                 $att[] = $a['file'];
               }
@@ -332,43 +336,46 @@ class mailings extends bbn\models\cls\db
           $text = $r['text'];
           $subject = $r['subject'];
           $sender = null;
-          if ( $r['cfg'] ){
+          if ($r['cfg']) {
             $r['cfg'] = json_decode($r['cfg'], true);
-            if ( !empty($r['cfg']['attachments']) ){
-              foreach ( $r['cfg']['attachments'] as $a ){
+            if (!empty($r['cfg']['attachments'])) {
+              foreach ($r['cfg']['attachments'] as $a){
                 $f = \bbn\x::indexOf($a, '/') === 0 ? $a : \bbn\mvc::get_content_path().$a;
-                if ( file_exists($f) ){
+                if (file_exists($f)) {
                   $att[] = $f;
                 }
               }
             }
           }
         }
-        if ( $subject && $text && \bbn\str::is_email($r['email']) ){
+        if ($subject && $text && \bbn\str::is_email($r['email'])) {
           $params = [
             'to' => $r['email'],
             'subject' => $subject,
             'text' => $text
           ];
-          if ( count($att) ){
+          if (count($att)) {
             $params['attachments'] = $att;
           }
-          if ( $ok = $this->send($params, $sender) ){
+          if ($ok = $this->send($params, $sender)) {
             $successes++;
           }
         }
-        $this->db->update('bbn_emails', [
+        $this->db->update(
+          'bbn_emails', [
           'status' => $ok ? 'success' : 'failure',
           'delivery' => date('Y-m-d H:i:s')
-        ], ['id' => $r['id']]);
+          ], ['id' => $r['id']]
+        );
       }
       foreach ($mailings as $id => $m) {
-        if (
-          ($m['state'] === 'sending')
-          && !$this->db->count('bbn_emails', [
-            'id_mailing' => $id,
-            'status'=> 'ready'
-          ])
+        if (($m['state'] === 'sending')
+            && !$this->db->count(
+              'bbn_emails', [
+              'id_mailing' => $id,
+              'status'=> 'ready'
+              ]
+            )
         ) {
           $this->change_state($id, 'sent');
         }
@@ -396,34 +403,36 @@ class mailings extends bbn\models\cls\db
   public function add(array $cfg): ?array
   {
     $notes = $this->_note();
-    if (
-      $this->check()
-      && $notes
-      && bbn\x::has_props($cfg, ['title', 'content', 'sender'], true)
-      && ($id_type = notes::get_option_id('mailings','types'))
-      && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
-      // Cannot give a date if no recipients selected
-      && (!empty($cfg['recipients']) || empty($cfg['sent']))
-    ){
+    if ($this->check()
+        && $notes
+        && bbn\x::has_props($cfg, ['title', 'content', 'sender'], true)
+        && ($id_type = notes::get_option_id('mailings','types'))
+        && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
+        // Cannot give a date if no recipients selected
+        && (!empty($cfg['recipients']) || empty($cfg['sent']))
+    ) {
       if (empty($cfg['sent'])) {
         $cfg['sent'] = null;
       }
-      if ($this->db->insert('bbn_emailings', [
+      if ($this->db->insert(
+        'bbn_emailings', [
         'id_note' => $id_note,
         'version' => 1,
         'sender' => $cfg['sender'],
         'recipients' => $cfg['recipients'] ?: null,
         'sent' => $cfg['sent']
-      ])){
+        ]
+      )
+      ) {
         $cfg['id'] = $this->db->last_id();
         $cfg['id_note'] = $id_note;
         $cfg['version'] = 1;
         if (!empty($cfg['attachments'])) {
-          foreach ( $cfg['attachments'] as $f ){
+          foreach ($cfg['attachments'] as $f){
             if (is_array($f)) {
               $notes->add_media_to_note($f['id_media'], $id_note, 1);
             }
-            else if ( is_file($f) ){
+            elseif (is_file($f)) {
               // Add media
               $notes->add_media($id_note, $f);
             }
@@ -443,13 +452,15 @@ class mailings extends bbn\models\cls\db
     if (!empty($date) && \bbn\date::validateSQL($date)) {
       $res = [];
       foreach ($emails as $item) {
-        if ($this->db->insert_ignore('bbn_emails', [
+        if ($this->db->insert_ignore(
+          'bbn_emails', [
             'email' => $item['email'],
             'id_mailing' => $id_mailing,
             'priority' => $priority,
             'status' => 'ready',
             'delivery' => $date
-          ])
+          ]
+        )
         ) {
           $item['id'] = $this->db->last_id();
           $res[] = $item;
@@ -467,12 +478,11 @@ class mailings extends bbn\models\cls\db
     $medias = $this->_medias();
     $res = 0;
     
-    if (
-      $this->check() &&
-      $user && $notes &&
-      bbn\x::has_props($cfg, ['title', 'content', 'sender']) &&
-      ($mailing = $this->get_mailing($id))
-    ){
+    if ($this->check() 
+        && $user && $notes 
+        && bbn\x::has_props($cfg, ['title', 'content', 'sender']) 
+        && ($mailing = $this->get_mailing($id))
+    ) {
       $cfg['id'] = $id;
       if ($this->count_sent($id)) {
         throw new Error(_("Impossible to edit a message already sent or partially sent, you need to duplicate it."));
@@ -481,15 +491,17 @@ class mailings extends bbn\models\cls\db
       if (($cfg['title'] !== $mailing['title']) || ($cfg['content'] !== $mailing['content'])) {
         $version = $notes->insert_version($mailing['id_note'], $cfg['title'], $cfg['content']);
       }
-      $this->db->update('bbn_emailings', [
+      $this->db->update(
+        'bbn_emailings', [
         'version' => $version,
         'sender' => $cfg['sender'],
         'recipients' => $cfg['recipients'] ?: null,
         'sent' => $cfg['sent']
-      ], [
+        ], [
         'id' => $id
-      ]);
-      foreach ( $cfg['attachments'] as $f ){
+        ]
+      );
+      foreach ($cfg['attachments'] as $f){
         // It exists already, the file is not sent
         if (is_array($f)) {
           $idx = empty($mailing['medias']) ? false : \bbn\x::find($mailing['medias'], ['name' => $f['name']]);
@@ -498,13 +510,13 @@ class mailings extends bbn\models\cls\db
               // If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments
               array_splice($mailing['medias'], $idx, 1);
             }
-            else if ($notes->add_media_to_note($mailing['medias'][$idx]['id'], $mailing['id_note'], $version)) {
+            elseif ($notes->add_media_to_note($mailing['medias'][$idx]['id'], $mailing['id_note'], $version)) {
               $res++;
             }
           }
         }
         // The pure path to the file is sent
-        else if ($notes->add_media($mailing['id_note'], $f)) {
+        elseif ($notes->add_media($mailing['id_note'], $f)) {
           $res++;
         }
       }
@@ -542,7 +554,7 @@ class mailings extends bbn\models\cls\db
     }
     $success = null;
     $mailing = $this->get_mailing($id);
-    if ( !empty($mailing['id_note']) ){
+    if (!empty($mailing['id_note'])) {
       $notes = $this->_note();
       //if the notes has media removes media before to remove the note
       if ($medias = $notes->get_medias($mailing['id_note'])) {
@@ -552,11 +564,11 @@ class mailings extends bbn\models\cls\db
       }
 
       // if there are emails with the given id_mailing
-      if ($this->db->count('bbn_emails', ['id_mailing' => $id])){
+      if ($this->db->count('bbn_emails', ['id_mailing' => $id])) {
         //it removes the emails ready or cancelled relative to this id_mailing
         $this->delete_all_emails($id);
       }
-      if (!$this->db->count('bbn_emails', ['id_mailing' => $id])){
+      if (!$this->db->count('bbn_emails', ['id_mailing' => $id])) {
         //deletes the row
         $success = $this->db->delete("bbn_emailings", ['id' => $id]);
         //$notes->remove($mailing['id_note']);
@@ -568,19 +580,19 @@ class mailings extends bbn\models\cls\db
   /**
    * Deletes a sent mailing. If $history is true completely delete the row from history.
    *
-   * @param string $id
+   * @param string  $id
    * @param boolean $history
    * @return integer|null
    */
   public function delete_sent(string $id, $history = false):? int
   {
     $success = false;
-    if ( $mailing = $this->get_mailing($id) ){
-      if ( !empty($mailing['id_note']) && ($mailing['state'] === 'sent') ){
-        if ( !empty($history) ){
+    if ($mailing = $this->get_mailing($id)) {
+      if (!empty($mailing['id_note']) && ($mailing['state'] === 'sent')) {
+        if (!empty($history)) {
           $notes = $this->_note();
-          if ( ($medias = $notes->get_medias($mailing['id_note']) )){
-            foreach ( $medias as $media ){
+          if (($medias = $notes->get_medias($mailing['id_note']) )) {
+            foreach ($medias as $media){
               $notes->remove_media($media['id'],$mailing['id_note']);
             }
           }
@@ -605,7 +617,7 @@ class mailings extends bbn\models\cls\db
    */
   public function delete_email(string $id_email):? int
   {
-    if ( !empty($id_email) ){
+    if (!empty($id_email)) {
       return $this->db->delete('bbn_emails', ['id' => $id_email]);
     }
   }
@@ -620,11 +632,11 @@ class mailings extends bbn\models\cls\db
   {
     $success = null;
     $emails = $this->db->rselect_all('bbn_emails', [], ['id_mailing' => $id_mailing]);
-    if ( !empty($emails) ){
+    if (!empty($emails)) {
       $n = 0;
-      foreach ( $emails as $e ){
-        if ( ($e['status'] === 'ready') || ($e['status'] === 'cancelled') ){
-          if (  $this->db->delete('bbn_emails', ['id' => $e['id']]) ){
+      foreach ($emails as $e){
+        if (($e['status'] === 'ready') || ($e['status'] === 'cancelled')) {
+          if ($this->db->delete('bbn_emails', ['id' => $e['id']])) {
             $n++;
           }
         }
@@ -644,9 +656,11 @@ class mailings extends bbn\models\cls\db
    */
   public function change_email_status(string $id_email, string $state): bool
   {
-    return $this->db->update('bbn_emails', ['status' => $state], [
+    return $this->db->update(
+      'bbn_emails', ['status' => $state], [
       'id' => $id_email,
-    ]);
+      ]
+    );
   }
 
   /**
@@ -657,9 +671,11 @@ class mailings extends bbn\models\cls\db
    */
   public function get_emails(string $id):? array
   {
-    return $this->db->rselect_all('bbn_emails', [], [
+    return $this->db->rselect_all(
+      'bbn_emails', [], [
       'id_mailing' => $id
-    ]);
+      ]
+    );
   }
 
   /**
@@ -671,11 +687,13 @@ class mailings extends bbn\models\cls\db
   public function count_sent(string $id): ?int
   {
     if ($this->check()) {
-      return $this->db->count('bbn_emails', [
+      return $this->db->count(
+        'bbn_emails', [
         'id_mailing' => $id,
         ['status', '!=', 'ready'],
         ['email', '!=', $this->get_test_emails()]
-      ]);
+        ]
+      );
     }
     return null;
   }
@@ -690,10 +708,10 @@ class mailings extends bbn\models\cls\db
   public function change_emails_status(string $id_mailing, string $status): bool
   { 
     $count = 0;
-    if ( ($emails = $this->get_emails($id_mailing)) ){
-      foreach ( $emails as $e ){
+    if (($emails = $this->get_emails($id_mailing))) {
+      foreach ($emails as $e){
         //here I've to check if ready or cancelled??
-        if ( $this->change_email_status($e['id'], $status) ){
+        if ($this->change_email_status($e['id'], $status)) {
           $count ++;
         };
       }
@@ -709,15 +727,17 @@ class mailings extends bbn\models\cls\db
    */
   public function copy(string $id):? string
   {
-    if ( $row = $this->get_mailing($id) ){
-      $id_mailing = $this->add([
+    if ($row = $this->get_mailing($id)) {
+      $id_mailing = $this->add(
+        [
         'title' => $row['title'],
         'content' => $row['content'],
         'sender' => $row['sender'],
         'recipients' => $row['recipients']
-      ]);
-      if ( !empty($row['medias']) && ($row2 = $this->get_mailing($id_mailing)) ){
-        foreach ( $row['medias'] as $r ){
+        ]
+      );
+      if (!empty($row['medias']) && ($row2 = $this->get_mailing($id_mailing))) {
+        foreach ($row['medias'] as $r){
           $this->notes->add_media_to_note($r['id'], $row2['id_note'], 1);
         }
       }
@@ -731,8 +751,10 @@ class mailings extends bbn\models\cls\db
    * @param int $limit
    * @return array
    */
-  public function get_lasts(int $limit = 10){
-    return $this->db->rselect_all([
+  public function get_lasts(int $limit = 10)
+  {
+    return $this->db->rselect_all(
+      [
       'table' => 'bbn_emailings',
       'fields' => ['id', 'title', 'sent', 'state'],
       'join' => [
@@ -760,79 +782,85 @@ class mailings extends bbn\models\cls\db
         'sent' => 'DESC'
       ],
       'limit' => $limit
-    ]);
-  }
-
-  /**
-   * Get the next mailings rows to be sent
-   *
-   * @param int $limit
-   * @return array
-   */
-  public function get_nexts(int $limit = 10){
-    return $this->db->rselect_all([
-      'table' => 'bbn_emailings',
-      'fields' => ['id', 'title', 'sent', 'state'],
-      'join' => [
-        [
-          'table' => 'bbn_notes_versions',
-          'on' => [
-            'conditions' => [
-              [
-                'field' => 'bbn_notes_versions.id_note',
-                'exp' => 'bbn_emailings.id_note'
-              ], [
-                'field' => 'bbn_notes_versions.version',
-                'exp' => 'bbn_emailings.version'
-              ]
-            ]
-          ]
-        ]
-      ],
-      'where' => [
-        ['state', '=', 'ready'],
-        ['sent', 'isnotnull'],
-      ],
-      'order' => [
-        'sent' => 'ASC'
-      ],
-      'limit' => $limit
-    ]);
-  }
-
-  /**
-   * Get the next mailings rows to be sent
-   *
-   * @param int $limit
-   * @return array
-   */
-  public function get_sendings(){
-    return $this->db->rselect_all([
-      'table' => 'bbn_emailings',
-      'fields' => ['id', 'title', 'sent', 'state'],
-      'join' => [
-        [
-          'table' => 'bbn_notes_versions',
-          'on' => [
-            'conditions' => [
-              [
-                'field' => 'bbn_notes_versions.id_note',
-                'exp' => 'bbn_emailings.id_note'
-              ], [
-                'field' => 'bbn_notes_versions.version',
-                'exp' => 'bbn_emailings.version'
-              ]
-            ]
-          ]
-        ]
-      ],
-      'where' => [
-        ['state', '=', 'sending']
-      ],
-      'order' => [
-        'sent' => 'DESC'
       ]
-    ]);
+    );
   }
 
+  /**
+   * Get the next mailings rows to be sent
+   *
+   * @param int $limit
+   * @return array
+   */
+  public function get_nexts(int $limit = 10)
+  {
+    return $this->db->rselect_all(
+      [
+        'table' => 'bbn_emailings',
+        'fields' => ['id', 'title', 'sent', 'state'],
+        'join' => [
+          [
+            'table' => 'bbn_notes_versions',
+            'on' => [
+              'conditions' => [
+                [
+                  'field' => 'bbn_notes_versions.id_note',
+                  'exp' => 'bbn_emailings.id_note'
+                ], [
+                  'field' => 'bbn_notes_versions.version',
+                  'exp' => 'bbn_emailings.version'
+                ]
+              ]
+            ]
+          ]
+        ],
+        'where' => [
+          ['state', '=', 'ready'],
+          ['sent', 'isnotnull'],
+        ],
+        'order' => [
+          'sent' => 'ASC'
+        ],
+        'limit' => $limit
+      ]
+    );
+  }
+
+  /**
+   * Get the next mailings rows to be sent
+   *
+   * @param int $limit
+   * @return array
+   */
+  public function get_sendings()
+  {
+    return $this->db->rselect_all(
+      [
+        'table' => 'bbn_emailings',
+        'fields' => ['id', 'title', 'sent', 'state'],
+        'join' => [
+          [
+            'table' => 'bbn_notes_versions',
+            'on' => [
+              'conditions' => [
+                [
+                  'field' => 'bbn_notes_versions.id_note',
+                  'exp' => 'bbn_emailings.id_note'
+                ], [
+                  'field' => 'bbn_notes_versions.version',
+                  'exp' => 'bbn_emailings.version'
+                ]
+              ]
+            ]
+          ]
+        ],
+        'where' => [
+          ['state', '=', 'sending']
+        ],
+        'order' => [
+          'sent' => 'DESC'
+        ]
+      ]
+    );
+  }
 }
