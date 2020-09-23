@@ -566,7 +566,7 @@ class cache
         }
         catch (\Exception $e) {
           unlink($tmp_file);
-          die($e->getMessage());
+          throw $e;
         }
         $exec = $timer->stop();
         $this->set($item, $data, $ttl, $exec);

@@ -94,7 +94,7 @@ class compiler extends bbn\models\cls\basic
       $ext = bbn\str::file_ext($file[0]);
       $minified = false;
       $c = '';
-      foreach ($file as $f){
+      foreach ($file as $f) {
         $has_content = false;
         if (!is_file($this->fpath.$f)) {
           return false;
@@ -116,11 +116,13 @@ class compiler extends bbn\models\cls\basic
           $c = trim($c);
         }
       }
+      $file = $file[0];
     }
     else{
       $ext = bbn\str::file_ext($file);
       $minified = false;
       if (!is_file($this->fpath.$file)) {
+        throw new \Exception(_("Impoossible to find the file").' '.$this->fpath.$file);
         return false;
       }
       foreach (self::$_min_suffixes as $s){
@@ -178,7 +180,7 @@ class compiler extends bbn\models\cls\basic
           }
           catch (\Exception $e){
             $this->set_error("Error during LESS compilation with file $file :".$e->getMessage());
-            die($e->getMessage());
+            throw $e;
           }
           break;
 

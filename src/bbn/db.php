@@ -2438,6 +2438,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
       if ( isset($r['BRACKET']) && (\count($r) === 1) ){
         $this->log('Bracket in the query '.$statement);
+        $this->log($r);
         return null;
       }
       return $r;

@@ -280,7 +280,7 @@ class cdn extends models\cls\basic
   /**
    * @return bool
    */
-  public function check()
+  public function check(): bool
   {
     if (!parent::check()) {
       return false;
@@ -289,7 +289,9 @@ class cdn extends models\cls\basic
     if ($file && is_file($file)) {
       return true;
     }
-    x::log("Impossible to find $file", 'cdn_errors');
+    if ($this->cfg['ext'] !== 'map') {
+      x::log("Impossible to find $file for ".$this->cfg['url'], 'cdn_errors');
+    }
     return false;
   }
 

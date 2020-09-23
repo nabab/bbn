@@ -34,10 +34,9 @@ use PhpOffice\PhpWord\Element\PageBreakTest;
 
 class options extends bbn\models\cls\db
 {
-  use
-    bbn\models\tts\retriever,
-    bbn\models\tts\cache,
-    bbn\models\tts\dbconfig;
+  use bbn\models\tts\retriever;
+  use bbn\models\tts\cache;
+  use bbn\models\tts\dbconfig;
 
   //protected const root_hex = '962d50c3e07211e781c6000c29703ca2';
   protected const root_hex = 'c88846c3bff511e7b7d5000c29703ca2';
@@ -65,20 +64,18 @@ class options extends bbn\models\cls\db
       ]
     ];
 
-  private
-    $is_init = false,
-    /** @var array The fields from the options' table not returned by default*/
-    $non_selected = ['cfg'],
-    /** @var array A store for parameters sent to @see from_code */
-    $_local_cache = [];
+  private $is_init = false;
+  /** @var array The fields from the options' table not returned by default*/
+  private $non_selected = ['cfg'];
+  /** @var array A store for parameters sent to @see from_code */
+  private $_local_cache = [];
 
-  protected
-    /** @var array $class_cfg */
-    $class_cfg,
-    /** @var int The root ID of the options in the table */
-    $root,
-    /** @var int The default ID as parent */
-    $default;
+  /** @var array $class_cfg */
+  protected $class_cfg;
+  /** @var int The root ID of the options in the table */
+  protected $root;
+  /** @var int The default ID as parent */
+  protected $default;
 
   private function _set_local_cache($name, $val): void
   {
