@@ -186,7 +186,7 @@ trait optional
    * @param string $code
    * @return int|false
    */
-  public static function get_appui_option_id(): string
+  public static function get_appui_option_id(): ?string
   {
     return self::get_options_object()->from_code(...self::_treat_args(func_get_args(), true));
   }

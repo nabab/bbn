@@ -174,13 +174,20 @@ class compiler extends bbn\models\cls\basic
           $less->setImportDir([\dirname($this->fpath.$file)]);
           try {
             $c = $less->compile($c);
-            if ($c && !$test) {
-              $c = $this->minify($c, 'css');
-            }
           }
-          catch (\Exception $e){
+          catch (\Exception $e) {
+            x::log("Error during LESS compilation with file $file :".$e->getMessage(), 'cdn_err');
             $this->set_error("Error during LESS compilation with file $file :".$e->getMessage());
             throw $e;
+          }
+          if ($c && !$test) {
+            try {
+              $c = $this->minify($c, 'css');
+            }
+            catch (\Exception $e) {
+              $this->set_error("Error during LESS compilation with file $file :".$e->getMessage());
+              throw $e;
+            }
           }
           break;
 
@@ -315,7 +322,7 @@ JAVASCRIPT;
         if (is_file($this->fpath.$f)) {
           $tmp = dirname($f);
           if (is_null($dir)) {
-            $dir = $tmp;
+            $dir = $tmp.'/';
           }
           elseif (strpos($dir, $tmp) !== 0) {
             $old_tmp = null;
