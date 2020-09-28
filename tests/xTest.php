@@ -4,7 +4,7 @@ use bbn\x;
 
 class xTest extends PHPUnit\Framework\TestCase {
 
-  public function countTest()
+  public function testCount()
   {
     $this->assertEquals(0, x::count('t'));
     x::increment('t');
