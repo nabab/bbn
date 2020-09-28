@@ -53,7 +53,7 @@
     "phpunitgen/core": "1.1.*"
   },
   "autoload": {
-    "psr-4": {"bbn": "src/"}
+    "psr-0": {"bbn": "src/"}
   },
   "minimum-stability": "dev",
   "prefer-stable" : true
