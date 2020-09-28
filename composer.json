@@ -49,7 +49,7 @@
 		"phpmd/phpmd": "2.9.*",
 		"phploc/phploc": "7.0.*",
 		"sebastian/phpcpd": "6.0.*",
-    "bartlett/umlwriter": "2.0.0-rc.*",
+    "bartlett/umlwriter": "2.0.*",
     "phpunitgen/core": "1.1.*"
   },
   "autoload": {
