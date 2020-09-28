@@ -16,12 +16,12 @@ class xTest extends PHPUnit\Framework\TestCase {
     $this->assertEquals(2, x::count('t'));
 
     $this->assertEquals(0, x::count());
-    x::increment('t');
+    x::increment();
     $this->assertEquals(1, x::count());
-    x::increment('t');
-    x::increment('t');
+    x::increment();
+    x::increment();
     $this->assertEquals(3, x::count());
-    x::decrement('t');
+    x::decrement();
     $this->assertEquals(2, x::count());
   }
 }
