@@ -1,0 +1,27 @@
+<?php
+
+use bbn\x;
+
+class xTest extends PHPUnit\Framework\TestCase {
+
+  public function countTest()
+  {
+    $this->assertEquals(0, x::count('t'));
+    x::increment('t');
+    $this->assertEquals(1, x::count('t'));
+    x::increment('t');
+    x::increment('t');
+    $this->assertEquals(3, x::count('t'));
+    x::decrement('t');
+    $this->assertEquals(2, x::count('t'));
+
+    $this->assertEquals(0, x::count());
+    x::increment('t');
+    $this->assertEquals(1, x::count());
+    x::increment('t');
+    x::increment('t');
+    $this->assertEquals(3, x::count());
+    x::decrement('t');
+    $this->assertEquals(2, x::count());
+  }
+}

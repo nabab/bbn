@@ -51,6 +51,16 @@ class x
 
   /**
    * @param string $name
+   * @param int $i
+   */
+  public static function decrement(string $name = 'num', int $i = 1)
+  {
+    self::_init_count($name);
+    self::$_counters[$name] -= $i;
+  }
+
+  /**
+   * @param string $name
    * @return mixed
    */
   public static function count(string $name = 'num', bool $delete = false)
