@@ -156,7 +156,7 @@
          unless="phpcs.done"
          description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
   <exec executable="${phpcs}" taskname="phpcs">
-   <arg value="--standard=PSR2" />
+   <arg value="--standard=PSR0" />
    <arg value="--extensions=php" />
    <arg value="--ignore=autoload.php" />
    <arg path="${basedir}/src" />
@@ -173,7 +173,7 @@
   <exec executable="${phpcs}" output="/dev/null" taskname="phpcs">
    <arg value="--report=checkstyle" />
    <arg value="--report-file=${basedir}/build/logs/checkstyle.xml" />
-   <arg value="--standard=PSR2" />
+   <arg value="--standard=PSR0" />
    <arg value="--extensions=php" />
    <arg value="--ignore=autoload.php" />
    <arg path="${basedir}/src" />
@@ -221,9 +221,7 @@
          unless="phpunit.done"
          depends="prepare"
          description="Run unit tests with PHPUnit (without generating code coverage reports)">
-  <exec executable="${phpunit}" failonerror="true" taskname="phpunit">
-   <arg path="./tests"/>
-   <arg value="--no-coverage"/>
+  <exec executable="${phpunit}" taskname="phpunit">
   </exec>
 
   <property name="phpunit.done" value="true"/>
