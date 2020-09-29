@@ -75,7 +75,10 @@ WHERE creator = ?
 AND public = ? 
 $where
 SQL;
-      if ( ($id_chat = $this->db->get_one($sql, $values)) && (count($users) === $this->db->count('bbn_chat_users', ['id_chat' => $id_chat])) ){
+      if (
+        ($id_chat = $this->db->get_one($sql, $values)) &&
+        (count($users) === $this->db->count('bbn_chat_users', ['id_chat' => $id_chat]))
+      ){
         return $id_chat;
       }
       if ( $this->db->insert('bbn_chats', [
@@ -182,10 +185,14 @@ SQL;
    * @param string $id_chat
    * @return array|null
    */
-  public function get_participants(string $id_chat): ?array
+  public function get_participants(string $id_chat, bool $with_current = true): ?array
   {
     if ( $this->check() ){
-      return $this->db->get_field_values('bbn_chats_users', 'id_user', ['id_chat' => $id_chat]);
+      $where = [['id_chat', '=', $id_chat], ['active', '=', 1]];
+      if ( !$with_current ){
+        $where[] = ['id_user', '!=', $this->user->get_id()];
+      }
+      return $this->db->get_field_values('bbn_chats_users', 'id_user', $where);
     }
     return null;
   }
@@ -252,7 +259,12 @@ SQL;
   public function get_chats(): ?array
   {
     if ( $this->check() ){
-      return $this->db->get_field_values('bbn_chats_users', 'id_chat', ['id_user' => $this->user->get_id()]);
+      return $this->db->get_field_values('bbn_chats_users', 'id_chat', [
+        'id_user' => $this->user->get_id(),
+        'active' => 1
+      ], [
+        'last_message' => 'DESC'
+      ]);
     }
   }
 
