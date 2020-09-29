@@ -1,8 +1,9 @@
 <?php
+namespace bbn;
 
 use bbn\x;
 
-class xTest extends PHPUnit\Framework\TestCase {
+class xTest extends \PHPUnit\Framework\TestCase {
 
   public function testCount()
   {

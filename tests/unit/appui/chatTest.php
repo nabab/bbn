@@ -3,7 +3,7 @@ namespace bbn\tests\appui;
 
 use bbn\appui\chat;
 
-class chatTest extends PHPUnit\Framework\TestCase {
+class chatTest extends \PHPUnit\Framework\TestCase {
 
   private $obj;
 
