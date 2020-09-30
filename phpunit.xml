@@ -3,13 +3,11 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/3.7/phpunit.xsd"
          backupGlobals="true"
          backupStaticAttributes="false"
-         cacheTokens="false"
-         colors="false"
+         colors="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          forceCoversAnnotation="false"
-         mapTestClassNameToCoveredClassName="false"
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
@@ -18,7 +16,6 @@
          timeoutForSmallTests="1"
          timeoutForMediumTests="10"
          timeoutForLargeTests="60"
-         strict="false"
          verbose="false">
   <testsuites>
     <testsuite name="Classes">
