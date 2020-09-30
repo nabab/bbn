@@ -1089,9 +1089,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
       }
     }
-    if ( !$this->engine ){
-      $this->log("Impossible to create the connection for $cfg[engine]/$cfg[db]");
-      die("Impossible to create the connection for $cfg[engine]/$cfg[db]");
+    if (!$this->engine) {
+      $connection = $cfg['engine'] ?? 'No engine';
+      $connection .= '/'.($cfg['db'] ?? 'No DB');
+      $this->log(_("Impossible to create the connection for").' '.$connection);
+      throw new \Exception(_("Impossible to create the connection for").' '.$connection);
     }
   }
 
