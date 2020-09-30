@@ -30,11 +30,12 @@ class x
   /**
   *
   */
-  private static function _init_count(string $name){
-    if ( !$name ){
+  private static function _init_count(string $name): void
+  {
+    if (!$name) {
       $name = 'num';
     }
-    if ( !isset(self::$_counters[$name]) ){
+    if (!isset(self::$_counters[$name])) {
       self::$_counters[$name] = 0;
     }
   }
@@ -63,7 +64,7 @@ class x
    * @param string $name
    * @return mixed
    */
-  public static function count(string $name = 'num', bool $delete = false)
+  public static function count(string $name = 'num', bool $delete = false): int
   {
     self::_init_count($name);
     $tmp = self::$_counters[$name];
@@ -76,7 +77,7 @@ class x
   public static function count_all($delete = false): array
   {
     $tmp = self::$_counters;
-    if ( $delete ){
+    if ($delete) {
       self::$_counters = [];
     }
     return $tmp;
@@ -95,23 +96,23 @@ class x
    */
   public static function log($st, string $file = 'misc'): void
   {
-    if ( \defined('BBN_DATA_PATH') ){
+    if (\defined('BBN_DATA_PATH')) {
       $log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
-      $backtrace = array_filter(debug_backtrace(), function($a){
+      $backtrace = array_filter(debug_backtrace(), function ($a) {
         return $a['function'] === 'log';
       });
       $i = end($backtrace);
       $r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
         self::get_dump($st).PHP_EOL;
 
-      if ( php_sapi_name() === 'cli' ){
+      if (php_sapi_name() === 'cli') {
         global $argv;
-        if ( isset($argv[2]) && ($argv[2] === 'log') ){
+        if (isset($argv[2]) && ($argv[2] === 'log')) {
           echo self::get_dump($st).PHP_EOL;
         }
       }
-      $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
-      if ( $s > BBN_X_MAX_LOG_FILE ){
+      $s = (file_exists($log_file)) ? filesize($log_file) : 0;
+      if ($s > BBN_X_MAX_LOG_FILE) {
         file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
       }
@@ -141,14 +142,14 @@ class x
         }
       }
       $r = false;
-      if ( is_file($file) ){
+      if (is_file($file)) {
         $r = json_decode(file_get_contents($file), 1);
       }
-      if ( !$r ){
+      if (!$r) {
         $r = [];
       }
       $t = date('Y-m-d H:i:s');
-      if ( class_exists('\\bbn\\mvc') ){
+      if (class_exists('\\bbn\\mvc')) {
         $mvc = mvc::get_instance();
       }
       $errfile = str_replace(BBN_APP_PATH, '', $errfile);
@@ -159,7 +160,7 @@ class x
         'line' => $errline,
         'request' => ''
       ]);
-      if ( $idx !== false ){
+      if ($idx !== false) {
         $r[$idx]['count']++;
         $r[$idx]['last_date'] = $t;
         $r[$idx]['backtrace'] = $backtrace;
@@ -260,31 +261,31 @@ class x
 
   public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, file\system $fs = null): ?string
   {
-    if ( empty($format) ){
+    if (empty($format)) {
       $format = 'Y/m/d';
     }
-    if ( !$max ){
+    if (!$max) {
       $max = 100;
     }
-    if ( !$fs ){
+    if (!$fs) {
       $fs = new file\system();
     }
     // One dir per $format
     $spath = date($format);
-    if ( $spath ){
+    if ($spath) {
       $path = $fs->create_path($path.(substr($path, -1) === '/' ? '' : '/').$spath);
-      if ( $fs->is_dir($path) ) {
+      if ($fs->is_dir($path)) {
         $num = count($fs->get_dirs($path));
         if ($num) {
           $num_files = count($fs->get_files($path.'/'.$num));
-          if ($num_files >= $max){
+          if ($num_files >= $max) {
             $num++;
           }
         }
         else {
           $num = 1;
         }
-        if ( $fs->create_path($path.'/'.$num) ){
+        if ($fs->create_path($path.'/'.$num)) {
           return $path.'/'.$num.'/';
         }
 
@@ -295,10 +296,10 @@ class x
 
   public static function clean_storage_path(string $path, $format = 'Y/m/d', file\system $fs = null): ?int
   {
-    if ( empty($format) ){
+    if (empty($format)) {
       $format = 'Y/m/d';
     }
-    if ( !$fs ){
+    if (!$fs) {
       $fs = new file\system();
     }
     if (!$fs->is_dir($path)) {
@@ -344,11 +345,12 @@ class x
    * @param object $o2 The second object to merge.
    * @return object The merged object.
    */
-  public static function merge_objects($o1, $o2){
+  public static function merge_objects(object $o1, object $o2): object
+  {
     $args = \func_get_args();
     /* @todo check if it's working with more than 2 object arguments */
-    if ( \count($args) > 2 ){
-      for ( $i = \count($args) - 1; $i > 1; $i-- ){
+    if (\count($args) > 2) {
+      for ($i = \count($args) - 1; $i > 1; $i--) {
         $args[$i-1] = self::merge_arrays($args[$i-1], $args[$i]);
       }
       $o2 = $args[1];
@@ -370,25 +372,26 @@ class x
    * @param array $a2 The second array to merge.
    * @return array The merged array.
    */
-  public static function merge_arrays(array $a1, array $a2){
+  public static function merge_arrays(array $a1, array $a2): array
+  {
     $args = \func_get_args();
-    if ( \count($args) > 2 ){
-      for ( $i = \count($args) - 1; $i > 1; $i-- ){
+    if (\count($args) > 2) {
+      for ($i = \count($args) - 1; $i > 1; $i--) {
         $args[$i-1] = self::merge_arrays($args[$i-1], $args[$i]);
       }
       $a2 = $args[1];
     }
-    if ( (self::is_assoc($a1) || empty($a1)) && (self::is_assoc($a2) || empty($a2)) ){
+    if ((self::is_assoc($a1) || empty($a1)) && (self::is_assoc($a2) || empty($a2))) {
       $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
       $r = [];
-      foreach ( $keys as $k ){
-        if ( !array_key_exists($k, $a1) && !array_key_exists($k, $a2) ){
+      foreach ($keys as $k) {
+        if (!array_key_exists($k, $a1) && !array_key_exists($k, $a2)) {
           continue;
         }
-        else if ( !array_key_exists($k, $a2) ){
+        elseif (!array_key_exists($k, $a2)) {
           $r[$k] = $a1[$k];
         }
-        else if ( !array_key_exists($k, $a1) || !\is_array($a2[$k]) || !\is_array($a1[$k]) || is_numeric(key($a2[$k])) ){
+        elseif (!array_key_exists($k, $a1) || !\is_array($a2[$k]) || !\is_array($a1[$k]) || is_numeric(key($a2[$k]))) {
           $r[$k] = $a2[$k];
         }
         else{
@@ -415,7 +418,7 @@ class x
    */
   public static function to_object($ar): object
   {
-    if ( \is_string($ar) ){
+    if (\is_string($ar)) {
       return json_decode($ar);
     }
     return (object)$ar;
@@ -440,7 +443,7 @@ class x
    */
   public static function to_array($obj): array
   {
-    if ( \is_string($obj) ){
+    if (\is_string($obj)) {
       $res = json_decode($obj, 1);
     }
     foreach ($obj as $p => &$v) {
@@ -458,17 +461,17 @@ class x
     $replace_keys = [];
 
     //$obj = x::convert_uids($obj);
-    $transform = function($o, $idx = 0) use(&$transform, &$value_arr, &$replace_keys){
-      foreach( $o as $key => &$value ){
+    $transform = function($o, $idx = 0) use(&$transform, &$value_arr, &$replace_keys) {
+      foreach($o as $key => &$value) {
         $idx++;
-        if ( \is_array($value) || \is_object($value) ){
+        if (\is_array($value) || \is_object($value)) {
           $value = $transform($value, $idx);
         }
-        else if (
+        elseif (
           \is_string($value) &&
           // Look for values starting with 'function('
           (strpos(trim($value), 'function(') === 0)
-        ){
+       ) {
           // Store function string.
           $value_arr[] = $value;
           // Replace function string in $foo with a ‘unique’ special key.
@@ -511,8 +514,8 @@ class x
    * @param string $json The original JSON string to process.
    * @return string Indented version of the original JSON string.
    */
-  public static function indent_json($json){
-
+  public static function indent_json(string $json): string
+  {
     $result      = '';
     $pos         = 0;
     $strLen      = \strlen($json);
@@ -521,21 +524,21 @@ class x
     $prevChar    = '';
     $outOfQuotes = true;
 
-    for ($i=0; $i<=$strLen; $i++){
+    for ($i=0; $i<=$strLen; $i++) {
 
       // Grab the next character in the string.
       $char = substr($json, $i, 1);
 
       // Are we inside a quoted string?
-      if ($char == '"' && $prevChar != '\\'){
+      if ($char == '"' && $prevChar != '\\') {
         $outOfQuotes = !$outOfQuotes;
 
         // If this character is the end of an element,
         // output a new line and indent the next line.
-      } else if(($char == '}' || $char == ']') && $outOfQuotes){
+      } elseif(($char == '}' || $char == ']') && $outOfQuotes) {
         $result .= $newLine;
         $pos --;
-        for ($j=0; $j<$pos; $j++){
+        for ($j=0; $j<$pos; $j++) {
           $result .= $indentStr;
         }
       }
@@ -545,13 +548,13 @@ class x
 
       // If the last character was the beginning of an element,
       // output a new line and indent the next line.
-      if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes){
+      if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
         $result .= $newLine;
-        if ($char == '{' || $char == '['){
+        if ($char == '{' || $char == '[') {
           $pos ++;
         }
 
-        for ($j = 0; $j < $pos; $j++){
+        for ($j = 0; $j < $pos; $j++) {
           $result .= $indentStr;
         }
       }
@@ -578,24 +581,25 @@ class x
    * @param bool $remove_space If "true" the spaces are removed, default: "false".
    * @return array The cleaned result.
    */
-  public static function remove_empty($arr, $remove_space = false){
-    foreach ( $arr as $k => $v ){
-      if ( \is_object($arr) ){
-        if ( \is_array($v) || \is_object($v) ){
+  public static function remove_empty(iterable $arr, $remove_space = false): iterable
+  {
+    foreach ($arr as $k => $v) {
+      if (\is_object($arr)) {
+        if (\is_array($v) || \is_object($v)) {
           $arr->$k = self::remove_empty($v);
         }
-        if ( empty($arr->$k) ){
+        if (empty($arr->$k)) {
           unset($arr->$k);
         }
       }
       else{
-        if ( \is_array($v) || \is_object($v) ){
+        if (\is_array($v) || \is_object($v)) {
           $arr[$k] = self::remove_empty($v);
         }
-        else if ( $remove_space ){
+        elseif ($remove_space) {
           $arr[$k] = trim($arr[$k]);
         }
-        if ( empty($arr[$k]) ){
+        if (empty($arr[$k])) {
           unset($arr[$k]);
         }
       }
@@ -620,9 +624,10 @@ class x
    * @param string $valname Alias for the value.
    * @return array Groups array.
    */
-  public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'){
+  public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'): array
+  {
     $r = [];
-    foreach ( $arr as $k => $v ){
+    foreach ($arr as $k => $v) {
       $r[] = [$keyname => $k, $valname => $v];
     }
     return $r;
@@ -649,18 +654,19 @@ class x
    * @param array $r The array to check.
    * @return bool
    */
-  public static function is_assoc(array $r){
+  public static function is_assoc(array $r): bool
+  {
     $keys = array_keys($r);
     $c = \count($keys);
-    for ( $i = 0; $i < $c; $i++ ){
-      if ( $keys[$i] !== $i ){
+    for ($i = 0; $i < $c; $i++) {
+      if ($keys[$i] !== $i) {
         return 1;
       }
     }
     return false;
   }
 
-  public static function is_cli()
+  public static function is_cli(): bool
   {
     if (!isset(self::$_cli)) {
       self::$_cli = (php_sapi_name() === 'cli');
@@ -674,51 +680,52 @@ class x
    * @param mixed
    * @return string
    */
-  public static function get_dump(){
+  public static function get_dump(): string
+  {
     $args = \func_get_args();
     $st = '';
-    foreach ( $args as $a ){
+    foreach ($args as $a) {
       $r = $a;
-      if ( \is_null($a) ){
+      if (\is_null($a)) {
         $r = 'null';
       }
-      else if ( $a === false ){
+      elseif ($a === false) {
         $r = 'false';
       }
-      else if ( $a === true ){
+      elseif ($a === true) {
         $r = 'true';
       }
-      else if ( $a === 0 ){
+      elseif ($a === 0) {
         $r = '0';
       }
-      else if ( $a === '' ){
+      elseif ($a === '') {
         $r = '""';
       }
-      else if ( $a === [] ){
+      elseif ($a === []) {
         $r = '[]';
       }
-      else if ( !$a ){
+      elseif (!$a) {
         $r = '0';
       }
-      else if ( !\is_string($a) && \is_callable($a) ){
+      elseif (!\is_string($a) && \is_callable($a)) {
         $r = 'Function';
       }
-      else if ( \is_object($a) ){
+      elseif (\is_object($a)) {
         $n = \get_class($a);
-        if ( $n === 'stdClass' ){
+        if ($n === 'stdClass') {
           $r = str::export($a);
         }
         else{
           $r = $n.' Object';
         }
       }
-      else if ( \is_array($a) ){
+      elseif (\is_array($a)) {
         $r = str::export($a);
       }
-      else if ( \is_resource($a) ){
+      elseif (\is_resource($a)) {
         $r = 'Resource '.get_resource_type($a);
       }
-      else if ( str::is_buid($a) ){
+      elseif (str::is_buid($a)) {
         $r = '0x'.bin2hex($a);
       }
       $st .= $r.PHP_EOL;
@@ -732,7 +739,8 @@ class x
    * @param mixed
    * @return string
    */
-  public static function get_hdump(){
+  public static function get_hdump(): string
+  {
     return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::get_dump(...\func_get_args()))), false);
   }
 
@@ -743,9 +751,9 @@ class x
    * @return void
    *
    */
-  public static function dump(){
+  public static function dump(): void
+  {
     echo self::get_dump(...\func_get_args());
-
   }
 
   /**
@@ -754,7 +762,8 @@ class x
    * @param mixed
    * @return void
    */
-  public static function hdump(){
+  public static function hdump(): void
+  {
     echo self::get_hdump(...\func_get_args());
   }
 
@@ -764,9 +773,9 @@ class x
    * @param mixed
    * @return void
    */
-  public static function adump()
+  public static function adump(): void
   {
-    return self::is_cli() ? self::dump(...\func_get_args()) : self::hdump(...\func_get_args());
+    self::is_cli() ? self::dump(...\func_get_args()) : self::hdump(...\func_get_args());
   }
 
   /**
@@ -789,37 +798,35 @@ class x
    * @param boolean $empty_label A label for empty value
    * @return string The HTML code.
    */
-  public static function build_options($values, $selected='', $empty_label=false){
-    if ( \is_array($values) )
-    {
-      $r = '';
-      if ( $empty_label !== false ){
-        $r .= '<option value="">'.$empty_label.'</option>';
-      }
-      $is_assoc = self::is_assoc($values);
-      foreach ( $values as $k => $v )
-      {
-        if ( \is_array($v) && \count($v) == 2 )
-        {
-          $value = $v[0];
-          $title = $v[1];
-        }
-        else if ( !isset($values[0]) && $is_assoc ){
-          $value = $k;
-          $title = $v;
-        }
-        else {
-          $value = $title = $v;
-        }
-        if ( isset($value,$title) ){
-          $r .= '<option value="'.$value.'"'.
-            ( $value == $selected ? ' selected="selected"' : '').
-            '>'.$title.'</option>';
-        }
-        unset($value,$title);
-      }
-      return $r;
+  public static function build_options(array $values, $selected='', $empty_label=false): string
+  {
+    $r = '';
+    if ($empty_label !== false) {
+      $r .= '<option value="">'.$empty_label.'</option>';
     }
+    $is_assoc = self::is_assoc($values);
+    foreach ($values as $k => $v)
+    {
+      if (\is_array($v) && \count($v) == 2)
+      {
+        $value = $v[0];
+        $title = $v[1];
+      }
+      elseif (!isset($values[0]) && $is_assoc) {
+        $value = $k;
+        $title = $v;
+      }
+      else {
+        $value = $title = $v;
+      }
+      if (isset($value,$title)) {
+        $r .= '<option value="'.$value.'"'.
+          ($value == $selected ? ' selected="selected"' : '').
+          '>'.$title.'</option>';
+      }
+      unset($value,$title);
+    }
+    return $r;
   }
 
   /**
@@ -832,15 +839,16 @@ class x
    *
    * @param array $arr The array. It must contain an even number of values
    * @param bool $protected If false no index protection will be performed
-   * @return array|false
+   * @return array
    */
-  public static function to_keypair($arr, $protected = 1){
+  public static function to_keypair(array $arr, bool $protected = true): array
+  {
     $num = \count($arr);
     $res = [];
-    if ( ($num % 2) === 0 ){
+    if (($num % 2) === 0) {
       $i = 0;
-      while ( isset($arr[$i]) ){
-        if ( !\is_string($arr[$i]) || ( !$protected && !preg_match('/[0-9A-z\-_]+/8', str::cast($arr[$i])) ) ){
+      while (isset($arr[$i])) {
+        if (!\is_string($arr[$i]) || (!$protected && !preg_match('/[0-9A-z\-_]+/8', str::cast($arr[$i])))) {
           return false;
         }
         $res[$arr[$i]] = $arr[$i+1];
@@ -869,16 +877,19 @@ class x
    * @param string $key Where to check the property value from
    * @return mixed
    */
-  public static function max_with_key($ar, $key){
-    if (!\is_array($ar) || \count($ar) == 0) return false;
+  public static function max_with_key(array $ar, $key)
+  {
+    if (\count($ar) == 0) {
+      return null;
+    }
     $max = current($ar)[$key];
-    foreach ( $ar as $a ){
-      if ( is_float($a[$key]) || is_float($max) ){
-        if ( self::compare_floats($a[$key], $max, '>') ){
+    foreach ($ar as $a) {
+      if (is_float($a[$key]) || is_float($max)) {
+        if (self::compare_floats($a[$key], $max, '>')) {
           $max = $a[$key];
         }
       }
-      else if( $a[$key] > $max ){
+      elseif ($a[$key] > $max) {
         $max = $a[$key];
       }
     }
@@ -903,11 +914,14 @@ class x
    * @param string $key The index where to search.
    * @return mixed value
    */
-  public static function min_with_key($array, $key){
-    if (!\is_array($array) || \count($array) == 0) return false;
+  public static function min_with_key(array $array, $key)
+  {
+    if (\count($array) == 0) {
+      return null;
+    }
     $min = $array[0][$key];
-    foreach($array as $a){
-      if($a[$key] < $min){
+    foreach($array as $a) {
+      if($a[$key] < $min) {
         $min = $a[$key];
       }
     }
@@ -923,14 +937,15 @@ class x
    * @param string $file The file to debug
    * @return void
    */
-  public static function debug($file=''){
-    $debug = array_map(function($a){
-      if ( isset($a['object']) ){
+  public static function debug($file='')
+  {
+    $debug = array_map(function($a) {
+      if (isset($a['object'])) {
         unset($a['object']);
       }
       return $a;
     }, debug_backtrace());
-    if ( empty($file) ){
+    if (empty($file)) {
       self::hdump($debug);
     }
     else{
@@ -960,8 +975,8 @@ class x
    *          ]
    *        ]
    *      ];
-   * x::hdump(x::map(function($a){
-   *  if ( $a['age']>20){
+   * x::hdump(x::map(function($a) {
+   *  if ($a['age']>20) {
    *    $a['name'] = 'Mr. '.$a['name'];
    *  }
    *  return $a;
@@ -1010,16 +1025,16 @@ class x
    * @param string|null $items If null the function will be applied just to the item of the parent array
    * @return array
    */
-  public static function map(callable $fn, array $ar, string $items = null){
+  public static function map(callable $fn, array $ar, string $items = null) {
     $res = [];
-    foreach ( $ar as $key => $a ){
+    foreach ($ar as $key => $a) {
       $is_false = $a === false;
       $r = $fn($a, $key);
-      if ( $is_false ){
+      if ($is_false) {
         $res[] = $r;
       }
-      else if ( $r !== false ){
-        if ( \is_array($r) && $items && isset($r[$items]) && \is_array($r[$items]) ){
+      elseif ($r !== false) {
+        if (\is_array($r) && $items && isset($r[$items]) && \is_array($r[$items])) {
           $r[$items] = self::map($fn, $r[$items], $items);
         }
         $res[] = $r;
@@ -1074,26 +1089,27 @@ class x
    * @param array $where The where condition
    * @return bool|int
    */
-  public static function find(array $ar, array $where, int $from = 0){
+  public static function find(array $ar, array $where, int $from = 0)
+  {
     //die(var_dump($where));
-    if ( !empty($where) ){
-      foreach ( $ar as $i => $v ){
+    if (!empty($where)) {
+      foreach ($ar as $i => $v) {
         if (!$from || ($i >= $from)) {
           $ok = 1;
           $v = (array)$v;
-          foreach ( $where as $k => $w ){
-            if ( !array_key_exists($k, $v) || ($v[$k] !== $w) ){
+          foreach ($where as $k => $w) {
+            if (!array_key_exists($k, $v) || ($v[$k] !== $w)) {
               $ok = false;
               break;
             }
           }
-          if ( $ok ){
+          if ($ok) {
             return $i;
           }
         }
       }
     }
-    return false;
+    return null;
   }
 
   public static function filter(array $ar, array $where): array
@@ -1160,11 +1176,12 @@ class x
    * @return bool|mixed
    *
    */
-  public static function get_row(array $r, array $where){
-    if ( ($res = self::find($r, $where)) !== false ){
+  public static function get_row(array $r, array $where)
+  {
+    if (($res = self::find($r, $where)) !== false) {
       return $r[$res];
     }
-    return false;
+    return null;
   }
 
   /**
@@ -1196,8 +1213,9 @@ class x
    * @param string $field The field where to look for
    * @return bool|mixed
    */
-  public static function get_field(array $r, array $where, string $field){
-    if ( ($res = self::get_row($r, $where)) && isset($res[$field]) ){
+  public static function get_field(array $r, array $where, string $field)
+  {
+    if (($res = self::get_row($r, $where)) && isset($res[$field])) {
       return $res[$field];
     }
     return false;
@@ -1228,12 +1246,12 @@ class x
    * @param array $keys The array's keys
    * @return array|mixed
    */
-  public static function pick(array $ar, array $keys){
-    while ( \count($keys) ){
+  public static function pick(array $ar, array $keys) {
+    while (\count($keys)) {
       $r = array_shift($keys);
-      if ( isset($ar[$r]) ){
+      if (isset($ar[$r])) {
         $ar = $ar[$r];
-        if ( !count($keys) ){
+        if (!count($keys)) {
           return $ar;
         }
       }
@@ -1254,17 +1272,17 @@ class x
    * @return void
    */
 
-  public static function sort(&$ar){
-    usort($ar, function($a, $b){
-      if ( !str::is_number($a, $b) ){
+  public static function sort(&$ar) {
+    usort($ar, function($a, $b) {
+      if (!str::is_number($a, $b)) {
         $a = str_replace('.', '0', str_replace('_', '1', str::change_case($a, 'lower')));
         $b = str_replace('.', '0', str_replace('_', '1', str::change_case($b, 'lower')));
         return strcmp($a, $b);
       }
-      if ( $a > $b ){
+      if ($a > $b) {
         return 1;
       }
-      else if ($a == $b){
+      elseif ($a == $b) {
         return 0;
       }
       return -1;
@@ -1291,39 +1309,39 @@ class x
    * @param string $dir The direction of the sort ('asc'|'desc')
    * @return void
    */
-  public static function sort_by(&$ar, $key, $dir = ''){
-
+  public static function sort_by(&$ar, $key, $dir = '')
+  {
     $args = \func_get_args();
     array_shift($args);
-    if ( \is_string($key) ){
+    if (\is_string($key)) {
       $args = [[
         'key' => $key,
         'dir' => $dir
       ]];
     }
-    usort($ar, function($a, $b) use($args){
-      foreach ( $args as $arg ){
+    usort($ar, function($a, $b) use($args) {
+      foreach ($args as $arg) {
         $key = $arg['key'];
         $dir = $arg['dir'] ?? 'asc';
-        if ( !\is_array($key) ){
+        if (!\is_array($key)) {
           $key = [$key];
         }
         $v1 = self::pick($a, $key);
         $v2 = self::pick($b, $key);
         $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
         $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
-        if ( !str::is_number($v1, $v2) ){
+        if (!str::is_number($v1, $v2)) {
           $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
           $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
           $cmp = strcmp($a1, $a2);
-          if ( !empty($cmp) ){
+          if (!empty($cmp)) {
             return $cmp;
           }
         }
-        if ( $a1 > $a2 ){
+        if ($a1 > $a2) {
           return 1;
         }
-        else if ( $a1 < $a2 ){
+        elseif ($a1 < $a2) {
           return -1;
         }
       }
@@ -1341,7 +1359,7 @@ class x
    *
    * @return bool
    */
-  public static function is_windows()
+  public static function is_windows(): bool
   {
     return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
   }
@@ -1370,10 +1388,10 @@ class x
     if (!in_array('returntransfer', $defined)) {
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     }
-    if (\is_object($param) ){
+    if (\is_object($param)) {
       $param = self::to_array($param);
     }
-    if ( \defined('BBN_IS_SSL') && \defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV ){
+    if (\defined('BBN_IS_SSL') && \defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV) {
       if (!in_array('ssl_verifypeer', $defined)) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
       }
@@ -1383,13 +1401,13 @@ class x
       //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
     }
     $options = array_change_key_case($options, CASE_UPPER);
-    foreach ( $options as $opt => $val ){
-      if ( \defined('CURLOPT_'.$opt) ){
+    foreach ($options as $opt => $val) {
+      if (\defined('CURLOPT_'.$opt)) {
         curl_setopt($ch, constant('CURLOPT_'.$opt), $val);
       }
     }
-    if ( $param ){
-      if ( !empty($options['POST']) ) {
+    if ($param) {
+      if (!empty($options['POST'])) {
         if (!in_array('url', $defined)) {
           curl_setopt($ch, CURLOPT_URL, $url);
         }
@@ -1397,7 +1415,7 @@ class x
           curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
         }
       }
-      else if ( !empty($options['DELETE']) ){
+      elseif (!empty($options['DELETE'])) {
         //die($url.'?'.http_build_query($param));
         if (!in_array('url', $defined)) {
           curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
@@ -1414,36 +1432,39 @@ class x
       if (!in_array('url', $defined)) {
         curl_setopt($ch, CURLOPT_URL, $url);
       }
-      if ( !empty($options['DELETE']) && !in_array('customrequest', $defined)){
+      if (!empty($options['DELETE']) && !in_array('customrequest', $defined)) {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
       }
     }
     $r = curl_exec($ch);
-    if ( !$r ){
+    if (!$r) {
       self::log(["PROBLEME AVEC L'URL $url", curl_error($ch), curl_getinfo($ch)], 'curl');
     }
     return $r;
   }
 
-  public static function last_curl_error(){
-    if ( self::$_last_curl ){
+  public static function last_curl_error()
+  {
+    if (self::$_last_curl) {
       return curl_error(self::$_last_curl);
     }
     return null;
   }
 
-  public static function last_curl_code(){
-    if ( self::$_last_curl ){
+  public static function last_curl_code()
+  {
+    if (self::$_last_curl) {
       $infos = curl_getinfo(self::$_last_curl);
-      if ( $infos ){
+      if ($infos) {
         return $infos['http_code'];
       }
     }
     return null;
   }
 
-  public static function last_curl_info(){
-    if ( self::$_last_curl ){
+  public static function last_curl_info()
+  {
+    if (self::$_last_curl) {
       return curl_getinfo(self::$_last_curl);
     }
     return null;
@@ -1461,23 +1482,24 @@ class x
    * @param array $ar
    * @return array
    */
-  public static function get_tree($ar){
+  public static function get_tree($ar): array
+  {
     $res = [];
-    foreach ( $ar as $k => $a ){
+    foreach ($ar as $k => $a) {
       $r = ['text' => $k];
-      if ( \is_object($a) ){
+      if (\is_object($a)) {
         $a = self::to_array($a);
       }
-      if ( \is_array($a) ){
+      if (\is_array($a)) {
         $r['items'] = self::get_tree($a);
       }
-      else if ( \is_null($a) ){
+      elseif (\is_null($a)) {
         $r['text'] .= ': null';
       }
-      else if ( $a === false ){
+      elseif ($a === false) {
         $r['text'] .= ': false';
       }
-      else if ( $a === true ){
+      elseif ($a === true) {
         $r['text'] .= ': true';
       }
       else {
@@ -1532,7 +1554,8 @@ class x
    * @param array $ar
    * @return string
    */
-  public static function make_tree(array $ar){
+  public static function make_tree(array $ar): string
+  {
     return "<bbn-tree :source='".\bbn\str::escape_squotes(json_encode(self::get_tree($ar)))."'></bbn-tree>";
   }
 
@@ -1544,7 +1567,7 @@ class x
    *  x::dump(x::from_csv(
    *      '"141";"10/11/2002";"350.00";"1311742251"
    *      "142";"12/12/2002";"349.00";"1311742258"'
-   *  ));
+   * ));
    * // [ [ "141", "10/11/2002", "350.00", "1311742251", ], [ "142", "12/12/2002", "349.00", "1311742258", ], ]
    * ```
    *
@@ -1554,16 +1577,14 @@ class x
    * @param string $separator
    * @return array
    */
-  public static function from_csv($st, $delimiter = ',', $enclosure = '"', $separator = PHP_EOL){
-    if ( \is_string($st) ){
-      $r = [];
-      $lines = explode($separator, $st);
-      foreach ( $lines as $line ){
-        array_push($r, str_getcsv($line, $delimiter, $enclosure));
-      }
-      return $r;
+  public static function from_csv(string $st, $delimiter = ',', $enclosure = '"', $separator = PHP_EOL): array
+  {
+    $r = [];
+    $lines = explode($separator, $st);
+    foreach ($lines as $line) {
+      array_push($r, str_getcsv($line, $delimiter, $enclosure));
     }
-    return [];
+    return $r;
   }
 
   /**
@@ -1585,21 +1606,22 @@ class x
    * @return string
    */
 
-  public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ){
+  public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false): string
+  {
     $delimiter_esc = preg_quote($delimiter, '/');
     $enclosure_esc = preg_quote($enclosure, '/');
 
     $lines = [];
-    foreach ( $data as $d ){
+    foreach ($data as $d) {
       $output = [];
-      foreach ( $d as $field ){
-        if ($field === null && $nullToMysqlNull){
+      foreach ($d as $field) {
+        if ($field === null && $nullToMysqlNull) {
           $output[] = 'NULL';
           continue;
         }
 
         // Enclose fields containing $delimiter, $enclosure or whitespace
-        if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ){
+        if ($encloseAll || preg_match("/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field)) {
           $output[] = $enclosure.str_replace($enclosure, '\\'.$enclosure, $field) . $enclosure;
         }
         else {
@@ -1619,23 +1641,25 @@ class x
    * @param bool $strict
    * @return bool
    */
-  public static function is_same(string $file1, string $file2, $strict = false){
-    if ( !is_file($file1) || !is_file($file2) ){
+  public static function is_same(string $file1, string $file2, $strict = false): bool
+  {
+    if (!is_file($file1) || !is_file($file2)) {
       throw Exception("Boo! One of the files given to the x::is_same function doesn't exist");
     }
     else{
       $same = filesize($file1) === filesize($file2);
-      if ( !$strict || !$same ){
+      if (!$strict || !$same) {
         return $same;
       }
       return filemtime($file1) === filemtime($file2);
     }
   }
 
-  public static function &retrieve_array_var(array $props, array &$ar){
+  public static function retrieve_array_var(array $props, array &$ar)
+  {
     $cur =& $ar;
-    foreach ( $props as $p ){
-      if ( \is_array($cur) && array_key_exists($p, $cur) ){
+    foreach ($props as $p) {
+      if (\is_array($cur) && array_key_exists($p, $cur)) {
         $cur =& $cur[$p];
       }
       else{
@@ -1645,10 +1669,11 @@ class x
     return $cur;
   }
 
-  public static function &retrieve_object_var(array $props, object &$obj){
+  public static function retrieve_object_var(array $props, object &$obj)
+  {
     $cur =& $obj;
-    foreach ( $props as $p ){
-      if ( property_exists($cur, $p) ){
+    foreach ($props as $p) {
+      if (property_exists($cur, $p)) {
         $cur =& $cur->{$p};
       }
       else{
@@ -1660,31 +1685,13 @@ class x
   
 
   /**
-  * @todo Comment this
-  */
-  public static function check_properties($obj){
-    $props = \func_get_args();
-    array_shift($props);
-    foreach ( $props as $p ){
-      if ( \is_array($p) ){
-        if ( (\count($p) !== 2) ){
-          /** @todo proper error */
-          die("Boo with check properties");
-        }
-        if ( function_exists('is_'.$p[1]) ){
-
-        }
-      }
-    }
-  }
-
-  /**
   * Counts the properties of an object.
   *
   * @parma $obj
   * @return int
   */
-  public static function count_properties($obj){
+  public static function count_properties(object $obj): int
+  {
     return \count(get_object_vars($obj));
   }
 
@@ -1702,15 +1709,15 @@ class x
     $sheet = $excel->getActiveSheet();
     $ow = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
     $can_save = false;
-    if ( empty($cfg) ){
+    if (empty($cfg)) {
       $todo = [];
       $checked = false;
-      foreach ( $data as $d ){
-        if ( !$checked && self::is_assoc($d) ){
-          if ( $with_titles ){
+      foreach ($data as $d) {
+        if (!$checked && self::is_assoc($d)) {
+          if ($with_titles) {
             $line1 = [];
             $line2 = [];
-            foreach ( $d as $k => $v ){
+            foreach ($d as $k => $v) {
               $line1[] = $k;
               $line2[] = '';
             }
@@ -1721,7 +1728,7 @@ class x
         }
         $todo[] = array_values($d);
       }
-      if ( count($todo) ){
+      if (count($todo)) {
         $sheet->fromArray($todo, NULL, 'A1');
         $excel
           ->getDefaultStyle()
@@ -1731,7 +1738,7 @@ class x
       }
     }
     else {
-      foreach ( $cfg['fields'] as $i => $field ){
+      foreach ($cfg['fields'] as $i => $field) {
         // Get cell object
         $cell = $sheet->getCellByColumnAndRow($i+1, 1);
         // Get colum name
@@ -1749,7 +1756,7 @@ class x
           ->getAlignment()
           ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
         // Set the correct data type
-        switch ( $field['type'] ){
+        switch ($field['type']) {
           case 'integer':
             // Set code's format to number
             $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
@@ -1788,7 +1795,7 @@ class x
               ->setWrapText(true);
             break;
         }
-        if ( $with_titles ){
+        if ($with_titles) {
           //$cell = $sheet->getCellByColumnAndRow($i+1, 1);
           $style = $cell->getStyle();
           // Set code's format to text
@@ -1804,7 +1811,7 @@ class x
       if (
         isset($cfg['map'], $cfg['map']['callable']) &&
         is_callable($cfg['map']['callable'])
-      ){
+     ) {
         array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
       }
       $sheet->fromArray($data, NULL, 'A' . ($with_titles ? '2' : '1'));
@@ -1813,7 +1820,7 @@ class x
     if (
       $can_save &&
       \bbn\file\dir::create_path(dirname($file))
-    ){
+   ) {
       $ow->save($file);
       return \is_file($file);
     }
@@ -1827,7 +1834,8 @@ class x
   * @param bool $hypens Set it to true if you want hypens to seperate the UID
   * @return string|bynary
   */
-  public static function make_uid($binary = false, $hyphens = false){
+  public static function make_uid($binary = false, $hyphens = false): string
+  {
     $tmp = sprintf($hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',
 
       // 32 bits for "time_low"
@@ -1847,7 +1855,7 @@ class x
 
       // 48 bits for "node"
       mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-    );
+   );
     return $binary ? hex2bin($tmp) : $tmp;
   }
 
@@ -1856,13 +1864,14 @@ class x
   * @param string|array|object $st
   * @return string
   */
-  public static function convert_uids($st){
-    if ( \is_array($st) || \is_object($st) ){
-      foreach ( $st as &$s ){
+  public static function convert_uids($st)
+  {
+    if (\is_array($st) || \is_object($st)) {
+      foreach ($st as &$s) {
         $s = self::convert_uids($s);
       }
     }
-    else if ( \bbn\str::is_uid($st) ){
+    elseif (\bbn\str::is_uid($st)) {
       $st = bin2hex($st);
     }
     return $st;
@@ -1881,7 +1890,7 @@ class x
   {
     $v1 = round((float)$v1 * pow(10, $precision));
     $v2 = round((float)$v2 * pow(10, $precision));
-    switch ($operator ){
+    switch ($operator) {
       case '===':
         return $v1 === $v2;
       case '==':
@@ -1908,11 +1917,11 @@ class x
   public static function json_base64_encode(array $arr, $json = true)
   {
     $res = [];
-    foreach ( $arr as $i => $a ){
-      if ( is_array($a) ){
+    foreach ($arr as $i => $a) {
+      if (is_array($a)) {
         $res[$i] = self::json_base64_encode($a, false);
       }
-      else if ( is_string($a) ){
+      elseif (is_string($a)) {
         $res[$i] = base64_encode($a);
       }
       else{
@@ -1931,12 +1940,12 @@ class x
   public static function json_base64_decode($st): ?array
   {
     $res = \is_string($st) ? json_decode($st, true) : $st;
-    if ( \is_array($res) ){
-      foreach ( $res as $i => $a ){
-        if ( \is_array($a) ){
+    if (\is_array($res)) {
+      foreach ($res as $i => $a) {
+        if (\is_array($a)) {
           $res[$i] = self::json_base64_decode($a);
         }
-        else if ( \is_string($a) ){
+        elseif (\is_string($a)) {
           $res[$i] = base64_decode($a);
         }
         else{
@@ -1955,14 +1964,14 @@ class x
   * @return array*/
   public static function index_by_first_val(array $ar): array
   {
-    if ( empty($ar) || !isset($ar[0]) || !\count($ar[0]) ){
+    if (empty($ar) || !isset($ar[0]) || !\count($ar[0])) {
       return $ar;
     }
     $cols = array_keys($ar[0]);
     $idx = array_shift($cols);
     $num_cols = \count($cols);
     $res = [];
-    foreach ( $ar as $d ){
+    foreach ($ar as $d) {
       $index = $d[$idx];
       unset($d[$idx]);
       $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
@@ -1991,10 +2000,10 @@ class x
   public static function indexOf($subject, $search, int $start = 0): int
   {
     $res = false;
-    if ( is_array($subject) ){
+    if (is_array($subject)) {
       $i = 0;
-      foreach ( $subject as $s ){
-        if ( ($i >= $start) && ($s === $search) ){
+      foreach ($subject as $s) {
+        if (($i >= $start) && ($s === $search)) {
           $res = $i;
           break;
         }
@@ -2003,7 +2012,7 @@ class x
         }
       }
     }
-    else if ( is_string($subject) ){
+    elseif (is_string($subject)) {
       $res = strpos($subject, $search, $start);
     }
     return $res === false ? -1 : $res;
@@ -2015,23 +2024,23 @@ class x
   public static function lastIndexOf($subject, $search, int $start = null): int
   {
     $res = false;
-    if ( is_array($subject) ){
+    if (is_array($subject)) {
       $i = count($subject) - 1;
-      if ( $i ){
-        if ( $start > 0 ){
-          if ( $start > $i ){
+      if ($i) {
+        if ($start > 0) {
+          if ($start > $i) {
             return -1;
           }
           $i = $start;
         }
-        else if ( $start < 0 ){
+        elseif ($start < 0) {
           $i -= $start;
-          if ( $i < 0 ){
+          if ($i < 0) {
             return -1;
           }
         }
-        foreach ( $subject as $s ){
-          if ( ($i <= $start) && ($s === $search) ){
+        foreach ($subject as $s) {
+          if (($i <= $start) && ($s === $search)) {
             $res = $i;
             break;
           }
@@ -2041,8 +2050,8 @@ class x
         }
       }
     }
-    else if ( is_string($subject) ){
-      if ( $start > 0 ){
+    elseif (is_string($subject)) {
+      if ($start > 0) {
         $start = strlen($subject) - (strlen($subject) - $start);
       }
       $res = strrpos($subject, $search, $start);
@@ -2054,19 +2063,19 @@ class x
   {
     $wrote = false;
     foreach (func_get_args() as $a) {
-      if ($a === null){
+      if ($a === null) {
         $st = 'null';
       }
-      else if ($a === true) {
+      elseif ($a === true) {
         $st = 'true';
       }
-      else if ($a === false) {
+      elseif ($a === false) {
         $st = 'false';
       }
-      else if (\bbn\str::is_number($a)) {
+      elseif (\bbn\str::is_number($a)) {
         $st = $a;
       }
-      else if (!is_string($a)) {
+      elseif (!is_string($a)) {
         $st = self::get_dump($a);
       }
       else {
