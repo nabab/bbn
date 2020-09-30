@@ -56,7 +56,7 @@
     "psr-0": {"bbn": "src/"}
   },
   "autoload": {
-    "psr-0": {"bbn\\tests": "tests/"}
+    "psr-0": {"bbn\\tests": "tests/unit/"}
   },
   "minimum-stability": "dev",
   "prefer-stable" : true
