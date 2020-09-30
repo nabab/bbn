@@ -53,11 +53,11 @@
     "phpunitgen/core": "1.1.*"
   },
   "autoload": {
-    "psr-0": {"bbn": "src/bbn/"}
+    "psr-0": {"": "src/"}
   },
   "autoload-dev": {
     "psr-0": {
-      "bbn": "src/bbn/",
+      "": "src/",
       "bbn\\tests": "tests/unit/"
     }
   },
