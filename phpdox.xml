@@ -8,7 +8,7 @@
     <!-- syntax: <require file="/path/to/file.php" /> -->
     <bootstrap/>
 
-    <php version="7.3" />
+    <php version="7.4" />
     
     <!-- A phpDox project to process, you can have multiple projects in one config file -->
     <project name="BBN Library" source="${basedir}/src" workdir="${basedir}/build/phpdox/xml">
@@ -77,14 +77,15 @@
 
                 <!-- add phploc output -->
                 <source type="phploc">
-		    <file name="phploc.xml" />
+		    <file name="build/logs/phploc.xml" />
 		</source>
                 
-                <!-- git vcs information -->
+                <!-- git vcs information >
                 <source type="git">
                     <git binary="/usr/bin/git" />
                     <history enabled="true" limit="100" cache="${phpDox.project.workdir}/gitlog.xml" />
                 </source>
+                -->
 
                 <!-- PHP Code Sniffer findings -->
                 <source type="phpcs">
@@ -93,7 +94,7 @@
 
                 <!-- PHPMessDetector -->
                 <source type="pmd">
-                    <file name="phpmd.xml" />
+                    <file name="build/logs/pmd-cpd.xml" />
                 </source>
                 
 		<!-- PHPUnit Coverage XML -->
