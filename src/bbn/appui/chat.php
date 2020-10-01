@@ -209,11 +209,11 @@ SQL;
     if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){
       $users = $this->get_participants($id_chat);
       if ( \in_array($this->user->get_id(), $users, true) ){
-        $time = microtime(true);
+        $time = round(microtime(true), 4);
         $st = bbn\util\enc::crypt(json_encode(['time' => $time, 'user' => $this->user->get_id(), 'message' => $message]));
         $day = date('Y-m-d');
         foreach ( $users as $user ){
-          $dir = BBN_DATA_PATH.'users/'.$user.'/chat/'.$id_chat.'/'.$day;
+          $dir = bbn\mvc::get_user_data_path($user, 'appui-chat').$id_chat.'/'.$day;
           if ( bbn\file\dir::create_path($dir) ){
             file_put_contents($dir.'/'.$time.'.msg', $st);
           }
@@ -322,14 +322,13 @@ SQL;
   {
     $res = ['success' => false, 'last' => null, 'messages' => []];
     if ( $this->check() ){
-      $dir = BBN_DATA_PATH.'users/'.$this->user->get_id().'/chat/'.$id_chat.'/'.($day ?: date('Y-m-d'));
+      $dir = bbn\mvc::get_user_data_path($this->user->get_id(), 'appui-chat').$id_chat.'/'.($day ?: date('Y-m-d'));
       if ( $this->is_participant($id_chat) && is_dir($dir) ){
         $res['success'] = true;
         $files = bbn\file\dir::get_files($dir);
         foreach ( $files as $file ){
           $time = (float)basename($file, '.msg');
           if ( (!$last || x::compare_floats($time, $last, '>')) && ($st = file_get_contents($file)) ){
-            $enc = bbn\util\enc::crypt('test');
             $res['messages'][] = json_decode(bbn\util\enc::decrypt($st), true);
           }
         }
@@ -380,7 +379,7 @@ SQL;
   public function has_old_messages(string $id_chat, $moment): bool
   {
     if ( $this->check() ){
-      $cdir = BBN_DATA_PATH.'users/'.$this->user->get_id().'/chat/'.$id_chat.'/';
+      $cdir = bbn\mvc::get_user_data_path($this->user->get_id(), 'appui-chat').$id_chat.'/';
       if ( $this->is_participant($id_chat) && is_dir($cdir) ){
         $dir = $cdir . date('Y-m-d', $moment);
         $files = \bbn\file\dir::get_files($dir);
@@ -399,6 +398,47 @@ SQL;
       }
     }
     return false;
+  }
+
+  public function get_prev_messages(string $id_chat, float $moment, int $num = 50){
+    if ( $this->check() ){
+      $res = [];
+      $dir = bbn\mvc::get_user_data_path($this->user->get_id(), 'appui-chat').$id_chat.'/';
+      $moment = round($moment, 4);
+      if ( $this->is_participant($id_chat) && is_dir($dir) ){
+        $get_files = function($files) use(&$res, $moment, $num){
+          foreach ( $files as $file ){
+            if ( count($res) >= $num ){
+              break;
+            }
+            $time = round((float)basename($file, '.msg'), 4);
+            if (
+              x::compare_floats($time, $moment, '<') &&
+              ($st = file_get_contents($file))
+            ){
+              $res[] = json_decode(bbn\util\enc::decrypt($st), true);
+            }
+          }
+        };
+        $get_files(\bbn\file\dir::get_files($dir . date('Y-m-d', $moment)));
+        if ( count($res) < $num ){
+          $dirs = array_reverse(\bbn\file\dir::get_dirs($dir));
+          foreach ( $dirs as $d ){
+            if ( count($res) >= $num ){
+              break;
+            }
+            if (
+              (basename($d) < date('Y-m-d', $moment)) &&
+              ($files = \bbn\file\dir::get_files($d))
+            ){
+              $get_files($files);
+            }
+          }
+        }
+      }
+      return $res;
+    }
+    return null;
   }
 
 }

@@ -84,6 +84,16 @@ class x
   }
 
   /**
+   * Returns a microtime with 4 digit behing the 
+   *
+   * @return void
+   */
+  public static function microtime(): float
+  {
+    return round(\microtime(true), 4);
+  }
+
+  /**
    * Saves logs to a file.
    *
    * ```php
