@@ -207,7 +207,7 @@ class menus extends bbn\models\cls\basic{
       ){
         if (
           ($bits = $this->pref->get_bits($id_menu, false, false)) &&
-          ( \bbn\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== false)
+          ( \bbn\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)
         ){
           return null;
         }

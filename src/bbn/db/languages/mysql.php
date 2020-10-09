@@ -664,7 +664,7 @@ MYSQL
           else {
             $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
           }
-          if (isset($f['value']) && in_array($f['value'], [1, 0, true, false], true)) {
+          if (empty($f['exp']) && isset($f['value']) && in_array($f['value'], [1, 0, true, false], true)) {
             // Always use LIKE as booleans and 1 and 0 are interpretated badly by MySQL
             $is_bool = true;
           }

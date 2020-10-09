@@ -301,7 +301,7 @@ class cms extends bbn\models\cls\db
 	{	
 		$success = false;
 		$idx = x::find($this->get_full_published(), ['url' => $url]);
-		if ( $this->_notes->get($id_note) && empty($idx) ){
+		if ( $this->_notes->get($id_note) && !isset($idx) ){
 			if ( empty($this->db->rselect([
 				'table' => $this->class_cfg['tables']['notes_url'], 
 				'fields' => [$this->class_cfg['arch']['notes_url']['url']],

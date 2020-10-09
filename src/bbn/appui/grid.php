@@ -409,14 +409,14 @@ class grid extends bbn\models\cls\cache
         if ( \is_string($r) ){
           $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;
         }
-        if ( (($k = \bbn\x::find($dates, ['field' => $i])) !== false ) ){
+        if ( (($k = \bbn\x::find($dates, ['field' => $i])) !== null ) ){
           if ( !empty($dates[$k]['format']) && !empty($r) ){
             $r = date($dates[$k]['format'], strtotime($r));
           }
           $row[$i] = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
         }
         if (
-          (($idx = \bbn\x::find($cfg['fields'], ['field' => $i])) === false ) ||
+          (($idx = \bbn\x::find($cfg['fields'], ['field' => $i])) === null ) ||
           !!$cfg['fields'][$idx]['hidden']
         ){
           unset($row[$i]);

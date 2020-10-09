@@ -770,6 +770,9 @@ MYSQL;
         }
         else {
           $idx = \bbn\x::find($modelize['fields'], ['id_option' => strtolower($col)]);
+          if (null === $idx) {
+            throw new \Error("Impossible to find the option $col");
+          }
           $fields[] = $modelize['fields'][$idx]['type'] === 'binary' ? 'ref' : 'val';
         }
         $where['col'] = $col;
@@ -1112,7 +1115,7 @@ MYSQL;
         $primary_defined = false;
         $primary_value = false;
         $idx1 = \bbn\x::find($cfg['values_desc'], ['primary' => true]);
-        if ( $idx1 !== false ){
+        if ( $idx1 !== null ){
           $primary_where = $cfg['values'][$idx1];
         }
         $idx = array_search($s['primary'], $cfg['fields'], true);

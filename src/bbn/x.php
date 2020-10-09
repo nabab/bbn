@@ -170,7 +170,7 @@ class x
         'line' => $errline,
         'request' => ''
       ]);
-      if ($idx !== false) {
+      if ($idx !== null) {
         $r[$idx]['count']++;
         $r[$idx]['last_date'] = $t;
         $r[$idx]['backtrace'] = $backtrace;
@@ -1129,7 +1129,7 @@ class x
     $i = 0;
     while ($i < $num) {
       $idx = self::find($ar, $where, $i);
-      if ($idx === false) {
+      if ($idx === null) {
         break;
       }
       else{
@@ -1188,7 +1188,7 @@ class x
    */
   public static function get_row(array $r, array $where)
   {
-    if (($res = self::find($r, $where)) !== false) {
+    if (($res = self::find($r, $where)) !== null) {
       return $r[$res];
     }
     return null;

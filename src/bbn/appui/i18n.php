@@ -977,7 +977,7 @@ class i18n extends bbn\models\cls\cache
                 $id = null;
                 if ($original = stripslashes($t->getMsgId())) {
                   $idx = \bbn\x::find($res, ['exp' => $original]);
-                  if ($idx !== false) {
+                  if ($idx !== null) {
                     $todo = false;
                     $row =& $res[$idx];
                   }

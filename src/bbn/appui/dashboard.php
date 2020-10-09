@@ -51,7 +51,7 @@ class dashboard
         $widgets = \array_merge($widgets, $prefs);
         foreach ($widgets as $i => $w){
           // Get the preferences of the single widget
-          if ((\bbn\x::find($prefs, [$this->arch_pref['id'] => $w[$this->arch_pref['id']]]) === false) 
+          if ((\bbn\x::find($prefs, [$this->arch_pref['id'] => $w[$this->arch_pref['id']]]) === null) 
               && ($p = $this->pref->get_by_option($w[$this->arch_pref['id']], false))
           ) {
             if (!empty($p[$this->arch_pref['cfg']])) {

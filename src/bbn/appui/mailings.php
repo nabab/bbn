@@ -505,7 +505,7 @@ class mailings extends bbn\models\cls\db
         // It exists already, the file is not sent
         if (is_array($f)) {
           $idx = empty($mailing['medias']) ? false : \bbn\x::find($mailing['medias'], ['name' => $f['name']]);
-          if ($idx !== false) {
+          if ($idx !== null) {
             if ($version === $mailing['version']) {
               // If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments
               array_splice($mailing['medias'], $idx, 1);

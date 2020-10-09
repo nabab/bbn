@@ -541,7 +541,7 @@ class events extends bbn\models\cls\db
       ($ex = $this->get_exceptions($recurrences[0][$rf['id_event']])) 
     ){
       return array_filter($recurrences, function($r) use($ex, $ef, $exf){
-        return \bbn\x::find($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === false;
+        return \bbn\x::find($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === null;
       });    
     }
     return $recurrences;

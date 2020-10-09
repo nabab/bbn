@@ -1199,7 +1199,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
               else{
                 $f = [
                   'field' => $key,
-                  'operator' => !str::is_uid($f) && is_string($f) ? 'LIKE' : '=',
+                  'operator' => is_string($f) && !str::is_uid($f) ? 'LIKE' : '=',
                   'value' => $f
                 ];
               }
@@ -1219,7 +1219,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
                 else{
                   $tmp['conditions'][] = [
                     'field' => $key,
-                    'operator' => !str::is_uid($f) && is_string($f) ? 'LIKE' : '=',
+                    'operator' => is_string($f) && !str::is_uid($f) ? 'LIKE' : '=',
                     'value' => $v
                   ];
                 }

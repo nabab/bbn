@@ -470,15 +470,15 @@ class doc {
       foreach ( $this->parsed as $p ){
         if (
           !empty($p['tags']) &&
-          (($i = \bbn\x::find($p['tags'], ['tag' => $tag])) !== false) &&
+          (($i = \bbn\x::find($p['tags'], ['tag' => $tag])) !== null) &&
           (
             (
               empty($memberof) &&
-              (\bbn\x::find($p['tags'], ['tag' => 'memberof']) === false)
+              (\bbn\x::find($p['tags'], ['tag' => 'memberof']) === null)
             ) ||
             (
               !empty($memberof) &&
-              (($k = \bbn\x::find($p['tags'], ['tag' => 'memberof'])) !== false) &&
+              (($k = \bbn\x::find($p['tags'], ['tag' => 'memberof'])) !== null) &&
               ($p['tags'][$k]['name'] === $memberof)
             )
           )

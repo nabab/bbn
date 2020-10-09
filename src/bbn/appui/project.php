@@ -413,7 +413,7 @@ class project extends bbn\models\cls\db {
   public function repository_by_id(string $id)
   {
     $idx = \bbn\x::find($this->repositories, ['id' => $id]) ?: '';
-    if ( !empty($idx) ){
+    if ( $idx !== null ){
       return $this->repositories[$idx];
     }
     return [];
