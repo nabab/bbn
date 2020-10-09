@@ -2453,7 +2453,7 @@ class options extends bbn\models\cls\db
    */
   public function order($id, int $pos = null)
   {
-    if ($this>check() 
+    if ($this->check() 
         && ($parent = $this->get_id_parent($id)) 
         && $this->is_sortable($parent)
     ) {
