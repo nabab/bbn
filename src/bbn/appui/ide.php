@@ -2629,7 +2629,11 @@ class ide
           $tab = $ssc['tab'];
           $o['tab'] = $tab;
           $file_path = $ssc['path'].'/';
-          if (($i = \bbn\x::find($rep['tabs'], ['url' => $tab])) !== null) {
+          $i = \bbn\x::find($rep['tabs'], ['url' => $tab]);
+          if ($i !== null) {
+            if (!isset($rep['tabs'][$i])) {
+              throw new \Error("No index corresponding to $i");
+            }
             $tab = $rep['tabs'][$i];
             if(!empty($this->is_MVC_from_url($url))) {
               $res .= 'mvc/';
