@@ -56,6 +56,7 @@ class user extends models\cls\basic
       'hotlinks' => 'bbn_users_hotlinks',
       'passwords' => 'bbn_users_passwords',
       'sessions' => 'bbn_users_sessions',
+      'tokens' => 'bbn_users_tokens',
       'users' => 'bbn_users',
     ],
     'arch' => [
@@ -87,6 +88,15 @@ class user extends models\cls\basic
         'creation' => 'creation',
         'last_activity' => 'last_activity',
         'cfg' => 'cfg',
+      ],
+      'tokens' => [
+        'id' => 'id',
+        'id_session' => 'id_session',
+        'content' => 'content',
+        'creation' => 'creation',
+        'dt_creation' => 'dt_creation',
+        'last' => 'last',
+        'dt_last' => 'dt_last'
       ],
       'users' => [
         'id' => 'id',
@@ -879,6 +889,27 @@ class user extends models\cls\basic
       }
       if ( isset($usr[$this->class_cfg['show']]) ){
         return $usr[$this->class_cfg['show']];
+      }
+    }
+    return null;
+  }
+
+  public function add_token(): ?string
+  {
+    if ($this->auth) {
+      $token = str::genpwd(32, 16);
+      $f =& $this->class_cfg['arch']['tokens'];
+      if ($this->db->insert(
+        $this->class_cfg['tables']['tokens'],
+        [
+          $f['id_session'] => $this->get_id_session(),
+          $f['content'] => $token,
+          $f['creation'] => x::microtime(),
+          $f['last'] => x::microtime()
+        ]
+      )
+      ) {
+        return $token;
       }
     }
     return null;

@@ -31,20 +31,20 @@ class timer
    * 
 	 * @return void 
 	 */
-	public function start($key='default')
+	public function start($key='default', $from = null)
 	{
 		if ( !isset($this->measures[$key]) ){
       $this->measures[$key] = [
         'num' => 0,
         'sum' => 0,
-        'start' => microtime(1)
+        'start' => $from ?: microtime(1)
       ];
     }
     else{
-      $this->measures[$key]['start'] = microtime(1);
+      $this->measures[$key]['start'] = $from ?: microtime(1);
     }
   }
-  
+
   /**
    * Returns true is the timer has started for the given key
    * 
@@ -91,7 +91,28 @@ class timer
       return microtime(1) - $this->measures[$key]['start'];
     }
   }
-  
+
+  public function current($key = 'default'): array
+  {
+    if ( isset($this->measures[$key]) ){
+      return \array_merge([
+        'current' => $this->has_started($key) ? $this->measure($key) : 0
+      ], $this->measures[$key]);
+    }
+    return [];
+  }
+
+  public function currents(): array
+  {
+    $currents = [];
+    foreach ( $this->measures as $key => $val ){
+      $currents[$key] = \array_merge([
+        'current' => $this->has_started($key) ? $this->measure($key) : 0
+      ], $val);
+    }
+    return $currents;
+  }
+
 	/**
 	 * @return array
 	 */
@@ -121,4 +142,12 @@ class timer
     return $r;
   }
 
+  public function remove($key = 'default'): bool
+  {
+    if ( isset($this->measures[$key]) ){
+      unset($this->measures[$key]);
+      return true;
+    }
+    return false;
+  }
 }

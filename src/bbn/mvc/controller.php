@@ -1,10 +1,12 @@
 <?php
 
 namespace bbn\mvc;
+
 use bbn;
 use bbn\x;
 
-class controller implements api{
+class controller implements api
+{
 
   use common;
 
@@ -114,17 +116,19 @@ class controller implements api{
   /**
    * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
    *
-   * @param bbn\mvc $mvc
-   * @param array $files
+   * @param bbn\mvc       $mvc
+   * @param array         $files
    * @param array|boolean $data
    */
-  public function __construct(bbn\mvc $mvc, array $files, $data = false){
+  public function __construct(bbn\mvc $mvc, array $files, $data = false)
+  {
     $this->_mvc = $mvc;
     $this->reset($files, $data);
   }
 
-  public function reset(array $info, $data = false){
-    if ( isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ){
+  public function reset(array $info, $data = false)
+  {
+    if (isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
       $this->_path = $info['path'];
       $this->_plugin = $info['plugin'];
       $this->_request = $info['request'];
@@ -148,20 +152,24 @@ class controller implements api{
     }
   }
 
-  public function get_root(){
+  public function get_root()
+  {
     return $this->_mvc->get_root();
   }
 
-  public function set_root($root){
+  public function set_root($root)
+  {
     $this->_mvc->set_root($root);
     return $this;
   }
 
-  public function get_url(){
+  public function get_url()
+  {
     return $this->_mvc->get_url();
   }
 
-  public function get_path(){
+  public function get_path()
+  {
     return $this->_path;
   }
 
@@ -170,15 +178,18 @@ class controller implements api{
    *
    * @return string
    */
-  public function get_request(){
+  public function get_request()
+  {
     return $this->_request;
   }
 
-  public function exists(){
+  public function exists()
+  {
     return !empty($this->_path);
   }
 
-  public function get_all(){
+  public function get_all()
+  {
     return [
       'controller' => $this->get_controller(),
       'dir' => $this->get_current_dir(),
@@ -218,7 +229,7 @@ class controller implements api{
    */
   public function get_local_path()
   {
-    if ( ($pp = $this->get_prepath()) && (strpos($this->_path, $pp) === 0) ){
+    if (($pp = $this->get_prepath()) && (strpos($this->_path, $pp) === 0)) {
       return substr($this->_path, \strlen($pp));
     }
     return $this->_path;
@@ -231,7 +242,7 @@ class controller implements api{
    */
   public function get_local_route()
   {
-    if ( ($pp = $this->get_prepath()) && (strpos($this->_request, $pp) === 0) ){
+    if (($pp = $this->get_prepath()) && (strpos($this->_request, $pp) === 0)) {
       return substr($this->_request, \strlen($pp));
     }
     return $this->_request;
@@ -242,43 +253,44 @@ class controller implements api{
    *
    * @return string
    */
-  public function get_current_dir()
+  public function get_current_dir(): ?string
   {
-    if ( $this->_path ){
+    if ($this->_path) {
       $p = dirname($this->_path);
-      if ( $p === '.' ){
+      if ($p === '.') {
         return '';
       }
-      if (
-        ($prepath = $this->get_prepath()) &&
-        (strpos($p, $prepath) === 0)
-      ){
+      if (($prepath = $this->get_prepath()) 
+          && (strpos($p, $prepath) === 0)
+      ) {
         return substr($p, \strlen($prepath));
       }
       return $p;
     }
-    return false;
+    return null;
   }
 
   /**
    * @return mixed
    */
-  public function get_plugin(){
+  public function get_plugin()
+  {
     return $this->_plugin;
   }
 
   /**
    * This directly renders content with arbitrary values using the existing Mustache engine.
    *
-   * @param string $view The view to be rendered
-   * @param array $model The data model to fill the view with
+   * @param string $view  The view to be rendered
+   * @param array  $model The data model to fill the view with
    * @return void
    */
-  public function render($view, $model=''){
-    if ( empty($model) && !empty($this->data) ){
+  public function render($view, $model='')
+  {
+    if (empty($model) && !empty($this->data)) {
       $model = $this->data;
     }
-    if ( \is_string($view) ){
+    if (\is_string($view)) {
       return \is_array($model) ? bbn\tpl::render($view, $model) : $view;
     }
     die(bbn\x::hdump("Problem with the template", $view, $this->_path, $this->mode));
@@ -302,7 +314,7 @@ class controller implements api{
    */
   public function reroute($path='', $post = false, $arguments = false)
   {
-    if ( !\in_array($path, $this->_reroutes) && ($this->_path !== $path) ){
+    if (!\in_array($path, $this->_reroutes) && ($this->_path !== $path)) {
       $this->_reroutes[] = $path;
       $this->_mvc->reroute($path, $post, $arguments);
       $this->_is_rerouted = 1;
@@ -315,17 +327,18 @@ class controller implements api{
    * @param string $file_name If .php is ommited it will be added
    * @return $this
    */
-  public function incl($file_name){
-    if ( $this->exists() ){
+  public function incl($file_name)
+  {
+    if ($this->exists()) {
       $d = dirname($this->_file).'/';
-      if ( substr($file_name, -4) !== '.php' ){
+      if (substr($file_name, -4) !== '.php') {
         $file_name .= '.php';
       }
-      if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
+      if ((strpos($file_name, '..') === false) && file_exists($d.$file_name)) {
         $bbn_path = $d.$file_name;
         $ctrl =& $this;
         unset($d, $file_name);
-        include($bbn_path);
+        include $bbn_path;
       }
     }
     return $this;
@@ -337,9 +350,10 @@ class controller implements api{
    * @param string $script The javascript chain to add
    * @return $this
    */
-  public function add_script($script){
-    if ( \is_object($this->obj) ){
-      if ( !isset($this->obj->script) ){
+  public function add_script($script)
+  {
+    if (\is_object($this->obj)) {
+      if (!isset($this->obj->script)) {
         $this->obj->script = '';
       }
       $this->obj->script .= $script;
@@ -349,18 +363,19 @@ class controller implements api{
 
   public function register_plugin_classes($plugin_path): self
   {
-    spl_autoload_register(function ($class_name) use ($plugin_path){
-      if (
-        (strpos($class_name,'/') === false) &&
-        (strpos($class_name,'.') === false)
-      ){
-        $cls = explode('\\', $class_name);
-        $path = implode('/', $cls);
-        if ( file_exists($plugin_path.'lib/'.$path.'.php') ){
-          include_once($plugin_path.'lib/'.$path.'.php');
+    spl_autoload_register(
+      function ($class_name) use ($plugin_path) {
+        if ((strpos($class_name,'/') === false) 
+            && (strpos($class_name,'.') === false)
+        ) {
+          $cls = explode('\\', $class_name);
+          $path = implode('/', $cls);
+          if (file_exists($plugin_path.'lib/'.$path.'.php')) {
+            include_once $plugin_path.'lib/'.$path.'.php';
+          }
         }
       }
-    });
+    );
     return $this;
   }
 
@@ -370,10 +385,11 @@ class controller implements api{
    *
    * @return boolean
    */
-  private function control(){
-    if ( $this->_file && !isset($this->_is_controlled) ){
+  private function control()
+  {
+    if ($this->_file && !isset($this->_is_controlled)) {
       $ok = 1;
-      if ( $this->_plugin ){
+      if ($this->_plugin) {
         $this->register_plugin_classes($this->plugin_path());
       }
       ob_start();
@@ -383,33 +399,33 @@ class controller implements api{
           array_unshift($this->_checkers, BBN_ROOT_CHECKER);
         }
       }
-      foreach ( $this->_checkers as $appui_checker_file ){
+      foreach ($this->_checkers as $appui_checker_file){
         // If a checker file returns false, the controller is not processed
         // The checker file can define data and inc that can be used in the subsequent controller
-        if ( bbn\mvc::include_controller($appui_checker_file, $this, true) === false ){
+        if (bbn\mvc::include_controller($appui_checker_file, $this, true) === false) {
           $ok = false;
           break;
         }
       }
-      if ( ($log = ob_get_contents()) && \is_string($log) ){
+      if (($log = ob_get_contents()) && \is_string($log)) {
         $this->obj->content = $log;
       }
       ob_end_clean();
       // If rerouted during the checkers
-      if ( $this->_is_rerouted ){
+      if ($this->_is_rerouted) {
         $this->_is_rerouted = false;
         return $this->control();
       }
-      if ( !$ok ){
+      if (!$ok) {
         return false;
       }
       $output = bbn\mvc::include_controller($this->_file, $this);
       // If rerouted during the controller
-      if ( $this->_is_rerouted ){
+      if ($this->_is_rerouted) {
         $this->_is_rerouted = false;
         return $this->control();
       }
-      if ( \is_object($this->obj) && !isset($this->obj->content) && !empty($output) ){
+      if (\is_object($this->obj) && !isset($this->obj->content) && !empty($output)) {
         $this->obj->content = $output;
       }
       $this->_is_controlled = 1;
@@ -423,9 +439,10 @@ class controller implements api{
    *
    * @return $this
    */
-  public function process(){
-    if ( \is_null($this->_is_controlled) ){
-      if ( $this->_plugin ){
+  public function process()
+  {
+    if (\is_null($this->_is_controlled)) {
+      if ($this->_plugin) {
         $this->apply_locale($this->_plugin);
       }
       $this->control();
@@ -433,11 +450,13 @@ class controller implements api{
     return $this;
   }
 
-  public function has_been_rerouted(){
+  public function has_been_rerouted()
+  {
     return $this->_is_rerouted;
   }
 
-  public function apply_locale($plugin){
+  public function apply_locale($plugin)
+  {
     return $this->_mvc->apply_locale($plugin);
   }
 
@@ -447,12 +466,13 @@ class controller implements api{
    * @param string $path
    * @return string|false
    */
-  public function get_js($path='', array $data=null, $encapsulated = true){
-    if ( \is_array($path) ){
+  public function get_js($path='', array $data=null, $encapsulated = true)
+  {
+    if (\is_array($path)) {
       $data = $path;
       $path = '';
     }
-    if ( $r = $this->get_view($path, 'js', $data) ){
+    if ($r = $this->get_view($path, 'js', $data)) {
       return '<script>'.
         ( $encapsulated ? '(function(){' : '' ).
         ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
@@ -468,12 +488,13 @@ class controller implements api{
    * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
    *
    * @param array|string $files
-   * @param array $data
-   * @param boolean $encapsulated
+   * @param array        $data
+   * @param boolean      $encapsulated
    * @return string|false
    */
-  public function get_js_group($files='', array $data=null, $encapsulated = true){
-    if ( $js = $this->get_view_group($files, $data, 'js') ){
+  public function get_js_group($files='', array $data=null, $encapsulated = true)
+  {
+    if ($js = $this->get_view_group($files, $data, 'js')) {
       return '<script>'.
       ( $encapsulated ? '(function($){' : '' ).
       ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
@@ -489,22 +510,23 @@ class controller implements api{
    * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
    *
    * @param array|string $files
-   * @param array $data
-   * @param string $mode
+   * @param array        $data
+   * @param string       $mode
    * @return string|false
    */
-  public function get_view_group($files='', array $data=null, $mode = 'html'){
-    if ( !\is_array($files) ){
-      if ( !($tmp = $this->_mvc->fetch_dir($files, $mode)) ){
+  public function get_view_group($files='', array $data=null, $mode = 'html')
+  {
+    if (!\is_array($files)) {
+      if (!($tmp = $this->_mvc->fetch_dir($files, $mode))) {
         $this->error("Impossible to get files from directory $files");
         return false;
       }
       $files = $tmp;
     }
-    if ( \is_array($files) && \count($files) ){
+    if (\is_array($files) && \count($files)) {
       $st = '';
-      foreach ( $files as $f ){
-        if ( $tmp = $this->get_view($f, $mode, $data) ){
+      foreach ($files as $f){
+        if ($tmp = $this->get_view($f, $mode, $data)) {
           $st .= $tmp;
         }
       }
@@ -519,8 +541,9 @@ class controller implements api{
    * @param string $path
    * @return string|false
    */
-  public function get_css($path=''){
-    if ( $r = $this->get_view($path, 'css') ){
+  public function get_css($path='')
+  {
+    if ($r = $this->get_view($path, 'css')) {
       return \CssMin::minify($r);
     }
     return false;
@@ -532,8 +555,9 @@ class controller implements api{
    * @param string $path
    * @return string|false
    */
-  public function get_less($path=''){
-    if ( $r = $this->get_view($path, 'css', false) ){
+  public function get_less($path='')
+  {
+    if ($r = $this->get_view($path, 'css', false)) {
       return \CssMin::minify($r);
     }
   }
@@ -544,9 +568,10 @@ class controller implements api{
    * @param string $path
    * @return string|false
    */
-  public function add_css($path=''){
-    if ( $css = $this->get_css($path) ){
-      if ( !isset($this->obj->css) ){
+  public function add_css($path='')
+  {
+    if ($css = $this->get_css($path)) {
+      if (!isset($this->obj->css)) {
         $this->obj->css = '';
       }
       $this->obj->css .= $css;
@@ -560,9 +585,10 @@ class controller implements api{
    * @param string $path
    * @return string|false
    */
-  public function add_less($path=''){
-    if ( $css = $this->get_less($path) ){
-      if ( !isset($this->obj->css) ){
+  public function add_less($path='')
+  {
+    if ($css = $this->get_less($path)) {
+      if (!isset($this->obj->css)) {
         $this->obj->css = '';
       }
       $this->obj->css .= $css;
@@ -578,28 +604,29 @@ class controller implements api{
    * @param string $mode
    * @return string|false
    */
-  public function add_js(){
+  public function add_js()
+  {
     $args = \func_get_args();
     $has_path = false;
-    foreach ( $args as $i => $a ){
-      if ( $new_data = $this->retrieve_var($a) ){
+    foreach ($args as $i => $a){
+      if ($new_data = $this->retrieve_var($a)) {
         $this->js_data($new_data);
       }
-      else if ( \is_string($a) ){
+      elseif (\is_string($a)) {
         $has_path = 1;
       }
-      else if ( \is_array($a) ){
+      elseif (\is_array($a)) {
         $this->js_data($a);
       }
-      else if ( $a === true ){
+      elseif ($a === true) {
         $this->js_data($this->data);
       }
     }
-    if ( !$has_path ){
+    if (!$has_path) {
       array_unshift($args, $this->_path);
     }
     $args[] = 'js';
-    if ( $r = $this->get_view(...$args) ){
+    if ($r = $this->get_view(...$args)) {
       $this->add_script($r);
     }
     return $this;
@@ -613,40 +640,46 @@ class controller implements api{
    * @param string $mode
    * @return string|false
    */
-  public function add_js_group($files = '', array $data = []){
-    if ( $js = $this->get_view_group($files, $data, 'js') ){
+  public function add_js_group($files = '', array $data = [])
+  {
+    if ($js = $this->get_view_group($files, $data, 'js')) {
       $this->js_data($data)->add_script($js);
     }
     return $this;
   }
 
-  public function set_obj(array $arr){
-    foreach ( $arr as $k => $a ){
+  public function set_obj(array $arr)
+  {
+    foreach ($arr as $k => $a){
       $this->obj->{$k} = $a;
     }
     return $this;
   }
 
-  public function set_url($url){
+  public function set_url($url)
+  {
     $this->obj->url = $url;
     return $this;
   }
 
-  public function set_title($title){
+  public function set_title($title)
+  {
     $this->obj->title = $title;
     return $this;
   }
 
-  public function set_icon(string $icon){
+  public function set_icon(string $icon)
+  {
     $this->obj->icon = $icon;
     return $this;
   }
 
-  public function set_color(string $bg = null, string $txt = null){
-    if ( $bg ){
+  public function set_color(string $bg = null, string $txt = null)
+  {
+    if ($bg) {
       $this->obj->bcolor = $bg;
     }
-    if ( $txt ){
+    if ($txt) {
       $this->obj->fcolor = $txt;
     }
     return $this;
@@ -667,17 +700,18 @@ class controller implements api{
 
   public function get_component(string $name, array $data = []): ?array
   {
-    if ( $tmp = $this->route_component($name) ){
-      if ( !empty($tmp['js']) ){
+    if ($tmp = $this->route_component($name)) {
+      if (!empty($tmp['js'])) {
         $v = new view($tmp['js']);
         $res = [
+          'name' => $name,
           'script' => $v->get($data)
         ];
-        if ( !empty($tmp['css']) ){
+        if (!empty($tmp['css'])) {
           $v = new view($tmp['css']);
           $res['css'] = $v->get();
         }
-        if ( !empty($tmp['html']) ){
+        if (!empty($tmp['html'])) {
           $v = new view($tmp['html']);
           $res['content'] = $v->get($data);
         }
@@ -687,57 +721,58 @@ class controller implements api{
     return null;
   }
 
-  public function js_data($data){
-    if ( bbn\x::is_assoc($data) ){
-      if ( !isset($this->obj->data) ){
+  public function js_data($data)
+  {
+    if (bbn\x::is_assoc($data)) {
+      if (!isset($this->obj->data)) {
         $this->obj->data = $data;
       }
-      else if ( bbn\x::is_assoc($this->obj->data) ){
+      elseif (bbn\x::is_assoc($this->obj->data)) {
         $this->obj->data = bbn\x::merge_arrays($this->obj->data, $data);
       }
     }
     return $this;
   }
 
-  private function get_arguments(array $args){
+  private function get_arguments(array $args)
+  {
     $r = [];
-    foreach ( $args as $a ){
-      if ( $new_data = $this->retrieve_var($a) ){
+    foreach ($args as $a){
+      if ($new_data = $this->retrieve_var($a)) {
         $r['data'] = $new_data;
       }
-      else if ( \is_string($a) && !isset($r['path']) ){
+      elseif (\is_string($a) && !isset($r['path'])) {
         $r['path'] = $a;
       }
-      else if ( \is_string($a) && router::is_mode($a) && !isset($r['mode']) ){
+      elseif (\is_string($a) && router::is_mode($a) && !isset($r['mode'])) {
         $r['mode'] = $a;
       }
-      else if ( \is_array($a) && !isset($r['data']) ){
+      elseif (\is_array($a) && !isset($r['data'])) {
         $r['data'] = $a;
       }
-      else if ( \is_bool($a) && !isset($r['die']) ){
+      elseif (\is_bool($a) && !isset($r['die'])) {
         $r['die'] = $a;
       }
     }
-    if ( !isset($r['mode']) && isset($r['path']) && router::is_mode($r['path']) ){
+    if (!isset($r['mode']) && isset($r['path']) && router::is_mode($r['path'])) {
       $r['mode'] = $r['path'];
       unset($r['path']);
     }
-    if ( empty($r['path']) ){
+    if (empty($r['path'])) {
       $r['path'] = $this->_path;
-      if (
-        ($this->get_mode() === 'dom') &&
-        (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))
-      ){
+      if (($this->get_mode() === 'dom') 
+          && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))
+      ) {
         $r['path'] .= '/index';
       }
     }
-    else if ( strpos($r['path'], './') === 0 ){
+    elseif (strpos($r['path'], './') === 0) {
       $r['path'] = $this->get_current_dir().substr($r['path'], 1);
     }
-    if ( !isset($r['data']) ){
+    if (!isset($r['data'])) {
       $r['data'] = $this->data;
     }
-    if ( !isset($r['die']) ){
+    if (!isset($r['die'])) {
       $r['die'] = true;
     }
     return $r;
@@ -762,7 +797,7 @@ class controller implements api{
     else{
       $v = $this->_mvc->get_view($args['path'], $args['mode'], $args['data']);
     }*/
-    if ( empty($args['mode']) ){
+    if (empty($args['mode'])) {
       $args['mode'] = 'html';
     }
     $v = $this->_mvc->get_view($args['path'], $args['mode'], $args['data']);
@@ -774,16 +809,17 @@ class controller implements api{
     return $v;
   }
 
-  public function get_external_view(string $full_path, string $mode = 'html', array $data=null){
+  public function get_external_view(string $full_path, string $mode = 'html', array $data=null)
+  {
     return $this->_mvc->get_external_view($full_path, $mode, $data);
   }
 
   public function custom_plugin_view(string $path, string $mode = 'html', array $data = [], string $plugin = null): ?string
   {
-    if ( !$plugin ){
+    if (!$plugin) {
       $plugin = $this->get_plugin();
     }
-    if ( $plugin ){
+    if ($plugin) {
       return $this->_mvc->custom_plugin_view($path, $mode, $data, $plugin);
     }
     return null;
@@ -795,11 +831,13 @@ class controller implements api{
 
   }
 
-  public function get_plugin_view(string $path, string $type = 'html', array $data = []){
+  public function get_plugin_view(string $path, string $type = 'html', array $data = [])
+  {
     return $this->_mvc->get_plugin_view($path, $type, $data, $this->get_plugin());
   }
 
-  public function get_plugin_views(string $path, array $data = [], array $data2 = null){
+  public function get_plugin_views(string $path, array $data = [], array $data2 = null)
+  {
     return [
       'html' => $this->_mvc->get_plugin_view($path, 'html', $data, $this->get_plugin()),
       'css' => $this->_mvc->get_plugin_view($path, 'css', [], $this->get_plugin()),
@@ -807,15 +845,22 @@ class controller implements api{
     ];
   }
 
-  public function get_plugin_model($path, $data = [], string $plugin = null, int $ttl = 0){
+  public function get_plugin_model($path, $data = [], string $plugin = null, int $ttl = 0)
+  {
     return $this->_mvc->get_plugin_model($path, $data, $this, $plugin ?: $this->get_plugin(), $ttl);
   }
 
-  public function get_subplugin_model($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0){
+  public function get_subplugin_model($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
+  {
     return $this->_mvc->get_subplugin_model($path, $data, $this, $plugin ?: $this->get_plugin(), $subplugin, $ttl);
   }
 
-/*
+  public function has_subplugin_model(string $path, string $plugin, string $subplugin)
+  {
+    return $this->_mvc->has_subplugin_model(...\func_get_args());
+  }
+
+  /*
   public function get_php(){
     $args = $this->get_arguments(\func_get_args());
     $v = $this->_mvc->get_view($args['path'], 'php', $args['data']);
@@ -833,59 +878,73 @@ class controller implements api{
     }
     return $v;
   }
-*/
-  private function retrieve_var($var){
-    if ( \is_string($var) && (strpos($var, '$') === 0) && isset($this->data[substr($var, 1)]) ){
+  */
+  private function retrieve_var($var)
+  {
+    if (\is_string($var) && (strpos($var, '$') === 0) && isset($this->data[substr($var, 1)])) {
       return $this->data[substr($var, 1)];
     }
     return false;
   }
 
-  public function action(){
+  public function action()
+  {
     $this->obj = $this->add_data(['res' => ['success' => false]])->add_data($this->post)->get_object_model();
   }
 
-  public function cached_action($ttl = 60){
+  public function cached_action($ttl = 60)
+  {
     $this->obj = \bbn\x::to_object(
       $this->add_data(['res' => ['success' => false]])
-           ->add_data($this->post)
-           ->get_cached_model('', $this->data, $ttl)
+        ->add_data($this->post)
+        ->get_cached_model('', $this->data, $ttl)
     );
   }
 
   /**
-   * @param string $title
-   * @param self
+   * Compile and echoes all the views with the given data
+   *
+   * @param string     $title The title of the final object
+   * @param array|bool $data  The data, if true the path' model will be used
+   * @param int        $ttl   The time-to-live value if cache must be used for the model
+   * @param string     $path  The path for the views/model; if null the controller path will be used
+   *
+   * @return self
    */
-  public function combo(string $title = null, $data = null, int $ttl = null): self
-  {
+  public function combo(
+      string $title = null,
+      $data = null,
+      int $ttl = null,
+      string $path = ''
+  ): self {
+
     $model = $ttl === null ?
-      $this->get_model('', bbn\x::merge_arrays($this->post, $this->data))
-      : $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $ttl);
+      $this->get_model($path, bbn\x::merge_arrays($this->post, $this->data))
+      : $this->get_cached_model($path, bbn\x::merge_arrays($this->post, $this->data), $ttl);
     if ($model && is_array($model)) {
       $this->add_data($model);
     }
 
-    $this->obj->css = $this->get_less('', false);
-    if ( $new_title = $this->retrieve_var($title) ){
+    $this->obj->css = $this->get_less($path, false);
+    if ($new_title = $this->retrieve_var($title)) {
       $this->set_title($new_title);
     }
-    else if ( $title ){
+    elseif ($title) {
       $this->set_title($title);
     }
-    if ( $tmp = $this->retrieve_var($data) ){
+    if ($tmp = $this->retrieve_var($data)) {
       $data = $tmp;
     }
-    else if ( !\is_array($data) ){
+    elseif (!\is_array($data)) {
       $data = $data === true ? $this->data : [];
     }
-    if ( $this->mode === 'dom' ){
-      $this->data['script'] = $this->get_js('', $data);
+    if ($this->mode === 'dom') {
+      $this->data['script'] = $this->get_js($path, $data);
     }
     else{
-      $this->add_js('', $data, false);
+      $this->add_js($path, $data, false);
     }
-    echo $this->get_view('', false);
+    echo $this->get_view($path, false);
     return $this;
   }
 
@@ -895,11 +954,12 @@ class controller implements api{
    * @param string $file_name
    * @return string|false
    */
-  public function get_content($file_name){
-    if ( $this->check_path($file_name) &&
-      \defined('BBN_DATA_PATH') &&
-      is_file(BBN_DATA_PATH.$file_name)
-    ){
+  public function get_content($file_name)
+  {
+    if ($this->check_path($file_name) 
+        && \defined('BBN_DATA_PATH') 
+        && is_file(BBN_DATA_PATH.$file_name)
+    ) {
       return file_get_contents(BBN_DATA_PATH.$file_name);
     }
     return false;
@@ -915,14 +975,16 @@ class controller implements api{
     return $this->_dir;
   }
 
-  public function get_prepath(){
-    if ( $this->exists() ){
+  public function get_prepath()
+  {
+    if ($this->exists()) {
       return $this->_mvc->get_prepath();
     }
   }
 
-  public function set_prepath($path){
-    if ( $this->exists() && $this->_mvc->set_prepath($path) ){
+  public function set_prepath($path)
+  {
+    if ($this->exists() && $this->_mvc->set_prepath($path)) {
       $this->params = $this->_mvc->get_params();
       return $this;
     }
@@ -936,38 +998,39 @@ class controller implements api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function get_model(){
+  public function get_model()
+  {
     $args = \func_get_args();
     $die = false;
-    foreach ( $args as $a ){
-      if ( \is_string($a) ){
+    foreach ($args as $a){
+      if (\is_string($a)) {
         $path = $a;
       }
-      else if ( \is_array($a) ){
+      elseif (\is_array($a)) {
         $data = $a;
       }
-      else if ( \is_bool($a) ){
+      elseif (\is_bool($a)) {
         $die = $a;
       }
     }
-    if ( empty($path) ){
+    if (empty($path)) {
       $path = $this->_path;
-      if ( ($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) ){
+      if (($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))) {
         $path .= '/index';
       }
     }
-    else if ( strpos($path, './') === 0 ){
+    elseif (strpos($path, './') === 0) {
       $path = $this->get_current_dir().substr($path, 1);
     }
-    if ( !isset($data) ){
+    if (!isset($data)) {
       $data = $this->data;
     }
     $m = $this->_mvc->get_model($path, $data, $this);
-    if ( \is_object($m) ){
+    if (\is_object($m)) {
       $m = bbn\x::to_array($m);
     }
-    if ( !\is_array($m) ){
-      if ( $die ){
+    if (!\is_array($m)) {
+      if ($die) {
         die("$path is an invalid model");
       }
       return [];
@@ -982,36 +1045,37 @@ class controller implements api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function get_cached_model(){
+  public function get_cached_model()
+  {
     $args = \func_get_args();
     $die = false;
     $ttl = 0;
     $data = [];
-    foreach ( $args as $a ){
-      if ( \is_string($a) && \strlen($a) ){
+    foreach ($args as $a){
+      if (\is_string($a) && \strlen($a)) {
         $path = $a;
       }
-      else if ( \is_array($a) ){
+      elseif (\is_array($a)) {
         $data = $a;
       }
-      else if ( \is_int($a) ){
+      elseif (\is_int($a)) {
         $ttl = $a;
       }
-      else if ( \is_bool($a) ){
+      elseif (\is_bool($a)) {
         $die = $a;
       }
     }
-    if ( !isset($path) ){
+    if (!isset($path)) {
       $path = $this->_path;
     }
-    else if ( strpos($path, './') === 0 ){
+    elseif (strpos($path, './') === 0) {
       $path = $this->get_current_dir().substr($path, 1);
     }
-    if ( !isset($data) ){
+    if (!isset($data)) {
       $data = $this->data;
     }
     $m = $this->_mvc->get_cached_model($path, $data, $this, $ttl);
-    if ( !\is_array($m) && $die ){
+    if (!\is_array($m) && $die) {
       die("$path is an invalid model");
     }
     return $m;
@@ -1023,24 +1087,25 @@ class controller implements api{
    * @params string path to the model
    * @params array data to send to the model
    */
-  public function delete_cached_model(){
+  public function delete_cached_model()
+  {
     $args = \func_get_args();
 
-    foreach ( $args as $a ){
-      if ( \is_string($a) && \strlen($a) ){
+    foreach ($args as $a){
+      if (\is_string($a) && \strlen($a)) {
         $path = $a;
       }
-      else if ( \is_array($a) ){
+      elseif (\is_array($a)) {
         $data = $a;
       }
     }
-    if ( !isset($path) ){
+    if (!isset($path)) {
       $path = $this->_path;
     }
-    else if ( strpos($path, './') === 0 ){
+    elseif (strpos($path, './') === 0) {
       $path = $this->get_current_dir().substr($path, 1);
     }
-    if ( !isset($data) ){
+    if (!isset($data)) {
       $data = $this->data;
     }
     return $this->_mvc->delete_cached_model($path, $data, $this);
@@ -1053,44 +1118,47 @@ class controller implements api{
    * @params array data to send to the model
    * @return $this
    */
-  public function set_cached_model(){
+  public function set_cached_model()
+  {
     $args = \func_get_args();
     $die = 1;
-    foreach ( $args as $a ){
-      if ( \is_string($a) && \strlen($a) ){
+    foreach ($args as $a){
+      if (\is_string($a) && \strlen($a)) {
         $path = $a;
       }
-      else if ( \is_array($a) ){
+      elseif (\is_array($a)) {
         $data = $a;
       }
-      else if ( \is_int($a) ){
+      elseif (\is_int($a)) {
         $ttl = $a;
       }
-      else if ( \is_bool($a) ){
+      elseif (\is_bool($a)) {
         $die = $a;
       }
     }
-    if ( !isset($path) ){
+    if (!isset($path)) {
       $path = $this->_path;
     }
-    else if ( strpos($path, './') === 0 ){
+    elseif (strpos($path, './') === 0) {
       $path = $this->get_current_dir().substr($path, 1);
     }
-    if ( !isset($data) ){
+    if (!isset($data)) {
       $data = $this->data;
     }
-    if ( !isset($ttl) ){
+    if (!isset($ttl)) {
       $ttl = 10;
     }
     $this->_mvc->set_cached_model($path, $data, $this, $ttl);
     return $this;
   }
 
-  public function get_object_model(){
+  public function get_object_model(): ?object
+  {
     $m = $this->get_model(...func_get_args());
-    if ( \is_array($m) ){
-      return bbn\x::to_object($m);
+    if (\is_array($m)) {
+      $m = bbn\x::to_object($m);
     }
+    return \is_object($m) ? $m : null;
   }
 
   /**
@@ -1132,20 +1200,20 @@ class controller implements api{
   }
 
   /**
-	 * Checks if data exists or if a specific index exists in the data
-	 *
-	 * @return bool
-	 */
-	public function has_data($idx = null, $check_empty = false)
-	{
-    if ( !\is_array($this->data) ){
+     * Checks if data exists or if a specific index exists in the data
+     *
+     * @return bool
+     */
+  public function has_data($idx = null, $check_empty = false)
+  {
+    if (!\is_array($this->data)) {
       return false;
     }
-    if ( \is_null($idx) ){
+    if (\is_null($idx)) {
       return !empty($this->data);
     }
     return \bbn\x::has_props($this->data, (array)$idx, $check_empty);
-	}
+  }
 
   /**
    * Checks if there is ny HTML content in the object
@@ -1154,7 +1222,7 @@ class controller implements api{
    */
   public function has_content()
   {
-    if ( !\is_object($this->obj) ){
+    if (!\is_object($this->obj)) {
       return false;
     }
     return !empty($this->obj->content);
@@ -1168,18 +1236,20 @@ class controller implements api{
    */
   public function get_rendered()
   {
-    if ( isset($this->obj->content) ){
+    if (isset($this->obj->content)) {
       return $this->obj->content;
     }
     return false;
   }
 
-  public function get_mode(){
+  public function get_mode()
+  {
     return $this->mode;
   }
 
-  public function set_mode($mode){
-    if ( $this->_mvc->set_mode($mode) ){
+  public function set_mode($mode)
+  {
+    if ($this->_mvc->set_mode($mode)) {
       $this->mode = $mode;
       //die(var_dump($mode));
     }
@@ -1194,7 +1264,7 @@ class controller implements api{
    */
   public function get_script()
   {
-    if ( isset($this->obj->script) ){
+    if (isset($this->obj->script)) {
       return $this->obj->script;
     }
     return '';
@@ -1217,10 +1287,11 @@ class controller implements api{
    *
    * @return $this
    */
-  public function add_data(array $data){
+  public function add_data(array $data)
+  {
     $ar = \func_get_args();
-    foreach ( $ar as $d ){
-      if ( \is_array($d) ){
+    foreach ($ar as $d){
+      if (\is_array($d)) {
         $this->data = empty($this->data) ? $d : array_merge($this->data, $d);
       }
     }
@@ -1234,10 +1305,10 @@ class controller implements api{
    */
   public function add($path, $data=[], $internal = false)
   {
-    if ( substr($path, 0, 2) === './' ){
+    if (substr($path, 0, 2) === './') {
       $path = $this->get_current_dir().substr($path, 1);
     }
-    if ( $route = $this->_mvc->get_route($path, $internal ? 'private' : 'public') ){
+    if ($route = $this->_mvc->get_route($path, $internal ? 'private' : 'public')) {
       $o = new controller($this->_mvc, $route, $data);
       $o->process();
       return $o;
@@ -1250,21 +1321,24 @@ class controller implements api{
    *
    * @return void
    */
-  public function add_to_obj(string $path, $data=[], $internal = false)
+  public function add_to_obj(string $path, $data=[], $internal = false): self
   {
-    if ( substr($path, 0, 2) === './' ){
+    if (substr($path, 0, 2) === './') {
       $path = $this->get_current_dir().substr($path, 1);
     }
-    if ( $route = $this->_mvc->get_route($path, $internal ? 'private' : 'public') ){
+    if ($route = $this->_mvc->get_route($path, $internal ? 'private' : 'public')) {
       $o = new controller($this->_mvc, $route, $data);
       $o->process();
       $this->obj = \bbn\x::merge_objects($this->obj, $o->obj);
-      return $this;
     }
-    return false;
+    else {
+      throw new \Error(_("Impossible to route the following request").': '.$path);
+    }
+    return $this;
   }
 
-  public function get_result(){
+  public function get_result()
+  {
     return $this->obj;
   }
 
@@ -1290,6 +1364,4 @@ class controller implements api{
   {
     return $this->_mvc->model_exists($path);
   }
-
-
 }

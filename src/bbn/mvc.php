@@ -39,98 +39,111 @@ if ( !\defined("BBN_DATA_PATH") ){
 	die("BBN_DATA_PATH must be defined");
 }
 
-class mvc implements mvc\api{
+class mvc implements mvc\api
+{
+  use models\tts\singleton;
+  use mvc\common;
 
-	use
-    models\tts\singleton,
-    mvc\common;
+  /**
+   * @var array The list of views which have been loaded
+   */
+  private static $_loaded_views = [
+    'html' => [],
+    'css' => [],
+    'js' => []
+  ];
+  /**
+   * @var string Database object
+   */
+  private static $_is_debug = false;
+  /**
+   * @var string The application name
+   */
+  private static $_app_name;
+  /**
+   * @var string The application prefix
+   */
+  private static $_app_prefix;
+  /**
+   * @var string The application path
+   */
+  private static $_app_path;
+  /**
+   * @var string The path in the URL
+   */
+  private static $_cur_path;
+  /**
+   * @var string The libraries path (vendor)
+   */
+  private static $_lib_path;
+  /**
+   * @var string The data path
+   */
+  private static $_data_path;
 
-  private static
-    /**
-     * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
-     * @var array
-     */
-    $_loaded_views = [
+  /**
+   * The current controller
+   * @var null|mvc\controller
+   */
+  private $controller;
+  /**
+   * @var db Database object
+   */
+  private $db;
+  /**
+   * @var mvc\environment Environment object
+   */
+  private $env;
+  /**
+   * @var mvc\router Database object
+   */
+  private $router;
+  /**
+   * @var array The file(s)'s configuration to transmit to the m/v/c
+   */
+  private $info;
+  /**
+   * @var string The root of the application in the URL (base href)
+   */
+  private $root;
+  /**
+   * @var array The plugins registered through the routes
+   */
+  private $plugins;
+  /**
+   * @var array The plugins registered through the routes
+   */
+  private $loaded = [
+    'views' => [
       'html' => [],
       'css' => [],
       'js' => []
     ],
-    $_is_debug = false,
-    $_app_name,
-    $_app_prefix,
-    $_app_path,
-    $_cur_path,
-    $_lib_path,
-    $_data_path;
+    'models' => [],
+    'ctrls' => []
+  ];
 
-	private
-    /**
-     * The current controller
-     * @var null|mvc\controller
-     */
-    $controller,
-    /**
-     * @var db Database object
-     */
-    $db,
-    /**
-     * @var mvc\environment Environment object
-     */
-    $env,
-    /**
-     * @var mvc\router Database object
-     */
-    $router,
-    /**
-     * @var array The file(s)'s configuration to transmit to the m/v/c
-     */
-    $info,
-    /**
-     * @var string The root of the application in the URL (base href)
-     */
-    $root,
-    /**
-     * @var array The plugins registered through the routes
-     */
-    $plugins,
-    /**
-     * @var array The plugins registered through the routes
-     */
-    $loaded = [
-      'views' => [
-        'html' => [],
-        'css' => [],
-        'js' => []
-      ],
-      'models' => [],
-      'ctrls' => []
-    ];
-
-	public
-    /**
-     * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-     * @var stdClass
-     */
-    $inc,
-    /**
-     * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-     * @var stdClass
-     */
-    $data = [],
-    // Same
-    $o,
-		/**
-		 * The output object
-		 * @var null|object
-		 */
-		$obj;
+  /**
+   * @var stdClass An external object that can be filled after the object creation and can be used as a global with the function add_inc
+   */
+  public $inc;
+  /**
+   * @var array 
+   */
+  public $data = [];
+  // Same
+  public $o;
+  /**
+   * The output object
+   * @var null|object
+   */
+  public $obj;
 
   private static
     $db_in_controller = false;
 
 	// These strings are forbidden to use in URL
-	public static
-    $reserved = ['_private', '_common', '_htaccess'];
+	public static $reserved = ['_private', '_common', '_htaccess'];
 
   public static function init_path(){
     if ( !self::$_app_name ){
@@ -143,23 +156,28 @@ class mvc implements mvc\api{
     }
   }
 
-  public static function get_app_name(){
+  public static function get_app_name(): string 
+  {
     return self::$_app_name;
   }
 
-  public static function get_app_prefix(){
+  public static function get_app_prefix(): ?string
+  {
     return self::$_app_prefix;
   }
 
-  public static function get_app_path($raw = false){
+  public static function get_app_path($raw = false): string
+  {
     return self::$_app_path.($raw ? '' : 'src/');
   }
 
-  public static function get_cur_path(){
+  public static function get_cur_path(): string
+  {
     return self::$_cur_path;
   }
 
-  public static function get_lib_path(){
+  public static function get_lib_path(): string
+  {
     return self::$_lib_path;
   }
 
@@ -483,39 +501,48 @@ class mvc implements mvc\api{
     return $this->router->route($path, $mode, $root);
   }
 
-  public function get_file(){
+  public function get_file(): ?string
+  {
     return $this->info['file'];
   }
 
-  public function get_url(){
+  public function get_url(): ?string
+  {
     return $this->env->get_url();
   }
 
-  public function get_params(){
+  public function get_params(): array
+  {
 		return $this->env->get_params();
 	}
 
-	public function get_post(){
+  public function get_post(): array
+  {
 		return $this->env->get_post();
 	}
 
-	public function get_get(){
+  public function get_get(): array
+  {
 		return $this->env->get_get();
 	}
 
-	public function get_files(){
+  public function get_files(): array
+  {
 		return $this->env->get_files();
 	}
 
-  public function get_mode(){
+  public function get_mode(): ?string
+  {
     return $this->env->get_mode();
   }
 
-  public function set_mode($mode){
+  public function set_mode($mode)
+  {
     return $this->env->set_mode($mode);
   }
 
-  public function is_cli(){
+  public function is_cli(): bool
+  {
     return $this->env->is_cli();
   }
 
@@ -653,16 +680,40 @@ class mvc implements mvc\api{
     return '';
   }
 
-  public function get_plugin_from_component(string $name)
+  /**
+   * Undocumented function
+   *
+   * @param string $name
+   *
+   * @return array|null
+   */
+  public function get_plugin_from_component(string $name): ?array
   {
     return $this->router->get_plugin_from_component($name);
   }
 
-  public function route_component(string $name)
+  /**
+   * Undocumented function
+   *
+   * @param string $name
+   *
+   * @return array|null
+   */
+  public function route_component(string $name): ?array
   {
     return $this->router->route_component($name);
   }
 
+  /**
+   * Undocumented function
+   *
+   * @param string $path
+   * @param string $mode
+   * @param array  $data
+   * @param string $plugin
+   *
+   * @return string|null
+   */
   public function custom_plugin_view(string $path, string $mode, array $data, string $plugin): ?string
   {
     if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), $mode, $plugin)) ){
@@ -675,6 +726,17 @@ class mvc implements mvc\api{
     return null;
   }
 
+  /**
+   * Undocumented function
+   *
+   * @param string         $path
+   * @param array          $data
+   * @param mvc\controller $ctrl
+   * @param string         $plugin
+   * @param int            $ttl
+   *
+   * @return array|null
+   */
   public function custom_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = null): ?array
   {
     if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), 'model', $plugin)) ){
@@ -687,14 +749,41 @@ class mvc implements mvc\api{
     return null;
   }
 
+  /**
+   * Returns true if the subplugin model exists.
+   *
+   * @param string         $path      The path in the subplugin
+   * @param string         $plugin    The plugin
+   * @param string         $subplugin The subplugin
+   *
+   * @return bool
+   */
+  public function has_subplugin_model(string $path, string $plugin, string $subplugin): bool
+  {
+    return !!$this->router->route_subplugin(router::parse($path), 'model', $plugin, $subplugin);
+  }
+
+  /**
+   * Get a subplugin model (a plugin inside the plugin directory of another plugin).
+   *
+   * @param string         $path      The path inside the subplugin directory
+   * @param array          $data      The data for the model
+   * @param mvc\controller $ctrl      The controller
+   * @param string         $plugin    The plugin name
+   * @param string         $subplugin The subplugin name
+   * @param int            $ttl       The cache TTL
+   *
+   * @return array|null
+   */
   public function subplugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, string $subplugin, int $ttl = null): ?array
   {
-    if ( $plugin && $subplugin && ($route = $this->router->route_subplugin(router::parse($path), 'model', $plugin, $subplugin)) ){
+    if ($plugin
+        && $subplugin
+        && ($route = $this->router->route_subplugin(router::parse($path), 'model', $plugin, $subplugin))
+    ) {
       $model = new mvc\model($this->db, $route, $ctrl, $this);
-      if ( $ttl ){
-        return $model->get_from_cache($data, '', $ttl);
-      }
-      return $model->get($data);
+      $res = $ttl ? $model->get_from_cache($data, '', $ttl) : $model->get($data);
+      return $res;
     }
     return null;
   }
@@ -702,10 +791,11 @@ class mvc implements mvc\api{
   /**
    * This will get a view.
    *
-   * @param string $path
-   * @param string $mode
-   * @param array $data
-   * @param string $plugin
+   * @param string $path   The path of the view in the plugin
+   * @param string $mode   The mode of the view
+   * @param array  $data   Data for the view
+   * @param string $plugin The plugin URL
+   * 
    * @return string|false
    */
   public function get_plugin_view(string $path, string $mode, array $data, string $plugin){
@@ -713,10 +803,11 @@ class mvc implements mvc\api{
   }
 
   /**
-   * This will get the model. There is no order for the arguments.
+   * This will get the model; there is no order for the arguments.
    *
-   * @params string path to the model
-   * @params array data to send to the model
+   * @param string $path Path to the model
+   * @param array  $data Data to send to the model
+   * 
    * @return array|false A data model
    */
   public function get_model($path, array $data, mvc\controller $ctrl){
@@ -732,7 +823,7 @@ class mvc implements mvc\api{
   }
 
   public function get_subplugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, string $subplugin, int $ttl = null){
-    return $this->subplugin_model(router::parse($path), $data, $ctrl, $this->plugin_name($plugin), $subplugin, $ttl);
+    return $this->subplugin_model($path, $data, $ctrl, $plugin, $subplugin, $ttl);
   }
 
   /**

@@ -589,9 +589,11 @@ SQL;
         ]
       ]);
       $diff = [];
+      $timer = new \bbn\util\timer();
       foreach ( $rows as $d ){
         if ($this->check_observer($d)) {
           // Aliases are the IDs of the observers aliases of the current row
+          $timer->start('exec');
           $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);
           if ( \bbn\str::is_json($d['request']) ){
             $d['request'] = json_decode($d['request'], true);
@@ -600,6 +602,7 @@ SQL;
           else{
             $real_result = $this->_exec($d['request'], $d['params']);
           }
+          x::log([$timer->stop('exec'), $this->db->last()], 'obs_request');
           // If the result is different we update the table
           if ( $real_result !== $d['result'] ){
             echo '+';

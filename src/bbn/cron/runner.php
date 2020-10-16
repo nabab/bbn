@@ -242,11 +242,12 @@ class runner extends bbn\models\cls\basic
       }
       */
       while ($this->is_poll_active()) {
+        // The only centralized action are the observers
         $res = $obs->observe();
         if (\is_array($res)) {
+          $time = time();
           foreach ($res as $id_user => $o) {
-            //$file = BBN_DATA_PATH."users/$id_user/tmp/poller/queue/observer-".time().'.json';
-            $file = $this->controller->data_path() . "users/$id_user/tmp/poller/queue/observer-" . time() . '.json';
+            $file = $this->controller->user_tmp_path($id_user)."poller/queue/observer-$time.json";
             if (bbn\file\dir::create_path(\dirname($file))) {
               file_put_contents($file, json_encode(['observers' => $o]));
             }
@@ -264,6 +265,7 @@ class runner extends bbn\models\cls\basic
           echo '.';
         }
       }
+      $this->output(_('Ending poll process'), date('Y-m-d H:i:s'));
     }
   }
 
