@@ -47,7 +47,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -57,7 +57,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -124,7 +124,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -134,7 +134,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -211,7 +211,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -221,7 +221,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -288,7 +288,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -298,7 +298,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -375,7 +375,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -385,7 +385,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -452,7 +452,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -462,7 +462,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -492,7 +492,7 @@
                 {
                     "name": "limit",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -502,7 +502,7 @@
                 {
                     "name": "start",
                     "position": 5,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -536,7 +536,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -546,7 +546,7 @@
                 {
                     "name": "field",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -613,7 +613,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -665,7 +665,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -819,7 +819,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -837,7 +837,7 @@
                 {
                     "name": "ignore",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -874,7 +874,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -920,7 +920,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -984,7 +984,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1039,7 +1039,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1094,7 +1094,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1140,7 +1140,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

@@ -759,7 +759,7 @@ class router
           'plugin' => $plugin,
           'mode' => $mode,
           'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
-        ], true);
+        ], false);
       }
     }
     return null;

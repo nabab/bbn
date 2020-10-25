@@ -283,7 +283,7 @@
                 {
                     "name": "table",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -293,7 +293,7 @@
                 {
                     "name": "escaped",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1101,7 +1101,7 @@
                 {
                     "name": "column",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1119,7 +1119,7 @@
                 {
                     "name": "length",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,

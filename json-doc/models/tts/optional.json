@@ -251,7 +251,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": []

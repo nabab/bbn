@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/observer.php",
     "startLine": 18,
-    "endLine": 651,
+    "endLine": 654,
     "contentConstructor": {
         "file": "bbn\\appui\\observer",
         "returns": null
@@ -40,16 +40,16 @@
             "returns": null,
             "parent": {
                 "name": "__construct",
-                "summary": "",
+                "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
                 "file": "bbn\\models\\cls\\db",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\db $db)\n  {\n  }",
-                "startLine": 27,
-                "endLine": 29,
+                "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
+                "startLine": 37,
+                "endLine": 40,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -110,7 +110,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -184,7 +184,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -221,7 +221,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -293,7 +293,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -315,9 +315,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->check() ){\n      $now = date('Y-m-d H:i:s');\n      $rows = $this->db->rselect_all([\n        'table' => 'bbn_observers',\n        'fields' => ['id', 'id_user', 'request', 'params', 'result', 'frequency'],\n        'where' => [\n          'conditions' => [\n            [\n              'field' => 'id_alias',\n              'operator' => 'isnull'\n            ], [\n              'field' => 'next',\n              'operator' => '<',\n              'value' => $now\n            ]\n          ]\n        ]\n      ]);\n      $diff = [];\n      foreach ( $rows as $d ){\n        if ($this->check_observer($d)) {\n          \/\/ Aliases are the IDs of the observers aliases of the current row\n          $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);\n          if ( \\bbn\\str::is_json($d['request']) ){\n            $d['request'] = json_decode($d['request'], true);\n            $real_result = $this->_exec_array($d['request']);\n          }\n          else{\n            $real_result = $this->_exec($d['request'], $d['params']);\n          }\n          \/\/ If the result is different we update the table\n          if ( $real_result !== $d['result'] ){\n            echo '+';\n            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);\n            \/\/ And if a user is attached to the observer we add it to the result\n            if ( $d['id_user'] ){\n              if ( !isset($diff[$d['id_user']]) ){\n                $diff[$d['id_user']] = [];\n              }\n              $diff[$d['id_user']][] = [\n                'id' => $d['id'],\n                'result' => $real_result\n              ];\n            }\n            \/\/ For each alias we add the entry for the corresponding user...\n            foreach ( $aliases as $a ){\n              \/\/ ...If the result differs\n              if ( $real_result !== $a['result'] ){\n                $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a['id']]);\n                if ( !isset($diff[$a['id_user']]) ){\n                  $diff[$a['id_user']] = [];\n                }\n                $diff[$a['id_user']][] = [\n                  'id' => $a['id'],\n                  'result' => $real_result\n                ];\n              }\n            }\n          }\n        }\n        \/\/ And we update the next time of execution\n        $this->_update_next($d['id'], $d['frequency']);\n      }\n      echo '.';\n      $this->delete_old();\n      $this->db->flush();\n      if ( count($diff) ){\n        bbn\\x::dump('Returning diff!', $diff);\n        return $diff;\n      }\n      if ( ob_get_contents() ){\n        ob_end_flush();\n      }\n      return true;\n    }\n    bbn\\x::dump('Canceling observer: '.date('H:i:s Y-m-d'));\n    return false;\n  }",
+            "code": "function()\n  {\n    if ( $this->check() ){\n      $now = date('Y-m-d H:i:s');\n      $rows = $this->db->rselect_all([\n        'table' => 'bbn_observers',\n        'fields' => ['id', 'id_user', 'request', 'params', 'result', 'frequency'],\n        'where' => [\n          'conditions' => [\n            [\n              'field' => 'id_alias',\n              'operator' => 'isnull'\n            ], [\n              'field' => 'next',\n              'operator' => '<',\n              'value' => $now\n            ]\n          ]\n        ]\n      ]);\n      $diff = [];\n      $timer = new \\bbn\\util\\timer();\n      foreach ( $rows as $d ){\n        if ($this->check_observer($d)) {\n          \/\/ Aliases are the IDs of the observers aliases of the current row\n          $timer->start('exec');\n          $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);\n          if ( \\bbn\\str::is_json($d['request']) ){\n            $d['request'] = json_decode($d['request'], true);\n            $real_result = $this->_exec_array($d['request']);\n          }\n          else{\n            $real_result = $this->_exec($d['request'], $d['params']);\n          }\n          x::log([$timer->stop('exec'), $this->db->last()], 'obs_request');\n          \/\/ If the result is different we update the table\n          if ( $real_result !== $d['result'] ){\n            echo '+';\n            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);\n            \/\/ And if a user is attached to the observer we add it to the result\n            if ( $d['id_user'] ){\n              if ( !isset($diff[$d['id_user']]) ){\n                $diff[$d['id_user']] = [];\n              }\n              $diff[$d['id_user']][] = [\n                'id' => $d['id'],\n                'result' => $real_result\n              ];\n            }\n            \/\/ For each alias we add the entry for the corresponding user...\n            foreach ( $aliases as $a ){\n              \/\/ ...If the result differs\n              if ( $real_result !== $a['result'] ){\n                $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a['id']]);\n                if ( !isset($diff[$a['id_user']]) ){\n                  $diff[$a['id_user']] = [];\n                }\n                $diff[$a['id_user']][] = [\n                  'id' => $a['id'],\n                  'result' => $real_result\n                ];\n              }\n            }\n          }\n        }\n        \/\/ And we update the next time of execution\n        $this->_update_next($d['id'], $d['frequency']);\n      }\n      echo '.';\n      $this->delete_old();\n      $this->db->flush();\n      if ( count($diff) ){\n        bbn\\x::dump('Returning diff!', $diff);\n        return $diff;\n      }\n      if ( ob_get_contents() ){\n        ob_end_flush();\n      }\n      return true;\n    }\n    bbn\\x::dump('Canceling observer: '.date('H:i:s Y-m-d'));\n    return false;\n  }",
             "startLine": 571,
-            "endLine": 650,
+            "endLine": 653,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -612,7 +612,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -621,7 +621,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -633,7 +633,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -642,7 +642,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

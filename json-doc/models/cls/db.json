@@ -1,12 +1,13 @@
 {
     "doc": {
-        "description": "Basic object Class\n *\n *\nThis class implements basic functions and vars",
+        "description": "Basic object Class\n *\nThis class implements basic functions and vars",
         "tags": {
-            "copyright": "BBN Solutions",
-            "since": "Apr 4, 2011, 23:23:55 +0000",
-            "category": "Generic classes",
+            "package": "BBN_Library",
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
-            "version": "0.2r89\nTodo: create a new delegation generic function for the double underscores functions"
+            "version": "Release: 0.2r89",
+            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/appui\/api",
+            "since": "Apr 4, 2011, 23:23:55 +0000"
         }
     },
     "name": "bbn\\models\\cls\\db",
@@ -14,8 +15,8 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/models\/cls\/db.php",
-    "startLine": 21,
-    "endLine": 31,
+    "startLine": 24,
+    "endLine": 41,
     "contentConstructor": {
         "file": "bbn\\models\\cls\\db",
         "returns": null
@@ -23,16 +24,16 @@
     "methods": {
         "__construct": {
             "name": "__construct",
-            "summary": "",
+            "summary": "Constructor.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\models\\cls\\db",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db)\n  {\n  }",
-            "startLine": 27,
-            "endLine": 29,
+            "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
+            "startLine": 37,
+            "endLine": 40,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -337,7 +338,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -346,7 +347,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -358,7 +359,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -367,7 +368,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -519,11 +520,11 @@
     "namespaceName": "bbn\\models\\cls",
     "shortName": "db",
     "summary": "Basic object Class",
-    "description": "*\n *\nThis class implements basic functions and vars",
+    "description": "*\nThis class implements basic functions and vars",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThis class implements basic functions and vars<\/p>"
+            "content": "<p>*\nThis class implements basic functions and vars<\/p>"
         }
     ]
 }

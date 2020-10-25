@@ -424,13 +424,13 @@ class cdn extends models\cls\basic
     $test = empty($this->cfg['test']) ? 'false' : 'true';
     return <<<JS
 (function(window){
-  if ( this.bbnAddGlobalScript === undefined ){
-    this.bbnAddGlobalScript = function(fn){
+  if (window.bbnAddGlobalScript === undefined ){
+    window.bbnAddGlobalScript = function(fn){
       return fn();
     }
-    this.bbnLoadedFiles = [];
-    this.bbnMinified = $test;
-    this.bbnLoadFile = function(file){
+    window.bbnLoadedFiles = [];
+    window.bbnMinified = $test;
+    window.bbnLoadFile = (file) => {
       if ( file.substr(0, 1) === '/' ){
         file = file.substr(1);
       }
@@ -438,12 +438,12 @@ class cdn extends models\cls\basic
         (window.bbnLoadedFiles !== undefined) &&
         (window.bbnLoadedFiles.length !== undefined)
       ){
-        for ( var j = 0; j < bbnLoadedFiles.length; j++ ){
-          if ( bbnLoadedFiles[j] === file ){
+        for ( var j = 0; j < window.bbnLoadedFiles.length; j++ ){
+          if ( window.bbnLoadedFiles[j] === file ){
             return false;
           }
         }
-        bbnLoadedFiles.push(file);
+        window.bbnLoadedFiles.push(file);
         return true;
       }
     };
@@ -470,9 +470,9 @@ JS;
         $tmp = $c['code'];
         if (empty($this->cfg['nocompil'])) {
           $tmp = <<<JS
-bbnAddGlobalScript(function(){
+window.bbnAddGlobalScript(function(){
   // $num
-  bbnLoadFile("$c[dir]/$c[file]");
+  window.bbnLoadFile("$c[dir]/$c[file]");
   var bbn_language = "{$this->cfg['lang']}",
       bbn_root_dir = "$c[dir]/",
       bbn_root_url = "$root_url";

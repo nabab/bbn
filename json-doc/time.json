@@ -45,7 +45,7 @@
                 {
                     "name": "t",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -103,7 +103,7 @@
                 {
                     "name": "format",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -137,7 +137,7 @@
                 {
                     "name": "date",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -147,7 +147,7 @@
                 {
                     "name": "comparator",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -181,7 +181,7 @@
                 {
                     "name": "date",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,7 +215,7 @@
                 {
                     "name": "date",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -249,7 +249,7 @@
                 {
                     "name": "date",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -297,7 +297,7 @@
                 {
                     "name": "format",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -346,7 +346,7 @@
                 {
                     "name": "format",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -381,7 +381,7 @@
                 {
                     "name": "modif",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -390,7 +390,7 @@
                 {
                     "name": "format",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -704,7 +704,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -713,7 +713,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -725,7 +725,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -734,7 +734,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

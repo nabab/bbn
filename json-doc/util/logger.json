@@ -44,7 +44,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -78,7 +78,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "misc",
@@ -112,7 +112,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -121,7 +121,7 @@
                 {
                     "name": "file",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "misc",

@@ -19,15 +19,46 @@ use bbn;
 class json //implements bbn\db\api
 {
   private $db;
-	public static
-          $operators=['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'],
-          $numeric_types=['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+  
+  public static $operators=[
+    '!=',
+    '=',
+    '<>',
+    '<',
+    '<=',
+    '>',
+    '>=',
+    'like',
+    'clike',
+    'slike',
+    'not',
+    'is',
+    'is not',
+    'in',
+    'between',
+    'not like'
+  ];
+
+  public static $numeric_types=[
+    'integer',
+    'int',
+    'smallint',
+    'tinyint',
+    'mediumint',
+    'bigint',
+    'decimal',
+    'numeric',
+    'float',
+    'double'
+  ];
 
   public $qte = '`';
+  
   /**
    * 
    */
-  public function __construct($file){
+  public function __construct($file)
+  {
     $this->current = $file;
   }
 	

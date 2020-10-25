@@ -15,7 +15,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/util\/timer.php",
     "startLine": 17,
-    "endLine": 124,
+    "endLine": 153,
     "contentConstructor": {
         "file": "bbn\\util\\timer",
         "returns": null
@@ -54,7 +54,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($key = 'default')\n  {\n\t\tif ( !isset($this->measures[$key]) ){\n      $this->measures[$key] = [\n        'num' => 0,\n        'sum' => 0,\n        'start' => microtime(1)\n      ];\n    }\n    else{\n      $this->measures[$key]['start'] = microtime(1);\n    }\n  }",
+            "code": "function($key = 'default', $from = NULL)\n  {\n\t\tif ( !isset($this->measures[$key]) ){\n      $this->measures[$key] = [\n        'num' => 0,\n        'sum' => 0,\n        'start' => $from ?: microtime(1)\n      ];\n    }\n    else{\n      $this->measures[$key]['start'] = $from ?: microtime(1);\n    }\n  }",
             "startLine": 34,
             "endLine": 46,
             "isDeprecated": false,
@@ -63,7 +63,7 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": null,
             "parent": false,
@@ -71,10 +71,19 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "default",
+                    "default_name": ""
+                },
+                {
+                    "name": "from",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
@@ -105,7 +114,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -139,7 +148,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -173,7 +182,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -207,13 +216,75 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
             ]
+        },
+        "current": {
+            "name": "current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\timer",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key = 'default')\n  {\n    if ( isset($this->measures[$key]) ){\n      return \\array_merge([\n        'current' => $this->has_started($key) ? $this->measure($key) : 0\n      ], $this->measures[$key]);\n    }\n    return [];\n  }",
+            "startLine": 95,
+            "endLine": 103,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "default",
+                    "default_name": ""
+                }
+            ]
+        },
+        "currents": {
+            "name": "currents",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\timer",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $currents = [];\n    foreach ( $this->measures as $key => $val ){\n      $currents[$key] = \\array_merge([\n        'current' => $this->has_started($key) ? $this->measure($key) : 0\n      ], $val);\n    }\n    return $currents;\n  }",
+            "startLine": 105,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
         },
         "result": {
             "name": "result",
@@ -225,8 +296,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($key = 'default')\n  {\n    if ( isset($this->measures[$key]) ){\n      if ( $this->has_started($key) ){\n        $this->stop($key);\n      }\n      return [\n        'num' => $this->measures[$key]['num'],\n        'total' => number_format($this->measures[$key]['sum'], 10),\n        'average' => number_format($this->measures[$key]['sum'] \/ $this->measures[$key]['num'], 10)\n      ];\n    }\n  }",
-            "startLine": 98,
-            "endLine": 110,
+            "startLine": 119,
+            "endLine": 131,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -241,7 +312,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -259,8 +330,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $r = [];\n    foreach ( $this->measures as $key => $val ){\n      $r[$key] = $this->result($key);\n    }\n    return $r;\n  }",
-            "startLine": 115,
-            "endLine": 122,
+            "startLine": 136,
+            "endLine": 143,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -272,12 +343,48 @@
             "returns": null,
             "parent": false,
             "arguments": []
+        },
+        "remove": {
+            "name": "remove",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\timer",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key = 'default')\n  {\n    if ( isset($this->measures[$key]) ){\n      unset($this->measures[$key]);\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 145,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "default",
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
-    "numMethods": 8,
+    "numMethods": 11,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,

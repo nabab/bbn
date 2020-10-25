@@ -689,7 +689,7 @@ class php extends bbn\models\cls\basic
           $ret = null;
           if ($ele->hasReTurnType()) {
             $type = $ele->getReturnType();
-            $ret = [(string)$type];
+            $ret = [$type->getName()];
             if ($type->allowsNull()) {
               $ret[] = null;
             }
@@ -725,7 +725,7 @@ class php extends bbn\models\cls\basic
     $ret = null;
     if ($method->hasReturnType()) {
       $type = $method->getReturnType();
-      $ret = [(string)$type];
+      $ret = [$type->getName()];
       if ($type->allowsNull()) {
         $ret[] = null;
       }
@@ -758,17 +758,17 @@ class php extends bbn\models\cls\basic
       'parent' => false,
       'arguments' => array_map(
         function ($p) {
-          $res = [
+          $type = $p->getType();
+          return [
             'name' => $p->getName(),
             'position' => $p->getPosition(),
-            'type' => (string)$p->getType(),
+            'type' => $type ? $type->getName() : null,
             'required' => !$p->isOptional(),
             'has_default' => $p->isDefaultValueAvailable(),
             'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
             'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ?
               $p->getDefaultValueConstantName() : ''
           ];
-          return $res;
         },
         $method->getParameters()
       )

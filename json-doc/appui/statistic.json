@@ -40,16 +40,16 @@
             "returns": null,
             "parent": {
                 "name": "__construct",
-                "summary": "",
+                "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
                 "file": "bbn\\models\\cls\\db",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\db $db)\n  {\n  }",
-                "startLine": 27,
-                "endLine": 29,
+                "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
+                "startLine": 37,
+                "endLine": 40,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -206,7 +206,7 @@
                 {
                     "name": "start",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,7 +215,7 @@
                 {
                     "name": "end",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -679,7 +679,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -688,7 +688,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -700,7 +700,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -709,7 +709,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1070,7 +1070,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": []

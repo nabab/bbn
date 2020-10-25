@@ -56,7 +56,7 @@
                 {
                     "name": "price",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -65,7 +65,7 @@
                 {
                     "name": "email",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -74,7 +74,7 @@
                 {
                     "name": "ref",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -83,7 +83,7 @@
                 {
                     "name": "currency",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "EUR",
@@ -117,7 +117,7 @@
                 {
                     "name": "button_title",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "Paiement Paybox",

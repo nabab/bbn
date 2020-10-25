@@ -294,7 +294,7 @@
                 {
                     "name": "including_dirs",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -304,7 +304,7 @@
                 {
                     "name": "hidden",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -313,7 +313,7 @@
                 {
                     "name": "filter",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -622,7 +622,7 @@
                 {
                     "name": "filter",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -741,7 +741,7 @@
                 {
                     "name": "recursive",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -985,7 +985,7 @@
                 {
                     "name": "name",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1128,7 +1128,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1137,7 +1137,7 @@
                 {
                     "name": "dest",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1146,7 +1146,7 @@
                 {
                     "name": "f",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1183,7 +1183,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1217,7 +1217,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1254,7 +1254,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1290,7 +1290,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1335,7 +1335,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1634,7 +1634,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1643,7 +1643,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1655,7 +1655,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1664,7 +1664,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

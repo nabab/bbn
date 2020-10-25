@@ -47,7 +47,7 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -84,7 +84,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": ".",
@@ -154,7 +154,7 @@
                 {
                     "name": "res",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -197,7 +197,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -231,7 +231,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -265,7 +265,7 @@
                 {
                     "name": "dir",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -299,7 +299,7 @@
                 {
                     "name": "dir",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -308,7 +308,7 @@
                 {
                     "name": "create",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -342,7 +342,7 @@
                 {
                     "name": "dir",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -376,7 +376,7 @@
                 {
                     "name": "item",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -410,7 +410,7 @@
                 {
                     "name": "src",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -419,7 +419,7 @@
                 {
                     "name": "dest",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -453,7 +453,7 @@
                 {
                     "name": "src",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -462,7 +462,7 @@
                 {
                     "name": "dest",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -854,7 +854,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -863,7 +863,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -875,7 +875,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -884,7 +884,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

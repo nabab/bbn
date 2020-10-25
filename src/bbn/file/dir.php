@@ -495,11 +495,13 @@ class dir extends bbn\models\cls\basic
 			foreach (array_reverse($bits) as $b) {
 				if (!empty($b)) {
 					$path .= '/'.$b;
-					try {
-						@mkdir($path);
-					}
-					catch (\Exception $e) {
-						\bbn\x::error_log($e->getMessage());
+					if (!is_dir($path)) {
+						try {
+							mkdir($path);
+						}
+						catch (\Exception $e) {
+							\bbn\x::error_log($e->getMessage());
+						}
 					}
 					if (!is_dir($path)) {
 						return null;

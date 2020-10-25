@@ -613,13 +613,15 @@ class image extends bbn\file
    * @param integer $h default BBN_MAX_HEIGHT
    * @return image
 	 */
-	public function autoresize($w=BBN_MAX_WIDTH, $h=BBN_MAX_HEIGHT)
+	public function autoresize(int $w = null, int $h = null)
 	{
-		if ( !$w ){
+		if (!$w) {
 			$w = \defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;
 		}
-		if ( $this->test() && is_numeric($w) && is_numeric($h) )
-		{
+		if (!$h) {
+			$h = \defined('BBN_MAX_HEIGHT') ? BBN_MAX_HEIGHT : self::$max_height;
+		}
+		if ($this->test() && is_numeric($w) && is_numeric($h)) {
 			if ( $this->w > $w ){
 				$this->resize($w);
 			}

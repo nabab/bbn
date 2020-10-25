@@ -16,7 +16,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cdn.php",
     "startLine": 53,
-    "endLine": 686,
+    "endLine": 688,
     "contentConstructor": {
         "file": "bbn\\cdn",
         "returns": null
@@ -129,9 +129,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!parent::check()) {\n      return false;\n    }\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];\n    if ($file && is_file($file)) {\n      return true;\n    }\n    x::log(\"Impossible to find $file\", 'cdn_errors');\n    return false;\n  }",
+            "code": "function()\n  {\n    if (!parent::check()) {\n      return false;\n    }\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];\n    if ($file && is_file($file)) {\n      return true;\n    }\n    if ($this->cfg['ext'] !== 'map') {\n      x::log(\"Impossible to find $file for \".$this->cfg['url'], 'cdn_errors');\n    }\n    return false;\n  }",
             "startLine": 283,
-            "endLine": 294,
+            "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -140,7 +140,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -177,8 +179,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($real = true)\n  {\n    if (is_file($this->cfg['cache_file'])) {\n      $last_modified = time();\n      $this->file_mtime = filemtime($this->cfg['cache_file']);\n      $c =& $this->cfg;\n      \/\/ Only checks if the file exists and is valid\n      if (!$real \n          && \\is_array($c['content']) \n          && (($last_modified - $this->file_mtime) < $this->cache_length)\n      ) {\n        return true;\n      }\n      clearstatcache();\n      \/\/ Real research for last mods and generation timestamps\n      if ($c['is_component']) {\n        foreach ($c['content'] as $name => $cp){\n          foreach ($cp as $type => $files){\n            foreach ($files as $f){\n              if (is_file($this->fpath.$f)) {\n                $last_modified = filemtime($this->fpath.$f);\n                if ($last_modified > $this->file_mtime) {\n                  return false;\n                }\n              }\n              else{\n                die(\"I can't find the file $f kkk!\");\n              }\n            }\n          }\n        }\n      }\n      else{\n        foreach ($this->cfg['content'][$this->mode] as $f){\n          if (is_file($this->fpath.$f)) {\n            $last_modified = filemtime($this->fpath.$f);\n            if ($last_modified > $this->file_mtime) {\n              return false;\n            }\n          }\n          else{\n            \/\/adump($this->cfg);\n            die(\"I can't find the file $f  mmm!\");\n          }\n        }\n      }\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 300,
-            "endLine": 349,
+            "startLine": 302,
+            "endLine": 351,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -193,7 +195,7 @@
                 {
                     "name": "real",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": true,
@@ -211,8 +213,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];\n    if ($file && is_file($file)) {\n      \/\/ get the HTTP_IF_MODIFIED_SINCE header if set\n      $client_if_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;\n      \/\/ get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)\n      $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('\"', '', stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;\n\n\n      \/\/ We get a unique hash of this file (etag)\n      $file_tag = md5($file.$this->file_mtime);\n\n\n      \/\/die(var_dump($this->file_mtime, $client_tag, $etagFile, $client_if_modified, $_SERVER));\n      if ($this->mode === 'css') {\n        header('Content-type: text\/css; charset=utf-8');\n      }\n      else{\n        if ($this->mode === 'js') {\n          header('Content-type: text\/javascript; charset=utf-8');\n        }\n        else{\n          $mime = finfo_open(FILEINFO_MIME_TYPE);\n          header('Content-type: '.finfo_file($mime, $file));\n        }\n      }\n      \/\/ make sure caching is turned on\n      header('Cache-Control: max-age=14400');\n      header('Expires: '.gmdate('D, d M Y H:i:s', time() + 14400).' GMT');\n      \/\/ set last-modified header\n      header('Date: '.gmdate('D, d M Y H:i:s', $this->file_mtime).' GMT');\n      header('Last-Modified: '.gmdate('D, d M Y H:i:s', $this->file_mtime).' GMT');\n      \/\/ set etag-header\n      header(\"ETag: $file_tag\");\n      \/\/header('Pragma: public');\n\n      \/\/ check if page has changed. If not, send 304 and exit\n      if ($client_if_modified \n          && ((strtotime($client_if_modified) == $this->file_mtime) \n          || ($client_tag == $file_tag)          )\n      ) {\n        header('HTTP\/1.1 304 Not Modified');\n      }\n      else{\n        if (empty($this->cfg['file']) && (($this->mode === 'js') \n            || ($this->mode === 'css')            ) \n        ) {\n          if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) \n              && (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)\n          ) {\n            header('Content-Encoding: gzip');\n            $file .= '.gzip';\n          }\n        }\n        readfile($file);\n      }\n      die();\n    }\n    die('No cache file '.$file);\n  }",
-            "startLine": 354,
-            "endLine": 414,
+            "startLine": 356,
+            "endLine": 416,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -460,7 +462,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -469,7 +471,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -481,7 +483,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -490,7 +492,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

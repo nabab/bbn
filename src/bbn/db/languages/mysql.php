@@ -1271,7 +1271,10 @@ MYSQL
       $i = 0;
       foreach ($model['keys'] as $name => $key) {
         $st .= '  ADD ';
-        if ($key['unique'] && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')) {
+        if ($key['unique']
+            && isset($model['fields'][$key['columns'][0]])
+            && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
+        ) {
           $st .= 'PRIMARY KEY';
         } elseif ($key['unique']) {
           $st .= 'UNIQUE KEY ' . $this->db->escape($name);

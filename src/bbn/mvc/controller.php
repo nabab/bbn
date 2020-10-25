@@ -152,6 +152,16 @@ class controller implements api
     }
   }
 
+  public function add_authorized_route(): int
+  {
+    return $this->_mvc->add_authorized_route(...\func_get_args());
+  }
+
+  public function is_authorized_route($url): bool
+  {
+    return $this->_mvc->is_authorized_route($url);
+  }
+
   public function get_root()
   {
     return $this->_mvc->get_root();

@@ -298,6 +298,7 @@ class sync
             $values[$f] = $cfg['values'][$i];
           }
         }
+        $last_id = self::$sync_connection->last_id();
         self::$sync_connection->insert(
           self::$sync_table, [
           'db' => self::$current_connection->get_current(),
@@ -308,6 +309,7 @@ class sync
           'vals' => empty($values) ? '[]' : x::json_base64_encode($values)
           ]
         );
+        self::$sync_connection->set_last_insert_id($last_id);
       }
     }
     return $cfg;

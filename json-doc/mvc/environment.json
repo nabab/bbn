@@ -65,7 +65,7 @@
                 {
                     "name": "mode",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -99,7 +99,7 @@
                 {
                     "name": "url",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -133,7 +133,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,7 +215,7 @@
                 {
                     "name": "url",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -224,7 +224,7 @@
                 {
                     "name": "post",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -233,7 +233,7 @@
                 {
                     "name": "arguments",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -389,7 +389,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"mWEXK2fxB8gS2igg4odvf4\"}"
     },
     "constants": null,
     "numMethods": 13,

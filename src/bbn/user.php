@@ -230,12 +230,14 @@ class user extends models\cls\basic
 
     $f =& $this->class_cfg['fields'];
 
+    /*
     if (x::is_cli() && isset($params['id'])) {
       $this->id = $params['id'];
       $this->auth = true;
     }
+    */
     // The user logs in
-    elseif ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){
+    if (isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']])) {
 
       /** @todo separate credentials and salt checking */
       if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){
@@ -487,6 +489,16 @@ class user extends models\cls\basic
       return $attr ? $this->session->get(self::$un, $attr) : $this->session->get(self::$un);
     }
     return null;
+  }
+
+  public function get_osession($attr = null)
+  {
+    return $this->_get_session($attr);
+  }
+
+  public function set_osession($attr)
+  {
+    return $this->_set_session($attr);
   }
 
 	/**

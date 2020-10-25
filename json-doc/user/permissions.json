@@ -88,7 +88,7 @@
                 {
                     "name": "type",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "page",
@@ -300,7 +300,7 @@
                 {
                     "name": "id_option",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -638,7 +638,7 @@
                 {
                     "name": "id_option",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -755,7 +755,7 @@
                 {
                     "name": "routes",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1045,7 +1045,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1054,7 +1054,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1066,7 +1066,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1075,7 +1075,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1489,7 +1489,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": []
@@ -1696,7 +1697,7 @@
         "optional_is_init": true,
         "option_root_id": "05c471dc025011e8beb3005056014c9f",
         "option_appui_id": "05c471dc025011e8beb3005056014c9f",
-        "current": null
+        "current": "05f4845f14c911eb9584366237393031"
     },
     "constants": null,
     "numMethods": 44,
@@ -1723,7 +1724,7 @@
         "optional_is_init": true,
         "option_root_id": "05c471dc025011e8beb3005056014c9f",
         "option_appui_id": "05c471dc025011e8beb3005056014c9f",
-        "current": null,
+        "current": "05f4845f14c911eb9584366237393031",
         "opt": null,
         "pref": null,
         "user": null,

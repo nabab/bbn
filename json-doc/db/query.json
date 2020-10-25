@@ -115,7 +115,7 @@
                     {
                         "name": "bound_input_params",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -127,7 +127,7 @@
                 {
                     "name": "args",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -231,7 +231,7 @@
                     {
                         "name": "how",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -240,7 +240,7 @@
                     {
                         "name": "orientation",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -249,7 +249,7 @@
                     {
                         "name": "offset",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -261,7 +261,7 @@
                 {
                     "name": "how",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -270,7 +270,7 @@
                 {
                     "name": "orientation",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -279,7 +279,7 @@
                 {
                     "name": "offset",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -334,7 +334,7 @@
                     {
                         "name": "how",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -343,7 +343,7 @@
                     {
                         "name": "class_name",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -352,7 +352,7 @@
                     {
                         "name": "ctor_args",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -364,7 +364,7 @@
                 {
                     "name": "fetch_style",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 4,
@@ -374,7 +374,7 @@
                 {
                     "name": "fetch_argument",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -384,7 +384,7 @@
                 {
                     "name": "ctor_args",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -440,7 +440,7 @@
                     {
                         "name": "column_number",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -452,7 +452,7 @@
                 {
                     "name": "column_number",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -508,7 +508,7 @@
                     {
                         "name": "class_name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -517,7 +517,7 @@
                     {
                         "name": "ctor_args",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -529,7 +529,7 @@
                 {
                     "name": "class_name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "stdClass",
@@ -539,7 +539,7 @@
                 {
                     "name": "ctor_args",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -646,7 +646,7 @@
                     {
                         "name": "column",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -658,7 +658,7 @@
                 {
                     "name": "column",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -978,7 +978,7 @@
                     {
                         "name": "paramno",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -987,7 +987,7 @@
                     {
                         "name": "param",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -996,7 +996,7 @@
                     {
                         "name": "type",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1005,7 +1005,7 @@
                     {
                         "name": "maxlen",
                         "position": 3,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1014,7 +1014,7 @@
                     {
                         "name": "driverdata",
                         "position": 4,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1026,7 +1026,7 @@
                 {
                     "name": "paramno",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1035,7 +1035,7 @@
                 {
                     "name": "param",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1044,7 +1044,7 @@
                 {
                     "name": "type",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1053,7 +1053,7 @@
                 {
                     "name": "maxlen",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1062,7 +1062,7 @@
                 {
                     "name": "driverdata",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1117,7 +1117,7 @@
                     {
                         "name": "column",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1126,7 +1126,7 @@
                     {
                         "name": "param",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1135,7 +1135,7 @@
                     {
                         "name": "type",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1144,7 +1144,7 @@
                     {
                         "name": "maxlen",
                         "position": 3,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1153,7 +1153,7 @@
                     {
                         "name": "driverdata",
                         "position": 4,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1165,7 +1165,7 @@
                 {
                     "name": "column",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1174,7 +1174,7 @@
                 {
                     "name": "param",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1183,7 +1183,7 @@
                 {
                     "name": "type",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1192,7 +1192,7 @@
                 {
                     "name": "maxlen",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1201,7 +1201,7 @@
                 {
                     "name": "driverdata",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1256,7 +1256,7 @@
                     {
                         "name": "paramno",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1265,7 +1265,7 @@
                     {
                         "name": "param",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1274,7 +1274,7 @@
                     {
                         "name": "type",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1286,7 +1286,7 @@
                 {
                     "name": "paramno",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1295,7 +1295,7 @@
                 {
                     "name": "param",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1304,7 +1304,7 @@
                 {
                     "name": "type",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1453,7 +1453,7 @@
                     {
                         "name": "attribute",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1462,7 +1462,7 @@
                     {
                         "name": "value",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1474,7 +1474,7 @@
                 {
                     "name": "attribute",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1483,7 +1483,7 @@
                 {
                     "name": "value",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1538,7 +1538,7 @@
                     {
                         "name": "attribute",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1550,7 +1550,7 @@
                 {
                     "name": "attribute",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1605,7 +1605,7 @@
                     {
                         "name": "mode",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1614,7 +1614,7 @@
                     {
                         "name": "params",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1626,7 +1626,7 @@
                 {
                     "name": "mode",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1635,7 +1635,7 @@
                 {
                     "name": "params",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": false,
                     "default": "",

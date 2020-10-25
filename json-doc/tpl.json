@@ -72,7 +72,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -81,7 +81,7 @@
                 {
                     "name": "data",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

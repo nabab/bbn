@@ -151,6 +151,18 @@ class preferences extends bbn\models\cls\db
   }
 
   /**
+   * Checks if the given user or the current user is authorized to access a user_option.
+   *
+   * @param string $id_user_option
+   *
+   * @return bool
+   */
+  public function is_authorized(string $id_user_option)
+  {
+    return (bool)$this->get($id_user_option, false);
+  }
+
+  /**
    * Returns true if the current user can access a preference, false otherwise
    *
    * @param string|null $id_option
@@ -963,14 +975,15 @@ class preferences extends bbn\models\cls\db
   /**
    * Adds a bit to a preference
    *
-   * @param string $id_usr_opt The preference's ID
+   * @param string $id_user_option The preference's ID
    * @param array $cfg The bit's values
    * @return string|null
    */
-  public function add_bit(string $id_usr_opt, array $cfg): ?string
+  public function add_bit(string $id_user_option, array $cfg): ?string
   {
     if (
-      ($id_usr_opt = $this->_get_id_option($id_usr_opt)) &&
+      ($id_user_option = $this->_get_id_option($id_user_option)) &&
+      $this->is_authorized($id_user_option) &&
       ($c = $this->class_cfg['arch']['user_options_bits'])
     ){
       $to_cfg = $this->get_bit_cfg(null, $cfg);
@@ -995,7 +1008,7 @@ class preferences extends bbn\models\cls\db
         $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
       }
       if ( $this->db->insert($this->class_cfg['tables']['user_options_bits'], [
-        $c['id_user_option'] => $id_usr_opt,
+        $c['id_user_option'] => $id_user_option,
         $c['id_parent'] => $cfg[$c['id_parent']] ?? NULL,
         $c['id_option'] => $cfg[$c['id_option']] ?? NULL,
         $c['num'] => $cfg[$c['num']] ?? NULL,
@@ -1017,10 +1030,11 @@ class preferences extends bbn\models\cls\db
    */
   public function delete_bit(string $id): ?int
   {
-    if ( \bbn\str::is_uid($id) ){
-      return $this->db->delete($this->class_cfg['tables']['user_options_bits'], [
-        $this->class_cfg['arch']['user_options_bits']['id'] => $id
-      ]);
+    if (\bbn\str::is_uid($id)) {
+      return $this->db->delete(
+        $this->class_cfg['tables']['user_options_bits'],
+        [$this->class_cfg['arch']['user_options_bits']['id'] => $id]
+      );
     }
     return null;
   }
@@ -1034,9 +1048,9 @@ class preferences extends bbn\models\cls\db
    */
   public function delete_bits(string $id_user_option): ?int
   {
-    if ( \bbn\str::is_uid($id_user_option) ){
+    if (\bbn\str::is_uid($id_user_option) && $this->is_authorized($id_user_option)) {
       $i = 0;
-      foreach ( $this->get_bits($id_user_option) as $b ){
+      foreach ($this->get_bits($id_user_option) as $b) {
         $i += (int)$this->delete_bit($b['id']);
       }
       return $i;
@@ -1096,10 +1110,6 @@ class preferences extends bbn\models\cls\db
     return null;
   }
 
-  public function set_bit(string $id_user_option, array $cfg){
-    
-  }
-
   /**
    * Returns a single preference's bit
    *
@@ -1114,10 +1124,12 @@ class preferences extends bbn\models\cls\db
         $this->class_cfg['arch']['user_options_bits']['id'] => $id
       ]))
     ){
-      if ( !empty($with_config) ){
-        return $this->explode_bit_cfg($bit);
+      if ($this->is_authorized($bit['id_user_option'])) {
+        if ($with_config) {
+          return $this->explode_bit_cfg($bit);
+        }
+        return $bit;
       }
-      return $bit;
     }
     return [];
   }
@@ -1129,40 +1141,42 @@ class preferences extends bbn\models\cls\db
    * @param null|string $id_parent The bits'parent ID
    * @return array
    */
-  public function get_bits(string $id_usr_opt, $id_parent = false, bool $with_config = true): array
+  public function get_bits(string $id_user_option, $id_parent = false, bool $with_config = true): array
   {
-    $c = $this->class_cfg['arch']['user_options_bits'];
-    $t = $this;
-    $where = [[
-      'field' => $c['id_user_option'],
-      'value' => $id_usr_opt
-    ]];
-    if ( \is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
-      $where[] = [
-        'field' => $c['id_parent'],
-        empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
-      ];
-    }
-    if (
-      \bbn\str::is_uid($id_usr_opt) &&
-      ($bits = $this->db->rselect_all([
-        'table' => $this->class_cfg['tables']['user_options_bits'],
-        'fields' => [],
-        'where' => [
-          'conditions' => $where
-        ],
-        'order' => [[
-          'field' => $c['num'],
-          'dir' => 'ASC'
-        ]]
-      ]))
-    ){
-      if ( !empty($with_config) ){
-        return array_map(function($b) use($t){
-          return $t->explode_bit_cfg($b);
-        }, $bits);
+    if ($this->is_authorized($id_user_option)) {
+      $c = $this->class_cfg['arch']['user_options_bits'];
+      $t = $this;
+      $where = [[
+        'field' => $c['id_user_option'],
+        'value' => $id_user_option
+      ]];
+      if ( \is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
+        $where[] = [
+          'field' => $c['id_parent'],
+          empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+        ];
       }
-      return $bits;
+      if (
+        \bbn\str::is_uid($id_user_option) &&
+        ($bits = $this->db->rselect_all([
+          'table' => $this->class_cfg['tables']['user_options_bits'],
+          'fields' => [],
+          'where' => [
+            'conditions' => $where
+          ],
+          'order' => [[
+            'field' => $c['num'],
+            'dir' => 'ASC'
+          ]]
+        ]))
+      ){
+        if ( !empty($with_config) ){
+          return array_map(function($b) use($t){
+            return $t->explode_bit_cfg($b);
+          }, $bits);
+        }
+        return $bits;
+      }
     }
     return [];
   }
@@ -1174,10 +1188,9 @@ class preferences extends bbn\models\cls\db
    * @param null|string $id_parent The bits'parent ID
    * @return array
    */
-  public function get_bits_by_id_option(string $id_opt, $id_parent = false, bool $with_config = true): array
+  public function get_bits_by_id_option(string $id_opt, $id_parent = false, bool $with_config = true): ?array
   {
     $c = $this->class_cfg['arch']['user_options_bits'];
-    $t = $this;
     $where = [[
       'field' => $c['id_user_option'],
       'value' => $id_opt
@@ -1200,34 +1213,35 @@ class preferences extends bbn\models\cls\db
         ]]
       ]))
     ){
-      if ( !empty($with_config) ){
-        return array_map(function($b) use($t){
-          return $t->explode_bit_cfg($b);
-        }, $bits);
+      $res = [];
+      foreach ($bits as $bit) {
+        if ($this->is_authorized($bit['id_user_option'])) {
+          $res[] = $with_config ? $t->explode_bit_cfg($bit) : $bit;
+        }
       }
-      return $bits;
+      return $res;
     }
-    return [];
+    return null;
   }
 
   /**
    * Returns the hierarchical bits list of a preference
    *
-   * @param string $id_usr_opt The preference's ID
+   * @param string $id_user_option The preference's ID
    * @param string $id_parent The parent's ID of a bit. Default: null
    * @param bool $with_config Set it to false if you don't want the preference's cfg field values on the results.
    * @return array
    */
-  public function get_full_bits(string $id_usr_opt, string $id_parent = null, bool $with_config = true): array
+  public function get_full_bits(string $id_user_option, string $id_parent = null, bool $with_config = true): array
   {
-    if ( \bbn\str::is_uid($id_usr_opt) ){
+    if ($this->is_authorized($id_user_option)) {
       $c = $this->class_cfg['arch']['user_options_bits'];
       $t = $this;
-      return array_map(function($b) use($t, $c, $id_usr_opt, $with_config){
+      return array_map(function($b) use($t, $c, $id_user_option, $with_config){
         if ( !empty($with_config) ){
           $b = $t->explode_bit_cfg($b);
         }
-        $b['items'] = $t->get_full_bits($id_usr_opt, $b[$c['id']], $with_config);
+        $b['items'] = $t->get_full_bits($id_user_option, $b[$c['id']], $with_config);
         return $b;
       }, $this->db->rselect_all([
         'table' => $this->class_cfg['tables']['user_options_bits'],
@@ -1235,7 +1249,7 @@ class preferences extends bbn\models\cls\db
         'where' => [
           'conditions' => [[
             'field' => $c['id_user_option'],
-            'value' => $id_usr_opt
+            'value' => $id_user_option
           ], [
             'field' => $c['id_parent'],
             empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
@@ -1252,12 +1266,14 @@ class preferences extends bbn\models\cls\db
    */
   public function get_bits_order(string $id_user_option): ?array
   {
-    $tab1 =$this->class_cfg['tables']['user_options'];
-    $tab2 = $this->class_cfg['tables']['user_options_bits'];
-    $cfg = $this->class_cfg['arch']['user_options'];
-    $cfg2 = $this->class_cfg['arch']['user_options_bits'];
-    if ( $this->db->select_one($tab1, $cfg['id_user'], ['id' => $id_user_option]) === $this->id_user ){
-      return $this->db->get_column_values($tab2, $cfg2['id_option'], [$cfg2['id_user_option'] => $id_user_option], [$cfg2['num'] => 'ASC']);
+    if ($this->is_authorized($id_user_option)) {
+      $tab1 =$this->class_cfg['tables']['user_options'];
+      $tab2 = $this->class_cfg['tables']['user_options_bits'];
+      $cfg = $this->class_cfg['arch']['user_options'];
+      $cfg2 = $this->class_cfg['arch']['user_options_bits'];
+      if ( $this->db->select_one($tab1, $cfg['id_user'], ['id' => $id_user_option]) === $this->id_user ){
+        return $this->db->get_column_values($tab2, $cfg2['id_option'], [$cfg2['id_user_option'] => $id_user_option], [$cfg2['num'] => 'ASC']);
+      }
     }
     return null;
   }

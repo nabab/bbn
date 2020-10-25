@@ -37,60 +37,11 @@ class session
     $fingerprint = BBN_FINGERPRINT,
     $name = BBN_APP_NAME;
 
-  protected
-    $data,
-    $id;
+  protected $was_opened = false;
 
-  /**
-   * Gets a reference to the part of the data corresponding to an array of indexes
-   *
-   * ```php
-   * $this->_get_value(['index1', 'index2'])
-   * // Will return the content of $this->data['index1']['index2']
-   * ```
-   * @param $args
-   * @return null
-   */
-  private function _get_value($args){
-    if ( $this->id ){
-      $var =& $this->data;
-      foreach ( $args as $a ){
-        if ( !isset($var[$a]) ){
-          return null;
-        }
-        $var =& $var[$a];
-      }
-      return $var;
-    }
-  }
+  protected $data;
 
-  private function _set_value($args){
-    if ( $this->id ){
-      // The value is the first argument
-      $value = array_shift($args);
-      // Except if it's an array and there is only one argument
-      if ( !count($args) && \is_array($value) && bbn\x::is_assoc($value) ){
-        $this->data = bbn\x::merge_arrays($this->data, $value);
-      }
-      else{
-        $var =& $this->data;
-        foreach ( $args as $i => $a ){
-          if ( $i === (\count($args) - 1) ){
-            if ( \is_null($value) ){
-              unset($var[$a]);
-            }
-            else{
-              $var[$a] = $value;
-            }
-          }
-          else{
-            $var =& $var[$a];
-          }
-        }
-      }
-    }
-    return $this;
-  }
+  protected $id;
 
   public function __construct(array $defaults = null)
   {
@@ -101,6 +52,10 @@ class session
       }
       */
       self::singleton_init($this);
+
+      if ($id = session_id()) {
+        $this->was_opened = true;
+      }
       $this->open();
       if ($this->id = session_id()) {
         if (!isset($_SESSION[self::$name])){
@@ -113,14 +68,14 @@ class session
   }
 
   protected function open(){
-    if (!$this->is_opened()) {
+    if (!$this->was_opened && !$this->is_opened()) {
       session_start();
     }
     return $this;
   }
 
   protected function close(){
-    if ( session_id() != '' ){
+    if ( !$this->was_opened && session_id() != '' ){
       session_write_close();
     }
     return $this;
@@ -274,6 +229,57 @@ class session
       return $this->get($name, 'bbn-data-state') === md5(serialize($data));
     }
     return false;
+  }
+
+  /**
+   * Gets a reference to the part of the data corresponding to an array of indexes
+   *
+   * ```php
+   * $this->_get_value(['index1', 'index2'])
+   * // Will return the content of $this->data['index1']['index2']
+   * ```
+   * @param $args
+   * @return null
+   */
+  private function _get_value($args){
+    if ( $this->id ){
+      $var =& $this->data;
+      foreach ( $args as $a ){
+        if ( !isset($var[$a]) ){
+          return null;
+        }
+        $var =& $var[$a];
+      }
+      return $var;
+    }
+  }
+
+  private function _set_value($args){
+    if ( $this->id ){
+      // The value is the first argument
+      $value = array_shift($args);
+      // Except if it's an array and there is only one argument
+      if ( !count($args) && \is_array($value) && bbn\x::is_assoc($value) ){
+        $this->data = bbn\x::merge_arrays($this->data, $value);
+      }
+      else{
+        $var =& $this->data;
+        foreach ( $args as $i => $a ){
+          if ( $i === (\count($args) - 1) ){
+            if ( \is_null($value) ){
+              unset($var[$a]);
+            }
+            else{
+              $var[$a] = $value;
+            }
+          }
+          else{
+            $var =& $var[$a];
+          }
+        }
+      }
+    }
+    return $this;
   }
 }
 /*

@@ -58,7 +58,7 @@
                 {
                     "name": "jpg",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -68,7 +68,7 @@
                 {
                     "name": "pdf",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -111,7 +111,7 @@
                 {
                     "name": "pdf",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -121,7 +121,7 @@
                 {
                     "name": "jpg",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -131,7 +131,7 @@
                 {
                     "name": "num",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -165,7 +165,7 @@
                 {
                     "name": "svg",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -174,7 +174,7 @@
                 {
                     "name": "filename",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -238,7 +238,7 @@
                     {
                         "name": "file",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -259,7 +259,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -495,7 +495,7 @@
                     {
                         "name": "dest",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": ".\/",
@@ -507,7 +507,7 @@
                 {
                     "name": "dest",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -607,7 +607,7 @@
                 {
                     "name": "w",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -617,7 +617,7 @@
                 {
                     "name": "h",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -627,7 +627,7 @@
                 {
                     "name": "crop",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -637,7 +637,7 @@
                 {
                     "name": "max_w",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -647,7 +647,7 @@
                 {
                     "name": "max_h",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -681,7 +681,7 @@
                 {
                     "name": "w",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "BBN_MAX_WIDTH",
@@ -691,7 +691,7 @@
                 {
                     "name": "h",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "BBN_MAX_HEIGHT",
@@ -734,7 +734,7 @@
                 {
                     "name": "w",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -744,7 +744,7 @@
                 {
                     "name": "h",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -754,7 +754,7 @@
                 {
                     "name": "x",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -764,7 +764,7 @@
                 {
                     "name": "y",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -807,7 +807,7 @@
                 {
                     "name": "angle",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -850,7 +850,7 @@
                 {
                     "name": "mode",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "v",
@@ -946,7 +946,7 @@
                 {
                     "name": "val",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "+",
@@ -989,7 +989,7 @@
                 {
                     "name": "val",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "+",
@@ -1131,7 +1131,7 @@
                 {
                     "name": "dest",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": ".",
@@ -1140,7 +1140,7 @@
                 {
                     "name": "sizes",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [
@@ -1170,7 +1170,7 @@
                 {
                     "name": "mask",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "_%s",
@@ -1179,7 +1179,7 @@
                 {
                     "name": "crop",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1188,7 +1188,7 @@
                 {
                     "name": "bigger",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1771,7 +1771,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1780,7 +1780,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1792,7 +1792,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1801,7 +1801,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

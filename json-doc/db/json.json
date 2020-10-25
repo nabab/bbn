@@ -15,7 +15,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/db\/json.php",
     "startLine": 19,
-    "endLine": 34,
+    "endLine": 65,
     "contentConstructor": {
         "file": "bbn\\db\\json",
         "returns": null
@@ -30,9 +30,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file)\n  {\n  }",
-            "startLine": 30,
-            "endLine": 32,
+            "code": "function($file)\n  {\n    $this->current = $file;\n  }",
+            "startLine": 60,
+            "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -47,7 +47,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

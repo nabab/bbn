@@ -38,7 +38,7 @@
                 {
                     "name": "string",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

@@ -2144,7 +2144,7 @@ class options extends bbn\models\cls\db
    * @param array   $it         The option configuration
    * @param boolean $force      Determines if the option should be updated if it already exists
    * @param boolean $return_num If set to true the function will return the number of rows inserted otherwise the ID of the newly created option
-   * @return int|false
+   * @return int|string|false
    */
   public function add(array $it, $force = false, $return_num = false)
   {
@@ -2156,17 +2156,21 @@ class options extends bbn\models\cls\db
         $c =& $this->class_cfg['arch']['options'];
         if ($it[$c['code']]) {
           $id = $this->db->select_one(
-            $this->class_cfg['table'], $c['id'], [
-            $c['id_parent'] => $it[$c['id_parent']],
-            $c['code'] => $it[$c['code']]
+            $this->class_cfg['table'],
+            $c['id'],
+            [
+              $c['id_parent'] => $it[$c['id_parent']],
+              $c['code'] => $it[$c['code']]
             ]
           );
         }
-        elseif ($it[$c['id']]) {
+        elseif (!empty($it[$c['id']])) {
           $id = $this->db->select_one(
-            $this->class_cfg['table'], $c['id'], [
-            $c['id'] => $it[$c['id']],
-            $c['code'] => null
+            $this->class_cfg['table'], 
+            $c['id'],
+            [
+              $c['id'] => $it[$c['id']],
+              $c['code'] => null
             ]
           );
         }
@@ -2175,15 +2179,15 @@ class options extends bbn\models\cls\db
             && (null !== $it[$c['code']])
         ) {
           $res = $this->db->update(
-            $this->class_cfg['table'], [
-            $c['text'] => $it[$c['text']],
-            $c['id_alias'] => $it[$c['id_alias']],
-            $c['value'] => $it[$c['value']],
-            $c['num'] => $it[$c['num']] ?? null,
-            $c['cfg'] => $it[$c['cfg']] ?? null
-            ], [
-            $c['id'] => $id
-            ]
+            $this->class_cfg['table'],
+            [
+              $c['text'] => $it[$c['text']],
+              $c['id_alias'] => $it[$c['id_alias']],
+              $c['value'] => $it[$c['value']],
+              $c['num'] => $it[$c['num']] ?? null,
+              $c['cfg'] => $it[$c['cfg']] ?? null
+            ],
+            [$c['id'] => $id]
           );
         }
         
@@ -2210,7 +2214,10 @@ class options extends bbn\models\cls\db
         if ($items && bbn\str::is_uid($id)) {
           foreach ($items as $item){
             $item['id_parent'] = $id;
-            $res += (int)$this->add($item, $force, $return_num);
+            $tmp = (int)$this->add($item, $force, $return_num);
+            if ($return_num && $tmp) {
+              $res += $tmp;
+            }
           }
         }
       }
@@ -2249,14 +2256,14 @@ class options extends bbn\models\cls\db
       $c =& $this->class_cfg['arch']['options'];
       // id_parent cannot be edited this way
       if ($res = $this->db->update(
-        $this->class_cfg['table'], [
-        $c['text'] => $cfg[$c['text']],
-        $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
-        $c['id_alias'] => !empty($cfg[$c['id_alias']]) ? $cfg[$c['id_alias']] : null,
-        $c['value'] => $cfg[$c['value']]
-        ], [
-        $c['id'] => $id
-        ]
+        $this->class_cfg['table'],
+        [
+          $c['text'] => $cfg[$c['text']],
+          $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
+          $c['id_alias'] => !empty($cfg[$c['id_alias']]) ? $cfg[$c['id_alias']] : null,
+          $c['value'] => $cfg[$c['value']]
+        ],
+        [$c['id'] => $id]
       ) 
       ) {
         $this->delete_cache($id);

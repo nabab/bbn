@@ -94,7 +94,7 @@
                 {
                     "name": "cfg",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -185,7 +185,7 @@
                 {
                     "name": "force",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -248,7 +248,7 @@
                 {
                     "name": "force",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -265,7 +265,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data = [])\n  {\n    $path = \\bbn\\x::make_storage_path(\\bbn\\mvc::get_user_tmp_path()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';\n    $cfg = $this->get_excel();\n    $dates = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));\n    }));\n    $data = array_map(function($row) use($cfg, $dates){\n      foreach ( $row as $i => $r ){\n        if ( \\is_string($r) ){\n          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;\n        }\n        if ( (($k = \\bbn\\x::find($dates, ['field' => $i])) !== false ) ){\n          if ( !empty($dates[$k]['format']) && !empty($r) ){\n            $r = date($dates[$k]['format'], strtotime($r));\n          }\n          $row[$i] = \\PhpOffice\\PhpSpreadsheet\\Shared\\Date::PHPToExcel($r);\n        }\n        if (\n          (($idx = \\bbn\\x::find($cfg['fields'], ['field' => $i])) === false ) ||\n          !!$cfg['fields'][$idx]['hidden']\n        ){\n          unset($row[$i]);\n        }\n      }\n      return $row;\n    }, $data ?: $this->get_data());\n    $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']);\n    }));\n    if ( \\bbn\\x::to_excel($data, $path, true, $cfg) ){\n      return ['file' => $path];\n    }\n    return ['error' => _('Error')];\n  }",
+            "code": "function(array $data = [])\n  {\n    $path = \\bbn\\x::make_storage_path(\\bbn\\mvc::get_user_tmp_path()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';\n    $cfg = $this->get_excel();\n    $dates = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));\n    }));\n    $data = array_map(function($row) use($cfg, $dates){\n      foreach ( $row as $i => $r ){\n        if ( \\is_string($r) ){\n          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;\n        }\n        if ( (($k = \\bbn\\x::find($dates, ['field' => $i])) !== null ) ){\n          if ( !empty($dates[$k]['format']) && !empty($r) ){\n            $r = date($dates[$k]['format'], strtotime($r));\n          }\n          $row[$i] = \\PhpOffice\\PhpSpreadsheet\\Shared\\Date::PHPToExcel($r);\n        }\n        if (\n          (($idx = \\bbn\\x::find($cfg['fields'], ['field' => $i])) === null ) ||\n          !!$cfg['fields'][$idx]['hidden']\n        ){\n          unset($row[$i]);\n        }\n      }\n      return $row;\n    }, $data ?: $this->get_data());\n    $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']);\n    }));\n    if ( \\bbn\\x::to_excel($data, $path, true, $cfg) ){\n      return ['file' => $path];\n    }\n    return ['error' => _('Error')];\n  }",
             "startLine": 400,
             "endLine": 434,
             "isDeprecated": false,
@@ -539,7 +539,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -551,7 +551,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -606,7 +606,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -615,7 +615,7 @@
                     {
                         "name": "method",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -624,7 +624,7 @@
                     {
                         "name": "ttl",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -636,7 +636,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -645,7 +645,7 @@
                 {
                     "name": "method",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -654,7 +654,7 @@
                 {
                     "name": "ttl",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -709,7 +709,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -718,7 +718,7 @@
                     {
                         "name": "method",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -727,7 +727,7 @@
                     {
                         "name": "data",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -736,7 +736,7 @@
                     {
                         "name": "ttl",
                         "position": 3,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -748,7 +748,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -757,7 +757,7 @@
                 {
                     "name": "method",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -766,7 +766,7 @@
                 {
                     "name": "data",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -775,7 +775,7 @@
                 {
                     "name": "ttl",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -839,7 +839,7 @@
                     {
                         "name": "uid",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -848,7 +848,7 @@
                     {
                         "name": "method",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -857,7 +857,7 @@
                     {
                         "name": "ttl",
                         "position": 3,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -878,7 +878,7 @@
                 {
                     "name": "uid",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -887,7 +887,7 @@
                 {
                     "name": "method",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -896,7 +896,7 @@
                 {
                     "name": "ttl",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -951,7 +951,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -960,7 +960,7 @@
                     {
                         "name": "method",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -969,7 +969,7 @@
                     {
                         "name": "ttl",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -981,7 +981,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -990,7 +990,7 @@
                 {
                     "name": "method",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -999,7 +999,7 @@
                 {
                     "name": "ttl",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1242,7 +1242,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1251,7 +1251,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1263,7 +1263,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1272,7 +1272,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

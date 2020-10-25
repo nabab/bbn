@@ -136,7 +136,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -145,7 +145,7 @@
                 {
                     "name": "prepath",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -179,7 +179,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -188,7 +188,7 @@
                 {
                     "name": "prepath",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -205,7 +205,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if (\n      ($bit = $this->pref->get_bit($id, false)) &&\n      ($id_option = $this->from_path('shortcuts')) &&\n      ($c = $this->pref->get_class_cfg())\n    ){\n      if ( $id_menu = $this->pref->get_by_option($id_option) ){\n        $id_menu = $id_menu[$c['arch']['user_options']['id']];\n      }\n      else {\n        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);\n      }\n      if (\n        !empty($id_menu) &&\n        ($arch = $c['arch']['user_options_bits'])\n      ){\n        if (\n          ($bits = $this->pref->get_bits($id_menu, false, false)) &&\n          ( \\bbn\\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== false)\n        ){\n          return null;\n        }\n        return $this->pref->add_bit($id_menu, [\n          $arch['id_option'] => $bit[$arch['id_option']],\n          $arch['text'] => $bit[$arch['text']],\n          $arch['cfg'] => $bit[$arch['cfg']],\n          $arch['num'] => $this->pref->next_bit_num($id_menu) ?: 1\n        ]);\n      }\n    }\n    return null;\n  }",
+            "code": "function($id)\n  {\n    if (\n      ($bit = $this->pref->get_bit($id, false)) &&\n      ($id_option = $this->from_path('shortcuts')) &&\n      ($c = $this->pref->get_class_cfg())\n    ){\n      if ( $id_menu = $this->pref->get_by_option($id_option) ){\n        $id_menu = $id_menu[$c['arch']['user_options']['id']];\n      }\n      else {\n        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);\n      }\n      if (\n        !empty($id_menu) &&\n        ($arch = $c['arch']['user_options_bits'])\n      ){\n        if (\n          ($bits = $this->pref->get_bits($id_menu, false, false)) &&\n          ( \\bbn\\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)\n        ){\n          return null;\n        }\n        return $this->pref->add_bit($id_menu, [\n          $arch['id_option'] => $bit[$arch['id_option']],\n          $arch['text'] => $bit[$arch['text']],\n          $arch['cfg'] => $bit[$arch['cfg']],\n          $arch['num'] => $this->pref->next_bit_num($id_menu) ?: 1\n        ]);\n      }\n    }\n    return null;\n  }",
             "startLine": 191,
             "endLine": 223,
             "isDeprecated": false,
@@ -262,7 +262,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -397,7 +397,7 @@
                 {
                     "name": "id_menu",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -531,7 +531,7 @@
                 {
                     "name": "id_menu",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -595,7 +595,7 @@
                 {
                     "name": "k_text",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "text",
@@ -605,7 +605,7 @@
                 {
                     "name": "k_value",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "value",
@@ -811,7 +811,7 @@
                 {
                     "name": "id_parent",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -820,7 +820,7 @@
                 {
                     "name": "deep",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -970,7 +970,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -979,7 +979,7 @@
                 {
                     "name": "prefix",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1269,7 +1269,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1278,7 +1278,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1290,7 +1290,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1299,7 +1299,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1660,7 +1660,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": []

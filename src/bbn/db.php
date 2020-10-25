@@ -1079,6 +1079,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $this->cache_renewal = (int)$cfg['cache_length'];
           }
           $this->start_fancy_stuff();
+          if (!empty($cfg['error_mode'])) {
+            $this->set_error_mode($cfg['error_mode']);
+          }
         }
         catch ( \PDOException $e ){
           $err = _("Impossible to create the connection")." $engine/$db ".PHP_EOL
@@ -2402,7 +2405,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
       else{
         $id = $this->lastInsertId();
-        if ( \is_string($id) && str::is_integer($id) ){
+        if ( \is_string($id) && str::is_integer($id) && ((int)$id != PHP_INT_MAX)){
           $id = (int)$id;
         }
       }
@@ -3372,7 +3375,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return int The number of rows inserted or updated.
    */
-  public function insert_update($table, array $values = null): ?int {
+  public function insert_update($table, array $values = null): ?int
+  {
     // Twice the arguments
     if ( \is_array($table) && isset($table['values']) ){
       $values = $table['values'];
@@ -3396,7 +3400,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $i++;
           }
         }
-        // Only if the number of known field values matches the number of columns qhich are parts of the unique key
+        // Only if the number of known field values matches the number of columns 
+        // which are parts of the unique key
+        // If a value is null it won't pass isset and so won't be used
         if ( ($i === \count($k['columns'])) && $this->count($table, $unique) ){
           // Removing unique matching fields from the values (as it is the where)
           foreach ( $unique as $f => $v ){

@@ -89,7 +89,7 @@
                 {
                     "name": "uid",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -123,7 +123,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -157,7 +157,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -166,7 +166,7 @@
                 {
                     "name": "value",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -200,7 +200,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -234,7 +234,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -360,7 +360,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -372,7 +372,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -427,7 +427,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -436,7 +436,7 @@
                     {
                         "name": "method",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -445,7 +445,7 @@
                     {
                         "name": "ttl",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -457,7 +457,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -466,7 +466,7 @@
                 {
                     "name": "method",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -475,7 +475,7 @@
                 {
                     "name": "ttl",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -530,7 +530,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -539,7 +539,7 @@
                     {
                         "name": "method",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -548,7 +548,7 @@
                     {
                         "name": "data",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -557,7 +557,7 @@
                     {
                         "name": "ttl",
                         "position": 3,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -569,7 +569,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -578,7 +578,7 @@
                 {
                     "name": "method",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -587,7 +587,7 @@
                 {
                     "name": "data",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -596,7 +596,7 @@
                 {
                     "name": "ttl",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -660,7 +660,7 @@
                     {
                         "name": "uid",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -669,7 +669,7 @@
                     {
                         "name": "method",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -678,7 +678,7 @@
                     {
                         "name": "ttl",
                         "position": 3,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -699,7 +699,7 @@
                 {
                     "name": "uid",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -708,7 +708,7 @@
                 {
                     "name": "method",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -717,7 +717,7 @@
                 {
                     "name": "ttl",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -772,7 +772,7 @@
                     {
                         "name": "uid",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -781,7 +781,7 @@
                     {
                         "name": "method",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": "",
@@ -790,7 +790,7 @@
                     {
                         "name": "ttl",
                         "position": 2,
-                        "type": "",
+                        "type": null,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -802,7 +802,7 @@
                 {
                     "name": "uid",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -811,7 +811,7 @@
                 {
                     "name": "method",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -820,7 +820,7 @@
                 {
                     "name": "ttl",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1110,7 +1110,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1119,7 +1119,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1131,7 +1131,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1140,7 +1140,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",

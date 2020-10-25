@@ -56,64 +56,79 @@ class mvc implements mvc\api
    * @var string Database object
    */
   private static $_is_debug = false;
+
   /**
    * @var string The application name
    */
   private static $_app_name;
+
   /**
    * @var string The application prefix
    */
   private static $_app_prefix;
+
   /**
    * @var string The application path
    */
   private static $_app_path;
+
   /**
    * @var string The path in the URL
    */
   private static $_cur_path;
+
   /**
    * @var string The libraries path (vendor)
    */
   private static $_lib_path;
+
   /**
    * @var string The data path
    */
   private static $_data_path;
 
+  protected static $db_in_controller = false;
+
   /**
    * The current controller
    * @var null|mvc\controller
    */
-  private $controller;
+  protected $controller;
+
   /**
    * @var db Database object
    */
-  private $db;
+  protected $db;
+
   /**
    * @var mvc\environment Environment object
    */
-  private $env;
+  protected $env;
+
   /**
    * @var mvc\router Database object
    */
-  private $router;
+  protected $router;
+
   /**
    * @var array The file(s)'s configuration to transmit to the m/v/c
    */
-  private $info;
+  protected $info;
+
   /**
    * @var string The root of the application in the URL (base href)
    */
-  private $root;
+  protected $root;
+
   /**
    * @var array The plugins registered through the routes
    */
-  private $plugins;
+  protected $plugins;
+
   /**
    * @var array The plugins registered through the routes
    */
-  private $loaded = [
+  protected $loaded = [
     'views' => [
       'html' => [],
       'css' => [],
@@ -123,24 +138,26 @@ class mvc implements mvc\api
     'ctrls' => []
   ];
 
+  protected $authorized_routes = [];
+
   /**
    * @var stdClass An external object that can be filled after the object creation and can be used as a global with the function add_inc
    */
   public $inc;
+
   /**
    * @var array 
    */
   public $data = [];
+
   // Same
   public $o;
+
   /**
    * The output object
    * @var null|object
    */
   public $obj;
-
-  private static
-    $db_in_controller = false;
 
 	// These strings are forbidden to use in URL
 	public static $reserved = ['_private', '_common', '_htaccess'];
@@ -266,6 +283,33 @@ class mvc implements mvc\api
 
   public function get_cookie(){
     return empty($_COOKIE[BBN_APP_NAME]) ? false : json_decode($_COOKIE[BBN_APP_NAME], true)['value'];
+  }
+
+  public function add_authorized_route(): int
+  {
+    $res = 0;
+    foreach (\func_get_args() as $a) {
+      if (!in_array($a, $this->authorized_routes, true)) {
+        $this->authorized_routes[] = $a;
+        $res++;
+      }
+    }
+    return $res;
+  }
+
+  public function is_authorized_route($url): bool
+  {
+    if (in_array($url, $this->authorized_routes, true)) {
+      return true;
+    }
+    foreach ($this->authorized_routes as $ar) {
+      if (substr($ar, -1) === '*') {
+        if (strpos($url, substr($ar, 0, -1)) === 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   public function set_root($root){

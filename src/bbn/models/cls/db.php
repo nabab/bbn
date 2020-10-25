@@ -1,31 +1,41 @@
 <?php
 /**
  * @package bbn
+ * @todo    create a new delegation generic function for the double underscores functions
  */
+
 namespace bbn\models\cls;
+
 use bbn;
+
 /**
  * Basic object Class
  *
- *
  * This class implements basic functions and vars
  *
- * @author Thomas Nabet <thomas.nabet@gmail.com>
- * @copyright BBN Solutions
- * @since Apr 4, 2011, 23:23:55 +0000
- * @category  Generic classes
+ * @category  GenericClasses
+ * @package   BBN_Library
+ * @author    Thomas Nabet <thomas.nabet@gmail.com>
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
- * @version 0.2r89
- * Todo: create a new delegation generic function for the double underscores functions
+ * @version   Release: 0.2r89
+ * @link      https://bbn.io/bbn-php/doc/class/appui/api
+ * @since     Apr 4, 2011, 23:23:55 +0000
  */
 abstract class db extends basic
 {
-  /** @var bbn\db */
-	protected $db;
+  /**
+   * @var bbn\db 
+   */
+  protected $db;
 
 
-	public function __construct(bbn\db $db){
-		$this->db = $db;
-	}
-
+  /**
+   * Constructor.
+   *
+   * @param bbn\db $db A database connection
+   */
+  public function __construct(bbn\db $db)
+  {
+      $this->db = $db;
+  }
 }

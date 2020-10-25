@@ -291,7 +291,7 @@
                 {
                     "name": "type",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -555,7 +555,7 @@
                 {
                     "name": "start",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -564,7 +564,7 @@
                 {
                     "name": "num",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 10,

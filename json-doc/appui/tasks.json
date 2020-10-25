@@ -41,16 +41,16 @@
             "returns": null,
             "parent": {
                 "name": "__construct",
-                "summary": "",
+                "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
                 "file": "bbn\\models\\cls\\db",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\db $db)\n  {\n  }",
-                "startLine": 27,
-                "endLine": 29,
+                "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
+                "startLine": 37,
+                "endLine": 40,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -206,7 +206,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,7 +215,7 @@
                 {
                     "name": "simple",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -345,7 +345,7 @@
                 {
                     "name": "code",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -379,7 +379,7 @@
                 {
                     "name": "code",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -413,7 +413,7 @@
                 {
                     "name": "code",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -447,7 +447,7 @@
                 {
                     "name": "code",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -481,7 +481,7 @@
                 {
                     "name": "parent",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -490,7 +490,7 @@
                 {
                     "name": "order",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "priority",
@@ -499,7 +499,7 @@
                 {
                     "name": "dir",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "ASC",
@@ -508,7 +508,7 @@
                 {
                     "name": "limit",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 50,
@@ -517,7 +517,7 @@
                 {
                     "name": "start",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -585,7 +585,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -619,7 +619,7 @@
                 {
                     "name": "limit",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 100,
@@ -628,7 +628,7 @@
                 {
                     "name": "start",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -662,7 +662,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -696,7 +696,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -730,7 +730,7 @@
                 {
                     "name": "parent",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -739,7 +739,7 @@
                 {
                     "name": "status",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "opened|ongoing|holding",
@@ -748,7 +748,7 @@
                 {
                     "name": "id_user",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -757,7 +757,7 @@
                 {
                     "name": "order",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "priority",
@@ -766,7 +766,7 @@
                 {
                     "name": "dir",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "ASC",
@@ -775,7 +775,7 @@
                 {
                     "name": "limit",
                     "position": 5,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 1000,
@@ -784,7 +784,7 @@
                 {
                     "name": "start",
                     "position": 6,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -818,7 +818,7 @@
                 {
                     "name": "search",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -827,7 +827,7 @@
                 {
                     "name": "order",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "last",
@@ -836,7 +836,7 @@
                 {
                     "name": "dir",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "DESC",
@@ -845,7 +845,7 @@
                 {
                     "name": "limit",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 1000,
@@ -854,7 +854,7 @@
                 {
                     "name": "start",
                     "position": 4,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -888,7 +888,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -897,7 +897,7 @@
                 {
                     "name": "closed",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -955,7 +955,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -964,7 +964,7 @@
                 {
                     "name": "with_comments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -998,7 +998,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1032,7 +1032,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1075,7 +1075,7 @@
                 {
                     "name": "sort",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1084,7 +1084,7 @@
                 {
                     "name": "start",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1093,7 +1093,7 @@
                 {
                     "name": "num",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 25,
@@ -1127,7 +1127,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1161,7 +1161,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1195,7 +1195,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1229,7 +1229,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1238,7 +1238,7 @@
                 {
                     "name": "id_user",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1272,7 +1272,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1306,7 +1306,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1315,7 +1315,7 @@
                 {
                     "name": "id_note",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1349,7 +1349,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1383,7 +1383,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1417,7 +1417,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1460,7 +1460,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1469,7 +1469,7 @@
                 {
                     "name": "action",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1546,7 +1546,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1580,7 +1580,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1589,7 +1589,7 @@
                 {
                     "name": "role",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1598,7 +1598,7 @@
                 {
                     "name": "id_user",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1632,7 +1632,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1641,7 +1641,7 @@
                 {
                     "name": "id_user",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1675,7 +1675,7 @@
                 {
                     "name": "date",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1825,7 +1825,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1834,7 +1834,7 @@
                 {
                     "name": "prop",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1843,7 +1843,7 @@
                 {
                     "name": "value",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1877,7 +1877,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1911,7 +1911,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1945,7 +1945,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1979,7 +1979,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2013,7 +2013,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2047,7 +2047,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2081,7 +2081,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2115,7 +2115,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2124,7 +2124,7 @@
                 {
                     "name": "id_user",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2158,7 +2158,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2168,7 +2168,7 @@
                 {
                     "name": "message",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2178,7 +2178,7 @@
                 {
                     "name": "id_user",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2212,7 +2212,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2246,7 +2246,7 @@
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2280,7 +2280,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2314,7 +2314,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2348,7 +2348,7 @@
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2382,7 +2382,7 @@
                 {
                     "name": "id_task",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2625,7 +2625,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -2634,7 +2634,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": "",
+                        "type": null,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -2646,7 +2646,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2655,7 +2655,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3040,7 +3040,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": []
