@@ -247,7 +247,7 @@ class runner extends bbn\models\cls\basic
         if (\is_array($res)) {
           $time = time();
           foreach ($res as $id_user => $o) {
-            $file = $this->controller->user_tmp_path($id_user)."poller/queue/observer-$time.json";
+            $file = $this->controller->user_data_path($id_user, 'appui-core')."poller/queue/observer-$time.json";
             if (bbn\file\dir::create_path(\dirname($file))) {
               file_put_contents($file, json_encode(['observers' => $o]));
             }

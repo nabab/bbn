@@ -56,13 +56,13 @@ class passwords extends bbn\models\cls\db
   {
     if ($password && defined('BBN_ENCRYPTION_KEY')) {
       $arch     = &$this->class_cfg['arch']['passwords'];
-      $to_store = \bbn\util\enc::crypt($password, BBN_ENCRYPTION_KEY);
+      $to_store = \bbn\util\enc::crypt64($password, BBN_ENCRYPTION_KEY);
       //var_dump(base64_encode($to_store));
       if ($this->db->insert_update(
         $this->class_cfg['table'],
         [
           $arch['id_option'] => $id_option,
-          $arch['password'] => base64_encode($to_store)
+          $arch['password'] => $to_store
         ]
       )
       ) {
@@ -115,7 +115,7 @@ class passwords extends bbn\models\cls\db
       if ($password = $this->db->select_one($this->class_cfg['table'], $arch['password'], [
         $arch['id_option'] => $id_option
       ])) {
-        return \bbn\util\enc::decrypt(base64_decode($password), BBN_ENCRYPTION_KEY);
+        return \bbn\util\enc::decrypt64($password), BBN_ENCRYPTION_KEY);
       }
     }
     return null;

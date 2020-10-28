@@ -76,6 +76,9 @@ class jwt
       x::hdump($e->getMessage());
       throw new \Exception($e);
     }
-    return $payload ? x::to_array($payload) : null;
+    if (!empty($payload->data)) {
+      return x::to_array($payload->data);
+    }
+    return null;
   }
 }

@@ -48,6 +48,16 @@ class enc
     return self::decryptOpenssl($s, $key);
   }
 
+  public static function crypt64(string $s, string $key=''): string
+  {
+    return base64_encode(self::crypt($s, $key));
+  }
+
+  public static function decrypt64(string $s, string $key=''): string
+  {
+    return self::decrypt(base64_decode($s), $key);
+  }
+
   /**
    * Encrypt string using openSSL module
    * @param string $s

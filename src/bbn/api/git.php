@@ -16,6 +16,21 @@ class git extends \Cz\Git\GitRepository
     return $this->extractFromCommand('git remote -v');
   }
 
+  public function getUrl(): ?string
+  {
+    if ($remote = $this->listRemote()) {
+      foreach ($remote as $r) {
+        preg_match('/^([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)/', $r, $bits);
+        if ((count($bits) === 4) && ($bits[1] === 'origin') && ($bits[3] === '(fetch)')) {
+          return $bits[2];
+        }
+      }
+    }
+
+    return null;
+  }
+
+
   public function createRepositoryRemote(string $token, array $scope, string $api=""){
     if ( $token &&
         !empty($scope['name']) &&
@@ -36,7 +51,7 @@ class git extends \Cz\Git\GitRepository
   }
 
 	public function diff(){
-    if (is_dir($this->getRepositoryPath().'.git')) {
+    if (is_dir($this->getRepositoryPath().'/.git')) {
       $output = $this->extractFromCommand('git status -s');
       if ( is_array($output) && !empty($output) ){
         $arr = [];
