@@ -247,9 +247,20 @@ class runner extends bbn\models\cls\basic
         if (\is_array($res)) {
           $time = time();
           foreach ($res as $id_user => $o) {
-            $file = $this->controller->user_data_path($id_user, 'appui-core')."poller/queue/observer-$time.json";
-            if (bbn\file\dir::create_path(\dirname($file))) {
-              file_put_contents($file, json_encode(['observers' => $o]));
+            $user = bbn\user::get_instance();
+            $ucfg = $user->get_class_cfg();
+            $sessions = $this->db->select_all($ucfg['tables']['sessions'], [
+              $ucfg['arch']['sessions']['id'],
+              $ucfg['arch']['sessions']['sess_id']
+            ], [
+              $ucfg['arch']['sessions']['id_user'] => $id_user,
+              $ucfg['arch']['sessions']['opened'] => 1
+            ]);
+            foreach ($sessions as $sess) {
+              $file = $this->controller->user_data_path($id_user, 'appui-core')."poller/queue/{$sess->id}/observer-$time.json";
+              if (bbn\file\dir::create_path(\dirname($file))) {
+                file_put_contents($file, json_encode(['observers' => $o]));
+              }
             }
           }
         }

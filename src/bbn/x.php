@@ -1282,22 +1282,29 @@ class x
    * @return void
    */
 
-  public static function sort(&$ar) {
-    usort($ar, function($a, $b) {
-      if (!str::is_number($a, $b)) {
-        $a = str_replace('.', '0', str_replace('_', '1', str::change_case($a, 'lower')));
-        $b = str_replace('.', '0', str_replace('_', '1', str::change_case($b, 'lower')));
-        return strcmp($a, $b);
+  public static function sort(array &$ar, bool $backward = false)
+  {
+    usort(
+      $ar,
+      function ($a, $b) use ($backward) {
+        if (!str::is_number($a, $b)) {
+          $a = str_replace('.', '0', str_replace('_', '1', str::change_case($a, 'lower')));
+          $b = str_replace('.', '0', str_replace('_', '1', str::change_case($b, 'lower')));
+          return strcmp($a, $b);
+        }
+
+        if ($a > $b) {
+          return $backward ? -1 : 1;
+        }
+        elseif ($a == $b) {
+          return 0;
+        }
+
+        return $backward ? 1 : -1;
       }
-      if ($a > $b) {
-        return 1;
-      }
-      elseif ($a == $b) {
-        return 0;
-      }
-      return -1;
-    });
+    );
   }
+
 
   /**
    * Sorts the items of an indexed array based on a given $key.
@@ -1319,7 +1326,7 @@ class x
    * @param string $dir The direction of the sort ('asc'|'desc')
    * @return void
    */
-  public static function sort_by(&$ar, $key, $dir = '')
+  public static function sort_by(array &$ar, string $key, string $dir = '')
   {
     $args = \func_get_args();
     array_shift($args);
@@ -1329,34 +1336,41 @@ class x
         'dir' => $dir
       ]];
     }
-    usort($ar, function($a, $b) use($args) {
-      foreach ($args as $arg) {
-        $key = $arg['key'];
-        $dir = $arg['dir'] ?? 'asc';
-        if (!\is_array($key)) {
-          $key = [$key];
-        }
-        $v1 = self::pick($a, $key);
-        $v2 = self::pick($b, $key);
-        $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
-        $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
-        if (!str::is_number($v1, $v2)) {
-          $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
-          $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
-          $cmp = strcmp($a1, $a2);
-          if (!empty($cmp)) {
-            return $cmp;
+
+    usort(
+      $ar,
+      function ($a, $b) use ($args) {
+        foreach ($args as $arg) {
+          $key = $arg['key'];
+          $dir = $arg['dir'] ?? 'asc';
+          if (!\is_array($key)) {
+            $key = [$key];
+          }
+
+          $v1 = self::pick($a, $key);
+          $v2 = self::pick($b, $key);
+          $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
+          $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
+          if (!str::is_number($v1, $v2)) {
+            $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
+            $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
+            $cmp = strcmp($a1, $a2);
+            if (!empty($cmp)) {
+              return $cmp;
+            }
+          }
+
+          if ($a1 > $a2) {
+            return 1;
+          }
+          elseif ($a1 < $a2) {
+            return -1;
           }
         }
-        if ($a1 > $a2) {
-          return 1;
-        }
-        elseif ($a1 < $a2) {
-          return -1;
-        }
+
+        return 0;
       }
-      return 0;
-    });
+    );
   }
 
 

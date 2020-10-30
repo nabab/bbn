@@ -115,7 +115,7 @@ class passwords extends bbn\models\cls\db
       if ($password = $this->db->select_one($this->class_cfg['table'], $arch['password'], [
         $arch['id_option'] => $id_option
       ])) {
-        return \bbn\util\enc::decrypt64($password), BBN_ENCRYPTION_KEY);
+        return \bbn\util\enc::decrypt64($password, BBN_ENCRYPTION_KEY);
       }
     }
     return null;

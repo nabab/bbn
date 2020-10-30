@@ -290,7 +290,7 @@ class observer extends bbn\models\cls\db
    * @param array $cfg
    * @return null|string
    */
-  public function add(array $cfg): ?string
+  public function add(array $cfg, $check_result = true): ?string
   {
     if (
       $this->id_user &&
@@ -338,8 +338,9 @@ class observer extends bbn\models\cls\db
       }
       // Getting the ID of the observer corresponding to current user
       if ( $id_obs = $this->_get_id_from_user($request, $params) ){
-        //
-        $this->check_result($id_obs);
+        if ($check_result) {
+          $this->check_result($id_obs);
+        }
         return $id_obs;
       }
       else if ( $id_alias ){
@@ -403,10 +404,13 @@ class observer extends bbn\models\cls\db
    * @param $id
    * @return false|int|string
    */
-  public function get_result($id): ?string
+  public function get_result(string $id, bool $now = false): ?string
   {
     $r = null;
     if ($this->check()) {
+      if ($now && ($o = $this->get($id))) {
+        return $this->_exec($o['request'], $o['params']);
+      }
       $r = $this->db->select_one(
         [
           'tables' => ['o' => 'bbn_observers'],
@@ -542,6 +546,7 @@ class observer extends bbn\models\cls\db
         }
       }
       if (!count($aliases)) {
+        $this->db->delete('bbn_observers', ['id' => $row['id']]);
         return false;
       }
     }
