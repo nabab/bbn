@@ -404,7 +404,7 @@ class observer extends bbn\models\cls\db
    * @param $id
    * @return false|int|string
    */
-  public function get_result(string $id, bool $now = false): ?string
+  public function get_result($id, bool $now = false): ?string
   {
     $r = null;
     if ($this->check()) {

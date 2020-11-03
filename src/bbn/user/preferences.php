@@ -1216,7 +1216,7 @@ class preferences extends bbn\models\cls\db
       $res = [];
       foreach ($bits as $bit) {
         if ($this->is_authorized($bit['id_user_option'])) {
-          $res[] = $with_config ? $t->explode_bit_cfg($bit) : $bit;
+          $res[] = $with_config ? $this->explode_bit_cfg($bit) : $bit;
         }
       }
       return $res;

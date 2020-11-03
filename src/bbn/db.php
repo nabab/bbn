@@ -765,7 +765,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       unset($t);
     }
     else{
-      throw new Error(_('No table given'));
+      throw new \Error(_('No table given'));
       return [];
     }
     if ( !empty($res['fields']) ){

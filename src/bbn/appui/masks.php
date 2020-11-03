@@ -55,9 +55,9 @@ class masks extends bbn\models\cls\db
     return null;
   }
 
-  public function get_all($id_type, $simple = true)
+  public function get_all($id_type = null, $simple = true)
   {
-    if (!bbn\str::is_uid($id_type)) {
+    if (!empty($id_type) && !bbn\str::is_uid($id_type)) {
       $id_type = self::get_option_id($id_type);
     }
     $r = [];

@@ -860,7 +860,7 @@ class tasks extends bbn\models\cls\db{
       $users = array_filter($this->get_users($data['id_task']), function($a) use($data){
         return $a !== $data['id_user'];
       });
-      $notif = new bbn\appui\notification($this->db);
+      $notif = new bbn\appui\notifications($this->db);
       return $notif->insert($title, $text, $users);
     }
     return false;

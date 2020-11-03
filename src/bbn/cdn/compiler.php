@@ -12,6 +12,7 @@
 namespace bbn\cdn;
 
 use bbn;
+use bbn\x;
 use JShrink;
 use CssMin;
 
