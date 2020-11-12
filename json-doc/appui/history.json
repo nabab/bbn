@@ -1627,8 +1627,18 @@
         "dbs": [
             "__BBN__8b9ad2d3eeba02ff4b0a91659a24b742__BBN__"
         ],
-        "structures": [],
-        "databases_obj": null,
+        "structures": {
+            "apst_app.bbn_mvc_logs": {
+                "history": false,
+                "primary": false,
+                "primary_type": null,
+                "primary_length": 0,
+                "auto_increment": false,
+                "id": null,
+                "fields": []
+            }
+        },
+        "databases_obj": {},
         "admin_db": "apst_app",
         "user": "752a9b0ef5ca11e89b35005056014c9f",
         "prefix": "bbn_",
@@ -1676,6 +1686,9 @@
                 "id"
             ],
             "apst_app.apst_infolegale_info": [
+                "id"
+            ],
+            "apst_app.apst_infos_complementaires": [
                 "id"
             ],
             "apst_app.apst_liens": [
@@ -1749,8 +1762,18 @@
         "dbs": [
             "__BBN__8b9ad2d3eeba02ff4b0a91659a24b742__BBN__"
         ],
-        "structures": [],
-        "databases_obj": null,
+        "structures": {
+            "apst_app.bbn_mvc_logs": {
+                "history": false,
+                "primary": false,
+                "primary_type": null,
+                "primary_length": 0,
+                "auto_increment": false,
+                "id": null,
+                "fields": []
+            }
+        },
+        "databases_obj": {},
         "admin_db": "apst_app",
         "user": "752a9b0ef5ca11e89b35005056014c9f",
         "prefix": "bbn_",
@@ -1798,6 +1821,9 @@
                 "id"
             ],
             "apst_app.apst_infolegale_info": [
+                "id"
+            ],
+            "apst_app.apst_infos_complementaires": [
                 "id"
             ],
             "apst_app.apst_liens": [

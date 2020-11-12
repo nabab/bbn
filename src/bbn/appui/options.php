@@ -3300,7 +3300,7 @@ class options extends bbn\models\cls\db
       $cfg = $this->get_cfg($id);
       if (!empty($cfg['permissions'])) {
         $perms = [];
-        $opts = $this->full_options($id);
+        $opts = $this->full_options_cfg($id);
         foreach ($opts as $opt){
           $o = [
             'icon' => $opt['icon'] ?? 'nf nf-fa-cog',

@@ -307,10 +307,10 @@ class model extends bbn\models\cls\db{
     return null;
   }
 
-  public function get_set_from_cache(\Closure $fn, array $data = null, $spec = '', $ttl): ?array
+  public function get_set_from_cache(\Closure $fn, array $data = null, $spec = '', $ttl = 10): ?array
   {
     if ( $cn = $this->_cache_name($data, $spec) ){
-      return $this->cache_get_set($fn, $cn, '', $ttl);
+      return $this->cache_get_set($fn, $cn, '', $ttl) ?: null;
     }
     return null;
   }

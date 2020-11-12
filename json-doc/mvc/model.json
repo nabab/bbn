@@ -1100,7 +1100,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(Closure $fn, array $data, $spec, $ttl)\n  {\n    if ( $cn = $this->_cache_name($data, $spec) ){\n      return $this->cache_get_set($fn, $cn, '', $ttl);\n    }\n    return null;\n  }",
+            "code": "function(Closure $fn, array $data = NULL, $spec = '', $ttl = 10)\n  {\n    if ( $cn = $this->_cache_name($data, $spec) ){\n      return $this->cache_get_set($fn, $cn, '', $ttl) ?: null;\n    }\n    return null;\n  }",
             "startLine": 310,
             "endLine": 316,
             "isDeprecated": false,
@@ -1110,7 +1110,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 4,
-            "numberOfRequiredParameters": 4,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "array",
                 null
@@ -1130,7 +1130,7 @@
                     "name": "data",
                     "position": 1,
                     "type": "array",
-                    "required": true,
+                    "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
@@ -1139,7 +1139,7 @@
                     "name": "spec",
                     "position": 2,
                     "type": null,
-                    "required": true,
+                    "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
@@ -1148,9 +1148,9 @@
                     "name": "ttl",
                     "position": 3,
                     "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 10,
                     "default_name": ""
                 }
             ]

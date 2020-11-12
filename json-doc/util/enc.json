@@ -15,7 +15,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/util\/enc.php",
     "startLine": 20,
-    "endLine": 201,
+    "endLine": 203,
     "contentConstructor": null,
     "methods": {
         "crypt": {
@@ -108,6 +108,96 @@
                 }
             ]
         },
+        "crypt64": {
+            "name": "crypt64",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($s, $key = '')\n  {\n    return base64_encode(self::crypt($s, $key));\n  }",
+            "startLine": 51,
+            "endLine": 54,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "s",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "decrypt64": {
+            "name": "decrypt64",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($s, $key = '')\n  {\n    return self::decrypt(base64_decode($s), $key);\n  }",
+            "startLine": 56,
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "s",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "encryptOpenssl": {
             "name": "encryptOpenssl",
             "summary": "Encrypt string using openSSL module",
@@ -118,8 +208,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($s, $key = NULL, $method = NULL, $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try{\n        $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e) {\n        bbn\\x::log(\"Impossible to decrypt\");\n      }\n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 58,
-            "endLine": 78,
+            "startLine": 68,
+            "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -184,8 +274,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($s, $key = NULL, $method = NULL, $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e){\n        x::log($e->getMessage(), 'decryptOpenssl');\n      }\n      if ($res) {\n        return $res;\n      }\n    }\n    return null;\n  }",
-            "startLine": 88,
-            "endLine": 109,
+            "startLine": 98,
+            "endLine": 119,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -249,9 +339,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($path, $algo = 'sha512', $key_bits = 4096)\n  {\n    $res = false;\n    if (!is_dir(dirname($path)) || file_exists($path.'_rsa') || !in_array($algo, hash_algos())) {\n      return false;\n    }\n    if (is_dir($path) && (substr($path, -1) !== '\/')) {\n      $path .= '\/';\n    }\n    $public = $path.'_rsa.pub';\n    $private = $path.'_rsa';\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    openssl_pkey_export($rsaKey, $privKey);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    if (openssl_pkey_export_to_file($privKey, $private) \/\/Private Key\n        && ($pubKey = self::_sshEncodePublicKey($rsaKey)) \/\/Public Key\n        && file_put_contents($public, $pubKey) \/\/save public key into file\n    ) {\n      $res = true;\n    }\n    umask($umask);\n    return $res;\n  }",
-            "startLine": 120,
-            "endLine": 148,
+            "code": "function($path, $algo = 'sha512', $key_bits = 4096)\n  {\n    $res = false;\n    if (is_dir(dirname($path))\n        && !file_exists($path.'_rsa')\n        && in_array($algo, hash_algos(), true)\n        && ($key = self::generateCert($algo, $key_bits))\n    ) {\n      if (is_dir($path) && (substr($path, -1) !== '\/')) {\n        $path .= '\/';\n      }\n      $public = $path.'_rsa.pub';\n      $private = $path.'_rsa';\n      if (\\file_put_contents($public, $key['public'])\n          && \\file_put_contents($private, $key['private'])\n      ) {\n        $res = true;\n      }\n    }\n    return $res;\n  }",
+            "startLine": 130,
+            "endLine": 150,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -305,8 +395,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($algo = 'sha512', $key_bits = 4096)\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ) {\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
-            "startLine": 150,
-            "endLine": 173,
+            "startLine": 152,
+            "endLine": 175,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -349,7 +439,7 @@
         "prefix": "bbn-"
     },
     "constants": null,
-    "numMethods": 6,
+    "numMethods": 8,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 3,

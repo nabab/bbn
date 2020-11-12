@@ -1495,7 +1495,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data)\n  {\n      $text = $this->translate_log($data);\n      $users = array_filter($this->get_users($data['id_task']), function($a) use($data){\n        return $a !== $data['id_user'];\n      });\n      $notif = new bbn\\appui\\notification($this->db);\n      return $notif->insert($title, $text, $users);\n    }\n    return false;\n  }",
+            "code": "function(array $data)\n  {\n      $text = $this->translate_log($data);\n      $users = array_filter($this->get_users($data['id_task']), function($a) use($data){\n        return $a !== $data['id_user'];\n      });\n      $notif = new bbn\\appui\\notifications($this->db);\n      return $notif->insert($title, $text, null, $users);\n    }\n    return false;\n  }",
             "startLine": 857,
             "endLine": 867,
             "isDeprecated": false,

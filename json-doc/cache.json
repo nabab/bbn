@@ -14,7 +14,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cache.php",
     "startLine": 14,
-    "endLine": 673,
+    "endLine": 678,
     "contentConstructor": {
         "file": "bbn\\cache",
         "returns": null
@@ -29,9 +29,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($value)\n  {\n    if (\\is_object($value) || \\is_array($value)) {\n      $value = serialize($value);\n    }\n    return md5($value);\n  }",
-            "startLine": 99,
-            "endLine": 105,
+            "code": "function($value)\n  {\n    if (\\is_object($value) || \\is_array($value)) {\n      $value = serialize($value);\n    }\n\n    return md5($value);\n  }",
+            "startLine": 114,
+            "endLine": 121,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -66,8 +66,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::$type;\n  }",
-            "startLine": 112,
-            "endLine": 115,
+            "startLine": 129,
+            "endLine": 132,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -92,9 +92,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($ttl)\n  {\n    if (str::is_integer($ttl)) {\n      return (int)$ttl;\n    }\n    if (\\is_string($ttl)) {\n      switch ($ttl) {\n        case 'xxs':\n          return 30;\n        case 'xs':\n          return 60;\n        case 's':\n          return 300;\n        case 'm':\n          return 3600;\n        case 'l':\n          return 3600*24;\n        case 'xl':\n          return 3600*24*7;\n        case 'xxl':\n          return 3600*24*30;\n      }\n    }\n    return 0;\n  }",
-            "startLine": 123,
-            "endLine": 147,
+            "code": "function($ttl)\n  {\n    if (str::is_integer($ttl)) {\n      return (int)$ttl;\n    }\n\n    if (\\is_string($ttl)) {\n      switch ($ttl) {\n        case 'xxs':\n          return 30;\n        case 'xs':\n          return 60;\n        case 's':\n          return 300;\n        case 'm':\n          return 3600;\n        case 'l':\n          return 3600 * 24;\n        case 'xl':\n          return 3600 * 24 * 7;\n        case 'xxl':\n          return 3600 * 24 * 30;\n      }\n    }\n\n    return 0;\n  }",
+            "startLine": 141,
+            "endLine": 167,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -129,8 +129,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($engine = NULL)\n  {\n    self::_init($engine);\n    return self::$engine;\n  }",
-            "startLine": 155,
-            "endLine": 159,
+            "startLine": 176,
+            "endLine": 180,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -165,8 +165,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($engine = NULL)\n  {\n    return self::get_cache($engine);\n  }",
-            "startLine": 167,
-            "endLine": 170,
+            "startLine": 189,
+            "endLine": 192,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -200,9 +200,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($engine = NULL)\n  {\n    \/** @todo APC doesn't work *\/\n    $engine = 'files';\n    if (self::$is_init) {\n      die(\"Only one cache object can be called. Use static function cache::get_engine()\");\n    }\n    if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {\n      self::_set_type('apc');\n    }\n    elseif ((!$engine || ($engine === 'memcache')) && class_exists(\"Memcache\")) {\n      $this->obj = new \\Memcache();\n      if ($this->obj->connect(\"127.0.0.1\", 11211)) {\n        self::_set_type('memcache');\n      }\n    }\n    elseif ($this->path = mvc::get_cache_path()) {\n      self::_set_type('files');\n    }\n  }",
-            "startLine": 177,
-            "endLine": 196,
+            "code": "function($engine = NULL)\n  {\n    \/** @todo APC doesn't work *\/\n    $engine = 'files';\n    if (self::$is_init) {\n      die(\"Only one cache object can be called. Use static function cache::get_engine()\");\n    }\n\n    if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {\n      self::_set_type('apc');\n    }\n    elseif ((!$engine || ($engine === 'memcache')) && class_exists(\"Memcache\")) {\n      $this->obj = new \\Memcache();\n      if ($this->obj->connect(\"127.0.0.1\", 11211)) {\n        self::_set_type('memcache');\n      }\n    }\n    elseif ($this->path = mvc::get_cache_path()) {\n      self::_set_type('files');\n      $this->fs = new file\\system();\n    }\n  }",
+            "startLine": 200,
+            "endLine": 221,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -221,8 +221,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The type of engine to use"
+                    "default_name": ""
                 }
             ]
         },
@@ -235,9 +234,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $ttl = 0)\n  {\n    \n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_exists($item);\n        case 'memcache':\n          return $this->obj->get($item) !== $item;\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (is_file($file)) {\n            $t = json_decode(file_get_contents($file), true);\n            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))\n                && (!$t['expire'] || ($t['expire'] > time()))\n            ) {\n              return true;\n            }\n            unlink($file);\n          }\n          return false;\n      }\n    }\n  }",
-            "startLine": 205,
-            "endLine": 228,
+            "code": "function($item, $ttl = 0)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_exists($item);\n        case 'memcache':\n          return $this->obj->get($item) !== $item;\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (($content = $this->fs->get_contents($file))\n              && ($t = json_decode($content, true))\n          ) {\n            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))\n                && (!$t['expire'] || ($t['expire'] > time()))\n            ) {\n              return true;\n            }\n\n            $this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
+            "startLine": 231,
+            "endLine": 255,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -259,7 +258,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "The time-to-live value"
                 },
                 {
                     "name": "ttl",
@@ -268,8 +267,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The time-to-live value"
+                    "default_name": ""
                 }
             ]
         },
@@ -282,9 +280,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_delete($item);\n        case 'memcache':\n          return $this->obj->delete($item);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (is_file($file)) {\n            return !!unlink($file);\n          }\n          return false;\n      }\n    }\n  }",
-            "startLine": 236,
-            "endLine": 252,
+            "code": "function($item)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_delete($item);\n        case 'memcache':\n          return $this->obj->delete($item);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (is_file($file)) {\n            return !!$this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
+            "startLine": 264,
+            "endLine": 280,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -305,8 +303,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The name of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -319,9 +316,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($st = NULL)\n  {\n    if (self::$type === 'files') {\n      $dir = self::_dir($st, $this->path, false);\n      if (is_dir($dir)) {\n        return !!file\\dir::delete($dir, $dir === $this->path ? false : true);\n      }\n      elseif (is_file($dir.'.bbn.cache')) {\n        return !!unlink($dir.'.bbn.cache');\n      }\n    }\n    elseif (self::$type) {\n      $items = $this->items($st);\n      $res = 0;\n      foreach ($items as $item){\n        if (!$st || strpos($item, $st) === 0) {\n          switch (self::$type){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n      return $res;\n    }\n    return false;\n  }",
-            "startLine": 260,
-            "endLine": 289,
+            "code": "function($st = NULL)\n  {\n    if (self::$type === 'files') {\n      $dir = self::_dir($st, $this->path, false);\n      if ($this->fs->is_dir($dir)) {\n        return !!$this->fs->delete($dir, $dir === $this->path ? false : true);\n      }\n      else {\n        return !!$this->fs->delete($dir.'.bbn.cache');\n      }\n    }\n    elseif (self::$type) {\n      $items = $this->items($st);\n      $res   = 0;\n      foreach ($items as $item){\n        if (!$st || strpos($item, $st) === 0) {\n          switch (self::$type){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
+            "startLine": 289,
+            "endLine": 320,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -342,8 +339,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The path of the items to delete"
+                    "default_name": ""
                 }
             ]
         },
@@ -357,8 +353,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->delete_all();\n    return $this;\n  }",
-            "startLine": 296,
-            "endLine": 300,
+            "startLine": 328,
+            "endLine": 332,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -382,9 +378,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item)\n  {\n    if ($r = $this->get_raw($item)) {\n      return $r['timestamp'];\n    }\n    return null;\n  }",
-            "startLine": 308,
-            "endLine": 314,
+            "code": "function($item)\n  {\n    if ($r = $this->get_raw($item)) {\n      return $r['timestamp'];\n    }\n\n    return null;\n  }",
+            "startLine": 341,
+            "endLine": 348,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -406,8 +402,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The name of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -420,9 +415,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item)\n  {\n    if ($r = $this->get_raw($item)) {\n      return $r['hash'];\n    }\n    return null;\n  }",
-            "startLine": 322,
-            "endLine": 328,
+            "code": "function($item)\n  {\n    if ($r = $this->get_raw($item)) {\n      return $r['hash'];\n    }\n\n    return null;\n  }",
+            "startLine": 357,
+            "endLine": 364,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -444,8 +439,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "The name of the item"
+                    "default_name": ""
                 }
             ]
         },
@@ -458,9 +452,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $time = NULL)\n  {\n    if (!$time) {\n      return false;\n    }\n    if ($r = $this->get_raw($item)) {\n      return $r['timestamp'] > $time;\n    }\n    return true;\n  }",
-            "startLine": 337,
-            "endLine": 346,
+            "code": "function($item, $time = NULL)\n  {\n    if (!$time) {\n      return false;\n    }\n\n    if ($r = $this->get_raw($item)) {\n      return $r['timestamp'] > $time;\n    }\n\n    return true;\n  }",
+            "startLine": 374,
+            "endLine": 385,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -482,7 +476,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "The timestamp to which the item's timestamp will be compared"
                 },
                 {
                     "name": "time",
@@ -491,8 +485,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "The timestamp to which the item's timestamp will be compared"
+                    "default_name": ""
                 }
             ]
         },
@@ -505,9 +498,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $val, $ttl = 10, $exec = NULL)\n  {\n    if (self::$type) {\n      $ttl = self::ttl($ttl);\n      $hash = self::make_hash($val);\n      switch (self::$type){\n        case 'apc':\n          return \\apc_store(\n            $item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], $ttl\n          );\n        case 'memcache':\n          return $this->obj->set(\n            $item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], false, $ttl\n          );\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (file\\dir::create_path(dirname($file))) {\n            $value = [\n              'timestamp' => microtime(1),\n              'hash' => $hash,\n              'expire' => $ttl ? time() + $ttl : 0,\n              'ttl' => $ttl,\n              'exec' => $exec,\n              'value' => $val\n            ];\n            if (file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT))) {\n              return true;\n            }\n          }\n      }\n    }\n    return false; \n  }",
-            "startLine": 356,
-            "endLine": 398,
+            "code": "function($item, $val, $ttl = 10, $exec = NULL)\n  {\n    if (self::$type) {\n      $ttl  = self::ttl($ttl);\n      $hash = self::make_hash($val);\n      switch (self::$type){\n        case 'apc':\n          return \\apc_store(\n            $item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], $ttl\n          );\n        case 'memcache':\n          return $this->obj->set(\n            $item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], false, $ttl\n          );\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if ($this->fs->create_path(dirname($file))) {\n            $value = [\n              'timestamp' => microtime(1),\n              'hash' => $hash,\n              'expire' => $ttl ? time() + $ttl : 0,\n              'ttl' => $ttl,\n              'exec' => $exec,\n              'value' => $val\n            ];\n            if ($this->fs->put_contents($file, json_encode($value, JSON_PRETTY_PRINT))) {\n              return true;\n            }\n          }\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 396,
+            "endLine": 439,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -529,7 +522,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "The value to be stored in the cache"
                 },
                 {
                     "name": "val",
@@ -539,7 +532,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The value to be stored in the cache"
+                    "description": "The length in seconds during which the value will be considered as valid"
                 },
                 {
                     "name": "ttl",
@@ -548,8 +541,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 10,
-                    "default_name": "",
-                    "description": "The length in seconds during which the value will be considered as valid"
+                    "default_name": ""
                 },
                 {
                     "name": "exec",
@@ -572,8 +564,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($item, $hash)\n  {\n    return $hash !== $this->hash($item);\n  }",
-            "startLine": 407,
-            "endLine": 410,
+            "startLine": 449,
+            "endLine": 452,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -595,85 +587,12 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "A MD5 hash to compare with"
                 },
                 {
                     "name": "hash",
                     "position": 1,
                     "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "A MD5 hash to compare with"
-                }
-            ]
-        },
-        "block": {
-            "name": "block",
-            "summary": "Set the cache file in a block state so other processes don't try to create it.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\cache",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($item)\n  {\n    if (self::$type === 'files') {\n      $file = self::_file($item, $this->path);\n      if (file_exists($file) && ($t = file_get_contents($file))) {\n        $t = json_decode($t, true);\n        if (!empty($t['block'])) {\n          return false;\n        }\n      }\n      else {\n        $t = [];\n      }\n      if ($dir = self::_dir($item, $this->path)) {\n        file\\dir::create_path($dir);\n      }\n      $t['block'] = 1;\n      $t['date_block'] = date('Y-m-d H:i:s');\n      $json = json_encode($t, JSON_PRETTY_PRINT);\n      if (file_put_contents($file, $json)) {\n        return true;\n      }\n      return false;\n    }\n    return true;\n  }",
-            "startLine": 418,
-            "endLine": 443,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "item",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "unblock": {
-            "name": "unblock",
-            "summary": "Unset the block staate from the cache file.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\cache",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($item)\n  {\n    return true;\n    if (self::$type === 'files') {\n      $file = self::_file($item, $this->path);\n      if (file_exists($file) && ($t = file_get_contents($file))) {\n        $t = json_decode($t, true);\n        if (!empty($t['block'])) {\n          @unlink($file);\n          return true;\n        }\n        return false;\n      }\n    }\n    return true;\n  }",
-            "startLine": 451,
-            "endLine": 466,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "item",
-                    "position": 0,
-                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -690,9 +609,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $ttl = 0)\n  {\n    if ($r = $this->get_raw($item, $ttl)) {\n      return $r['value'];\n    }\n    return false;\n  }",
-            "startLine": 525,
-            "endLine": 531,
+            "code": "function($item, $ttl = 0)\n  {\n    if ($r = $this->get_raw($item, $ttl)) {\n      return $r['value'];\n    }\n\n    return false;\n  }",
+            "startLine": 514,
+            "endLine": 521,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -712,7 +631,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "The cache length"
                 },
                 {
                     "name": "ttl",
@@ -721,8 +640,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The cache length"
+                    "default_name": ""
                 }
             ]
         },
@@ -735,8 +653,8 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($fn, $item, $ttl = 0)\n  {\n    $tmp = $this->get_raw($item, $ttl);\n    $data = null;\n    if (!$tmp) {\n      $file = self::_file($item, $this->path);\n      $tmp_file = dirname($file).'\/_'.basename($file);\n      $do = false;\n      if (is_file($file)) {\n        rename($file, $tmp_file);\n        $do = true;\n      }\n      elseif (!is_file($tmp_file)) {\n        file\\dir::create_path(dirname($tmp_file));\n        file_put_contents($tmp_file, ' ');\n        $do = true;\n      }\n      else {\n        return $this->get($item);\n      }\n      if ($do) {\n        $timer = new util\\timer();\n        $timer->start();\n        try {\n          $data = $fn();\n        }\n        catch (\\Exception $e) {\n          unlink($tmp_file);\n          throw $e;\n        }\n        $exec = $timer->stop();\n        $this->set($item, $data, $ttl, $exec);\n        unlink($tmp_file);\n      }\n    }\n    else {\n      $data = $tmp['value'];\n    }\n    return $data;\n  }",
-            "startLine": 541,
+            "code": "function($fn, $item, $ttl = 0)\n  {\n    switch (self::$type) {\n      case 'apc':\n        break;\n      case 'memcache':\n        break;\n      case 'files':\n        $tmp  = $this->get_raw($item, $ttl);\n        $data = null;\n        if (!$tmp) {\n          $file     = self::_file($item, $this->path);\n          $tmp_file = dirname($file).'\/_'.basename($file);\n          $do       = false;\n          if ($this->fs->is_file($file)) {\n            $this->fs->rename($file, '_'.basename($file));\n            $do = true;\n          }\n          elseif (!$this->fs->is_file($tmp_file)) {\n            $this->fs->create_path(dirname($tmp_file));\n            $this->fs->put_contents($tmp_file, ' ');\n            $do = true;\n          }\n          else {\n            return $this->get($item);\n          }\n\n          if ($do) {\n            $timer = new util\\timer();\n            $timer->start();\n            try {\n              $data = $fn();\n            }\n            catch (\\Exception $e) {\n              unlink($tmp_file);\n              throw $e;\n            }\n\n            $exec = $timer->stop();\n            $this->set($item, $data, $ttl, $exec);\n            $this->fs->delete($tmp_file);\n          }\n        }\n        else {\n          $data = $tmp['value'];\n        }\n        return $data;\n    }\n  }",
+            "startLine": 532,
             "endLine": 580,
             "isDeprecated": false,
             "isGenerator": false,
@@ -757,7 +675,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "The function which returns the value for the cache"
                 },
                 {
                     "name": "item",
@@ -767,7 +685,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The function which returns the value for the cache"
+                    "description": "The cache length"
                 },
                 {
                     "name": "ttl",
@@ -776,8 +694,7 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": "",
-                    "description": "The cache length"
+                    "default_name": ""
                 }
             ]
         },
@@ -790,9 +707,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats('slabs');\n        case 'files':\n          return file\\dir::get_files($this->path);\n      }\n    }\n  }",
-            "startLine": 585,
-            "endLine": 597,
+            "code": "function()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats('slabs');\n        case 'files':\n          return $this->fs->get_files($this->path);\n      }\n    }\n  }",
+            "startLine": 586,
+            "endLine": 598,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -814,9 +731,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats();\n        case 'files':\n          return file\\dir::get_files($this->path);\n      }\n    }\n  }",
-            "startLine": 602,
-            "endLine": 614,
+            "code": "function()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats();\n        case 'files':\n          return $this->fs->get_files($this->path);\n      }\n    }\n  }",
+            "startLine": 604,
+            "endLine": 616,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -838,9 +755,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($dir = '')\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          $all = apc_cache_info();\n          $list = [];\n          foreach ($all['cache_list'] as $a){\n            array_push($list, $a['info']);\n          }\n          return $list;\n        case 'memcache':\n          $list = [];\n          $allSlabs = $this->obj->getExtendedStats('slabs');\n          foreach ($allSlabs as $server => $slabs){\n            foreach ($slabs as $slabId => $slabMeta){\n              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);\n              foreach ($cdump AS $keys => $arrVal){\n                foreach ($arrVal AS $k => $v){\n                  if ($k !== 'CLIENT_ERROR') {\n                    echo array_push($list, $k);\n                  }\n                }\n              }\n            }\n          }\n          return $list;\n        case 'files':\n          $cache =& $this;\n          $list = array_filter(\n            array_map(\n              function ($a) use ($dir) {\n                return ( $dir ? $dir.'\/' : '' ).basename($a, '.bbn.cache');\n              }, file\\dir::get_files($this->path.($dir ? '\/'.$dir : ''))\n            ),\n            function ($a) use ($cache) {\n              \/\/ Only gives valid cache\n              return $cache->has($a);\n            }\n          );\n          $dirs = file\\dir::get_dirs($this->path.($dir ? '\/'.$dir : ''));\n          if (\\count($dirs)) {\n            foreach ($dirs as $d){\n              $res = $this->items($dir ? $dir.'\/'.basename($d) : basename($d));\n              foreach ($res as $r){\n                array_push($list, $r);\n              }\n            }\n          }\n          return $list;\n      }\n    }\n  }",
-            "startLine": 620,
-            "endLine": 672,
+            "code": "function($dir = '')\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          $all  = apc_cache_info();\n          $list = [];\n          foreach ($all['cache_list'] as $a){\n            array_push($list, $a['info']);\n          }\n          return $list;\n        case 'memcache':\n          $list     = [];\n          $allSlabs = $this->obj->getExtendedStats('slabs');\n          foreach ($allSlabs as $server => $slabs){\n            foreach ($slabs as $slabId => $slabMeta){\n              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);\n              foreach ($cdump AS $keys => $arrVal){\n                foreach ($arrVal AS $k => $v){\n                  if ($k !== 'CLIENT_ERROR') {\n                    echo array_push($list, $k);\n                  }\n                }\n              }\n            }\n          }\n          return $list;\n        case 'files':\n          $cache =& $this;\n          $list  = array_filter(\n            array_map(\n              function ($a) use ($dir) {\n                return ( $dir ? $dir.'\/' : '' ).basename($a, '.bbn.cache');\n              }, $this->fs->get_files($this->path.($dir ? '\/'.$dir : ''))\n            ),\n            function ($a) use ($cache) {\n              \/\/ Only gives valid cache\n              return $cache->has($a);\n            }\n          );\n          $dirs  = $this->fs->get_dirs($this->path.($dir ? '\/'.$dir : ''));\n          if (\\count($dirs)) {\n            foreach ($dirs as $d){\n              $res = $this->items($dir ? $dir.'\/'.basename($d) : basename($d));\n              foreach ($res as $r){\n                array_push($list, $r);\n              }\n            }\n          }\n          return $list;\n      }\n    }\n  }",
+            "startLine": 623,
+            "endLine": 675,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -872,7 +789,7 @@
         "engine": {}
     },
     "constants": null,
-    "numMethods": 22,
+    "numMethods": 20,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 4,
@@ -892,7 +809,8 @@
         "max_wait": 10,
         "engine": null,
         "path": null,
-        "obj": null
+        "obj": null,
+        "fs": null
     },
     "isIterable": false,
     "extensionName": false,

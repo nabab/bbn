@@ -38,7 +38,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -47,7 +47,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -81,7 +81,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -90,7 +90,7 @@
                 {
                     "name": "fn",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -133,7 +133,7 @@
                 {
                     "name": "dbs",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -142,7 +142,7 @@
                 {
                     "name": "tables",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -151,7 +151,7 @@
                 {
                     "name": "dbs_table",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -193,7 +193,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      self::$dbs = new bbn\\db(self::$dbs);\n    }\n    if ( class_exists('\\\\bbn\\\\appui\\\\history') && bbn\\appui\\history::$is_used ){\n      self::$has_history = 1;\n    }\n    \/** @todo Replace with DB functions *\/\n    if ( (self::$dbs->engine === 'sqlite') && !\\in_array(self::$dbs_table, self::$dbs->get_tables()) ){\n      self::$dbs->exec(<<<MYSQL\n        CREATE TABLE \"dbsync\" (\n          \"id\" INTEGER PRIMARY KEY  NOT NULL ,\n          \"db\" TEXT NOT NULL ,\n          \"tab\" TEXT NOT NULL ,\n          \"chrono\" REAL NOT NULL,\n          \"action\" TEXT NOT NULL,\n          \"rows\" TEXT,\"vals\" TEXT,\n          \"state\" INTEGER NOT NULL DEFAULT (0)\n        );\n        CREATE INDEX \"db\" \"dbsync\" (\"db\");\n        CREATE INDEX \"tab\" \"dbsync\" (\"tab\");\n        CREATE INDEX \"chrono\" \"dbsync\" (\"chrono\");\n        CREATE INDEX \"action\" \"dbsync\" (\"action\");\n        CREATE INDEX \"state\" \"dbsync\" (\"state\");\nMYSQL\n      );\n    }\n    else if ( (self::$dbs->engine === 'mysql') && !\\in_array(self::$dbs_table, self::$dbs->get_tables()) ){\n      self::$dbs->exec(<<<MYSQL\n        CREATE TABLE IF NOT EXISTS `dbsync` (\n          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n          `db` varchar(50) NOT NULL,\n          `tab` varchar(50) NOT NULL,\n          `chrono` decimal(14,4) unsigned NOT NULL,\n          `action` varchar(20) NOT NULL,\n          `rows` text,\n          `vals` longtext,\n          `state` int(10) NOT NULL DEFAULT '0'\n        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n        ALTER TABLE `dbsync`\n          ADD PRIMARY KEY (`id`),\n          ADD KEY `db` (`db`),\n          ADD KEY `tab` (`tab`),\n          ADD KEY `chrono` (`chrono`),\n          ADD KEY `action` (`action`),\n          ADD KEY `state` (`state`);\nMYSQL\n      );\n    }\n  }",
+            "code": "function()\n  {\n      self::$dbs = new bbn\\db(self::$dbs);\n    }\n    if ( class_exists('\\\\bbn\\\\appui\\\\history') && bbn\\appui\\history::$is_used ){\n      self::$has_history = 1;\n    }\n    \/** @todo Replace with DB functions *\/\n    if ( (self::$dbs->get_engine() === 'sqlite') && !\\in_array(self::$dbs_table, self::$dbs->get_tables()) ){\n      self::$dbs->exec(<<<MYSQL\n        CREATE TABLE \"dbsync\" (\n          \"id\" INTEGER PRIMARY KEY  NOT NULL ,\n          \"db\" TEXT NOT NULL ,\n          \"tab\" TEXT NOT NULL ,\n          \"chrono\" REAL NOT NULL,\n          \"action\" TEXT NOT NULL,\n          \"rows\" TEXT,\"vals\" TEXT,\n          \"state\" INTEGER NOT NULL DEFAULT (0)\n        );\n        CREATE INDEX \"db\" \"dbsync\" (\"db\");\n        CREATE INDEX \"tab\" \"dbsync\" (\"tab\");\n        CREATE INDEX \"chrono\" \"dbsync\" (\"chrono\");\n        CREATE INDEX \"action\" \"dbsync\" (\"action\");\n        CREATE INDEX \"state\" \"dbsync\" (\"state\");\nMYSQL\n      );\n    }\n    else if ( (self::$dbs->get_engine() === 'mysql') && !\\in_array(self::$dbs_table, self::$dbs->get_tables()) ){\n      self::$dbs->exec(<<<MYSQL\n        CREATE TABLE IF NOT EXISTS `dbsync` (\n          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n          `db` varchar(50) NOT NULL,\n          `tab` varchar(50) NOT NULL,\n          `chrono` decimal(14,4) unsigned NOT NULL,\n          `action` varchar(20) NOT NULL,\n          `rows` text,\n          `vals` longtext,\n          `state` int(10) NOT NULL DEFAULT '0'\n        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n        ALTER TABLE `dbsync`\n          ADD PRIMARY KEY (`id`),\n          ADD KEY `db` (`db`),\n          ADD KEY `tab` (`tab`),\n          ADD KEY `chrono` (`chrono`),\n          ADD KEY `action` (`action`),\n          ADD KEY `state` (`state`);\nMYSQL\n      );\n    }\n  }",
             "startLine": 106,
             "endLine": 155,
             "isDeprecated": false,
@@ -451,7 +451,7 @@
                 {
                     "name": "dbs",
                     "position": 1,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -460,7 +460,7 @@
                 {
                     "name": "dbs_table",
                     "position": 2,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -469,7 +469,7 @@
                 {
                     "name": "num_try",
                     "position": 3,
-                    "type": "",
+                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -491,27 +491,11 @@
                         "description": "The DB connection"
                     }
                 ]
-            },
-            "value": {
-                "last_error": false,
-                "debug": false,
-                "engine": "mysql",
-                "host": "mysql.lan",
-                "username": "bbn",
-                "current": "apst_app"
             }
         },
         "dbs": {
             "static": true,
-            "visibility": "public",
-            "value": {
-                "last_error": false,
-                "debug": false,
-                "engine": "mysql",
-                "host": "mysql.lan",
-                "username": "bbn",
-                "current": "apst_sync"
-            }
+            "visibility": "public"
         },
         "has_history": {
             "static": true,
@@ -519,31 +503,7 @@
         },
         "tables": {
             "static": true,
-            "visibility": "public",
-            "value": [
-                "apst_app.apst_adherents",
-                "apst_app.apst_attestations",
-                "apst_app.apst_baremes_annuels",
-                "apst_app.apst_changes",
-                "apst_app.apst_tmp_files",
-                "apst_app.apst_changes_files",
-                "apst_app.apst_clotures",
-                "apst_app.apst_cotisations",
-                "apst_app.apst_cotisations_annuelles",
-                "apst_app.apst_cp",
-                "apst_app.apst_demandes",
-                "apst_app.apst_demandes_documents",
-                "apst_app.apst_documents",
-                "apst_app.apst_liens",
-                "apst_app.apst_marques",
-                "apst_app.apst_passages",
-                "apst_app.apst_prospects",
-                "apst_app.apst_suivi",
-                "apst_app.bbn_addresses",
-                "apst_app.bbn_events",
-                "apst_app.bbn_options",
-                "apst_app.bbn_people"
-            ]
+            "visibility": "public"
         },
         "dbs_table": {
             "static": true,
@@ -552,22 +512,8 @@
         }
     },
     "staticProperties": {
-        "db": {
-            "last_error": false,
-            "debug": false,
-            "engine": "mysql",
-            "host": "mysql.lan",
-            "username": "bbn",
-            "current": "apst_app"
-        },
-        "dbs": {
-            "last_error": false,
-            "debug": false,
-            "engine": "mysql",
-            "host": "mysql.lan",
-            "username": "bbn",
-            "current": "apst_sync"
-        },
+        "db": {},
+        "dbs": {},
         "has_history": false,
         "tables": [
             "apst_app.apst_adherents",
@@ -621,50 +567,13 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
-        "db": {
-            "last_error": false,
-            "debug": false,
-            "engine": "mysql",
-            "host": "mysql.lan",
-            "username": "bbn",
-            "current": "apst_app"
-        },
-        "dbs": {
-            "last_error": false,
-            "debug": false,
-            "engine": "mysql",
-            "host": "mysql.lan",
-            "username": "bbn",
-            "current": "apst_sync"
-        },
+        "db": false,
+        "dbs": false,
         "has_history": false,
-        "tables": [
-            "apst_app.apst_adherents",
-            "apst_app.apst_attestations",
-            "apst_app.apst_baremes_annuels",
-            "apst_app.apst_changes",
-            "apst_app.apst_tmp_files",
-            "apst_app.apst_changes_files",
-            "apst_app.apst_clotures",
-            "apst_app.apst_cotisations",
-            "apst_app.apst_cotisations_annuelles",
-            "apst_app.apst_cp",
-            "apst_app.apst_demandes",
-            "apst_app.apst_demandes_documents",
-            "apst_app.apst_documents",
-            "apst_app.apst_liens",
-            "apst_app.apst_marques",
-            "apst_app.apst_passages",
-            "apst_app.apst_prospects",
-            "apst_app.apst_suivi",
-            "apst_app.bbn_addresses",
-            "apst_app.bbn_events",
-            "apst_app.bbn_options",
-            "apst_app.bbn_people"
-        ],
+        "tables": [],
         "dbs_table": "dbsync",
         "methods": [],
-        "_is_init": true,
+        "_is_init": false,
         "_is_checked": null,
         "default_cfg": {
             "engine": "sqlite",

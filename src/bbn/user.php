@@ -941,8 +941,8 @@ class user extends models\cls\basic
       elseif (str::is_uid($usr) && ($mgr = $this->get_manager())) {
         $usr = $mgr->get_user($usr);
       }
-      if (isset($usr[$this->class_cfg['email']])) {
-        return $usr[$this->class_cfg['email']];
+      if (isset($usr[$this->fields['email']])) {
+        return $usr[$this->fields['email']];
       }
     }
     return null;

@@ -467,8 +467,13 @@ class permissions extends bbn\models\cls\basic
           $p['id_parent'] = $id_option;
           $p['type'] = 'option';
           unset($p['id']);
-
+          if (!empty($p['items'])) {
+            $p['items'] = $this->_treat_options($p['items']);
+          }
           $res['total'] += $this->opt->add($p, true, true);
+          if (!empty($p['items'])) {
+            unset($p['items']);
+          }
           $p['id_parent'] = $this->opt->from_code($p['code'], $id_option);
           $p['code'] = 'write';
           $p['text'] = 'Écriture';
@@ -479,6 +484,20 @@ class permissions extends bbn\models\cls\basic
     }
     return $res;
 
+  }
+
+  private function _treat_options(array $tree){
+    $t = $this;
+    return \array_map(function($i) use($t){
+      $i['id_alias'] = $i['id'];
+      $i['code'] = 'opt'.$i['id'];
+      $i['type'] = 'option';
+      unset($i['id']);
+      if (!empty($i['items'])) {
+        $i['items'] = $t->_treat_options($i['items']);
+      }
+      return $i;
+    }, $tree);
   }
 
   private function _treat(array $tree, $parent=false)

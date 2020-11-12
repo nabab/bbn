@@ -173,7 +173,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_type, $simple = true)\n  {\n    if (!bbn\\str::is_uid($id_type)) {\n      $id_type = self::get_option_id($id_type);\n    }\n    $r = [];\n    $all = $this->db->get_column_values(\n      'bbn_notes_masks', 'id_note', $id_type ? [\n      'id_type' => $id_type\n      ] : []\n    );\n    foreach ($all as $a){\n      if ($tmp = $this->get($a, $simple)) {\n        $r[] = $tmp;\n      }\n    }\n    return $r;\n  }",
+            "code": "function($id_type = NULL, $simple = true)\n  {\n    if (!empty($id_type) && !bbn\\str::is_uid($id_type)) {\n      $id_type = self::get_option_id($id_type);\n    }\n    $r = [];\n    $all = $this->db->get_column_values(\n      'bbn_notes_masks', 'id_note', $id_type ? [\n      'id_type' => $id_type\n      ] : []\n    );\n    foreach ($all as $a){\n      if ($tmp = $this->get($a, $simple)) {\n        $r[] = $tmp;\n      }\n    }\n    return $r;\n  }",
             "startLine": 58,
             "endLine": 75,
             "isDeprecated": false,
@@ -183,7 +183,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": null,
             "parent": false,
             "arguments": [
@@ -191,9 +191,9 @@
                     "name": "id_type",
                     "position": 0,
                     "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 },
                 {

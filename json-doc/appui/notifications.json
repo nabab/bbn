@@ -3,18 +3,18 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\appui\\menus",
+    "name": "bbn\\appui\\notifications",
     "namespace": true,
     "traits": [
-        "bbn\\models\\tts\\cache",
-        "bbn\\models\\tts\\optional"
+        "bbn\\models\\tts\\optional",
+        "bbn\\models\\tts\\dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/menus.php",
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/notifications.php",
     "startLine": 6,
-    "endLine": 664,
+    "endLine": 725,
     "contentConstructor": {
-        "file": "bbn\\appui\\menus",
+        "file": "bbn\\appui\\notifications",
         "returns": null
     },
     "methods": {
@@ -23,37 +23,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->options = bbn\\appui\\options::get_instance();\n    $this->pref    = bbn\\user\\preferences::get_instance();\n    $this->cache_init();\n    self::optional_init();\n  }",
-            "startLine": 26,
-            "endLine": 32,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
-            "parent": false,
-            "arguments": []
-        },
-        "from_path": {
-            "name": "from_path",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($path)\n  {\n    if (!bbn\\str::is_uid($path)) {\n      \/\/$path = $this->options->from_code($path, self::$option_root_id);\n      $path = self::get_appui_option_id($path);\n    }\n\n    return bbn\\str::is_uid($path) ? $path : false;\n  }",
-            "startLine": 178,
-            "endLine": 186,
+            "code": "function(bbn\\db $db)\n  {\n    parent::__construct($db);\n    $this->_init_class_cfg(self::$default_class_cfg);\n    self::optional_init();\n    $this->opt = bbn\\appui\\options::get_instance();\n    $this->user = bbn\\user::get_instance();\n    $this->pref = new bbn\\user\\preferences($this->db);\n    $this->perms = new bbn\\user\\permissions();\n  }",
+            "startLine": 54,
+            "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -63,12 +39,45 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": null,
-            "parent": false,
+            "parent": {
+                "name": "__construct",
+                "summary": "Constructor.",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\db",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
+                "startLine": 37,
+                "endLine": 40,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "db",
+                        "position": 0,
+                        "type": "bbn\\db",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
             "arguments": [
                 {
-                    "name": "path",
+                    "name": "db",
                     "position": 0,
-                    "type": "string",
+                    "type": "bbn\\db",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -76,32 +85,187 @@
                 }
             ]
         },
-        "to_path": {
-            "name": "to_path",
-            "summary": "Returns the path corresponding to an ID",
+        "create": {
+            "name": "create",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if (bbn\\str::is_uid($id)) {\n      return $this->options->to_path($id, '', $this->_get_public_root());\n    }\n\n    return false;\n  }",
-            "startLine": 195,
-            "endLine": 202,
+            "code": "function($opt_path, $title, $content, $perms = true, array $users = [])\n  {\n    if ($list_opt = self::get_option_id('list')) {\n      $ocfg = $this->opt->get_class_cfg();\n      $pcfg = $this->pref->get_class_cfg();\n      $perms = !empty($perms) && defined('BBN_ID_PERMISSION');\n      if (!($id_opt = $this->opt->from_path($opt_path, '\/', $list_opt))) {\n        $bits = \\explode('\/', $opt_path);\n        $parent = $list_opt;\n        if ($perms) {\n          $permissions = $this->db->select_all($pcfg['table'], [\n            $pcfg['arch']['user_options']['id_user'],\n            $pcfg['arch']['user_options']['id_group']\n          ], [$pcfg['arch']['user_options']['id_option'] => BBN_ID_PERMISSION]);\n          $is_public = (bool)$this->opt->get_prop(BBN_ID_PERMISSION, 'public');\n          $perm_parent = $this->db->select_one($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$list_opt]);\n        }\n        while (count($bits)) {\n          $code = \\array_shift($bits);\n          if (!($p = $this->opt->from_code($code, $parent))) {\n            $p = $this->opt->add([\n              $ocfg['arch']['options']['text'] => $code,\n                $ocfg['arch']['options']['code'] => $code,\n                $ocfg['arch']['options']['id_parent'] => $parent\n            ]);\n          }\n          if ($perms) {\n            if (!($pp = $this->opt->from_code($p, $perm_parent))) {\n              $pp = $this->opt->add([\n                $ocfg['arch']['options']['text'] => $code,\n                $ocfg['arch']['options']['code'] => 'opt'.$p,\n                $ocfg['arch']['options']['id_parent'] => $perm_parent,\n                $ocfg['arch']['options']['id_alias'] => $p,\n                'public' => $is_public\n              ]);\n              if (!$is_public) {\n                foreach ($permissions as $perm) {\n                  $this->db->insert($pcfg['table'], [\n                    $pcfg['arch']['user_options']['id_option'] => $pp,\n                    $pcfg['arch']['user_options']['id_user'] => $perm->{$pcfg['arch']['user_options']['id_user']},\n                    $pcfg['arch']['user_options']['id_group'] => $perm->{$pcfg['arch']['user_options']['id_user']}\n                  ]);\n                }\n              }\n            }\n            $perm_parent = $pp;\n          }\n          $parent = $p;\n          if (empty($bits)) {\n            $id_opt = $parent;\n          }\n        }\n      }\n      if (bbn\\str::is_uid($id_opt)) {\n        if ($perms) {\n          return $perms ? $this->insert_by_option($title, $content, $id_opt) : $this->insert($title, $content, $id_opt, $users);\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 65,
+            "endLine": 125,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
+                    "name": "opt_path",
                     "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "perms",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                },
+                {
+                    "name": "users",
+                    "position": 4,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "insert": {
+            "name": "insert",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($title, $content, $id_option = NULL, array $users = [])\n  {\n    if (\\is_string($id_option) && !bbn\\str::is_uid($id_option)) {\n      $id_option = \\array_reverse(\\explode('\/', $id_option));\n      if (\\count($id_option) === 2) {\n        $id_option[] = 'list';\n      }\n      $id_option = self::get_option_id(...$id_option);\n    }\n    if (!empty($title)\n      && !empty($content)\n      && (\\is_null($id_option)\n        || bbn\\str::is_uid($id_option))\n    ) {\n      $notification = [\n        $this->class_cfg['arch']['content']['id_option'] => $id_option,\n        $this->class_cfg['arch']['content']['title'] => $title,\n        $this->class_cfg['arch']['content']['content'] => $content,\n        $this->class_cfg['arch']['content']['creation'] => \\date('Y-m-d H:i:s')\n      ];\n      if ($this->db->insert($this->class_cfg['tables']['content'], $notification)) {\n        $id = $this->db->last_id();\n        if (empty($users)) {\n          $users[] = $this->user->get_id();\n        }\n        $i = 0;\n        foreach ( $users as $u ){\n          if ($this->_user_has_permission($notification, $u)) {\n            $i += (int)$this->db->insert($this->class_table, [\n              $this->fields['id_content'] => $id,\n              $this->fields['id_user'] => $u\n            ]);\n          }\n        }\n        return (bool)$i;\n      }\n    }\n    return false;\n  }",
+            "startLine": 127,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "title",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "users",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "insert_by_option": {
+            "name": "insert_by_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($title, $content, $id_option)\n  {\n    if (!bbn\\str::is_uid($id_option)) {\n      $id_option = \\array_reverse(\\explode('\/', $id_option));\n      if (\\count($id_option) === 2) {\n        $id_option[] = 'list';\n      }\n      $id_option = self::get_option_id(...$id_option);\n    }\n    if (bbn\\str::is_uid($id_option)\n      && ($ucfg = $this->user->get_class_cfg())\n      && ($ocfg = $this->opt->get_class_cfg())\n      && ($groups = $this->db->get_column_values($ucfg['tables']['groups'], $ucfg['arch']['groups']['id'], [$ucfg['arch']['groups']['type'] => 'real']))\n      && ($id_perm = $this->db->select_one($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$id_option]))\n      && ($perm = $this->opt->option($id_perm))\n    ) {\n      $users = [];\n      $is_public = !empty($perm['public']);\n      foreach ($groups as $group) {\n        $has_perm = $this->pref->group_has($id_perm, $group);\n        $group_users = $this->db->select_all($ucfg['table'], [], [\n          $ucfg['arch']['users']['id_group'] => $group,\n          $ucfg['arch']['users']['active'] => 1\n        ]);\n        foreach ($group_users as $user) {\n          $id_user = $user->{$ucfg['arch']['users']['id']};\n          if (!\\in_array($id_user, $users, true)\n            && ($is_public\n              || $has_perm\n              || $this->pref->user_has($id_perm, $id_user)\n              || (!empty($user->{$ucfg['arch']['users']['admin']})\n                || !empty($user->{$ucfg['arch']['users']['dev']})))\n          ) {\n            $users[] = $id_user;\n          }\n        }\n      }\n      if (!empty($users)) {\n        return $this->insert($title, $content, $id_option, $users);\n      }\n    }\n    return false;\n  }",
+            "startLine": 167,
+            "endLine": 209,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "title",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 2,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -110,17 +274,17 @@
                 }
             ]
         },
-        "tree": {
-            "name": "tree",
+        "delete": {
+            "name": "delete",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $prepath = false)\n  {\n    if (\\bbn\\str::is_uid($id)) {\n      if ($this->cache_has($id, __FUNCTION__)) {\n        return $this->cache_get($id, __FUNCTION__);\n      }\n\n      $tree = $this->pref->get_tree($id);\n      $res  = $this->_arrange($tree, $prepath);\n      $this->cache_set($id, __FUNCTION__, $res['items'] ?? []);\n      return $res['items'] ?? [];\n    }\n  }",
-            "startLine": 205,
+            "code": "function($id)\n  {\n    if (bbn\\str::is_uid($id)) {\n      return (bool)$this->db->delete($this->class_table, [$this->fields['id'] => $id]);\n    }\n    return null;\n  }",
+            "startLine": 211,
             "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
@@ -128,52 +292,48 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool",
+                null
+            ],
             "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
-                },
-                {
-                    "name": "prepath",
-                    "position": 1,
-                    "type": null,
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
                 }
             ]
         },
-        "custom_tree": {
-            "name": "custom_tree",
+        "read": {
+            "name": "read",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $prepath = false)\n  {\n    if ($tree = $this->tree($id, $prepath)) {\n      return $this->_adapt($tree, $this->pref, $prepath);\n    }\n  }",
-            "startLine": 220,
-            "endLine": 225,
+            "code": "function($id, $id_user = NULL, $moment = NULL)\n  {\n    if (!$id_user) {\n      $id_user = $this->user->get_id();\n    }\n    if (bbn\\str::is_uid($id_user)){\n      if (\\is_array($id)) {\n        $todo = count($id);\n        $did = 0;\n        foreach ($id as $i) {\n          if ($this->read($i, $id_user, $moment)) {\n            $did++;\n          }\n        }\n        return $todo === $did;\n      }\n      else if (bbn\\str::is_uid($id)\n        && !$this->db->select_one($this->class_table, $this->fields['read'], [$this->fields['id'] => $id])\n      ) {\n        return (bool)$this->db->update($this->class_table, [\n          $this->fields['read'] => $moment ? \\round((float)$moment, 4) : bbn\\x::microtime()\n        ], [\n          $this->fields['id'] => $id\n        ]);\n      }\n    }\n    return false;\n  }",
+            "startLine": 219,
+            "endLine": 246,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -186,27 +346,36 @@
                     "default_name": ""
                 },
                 {
-                    "name": "prepath",
+                    "name": "id_user",
                     "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "moment",
+                    "position": 2,
                     "type": null,
                     "required": false,
                     "has_default": true,
-                    "default": false,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "add_shortcut": {
-            "name": "add_shortcut",
-            "summary": "Adds an user'shortcut from a menu",
+        "read_all": {
+            "name": "read_all",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if (($bit = $this->pref->get_bit($id, false))\n        && ($id_option = $this->from_path('shortcuts'))\n        && ($c = $this->pref->get_class_cfg())\n    ) {\n      if ($id_menu = $this->pref->get_by_option($id_option)) {\n        $id_menu = $id_menu[$c['arch']['user_options']['id']];\n      }\n      else {\n        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);\n      }\n\n      if (!empty($id_menu)\n          && ($arch = $c['arch']['user_options_bits'])\n      ) {\n        if (($bits = $this->pref->get_bits($id_menu, false, false))\n            && ( \\bbn\\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)\n        ) {\n          return null;\n        }\n\n        return $this->pref->add_bit(\n          $id_menu, [\n          $arch['id_option'] => $bit[$arch['id_option']],\n          $arch['text'] => $bit[$arch['text']],\n          $arch['cfg'] => $bit[$arch['cfg']],\n          $arch['num'] => $this->pref->next_bit_num($id_menu) ?: 1\n          ]\n        );\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 234,
+            "code": "function($id_user = NULL, $moment = NULL)\n  {\n    if (!$id_user) {\n      $id_user = $this->user->get_id();\n    }\n    if (bbn\\str::is_uid($id_user)\n      && ($unreads = $this->get_unread_ids($id_user))\n    ) {\n      $todo = count($unreads);\n      $did = 0;\n      foreach ($unreads as $id){\n        $did += $this->db->update($this->class_table, [\n          $this->fields['read'] => $moment ? \\round((float)$moment, 4) : bbn\\x::microtime()\n        ], [\n          $this->fields['id'] => $id\n        ]);\n      }\n      return $todo === $did;\n    }\n    return false;\n  }",
+            "startLine": 248,
             "endLine": 268,
             "isDeprecated": false,
             "isGenerator": false,
@@ -214,748 +383,305 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "remove_shortcut": {
-            "name": "remove_shortcut",
-            "summary": "Removes an user'shortcut",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    if (\\bbn\\str::is_uid($id)) {\n      return $this->pref->delete_bit($id);\n    }\n\n    return null;\n  }",
-            "startLine": 277,
-            "endLine": 284,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "shortcuts": {
-            "name": "shortcuts",
-            "summary": "Gets the user' shortcuts list",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if (($id_option = $this->from_path('shortcuts'))\n        && ($menu = $this->pref->get_by_option($id_option))\n    ) {\n      $links = $this->pref->get_bits($menu['id']);\n      $res   = [];\n      foreach ($links as $link){\n        if (($url = $this->to_path($link['id_option']))) {\n          $res[] = [\n            'id' => $link['id'],\n            'id_option' => $link['id_option'],\n            'url' => $url,\n            'text' => $link['text'],\n            'icon' => $link['icon'],\n            'num' => $link['num']\n          ];\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 292,
-            "endLine": 316,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "get_id_menu": {
-            "name": "get_id_menu",
-            "summary": "Returns the menu's ID form an its item",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    return $this->pref->get_id_by_bit($id);\n  }",
-            "startLine": 325,
-            "endLine": 328,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "remove": {
-            "name": "remove",
-            "summary": "Removes menu and deletes parent cache",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    if (\\bbn\\str::is_uid($id)) {\n      if ($id_menu = $this->get_id_menu($id)) {\n        if ($this->pref->delete_bit($id)) {\n          $this->delete_cache($id_menu);\n          return true;\n        }\n      }\n      elseif ($this->pref->delete($id)) {\n        $this->options->delete_cache($this->from_path('menus'));\n        return true;\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 336,
-            "endLine": 352,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "add": {
-            "name": "add",
-            "summary": "Add menu and delete the chache.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_menu, array $cfg = NULL)\n  {\n    $id     = false;\n    $id_opt = $this->from_path('menus');\n    if (\\is_array($id_menu)) {\n      $cfg = $id_menu;\n    }\n\n    if (\\bbn\\str::is_uid($id_menu)) {\n      $this->delete_cache($id_menu);\n    }\n    if (!empty($cfg)\n        && ($id = \\bbn\\str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg))\n    ) {\n\n      $this->options->delete_cache($id_opt);\n      return $id;\n    }\n\n    return null;\n  }",
-            "startLine": 363,
-            "endLine": 383,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_menu",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "cfg",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "set": {
-            "name": "set",
-            "summary": "Updates a menu item and deletes the menu cache",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, array $cfg)\n  {\n    if (\\bbn\\str::is_uid($id)\n        && ($id_menu = $this->get_id_menu($id))\n        && $this->pref->update_bit($id, $cfg)\n    ) {\n      $this->delete_cache($id_menu);\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 393,
-            "endLine": 404,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
             "returns": [
                 "bool"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
+                    "name": "id_user",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "cfg",
-                    "position": 1,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "set_text": {
-            "name": "set_text",
-            "summary": "Sets the menu's text and deletes its chache",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $text)\n  {\n    if (\\bbn\\str::is_uid($id) && $this->pref->set_text($id, $text)) {\n      $this->delete_cache($id);\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 414,
-            "endLine": 422,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The new text tp set"
-                },
-                {
-                    "name": "text",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "delete_cache": {
-            "name": "delete_cache",
-            "summary": "Clears the menu cache",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_menu)\n  {\n    $this->options->delete_cache($this->from_path('menus'), true);\n    return $this->cache_delete($id_menu);\n  }",
-            "startLine": 428,
-            "endLine": 432,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_menu",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "get_default": {
-            "name": "get_default",
-            "summary": "Gets the user's default menu",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if (($id_opt = $this->from_path('default'))\n        && ($all = $this->pref->get_all($id_opt))\n    ) {\n      $id = null;\n      if ($by_id_user = \\array_filter(\n        $all, function ($a) {\n          return !empty($a['id_user']) && !empty($a['id_alias']);\n        }\n      )\n      ) {\n        $id = $by_id_user[0]['id_alias'];\n      }\n      elseif ($by_id_group = \\array_filter(\n        $all, function ($a) {\n          return !empty($a['id_group']) && !empty($a['id_alias']);\n        }\n      )\n      ) {\n        $id = $by_id_group[0]['id_alias'];\n      }\n      elseif ($by_public = \\array_filter(\n        $all, function ($a) {\n          return !empty($a['public']) && !empty($a['id_alias']);\n        }\n      )\n      ) {\n        $id = $by_public[0]['id_alias'];\n      }\n\n      return $id;\n    }\n\n    return null;\n  }",
-            "startLine": 440,
-            "endLine": 475,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "get_menus": {
-            "name": "get_menus",
-            "summary": "Gets the user's menus list (text-value form)",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($k_text = 'text', $k_value = 'value')\n  {\n    $c    = $this->pref->get_class_cfg();\n    $pref =& $this->pref;\n    return array_map(\n      function ($e) use ($c, $k_text, $k_value, $pref) {\n        return [\n        $k_text => $e[$c['arch']['user_options']['text']],\n        $k_value => $e[$c['arch']['user_options']['id']],\n        $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],\n        $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],\n        $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],\n        'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))\n        ];\n      }, $this->pref->get_all(self::get_appui_option_id('menus'))\n    );\n  }",
-            "startLine": 485,
-            "endLine": 501,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "k_text",
-                    "position": 0,
-                    "type": null,
-                    "required": false,
-                    "has_default": true,
-                    "default": "text",
-                    "default_name": "",
-                    "description": "value The key used for the value. Default 'value'"
-                },
-                {
-                    "name": "k_value",
-                    "position": 1,
-                    "type": null,
-                    "required": false,
-                    "has_default": true,
-                    "default": "value",
-                    "default_name": ""
-                }
-            ]
-        },
-        "clone": {
-            "name": "clone",
-            "summary": "Clones a menu",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $name)\n  {\n    if (\\bbn\\str::is_uid($id) && ($id_menu = $this->add(['text' => $name]))) {\n      if (($bits = $this->pref->get_full_bits($id)) && !$this->_clone($id_menu, $bits)) {\n        return null;\n      }\n\n      return $id_menu;\n    }\n\n    return null;\n  }",
-            "startLine": 511,
-            "endLine": 522,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The new menu's name"
-                },
-                {
-                    "name": "name",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "copy": {
-            "name": "copy",
-            "summary": "Copies a menu into another one.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_menu, $id_menu_to, array $cfg)\n  {\n    if (\\bbn\\str::is_uid($id_menu)\n        && \\bbn\\str::is_uid($id_menu_to)\n        && ($bits = $this->pref->get_full_bits($id_menu))\n        && ($id = $this->add($id_menu_to, $cfg))\n        && $this->_clone($id_menu_to, $bits, $id)\n    ) {\n      return $id;\n    }\n\n    return null;\n  }",
-            "startLine": 535,
-            "endLine": 547,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 3,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_menu",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "menu_to The target menu's ID"
-                },
-                {
-                    "name": "id_menu_to",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "cfg",
-                    "position": 2,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "copy_to": {
-            "name": "copy_to",
-            "summary": "Clones a section\/link to an other menu.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_bit, $id_menu_to, array $cfg)\n  {\n    if (\\bbn\\str::is_uid($id_bit)\n        && \\bbn\\str::is_uid($id_menu_to)\n        && ($bit = $this->pref->get_bit($id_bit))\n        && ($id_menu = $this->get_id_menu($id_bit))\n    ) {\n      $bit  = array_merge(\n        $bit, $cfg, [\n        'id_parent' => null,\n        'num' => $this->pref->get_max_bit_num($id_menu_to, null, true)\n        ]\n      );\n      $bits = $this->pref->get_full_bits($id_menu, $id_bit, true);\n      if ($id = $this->add($id_menu_to, $bit)) {\n        if (!empty($bits) && !$this->_clone($id_menu_to, $bits, $id)) {\n          return null;\n        }\n\n        return $id;\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 560,
-            "endLine": 584,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 3,
-            "returns": [
-                "string",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_bit",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "menu_to The menu's ID to clone"
-                },
-                {
-                    "name": "id_menu_to",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "of bit"
-                },
-                {
-                    "name": "cfg",
-                    "position": 2,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "fix_order": {
-            "name": "fix_order",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $id_parent = NULL, $deep = false)\n  {\n    if (\\bbn\\str::is_uid($id)\n        && (empty($id_parent) || \\bbn\\str::is_uid($id_parent))\n    ) {\n      $fixed = $this->pref->fix_bits_order($id, $id_parent, $deep);\n      if ($fixed) {\n        $this->delete_cache($id);\n      }\n\n      return (int)$fixed;\n    }\n\n    return null;\n  }",
-            "startLine": 587,
-            "endLine": 601,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "id_parent",
-                    "position": 1,
-                    "type": null,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 },
                 {
-                    "name": "deep",
-                    "position": 2,
+                    "name": "moment",
+                    "position": 1,
                     "type": null,
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
-                }
-            ]
-        },
-        "order": {
-            "name": "order",
-            "summary": "Orders a section\/link.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $pos)\n  {\n    if (\\bbn\\str::is_uid($id)\n        && $this->pref->order_bit($id, $pos)\n    ) {\n      $this->delete_cache($this->get_id_menu($id));\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 611,
-            "endLine": 621,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The new position."
-                },
-                {
-                    "name": "pos",
-                    "position": 1,
-                    "type": "int",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "move": {
-            "name": "move",
-            "summary": "Moves a section\/link inside to another one.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $id_parent = NULL)\n  {\n    if ($this->pref->move_bit($id, $id_parent)) {\n      $this->delete_cache($this->get_id_menu($id));\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 631,
-            "endLine": 639,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "parent The parent's ID."
-                },
-                {
-                    "name": "id_parent",
-                    "position": 1,
-                    "type": "string",
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
             ]
-        },
-        "get_options_menus": {
-            "name": "get_options_menus",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\menus",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    \/\/$items = $this->options->full_options('menus', self::$option_root_id);\n    $items = self::get_appui_option('menus');\n    $res   = [];\n    foreach ($items as $it){\n      $res[] = [\n        'text' => $it['text'],\n        'value' => $it['id']\n      ];\n    }\n\n    return $res;\n  }",
-            "startLine": 642,
-            "endLine": 655,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
-            "parent": false,
-            "arguments": []
         },
         "get": {
             "name": "get",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $prefix = '')\n  {\n    $id = $this->from_path($id);\n  }",
-            "startLine": 658,
-            "endLine": 661,
+            "code": "function($id)\n  {\n    if (bbn\\str::is_uid($id) && ($ucfg = $this->user->get_class_cfg())) {\n      return $this->db->rselect([\n        'table' => $this->class_table,\n        'fields' => array_merge(array_values($this->fields), [\n          $this->class_cfg['arch']['content']['id_option'],\n          $this->class_cfg['arch']['content']['title'],\n          $this->class_cfg['arch']['content']['content'],\n          $this->class_cfg['arch']['content']['creation']\n        ]),\n        'join' => [[\n          'table' => $this->class_cfg['tables']['content'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->col_full_name($this->fields['id_content'], $this->class_table),\n              'exp' => $this->db->col_full_name($this->class_cfg['arch']['content']['id'], $this->class_cfg['tables']['content'])\n            ]]\n          ]\n        ], [\n          'table' => $ucfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n              'exp' => $this->db->col_full_name($ucfg['arch']['users']['id'], $ucfg['table'])\n            ], [\n              'field' => $this->db->col_full_name($ucfg['arch']['users']['active'], $ucfg['table']),\n              'value' => 1\n            ]]\n          ]\n        ]],\n        'where' => [\n          'conditions' => [[\n            'field' => $this->db->col_full_name($this->fields['id'], $this->class_table),\n            'value' => $id\n          ]]\n        ]\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 270,
+            "endLine": 310,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_unread": {
+            "name": "get_unread",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, array $additional_where = [])\n  {\n    $ucfg = $this->user->get_class_cfg();\n    $where = [\n      'conditions' => [[\n        'field' => $this->db->col_full_name($this->fields['read'], $this->class_table),\n        'operator' => 'isnull'\n      ]]\n    ];\n    if (bbn\\str::is_uid($id_user)) {\n      $where['conditions'][] = [\n        'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n        'value' => $id_user\n      ];\n    }\n    if (!empty($additional_where)) {\n      $where['conditions'][] = $additional_where;\n    }\n    return $this->db->rselect_all([\n      'table' => $this->class_table,\n      'fields' => array_merge(array_values($this->fields), [\n        $this->class_cfg['arch']['content']['id_option'],\n        $this->class_cfg['arch']['content']['title'],\n        $this->class_cfg['arch']['content']['content'],\n        $this->class_cfg['arch']['content']['creation']\n      ]),\n      'join' => [[\n        'table' => $this->class_cfg['tables']['content'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->col_full_name($this->fields['id_content'], $this->class_table),\n            'exp' => $this->db->col_full_name($this->class_cfg['arch']['content']['id'], $this->class_cfg['tables']['content'])\n          ]]\n        ]\n      ], [\n        'table' => $ucfg['table'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n            'exp' => $this->db->col_full_name($ucfg['arch']['users']['id'], $ucfg['table'])\n          ], [\n            'field' => $this->db->col_full_name($ucfg['arch']['users']['active'], $ucfg['table']),\n            'value' => 1\n          ]]\n        ]\n      ]],\n      'where' => $where,\n      'order_by' => [[\n        'field' => $this->db->col_full_name($this->class_cfg['arch']['content']['creation'], $this->class_cfg['tables']['content']),\n        'dir' => 'ASC'\n      ]]\n    ]);\n  }",
+            "startLine": 312,
+            "endLine": 364,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "additional_where",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_unread_ids": {
+            "name": "get_unread_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL)\n  {\n    $ucfg = $this->user->get_class_cfg();\n    $where = [\n      'conditions' => [[\n        'field' => $this->db->col_full_name($this->fields['read'], $this->class_table),\n        'operator' => 'isnull'\n      ]]\n    ];\n    if (bbn\\str::is_uid($id_user)) {\n      $where['conditions'][] = [\n        'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n        'value' => $id_user\n      ];\n    }\n    return $this->db->get_column_values([\n      'table' => $this->class_table,\n      'fields' => [$this->fields['id']],\n      'join' => [[\n        'table' => $this->class_cfg['tables']['content'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->col_full_name($this->fields['id_content'], $this->class_table),\n            'exp' => $this->db->col_full_name($this->class_cfg['arch']['content']['id'], $this->class_cfg['tables']['content'])\n          ]]\n        ]\n      ], [\n        'table' => $ucfg['table'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n            'exp' => $this->db->col_full_name($ucfg['arch']['users']['id'], $ucfg['table'])\n          ], [\n            'field' => $this->db->col_full_name($ucfg['arch']['users']['active'], $ucfg['table']),\n            'value' => 1\n          ]]\n        ]\n      ]],\n      'where' => $where,\n      'order_by' => [[\n        'field' => $this->db->col_full_name($this->class_cfg['arch']['content']['creation'], $this->class_cfg['tables']['content']),\n        'dir' => 'ASC'\n      ]]\n    ]);\n  }",
+            "startLine": 366,
+            "endLine": 410,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_list_by_user": {
+            "name": "get_list_by_user",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, array $data)\n  {\n    if (bbn\\str::is_uid($id_user)) {\n      $ucfg = $this->user->get_class_cfg();\n      $grid = new bbn\\appui\\grid($this->db, $data, [\n        'table' => $this->class_table,\n        'fields' => array_merge(array_values($this->fields), [\n          $this->class_cfg['arch']['content']['id_option'],\n          $this->class_cfg['arch']['content']['title'],\n          $this->class_cfg['arch']['content']['content'],\n          $this->class_cfg['arch']['content']['creation']\n        ]),\n        'join' => [[\n          'table' => $this->class_cfg['tables']['content'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->col_full_name($this->fields['id_content'], $this->class_table),\n              'exp' => $this->db->col_full_name($this->class_cfg['arch']['content']['id'], $this->class_cfg['tables']['content'])\n            ]]\n          ]\n        ], [\n          'table' => $ucfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n              'exp' => $this->db->col_full_name($ucfg['arch']['users']['id'], $ucfg['table'])\n            ], [\n              'field' => $this->db->col_full_name($ucfg['arch']['users']['active'], $ucfg['table']),\n              'value' => 1\n            ]]\n          ]\n        ]],\n        'filters' => [\n          'conditions' => [[\n            'field' => $this->db->col_full_name($this->fields['id_user'], $this->class_table),\n            'value' => $id_user\n          ]]\n        ],\n        'order by' => [[\n          'field' => $this->db->col_full_name($this->class_cfg['arch']['content']['creation'], $this->class_cfg['tables']['content']),\n          'dir' => 'DESC'\n        ]]\n      ]);\n      if ($grid->check()){\n        return $grid->get_datatable();\n      }\n    }\n    return null;\n  }",
+            "startLine": 412,
+            "endLine": 460,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "cont_unread": {
+            "name": "cont_unread",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL)\n  {\n    return \\count($this->get_unread_ids($id_user));\n  }",
+            "startLine": 462,
+            "endLine": 465,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "notify": {
+            "name": "notify",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($notification)\n  {\n    if (bbn\\str::is_uid($notification)) {\n      $notification = $this->get($notification);\n    }\n    if (\\is_array($notification)\n      && bbn\\str::is_uid($notification[$this->fields['id']])\n      && bbn\\str::is_uid($notification[$this->fields['id_content']])\n      && bbn\\str::is_uid($notification[$this->fields['id_user']])\n      && ($id_user = $notification[$this->fields['id_user']])\n      && !empty($notification[$this->class_cfg['arch']['content']['title']])\n      && !empty($notification[$this->class_cfg['arch']['content']['content']])\n      && empty($notification[$this->fields['read']])\n      && ($cfg = $this->get_cfg($id_user, $notification[$this->class_cfg['arch']['content']['id_option']]))\n    ) {\n      $mtime = bbn\\x::microtime();\n      $path = bbn\\mvc::get_user_data_path($id_user, 'appui-notifications');\n      $ucfg = $this->user->get_class_cfg();\n      $sessions = $this->db->select_all($ucfg['tables']['sessions'], [\n        $ucfg['arch']['sessions']['id'],\n        $ucfg['arch']['sessions']['sess_id']\n      ], [\n        $ucfg['arch']['sessions']['id_user'] => $id_user,\n        $ucfg['arch']['sessions']['opened'] => 1\n      ]);\n      \/\/ Web notification\n      if (empty($notification[$this->fields['web']])\n        && !empty($cfg['web'])\n        && !empty($sessions)\n      ) {\n        foreach ($sessions as $sess) {\n          $path = $path . \"web\/{$sess->id}\/\";\n          if (bbn\\file\\dir::create_path($path) && !\\is_file($path . \"$mtime.json\")) {\n            $notification[$this->fields['web']] = $mtime;\n            $notification[$this->fields['dt_web']] = date('Y-m-d H:i:s', $mtime);\n            file_put_contents($path . \"$mtime.json\", json_encode($notification));\n          }\n        }\n      }\n      \/\/ Browser notification\n      else if (empty($notification[$this->fields['browser']])\n        && !empty($cfg['browser'])\n        && !empty($sessions)\n      ) {\n        foreach ($sessions as $sess) {\n          $path = $path . \"browser\/{$sess->id}\/\";\n          if ( bbn\\file\\dir::create_path($path) && !\\is_file($path . \"$mtime.json\")) {\n            $notification[$this->fields['browser']] = $mtime;\n            $notification[$this->fields['dt_browser']] = date('Y-m-d H:i:s', $mtime);\n            file_put_contents($path . \"$mtime.json\", json_encode($notification));\n          }\n        }\n      }\n      \/\/ Mail notification\n      else if (empty($notification[$this->fields['mail']]) && !empty($cfg['mail'])) {\n        $creation = strtotime($notification[$this->class_cfg['arch']['content']['creation']]);\n        if ( ($cfg['mail'] === 'immediately')\n          || (($cfg['mail'] === 'daily')\n            && (time() > strtotime('00:00:00 +1 day', $creation)))\n          || (($cfg['mail'] === 'default')\n            && (time() > strtotime('+1 hour', $creation)))\n        ) {\n          $notification[$this->fields['mail']] = $mtime;\n          $this->_send_grouped_mail($notification, $cfg['mail']);\n        }\n      }\n      \/\/ App notification\n      \/\/else if (empty($notification[$this->fields['mobile']]) && !empty($cfg['mobile'])) {}\n      return $this->_update($notification[$this->fields['id']], $notification);\n    }\n    return null;\n  }",
+            "startLine": 467,
+            "endLine": 538,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "notification",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "process": {
+            "name": "process",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->notify($n);\n    }\n  }",
+            "startLine": 540,
+            "endLine": 544,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_cfg": {
+            "name": "get_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $id_option = NULL)\n  {\n    if (bbn\\str::is_uid($id_user)\n      && ($cfg_opt_id = self::get_option_id('cfg'))\n      && bbn\\str::is_uid($cfg_opt_id)\n    ) {\n      \/\/ Glogal cfg\n      if (empty($this->cfg)) {\n        $this->cfg = $this->opt->get_value($cfg_opt_id);\n      }\n      $cfg = $this->cfg;\n      \/\/ Get global user's preferences\n      if ($cfg_pref = $this->pref->get_cfg_by_option($cfg_opt_id, $id_user)) {\n        $cfg = \\array_merge($cfg, $cfg_pref);\n      }\n      \/\/ Get users's preferences of the notification's category\n      if (bbn\\str::is_uid($id_option)\n        && ($id_option_parent = $this->opt->get_id_parent($id_option))\n        && bbn\\str::is_uid($id_option_parent)\n        && ($not_parent_pref = $this->pref->get_cfg_by_option($id_option_parent, $id_user))\n      ) {\n        $cfg = \\array_merge($cfg, $not_parent_pref);\n      }\n      \/\/ Get user's preferences of this notification\n      if (bbn\\str::is_uid($id_option)\n        && ($not_pref = $this->pref->get_cfg_by_option($id_option, $id_user))\n      ) {\n        $cfg = \\array_merge($cfg, $not_pref);\n      }\n      return $cfg;\n    }\n    return null;\n  }",
+            "startLine": 546,
+            "endLine": 578,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -964,11 +690,95 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array",
+                null
+            ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_cfg": {
+            "name": "set_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    if (!empty($cfg['id_option'])\n      && isset($cfg['web'], $cfg['browser'], $cfg['mail'], $cfg['mobile'])\n    ) {\n      return (bool)$this->pref->update_by_option($cfg['id_option'], [\n        'web' => (bool)$cfg['web'],\n        'browser' => (bool)$cfg['browser'],\n        'mail' => \\is_string($cfg['mail']) ? $cfg['mail'] : (bool)$cfg['mail'],\n        'mobile' => (bool)$cfg['mobile']\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 580,
+            "endLine": 593,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_user_has_permission": {
+            "name": "_user_has_permission",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($notification, $id_user = NULL)\n  {\n    if (!\\is_array($notification)\n      && \\is_string($notification)\n      && bbn\\str::is_uid($notification)\n    ) {\n      $notification = $this->get($notification);\n    }\n    if (\\is_array($notification)\n      && ($id_user = $id_user ?: ($notification[$this->fields['id_user']] ?? $this->user->get_id()))\n      && bbn\\str::is_uid($id_user)\n      && ($ucfg = $this->user->get_class_cfg())\n      && ($ocfg = $this->opt->get_class_cfg())\n      && ($user = $this->db->select($ucfg['table'], [\n        $ucfg['arch']['users']['id_group'],\n        $ucfg['arch']['users']['admin'],\n        $ucfg['arch']['users']['dev']\n      ], [$ucfg['arch']['users']['id'] => $id_user]))\n    ) {\n      $id_opt = $notification[$this->class_cfg['arch']['content']['id_option']] ?? null;\n      if (!empty($user->{$ucfg['arch']['users']['admin']})\n        || !empty($user->{$ucfg['arch']['users']['dev']})\n        || empty($id_opt)\n      ) {\n        return true;\n      }\n      if (($id_perm = $this->db->select_one($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$id_opt]))\n        && ($perm = $this->opt->option($id_perm))\n      ) {\n        if (!empty($perm['public'])) {\n          return true;\n        }\n        return $this->pref->user_has($id_perm, $id_user)\n          || $this->pref->group_has($id_perm, $user->{$ucfg['arch']['users']['id_group']});\n      }\n    }\n    return false;\n  }",
+            "startLine": 687,
+            "endLine": 724,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "notification",
                     "position": 0,
                     "type": null,
                     "required": true,
@@ -977,12 +787,12 @@
                     "default_name": ""
                 },
                 {
-                    "name": "prefix",
+                    "name": "id_user",
                     "position": 1,
-                    "type": null,
+                    "type": "string",
                     "required": false,
                     "has_default": true,
-                    "default": "",
+                    "default": null,
                     "default_name": ""
                 }
             ]
@@ -1426,7 +1236,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1450,7 +1260,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1474,7 +1284,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1500,7 +1310,7 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1524,7 +1334,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1548,7 +1358,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1572,7 +1382,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1596,7 +1406,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1620,7 +1430,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1644,7 +1454,7 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1671,7 +1481,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1697,7 +1507,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1723,7 +1533,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1750,7 +1560,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1777,7 +1587,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\menus",
+            "file": "bbn\\appui\\notifications",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1795,52 +1605,201 @@
             "returns": null,
             "parent": false,
             "arguments": []
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $res = $this->db->count(\n      $this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n      ]\n    );\n    return (bool)$res;\n  }",
+            "startLine": 61,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_class_cfg": {
+            "name": "get_class_cfg",
+            "summary": "Return the",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "startLine": 75,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_fields": {
+            "name": "get_fields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\notifications",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->fields;\n  }",
+            "startLine": 80,
+            "endLine": 83,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
         }
     },
     "properties": null,
     "staticProperties": {
-        "id_public_root": null,
-        "public_root": "permissions|page",
+        "default_class_cfg": {
+            "table": "bbn_notifications",
+            "tables": {
+                "notifications": "bbn_notifications",
+                "content": "bbn_notifications_content"
+            },
+            "arch": {
+                "notifications": {
+                    "id": "id",
+                    "id_content": "id_content",
+                    "id_user": "id_user",
+                    "web": "web",
+                    "browser": "browser",
+                    "mail": "mail",
+                    "mobile": "mobile",
+                    "read": "read",
+                    "dt_web": "dt_web",
+                    "dt_browser": "dt_browser",
+                    "dt_mail": "dt_mail",
+                    "dt_mobile": "dt_mobile",
+                    "dt_read": "dt_read"
+                },
+                "content": {
+                    "id": "id",
+                    "id_option": "id_option",
+                    "title": "title",
+                    "content": "content",
+                    "creation": "creation"
+                }
+            }
+        },
         "optional_is_init": false,
         "option_root_id": null,
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 47,
+    "numMethods": 43,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 5,
+    "numStaticProperties": 4,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
-        "bbn\\models\\tts\\cache",
-        "bbn\\models\\tts\\optional"
+        "bbn\\models\\tts\\optional",
+        "bbn\\models\\tts\\dbconfig"
     ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
     "isFinal": false,
     "modifiers": 0,
-    "parentClass": "bbn\\models\\cls\\basic",
+    "parentClass": "bbn\\models\\cls\\db",
     "isSubclassOf": false,
     "defaultProperties": {
-        "id_public_root": null,
-        "public_root": "permissions|page",
+        "default_class_cfg": {
+            "table": "bbn_notifications",
+            "tables": {
+                "notifications": "bbn_notifications",
+                "content": "bbn_notifications_content"
+            },
+            "arch": {
+                "notifications": {
+                    "id": "id",
+                    "id_content": "id_content",
+                    "id_user": "id_user",
+                    "web": "web",
+                    "browser": "browser",
+                    "mail": "mail",
+                    "mobile": "mobile",
+                    "read": "read",
+                    "dt_web": "dt_web",
+                    "dt_browser": "dt_browser",
+                    "dt_mail": "dt_mail",
+                    "dt_mobile": "dt_mobile",
+                    "dt_read": "dt_read"
+                },
+                "content": {
+                    "id": "id",
+                    "id_option": "id_option",
+                    "title": "title",
+                    "content": "content",
+                    "creation": "creation"
+                }
+            }
+        },
         "optional_is_init": false,
         "option_root_id": null,
         "option_appui_id": null,
-        "options": null,
+        "opt": null,
+        "user": null,
         "pref": null,
+        "perms": null,
+        "cfg": null,
+        "db": null,
         "errors": [],
         "error": false,
         "debug": false,
         "log": [],
-        "_cache_prefix": null,
-        "cache_engine": null
+        "options": null,
+        "class_cfg": null,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
     },
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "menus",
+    "shortName": "notifications",
     "summary": ""
 }

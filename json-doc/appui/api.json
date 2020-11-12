@@ -8,8 +8,8 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/api.php",
-    "startLine": 9,
-    "endLine": 21,
+    "startLine": 10,
+    "endLine": 180,
     "contentConstructor": {
         "file": "bbn\\appui\\api",
         "returns": null
@@ -18,15 +18,117 @@
         "__construct": {
             "name": "__construct",
             "summary": "Constructor",
+            "description": "*",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                }
+            ],
+            "file": "bbn\\appui\\api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\user $user, bbn\\db $db, $ttl = 300)\n  {\n    if ($user->get_id()) {\n      $this->db = $db;\n      $this->jwt = new jwt();\n      $this->jwt->prepare($user->get_id(), $user->get_osession('fingerprint'), $ttl);\n    }\n  }",
+            "startLine": 46,
+            "endLine": 53,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "bbn\\user",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 300,
+                    "default_name": ""
+                }
+            ]
+        },
+        "register": {
+            "name": "register",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\appui\\api",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db)\n  {\n    parent::__construct($db);\n  }",
-            "startLine": 17,
-            "endLine": 20,
+            "code": "function(array $cfg, $key)\n  {\n    if ($this->jwt) {\n      $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);\n      if ($res = x::curl(\n        self::REMOTE,\n        ['action' => 'register', 'data' => $jwt]\n      )\n      ) {\n        $key = self::_get_tmp_key();\n        return $this->jwt->set_key($key)->get($res);\n      }\n      else {\n        throw new \\Exception(_(\"Impossible to register\"));\n      }\n    }\n    else {\n      throw new \\Exception(_(\"No JWT\"));\n    }\n  }",
+            "startLine": 55,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "emit": {
+            "name": "emit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cfg)\n  {\n    if ($this->jwt) {\n      $key = self::_get_key(true);\n      $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);\n      if ($res = x::curl(\n        self::REMOTE.'\/'.BBN_ID_APP,\n        ['action' => 'emit', 'data' => $jwt]\n      )\n      ) {\n        $key = self::_get_key();\n        return $this->jwt->set_key($key)->get($res);\n      }\n      else {\n        throw new \\Exception(_(\"Impossible to emit\"));\n      }\n    }\n    else {\n      throw new \\Exception(_(\"No JWT\"));\n    }\n  }",
+            "startLine": 77,
+            "endLine": 97,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -35,46 +137,15 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": {
-                "name": "__construct",
-                "summary": "Constructor.",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\models\\cls\\db",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
-                "startLine": 37,
-                "endLine": 40,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 1,
-                "numberOfRequiredParameters": 1,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "db",
-                        "position": 0,
-                        "type": "bbn\\db",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
+            "returns": [
+                "array"
+            ],
+            "parent": false,
             "arguments": [
                 {
-                    "name": "db",
+                    "name": "cfg",
                     "position": 0,
-                    "type": "bbn\\db",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -517,13 +588,23 @@
             ]
         }
     },
-    "properties": null,
-    "staticProperties": [],
-    "constants": null,
-    "numMethods": 9,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 0,
+    "properties": {
+        "jwt": {
+            "visibility": "public"
+        }
+    },
+    "staticProperties": {
+        "_rsa_in_tmp": null,
+        "_rsa_out_tmp": null,
+        "_rsa_in": null,
+        "_rsa_out": null,
+        "_rsa_public": null
+    },
+    "constants": [],
+    "numMethods": 11,
+    "numProperties": 1,
+    "numConstants": 5,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -532,9 +613,15 @@
     "isAbstract": false,
     "isFinal": false,
     "modifiers": 0,
-    "parentClass": "bbn\\models\\cls\\db",
+    "parentClass": "bbn\\models\\cls\\basic",
     "isSubclassOf": false,
     "defaultProperties": {
+        "_rsa_in_tmp": null,
+        "_rsa_out_tmp": null,
+        "_rsa_in": null,
+        "_rsa_out": null,
+        "_rsa_public": null,
+        "jwt": null,
         "db": null,
         "errors": [],
         "error": false,

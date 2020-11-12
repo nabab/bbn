@@ -389,7 +389,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"mWEXK2fxB8gS2igg4odvf4\"}"
+        "_input": "{\"_bbn_baseURL\":\"\",\"_bbn_referer\":\"projects\/router\/apst-app\/ide\/editor\/file\/lib\/appui-cdn\/mvc\/publishing\/gen-php\/_end_\/php\",\"_bbn_key\":\"cdn\/publishing\/gen-php:412e9404033fb9aa5cb8e2627ba4dcdb\",\"_bbn_token\":\"bqbqJnfV7OrB37S3ZUr5SGv5\"}"
     },
     "constants": null,
     "numMethods": 13,

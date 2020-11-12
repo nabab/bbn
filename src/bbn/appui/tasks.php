@@ -861,7 +861,7 @@ class tasks extends bbn\models\cls\db{
         return $a !== $data['id_user'];
       });
       $notif = new bbn\appui\notifications($this->db);
-      return $notif->insert($title, $text, $users);
+      return $notif->insert($title, $text, null, $users);
     }
     return false;
   }

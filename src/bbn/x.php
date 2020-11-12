@@ -27,6 +27,7 @@ class x
 
   private static $_cli;
 
+
   /**
   *
   */
@@ -35,14 +36,16 @@ class x
     if (!$name) {
       $name = 'num';
     }
+
     if (!isset(self::$_counters[$name])) {
       self::$_counters[$name] = 0;
     }
   }
 
+
   /**
    * @param string $name
-   * @param int $i
+   * @param int    $i
    */
   public static function increment(string $name = 'num', int $i = 1)
   {
@@ -50,15 +53,17 @@ class x
     self::$_counters[$name] += $i;
   }
 
+
   /**
    * @param string $name
-   * @param int $i
+   * @param int    $i
    */
   public static function decrement(string $name = 'num', int $i = 1)
   {
     self::_init_count($name);
     self::$_counters[$name] -= $i;
   }
+
 
   /**
    * @param string $name
@@ -71,8 +76,10 @@ class x
     if ($delete) {
       unset(self::$_counters[$name]);
     }
+
     return $tmp;
   }
+
 
   public static function count_all($delete = false): array
   {
@@ -80,11 +87,13 @@ class x
     if ($delete) {
       self::$_counters = [];
     }
+
     return $tmp;
   }
 
+
   /**
-   * Returns a microtime with 4 digit behing the 
+   * Returns a microtime with 4 digit after the coma
    *
    * @return void
    */
@@ -93,6 +102,7 @@ class x
     return round(\microtime(true), 4);
   }
 
+
   /**
    * Saves logs to a file.
    *
@@ -100,19 +110,21 @@ class x
    * x::log('My text', 'FileName');
    * ```
    *
-   * @param mixed $st Item to log.
+   * @param mixed  $st   Item to log.
    * @param string $file Filename, default: "misc".
    * @return void
    */
   public static function log($st, string $file = 'misc'): void
   {
     if (\defined('BBN_DATA_PATH')) {
-      $log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
-      $backtrace = array_filter(debug_backtrace(), function ($a) {
-        return $a['function'] === 'log';
-      });
-      $i = end($backtrace);
-      $r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
+      $log_file  = BBN_DATA_PATH.'logs/'.$file.'.log';
+      $backtrace = array_filter(
+        debug_backtrace(), function ($a) {
+          return $a['function'] === 'log';
+        }
+      );
+      $i         = end($backtrace);
+      $r         = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
         self::get_dump($st).PHP_EOL;
 
       if (php_sapi_name() === 'cli') {
@@ -121,6 +133,7 @@ class x
           echo self::get_dump($st).PHP_EOL;
         }
       }
+
       $s = (file_exists($log_file)) ? filesize($log_file) : 0;
       if ($s > BBN_X_MAX_LOG_FILE) {
         file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
@@ -132,11 +145,12 @@ class x
     }
   }
 
+
   /**
    * Puts the PHP errors into a JSON file.
    *
-   * @param string $errno The text to save.
-   * @param string $errstr The file's name, default: "misc".
+   * @param string  $errno  The text to save.
+   * @param string  $errstr The file's name, default: "misc".
    * @param $errfile
    * @param $errline
    * @return void
@@ -144,32 +158,38 @@ class x
   public static function log_error($errno, $errstr, $errfile, $errline): void
   {
     if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
-      $file = BBN_DATA_PATH.'logs/_php_error.json';
+      $file      = BBN_DATA_PATH.'logs/_php_error.json';
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
       foreach ($backtrace as &$b) {
         if (!empty($b['file'])) {
           $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
         }
       }
+
       $r = false;
       if (is_file($file)) {
         $r = json_decode(file_get_contents($file), 1);
       }
+
       if (!$r) {
         $r = [];
       }
+
       $t = date('Y-m-d H:i:s');
       if (class_exists('\\bbn\\mvc')) {
         $mvc = mvc::get_instance();
       }
+
       $errfile = str_replace(BBN_APP_PATH, '', $errfile);
-      $idx = self::find($r, [
+      $idx     = self::find(
+        $r, [
         'type' => $errno,
         'error' => $errstr,
         'file' => $errfile,
         'line' => $errline,
         'request' => ''
-      ]);
+        ]
+      );
       if ($idx !== null) {
         $r[$idx]['count']++;
         $r[$idx]['last_date'] = $t;
@@ -189,16 +209,18 @@ class x
           //'context' => $context
         ];
       }
+
       self::sort_by($r, 'last_date', 'DESC');
       file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
     }
   }
 
+
   /**
    * Check if an array or an object has the given property
    *
    * @param array|object $obj
-   * @param string $prop
+   * @param string       $prop
    * @return boolean|null
    */
   public static function has_prop(iterable $obj, string $prop, bool $check_empty = false): ?bool
@@ -209,14 +231,16 @@ class x
     elseif (is_object($obj)) {
       return \property_exists($obj, $prop) && (!$check_empty || !empty($obj->$prop));
     }
+
     return null;
   }
+
 
   /**
    * Check if an array or an object has the given properties
    *
    * @param array|object $obj
-   * @param array $props
+   * @param array        $props
    * @return boolean|null
    */
   public static function has_props(iterable $obj, array $props, bool $check_empty = false): ?bool
@@ -230,8 +254,10 @@ class x
         return false;
       }
     }
+
     return true;
   }
+
 
   /**
    * Check if an array or an object has the given property.
@@ -240,7 +266,11 @@ class x
    * @param  string       $prop_path
    * @return boolean|null
    */
-  public static function has_deep_prop(iterable $obj, array $prop_path, bool $check_empty = false): ?bool
+  public static function has_deep_prop(
+      iterable $obj,
+      array $prop_path,
+      bool $check_empty = false
+  ): ?bool
   {
     $o =& $obj;
     foreach ($prop_path as $p) {
@@ -248,38 +278,52 @@ class x
         if (!\array_key_exists($p, $o)) {
           return false;
         }
+
         if ($check_empty && !$o[$p]) {
           return false;
         }
+
         $o =& $o[$p];
       }
       elseif (\is_object($o)) {
         if (!\property_exists($o, $p)) {
           return false;
         }
+
         if ($check_empty && !$o->$p) {
           return false;
         }
+
         $o =& $o->$p;
       }
       else {
         return false;
       }
     }
+
     return true;
   }
 
-  public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, file\system $fs = null): ?string
+
+  public static function make_storage_path(
+      string $path,
+      $format = 'Y/m/d',
+      $max = 100,
+      file\system $fs = null
+  ): ?string
   {
     if (empty($format)) {
       $format = 'Y/m/d';
     }
+
     if (!$max) {
       $max = 100;
     }
+
     if (!$fs) {
       $fs = new file\system();
     }
+
     // One dir per $format
     $spath = date($format);
     if ($spath) {
@@ -295,28 +339,37 @@ class x
         else {
           $num = 1;
         }
+
         if ($fs->create_path($path.'/'.$num)) {
           return $path.'/'.$num.'/';
         }
-
       }
     }
+
     return null;
   }
 
-  public static function clean_storage_path(string $path, $format = 'Y/m/d', file\system $fs = null): ?int
+
+  public static function clean_storage_path(
+      string $path,
+      $format = 'Y/m/d',
+      file\system $fs = null
+  ): ?int
   {
     if (empty($format)) {
       $format = 'Y/m/d';
     }
+
     if (!$fs) {
       $fs = new file\system();
     }
+
     if (!$fs->is_dir($path)) {
       return null;
     }
+
     $limit = count(self::split($format, '/')) + 1;
-    $res = 0;
+    $res   = 0;
     while ($limit > 0) {
       if (!$fs->get_num_files($path) && $fs->delete($path)) {
         $limit--;
@@ -327,8 +380,10 @@ class x
         break;
       }
     }
+
     return $res;
   }
+
 
   /**
    * Returns to a merged object from two objects.
@@ -355,21 +410,25 @@ class x
    * @param object $o2 The second object to merge.
    * @return object The merged object.
    */
-  public static function merge_objects(object $o1, object $o2): object
+  public static function merge_objects(object $o1, object $o2): \stdClass
   {
     $args = \func_get_args();
     /* @todo check if it's working with more than 2 object arguments */
     if (\count($args) > 2) {
       for ($i = \count($args) - 1; $i > 1; $i--) {
-        $args[$i-1] = self::merge_arrays($args[$i-1], $args[$i]);
+        $args[$i - 1] = self::merge_arrays($args[$i - 1], $args[$i]);
       }
+
       $o2 = $args[1];
     }
-    $a1 = self::to_array($o1);
-    $a2 = self::to_array($o2);
+
+    $a1  = self::to_array($o1);
+    $a2  = self::to_array($o2);
     $res = self::merge_arrays($a1, $a2);
     return self::to_object($res);
   }
+
+
   /**
    * Returns to a merged array from two or more arrays.
    *
@@ -387,13 +446,15 @@ class x
     $args = \func_get_args();
     if (\count($args) > 2) {
       for ($i = \count($args) - 1; $i > 1; $i--) {
-        $args[$i-1] = self::merge_arrays($args[$i-1], $args[$i]);
+        $args[$i - 1] = self::merge_arrays($args[$i - 1], $args[$i]);
       }
+
       $a2 = $args[1];
     }
+
     if ((self::is_assoc($a1) || empty($a1)) && (self::is_assoc($a2) || empty($a2))) {
       $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
-      $r = [];
+      $r    = [];
       foreach ($keys as $k) {
         if (!array_key_exists($k, $a1) && !array_key_exists($k, $a2)) {
           continue;
@@ -412,8 +473,10 @@ class x
     else{
       $r = array_merge($a1, $a2);
     }
+
     return $r;
   }
+
 
   /**
    * Converts a JSON string or an array into an object.
@@ -426,13 +489,19 @@ class x
    * @param array $ar The array or JSON to convert.
    * @return false | object
    */
-  public static function to_object($ar): object
+  public static function to_object($ar): \stdClass
   {
     if (\is_string($ar)) {
       return json_decode($ar);
     }
+
+    if (\is_array($ar)) {
+      return json_decode(json_encode($ar));
+    }
+
     return (object)$ar;
   }
+
 
   /**
    * Converts a JSON string or an object into an array.
@@ -456,32 +525,34 @@ class x
     if (\is_string($obj)) {
       $res = json_decode($obj, 1);
     }
+
     foreach ($obj as $p => &$v) {
       if (is_object($v)) {
         $v = self::to_array($v);
       }
     }
+
     unset($v);
     return (array)$obj;
   }
 
+
   public static function js_object(iterable $obj): string
   {
-    $value_arr = [];
+    $value_arr    = [];
     $replace_keys = [];
 
     //$obj = x::convert_uids($obj);
-    $transform = function($o, $idx = 0) use(&$transform, &$value_arr, &$replace_keys) {
+    $transform = function ($o, $idx = 0) use (&$transform, &$value_arr, &$replace_keys) {
       foreach($o as $key => &$value) {
         $idx++;
         if (\is_array($value) || \is_object($value)) {
           $value = $transform($value, $idx);
         }
-        elseif (
-          \is_string($value) &&
-          // Look for values starting with 'function('
-          (strpos(trim($value), 'function(') === 0)
-       ) {
+        elseif (\is_string($value)
+            // Look for values starting with 'function('
+            && (strpos(trim($value), 'function(') === 0)
+        ) {
           // Store function string.
           $value_arr[] = $value;
           // Replace function string in $foo with a ‘unique’ special key.
@@ -490,6 +561,7 @@ class x
           $replace_keys[] = '"'.$value.'"';
         }
       }
+
       return $o;
     };
     // Now encode the array to json format
@@ -506,6 +578,7 @@ class x
     // Replace the special keys with the original string.
     return \count($replace_keys) ? str_replace($replace_keys, $value_arr, $json) : $json;
   }
+
 
   /**
    * Indents a flat JSON string to make it human-readable.
@@ -534,8 +607,7 @@ class x
     $prevChar    = '';
     $outOfQuotes = true;
 
-    for ($i=0; $i<=$strLen; $i++) {
-
+    for ($i = 0; $i <= $strLen; $i++) {
       // Grab the next character in the string.
       $char = substr($json, $i, 1);
 
@@ -548,7 +620,7 @@ class x
       } elseif(($char == '}' || $char == ']') && $outOfQuotes) {
         $result .= $newLine;
         $pos --;
-        for ($j=0; $j<$pos; $j++) {
+        for ($j = 0; $j < $pos; $j++) {
           $result .= $indentStr;
         }
       }
@@ -575,6 +647,7 @@ class x
     return $result;
   }
 
+
   /**
    * Returns an object or an array cleaned of all empty values.
    * @todo Add a preserve_keys option?
@@ -587,17 +660,18 @@ class x
    * // array [0 => 'Allison', 1 => 'Mike', 3 => 'John']
    * ```
    *
-   * @param array|object $arr An object or array to clean.
-   * @param bool $remove_space If "true" the spaces are removed, default: "false".
+   * @param array|object $arr          An object or array to clean.
+   * @param bool         $remove_space If "true" the spaces are removed, default: "false".
    * @return array The cleaned result.
    */
-  public static function remove_empty(iterable $arr, $remove_space = false): iterable
+  public static function remove_empty(iterable $arr, $remove_space = false)
   {
     foreach ($arr as $k => $v) {
       if (\is_object($arr)) {
         if (\is_array($v) || \is_object($v)) {
           $arr->$k = self::remove_empty($v);
         }
+
         if (empty($arr->$k)) {
           unset($arr->$k);
         }
@@ -609,13 +683,16 @@ class x
         elseif ($remove_space) {
           $arr[$k] = trim($arr[$k]);
         }
+
         if (empty($arr[$k])) {
           unset($arr[$k]);
         }
       }
     }
+
     return $arr;
   }
+
 
   /**
    * Converts an indexed array into a numeric array where the original index is a property.
@@ -629,7 +706,7 @@ class x
    * // array [['id' => 25, 'name' => 'Allison'], ['id' => 33, 'name' => 'Francis'], ['id' => 19, 'name' => 'John']]
    * ```
    *
-   * @param array $arr The original array.
+   * @param array  $arr     The original array.
    * @param string $keyname Alias for the index.
    * @param string $valname Alias for the value.
    * @return array Groups array.
@@ -640,8 +717,10 @@ class x
     foreach ($arr as $k => $v) {
       $r[] = [$keyname => $k, $valname => $v];
     }
+
     return $r;
   }
+
 
   /**
    * Checks if the given array is associative.
@@ -667,22 +746,26 @@ class x
   public static function is_assoc(array $r): bool
   {
     $keys = array_keys($r);
-    $c = \count($keys);
+    $c    = \count($keys);
     for ($i = 0; $i < $c; $i++) {
       if ($keys[$i] !== $i) {
         return 1;
       }
     }
+
     return false;
   }
+
 
   public static function is_cli(): bool
   {
     if (!isset(self::$_cli)) {
       self::$_cli = (php_sapi_name() === 'cli');
     }
+
     return self::$_cli;
   }
+
 
   /**
    * Returns a dump of the given variable.
@@ -693,7 +776,7 @@ class x
   public static function get_dump(): string
   {
     $args = \func_get_args();
-    $st = '';
+    $st   = '';
     foreach ($args as $a) {
       $r = $a;
       if (\is_null($a)) {
@@ -738,10 +821,13 @@ class x
       elseif (str::is_buid($a)) {
         $r = '0x'.bin2hex($a);
       }
+
       $st .= $r.PHP_EOL;
     }
+
     return PHP_EOL.$st;
   }
+
 
   /**
    * Returns an HTML dump of the given variable.
@@ -753,6 +839,7 @@ class x
   {
     return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::get_dump(...\func_get_args()))), false);
   }
+
 
   /**
    * Dumps the given variable.
@@ -766,6 +853,7 @@ class x
     echo self::get_dump(...\func_get_args());
   }
 
+
   /**
    * Dumps the given variable in HTML.
    *
@@ -777,6 +865,7 @@ class x
     echo self::get_hdump(...\func_get_args());
   }
 
+
   /**
    * Adaptative dump, i.e. dunps in text if CLI, HTML otherwise.
    *
@@ -787,6 +876,7 @@ class x
   {
     self::is_cli() ? self::dump(...\func_get_args()) : self::hdump(...\func_get_args());
   }
+
 
   /**
    * Returns the HTML code for creating the &lt;option&gt; tag(s) based on an array.
@@ -803,8 +893,8 @@ class x
    * // string "<option  value="">Who?</option><option  value="3">Allison</option><option  value="4">Mike</option><option  value="5"  selected="selected">Andrew</option>"
    * ```
    *
-   * @param array $values The source array for the options
-   * @param mixed $selected The selected value
+   * @param array   $values      The source array for the options
+   * @param mixed   $selected    The selected value
    * @param boolean $empty_label A label for empty value
    * @return string The HTML code.
    */
@@ -814,11 +904,11 @@ class x
     if ($empty_label !== false) {
       $r .= '<option value="">'.$empty_label.'</option>';
     }
+
     $is_assoc = self::is_assoc($values);
     foreach ($values as $k => $v)
     {
-      if (\is_array($v) && \count($v) == 2)
-      {
+      if (\is_array($v) && \count($v) == 2) {
         $value = $v[0];
         $title = $v[1];
       }
@@ -829,15 +919,19 @@ class x
       else {
         $value = $title = $v;
       }
+
       if (isset($value,$title)) {
         $r .= '<option value="'.$value.'"'.
           ($value == $selected ? ' selected="selected"' : '').
           '>'.$title.'</option>';
       }
+
       unset($value,$title);
     }
+
     return $r;
   }
+
 
   /**
    * Converts a numeric array into an associative one, alternating key and value.
@@ -847,8 +941,8 @@ class x
    * // string ['Test' => 'TestFile', 'Example' => 'ExampleFile']
    * ```
    *
-   * @param array $arr The array. It must contain an even number of values
-   * @param bool $protected If false no index protection will be performed
+   * @param array $arr       The array. It must contain an even number of values
+   * @param bool  $protected If false no index protection will be performed
    * @return array
    */
   public static function to_keypair(array $arr, bool $protected = true): array
@@ -861,12 +955,15 @@ class x
         if (!\is_string($arr[$i]) || (!$protected && !preg_match('/[0-9A-z\-_]+/8', str::cast($arr[$i])))) {
           return false;
         }
-        $res[$arr[$i]] = $arr[$i+1];
-        $i += 2;
+
+        $res[$arr[$i]] = $arr[$i + 1];
+        $i            += 2;
       }
     }
+
     return $res;
   }
+
 
   /**
    * Returns the maximum value of a given property from a 2 dimensions array.
@@ -883,7 +980,7 @@ class x
    * // int  45
    * ```
    *
-   * @param array $ar A multidimensional array
+   * @param array  $ar  A multidimensional array
    * @param string $key Where to check the property value from
    * @return mixed
    */
@@ -892,6 +989,7 @@ class x
     if (\count($ar) == 0) {
       return null;
     }
+
     $max = current($ar)[$key];
     foreach ($ar as $a) {
       if (is_float($a[$key]) || is_float($max)) {
@@ -903,8 +1001,10 @@ class x
         $max = $a[$key];
       }
     }
+
     return $max;
   }
+
 
   /**
    * Returns the minimum value of an index from a multidimensional array.
@@ -920,8 +1020,8 @@ class x
    * // int  1
    * ```
    *
-   * @param array $array A multidimensional array.
-   * @param string $key The index where to search.
+   * @param array  $array A multidimensional array.
+   * @param string $key   The index where to search.
    * @return mixed value
    */
   public static function min_with_key(array $array, $key)
@@ -929,14 +1029,17 @@ class x
     if (\count($array) == 0) {
       return null;
     }
+
     $min = $array[0][$key];
     foreach($array as $a) {
       if($a[$key] < $min) {
         $min = $a[$key];
       }
     }
+
     return $min;
   }
+
 
   /**
    * Gets the backtrace and dumps or logs it into a file.
@@ -949,12 +1052,15 @@ class x
    */
   public static function debug($file='')
   {
-    $debug = array_map(function($a) {
-      if (isset($a['object'])) {
-        unset($a['object']);
-      }
-      return $a;
-    }, debug_backtrace());
+    $debug = array_map(
+      function ($a) {
+        if (isset($a['object'])) {
+          unset($a['object']);
+        }
+
+        return $a;
+      }, debug_backtrace()
+    );
     if (empty($file)) {
       self::hdump($debug);
     }
@@ -962,6 +1068,7 @@ class x
       self::log($debug, $file);
     }
   }
+
 
   /**
    * Applies the given function at all levels of a multidimensional array (if defined param $item).
@@ -1030,16 +1137,17 @@ class x
    *          ]
    *
    * ```
-   * @param callable $fn The function to be applied to the items of the array
-   * @param array $ar
+   * @param callable    $fn    The function to be applied to the items of the array
+   * @param array       $ar
    * @param string|null $items If null the function will be applied just to the item of the parent array
    * @return array
    */
-  public static function map(callable $fn, array $ar, string $items = null) {
+  public static function map(callable $fn, array $ar, string $items = null): array
+  {
     $res = [];
     foreach ($ar as $key => $a) {
       $is_false = $a === false;
-      $r = $fn($a, $key);
+      $r        = $fn($a, $key);
       if ($is_false) {
         $res[] = $r;
       }
@@ -1047,11 +1155,14 @@ class x
         if (\is_array($r) && $items && isset($r[$items]) && \is_array($r[$items])) {
           $r[$items] = self::map($fn, $r[$items], $items);
         }
+
         $res[] = $r;
       }
     }
+
     return $res;
   }
+
 
   /**
    * Returns the array's first index, which satisfies the 'where' condition.
@@ -1095,7 +1206,7 @@ class x
    * // int 1
    * ```
    *
-   * @param array $ar The search within the array
+   * @param array $ar    The search within the array
    * @param array $where The where condition
    * @return bool|int
    */
@@ -1106,27 +1217,30 @@ class x
       foreach ($ar as $i => $v) {
         if (!$from || ($i >= $from)) {
           $ok = 1;
-          $v = (array)$v;
+          $v  = (array)$v;
           foreach ($where as $k => $w) {
             if (!array_key_exists($k, $v) || ($v[$k] !== $w)) {
               $ok = false;
               break;
             }
           }
+
           if ($ok) {
             return $i;
           }
         }
       }
     }
+
     return null;
   }
+
 
   public static function filter(array $ar, array $where): array
   {
     $res = [];
     $num = count($ar);
-    $i = 0;
+    $i   = 0;
     while ($i < $num) {
       $idx = self::find($ar, $where, $i);
       if ($idx === null) {
@@ -1134,28 +1248,33 @@ class x
       }
       else{
         $res[] = $ar[$idx];
-        $i = $idx + 1;
+        $i     = $idx + 1;
       }
     }
+
     return $res;
   }
+
 
   public static function get_rows(array $ar, array $where): array
   {
     return self::filter($ar, $where);
   }
 
+
   public static function sum(array $ar, string $field, array $where = null): float
   {
     $tot = 0;
     if ($res = $where ? self::filter($ar, $where) : $ar) {
       foreach ($res as $r) {
-        $r = (array)$r;
+        $r    = (array)$r;
         $tot += (float)($r[$field]);
       }
     }
+
     return $tot;
   }
+
 
   /**
    * Returns the first row of an array to satisfy the where parameters ({@link find()).
@@ -1181,18 +1300,20 @@ class x
    * // array [ "id" => 2, "name" => "Albert", "fname" => "Taylor", ]
    * ```
    *
-   * @param array $r The array
+   * @param array $r     The array
    * @param array $where The where condition
    * @return bool|mixed
    *
    */
-  public static function get_row(array $r, array $where)
+  public static function get_row(array $r, array $where): ?array
   {
     if (($res = self::find($r, $where)) !== null) {
       return $r[$res];
     }
+
     return null;
   }
+
 
   /**
    * Returns the first value of a specific field of an array.
@@ -1218,8 +1339,8 @@ class x
    * // int 2
    * ```
    *
-   * @param array $r The array
-   * @param array $where The where condition
+   * @param array  $r     The array
+   * @param array  $where The where condition
    * @param string $field The field where to look for
    * @return bool|mixed
    */
@@ -1228,8 +1349,10 @@ class x
     if (($res = self::get_row($r, $where)) && isset($res[$field])) {
       return $res[$field];
     }
+
     return false;
   }
+
 
   /**
    * Returns a reference to a subarray targeted by an array $keys.
@@ -1252,11 +1375,12 @@ class x
    * x::hdump(x::pick($ar,['session', 'user', 'profile', 'admin']));
    * // ["email"  =>  "test@test.com",]
    * ```
-   * @param array $ar The array
+   * @param array $ar   The array
    * @param array $keys The array's keys
    * @return array|mixed
    */
-  public static function pick(array $ar, array $keys) {
+  public static function pick(array $ar, array $keys)
+  {
     while (\count($keys)) {
       $r = array_shift($keys);
       if (isset($ar[$r])) {
@@ -1267,6 +1391,7 @@ class x
       }
     }
   }
+
 
   /**
    * Sorts the items of an array.
@@ -1281,6 +1406,7 @@ class x
    * @param $ar array The reference of the array to sort
    * @return void
    */
+
 
   public static function sort(array &$ar, bool $backward = false)
   {
@@ -1310,7 +1436,11 @@ class x
    * Sorts the items of an indexed array based on a given $key.
    *
    * ```php
-   *  $v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];
+   *  $v = [
+   *    ['age'=>10, 'name'=>'thomas'],
+   *    ['age'=>22, 'name'=>'John'],
+   *    ['age'=>37, 'name'=>'Michael']
+   *  ];
    *  x::sort_by($v,'name','desc');
    *  x::hdump($v);
    *  x::sort_by($v,'name','asc');
@@ -1321,12 +1451,12 @@ class x
    *  x::hdump($v);
    * ```
    *
-   * @param array $ar The array of data to sort
-   * @param string|int $key The key to sort by
-   * @param string $dir The direction of the sort ('asc'|'desc')
+   * @param array            $ar  The array of data to sort
+   * @param string|int|array $key The key to sort by
+   * @param string           $dir The direction of the sort ('asc'|'desc')
    * @return void
    */
-  public static function sort_by(array &$ar, string $key, string $dir = '')
+  public static function sort_by(array &$ar, $key, $dir = ''): array
   {
     $args = \func_get_args();
     array_shift($args);
@@ -1352,8 +1482,8 @@ class x
           $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
           $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
           if (!str::is_number($v1, $v2)) {
-            $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
-            $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
+            $a1  = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
+            $a2  = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
             $cmp = strcmp($a1, $a2);
             if (!empty($cmp)) {
               return $cmp;
@@ -1371,6 +1501,7 @@ class x
         return 0;
       }
     );
+    return $ar;
   }
 
 
@@ -1388,6 +1519,7 @@ class x
     return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
   }
 
+
   /**
    * Makes a Curl call towards a URL and returns the result as a string.
    *
@@ -1396,45 +1528,64 @@ class x
    *  $param = ['t'=>'la vita è bella'];
    *  x::hdump(x::curl($url,$param, ['POST' => false]));
    *
-   * // object {"Title":"La  vita  è  bella","Year":"1943","Rated":"N/A","Released":"26  May  1943","Runtime":"76  min","Genre":"Comedy","Director":"Carlo  Ludovico  Bragaglia","Writer":"Carlo  Ludovico  Bragaglia  (story  and  screenplay)","Actors":"Alberto  Rabagliati,  María  Mercader,  Anna  Magnani,  Carlo  Campanini","Plot":"N/A","Language":"Italian","Country":"Italy","Awards":"N/A","Poster":"http://ia.media-imdb.com/images/M/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg","Metascore":"N/A","imdbRating":"7.9","imdbVotes":"50","imdbID":"tt0036502","Type":"movie","Response":"True"}
+   * // object {
+   * //   "Title":"La  vita  è  bella",
+   * //   "Year":"1943",
+   * //   "Rated":"N/A",
+   * //   "Released":"26  May  1943",
+   * //   "Runtime":"76  min",
+   * //   "Genre":"Comedy"
+   * //   "imdbRating":"7.9",
+   * //   "imdbVotes":"50",
+   * //   "imdbID":"tt0036502",
+   * //   "Type":"movie",
+   * //   "Response":"True"
+   * // }
    * ```
    *
    * @param string $url
-   * @param array $param
-   * @param array $options
+   * @param array  $param
+   * @param array  $options
    * @return mixed
    */
   public static function curl(string $url, $param = null, array $options = ['post' => 1])
   {
-    $ch = curl_init();
+    $ch               = curl_init();
     self::$_last_curl = $ch;
-    $defined = array_map('strtolower', array_keys($options));
+    $defined          = array_map('strtolower', array_keys($options));
     if (!in_array('returntransfer', $defined)) {
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     }
+
     if (\is_object($param)) {
       $param = self::to_array($param);
     }
+
     if (\defined('BBN_IS_SSL') && \defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV) {
       if (!in_array('ssl_verifypeer', $defined)) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
       }
+
       if (!in_array('ssl_verifyhost', $defined)) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
       }
+
       //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
     }
+
     $options = array_change_key_case($options, CASE_UPPER);
     foreach ($options as $opt => $val) {
       if (\defined('CURLOPT_'.$opt)) {
         curl_setopt($ch, constant('CURLOPT_'.$opt), $val);
       }
     }
+
     if ($param) {
       if (!empty($options['POST'])) {
         if (!in_array('url', $defined)) {
           curl_setopt($ch, CURLOPT_URL, $url);
         }
+
         if (!in_array('postfields', $defined)) {
           curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
         }
@@ -1444,8 +1595,9 @@ class x
         if (!in_array('url', $defined)) {
           curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
         }
+
         if (!in_array('customrequest', $defined)) {
-          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');        
+          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
       }
       elseif (!in_array('url', $defined)) {
@@ -1456,24 +1608,30 @@ class x
       if (!in_array('url', $defined)) {
         curl_setopt($ch, CURLOPT_URL, $url);
       }
+
       if (!empty($options['DELETE']) && !in_array('customrequest', $defined)) {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
       }
     }
+
     $r = curl_exec($ch);
     if (!$r) {
       self::log(["PROBLEME AVEC L'URL $url", curl_error($ch), curl_getinfo($ch)], 'curl');
     }
+
     return $r;
   }
+
 
   public static function last_curl_error()
   {
     if (self::$_last_curl) {
       return curl_error(self::$_last_curl);
     }
+
     return null;
   }
+
 
   public static function last_curl_code()
   {
@@ -1483,16 +1641,20 @@ class x
         return $infos['http_code'];
       }
     }
+
     return null;
   }
+
 
   public static function last_curl_info()
   {
     if (self::$_last_curl) {
       return curl_getinfo(self::$_last_curl);
     }
+
     return null;
   }
+
 
   /**
    * Returns the given array or object as a tree structure ready for a JS tree.
@@ -1514,6 +1676,7 @@ class x
       if (\is_object($a)) {
         $a = self::to_array($a);
       }
+
       if (\is_array($a)) {
         $r['items'] = self::get_tree($a);
       }
@@ -1529,10 +1692,13 @@ class x
       else {
         $r['text'] .= ': '.(string)$a;
       }
+
       array_push($res, $r);
     }
+
     return $res;
   }
+
 
   /**
    * Returns a view of an array or object as a JS tree.
@@ -1583,6 +1749,7 @@ class x
     return "<bbn-tree :source='".\bbn\str::escape_squotes(json_encode(self::get_tree($ar)))."'></bbn-tree>";
   }
 
+
   /**
    * Formats a CSV line(s) and returns it as an array.
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
@@ -1595,21 +1762,23 @@ class x
    * // [ [ "141", "10/11/2002", "350.00", "1311742251", ], [ "142", "12/12/2002", "349.00", "1311742258", ], ]
    * ```
    *
-   * @param $st The Csv string to format
-   * @param string $delimiter
-   * @param string $enclosure
-   * @param string $separator
+   * @param string $st  The Csv string to format
+   * @param string $del Deimiter
+   * @param string $enc Enclosure
+   * @param string $sep Separator
    * @return array
    */
-  public static function from_csv(string $st, $delimiter = ',', $enclosure = '"', $separator = PHP_EOL): array
+  public static function from_csv(string $st, $del = ',', $enc = '"', $sep = PHP_EOL): array
   {
-    $r = [];
-    $lines = explode($separator, $st);
+    $r     = [];
+    $lines = explode($sep, $st);
     foreach ($lines as $line) {
-      array_push($r, str_getcsv($line, $delimiter, $enclosure));
+      $r[] = str_getcsv($line, $del, $enc);
     }
+
     return $r;
   }
+
 
   /**
    * Formats an array as a CSV string.
@@ -1617,18 +1786,19 @@ class x
    *
    * ```php
    * x::dump(x::to_csv([["John", "Mike", "David", "Clara"],["White", "Red", "Green", "Blue"]]));
-   * /* string  John;Mike;David;Clara
-   *            White;Red;Green;Blue
+   * // John;Mike;David;Clara
+   * // White;Red;Green;Blue
    * ```
    *
-   * @param array $data The array to format
+   * @param array  $data            The array to format
    * @param string $delimiter
    * @param string $enclosure
    * @param string $separator
-   * @param bool $encloseAll
-   * @param bool $nullToMysqlNull
+   * @param bool   $encloseAll
+   * @param bool   $nullToMysqlNull
    * @return string
    */
+
 
   public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false): string
   {
@@ -1652,17 +1822,20 @@ class x
           $output[] = $field;
         }
       }
+
       $lines[] = implode($delimiter, $output);
     }
+
     return self::join($lines, $separator);
   }
+
 
   /**
    * Checks if two files are the same.
    *
    * @param string $file1
    * @param string $file2
-   * @param bool $strict
+   * @param bool   $strict
    * @return bool
    */
   public static function is_same(string $file1, string $file2, $strict = false): bool
@@ -1675,9 +1848,11 @@ class x
       if (!$strict || !$same) {
         return $same;
       }
+
       return filemtime($file1) === filemtime($file2);
     }
   }
+
 
   public static function retrieve_array_var(array $props, array &$ar)
   {
@@ -1690,8 +1865,10 @@ class x
         throw new \Exception("Impossible to find the value in the array");
       }
     }
+
     return $cur;
   }
+
 
   public static function retrieve_object_var(array $props, object &$obj)
   {
@@ -1704,9 +1881,10 @@ class x
         throw new \Exception("Impossible to find the value in the object");
       }
     }
+
     return $cur;
   }
-  
+
 
   /**
   * Counts the properties of an object.
@@ -1719,22 +1897,23 @@ class x
     return \count(get_object_vars($obj));
   }
 
+
   /**
   * Creates an Excel file from a given array.
   *
-  * @param array $array The array to export
-  * @param string $file The file path
-  * @param bool $with_titles Set it to false if you don't want the columns titles. Default true
+  * @param array  $array       The array to export
+  * @param string $file        The file path
+  * @param bool   $with_titles Set it to false if you don't want the columns titles. Default true
   * @return bool
   */
   public static function to_excel(array $data, string $file, bool $with_titles = true, array $cfg = []): bool
   {
-    $excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $excel->getActiveSheet();
-    $ow = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
+    $excel    = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet    = $excel->getActiveSheet();
+    $ow       = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
     $can_save = false;
     if (empty($cfg)) {
-      $todo = [];
+      $todo    = [];
       $checked = false;
       foreach ($data as $d) {
         if (!$checked && self::is_assoc($d)) {
@@ -1745,40 +1924,37 @@ class x
               $line1[] = $k;
               $line2[] = '';
             }
+
             $todo[] = $line1;
             $todo[] = $line2;
           }
+
           $checked = true;
         }
+
         $todo[] = array_values($d);
       }
+
       if (count($todo)) {
-        $sheet->fromArray($todo, NULL, 'A1');
-        $excel
-          ->getDefaultStyle()
-          ->getNumberFormat()
-          ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        $sheet->fromArray($todo, null, 'A1');
+        $excel->getDefaultStyle()->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
         $can_save = true;
       }
     }
     else {
       foreach ($cfg['fields'] as $i => $field) {
         // Get cell object
-        $cell = $sheet->getCellByColumnAndRow($i+1, 1);
+        $cell = $sheet->getCellByColumnAndRow($i + 1, 1);
         // Get colum name
         $col_idx = $cell->getColumn();
         // Set auto width to the column
-        $sheet
-          ->getColumnDimension($col_idx)
-          ->setAutoSize(true);
+        $sheet->getColumnDimension($col_idx)->setAutoSize(true);
         // Cell style object
         $style = $sheet->getStyle("$col_idx:$col_idx");
         // Get number format object
         $format = $style->getNumberFormat();
         // Set the vertical alignment to center
-        $style
-          ->getAlignment()
-          ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+        $style->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
         // Set the correct data type
         switch ($field['type']) {
           case 'integer':
@@ -1814,11 +1990,10 @@ class x
             // Set code's format to text
             $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
             // Set wrap text
-            $style
-              ->getAlignment()
-              ->setWrapText(true);
+            $style->getAlignment()->setWrapText(true);
             break;
         }
+
         if ($with_titles) {
           //$cell = $sheet->getCellByColumnAndRow($i+1, 1);
           $style = $cell->getStyle();
@@ -1832,56 +2007,56 @@ class x
           $cell->setValue($field['title'] ?? $field['field']);
         }
       }
-      if (
-        isset($cfg['map'], $cfg['map']['callable']) &&
-        is_callable($cfg['map']['callable'])
-     ) {
+
+      if (isset($cfg['map'], $cfg['map']['callable'])
+          && is_callable($cfg['map']['callable'])
+      ) {
         array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
       }
-      $sheet->fromArray($data, NULL, 'A' . ($with_titles ? '2' : '1'));
+
+      $sheet->fromArray($data, null, 'A' . ($with_titles ? '2' : '1'));
       $can_save = true;
     }
-    if (
-      $can_save &&
-      \bbn\file\dir::create_path(dirname($file))
-   ) {
+
+    if ($can_save
+        && \bbn\file\dir::create_path(dirname($file))
+    ) {
       $ow->save($file);
       return \is_file($file);
     }
+
     return false;
   }
 
+
   /**
   * Makes a UID.
-  * 
+  *
   * @param bool $binary Set it to true if you want a binary UID
   * @param bool $hypens Set it to true if you want hypens to seperate the UID
   * @return string|bynary
   */
   public static function make_uid($binary = false, $hyphens = false): string
   {
-    $tmp = sprintf($hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',
-
+    $tmp = sprintf(
+      $hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',
       // 32 bits for "time_low"
       mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-
       // 16 bits for "time_mid"
       mt_rand(0, 0xffff),
-
       // 16 bits for "time_hi_and_version",
       // four most significant bits holds version number 4
       mt_rand(0, 0x0fff) | 0x4000,
-
       // 16 bits, 8 bits for "clk_seq_hi_res",
       // 8 bits for "clk_seq_low",
       // two most significant bits holds zero and one for variant DCE1.1
       mt_rand(0, 0x3fff) | 0x8000,
-
       // 48 bits for "node"
       mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-   );
+    );
     return $binary ? hex2bin($tmp) : $tmp;
   }
+
 
   /**
   * Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.
@@ -1898,23 +2073,25 @@ class x
     elseif (\bbn\str::is_uid($st)) {
       $st = bin2hex($st);
     }
+
     return $st;
   }
+
 
   /**
   * Compares two float numbers with the given operator.
   *
-  * @param float $v1
-  * @param float $v2
-  * @param string $operator
-  * @param int $precision
+  * @param float  $v1 Value 1
+  * @param float  $v2 Value 2
+  * @param string $op Operator
+  * @param int    $pr Precision
   * @return boolean
   */
-  public static function compare_floats($v1, $v2, string $operator = '===', int $precision = 4): bool
+  public static function compare_floats($v1, $v2, string $op = '===', int $pr = 4): bool
   {
-    $v1 = round((float)$v1 * pow(10, $precision));
-    $v2 = round((float)$v2 * pow(10, $precision));
-    switch ($operator) {
+    $v1 = round((float)$v1 * pow(10, $pr));
+    $v2 = round((float)$v2 * pow(10, $pr));
+    switch ($op) {
       case '===':
         return $v1 === $v2;
       case '==':
@@ -1928,13 +2105,15 @@ class x
       case '<':
         return $v1 < $v2;
     }
+
     return false;
   }
+
 
   /**
   * Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).
   *
-  * @param array $arr
+  * @param array   $arr
   * @param boolean $json
   * @return string|array
   */
@@ -1952,14 +2131,16 @@ class x
         $res[$i] = $a;
       }
     }
+
     return $json ? json_encode($res) : $res;
   }
 
+
   /**
   * Decodes the base64 array's values. You can also give a JSON string of an array.
-  * 
+  *
   * @param string|array $st
-  * @result array 
+  * @result array
   */
   public static function json_base64_decode($st): ?array
   {
@@ -1976,10 +2157,13 @@ class x
           $res[$i] = $a;
         }
       }
+
       return $res;
     }
+
     return null;
   }
+
 
   /**
   * Creates an associative array based on the first array's value.
@@ -1991,32 +2175,38 @@ class x
     if (empty($ar) || !isset($ar[0]) || !\count($ar[0])) {
       return $ar;
     }
-    $cols = array_keys($ar[0]);
-    $idx = array_shift($cols);
+
+    $cols     = array_keys($ar[0]);
+    $idx      = array_shift($cols);
     $num_cols = \count($cols);
-    $res = [];
+    $res      = [];
     foreach ($ar as $d) {
       $index = $d[$idx];
       unset($d[$idx]);
       $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
     }
+
     return $res;
   }
+
 
   public static function join(array $ar, string $glue = ''): string
   {
     return implode($glue, $ar);
   }
 
+
   public static function concat(string $st, string $separator): array
   {
     return explode($separator, $st);
   }
 
+
   public static function split(string $st, string $separator): array
   {
     return explode($separator, $st);
   }
+
 
   /**
    * Searches from start to end
@@ -2039,8 +2229,10 @@ class x
     elseif (is_string($subject)) {
       $res = strpos($subject, $search, $start);
     }
+
     return $res === false ? -1 : $res;
   }
+
 
   /**
    * Searches from end to start
@@ -2055,6 +2247,7 @@ class x
           if ($start > $i) {
             return -1;
           }
+
           $i = $start;
         }
         elseif ($start < 0) {
@@ -2063,6 +2256,7 @@ class x
             return -1;
           }
         }
+
         foreach ($subject as $s) {
           if (($i <= $start) && ($s === $search)) {
             $res = $i;
@@ -2078,10 +2272,13 @@ class x
       if ($start > 0) {
         $start = strlen($subject) - (strlen($subject) - $start);
       }
+
       $res = strrpos($subject, $search, $start);
     }
+
     return $res === false ? -1 : $res;
   }
+
 
   public static function output()
   {
@@ -2105,15 +2302,18 @@ class x
       else {
         $st = $a;
       }
+
       if ($st) {
         $wrote = true;
         echo $st.PHP_EOL;
       }
     }
+
     if ($wrote) {
       //ob_end_flush();
     }
   }
+
 
   public static function __callStatic($name, $arguments)
   {
@@ -2125,7 +2325,10 @@ class x
           return $res;
         }
       }
+
       return $res;
     }
   }
+
+
 }

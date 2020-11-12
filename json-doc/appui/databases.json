@@ -3028,9 +3028,9 @@
     },
     "properties": null,
     "staticProperties": {
-        "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "optional_is_init": true,
+        "option_root_id": "0e225207025011e8beb3005056014c9f",
+        "option_appui_id": "0e225207025011e8beb3005056014c9f"
     },
     "constants": null,
     "numMethods": 67,
@@ -3050,9 +3050,9 @@
     "parentClass": "bbn\\models\\cls\\cache",
     "isSubclassOf": false,
     "defaultProperties": {
-        "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null,
+        "optional_is_init": true,
+        "option_root_id": "0e225207025011e8beb3005056014c9f",
+        "option_appui_id": "0e225207025011e8beb3005056014c9f",
         "o": null,
         "pw": null,
         "db_alt": null,
