@@ -14493,7 +14493,7 @@
         "value": "db",
         "text": "db",
         "url": "bbn-php\/doc\/class\/db",
-        "desc": "",
+        "desc": "Half ORM half DB management, the simplest class for data queries.",
         "items": [
             {
                 "type": "method",
@@ -14509,7 +14509,7 @@
                 "text": "__toString",
                 "value": "__toString",
                 "url": "bbn-php\/doc\/method\/db\/__toString",
-                "desc": ""
+                "desc": "Makes that echoing the connection shows its engin and host."
             },
             {
                 "type": "method",
@@ -14957,7 +14957,7 @@
                 "text": "get_current",
                 "value": "get_current",
                 "url": "bbn-php\/doc\/method\/db\/get_current",
-                "desc": ""
+                "desc": "Returns the current database selected by the current connection."
             },
             {
                 "type": "method",
@@ -14989,7 +14989,7 @@
                 "text": "get_engine",
                 "value": "get_engine",
                 "url": "bbn-php\/doc\/method\/db\/get_engine",
-                "desc": ""
+                "desc": "Returns the engine used by the current connection."
             },
             {
                 "type": "method",
@@ -15053,7 +15053,7 @@
                 "text": "get_host",
                 "value": "get_host",
                 "url": "bbn-php\/doc\/method\/db\/get_host",
-                "desc": ""
+                "desc": "Returns the host of the current connection."
             },
             {
                 "type": "method",
@@ -15117,7 +15117,7 @@
                 "text": "get_last_error",
                 "value": "get_last_error",
                 "url": "bbn-php\/doc\/method\/db\/get_last_error",
-                "desc": ""
+                "desc": "Returns the last error."
             },
             {
                 "type": "method",
@@ -15149,7 +15149,7 @@
                 "text": "get_log_line",
                 "value": "get_log_line",
                 "url": "bbn-php\/doc\/method\/db\/get_log_line",
-                "desc": ""
+                "desc": "Returns a string with the given text in the middle of a \"line\" of logs."
             },
             {
                 "type": "method",

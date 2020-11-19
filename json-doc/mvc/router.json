@@ -1392,19 +1392,6 @@
                         "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/public\/_ctrl.php",
                         "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
                     ]
-                },
-                "cdn\/publishing\/home": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
-                    "path": "cdn\/publishing\/home",
-                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/",
-                    "request": "cdn\/publishing",
-                    "mode": "public",
-                    "plugin": "cdn",
-                    "args": [],
-                    "checkers": [
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
-                    ]
                 }
             },
             "private": [],
@@ -1504,19 +1491,6 @@
                     "path": "cdn\/publishing\/gen-php",
                     "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/",
                     "request": "cdn\/publishing\/gen-php",
-                    "mode": "public",
-                    "plugin": "cdn",
-                    "args": [],
-                    "checkers": [
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
-                    ]
-                },
-                "cdn\/publishing\/home": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
-                    "path": "cdn\/publishing\/home",
-                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/",
-                    "request": "cdn\/publishing",
                     "mode": "public",
                     "plugin": "cdn",
                     "args": [],
