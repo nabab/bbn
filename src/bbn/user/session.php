@@ -3,7 +3,9 @@
  * @package user
  */
 namespace bbn\user;
+
 use bbn;
+
 /**
  * A session management object for asynchronous PHP tasks
  *
@@ -17,31 +19,26 @@ use bbn;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if (!defined('BBN_FINGERPRINT')) {
-  die('define BBN_FINGERPRINT');
-}
-if (!defined('BBN_APP_NAME')) {
-  die('define BBN_APP_NAME');
-}
-if (defined('BBN_SESS_LIFETIME')  && (session_status() === PHP_SESSION_NONE)) {
-  ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
-}
 
+if (!defined('BBN_APP_NAME')) {
+  define('BBN_APP_NAME', 'bbn-app');
+}
 
 class session
 {
   use bbn\models\tts\singleton;
 
-  private static
-    /** @var string */
-    $fingerprint = BBN_FINGERPRINT,
-    $name = BBN_APP_NAME;
+  /** @var string */
+  protected static $name = BBN_APP_NAME;
 
   protected $was_opened = false;
+
+  protected $once_opened = false;
 
   protected $data;
 
   protected $id;
+
 
   public function __construct(array $defaults = null)
   {
@@ -55,71 +52,73 @@ class session
 
       if ($id = session_id()) {
         $this->was_opened = true;
+        $this->once_opened = true;
       }
+
       $this->open();
       if ($this->id = session_id()) {
-        if (!isset($_SESSION[self::$name])){
+        if (!isset($_SESSION[self::$name])) {
           $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
         }
+
         $this->data = $_SESSION[self::$name];
         $this->close();
       }
     }
   }
 
-  protected function open(){
-    if (!$this->was_opened && !$this->is_opened()) {
-      session_start();
-    }
-    return $this;
-  }
-
-  protected function close(){
-    if ( !$this->was_opened && session_id() != '' ){
-      session_write_close();
-    }
-    return $this;
-  }
 
   public function is_opened(): bool
   {
     return session_status() !== PHP_SESSION_NONE;
   }
 
-  public function get(){
-    if ( $this->id ){
+
+  public function get()
+  {
+    if ($this->id) {
       return $this->_get_value(\func_get_args());
     }
   }
 
-  public function fetch($arg=null){
-    if ( $this->id ){
+
+  public function fetch($arg=null)
+  {
+    if ($this->id) {
       $this->open();
       $this->data = $_SESSION[self::$name];
       $this->close();
-      if ( \is_null($arg) ){
+      if (\is_null($arg)) {
         return $this->data;
       }
+
       return $this->_get_value(\func_get_args());
     }
   }
 
-  public function has(){
+
+  public function has()
+  {
     return !\is_null($this->_get_value(\func_get_args()));
   }
 
-  public function set($val){
-    if ( $this->id ){
+
+  public function set($val)
+  {
+    if ($this->id) {
       $this->_set_value(\func_get_args());
       $this->open();
       $_SESSION[self::$name] = $this->data;
       $this->close();
     }
+
     return $this;
   }
 
-  public function uset($val){
-    if ( $this->id ){
+
+  public function uset($val)
+  {
+    if ($this->id) {
       $args = \func_get_args();
       array_unshift($args, null);
       $this->_set_value($args);
@@ -127,11 +126,14 @@ class session
       $_SESSION[self::$name] = $this->data;
       $this->close();
     }
+
     return $this;
   }
 
-  public function transform(callable $fn){
-    if ( $this->id ){
+
+  public function transform(callable $fn)
+  {
+    if ($this->id) {
       $args = \func_get_args();
       array_shift($args);
       $transformed = \call_user_func($fn, $this->_get_value($args));
@@ -141,95 +143,147 @@ class session
       $_SESSION[self::$name] = $this->data;
       $this->close();
     }
+
     return $this;
   }
 
-  public function work(callable $fn){
+
+  public function work(callable $fn)
+  {
     return $this->transform(...\func_get_args());
   }
 
 
-  public function push($value){
-    if ( $this->id ){
+  public function push($value)
+  {
+    if ($this->id) {
       $args = \func_get_args();
       array_shift($args);
       $var = $this->get(...$args);
-      if ( !\is_array($var) ){
+      if (!\is_array($var)) {
         $var = [];
       }
-      if ( !\in_array($value, $var) ){
+
+      if (!\in_array($value, $var)) {
         array_push($var, $value);
         array_unshift($args, $var);
         $this->set(...$args);
       }
+
       return $this;
     }
   }
 
-  public function destroy(){
-    if ( $this->id ){
+
+  public function destroy()
+  {
+    if ($this->id) {
       $this->open();
       $args = \func_get_args();
-      $var =& $_SESSION[self::$name];
+      $var  =& $_SESSION[self::$name];
       $var2 =& $var;
-      foreach ( $args as $i => $a ){
-        if ( !\is_array($var) ){
+      foreach ($args as $i => $a){
+        if (!\is_array($var)) {
           $var = [];
         }
-        if ( !isset($var[$a]) ){
-          if ( \count($args) >= $i ){
+
+        if (!isset($var[$a])) {
+          if (\count($args) >= $i) {
             $var[$a] = [];
           }
           else{
             break;
           }
         }
+
         unset($var2);
         $var2 =& $var[$a];
         unset($var);
         $var =& $var2;
       }
-      $var = null;
+
+      $var        = null;
       $this->data = isset($_SESSION[self::$name]) ? $_SESSION[self::$name] : [];
       $this->close();
       return $this;
     }
   }
 
+
   /**
    * Executes a function on the session or a part of the session
    * @param function $func
    * @return session
    */
-  public function get_id(){
+  public function get_id()
+  {
     return $this->id;
   }
 
-  public function set_data_state($name, $data){
-    if ( $this->id ){
+
+  public function set_data_state($name, $data)
+  {
+    if ($this->id) {
       $this->set(md5(serialize($data)), $name, 'bbn-data-state');
     }
   }
 
-  public function get_data_state( $name){
-    if ( $this->id ){
+
+  public function get_data_state( $name)
+  {
+    if ($this->id) {
       $this->get($name, 'bbn-data-state');
     }
   }
 
-  public function has_data_state($name){
-    if ( $this->id ){
+
+  public function has_data_state($name)
+  {
+    if ($this->id) {
       return $this->get($name, 'bbn-data-state') ? true : false;
     }
+
     return false;
   }
 
-  public function is_data_state($name, $data){
-    if ( $this->id ){
+
+  public function is_data_state($name, $data)
+  {
+    if ($this->id) {
       return $this->get($name, 'bbn-data-state') === md5(serialize($data));
     }
+
     return false;
   }
+
+
+  protected function open()
+  {
+    if (!$this->was_opened && !$this->is_opened()) {
+      if (!$this->once_opened) {
+        $this->once_opened = true;
+
+        if (defined('BBN_SESS_LIFETIME')) {
+          ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
+        }
+      }
+
+      session_start();
+    }
+
+    return $this;
+  }
+
+
+  protected function close()
+  {
+    if (!$this->was_opened && session_id()) {
+      session_write_close();
+    }
+
+    return $this;
+  }
+
 
   /**
    * Gets a reference to the part of the data corresponding to an array of indexes
@@ -241,32 +295,37 @@ class session
    * @param $args
    * @return null
    */
-  private function _get_value($args){
-    if ( $this->id ){
+  private function _get_value($args)
+  {
+    if ($this->id) {
       $var =& $this->data;
-      foreach ( $args as $a ){
-        if ( !isset($var[$a]) ){
+      foreach ($args as $a){
+        if (!isset($var[$a])) {
           return null;
         }
+
         $var =& $var[$a];
       }
+
       return $var;
     }
   }
 
-  private function _set_value($args){
-    if ( $this->id ){
+
+  private function _set_value($args)
+  {
+    if ($this->id) {
       // The value is the first argument
       $value = array_shift($args);
       // Except if it's an array and there is only one argument
-      if ( !count($args) && \is_array($value) && bbn\x::is_assoc($value) ){
+      if (!count($args) && \is_array($value) && bbn\x::is_assoc($value)) {
         $this->data = bbn\x::merge_arrays($this->data, $value);
       }
       else{
         $var =& $this->data;
-        foreach ( $args as $i => $a ){
-          if ( $i === (\count($args) - 1) ){
-            if ( \is_null($value) ){
+        foreach ($args as $i => $a){
+          if ($i === (\count($args) - 1)) {
+            if (\is_null($value)) {
               unset($var[$a]);
             }
             else{
@@ -279,8 +338,11 @@ class session
         }
       }
     }
+
     return $this;
   }
+
+
 }
 /*
 $sess = new bbn\user\session();

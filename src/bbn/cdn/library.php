@@ -15,11 +15,11 @@ use bbn;
 
 /**
  * Library retriever tool.
- * 
- * Allows to create a whole configuratiuon based on libraries names and versions.  
- * 
+ *
+ * Allows to create a whole configuratiuon based on libraries names and versions.
+ *
  * You first create the object with a database connection to the CDN database:
- * 
+ *
  * ```php
  * $db = new \bbn\db([
  *   'engine' => 'sqlite',
@@ -27,9 +27,9 @@ use bbn;
  * ]);
  * $lib = new \bbn\cdn\library($db, 'fr');
  * ```
- * 
+ *
  * It can give you information about the given library:
- * 
+ *
  * ```php
  * $info = $lib->info('moment|2.12.0')
  * // {
@@ -56,16 +56,16 @@ use bbn;
  * //     ],
  * // }
  * ```
- * 
+ *
  * Or you can add all the libraries you want:
- * 
+ *
  * ```php
  * $lib->add('jquery-ui') // jQuery will also be added
  *     ->add('axios', false); // no dependency will be added here
  * ```
- * 
+ *
  * Then get an array of all the files needed to be loaded:
- * 
+ *
  * ```php
  * $cfg = $lib->get_config()
  * // {
@@ -212,14 +212,21 @@ use bbn;
 class library
 {
   use common;
-  
+
   protected $db;
+
   public $libs = [];
+
   public $js = [];
+
   public $css = [];
+
   public $lang = 'en';
+
   public $theme = false;
+
   public $vars = [];
+
 
   /**
    * Constructor.
@@ -237,13 +244,14 @@ class library
    */
   public function __construct(bbn\db $db, $lang = 'en')
   {
-    $this->db = $db;
+    $this->db   = $db;
     $this->lang = $lang;
   }
 
+
   /**
    * Returns all the informations stored about a library.
-   * 
+   *
    * ```php
    * $info = $lib->info('bbn-vue');
    * // {
@@ -302,14 +310,14 @@ class library
   public function info(string $library): ?array
   {
     $params = explode('|', $library);
-    $lib = array_shift($params);
-    $cfg = [
+    $lib    = array_shift($params);
+    $cfg    = [
       'table' => 'libraries',
       'fields' => [
         'libraries.name', 'libraries.fname', 'libraries.title',
         'libraries.latest', 'libraries.website', 'libraries.last_update',
-        'libraries.last_check', 'versions.id', 
-        'versions.content', 'versions.internal', 'libraries.git',
+        'libraries.last_check', 'libraries.git', 'libraries.npm', 'libraries.mode',
+        'versions.id', 'versions.content', 'versions.internal',
         'version' => 'versions.name'
       ],
       'join' => [
@@ -369,6 +377,7 @@ class library
           $info['git'] = null;
         }
       }
+
       // If there are theme files we want to add them to the list of files
       if (!empty($info['content']->theme_files) && isset($info['content']->files)) {
         // Parameters of the library sent through the URL
@@ -377,6 +386,7 @@ class library
         } elseif (isset($info['content']->default_theme)) {
           $ths = [$info['content']->default_theme];
         }
+
         if (!empty($ths)) {
           foreach ($ths as $th) {
             if (!empty($info['content']->theme_prepend)) {
@@ -404,6 +414,7 @@ class library
           }
         }
       }
+
       // Themes
       if (!isset($ths) && isset($info['content']->themes)) {
         if (isset($params[1], $info['content']->themes->$params[1])) {
@@ -411,21 +422,26 @@ class library
         } elseif (isset($info['content']->default_theme)) {
           $info['theme'] = $info['content']->default_theme;
         }
+
         if (isset($info['theme'], $info['content']->themes->{$info['theme']})) {
           if (!is_array($info['content']->themes->{$info['theme']})) {
             $info['content']->themes->$info['theme'] = [$info['content']->themes->$info['theme']];
           }
+
           $info['content']->files = array_merge($info['content']->files, $info['content']->themes->$info['theme']);
         }
       }
+
       return $info;
     }
+
     return null;
   }
-  
+
+
   /**
    * Returns the dependencies from the given library version.
-   * 
+   *
    * ```php
    * $info = $lib->info('bbn-vue');
    * $deps = $lib->get_dependencies($info['version']);
@@ -474,12 +490,14 @@ SQL,
         }
       }
     }
+
     return $res;
   }
 
+
   /**
    * Adds a new library to the config.
-   * 
+   *
    * ```php
    * // @var bbn\cdn\library $lib
    * $lib->add('jquery-ui') // jQuery will be added too
@@ -516,8 +534,9 @@ SQL,
         if ($has_dep) {
           // Adding dependencies
           if (!$info['id']) {
-            die(var_dump($info, $this->db->last()));
+            throw new \Exception(_("Problem adding library").' '.$library);
           }
+
           $dependencies = $this->get_dependencies($info['id']);
           //bbn\x::dump($dependencies, $info);
           if (!empty($dependencies)) {
@@ -531,19 +550,20 @@ SQL,
           $this->libs[$info['name']] = [];
         }
 
-        $path = 'lib/'.$info['name'].'/'.$info['version'].'/';
+        $path                                         = 'lib/'.$info['name'].'/'.$info['version'].'/';
         $this->libs[$info['name']][$info['internal']] = [
           'version' => $info['version'],
           'prepend' => [],
           'git' => $info['git'],
+          'npm' => $info['npm'],
+          'mode' => $info['mode'],
           'name' => $info['name'],
           'path' => $path,
           'files' => []
         ];
-        $files =& $this->libs[$info['name']][$info['internal']]['files'];
-        $prepend =& $this->libs[$info['name']][$info['internal']]['prepend'];
-        
-        
+        $files                                        =& $this->libs[$info['name']][$info['internal']]['files'];
+        $prepend                                      =& $this->libs[$info['name']][$info['internal']]['prepend'];
+
         // From here, adding files (no matter the type) to $this->libs array for each library
         // Adding language files if they must be prepent
         if (($this->lang !== 'en') && isset($info['content']->lang, $info['content']->prepend_lang)) {
@@ -558,24 +578,27 @@ SQL,
             if (isset($this->info['theme']) && strpos($f, '%s')) {
               $f = sprintf($f, $this->info['theme']);
             }
+
             if (isset($info['prepend'][$f])) {
               $prepend[$path.$f] = [];
               foreach ($info['prepend'][$f] as $p) {
                 $prepend[$path.$f][] = $path.$p;
               }
             }
+
             $files[] = $path.$f;
           }
         }
         else {
           die(\bbn\x::dump("Error!", $library, $info, $last));
         }
-        
+
         // Adding language files at the end (default way)
         if (($this->lang !== 'en') && isset($info['content']->lang) && !isset($info['content']->prepend_lang)) {
           if (is_string($info['content']->lang)) {
             $info['content']->lang = [$info['content']->lang];
           }
+
           if (is_array($info['content']->lang)) {
             foreach ($info['content']->lang as $lang) {
               array_push($files, sprintf($path.$lang, $this->lang));
@@ -590,12 +613,14 @@ SQL,
     else {
       die(\bbn\x::dump($library, $this->db->last()));
     }
+
     return $this;
   }
-  
+
+
   /**
    * Creates the configuration and returns it.
-   * 
+   *
    * ```php
    * // @var bbn\cdn\library $lib
    * $lib->add('jquery-ui|latest|black');
@@ -633,11 +658,12 @@ SQL,
     ];
     foreach ($this->libs as $lib_name => $lib) {
       ksort($lib);
-      $lib = current($lib);
-      $res['libraries'][$lib_name] = (string) $lib['version'];
+      $lib                         = current($lib);
+      $res['libraries'][$lib_name] = (string)$lib['version'];
       if (isset($lib['prepend'])) {
         $res['prepend'] = array_merge($res['prepend'], $lib['prepend']);
       }
+
       $inc = $lib;
       foreach ($lib['files'] as $f) {
         $ext = bbn\str::file_ext($f);
@@ -647,6 +673,7 @@ SQL,
               $res[$type] = [];
               $inc[$type] = [];
             }
+
             if (!in_array($f, $res[$type])) {
               $res[$type][] = $f;
               $inc[$type][] = substr($f, strlen($inc['path']));
@@ -654,9 +681,13 @@ SQL,
           }
         }
       }
+
       unset($inc['files']);
       $res['includes'][] = $inc;
     }
+
     return $res;
   }
+
+
 }

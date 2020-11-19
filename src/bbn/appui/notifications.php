@@ -62,69 +62,73 @@ class notifications extends bbn\models\cls\db
     $this->perms = new bbn\user\permissions();
   }
 
-  public function create(string $opt_path, string $title, string $content, bool $perms = true, array $users = []): bool
+  public function create(string $opt_path, string $title, string $content, $perms = true, string $opt_text = '', string $cat_text = '', bool $user_excluded = false): bool
   {
     if ($list_opt = self::get_option_id('list')) {
       $ocfg = $this->opt->get_class_cfg();
       $pcfg = $this->pref->get_class_cfg();
-      $perms = !empty($perms) && defined('BBN_ID_PERMISSION');
+      $users = \is_array($perms) ? $perms : [];
+      $perms = \is_bool($perms) && !empty($perms) && defined('BBN_ID_PERMISSION');
       if (!($id_opt = $this->opt->from_path($opt_path, '/', $list_opt))) {
         $bits = \explode('/', $opt_path);
-        $parent = $list_opt;
-        if ($perms) {
-          $permissions = $this->db->select_all($pcfg['table'], [
-            $pcfg['arch']['user_options']['id_user'],
-            $pcfg['arch']['user_options']['id_group']
-          ], [$pcfg['arch']['user_options']['id_option'] => BBN_ID_PERMISSION]);
-          $is_public = (bool)$this->opt->get_prop(BBN_ID_PERMISSION, 'public');
-          $perm_parent = $this->db->select_one($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$list_opt]);
-        }
-        while (count($bits)) {
-          $code = \array_shift($bits);
-          if (!($p = $this->opt->from_code($code, $parent))) {
-            $p = $this->opt->add([
-              $ocfg['arch']['options']['text'] => $code,
-                $ocfg['arch']['options']['code'] => $code,
-                $ocfg['arch']['options']['id_parent'] => $parent
-            ]);
-          }
+        if (count($bits) === 2) {
           if ($perms) {
-            if (!($pp = $this->opt->from_code($p, $perm_parent))) {
-              $pp = $this->opt->add([
-                $ocfg['arch']['options']['text'] => $code,
-                $ocfg['arch']['options']['code'] => 'opt'.$p,
-                $ocfg['arch']['options']['id_parent'] => $perm_parent,
-                $ocfg['arch']['options']['id_alias'] => $p,
-                'public' => $is_public
+            // Get permissions from the current BBN_ID_PERMISSION value
+            $permissions = $this->db->select_all($pcfg['table'], [
+              $pcfg['arch']['user_options']['id_user'],
+              $pcfg['arch']['user_options']['id_group']
+            ], [$pcfg['arch']['user_options']['id_option'] => BBN_ID_PERMISSION]);
+            $is_public = (bool)$this->opt->get_prop(BBN_ID_PERMISSION, 'public');
+            $perm_parent = $this->db->select_one($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$list_opt]);
+          }
+          $parent = $list_opt;
+          foreach ($bits as $i => $code) {
+            $text = ($i === 0) && !empty($cat_text) ? $cat_text : (($i === 1) && !empty($opt_text) ? $opt_text : $code);
+            if (!($p = $this->opt->from_code($code, $parent))) {
+              $p = $this->opt->add([
+                $ocfg['arch']['options']['text'] => $text,
+                  $ocfg['arch']['options']['code'] => $code,
+                  $ocfg['arch']['options']['id_parent'] => $parent
               ]);
-              if (!$is_public) {
-                foreach ($permissions as $perm) {
-                  $this->db->insert($pcfg['table'], [
-                    $pcfg['arch']['user_options']['id_option'] => $pp,
-                    $pcfg['arch']['user_options']['id_user'] => $perm->{$pcfg['arch']['user_options']['id_user']},
-                    $pcfg['arch']['user_options']['id_group'] => $perm->{$pcfg['arch']['user_options']['id_user']}
-                  ]);
+            }
+            if ($perms) {
+              if (!($pp = $this->opt->from_code($p, $perm_parent))) {
+                $pp = $this->opt->add([
+                  $ocfg['arch']['options']['text'] => $text,
+                  $ocfg['arch']['options']['code'] => 'opt'.$p,
+                  $ocfg['arch']['options']['id_parent'] => $perm_parent,
+                  $ocfg['arch']['options']['id_alias'] => $p,
+                  'public' => $is_public
+                ]);
+                if (!$is_public) {
+                  foreach ($permissions as $perm) {
+                    $this->db->insert($pcfg['table'], [
+                      $pcfg['arch']['user_options']['id_option'] => $pp,
+                      $pcfg['arch']['user_options']['id_user'] => $perm->{$pcfg['arch']['user_options']['id_user']},
+                      $pcfg['arch']['user_options']['id_group'] => $perm->{$pcfg['arch']['user_options']['id_group']}
+                    ]);
+                  }
                 }
               }
+              $perm_parent = $pp;
             }
-            $perm_parent = $pp;
-          }
-          $parent = $p;
-          if (empty($bits)) {
-            $id_opt = $parent;
+            $parent = $p;
+            if ($i === 1) {
+              $id_opt = $parent;
+            }
           }
         }
       }
       if (bbn\str::is_uid($id_opt)) {
         if ($perms) {
-          return $perms ? $this->insert_by_option($title, $content, $id_opt) : $this->insert($title, $content, $id_opt, $users);
+          return $perms ? $this->insert_by_option($title, $content, $id_opt, $user_excluded) : $this->insert($title, $content, $id_opt, $users, $user_excluded);
         }
       }
     }
     return false;
   }
 
-  public function insert(string $title, string $content, string $id_option = null, array $users = []): bool
+  public function insert(string $title, string $content, string $id_option = null, array $users = [], bool $user_excluded = false): bool
   {
     if (\is_string($id_option) && !bbn\str::is_uid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
@@ -146,12 +150,15 @@ class notifications extends bbn\models\cls\db
       ];
       if ($this->db->insert($this->class_cfg['tables']['content'], $notification)) {
         $id = $this->db->last_id();
-        if (empty($users)) {
+        if (empty($users) && !$user_excluded) {
           $users[] = $this->user->get_id();
         }
         $i = 0;
+        $current_id_user = $this->user->get_id();
         foreach ( $users as $u ){
-          if ($this->_user_has_permission($notification, $u)) {
+          if ((!$user_excluded || ($current_id_user !== $u))
+            && $this->_user_has_permission($notification, $u)
+          ) {
             $i += (int)$this->db->insert($this->class_table, [
               $this->fields['id_content'] => $id,
               $this->fields['id_user'] => $u
@@ -164,7 +171,7 @@ class notifications extends bbn\models\cls\db
     return false;
   }
 
-  public function insert_by_option(string $title, string $content, string $id_option): bool
+  public function insert_by_option(string $title, string $content, string $id_option, bool $user_excluded = false): bool
   {
     if (!bbn\str::is_uid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
@@ -182,6 +189,7 @@ class notifications extends bbn\models\cls\db
     ) {
       $users = [];
       $is_public = !empty($perm['public']);
+      $current_id_user = $this->user->get_id();
       foreach ($groups as $group) {
         $has_perm = $this->pref->group_has($id_perm, $group);
         $group_users = $this->db->select_all($ucfg['table'], [], [
@@ -191,6 +199,7 @@ class notifications extends bbn\models\cls\db
         foreach ($group_users as $user) {
           $id_user = $user->{$ucfg['arch']['users']['id']};
           if (!\in_array($id_user, $users, true)
+            && (!$user_excluded || ($current_id_user !== $id_user))
             && ($is_public
               || $has_perm
               || $this->pref->user_has($id_perm, $id_user)
@@ -447,7 +456,7 @@ class notifications extends bbn\models\cls\db
             'value' => $id_user
           ]]
         ],
-        'order by' => [[
+        'order' => [[
           'field' => $this->db->col_full_name($this->class_cfg['arch']['content']['creation'], $this->class_cfg['tables']['content']),
           'dir' => 'DESC'
         ]]
@@ -480,7 +489,7 @@ class notifications extends bbn\models\cls\db
       && ($cfg = $this->get_cfg($id_user, $notification[$this->class_cfg['arch']['content']['id_option']]))
     ) {
       $mtime = bbn\x::microtime();
-      $path = bbn\mvc::get_user_data_path($id_user, 'appui-notifications');
+      $dpath = bbn\mvc::get_user_data_path($id_user, 'appui-notifications');
       $ucfg = $this->user->get_class_cfg();
       $sessions = $this->db->select_all($ucfg['tables']['sessions'], [
         $ucfg['arch']['sessions']['id'],
@@ -493,9 +502,10 @@ class notifications extends bbn\models\cls\db
       if (empty($notification[$this->fields['web']])
         && !empty($cfg['web'])
         && !empty($sessions)
+        && empty($notification[$this->fields['mail']])
       ) {
         foreach ($sessions as $sess) {
-          $path = $path . "web/{$sess->id}/";
+          $path = $dpath . "web/{$sess->id}/";
           if (bbn\file\dir::create_path($path) && !\is_file($path . "$mtime.json")) {
             $notification[$this->fields['web']] = $mtime;
             $notification[$this->fields['dt_web']] = date('Y-m-d H:i:s', $mtime);
@@ -507,9 +517,10 @@ class notifications extends bbn\models\cls\db
       else if (empty($notification[$this->fields['browser']])
         && !empty($cfg['browser'])
         && !empty($sessions)
+        && empty($notification[$this->fields['mail']])
       ) {
         foreach ($sessions as $sess) {
-          $path = $path . "browser/{$sess->id}/";
+          $path = $dpath . "browser/{$sess->id}/";
           if ( bbn\file\dir::create_path($path) && !\is_file($path . "$mtime.json")) {
             $notification[$this->fields['browser']] = $mtime;
             $notification[$this->fields['dt_browser']] = date('Y-m-d H:i:s', $mtime);

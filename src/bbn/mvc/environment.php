@@ -77,9 +77,11 @@ class environment
       foreach ($tmp as $t) {
         if (!empty($t) || bbn\str::is_number($t)) {
           if (\in_array($t, bbn\mvc::$reserved, true)) {
-            die('The controller you are asking for contains one of the following reserved strings: ' .
-              implode(', ', bbn\mvc::$reserved));
+            $msg = _('The controller you are asking for contains one of these reserved words')
+                .': '.implode(', ', bbn\mvc::$reserved);
+            throw new \Exception($msg);
           }
+
           $this->_params[] = $t;
         }
       }
@@ -355,5 +357,13 @@ class environment
   public function get_params()
   {
     return $this->_params;
+  }
+
+  public function get_request(): ?string
+  {
+    if (self::$_initiated) {
+      return $this->_url;
+    }
+    return null;
   }
 }

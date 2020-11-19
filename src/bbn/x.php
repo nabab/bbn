@@ -1699,6 +1699,12 @@ class x
     return $res;
   }
 
+  public static function move(array &$ar, int $old_index, int $new_index): void
+  {
+    $out = array_splice($ar, $old_index, 1);
+    array_splice($ar, $new_index, 0, $out);
+  }
+
 
   /**
    * Returns a view of an array or object as a JS tree.

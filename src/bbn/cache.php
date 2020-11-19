@@ -55,8 +55,8 @@ class cache
 
   private static function _sanitize($st)
   {
-    $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
-    $st = mb_ereg_replace("([\.]{2,})", '', $st);
+    $st = \mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
+    $st = \mb_ereg_replace("([\.]{2,})", '', $st);
     return $st;
   }
 

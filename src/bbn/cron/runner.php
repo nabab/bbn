@@ -230,6 +230,7 @@ class runner extends bbn\models\cls\basic
     if ($this->check()) {
       $this->timer->start('timeout');
       $this->timer->start('users');
+      $this->timer->start('cron_check');
       $obs = new bbn\appui\observer($this->db);
       //$this->output(_('Starting poll'), date('Y-m-d H:i:s'));
       /*
@@ -274,6 +275,11 @@ class runner extends bbn\models\cls\basic
         if ($this->timer->measure('timeout') > self::$poll_timeout) {
           //$this->output(_('Timeout'), date('Y-m-d H:i:s'));
           echo '.';
+        }
+        if ($this->timer->measure('cron_check') > self::$cron_check_timeout) {
+          $this->cron->get_manager()->notify_failed();
+          $this->timer->stop('cron_check');
+          $this->timer->start('cron_check');
         }
       }
       $this->output(_('Ending poll process'), date('Y-m-d H:i:s'));
@@ -337,9 +343,10 @@ class runner extends bbn\models\cls\basic
         $day = date('d');
         $month = date('m');
         $bits = x::split($cfg['log_file'], '/');
+        $path = x::join(array_slice($bits, -5), '/');
         $path_elements = array_splice($bits, -5, 3);
-        $path_bits = array_splice($bits, -5);
-        $path = x::join($path_bits, '/');
+        //$path_bits = array_splice($bits, -5);
+        //$path = x::join($path_bits, '/');
         $json_file = dirname(dirname(dirname($cfg['log_file']))).'/'.x::join($path_elements, '-').'.json';
         array_pop($path_elements);
         $month_file = dirname(dirname($json_file)).'/'.x::join($path_elements, '-').'.json';

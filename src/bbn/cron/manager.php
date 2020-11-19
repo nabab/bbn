@@ -369,6 +369,18 @@ class manager extends bbn\models\cls\basic {
     return null;
   }
 
+  public function notify_failed(){
+    $notifications = new \bbn\appui\notifications($this->db);
+    foreach ($this->get_failed() as $f) {
+      $content = _('The task') . ' ' . $f['file'] . ' ' . _('failed.');
+      if (empty($f['notification'])
+        && $notifications->insert_by_option(_('CRON task failed'), $content, 'cron/task_failed', true)
+      ) {
+        $this->db->update($this->table, ['notification' => \bbn\x::microtime()], ['id' => $f['id']]);
+      }
+    }
+  }
+
   /**
    * @param $id_cron
    * @return bool
@@ -413,7 +425,10 @@ class manager extends bbn\models\cls\basic {
    * @return mixed
    */
   public function unset_pid($id_cron){
-    return $this->db->update($this->table, ['pid' => null], ['id' => $id_cron]);
+    return $this->db->update($this->table, [
+      'pid' => null,
+      'notification' => null
+    ], ['id' => $id_cron]);
   }
 
   public function add($cfg): ?array
@@ -421,7 +436,7 @@ class manager extends bbn\models\cls\basic {
     if (
       defined('BBN_PROJECT')
       && $this->check()
-      && bbn\x::has_props($cfg, ['action', 'file', 'priority', 'frequency', 'timeout'], true)
+      && bbn\x::has_props($cfg, ['file', 'priority', 'frequency', 'timeout'], true)
     ) {
       $d = [
         'file' => $cfg['file'],

@@ -51,6 +51,8 @@ trait common {
 
   protected static $user_timeout = 480;
 
+  protected static $cron_check_timeout = 60;
+
   /**
    * @return int
    */
