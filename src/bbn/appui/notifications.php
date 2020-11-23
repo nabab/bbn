@@ -631,12 +631,14 @@ class notifications extends bbn\models\cls\db
       && ($templ = $masks->get_default('notifications'))
       && bbn\str::is_uid($id_user)
       && !empty($notifications)
+      && ($mgr = $this->user->get_manager())
+      && ($usr = $mgr->get_user($id_user))
+      && ($ucfg = $this->user->get_class_cfg())
       && ($rendered = bbn\tpl::render($templ['content'], [
-        'user' => $this->user->get_name($id_user),
+        'user' => $usr[$ucfg['show']] ?? '',
         'notifications' => $notifications
       ]))
-      && ($ucfg = $this->user->get_class_cfg())
-      && ($email = $this->db->select_one($ucfg['table'], $ucfg['arch']['users']['email'], [$ucfg['arch']['users']['id'] => $id_user]))
+      && ($email = $usr[$ucfg['arch']['users']['email']])
       && bbn\str::is_email($email)
     ){
       $templ['title'] = str_replace('{{app_name}}', defined('BBN_SITE_TITLE') ? BBN_SITE_TITLE : BBN_CLIENT_NAME, $templ['title']);
