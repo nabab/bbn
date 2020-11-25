@@ -68,10 +68,11 @@ class passwords extends bbn\models\cls\db
       ) {
         return true;
       }
+
+      return false;
     }
 
-    x::log('not ok');
-    return false;
+    throw new \Exception(_("No passwod given or BBN_ENCRYPTION_KEY not defined"));
   }
 
 
@@ -79,7 +80,7 @@ class passwords extends bbn\models\cls\db
    * Stores a password in the database for a user.
    *
    * @param string   $password The password to store
-   * @param string   $id_pref  The ID in user_option_bits
+   * @param string   $id_pref  The ID in user_options
    * @param bbn\user $user     A user object
    *
    * @return bool
@@ -112,9 +113,12 @@ class passwords extends bbn\models\cls\db
   {
     if (defined('BBN_ENCRYPTION_KEY')) {
       $arch =& $this->class_cfg['arch']['passwords'];
-      if ($password = $this->db->select_one($this->class_cfg['table'], $arch['password'], [
-        $arch['id_option'] => $id_option
-      ])) {
+      if ($password = $this->db->select_one(
+        $this->class_cfg['table'],
+        $arch['password'],
+        [$arch['id_option'] => $id_option]
+      )
+      ) {
         return \bbn\util\enc::decrypt64($password, BBN_ENCRYPTION_KEY);
       }
     }
@@ -125,7 +129,7 @@ class passwords extends bbn\models\cls\db
   /**
    * Returns a password for the given user's option.
    *
-   * @param string   $id_pref The ID in user_option_bits
+   * @param string   $id_pref The ID in user_options
    * @param bbn\user $user    A user object
    *
    * @return string|null
@@ -134,9 +138,12 @@ class passwords extends bbn\models\cls\db
   {
     if ($user->is_auth()) {
       $arch =& $this->class_cfg['arch']['passwords'];
-      if ($password = $this->db->select_one($this->class_cfg['table'], $arch['password'], [
-        $arch['id_user_option'] => $id_pref
-      ])) {
+      if ($password = $this->db->select_one(
+        $this->class_cfg['table'],
+        $arch['password'],
+        [$arch['id_user_option'] => $id_pref]
+      )
+      ) {
         return $user->decrypt(base64_decode($password));
       }
     }
@@ -154,9 +161,10 @@ class passwords extends bbn\models\cls\db
   public function delete(string $id_option): bool
   {
     $arch =& $this->class_cfg['arch']['passwords'];
-    return (bool)$this->db->delete($this->class_cfg['table'], [
-      $arch['id_option'] => $id_option
-    ]);
+    return (bool)$this->db->delete(
+      $this->class_cfg['table'],
+      [$arch['id_option'] => $id_option]
+    );
   }
 
   public function user_delete(string $id_pref, bbn\user $user)
@@ -165,9 +173,10 @@ class passwords extends bbn\models\cls\db
       $pref = \bbn\user\preferences::get_instance();
       if ($pref->is_authorized($id_pref)) {
         $arch =& $this->class_cfg['arch']['passwords'];
-        return $this->db->delete($this->class_cfg['table'], [
-          $arch['id_user_option'] => $id_pref
-        ]);
+        return $this->db->delete(
+          $this->class_cfg['table'], 
+          [$arch['id_user_option'] => $id_pref]
+        );
       }
     }
   }

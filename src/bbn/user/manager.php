@@ -4,6 +4,8 @@
  */
 namespace bbn\user;
 use bbn;
+use bbn\x;
+
 /**
  * A class for managing users
  *
@@ -58,7 +60,8 @@ You can click the following link to access directly your account:<br>
 
   protected $class_cfg = false;
 
-  public function get_list_fields(){
+  public function get_list_fields()
+  {
     return $this->list_fields;
   }
 
@@ -91,7 +94,7 @@ You can click the following link to access directly your account:<br>
     return $this->db->rselect_all($cfg);
   }
 
-  public function destroy_sessions($id_user, int $minutes = 5): bool
+  public function destroy_sessions(string $id_user, int $minutes = 5): bool
   {
     $sessions = $this->find_sessions($id_user, $minutes);    
     //$num = count($sessions);
@@ -136,28 +139,33 @@ You can click the following link to access directly your account:<br>
    * @param bool $adm
    * @return array|false
    */
-  public function groups(){
+  public function groups(): array
+  {
     $a =& $this->class_cfg['arch'];
     $t =& $this->class_cfg['tables'];
-    $id = $this->db->cfn($a['groups']['id'], $t['groups'], 1);
-    $group = $this->db->cfn($a['groups']['group'], $t['groups'], 1);
-    $id_group = $this->db->cfn($a['users']['id_group'], $t['users'], 1);
-    $type = $this->db->cfn($a['groups']['type'], $t['groups'], 1);
-    $code = $this->db->cfn($a['groups']['code'], $t['groups'], 1);
-    $active = $this->db->cfn($a['users']['active'], $t['users'], 1);
+    $id = $this->db->cfn($a['groups']['id'], $t['groups']);
     $users_id = $this->db->cfn($a['users']['id'], $t['users'], 1);
-    $groups = $this->db->escape($t['groups']);
-    $users = $this->db->escape($t['users']);
-    return $this->db->get_rows("
-      SELECT $id, $group, $type, $code,
-      COUNT($users_id) AS `num`
-      FROM $groups
-        LEFT JOIN $users
-          ON $id_group = $id
-      GROUP BY $id");
+    return $this->db->rselect_all([
+      'tables' => [$t['groups']],
+      'fields' => array_merge($a['groups'], ['num' => "COUNT($users_id)"]),
+      'join' => [
+        [
+          'table' => $t['users'],
+          'type' => 'left',
+          'on' => [
+            [
+              'field' => 'id_group',
+              'exp' => $id
+            ]
+          ]
+        ]
+      ],
+      'group_by' => [$id]
+    ]);
   }
 
-  public function text_value_groups(){
+  public function text_value_groups()
+  {
     return $this->db->rselect_all(
       $this->class_cfg['tables']['groups'], [
         'value' => $this->class_cfg['arch']['groups']['id'],
@@ -165,17 +173,20 @@ You can click the following link to access directly your account:<br>
       ]);
   }
 
-  public function get_email($id){
+  public function get_email(string $id): ?string
+  {
     if ( bbn\str::is_uid($id) ){
       $email = $this->db->select_one($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);
       if ( $email && bbn\str::is_email($email) ){
         return $email;
       }
     }
-    return false;
+    return null;
   }
-  
-  public function get_list($group_id = null){
+
+
+  public function get_list(string $group_id = null): array
+  {
     $db =& $this->db;
     $arch =& $this->class_cfg['arch'];
     $s =& $arch['sessions'];
@@ -216,7 +227,8 @@ You can click the following link to access directly your account:<br>
     return $db->get_rows($sql);
   }
 
-  public function get_user($id){
+  public function get_user(string $id): ?array
+  {
     $u = $this->class_cfg['arch']['users'];
     if ( bbn\str::is_uid($id) ){
       $where = [$u['id'] => $id];
@@ -245,10 +257,11 @@ You can click the following link to access directly your account:<br>
       }
       return array_merge($session, $user);
     }
-    return false;
+    return null;
   }
 
-  public function get_group($id){
+  public function get_group(string $id): ?array
+  {
     $g = $this->class_cfg['arch']['groups'];
     if ( $group = $this->db->rselect($this->class_cfg['tables']['groups'], [], [
       $g['id'] => $id
@@ -256,10 +269,11 @@ You can click the following link to access directly your account:<br>
       $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
       return $group;
     }
-    return false;
+    return null;
   }
 
-  public function get_users($group_id = null){
+  public function get_users($group_id = null): array
+  {
     return $this->db->get_col_array("
       SELECT ".$this->class_cfg['arch']['users']['id']."
       FROM ".$this->class_cfg['tables']['users']."
@@ -268,7 +282,8 @@ You can click the following link to access directly your account:<br>
     );
   }
 
-  public function full_list(){
+  public function full_list(): array
+  {
     $r = [];
     $u = $this->class_cfg['arch']['users'];
     foreach ( $this->db->rselect_all('bbn_users') as $a ){
@@ -282,7 +297,7 @@ You can click the following link to access directly your account:<br>
     return $r;
   }
 
-  public function get_user_id($login)
+  public function get_user_id(string $login): ?string
   {
     return $this->db->select_one(
       $this->class_cfg['tables']['users'], 
@@ -292,7 +307,7 @@ You can click the following link to access directly your account:<br>
       ]);
   }
 
-  public function get_admin_group()
+  public function get_admin_group(): ?string
   {
     if (!self::$admin_group) {
       if ($res = $this->db->select_one(
@@ -309,7 +324,7 @@ You can click the following link to access directly your account:<br>
     return self::$admin_group;
   }
 
-  public function get_dev_group()
+  public function get_dev_group(): ?string
   {
     if (!self::$dev_group) {
       if ($res = $this->db->select_one(
@@ -343,7 +358,7 @@ You can click the following link to access directly your account:<br>
     return '';
   }
 
-  public function get_group_type($id_group)
+  public function get_group_type(string $id_group): ?string
   {
     $g =& $this->class_cfg['arch']['groups'];
     return $this->db->select_one($this->class_cfg['tables']['groups'], $g['type'], [$g['id'] => $id_group]);
@@ -351,11 +366,11 @@ You can click the following link to access directly your account:<br>
 
   /**
    * Creates a new user and returns its configuration (with the new ID)
-   * 
+   *
    * @param array $cfg A configuration array
 	 * @return array|false
 	 */
-	public function add($cfg): ?array
+	public function add(array $cfg): ?array
 	{
     $u =& $this->class_cfg['arch']['users'];
     $fields = array_unique(array_values($u));
@@ -378,7 +393,6 @@ You can click the following link to access directly your account:<br>
                   $this->db->insert($this->class_cfg['tables']['users'], $cfg)
           ){
             $cfg[$u['id']] = $this->db->last_id();
-  
             // Envoi d'un lien
             $this->make_hotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
             return $cfg;
@@ -393,17 +407,17 @@ You can click the following link to access directly your account:<br>
           }
           break;
       }
-    }   
+    }
 		return null;
 	}
-  
+
 	/**
    * Creates a new user and returns its configuration (with the new ID)
-   * 
+   *
    * @param array $cfg A configuration array
 	 * @return array|false
 	 */
-	public function edit($cfg, $id_user=false)
+	public function edit(array $cfg, string $id_user = null): ?array
 	{
 	  $u =& $this->class_cfg['arch']['users'];
     $fields = array_unique(array_values($this->class_cfg['arch']['users']));
@@ -428,7 +442,7 @@ You can click the following link to access directly your account:<br>
         return $cfg;
       }
     }
-		return false;
+		return null;
   }
 
   public function copy(string $type, string $id, array $data): ?string
@@ -438,7 +452,7 @@ You can click the following link to access directly your account:<br>
     switch ($type) {
       case 'user':
         if ($src = $this->get_user($id)) {
-          $data = \bbn\x::merge_arrays($src, $data);
+          $data = x::merge_arrays($src, $data);
           unset($data[$this->class_cfg['arch']['users']['id']]);
           $col = $cfg['arch']['user_options']['id_user'];
           $id_new = $this->add($data);
@@ -446,7 +460,7 @@ You can click the following link to access directly your account:<br>
         break;
       case 'group':
         if ($src = $this->get_group($id)) {
-          $data = \bbn\x::merge_arrays($src, $data);
+          $data = x::merge_arrays($src, $data);
           unset($data[$this->class_cfg['arch']['groups']['id']]);
           $col = $cfg['arch']['user_options']['id_group'];
           $id_new = $this->group_insert($data);
@@ -524,11 +538,12 @@ You can click the following link to access directly your account:<br>
     }
     return null;
   }
-  
+
+
   public function send_mail(string $id_user, string $subject, string $text, array $attachments = []): ?int
   {
     if ( !$this->get_mailer() ){
-      die("Impossible to make hotlinks without a proper mailer parameter");
+      throw new \Exception(_("Impossible to make hotlinks without a proper mailer parameter"));
     }
     if ( ($usr = $this->get_user($id_user)) && $usr['email']){
       return $this->mailer->send([
@@ -540,7 +555,8 @@ You can click the following link to access directly your account:<br>
     }
     return null;
   }
-  
+
+
   /**
    *
    * @param string $id_user User ID
@@ -548,10 +564,9 @@ You can click the following link to access directly your account:<br>
    * @param int $exp Timestamp of the expiration date
    * @return manager
    */
-  public function make_hotlink($id_user, $message='hotlink', $exp=null): self
+  public function make_hotlink(string $id_user, string $message = 'hotlink', $exp = null): self
   {
     if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {
-      
       switch ($message)
       {
         case 'hotlink':
@@ -574,6 +589,7 @@ You can click the following link to access directly your account:<br>
         die("Impossible to make hotlinks without a link configured");
       }
     }
+
     if ($usr = $this->get_user($id_user)) {
       // Expiration date
       if ( !\is_int($exp) || ($exp < 1) ){
@@ -603,18 +619,20 @@ You can click the following link to access directly your account:<br>
       );
     }
     else{
-      die("User $id_user not found");
+      x::log("User $id_user not found");
+      throw new \Exception(_('User not found'));
     }
     return $this;
   }
-  
+
+
   /**
    * 
    * @param int $id_user User ID
    * @param int $id_group Group ID
    * @return manager
    */
-  public function set_unique_group($id_user, $id_group): bool
+  public function set_unique_group(string $id_user, string $id_group): bool
   {
     return (bool)$this->db->update($this->class_cfg['tables']['users'], [
       $this->class_cfg['arch']['users']['id_group'] => $id_group
@@ -623,7 +641,8 @@ You can click the following link to access directly your account:<br>
     ]);
   }
 
-  public function user_has_option($id_user, $id_option, $with_group = true){
+  public function user_has_option(string $id_user, string $id_option, bool $with_group = true): bool
+  {
     if ( $with_group && $user = $this->get_user($id_user) ){
       $id_group = $user[$this->class_cfg['arch']['users']['id_group']];
       if ( $this->group_has_option($id_group, $id_option) ){
@@ -641,7 +660,8 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function group_has_option($id_group, $id_option){
+  public function group_has_option(string $id_group, string $id_option): bool
+  {
     if (
       ($pref = preferences::get_preferences()) &&
       ($cfg = $pref->get_class_cfg())
@@ -674,12 +694,13 @@ You can click the following link to access directly your account:<br>
     return null;
   }
 
-  public function user_insert_option($id_user, $id_option){
+  public function user_insert_option(string $id_user, string $id_option): bool
+  {
     if (
       ($pref = preferences::get_preferences()) &&
       ($cfg = $pref->get_class_cfg())
     ){
-      return $this->db->insert_ignore($cfg['table'], [
+      return (bool)$this->db->insert_ignore($cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_user'] => $id_user
       ]);
@@ -687,12 +708,13 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function group_insert_option($id_group, $id_option){
+  public function group_insert_option(string $id_group, string $id_option): bool
+  {
     if (
       ($pref = preferences::get_preferences()) &&
       ($cfg = $pref->get_class_cfg())
     ){
-      return $this->db->insert_ignore($cfg['table'], [
+      return (bool)$this->db->insert_ignore($cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_group'] => $id_group
       ]);
@@ -700,12 +722,13 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function user_delete_option($id_user, $id_option){
+  public function user_delete_option(string $id_user, string $id_option): bool
+  {
     if (
       ($pref = preferences::get_preferences()) &&
       ($cfg = $pref->get_class_cfg())
     ){
-      return $this->db->delete_ignore($cfg['table'], [
+      return (bool)$this->db->delete_ignore($cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_user'] => $id_user
       ]);
@@ -713,12 +736,13 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function group_delete_option($id_group, $id_option){
+  public function group_delete_option(string $id_group, string $id_option): bool
+  {
     if (
       ($pref = preferences::get_preferences()) &&
       ($cfg = $pref->get_class_cfg())
     ){
-      return $this->db->delete_ignore($cfg['table'], [
+      return (bool)$this->db->delete_ignore($cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_group'] => $id_group
       ]);
@@ -726,14 +750,16 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function group_num_users($id_group){
+  public function group_num_users(string $id_group): int
+  {
     $u =& $this->class_cfg['arch']['users'];
     return $this->db->count($this->class_cfg['tables']['users'], [
       $u['id_group'] => $id_group
     ]);
   }
 
-  public function group_insert($data){
+  public function group_insert(array $data): ?string
+  {
     $g = $this->class_cfg['arch']['groups'];
     if ( isset($data[$g['group']]) ){
       if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {
@@ -746,34 +772,37 @@ You can click the following link to access directly your account:<br>
         return $this->db->last_id();
       }
     }
-    return false;
+    return null;
   }
 
-  public function group_rename($id, $name){
+  public function group_rename(string $id, string $name): bool
+  {
     $g = $this->class_cfg['arch']['groups'];
-    return $this->db->update($this->class_cfg['tables']['groups'], [
+    return (bool)$this->db->update($this->class_cfg['tables']['groups'], [
       $g['group'] => $name
     ], [
       $g['id'] => $id
     ]);
   }
 
-  public function group_set_cfg($id, $cfg){
+  public function group_set_cfg(string $id, array $cfg): bool
+  {
     $g = $this->class_cfg['arch']['groups'];
-    return $this->db->update($this->class_cfg['tables']['groups'], [
+    return (bool)$this->db->update($this->class_cfg['tables']['groups'], [
       $g['cfg'] => $cfg ?: '{}'
     ], [
       $g['id'] => $id
     ]);
   }
 
-  public function group_delete($id){
+  public function group_delete(string $id): bool
+  {
     $g = $this->class_cfg['arch']['groups'];
     if ( $this->group_num_users($id) ){
       /** @todo Error management */
-      die("This group has users...");
+      throw new \Exception(_("Impossible to delete this group as it has users"));
     }
-    return $this->db->delete($this->class_cfg['tables']['groups'], [
+    return (bool)$this->db->delete($this->class_cfg['tables']['groups'], [
       $g['id'] => $id
     ]);
   }
@@ -783,7 +812,8 @@ You can click the following link to access directly your account:<br>
    * 
    * @return int|false Update result
 	 */
-	public function deactivate($id_user){
+	public function deactivate(string $id_user): bool
+  {
     $update = [
       $this->class_cfg['arch']['users']['active'] => 0,
       $this->class_cfg['arch']['users']['email'] => null,
@@ -797,7 +827,9 @@ You can click the following link to access directly your account:<br>
     ])) {
       // Deleting existing sessions
       $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id_user'] => $id_user]);
+      return true;
     }
+    return false;
 	}
 
 	/**
@@ -805,17 +837,18 @@ You can click the following link to access directly your account:<br>
    * 
    * @return manager
 	 */
-	public function reactivate($id_user){
-    $this->db->update($this->class_cfg['tables']['users'], [
+	public function reactivate(string $id_user): bool
+  {
+    return (bool)$this->db->update($this->class_cfg['tables']['users'], [
       $this->class_cfg['arch']['users']['active'] => 1
     ], [
       $this->class_cfg['arch']['users']['id'] => $id_user
     ]);
-    return $this;
 	}
 
 
-  protected function set_default_list_fields(){
+  protected function set_default_list_fields()
+  {
     $fields = $this->class_cfg['arch']['users'];
     unset($fields['id'], $fields['active'], $fields['cfg']);
     $this->list_fields = [];
