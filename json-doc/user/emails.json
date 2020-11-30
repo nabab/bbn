@@ -3,142 +3,33 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\appui\\mailings",
+    "name": "bbn\\user\\emails",
     "namespace": true,
     "traits": [
+        "bbn\\models\\tts\\dbconfig",
         "bbn\\models\\tts\\optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/mailings.php",
-    "startLine": 14,
-    "endLine": 866,
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user\/emails.php",
+    "startLine": 8,
+    "endLine": 756,
     "contentConstructor": {
-        "file": "bbn\\appui\\mailings",
+        "file": "bbn\\user\\emails",
         "returns": null
     },
     "methods": {
-        "_get_cfg": {
-            "name": "_get_cfg",
+        "get_folder_types": {
+            "name": "get_folder_types",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return bbn\\x::get_row(\n      self::_get_cfgs() ?: [],\n      bbn\\str::is_uid($id) ? ['id' => $id] : ['code' => $id]\n    );\n  }",
-            "startLine": 69,
-            "endLine": 75,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "__construct": {
-            "name": "__construct",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bbn\\db $db, array $cfg = NULL)\n  {\n    if ($db->check()) {\n      self::optional_init();\n      $this->get_options_text_value('text');\n      $this->db = $db;\n    }\n  }",
-            "startLine": 96,
-            "endLine": 103,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": {
-                "name": "__construct",
-                "summary": "Constructor.",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\models\\cls\\db",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function(bbn\\db $db)\n  {\n      $this->db = $db;\n  }",
-                "startLine": 37,
-                "endLine": 40,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 1,
-                "numberOfRequiredParameters": 1,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "db",
-                        "position": 0,
-                        "type": "bbn\\db",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
-            "arguments": [
-                {
-                    "name": "db",
-                    "position": 0,
-                    "type": "bbn\\db",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "cfg",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "get_test_emails": {
-            "name": "get_test_emails",
-            "summary": "Returns an array of email addresses used for testing purposes.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if (!is_array($this->_test_emails)) {\n      $emails = $this->get_options_text_value('test');\n      $this->_test_emails = [];\n      foreach ($emails as $em) {\n        $this->_test_emails[] = $em['text'];\n      }\n    }\n    return $this->_test_emails;\n  }",
-            "startLine": 110,
-            "endLine": 120,
+            "code": "function()\n  {\n    return self::get_options('folders');\n  }",
+            "startLine": 86,
+            "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -153,18 +44,104 @@
             "parent": false,
             "arguments": []
         },
-        "check": {
-            "name": "check",
-            "summary": "Checks if the object is in error state.",
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->db && $this->db->check();\n  }",
-            "startLine": 127,
-            "endLine": 130,
+            "code": "function(bbn\\db $db, bbn\\user $user = NULL, bbn\\user\\preferences $preferences = NULL)\n  {\n    self::optional_init();\n    $this->_init_class_cfg();\n    $this->db   = $db;\n    $this->user = $user ?: bbn\\user::get_instance();\n    $this->pref = $preferences ?: bbn\\user\\preferences::get_instance();;\n  }",
+            "startLine": 92,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "bbn\\user",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "preferences",
+                    "position": 2,
+                    "type": "bbn\\user\\preferences",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_mailbox": {
+            "name": "get_mailbox",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account)\n  {\n    if (!isset($this->mboxes[$id_account])) {\n      $this->get_account($id_account);\n    }\n\n    if (isset($this->mboxes[$id_account])) {\n      $mb = &$this->mboxes[$id_account];\n      if (!isset($mb['mailbox'])) {\n        $cfg           = $this->mboxes[$id_account];\n        $cfg['pass']   = $this->_get_password()->user_get($id_account, $this->user);\n        $mb['mailbox'] = new bbn\\appui\\mailbox($cfg);\n      }\n\n      if (isset($mb['mailbox'])) {\n        return $mb['mailbox'];\n      }\n    }\n\n    return null;\n\n  }",
+            "startLine": 102,
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_accounts_ids": {
+            "name": "get_accounts_ids",
+            "summary": "Returns the list of the accounts' IDs of the current user.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($id_accounts = self::get_option_id('accounts')) {\n      return $this->pref->retrieve_ids($id_accounts);\n    }\n\n    return null;\n  }",
+            "startLine": 132,
+            "endLine": 139,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -174,81 +151,23 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "bool"
-            ],
-            "parent": {
-                "name": "check",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
-                "startLine": 56,
-                "endLine": 61,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": null,
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "is_sending": {
-            "name": "is_sending",
-            "summary": "Checks if the given mailing is being sent.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id = NULL)\n  {\n    $cond = ['state' => 'sending'];\n    if ($id) {\n      $cond['id'] = $id;\n    }\n    return $this->db->count('bbn_emailings', $cond) > 0;\n  }",
-            "startLine": 138,
-            "endLine": 145,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
+                "array",
+                null
             ],
             "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
+            "arguments": []
         },
-        "is_suspended": {
-            "name": "is_suspended",
-            "summary": "Checks if the given mailing is in suspended state.",
+        "get_accounts": {
+            "name": "get_accounts",
+            "summary": "Returns the list of the accounts of the current user.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id = NULL)\n  {\n    $cond = ['state' => 'suspended'];\n    if ($id) {\n      $cond['id'] = $id;\n    }\n    return $this->db->count('bbn_emailings', $cond) > 0;\n  }",
-            "startLine": 153,
+            "code": "function($force = false)\n  {\n    if ($ids = $this->get_accounts_ids()) {\n      $res = [];\n      foreach ($ids as $id) {\n        $res[] = $this->get_account($id, $force);\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 148,
             "endLine": 160,
             "isDeprecated": false,
             "isGenerator": false,
@@ -259,473 +178,15 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "get_next_mailing": {
-            "name": "get_next_mailing",
-            "summary": "Returns the next mailing to process if any.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->check() \n        && ($id = $this->db->select_one(\n          'bbn_emailings', 'id', [\n          ['state', 'LIKE', 'ready'],\n          ['sent', '<', date('Y-m-d H:i:s')],\n          ['sent', 'isnotnull']\n          ], ['sent' => 'ASC']\n        ))\n    ) {\n      return $this->get_mailing($id);\n    }\n    return null;\n  }",
-            "startLine": 180,
-            "endLine": 194,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "change_state": {
-            "name": "change_state",
-            "summary": "Changes the state of the given mailing.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $new_state)\n  {\n    if ($this->check()) {\n      $cur = $this->db->select_one(\"bbn_emailings\", 'state', ['id' => $id]);\n      if (($cur === 'sent') || ($cur === 'cancelled')) {\n        return false;\n      }\n      return (bool)$this->db->update(\"bbn_emailings\", ['state' => $new_state], ['id' => $id]);\n    }\n    return false;\n  }",
-            "startLine": 203,
-            "endLine": 213,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "state"
-                },
-                {
-                    "name": "new_state",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "get_medias": {
-            "name": "get_medias",
-            "summary": "Returns the attachments for the given mailing.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    if ($this->check() && ($row = $this->db->select('bbn_emailings', ['id_note', 'version'], ['id' => $id]))) {\n      return $this->_note()->get_medias($row->id_note, $row->version);\n    }\n    return null;\n  }",
-            "startLine": 221,
-            "endLine": 227,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
                 "array",
                 null
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
+                    "name": "force",
                     "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "get_mailing": {
-            "name": "get_mailing",
-            "summary": "Returns all the information about the given mailing.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    if ($this->check()) {\n      $notes = $this->_note();\n      if (($row = $this->db->rselect('bbn_emailings', [], ['id' => $id])) \n          && ($note = $notes->get($row['id_note']))\n      ) {\n        return array_merge($note, $row);\n      }\n    }\n    return null;\n  }",
-            "startLine": 235,
-            "endLine": 246,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "process": {
-            "name": "process",
-            "summary": "Sends the emails to be sent in the limit provided.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($limit = 10)\n  {\n    if ($this->check()) {\n      $sent = 0;\n      $successes = 0;\n      $mailings = [];\n      foreach ($this->db->rselect_all(\n        [\n        'table' => 'bbn_emails',\n        'fields' => ['bbn_emails.id', 'email', 'id_mailing', 'subject', 'text', 'cfg', 'status', 'delivery', 'read', 'priority'],\n        'join' => [[\n          'table' => 'bbn_emailings',\n          'type' => 'left',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'id_mailing',\n                'exp' => 'bbn_emailings.id'\n              ]\n            ]\n          ]\n        ]],\n        'where' => [\n          'conditions' => [\n            'status' => 'ready',\n            [\n              'logic' => 'OR',\n              'conditions' => [\n                [\n                  'field' => 'delivery',\n                  'operator' => 'isnull'\n                ], [\n                  'field' => 'delivery',\n                  'operator' => '<',\n                  'exp' => 'NOW()'\n                ]\n              ]\n            ], [\n              'logic' => 'OR',\n              'conditions' => [\n                [\n                  'field' => 'bbn_emailings.state',\n                  'operator' => 'isnull'\n                ], [\n                  'field' => 'bbn_emailings.state',\n                  'value' => 'ready'\n                ], [\n                  'field' => 'bbn_emailings.state',\n                  'value' => 'sending'\n                ]\n              ]\n            ]\n          ]\n        ],\n        'order' => ['priority'],\n        'limit' => $limit\n        ]\n      ) as $r) {\n        $sent++;\n        $ok = false;\n        $att = [];\n        if (!empty($r['id_mailing'])) {\n          if (!isset($mailings[$r['id_mailing']])) {\n            $mailings[$r['id_mailing']] = $this->get_mailing($r['id_mailing']);\n          }\n          $mailing = &$mailings[$r['id_mailing']];\n          if ($mailing['state'] === 'ready') {\n            $this->change_state($r['id_mailing'], 'sending');\n            $mailing['state'] = 'sending';\n          }\n          $text = $mailing['content'];\n          $subject = $mailing['title'];\n          $sender = $mailing['sender'];\n          if (!empty($mailing['medias'])) {\n            foreach ($mailing['medias'] as $a){\n              if (!empty($a['file']) && file_exists($a['file'])) {\n                $att[] = $a['file'];\n              }\n            }\n          }\n        }\n        else{\n          $text = $r['text'];\n          $subject = $r['subject'];\n          $sender = null;\n          if ($r['cfg']) {\n            $r['cfg'] = json_decode($r['cfg'], true);\n            if (!empty($r['cfg']['attachments'])) {\n              foreach ($r['cfg']['attachments'] as $a){\n                $f = \\bbn\\x::indexOf($a, '\/') === 0 ? $a : \\bbn\\mvc::get_content_path().$a;\n                if (file_exists($f)) {\n                  $att[] = $f;\n                }\n              }\n            }\n          }\n        }\n        if ($subject && $text && \\bbn\\str::is_email($r['email'])) {\n          $params = [\n            'to' => $r['email'],\n            'subject' => $subject,\n            'text' => $text\n          ];\n          if (count($att)) {\n            $params['attachments'] = $att;\n          }\n          if ($ok = $this->send($params, $sender)) {\n            $successes++;\n          }\n        }\n        $this->db->update(\n          'bbn_emails', [\n          'status' => $ok ? 'success' : 'failure',\n          'delivery' => date('Y-m-d H:i:s')\n          ], ['id' => $r['id']]\n        );\n      }\n      foreach ($mailings as $id => $m) {\n        if (($m['state'] === 'sending')\n            && !$this->db->count(\n              'bbn_emails', [\n              'id_mailing' => $id,\n              'status'=> 'ready'\n              ]\n            )\n        ) {\n          $this->change_state($id, 'sent');\n        }\n      }\n      return $successes;\n    }\n    $this->set_error(_(\"No mailer defined\"));\n    return null;\n  }",
-            "startLine": 254,
-            "endLine": 387,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "limit",
-                    "position": 0,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 10,
-                    "default_name": ""
-                }
-            ]
-        },
-        "send": {
-            "name": "send",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $cfg, $sender = NULL)\n  {\n    if (!empty($cfg['to']) && ($mailer = $this->_get_mailer($sender))) {\n      return $mailer->send($cfg);\n    }\n    return false;\n  }",
-            "startLine": 389,
-            "endLine": 395,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "cfg",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "sender",
-                    "position": 1,
-                    "type": "string",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "add": {
-            "name": "add",
-            "summary": "Adds a new mailing and returns its ID.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $cfg)\n  {\n    $notes = $this->_note();\n    if ($this->check()\n        && $notes\n        && bbn\\x::has_props($cfg, ['title', 'content', 'sender'], true)\n        && ($id_type = notes::get_option_id('mailings','types'))\n        && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))\n        \/\/ Cannot give a date if no recipients selected\n        && (!empty($cfg['recipients']) || empty($cfg['sent']))\n    ) {\n      if (empty($cfg['sent'])) {\n        $cfg['sent'] = null;\n      }\n      if ($this->db->insert(\n        'bbn_emailings', [\n        'id_note' => $id_note,\n        'version' => 1,\n        'sender' => $cfg['sender'],\n        'recipients' => $cfg['recipients'] ?: null,\n        'sent' => $cfg['sent']\n        ]\n      )\n      ) {\n        $cfg['id'] = $this->db->last_id();\n        $cfg['id_note'] = $id_note;\n        $cfg['version'] = 1;\n        if (!empty($cfg['attachments'])) {\n          foreach ($cfg['attachments'] as $f){\n            if (is_array($f)) {\n              $notes->add_media_to_note($f['id_media'], $id_note, 1);\n            }\n            elseif (is_file($f)) {\n              \/\/ Add media\n              $notes->add_media($id_note, $f);\n            }\n          }\n        }\n        if (bbn\\x::has_props($cfg, ['recipients', 'sent', 'emails'], true)) {\n          $cfg['res'] = $this->insert_emails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);\n        }\n        return $cfg;\n      }\n    }\n    return null;\n  }",
-            "startLine": 403,
-            "endLine": 448,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "cfg",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "insert_emails": {
-            "name": "insert_emails",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_mailing, $date, array $emails, $priority = 5)\n  {\n    if (!empty($date) && \\bbn\\date::validateSQL($date)) {\n      $res = [];\n      foreach ($emails as $item) {\n        if ($this->db->insert_ignore(\n          'bbn_emails', [\n            'email' => $item['email'],\n            'id_mailing' => $id_mailing,\n            'priority' => $priority,\n            'status' => 'ready',\n            'delivery' => $date\n          ]\n        )\n        ) {\n          $item['id'] = $this->db->last_id();\n          $res[] = $item;\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 450,
-            "endLine": 472,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 3,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_mailing",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "date",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "emails",
-                    "position": 2,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "priority",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 5,
-                    "default_name": ""
-                }
-            ]
-        },
-        "edit": {
-            "name": "edit",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $cfg)\n  {\n    $notes = $this->_note();\n    $user = bbn\\user::get_instance();\n    $medias = $this->_medias();\n    $res = 0;\n    \n    if ($this->check() \n        && $user && $notes \n        && bbn\\x::has_props($cfg, ['title', 'content', 'sender']) \n        && ($mailing = $this->get_mailing($id))\n    ) {\n      $cfg['id'] = $id;\n      if ($this->count_sent($id)) {\n        throw new Error(_(\"Impossible to edit a message already sent or partially sent, you need to duplicate it.\"));\n      }\n      $version = $mailing['version'];\n      if (($cfg['title'] !== $mailing['title']) || ($cfg['content'] !== $mailing['content'])) {\n        $version = $notes->insert_version($mailing['id_note'], $cfg['title'], $cfg['content']);\n      }\n      $this->db->update(\n        'bbn_emailings', [\n        'version' => $version,\n        'sender' => $cfg['sender'],\n        'recipients' => $cfg['recipients'] ?: null,\n        'sent' => $cfg['sent']\n        ], [\n        'id' => $id\n        ]\n      );\n      foreach ($cfg['attachments'] as $f){\n        \/\/ It exists already, the file is not sent\n        if (is_array($f)) {\n          $idx = empty($mailing['medias']) ? false : \\bbn\\x::find($mailing['medias'], ['name' => $f['name']]);\n          if ($idx !== null) {\n            if ($version === $mailing['version']) {\n              \/\/ If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments\n              array_splice($mailing['medias'], $idx, 1);\n            }\n            elseif ($notes->add_media_to_note($mailing['medias'][$idx]['id'], $mailing['id_note'], $version)) {\n              $res++;\n            }\n          }\n        }\n        \/\/ The pure path to the file is sent\n        elseif ($notes->add_media($mailing['id_note'], $f)) {\n          $res++;\n        }\n      }\n      if ($version === $mailing['version']) {\n        foreach ($mailing['medias'] as $med) {\n          if ($medias->delete($med['id'])) {\n            $res++;\n          }\n        }\n      }\n      else{\n        $res++;\n      }\n      if (!$cfg['sent'] || ($mailing['recipients'] !== $cfg['recipients'])) {\n        $this->delete_all_emails($id);\n      }\n      if (bbn\\x::has_props($cfg, ['recipients', 'sent', 'emails'], true)) {\n        $cfg['res'] = $this->insert_emails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);\n      }\n      return $cfg;\n    }\n    return null;\n  }",
-            "startLine": 474,
-            "endLine": 542,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "array",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "cfg",
-                    "position": 1,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "delete": {
-            "name": "delete",
-            "summary": "Deletes the mailing and relative emails.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    \/\/ We do not delete mailings which have been sent\n    if ($this->count_sent($id)) {\n      \/\/return 0;\n    }\n    $success = null;\n    $mailing = $this->get_mailing($id);\n    if (!empty($mailing['id_note'])) {\n      $notes = $this->_note();\n      \/\/if the notes has media removes media before to remove the note\n      if ($medias = $notes->get_medias($mailing['id_note'])) {\n        foreach ($medias as $media){\n          $notes->remove_media($media['id'], $mailing['id_note']);\n        }\n      }\n\n      \/\/ if there are emails with the given id_mailing\n      if ($this->db->count('bbn_emails', ['id_mailing' => $id])) {\n        \/\/it removes the emails ready or cancelled relative to this id_mailing\n        $this->delete_all_emails($id);\n      }\n      if (!$this->db->count('bbn_emails', ['id_mailing' => $id])) {\n        \/\/deletes the row\n        $success = $this->db->delete(\"bbn_emailings\", ['id' => $id]);\n        \/\/$notes->remove($mailing['id_note']);\n      }\n    }\n    return $success;\n  }",
-            "startLine": 549,
-            "endLine": 578,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "delete_sent": {
-            "name": "delete_sent",
-            "summary": "Deletes a sent mailing. If $history is true completely delete the row from history.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id, $history = false)\n  {\n    $success = false;\n    if ($mailing = $this->get_mailing($id)) {\n      if (!empty($mailing['id_note']) && ($mailing['state'] === 'sent')) {\n        if (!empty($history)) {\n          $notes = $this->_note();\n          if (($medias = $notes->get_medias($mailing['id_note']) )) {\n            foreach ($medias as $media){\n              $notes->remove_media($media['id'],$mailing['id_note']);\n            }\n          }\n          $notes->remove($mailing['id_note']);  \n          $success = $this->db->delete('bbn_$_uids', ['bbn_uid' => $id]);\n        }\n        else {\n          $success = $this->db->delete('bbn_emailings', ['id' => $id]);\n        }\n      }\n      \n    }\n    \n    return $success;\n  }",
-            "startLine": 587,
-            "endLine": 610,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "history",
-                    "position": 1,
-                    "type": null,
+                    "type": "bool",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -733,92 +194,18 @@
                 }
             ]
         },
-        "delete_email": {
-            "name": "delete_email",
-            "summary": "Undocumented function",
+        "get_account": {
+            "name": "get_account",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_email)\n  {\n    if (!empty($id_email)) {\n      return $this->db->delete('bbn_emails', ['id' => $id_email]);\n    }\n  }",
-            "startLine": 618,
-            "endLine": 623,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_email",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "delete_all_emails": {
-            "name": "delete_all_emails",
-            "summary": "Deletes all the emails ready or cancelled relative to the given id_mailing.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_mailing)\n  {\n    $success = null;\n    $emails = $this->db->rselect_all('bbn_emails', [], ['id_mailing' => $id_mailing]);\n    if (!empty($emails)) {\n      $n = 0;\n      foreach ($emails as $e){\n        if (($e['status'] === 'ready') || ($e['status'] === 'cancelled')) {\n          if ($this->db->delete('bbn_emails', ['id' => $e['id']])) {\n            $n++;\n          }\n        }\n      }\n      $success = $n;\n    }\n    return $success;\n  }",
-            "startLine": 631,
-            "endLine": 647,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "int",
-                null
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_mailing",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "change_email_status": {
-            "name": "change_email_status",
-            "summary": "Changes the status of the given id email.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id_email, $state)\n  {\n    return $this->db->update(\n      'bbn_emails', ['status' => $state], [\n      'id' => $id_email,\n      ]\n    );\n  }",
-            "startLine": 657,
-            "endLine": 664,
+            "code": "function($id_account, $force = false)\n  {\n    if ($force || !isset($this->mboxes[$id_account])) {\n      if ($a = $this->pref->get($id_account)) {\n        $this->mboxes[$id_account] = [\n          'id' => $a['id'],\n          'host' => $a['host'] ?? null,\n          'login' => $a['login'],\n          'type' => $a['type'],\n          'port' => $a['port'] ?? null,\n          'ssl' => $a['ssl'] ?? true,\n          'folders' => null,\n          'last_uid' => $a['last_uid'] ?? null,\n          'last_check' => $a['last_check'] ?? null\n        ];\n        $this->mboxes[$id_account]['folders'] = $this->get_folders($this->mboxes[$id_account]);\n      }\n    }\n    return $this->mboxes[$id_account] ?? null;\n  }",
+            "startLine": 163,
+            "endLine": 182,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -826,51 +213,6 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id_email",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "state",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "get_emails": {
-            "name": "get_emails",
-            "summary": "Returns the array containing all the emails relative to an id_mailing.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\mailings",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n    return $this->db->rselect_all(\n      'bbn_emails', [], [\n      'id_mailing' => $id\n      ]\n    );\n  }",
-            "startLine": 672,
-            "endLine": 679,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
                 "array",
@@ -879,28 +221,37 @@
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
+                    "name": "id_account",
                     "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
                 }
             ]
         },
-        "count_sent": {
-            "name": "count_sent",
-            "summary": "Returns the number of emails sent for the given mailing.",
+        "check_config": {
+            "name": "check_config",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ($this->check()) {\n      return $this->db->count(\n        'bbn_emails', [\n        'id_mailing' => $id,\n        ['status', '!=', 'ready'],\n        ['email', '!=', $this->get_test_emails()]\n        ]\n      );\n    }\n    return null;\n  }",
-            "startLine": 687,
-            "endLine": 699,
+            "code": "function($cfg)\n  {\n    if (x::has_props(['login', 'pass', 'type'], true)) {\n      $mb = new bbn\\appui\\mailbox($cfg);\n      return $mb->check();\n    }\n  }",
+            "startLine": 185,
+            "endLine": 191,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -910,15 +261,14 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
-                null
+                "bool"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
+                    "name": "cfg",
                     "position": 0,
-                    "type": "string",
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -926,18 +276,18 @@
                 }
             ]
         },
-        "change_emails_status": {
-            "name": "change_emails_status",
-            "summary": "Changes the status of the emails relative to the given mailing.",
+        "update_account": {
+            "name": "update_account",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_mailing, $status)\n  {\n    $count = 0;\n    if (($emails = $this->get_emails($id_mailing))) {\n      foreach ($emails as $e){\n        \/\/here I've to check if ready or cancelled??\n        if ($this->change_email_status($e['id'], $status)) {\n          $count ++;\n        };\n      }\n      return $count;\n    }\n  }",
-            "startLine": 708,
-            "endLine": 720,
+            "code": "function($id_account, array $cfg)\n  {\n    if (x::has_props($cfg, ['login', 'pass', 'type'], true)\n        && ($acc = $this->get_account($id_account))\n        && ($this->pref->set_cfg(\n          $id_account,\n          [\n            'host' => $cfg['host'] ?? null,\n            'login' => $cfg['login'],\n            'type' => $cfg['type'],\n            'port' => $cfg['port'] ?? null,\n            'ssl' => $cfg['ssl'] ?? true,\n            'last_uid' => $cfg['last_uid'] ?? null,\n            'last_check' => $cfg['last_check'] ?? null\n          ]\n        ))\n    ) {\n      return true;\n    }\n\n    return false;\n  }",
+            "startLine": 194,
+            "endLine": 215,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -952,7 +302,7 @@
             "parent": false,
             "arguments": [
                 {
-                    "name": "id_mailing",
+                    "name": "id_account",
                     "position": 0,
                     "type": "string",
                     "required": true,
@@ -961,8 +311,44 @@
                     "default_name": ""
                 },
                 {
-                    "name": "status",
+                    "name": "cfg",
                     "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete_account": {
+            "name": "delete_account",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account)\n  {\n    return (bool)$this->pref->delete($id_account);\n  }",
+            "startLine": 218,
+            "endLine": 221,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -971,18 +357,18 @@
                 }
             ]
         },
-        "copy": {
-            "name": "copy",
-            "summary": "Copies the email",
+        "add_account": {
+            "name": "add_account",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ($row = $this->get_mailing($id)) {\n      $id_mailing = $this->add(\n        [\n        'title' => $row['title'],\n        'content' => $row['content'],\n        'sender' => $row['sender'],\n        'recipients' => $row['recipients']\n        ]\n      );\n      if (!empty($row['medias']) && ($row2 = $this->get_mailing($id_mailing))) {\n        foreach ($row['medias'] as $r){\n          $this->notes->add_media_to_note($r['id'], $row2['id_note'], 1);\n        }\n      }\n      return $id_mailing;\n    }\n  }",
-            "startLine": 728,
-            "endLine": 746,
+            "code": "function(array $cfg)\n  {\n    if (x::has_props($cfg, ['login', 'pass', 'type'], true)\n        && ($id_accounts = self::get_option_id('accounts'))\n        && ($id_pref = $this->pref->add_to_group(\n          $id_accounts,\n          [\n            'id_user' => $this->user->get_id(),\n            'login' => $cfg['login'],\n            'type' => $cfg['type'],\n            'host' => $cfg['host'] ?? null,\n            'port' => $cfg['port'] ?? null,\n            'ssl' => $cfg['ssl'] ?? true\n          ]\n        ))\n    ) {\n      $this->_get_password()->user_store($cfg['pass'], $id_pref, $this->user);\n      return $id_pref;\n    }\n\n    return null;\n  }",
+            "startLine": 224,
+            "endLine": 245,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -998,6 +384,276 @@
             "parent": false,
             "arguments": [
                 {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "reset": {
+            "name": "reset",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account)\n  {\n    if (($account = $this->get_account($id_account))\n        && ($num = $this->pref->delete_bits($id_account))\n    ) {\n      return true;\n    }\n\n    return false;\n  }",
+            "startLine": 248,
+            "endLine": 257,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "create_folder": {
+            "name": "create_folder",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account, $name, $id_parent = NULL)\n  {\n\n    $this->create_folder_db($id, $id_parent);\n  }",
+            "startLine": 260,
+            "endLine": 264,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_parent",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "create_folder_db": {
+            "name": "create_folder_db",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account, $name, $id_parent = NULL)\n  {\n\n  }",
+            "startLine": 267,
+            "endLine": 270,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_parent",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "rename_folder": {
+            "name": "rename_folder",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $name)\n  {\n\n    $this->rename_folder_db($id, $name);\n  }",
+            "startLine": 273,
+            "endLine": 277,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "rename_folder_db": {
+            "name": "rename_folder_db",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $name)\n  {\n\n  }",
+            "startLine": 280,
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete_folder": {
+            "name": "delete_folder",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $this->delete_folder_db($id);\n  }",
+            "startLine": 286,
+            "endLine": 289,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
                     "name": "id",
                     "position": 0,
                     "type": "string",
@@ -1008,18 +664,18 @@
                 }
             ]
         },
-        "get_lasts": {
-            "name": "get_lasts",
-            "summary": "Get the last mailings rows which aree not sending",
+        "delete_folder_db": {
+            "name": "delete_folder_db",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($limit = 10)\n  {\n    return $this->db->rselect_all(\n      [\n      'table' => 'bbn_emailings',\n      'fields' => ['id', 'title', 'sent', 'state'],\n      'join' => [\n        [\n          'table' => 'bbn_notes_versions',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'bbn_notes_versions.id_note',\n                'exp' => 'bbn_emailings.id_note'\n              ], [\n                'field' => 'bbn_notes_versions.version',\n                'exp' => 'bbn_emailings.version'\n              ]\n            ]\n          ]\n        ]\n      ],\n      'where' => [\n        ['state', '!=', 'sending'],\n        ['sent', 'isnotnull'],\n        ['sent', '<', date('Y-m-d H:i:s')]\n      ],\n      'order' => [\n        'sent' => 'DESC'\n      ],\n      'limit' => $limit\n      ]\n    );\n  }",
-            "startLine": 754,
-            "endLine": 787,
+            "code": "function($id)\n  {\n\n  }",
+            "startLine": 292,
+            "endLine": 295,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1027,33 +683,256 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "limit",
+                    "name": "id",
                     "position": 0,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 10,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 }
             ]
         },
-        "get_nexts": {
-            "name": "get_nexts",
-            "summary": "Get the next mailings rows to be sent",
+        "check_folder": {
+            "name": "check_folder",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($limit = 10)\n  {\n    return $this->db->rselect_all(\n      [\n        'table' => 'bbn_emailings',\n        'fields' => ['id', 'title', 'sent', 'state'],\n        'join' => [\n          [\n            'table' => 'bbn_notes_versions',\n            'on' => [\n              'conditions' => [\n                [\n                  'field' => 'bbn_notes_versions.id_note',\n                  'exp' => 'bbn_emailings.id_note'\n                ], [\n                  'field' => 'bbn_notes_versions.version',\n                  'exp' => 'bbn_emailings.version'\n                ]\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          ['state', '=', 'ready'],\n          ['sent', 'isnotnull'],\n        ],\n        'order' => [\n          'sent' => 'ASC'\n        ],\n        'limit' => $limit\n      ]\n    );\n  }",
-            "startLine": 795,
-            "endLine": 827,
+            "code": "function(array $folder, $sync = false)\n  {\n    if (x::has_prop($folder, 'uid')\n        && ($mb = $this->get_mailbox($folder['id_account']))\n        && $mb->check()\n    ) {\n      if ($mb->update($folder['uid']) && ($res = $mb->get_folders()[$folder['uid']])) {\n        if ($folder['last_uid'] !== $res['last_uid']) {\n          $id_account = $folder['id_account'];\n          unset($folder['id_account']);\n          $res = array_merge($folder, $res);\n          $this->pref->update_bit($folder['id'], $res, true);\n          $res['id_account'] = $id_account;\n          $this->get_account($id_account, true);\n          if ($sync) {\n            $this->sync_emails($res);\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n\n  }",
+            "startLine": 298,
+            "endLine": 323,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "folder",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "sync",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_folders": {
+            "name": "get_folders",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($account, $force = false)\n  {\n    $acc = is_array($account) ? $account : $acc = $this->get_account($account);\n    if ($acc) {\n      $types = self::get_folder_types();\n      if ($force) {\n        $this->sync_folders($acc['id']);\n      }\n\n      $cfg   = $this->class_cfg['arch']['users_emails'];\n      $table = $this->class_cfg['tables']['users_emails'];\n      return x::map(\n        function ($a) use ($types, $cfg, $table) {\n          if (!isset($a['uid'])) {\n\n            \/\/die(x::dump(\"NO UID\", $a, debug_backtrace()));\n          }\n\n          $res = [\n            'id' => $a['id'],\n            'id_account' => $a['id_user_option'],\n            'text' => $a['text'],\n            'uid' => $a['uid'],\n            'id_option' => $a['id_option'],\n            'type' => x::get_field($types, ['id' => $a['id_option']], 'code'),\n            'db_uid' => $this->db->select_one(\n              $table,\n              'MAX('.$this->db->csn($cfg['msg_uid'], true).')',\n              [\n                $cfg['id_folder'] => $a['id'],\n                $cfg['id_user'] => $this->user->get_id()\n              ]\n            ),\n            'last_uid' => $a['last_uid'] ?? null,\n            'last_check' => $a['last_check'] ?? null\n          ];\n          if (!empty($a['items'])) {\n            $res['items'] = $a['items'];\n          }\n\n          return $res;\n        },\n        $this->pref->get_full_bits($acc['id']),\n        'items'\n      );\n    }\n\n    return null;\n  }",
+            "startLine": 326,
+            "endLine": 374,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "account",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "sync_emails": {
+            "name": "sync_emails",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $folder, $limit = 0)\n  {\n    if (x::has_props($folder, ['id', 'id_account', 'last_uid', 'uid'])) {\n      $res = 0;\n      if ($folder['last_uid'] && ($folder['last_uid'] !== $folder['db_uid'])) {\n        $mb = $this->get_mailbox($folder['id_account']);\n        if ($mb->select_folder($folder['uid'])) {\n          $start    = $folder['db_uid'] ? $mb->get_msg_no($folder['db_uid']) : 1;\n          $real_end = $folder['last_uid'] ? $mb->get_msg_no($folder['last_uid']): 0;\n          $end      = $start;\n          $num      = $real_end - $start;\n          var_dump($folder, $num, $real_end);\n          while ($end <= $real_end) {\n            $end = min($real_end, $start + 999);\n            $all = $mb->get_emails_list($folder['uid'], $start, $end);\n            $start += 1000;\n            var_dump($start, $end);\n            foreach ($all as $a) {\n              if ($this->insert_email($folder['id'], $a)) {\n                $res++;\n              }\n              else {\n                throw new \\Exception(_(\"Impossible to insert the email with ID\").' '.$a['message_id']);\n              }\n            }\n\n            if ($end === $real_end) {\n              \/\/$this->pref->update_bit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);\n              break;\n            }\n          }\n        }\n      }\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 377,
+            "endLine": 414,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "folder",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "insert_email": {
+            "name": "insert_email",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_folder, array $email)\n  {\n    if (x::has_props($email, ['from', 'uid'])) {\n      $cfg      = $this->class_cfg['arch']['users_emails'];\n      $table    = $this->class_cfg['tables']['users_emails'];\n      $existing = $this->db->select_one(\n        $table,\n        $cfg['id'],\n        [\n          $cfg['id_user'] => $this->user->get_id(),\n          $cfg['msg_unique_id'] => $email['message_id']\n        ]\n      );\n      foreach (bbn\\appui\\mailbox::get_dest_fields() as $df) {\n        if (!empty($email[$df])) {\n          foreach ($email[$df] as &$dest) {\n            if (!($id = $this->retrieve_email($dest['email']))) {\n              if (!($id = $this->add_contact_from_mail($dest))) {\n                throw new \\Exception(_(\"Impossible to add the contact\").' '.$dest['email']);\n              }\n            }\n\n            $dest['id'] = $id;\n          }\n\n          if ($df === 'from') {\n            $id_sender = $id;\n          }\n        }\n      }\n\n      if (!empty($id_sender)) {\n        $id_parent = null;\n        $id_thread = null;\n        if (!empty($email['in_reply_to'])) {\n          $tmp = $this->db->rselect(\n            $table,\n            [$cfg['id'], $cfg['id_thread']],\n            [\n              $cfg['id_user'] => $this->user->get_id(),\n              $cfg['msg_unique_id'] => $email['in_reply_to']\n            ]\n          );\n          if ($tmp) {\n            $id_parent = $tmp[$cfg['id']];\n            $id_thread = $tmp[$cfg['id_thread']] ?: $id_parent;\n          }\n        }\n\n        \/\/die(var_dump($email));\n        $external = null;\n        if (!empty($email['in_reply_to']) || !empty($email['references'])) {\n          $external = [\n            'in_reply_to' => $email['in_reply_to'] ?? null,\n            'references'  => $email['references'] ?? null\n          ];\n        }\n\n        $ar = [\n          $cfg['id_user'] => $this->user->get_id(),\n          $cfg['id_folder'] => $id_folder,\n          $cfg['msg_uid'] => $email['uid'],\n          $cfg['msg_unique_id'] => $email['message_id'],\n          $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),\n          $cfg['id_sender'] => $id_sender,\n          $cfg['subject'] => $email['subject'] ?? '',\n          $cfg['size'] => $email['Size'],\n          $cfg['attachments'] => empty($email['attachments']) ? null : json_encode($email['attachments']),\n          $cfg['flags'] => $email['Flagged'] ?: null,\n          $cfg['is_read'] => $email['Unseen'] ? 0 : 1,\n          $cfg['id_parent'] => $id_parent,\n          $cfg['id_thread'] => $id_thread,\n          $cfg['external_uids'] => json_encode($external)\n        ];\n        $id = false;\n        if ($existing) {\n          die(var_dump($ar));\n          $this->db->update($table, $ar, [$cfg['id'] => $existing]);\n          $id =  $existing;\n        }\n        elseif ($this->db->insert($table, $ar)) {\n          $id = $this->db->last_id();\n        }\n\n        if ($id) {\n          foreach (bbn\\appui\\mailbox::get_dest_fields() as $df) {\n            if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {\n              foreach ($email[$df] as $dest) {\n                if (!empty($dest['id'])) {\n                  $this->add_link_to_mail($id, $dest['id'], $df);\n                }\n              }\n            }\n          }\n\n          return $id;\n        }\n      }\n    }\n\n    throw new \\Exception(_(\"Invalid email\"));\n  }",
+            "startLine": 417,
+            "endLine": 518,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_folder",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "email",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_contact_from_mail": {
+            "name": "add_contact_from_mail",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $dest, $blacklist = false)\n  {\n    if (x::has_prop($dest, 'email', true)) {\n      $cfg_contacts   = $this->class_cfg['arch']['users_contacts'];\n      $cfg_links      = $this->class_cfg['arch']['users_contacts_links'];\n      $table_contacts = $this->class_cfg['tables']['users_contacts'];\n      $table_links = $this->class_cfg['tables']['users_contacts_links'];\n      if ($this->db->insert($table_contacts, [\n        $cfg_contacts['id_user']   => $this->user->get_id(),\n        $cfg_contacts['name']      => $dest['name'] ?? null,\n        $cfg_contacts['blacklist'] => $blacklist ? 1 : 0\n      ])) {\n        $id_contact = $this->db->last_id();\n        if ($this->db->insert($table_links, [\n          'id_contact' => $id_contact,\n          'type' => 'email',\n          'value' => $dest['email']\n        ])) {\n          return $this->db->last_id();\n        }\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 521,
+            "endLine": 545,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dest",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "blacklist",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_link": {
+            "name": "get_link",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $cfg   = $this->class_cfg['arch']['users_contacts_links'];\n    $table = $this->class_cfg['tables']['users_contacts_links'];\n    $data  = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);\n    return $data ?: null;\n  }",
+            "startLine": 548,
+            "endLine": 554,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1061,44 +940,285 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "limit",
+                    "name": "id",
                     "position": 0,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 10,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 }
             ]
         },
-        "get_sendings": {
-            "name": "get_sendings",
-            "summary": "Get the next mailings rows to be sent",
+        "add_link_to_mail": {
+            "name": "add_link_to_mail",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->db->rselect_all(\n      [\n        'table' => 'bbn_emailings',\n        'fields' => ['id', 'title', 'sent', 'state'],\n        'join' => [\n          [\n            'table' => 'bbn_notes_versions',\n            'on' => [\n              'conditions' => [\n                [\n                  'field' => 'bbn_notes_versions.id_note',\n                  'exp' => 'bbn_emailings.id_note'\n                ], [\n                  'field' => 'bbn_notes_versions.version',\n                  'exp' => 'bbn_emailings.version'\n                ]\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          ['state', '=', 'sending']\n        ],\n        'order' => [\n          'sent' => 'DESC'\n        ]\n      ]\n    );\n  }",
-            "startLine": 835,
-            "endLine": 865,
+            "code": "function($id_email, $id_link, $type)\n  {\n    $cfg   = $this->class_cfg['arch']['users_emails_recipients'];\n    $table = $this->class_cfg['tables']['users_emails_recipients'];\n    return (bool)$this->db->insert_ignore(\n      $table,\n      [\n        $cfg['id_email'] => $id_email,\n        $cfg['id_contact_link'] => $id_link,\n        $cfg['type'] => $type\n      ]\n    );\n\n  }",
+            "startLine": 557,
+            "endLine": 570,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_email",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_link",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_sent_to_link": {
+            "name": "add_sent_to_link",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_link, $date)\n  {\n    if ($link = $this->get_link($id_link)) {\n      $cfg   = $this->class_cfg['arch']['users_contacts_links'];\n      $table = $this->class_cfg['tables']['users_contacts_links'];\n      return (bool)$this->db->update(\n        $table,\n        [\n          $cfg['num_sent']  => $link[$cfg['num_sent']] + 1,\n          $cfg['last_sent'] => $date\n        ], [\n          'id' => $id_link\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "startLine": 573,
+            "endLine": 590,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_link",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "retrieve_email": {
+            "name": "retrieve_email",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($email)\n  {\n    $contacts = $this->class_cfg['tables']['users_contacts'];\n    $cfg_c    = $this->class_cfg['arch']['users_contacts'];\n    $links    = $this->class_cfg['tables']['users_contacts_links'];\n    $cfg_l    = $this->class_cfg['arch']['users_contacts_links'];\n    return $this->db->select_one(\n      [\n        'tables' => [$links],\n        'field'  => $this->db->cfn($cfg_l['id'], $links),\n        'join'   => [\n          [\n            'table' => $contacts,\n            'on'    => [\n              [\n                'field' => $cfg_l['id_contact'],\n                'exp'   => $this->db->cfn($cfg_c['id'], $contacts)\n              ]\n            ]\n\n          ]\n        ],\n        'where' => [\n          'value' => $email,\n          'id_user' => $this->user->get_id(),\n          'type' => 'email'\n        ]\n      ]\n    );\n  }",
+            "startLine": 593,
+            "endLine": 622,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": null,
             "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "email",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_contact": {
+            "name": "get_contact",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($email, $name, $force)\n  {\n\n  }",
+            "startLine": 625,
+            "endLine": 628,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "email",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 2,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "sync_folders": {
+            "name": "sync_folders",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account)\n  {\n    if ($mb = $this->get_mailbox($id_account)) {\n      $mbParam = $mb->get_params();\n      $types   = self::get_folder_types();\n\n      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res) {\n        $ele = array_shift($a);\n        $idx = x::find($res, ['text' => $ele]);\n        if (null === $idx) {\n          $tmp = [\n            'text' => $ele,\n            'uid' => $prefix.$ele,\n            'items' => []\n          ];\n          $res[] = $tmp;\n        }\n\n        if (count($a)) {\n          $put_in_res($a, $res[$idx]['items'], $prefix.$ele.'.');\n        }\n      };\n\n      $compare = function (\n          array $real,\n          array $db,\n          array &$res = null,\n          $id_parent = null\n      ) use (&$compare): array {\n        if (!$res) {\n          $res = ['add' => [], 'delete' => []];\n        }\n\n        foreach ($real as $r) {\n          $idx = x::find($db, ['text' => $r['text']]);\n          if (null === $idx) {\n            if ($id_parent) {\n              $r['id_parent'] = $id_parent;\n            }\n\n            $res['add'][] = $r;\n          }\n          elseif ($r['items'] && $db[$idx]['items']) {\n            $compare($r['items'], $db[$idx]['items'], $res, $db[$idx]['id']);\n          }\n        }\n\n        foreach ($db as $r) {\n          $idx = x::find($real, ['text' => $r['text']]);\n          if (null === $idx) {\n            $res['delete'][] = $r;\n          }\n        }\n\n        return $res;\n      };\n\n      $pref = $this->pref;\n\n      $import = function (array $to_add, $id_parent = null) use ($id_account, &$pref, &$import, &$types) {\n        foreach ($to_add as $a) {\n          if ($id_parent) {\n            $a['id_parent'] = $id_parent;\n            $a['id_option'] = x::get_field($types, ['code' => 'folders'], 'id');\n          }\n          else {\n            foreach ($types as $type) {\n              if (!empty($type['names'])) {\n                if (in_array($a['text'], $type['names'], true)) {\n                  $a['id_option'] = $type['id'];\n                  break;\n                }\n              }\n            }\n\n            if (!isset($a['id_option'])) {\n              $a['id_option'] = x::get_field($types, ['code' => 'folders'], 'id');\n            }\n          }\n\n          if ($id_bit = $pref->add_bit($id_account, $a)) {\n            if (!empty($a['items'])) {\n              $import($a['items'], $id_bit);\n            }\n          }\n        }\n      };\n\n      $res = [];\n      foreach ($mb->list_all_subscribed() as $dir) {\n        $tmp = str_replace($mbParam, '', $dir);\n        $bits = x::split($tmp, '.');\n        $put_in_res($bits, $res);\n      }\n\n      \/\/ We have a tree\n      $db_tree = $this->pref->get_full_bits($id_account);\n\n      $result = $compare($res, $db_tree);\n\n      $import($result['add']);\n\n      return ['real' => $res, 'db' => $db_tree, 'compare' => $result];\n    }\n\n    return null;\n  }",
+            "startLine": 631,
+            "endLine": 737,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_structure": {
+            "name": "get_structure",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_account, $force)\n  {\n\n  }",
+            "startLine": 740,
+            "endLine": 743,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         },
         "test": {
             "name": "test",
@@ -1133,6 +1253,53 @@
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
                 "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1487,12 +1654,96 @@
                 }
             ]
         },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $res = $this->db->count(\n      $this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n      ]\n    );\n    return (bool)$res;\n  }",
+            "startLine": 61,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_class_cfg": {
+            "name": "get_class_cfg",
+            "summary": "Return the",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "startLine": 75,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_fields": {
+            "name": "get_fields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\emails",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->fields;\n  }",
+            "startLine": 80,
+            "endLine": 83,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
         "get_option_root": {
             "name": "get_option_root",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1516,7 +1767,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1540,7 +1791,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1566,7 +1817,7 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1590,7 +1841,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1614,7 +1865,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1638,7 +1889,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1662,7 +1913,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1686,7 +1937,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1710,7 +1961,7 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1737,7 +1988,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1763,7 +2014,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1789,7 +2040,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1816,7 +2067,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1843,7 +2094,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\appui\\mailings",
+            "file": "bbn\\user\\emails",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -1865,20 +2116,73 @@
     },
     "properties": null,
     "staticProperties": {
-        "_cfgs": null,
-        "_mailers": [],
+        "default_class_cfg": {
+            "table": "bbn_users_emails",
+            "tables": {
+                "users_emails": "bbn_users_emails",
+                "users_emails_aliases": "bbn_users_emails_aliases",
+                "users_emails_recipients": "bbn_users_emails_recipients",
+                "users_contacts": "bbn_users_contacts",
+                "users_contacts_links": "bbn_users_contacts_links"
+            },
+            "arch": {
+                "users_emails": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "id_folder": "id_folder",
+                    "msg_uid": "msg_uid",
+                    "msg_unique_id": "msg_unique_id",
+                    "date": "date",
+                    "id_sender": "id_sender",
+                    "subject": "subject",
+                    "size": "size",
+                    "attachments": "attachments",
+                    "flags": "flags",
+                    "is_read": "is_read",
+                    "id_parent": "id_parent",
+                    "id_thread": "id_thread",
+                    "external_uids": "external_uids"
+                },
+                "users_emails_aliases": {
+                    "id_account": "id_account",
+                    "id_link": "id_link",
+                    "main": "main"
+                },
+                "users_emails_recipients": {
+                    "id_email": "id_email",
+                    "id_contact_link": "id_contact_link",
+                    "type": "type"
+                },
+                "users_contacts": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "name": "name",
+                    "blacklist": "blacklist",
+                    "cfg": "cfg"
+                },
+                "users_contacts_links": {
+                    "id": "id",
+                    "id_contact": "id_contact",
+                    "type": "type",
+                    "value": "value",
+                    "num_sent": "num_sent",
+                    "last_sent": "last_sent"
+                }
+            }
+        },
         "optional_is_init": false,
         "option_root_id": null,
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 49,
+    "numMethods": 55,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 5,
+    "numStaticProperties": 4,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
+        "bbn\\models\\tts\\dbconfig",
         "bbn\\models\\tts\\optional"
     ],
     "traitAliases": [],
@@ -1886,28 +2190,84 @@
     "isAbstract": false,
     "isFinal": false,
     "modifiers": 0,
-    "parentClass": "bbn\\models\\cls\\db",
+    "parentClass": "bbn\\models\\cls\\basic",
     "isSubclassOf": false,
     "defaultProperties": {
-        "_cfgs": null,
-        "_mailers": [],
+        "default_class_cfg": {
+            "table": "bbn_users_emails",
+            "tables": {
+                "users_emails": "bbn_users_emails",
+                "users_emails_aliases": "bbn_users_emails_aliases",
+                "users_emails_recipients": "bbn_users_emails_recipients",
+                "users_contacts": "bbn_users_contacts",
+                "users_contacts_links": "bbn_users_contacts_links"
+            },
+            "arch": {
+                "users_emails": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "id_folder": "id_folder",
+                    "msg_uid": "msg_uid",
+                    "msg_unique_id": "msg_unique_id",
+                    "date": "date",
+                    "id_sender": "id_sender",
+                    "subject": "subject",
+                    "size": "size",
+                    "attachments": "attachments",
+                    "flags": "flags",
+                    "is_read": "is_read",
+                    "id_parent": "id_parent",
+                    "id_thread": "id_thread",
+                    "external_uids": "external_uids"
+                },
+                "users_emails_aliases": {
+                    "id_account": "id_account",
+                    "id_link": "id_link",
+                    "main": "main"
+                },
+                "users_emails_recipients": {
+                    "id_email": "id_email",
+                    "id_contact_link": "id_contact_link",
+                    "type": "type"
+                },
+                "users_contacts": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "name": "name",
+                    "blacklist": "blacklist",
+                    "cfg": "cfg"
+                },
+                "users_contacts_links": {
+                    "id": "id",
+                    "id_contact": "id_contact",
+                    "type": "type",
+                    "value": "value",
+                    "num_sent": "num_sent",
+                    "last_sent": "last_sent"
+                }
+            }
+        },
         "optional_is_init": false,
         "option_root_id": null,
         "option_appui_id": null,
-        "_test_emails": null,
-        "notes": null,
-        "medias": null,
-        "mailer": null,
-        "db": null,
+        "mboxes": [],
+        "user": null,
+        "pref": null,
+        "opt": null,
+        "pw": null,
         "errors": [],
         "error": false,
         "debug": false,
         "log": [],
+        "class_cfg": null,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null,
         "options": null
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\appui",
-    "shortName": "mailings",
+    "namespaceName": "bbn\\user",
+    "shortName": "emails",
     "summary": ""
 }

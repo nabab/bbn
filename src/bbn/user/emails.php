@@ -3,6 +3,7 @@ namespace bbn\user;
 
 use bbn;
 use bbn\x;
+use bbn\user;
 
 class emails extends bbn\models\cls\basic
 {
@@ -69,10 +70,10 @@ class emails extends bbn\models\cls\basic
   /** @var array An array of connection objects */
   protected $mboxes = [];
 
-  /** @var bbn\user The user object */
+  /** @var user The user object */
   protected $user;
 
-  /** @var bbn\user The preferences object */
+  /** @var preferences The preferences object */
   protected $pref;
 
   /** @var bbn\appui\options The options object */
@@ -174,7 +175,7 @@ class emails extends bbn\models\cls\basic
           'last_uid' => $a['last_uid'] ?? null,
           'last_check' => $a['last_check'] ?? null
         ];
-        $this->mboxes[$id_account]['folders'] = $this->get_folders($id_account);
+        $this->mboxes[$id_account]['folders'] = $this->get_folders($this->mboxes[$id_account]);
       }
     }
     return $this->mboxes[$id_account] ?? null;
@@ -322,24 +323,24 @@ class emails extends bbn\models\cls\basic
   }
 
 
-  public function get_folders(string $id_account, $force = false)
+  public function get_folders($account, $force = false)
   {
-    if ($acc = $this->get_account($id_account)) {
+    $acc = is_array($account) ? $account : $acc = $this->get_account($account);
+    if ($acc) {
       $types = self::get_folder_types();
       if ($force) {
-        $this->sync_folders($id_account);
+        $this->sync_folders($acc['id']);
       }
 
-
-      $cfg = $this->class_cfg['arch']['users_emails'];
+      $cfg   = $this->class_cfg['arch']['users_emails'];
       $table = $this->class_cfg['tables']['users_emails'];
-
       return x::map(
         function ($a) use ($types, $cfg, $table) {
           if (!isset($a['uid'])) {
 
-            die(x::dump("NO UID", $a, debug_backtrace()));
+            //die(x::dump("NO UID", $a, debug_backtrace()));
           }
+
           $res = [
             'id' => $a['id'],
             'id_account' => $a['id_user_option'],
@@ -364,7 +365,7 @@ class emails extends bbn\models\cls\basic
 
           return $res;
         },
-        $this->pref->get_full_bits($id_account),
+        $this->pref->get_full_bits($acc['id']),
         'items'
       );
     }

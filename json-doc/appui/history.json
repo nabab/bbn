@@ -2029,6 +2029,11 @@
                     "bbn_tasks_roles",
                     "bbn_tasks_sessions",
                     "bbn_users",
+                    "bbn_users_contacts",
+                    "bbn_users_contacts_links",
+                    "bbn_users_emails",
+                    "bbn_users_emails_aliases",
+                    "bbn_users_emails_recipients",
                     "bbn_users_groups",
                     "bbn_users_hotlinks",
                     "bbn_users_options",
@@ -13527,6 +13532,30 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
+                        },
+                        "title": {
+                            "columns": [
+                                "title"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "content": {
+                            "columns": [
+                                "content"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
                         }
                     },
                     "cols": {
@@ -13539,6 +13568,12 @@
                         ],
                         "id_user": [
                             "id_user"
+                        ],
+                        "title": [
+                            "title"
+                        ],
+                        "content": [
+                            "content"
                         ]
                     },
                     "fields": {
@@ -13568,7 +13603,7 @@
                             "position": 3,
                             "type": "varchar",
                             "null": 1,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -13580,7 +13615,7 @@
                             "position": 4,
                             "type": "mediumtext",
                             "null": 0,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -14128,10 +14163,10 @@
                         },
                         "id_user_option": {
                             "columns": [
-                                "id_user_option_bit"
+                                "id_user_option"
                             ],
                             "ref_db": "apst_app",
-                            "ref_table": "bbn_users_options_bits",
+                            "ref_table": "bbn_users_options",
                             "ref_column": "id",
                             "constraint": "bbn_passwords_ibfk_2",
                             "update": "CASCADE",
@@ -14146,7 +14181,7 @@
                         "id_option": [
                             "id_option"
                         ],
-                        "id_user_option_bit": [
+                        "id_user_option": [
                             "id_user_option"
                         ]
                     },
@@ -14174,7 +14209,7 @@
                             "default": "NULL",
                             "maxlength": 16
                         },
-                        "id_user_option_bit": {
+                        "id_user_option": {
                             "position": 3,
                             "type": "binary",
                             "null": 1,
@@ -15728,6 +15763,775 @@
                         }
                     }
                 },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_contacts": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
+                        "id_user": {
+                            "columns": [
+                                "id_user"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_contacts_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "name": {
+                            "columns": [
+                                "name"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id": [
+                            "PRIMARY"
+                        ],
+                        "id_user": [
+                            "id_user"
+                        ],
+                        "name": [
+                            "name"
+                        ]
+                    },
+                    "fields": {
+                        "id": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_user": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "name": {
+                            "position": 3,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 100
+                        },
+                        "blacklist": {
+                            "position": 4,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "cfg": {
+                            "position": 5,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_contacts_links": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
+                        "id_contact": {
+                            "columns": [
+                                "id_contact"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_contacts_links_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "value": {
+                            "columns": [
+                                "value"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id": [
+                            "PRIMARY"
+                        ],
+                        "id_contact": [
+                            "id_contact"
+                        ],
+                        "value": [
+                            "value"
+                        ]
+                    },
+                    "fields": {
+                        "id": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_contact": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "type": {
+                            "position": 3,
+                            "type": "enum",
+                            "null": 0,
+                            "key": null,
+                            "extra": "'email','phone','website'",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "values": [
+                                "email",
+                                "phone",
+                                "website"
+                            ]
+                        },
+                        "value": {
+                            "position": 4,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 255
+                        },
+                        "num_sent": {
+                            "position": 5,
+                            "type": "int",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 10
+                        },
+                        "last_sent": {
+                            "position": 6,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_emails": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
+                        "msguid": {
+                            "columns": [
+                                "msg_uid"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "date": {
+                            "columns": [
+                                "date"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "id_sender": {
+                            "columns": [
+                                "id_sender"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts_links",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_3",
+                            "update": "CASCADE",
+                            "delete": "RESTRICT",
+                            "unique": 0
+                        },
+                        "is_read": {
+                            "columns": [
+                                "is_read"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "id_parent": {
+                            "columns": [
+                                "id_parent"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_emails",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_4",
+                            "update": "CASCADE",
+                            "delete": "SET NULL",
+                            "unique": 0
+                        },
+                        "id_thread": {
+                            "columns": [
+                                "id_thread"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_emails",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_5",
+                            "update": "CASCADE",
+                            "delete": "SET NULL",
+                            "unique": 0
+                        },
+                        "id_mailbox": {
+                            "columns": [
+                                "id_folder"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_options_bits",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_6",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "id_user": {
+                            "columns": [
+                                "id_user"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "msg_unique_id": {
+                            "columns": [
+                                "msg_unique_id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "subject": {
+                            "columns": [
+                                "subject"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id": [
+                            "PRIMARY"
+                        ],
+                        "msg_uid": [
+                            "msguid"
+                        ],
+                        "date": [
+                            "date"
+                        ],
+                        "id_sender": [
+                            "id_sender"
+                        ],
+                        "is_read": [
+                            "is_read"
+                        ],
+                        "id_parent": [
+                            "id_parent"
+                        ],
+                        "id_thread": [
+                            "id_thread"
+                        ],
+                        "id_folder": [
+                            "id_mailbox"
+                        ],
+                        "id_user": [
+                            "id_user"
+                        ],
+                        "msg_unique_id": [
+                            "msg_unique_id"
+                        ],
+                        "subject": [
+                            "subject"
+                        ]
+                    },
+                    "fields": {
+                        "id": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_user": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_folder": {
+                            "position": 3,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "msg_uid": {
+                            "position": 4,
+                            "type": "bigint",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 14
+                        },
+                        "msg_unique_id": {
+                            "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 128
+                        },
+                        "date": {
+                            "position": 6,
+                            "type": "datetime",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": ""
+                        },
+                        "id_sender": {
+                            "position": 7,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "subject": {
+                            "position": 8,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 1000
+                        },
+                        "size": {
+                            "position": 9,
+                            "type": "bigint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 14
+                        },
+                        "attachments": {
+                            "position": 10,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "flags": {
+                            "position": 11,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 100
+                        },
+                        "is_read": {
+                            "position": 12,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "id_parent": {
+                            "position": 13,
+                            "type": "binary",
+                            "null": 1,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 16
+                        },
+                        "id_thread": {
+                            "position": 14,
+                            "type": "binary",
+                            "null": 1,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 16
+                        },
+                        "external_uids": {
+                            "position": 15,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_emails_aliases": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id_account",
+                                "id_link"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": "bbn_users_emails_aliases_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 1
+                        },
+                        "id_account": {
+                            "columns": [
+                                "id_account"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_options",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_aliases_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "id_link": {
+                            "columns": [
+                                "id_link"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts_links",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_aliases_ibfk_2",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id_account": [
+                            "PRIMARY",
+                            "id_account"
+                        ],
+                        "id_link": [
+                            "PRIMARY",
+                            "id_link"
+                        ]
+                    },
+                    "fields": {
+                        "id_account": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_link": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "main": {
+                            "position": 3,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_emails_recipients": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id_email",
+                                "id_contact_link",
+                                "type"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": "bbn_users_emails_recipients_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 1
+                        },
+                        "id_email": {
+                            "columns": [
+                                "id_email"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_emails",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_recipients_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "id_contact_link": {
+                            "columns": [
+                                "id_contact_link"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts_links",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_recipients_ibfk_2",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "type": {
+                            "columns": [
+                                "type"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id_email": [
+                            "PRIMARY",
+                            "id_email"
+                        ],
+                        "id_contact_link": [
+                            "PRIMARY",
+                            "id_contact_link"
+                        ],
+                        "type": [
+                            "PRIMARY",
+                            "type"
+                        ]
+                    },
+                    "fields": {
+                        "id_email": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_contact_link": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "type": {
+                            "position": 3,
+                            "type": "enum",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "'to','cc','bcc'",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "values": [
+                                "to",
+                                "cc",
+                                "bcc"
+                            ]
+                        }
+                    }
+                },
                 "mysql\/mysql.lan\/apst_app\/bbn_users_groups": {
                     "keys": {
                         "PRIMARY": {
@@ -15949,36 +16753,6 @@
                             "delete": null,
                             "unique": 1
                         },
-                        "id_option_2": {
-                            "columns": [
-                                "id_option",
-                                "id_user",
-                                "id_group",
-                                "id_link",
-                                "id_alias"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": "bbn_users_options_ibfk_3",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 1
-                        },
-                        "id_option_3": {
-                            "columns": [
-                                "id_option",
-                                "id_user",
-                                "id_group"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": "bbn_users_options_ibfk_3",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 1
-                        },
                         "id_option": {
                             "columns": [
                                 "id_option"
@@ -16045,26 +16819,18 @@
                             "PRIMARY"
                         ],
                         "id_option": [
-                            "id_option_2",
-                            "id_option_3",
                             "id_option"
                         ],
                         "id_user": [
-                            "id_option_2",
-                            "id_option_3",
                             "id_user"
                         ],
                         "id_group": [
-                            "id_option_2",
-                            "id_option_3",
                             "id_group"
                         ],
                         "id_link": [
-                            "id_option_2",
                             "id_link"
                         ],
                         "id_alias": [
-                            "id_option_2",
                             "id_alias"
                         ]
                     },
@@ -17326,6 +18092,11 @@
                     "bbn_tasks_roles",
                     "bbn_tasks_sessions",
                     "bbn_users",
+                    "bbn_users_contacts",
+                    "bbn_users_contacts_links",
+                    "bbn_users_emails",
+                    "bbn_users_emails_aliases",
+                    "bbn_users_emails_recipients",
                     "bbn_users_groups",
                     "bbn_users_hotlinks",
                     "bbn_users_options",
@@ -28824,6 +29595,30 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
+                        },
+                        "title": {
+                            "columns": [
+                                "title"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "content": {
+                            "columns": [
+                                "content"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
                         }
                     },
                     "cols": {
@@ -28836,6 +29631,12 @@
                         ],
                         "id_user": [
                             "id_user"
+                        ],
+                        "title": [
+                            "title"
+                        ],
+                        "content": [
+                            "content"
                         ]
                     },
                     "fields": {
@@ -28865,7 +29666,7 @@
                             "position": 3,
                             "type": "varchar",
                             "null": 1,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -28877,7 +29678,7 @@
                             "position": 4,
                             "type": "mediumtext",
                             "null": 0,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -29425,10 +30226,10 @@
                         },
                         "id_user_option": {
                             "columns": [
-                                "id_user_option_bit"
+                                "id_user_option"
                             ],
                             "ref_db": "apst_app",
-                            "ref_table": "bbn_users_options_bits",
+                            "ref_table": "bbn_users_options",
                             "ref_column": "id",
                             "constraint": "bbn_passwords_ibfk_2",
                             "update": "CASCADE",
@@ -29443,7 +30244,7 @@
                         "id_option": [
                             "id_option"
                         ],
-                        "id_user_option_bit": [
+                        "id_user_option": [
                             "id_user_option"
                         ]
                     },
@@ -29471,7 +30272,7 @@
                             "default": "NULL",
                             "maxlength": 16
                         },
-                        "id_user_option_bit": {
+                        "id_user_option": {
                             "position": 3,
                             "type": "binary",
                             "null": 1,
@@ -31025,6 +31826,775 @@
                         }
                     }
                 },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_contacts": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
+                        "id_user": {
+                            "columns": [
+                                "id_user"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_contacts_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "name": {
+                            "columns": [
+                                "name"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id": [
+                            "PRIMARY"
+                        ],
+                        "id_user": [
+                            "id_user"
+                        ],
+                        "name": [
+                            "name"
+                        ]
+                    },
+                    "fields": {
+                        "id": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_user": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "name": {
+                            "position": 3,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 100
+                        },
+                        "blacklist": {
+                            "position": 4,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "cfg": {
+                            "position": 5,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_contacts_links": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
+                        "id_contact": {
+                            "columns": [
+                                "id_contact"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_contacts_links_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "value": {
+                            "columns": [
+                                "value"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id": [
+                            "PRIMARY"
+                        ],
+                        "id_contact": [
+                            "id_contact"
+                        ],
+                        "value": [
+                            "value"
+                        ]
+                    },
+                    "fields": {
+                        "id": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_contact": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "type": {
+                            "position": 3,
+                            "type": "enum",
+                            "null": 0,
+                            "key": null,
+                            "extra": "'email','phone','website'",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "values": [
+                                "email",
+                                "phone",
+                                "website"
+                            ]
+                        },
+                        "value": {
+                            "position": 4,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 255
+                        },
+                        "num_sent": {
+                            "position": 5,
+                            "type": "int",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 10
+                        },
+                        "last_sent": {
+                            "position": 6,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_emails": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
+                        "msguid": {
+                            "columns": [
+                                "msg_uid"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "date": {
+                            "columns": [
+                                "date"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "id_sender": {
+                            "columns": [
+                                "id_sender"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts_links",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_3",
+                            "update": "CASCADE",
+                            "delete": "RESTRICT",
+                            "unique": 0
+                        },
+                        "is_read": {
+                            "columns": [
+                                "is_read"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "id_parent": {
+                            "columns": [
+                                "id_parent"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_emails",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_4",
+                            "update": "CASCADE",
+                            "delete": "SET NULL",
+                            "unique": 0
+                        },
+                        "id_thread": {
+                            "columns": [
+                                "id_thread"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_emails",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_5",
+                            "update": "CASCADE",
+                            "delete": "SET NULL",
+                            "unique": 0
+                        },
+                        "id_mailbox": {
+                            "columns": [
+                                "id_folder"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_options_bits",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_6",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "id_user": {
+                            "columns": [
+                                "id_user"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "msg_unique_id": {
+                            "columns": [
+                                "msg_unique_id"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        },
+                        "subject": {
+                            "columns": [
+                                "subject"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id": [
+                            "PRIMARY"
+                        ],
+                        "msg_uid": [
+                            "msguid"
+                        ],
+                        "date": [
+                            "date"
+                        ],
+                        "id_sender": [
+                            "id_sender"
+                        ],
+                        "is_read": [
+                            "is_read"
+                        ],
+                        "id_parent": [
+                            "id_parent"
+                        ],
+                        "id_thread": [
+                            "id_thread"
+                        ],
+                        "id_folder": [
+                            "id_mailbox"
+                        ],
+                        "id_user": [
+                            "id_user"
+                        ],
+                        "msg_unique_id": [
+                            "msg_unique_id"
+                        ],
+                        "subject": [
+                            "subject"
+                        ]
+                    },
+                    "fields": {
+                        "id": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_user": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_folder": {
+                            "position": 3,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "msg_uid": {
+                            "position": 4,
+                            "type": "bigint",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 14
+                        },
+                        "msg_unique_id": {
+                            "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 128
+                        },
+                        "date": {
+                            "position": 6,
+                            "type": "datetime",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": ""
+                        },
+                        "id_sender": {
+                            "position": 7,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "subject": {
+                            "position": 8,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 1000
+                        },
+                        "size": {
+                            "position": 9,
+                            "type": "bigint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 14
+                        },
+                        "attachments": {
+                            "position": 10,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "flags": {
+                            "position": 11,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 100
+                        },
+                        "is_read": {
+                            "position": 12,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "id_parent": {
+                            "position": 13,
+                            "type": "binary",
+                            "null": 1,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 16
+                        },
+                        "id_thread": {
+                            "position": 14,
+                            "type": "binary",
+                            "null": 1,
+                            "key": "MUL",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 16
+                        },
+                        "external_uids": {
+                            "position": 15,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_emails_aliases": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id_account",
+                                "id_link"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": "bbn_users_emails_aliases_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 1
+                        },
+                        "id_account": {
+                            "columns": [
+                                "id_account"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_options",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_aliases_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "id_link": {
+                            "columns": [
+                                "id_link"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts_links",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_aliases_ibfk_2",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id_account": [
+                            "PRIMARY",
+                            "id_account"
+                        ],
+                        "id_link": [
+                            "PRIMARY",
+                            "id_link"
+                        ]
+                    },
+                    "fields": {
+                        "id_account": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_link": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "main": {
+                            "position": 3,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        }
+                    }
+                },
+                "mysql\/mysql.lan\/apst_app\/bbn_users_emails_recipients": {
+                    "keys": {
+                        "PRIMARY": {
+                            "columns": [
+                                "id_email",
+                                "id_contact_link",
+                                "type"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": "bbn_users_emails_recipients_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 1
+                        },
+                        "id_email": {
+                            "columns": [
+                                "id_email"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_emails",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_recipients_ibfk_1",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "id_contact_link": {
+                            "columns": [
+                                "id_contact_link"
+                            ],
+                            "ref_db": "apst_app",
+                            "ref_table": "bbn_users_contacts_links",
+                            "ref_column": "id",
+                            "constraint": "bbn_users_emails_recipients_ibfk_2",
+                            "update": "CASCADE",
+                            "delete": "CASCADE",
+                            "unique": 0
+                        },
+                        "type": {
+                            "columns": [
+                                "type"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
+                        }
+                    },
+                    "cols": {
+                        "id_email": [
+                            "PRIMARY",
+                            "id_email"
+                        ],
+                        "id_contact_link": [
+                            "PRIMARY",
+                            "id_contact_link"
+                        ],
+                        "type": [
+                            "PRIMARY",
+                            "type"
+                        ]
+                    },
+                    "fields": {
+                        "id_email": {
+                            "position": 1,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "id_contact_link": {
+                            "position": 2,
+                            "type": "binary",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "type": {
+                            "position": 3,
+                            "type": "enum",
+                            "null": 0,
+                            "key": "PRI",
+                            "extra": "'to','cc','bcc'",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "values": [
+                                "to",
+                                "cc",
+                                "bcc"
+                            ]
+                        }
+                    }
+                },
                 "mysql\/mysql.lan\/apst_app\/bbn_users_groups": {
                     "keys": {
                         "PRIMARY": {
@@ -31246,36 +32816,6 @@
                             "delete": null,
                             "unique": 1
                         },
-                        "id_option_2": {
-                            "columns": [
-                                "id_option",
-                                "id_user",
-                                "id_group",
-                                "id_link",
-                                "id_alias"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": "bbn_users_options_ibfk_3",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 1
-                        },
-                        "id_option_3": {
-                            "columns": [
-                                "id_option",
-                                "id_user",
-                                "id_group"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": "bbn_users_options_ibfk_3",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 1
-                        },
                         "id_option": {
                             "columns": [
                                 "id_option"
@@ -31342,26 +32882,18 @@
                             "PRIMARY"
                         ],
                         "id_option": [
-                            "id_option_2",
-                            "id_option_3",
                             "id_option"
                         ],
                         "id_user": [
-                            "id_option_2",
-                            "id_option_3",
                             "id_user"
                         ],
                         "id_group": [
-                            "id_option_2",
-                            "id_option_3",
                             "id_group"
                         ],
                         "id_link": [
-                            "id_option_2",
                             "id_link"
                         ],
                         "id_alias": [
-                            "id_option_2",
                             "id_alias"
                         ]
                     },

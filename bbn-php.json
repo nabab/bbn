@@ -2860,7 +2860,7 @@
                 "value": "mailbox",
                 "text": "mailbox",
                 "url": "bbn-php\/doc\/class\/appui\/mailbox",
-                "desc": "Checks if we are connected  (Test: ok)",
+                "desc": "",
                 "items": [
                     {
                         "type": "method",
