@@ -1251,47 +1251,48 @@ class preferences extends bbn\models\cls\db
         unset($cfg[$c['id']]);
       }
 
-      $to_cfg = $this->get_bit_cfg(null, $cfg);
-      //die(var_dump($cfg, $to_cfg));
+      if (\bbn\str::is_json($cfg[$c['cfg']])) {
+        $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
+      }
+
+      
+      $to_cfg = $this->get_bit_cfg(null, $cfg[$c['cfg']] ?? $cfg);
       if (isset($to_cfg['items'])) {
         unset($to_cfg['items']);
       }
 
+      $update = [];
+      $from_cfg = $this->get_bit_cfg($id);
       if (!empty($to_cfg)) {
-        if (!empty($merge_config) && !empty($cfg[$c['cfg']])) {
-          if (\bbn\str::is_json($cfg[$c['cfg']])) {
-            $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
-          }
-
-          if (\is_array($cfg[$c['cfg']])) {
-            $cfg[$c['cfg']] = array_merge($cfg[$c['cfg']], $to_cfg);
-          }
-          else {
-            $cfg[$c['cfg']] = $to_cfg;
-          }
+        if ($merge_config && !empty($from_cfg)) {
+          $update['cfg'] = json_encode(array_merge($from_cfg, $to_cfg));
         }
         else {
-          $cfg[$c['cfg']] = $to_cfg;
+          $update['cfg'] = json_encode($to_cfg);
         }
-
-        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
+      }
+      elseif (!$merge_config) {
+        $update['cfg'] = null;
       }
 
-      if (!\bbn\str::is_json($cfg[$c['cfg']])) {
-        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
+      if (isset($cfg[$c['id_parent']])) {
+        $update[$c['id_parent']] = $cfg[$c['id_parent']];
+      }
+      if (isset($cfg[$c['id_option']])) {
+        $update[$c['id_option']] = $cfg[$c['id_option']];
+      }
+      if (isset($cfg[$c['num']])) {
+        $update[$c['num']] = $cfg[$c['num']];
+      }
+      if (isset($cfg[$c['text']])) {
+        $update[$c['text']] = $cfg[$c['text']];
       }
 
-      return $this->db->update(
-        $this->class_cfg['tables']['user_options_bits'], [
-        $c['id_parent'] => $cfg[$c['id_parent']] ?? null,
-        $c['id_option'] => $cfg[$c['id_option']] ?? null,
-        $c['num'] => $cfg[$c['num']] ?? null,
-        $c['text'] => $cfg[$c['text']] ?? '',
-        $c['cfg'] => $cfg[$c['cfg']] ?? '',
-        ], [
-        $c['id'] => $id
-        ]
-      );
+      return count($update) ? $this->db->update(
+        $this->class_cfg['tables']['user_options_bits'],
+        $update,
+        [$c['id'] => $id]
+      ) : 0;
     }
 
     return null;

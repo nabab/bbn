@@ -172,6 +172,10 @@ MYSQL
     self::$disabled = false;
   }
 
+  public static function is_enabled(){
+    return !self::$disabled;
+  }
+
 	/**
 	 * Gets all information about a given table
    *

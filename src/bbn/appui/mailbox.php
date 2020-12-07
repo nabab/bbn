@@ -500,7 +500,7 @@ class mailbox
   public function get_info_folder(string $dir = null)
   {
     if ($this->_is_connected()) {
-      if (!$dir || $this->seect_folder($dir)) {
+      if (!$dir || $this->select_folder($dir)) {
         return imap_mailboxmsginfo($this->stream);
       }
     }
@@ -547,18 +547,23 @@ class mailbox
           if (!empty($tmp[$df])) {
             $ads = [];
             foreach ($tmp[$df] as $a) {
-              $ads[] = [
-                'name' => $a->personal ?? null,
-                'email' => strtolower($a->mailbox.'@'.$a->host),
-                'host' => $a->host
-              ];
+              if (isset($a->host)) {
+                $ads[] = [
+                  'name' => $a->personal ?? null,
+                  'email' => strtolower($a->mailbox.'@'.$a->host),
+                  'host' => $a->host
+                ];
+              }
+              else {
+                $this->log((array)$a);
+              }
             }
 
             $tmp[$df] = $ads;
           }
         }
         $tmp['references']  = empty($tmp['references']) ? [] : x::split(substr($tmp['references'], 1, -1), '> <');
-        $tmp['message_id']  = substr($tmp['message_id'], 1, -1);
+        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : '';
         $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
         $tmp['attachments'] = [];
         $tmp['is_html']     = false;
@@ -590,9 +595,6 @@ class mailbox
 
         $res[] = $tmp;
         $start++;
-        if ($start % 100 === 0) {
-          break;
-        }
       }
 
       return $res;

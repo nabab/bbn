@@ -17,6 +17,7 @@
 namespace bbn\file;
 
 use bbn;
+use bbn\x;
 
 /**
  * Class system
@@ -57,712 +58,6 @@ class system extends bbn\models\cls\basic
   protected $timeout = 10;
 
 
-  private function _get_password(array $cfg)
-  {
-    if (isset($cfg['pass'])) {
-      if (!empty($cfg['encrypted'])) {
-        if ($tmp = base64_decode($cfg['pass'])) {
-          return \bbn\util\enc::decrypt($tmp, $cfg['encryption_key'] ?? '');
-        }
-      }
-
-      return $cfg['pass'];
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Connect to a Nextcloud instance
-   * @param array $cfg
-   * @return bool
-   */
-  private function _connect_nextcloud(array $cfg): bool
-  {
-    if (isset($cfg['host'], $cfg['user'], $cfg['pass']) && class_exists('\\Sabre\\DAV\\Client')) {
-      $this->prefix = '/remote.php/webdav/';
-      $this->obj    = new \Sabre\DAV\Client(
-        [
-        'baseUri' => 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'].$this->prefix.$cfg['name'],
-        'userName' => $cfg['user'],
-        'password' => $this->_get_password($cfg)
-        ]
-      );
-      $this->host   = 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'];
-      if ($this->obj->options()) {
-        $this->current = '';
-        return true;
-      }
-
-      $this->error = _('Impossible to connect to the WebDAV host');
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Connect to FTP
-   * @param array $cfg
-   * @return bool
-   */
-  private function _connect_ftp(array $cfg): bool
-  {
-    if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
-      $args = [$cfg['host'], $cfg['port'] ?? 21, $cfg['timeout'] ?? $this->timeout];
-      try {
-        $this->obj = ftp_ssl_connect(...$args);
-      }
-      catch (\Exception $e){
-        $this->error  = _('Impossible to connect to the FTP host through SSL');
-        $this->error .= PHP_EOL.$e->getMessage();
-      }
-
-      if (!$this->obj) {
-        try {
-          $this->obj = ftp_connect(...$args);
-        }
-        catch (\Exception $e){
-          $this->error  = _('Impossible to connect to the FTP host');
-          $this->error .= PHP_EOL.$e->getMessage();
-        }
-      }
-
-      if ($this->obj) {
-        if (!@ftp_login($this->obj, $cfg['user'], $this->_get_password($cfg))) {
-          $this->error  = _('Impossible to login to the FTP host');
-          $this->error .= PHP_EOL.error_get_last()['message'];
-        }
-        else{
-          $this->current = ftp_pwd($this->obj);
-          if (!empty($cfg['passive'])
-              || (defined('BBN_SERVER_NAME') && !@fsockopen(BBN_SERVER_NAME, $args[1]))
-          ) {
-            ftp_pasv($this->obj, true);
-            stream_set_chunk_size($this->obj, 1024 * 1024);
-          }
-
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Connects to SSH
-   * @param array $cfg
-   * @return bool
-   */
-  private function _connect_ssh(array $cfg): bool
-  {
-    if (isset($cfg['host'])) {
-      $param = [];
-      // Keys as parans
-      if (isset($cfg['public'], $cfg['private'])) {
-        $param['hostkey'] = 'ssh-rsa';
-      }
-
-      $this->cn = @ssh2_connect(
-        $cfg['host'], $cfg['port'] ?? 22, $param/*, [
-        'debug' => function($message, $language, $always_display){
-        bbn\x::log([$message, $language, $always_display], 'connect_ssh_debug');
-        },
-        'disconnect' => function($reason, $message, $language){
-        bbn\x::log([$reason, $message, $language], 'connect_ssh_disconnect');
-        }
-        ]*/
-      );
-      if (!$this->cn) {
-        $this->error = _("Could not connect through SSH.");
-      }
-      elseif (isset($cfg['user'], $cfg['public'], $cfg['private'])) {
-        stream_set_blocking($this->cn, true);
-        stream_set_chunk_size($this->cn, 1024 * 1024);
-        /*
-        $fingerprint = ssh2_fingerprint($this->cn, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
-        if ( strcmp($this->ssh_server_fp, $fingerprint) !== 0 ){
-          $this->error = _('Unable to verify server identity!');
-        }
-        */
-        if (!ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $this->_get_password($cfg))) {
-          $this->error = _('Authentication rejected by server');
-        }
-        elseif ($this->obj = @ssh2_sftp($this->cn)) {
-          $this->current = ssh2_sftp_realpath($this->obj, '.');
-          return true;
-        }
-        else{
-          $this->error = _("Could not connect through SFTP.");
-        }
-      }
-      elseif (isset($cfg['user'], $cfg['pass']) && @ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg))) {
-        //die(_("Could not authenticate with username and password."));
-        $this->obj = @ssh2_sftp($this->cn);
-        if ($this->obj) {
-          $this->current = ssh2_sftp_realpath($this->obj, '.');
-          return true;
-        }
-
-        $this->error = _("Could not initialize SFTP subsystem.");
-      }
-      else{
-        $this->error = _("Could not authenticate with username and password.");
-      }
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Checks if the given files name ends with the given suffix string
-   *
-   * @todo Nextcloud
-   * @param array|string    $item
-   * @param callable|string $filter
-   * @return bool
-   */
-  private function _check_filter($item, $filter): bool
-  {
-    if ($filter) {
-      if (is_string($filter)) {
-        $extensions = array_map(
-          function ($a) {
-            if (substr($a, 0, 1) !== '.') {
-              $a = '.'.$a;
-            }
-
-            return strtolower($a);
-          }, \bbn\x::split($filter, '|')
-        );
-        foreach ($extensions as $ext) {
-          if (strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($ext))) === $ext) {
-            return true;
-          }
-        }
-
-        return false;
-      }
-      elseif (is_callable($filter)) {
-        return $filter($item);
-      }
-    }
-
-    return true;
-  }
-
-
-  /**
-   * Raw function returning the elements contained in the given directory
-   * @param string          $path
-   * @param string|callable $type
-   * @param bool            $hidden
-   * @param string          $detailed
-   * @return array
-   */
-  private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
-  {
-    if ($this->mode !== 'nextcloud') {
-      $files        = [];
-      $dirs         = [];
-      $has_size     = stripos((string)$detailed, 's') !== false;
-      $has_type     = stripos((string)$detailed, 't') !== false;
-      $has_mod      = stripos((string)$detailed, 'm') !== false;
-      $has_children = stripos((string)$detailed, 'c') !== false;
-      if (($this->mode === 'ftp') && ($detailed || ($type !== 'both'))) {
-        if ($fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)))) {
-          foreach ($fs as $f){
-            if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0))) {
-              $ok = 0;
-              if ($type === 'both') {
-                $ok = 1;
-              }
-              elseif ($type === 'dir') {
-                $ok = $f['type'] === 'dir';
-              }
-              elseif ($type === 'file') {
-                $ok = $f['type'] === 'file';
-              }
-              elseif (!is_string($type) || is_file($path.'/'.$f['name'])) {
-                $ok = $this->_check_filter($f['name'], $type);
-              }
-
-              if ($ok) {
-                if ($detailed) {
-                  $tmp = [
-                    'name' => $path.'/'.$f['name']
-                  ];
-                  if ($has_mod) {
-                    $tmp['mtime'] = mktime(
-                      substr($f['modify'], 8, 2),
-                      substr($f['modify'], 10, 2),
-                      substr($f['modify'], 12, 2),
-                      substr($f['modify'], 4, 2),
-                      substr($f['modify'], 6, 2),
-                      substr($f['modify'], 0, 4)
-                    );
-                  }
-
-                  if ($has_type) {
-                    $tmp['dir']  = $f['type'] === 'dir';
-                    $tmp['file'] = $f['type'] !== 'dir';
-                  }
-
-                  if ($has_size) {
-                    $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
-                  }
-
-                  if ($has_children && ($f['type'] === 'dir')) {
-                    $tmp['num'] = count($this->get_files($path.'/'.$f['name'], true, $hidden));
-                  }
-                }
-                else{
-                  $tmp = $path.'/'.$f['name'];
-                }
-
-                if ($f['type'] === 'dir') {
-                  $dirs[] = $tmp;
-                }
-                else {
-                  $files[] = $tmp;
-                }
-              }
-            }
-          }
-        }
-        else{
-          bbn\x::log(error_get_last(), 'filesystem');
-        }
-      }
-      else {
-        $fs = scandir($path, SCANDIR_SORT_ASCENDING);
-        foreach ($fs as $f){
-          if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0))) {
-            $ok      = 0;
-            $is_dir  = is_dir($path.'/'.$f);
-            $is_file = is_file($path.'/'.$f);
-            if (($type === 'both')
-                || (($type === 'file') && $is_file)
-                || (($type === 'dir') && $is_dir)
-            ) {
-              $ok = 1;
-            }
-            elseif (!is_string($type) || is_file($path.'/'.$f)) {
-              $ok = $this->_check_filter($f, $type);
-            }
-
-            if ($ok) {
-              if ($detailed) {
-                $tmp = [
-                  'name' => $path.'/'.$f
-                ];
-                if ($has_mod) {
-                  $tmp['mtime'] = filemtime($path.'/'.$f);
-                }
-
-                if ($has_type) {
-                  $tmp['dir']  = $is_dir;
-                  $tmp['file'] = $is_file;
-                }
-
-                if ($has_size) {
-                  $tmp['size'] = $is_dir ? 0 : $this->filesize($path.'/'.$f);
-                }
-
-                if ($has_children && $is_dir) {
-                  $tmp['num'] = count($this->get_files($path.'/'.$f, true, $hidden));
-                }
-              }
-              else {
-                $tmp = $path.'/'.$f;
-              }
-
-              if ($is_dir) {
-                $dirs[] = $tmp;
-              }
-              else{
-                $files[] = $tmp;
-              }
-            }
-          }
-        }
-      }
-
-      return array_merge($dirs, $files);
-    }
-    else {
-      return $this->obj->get_items($path, $type, $hidden, $detailed);
-    }
-  }
-
-
-  /**
-   * @param $path
-   * @return bool
-   */
-  private function _exists($path): bool
-  {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->exists($path);
-    }
-    else {
-      return file_exists($path);
-    }
-  }
-
-
-  /**
-   * @param string               $path
-   * @param string|callable|null $filter
-   * @param bool                 $hidden
-   * @param string               $detailed
-   * @return array
-   */
-  private function _scand(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
-  {
-    $all = [];
-    foreach ($this->_get_items($path, 'dir', $hidden, $detailed) as $it){
-      $p = $detailed ? $it['name'] : $it;
-      if (!$filter || $this->_check_filter($p, $filter)) {
-        $all[] = $it;
-      }
-
-      foreach ($this->_scand($p, $filter, $hidden, $detailed) as $t){
-        $all[] = $t;
-      }
-    }
-
-    return $all;
-  }
-
-
-  /**
-   * @param string               $path
-   * @param string|callable|null $filter
-   * @param bool                 $hidden
-   * @param string               $detailed
-   * @return array
-   */
-  private function _scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
-  {
-    $all = [];
-    if (!$filter) {
-      $filter = 'both';
-    }
-
-    foreach ($this->_get_items($path, 'both', $hidden, $detailed) as $it){
-      $p = $detailed ? $it['name'] : $it;
-      if (!$filter || $this->_check_filter($p, $filter)) {
-        $all[] = $it;
-      }
-
-      if ($this->_is_dir($p)) {
-        foreach ($this->_scan($p, $filter, $hidden, $detailed) as $t){
-          $all[] = $t;
-        }
-      }
-    }
-
-    return $all;
-  }
-
-
-  /**
-   * @param string $dir
-   * @param int    $chmod
-   * @param bool   $recursive
-   * @return bool
-   */
-  private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
-  {
-    if (empty($this->_is_dir($dir))) {
-      return mkdir($dir, $chmod, $recursive);
-    }
-
-    return true;
-  }
-
-
-  /**
-   * @param string $path
-   * @param bool   $full
-   * @return bool
-   */
-  private function _delete(string $path, bool $full = true): bool
-  {
-    $res = false;
-    if ($this->mode === 'nextcloud') {
-      $res = $this->obj->delete($path);
-    }
-    else {
-      if ($this->_is_dir($path)) {
-        $files = $this->_get_items($path, 'both', true);
-        if (!empty($files)) {
-          foreach ($files as $file) {
-            $this->_delete($file);
-          }
-        }
-
-        if ($full) {
-          if ($this->mode === 'ssh') {
-            try {
-              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-            }
-            catch (\Exception $e) {
-              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
-            }
-          }
-          elseif ($this->mode === 'ftp') {
-            try {
-              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-            }
-            catch (\Exception $e) {
-              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
-            }
-          }
-          else{
-            try {
-              $res = rmdir($path);
-            }
-            catch (\Exception $e) {
-              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
-            }
-          }
-        }
-        else {
-          $res = true;
-        }
-      }
-      elseif ($this->_is_file($path)) {
-        if ($this->mode === 'ssh') {
-          try {
-            $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
-          }
-          catch (\Exception $e) {
-            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
-          }
-        }
-        elseif ($this->mode === 'ftp') {
-          try {
-            $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
-          }
-          catch (\Exception $e) {
-            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
-          }
-        }
-        else {
-          try {
-            $res = unlink($path);
-          }
-          catch (\Exception $e) {
-            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
-          }
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Copy either the file to the new path or the ocntent of the dir inside the new dir
-   * @param string $source
-   * @param string $dest
-   * @return bool
-   */
-  private function _copy(string $source, string $dest): bool
-  {
-    if ($this->mode !== 'nextcloud') {
-      if ($this->_is_file($source)) {
-        return copy($source, $dest);
-      }
-      elseif ($this->_is_dir($source) && $this->_mkdir($dest)) {
-        foreach ($this->_get_items($source, 'both', true) as $it){
-          $this->_copy($it, $dest.'/'.basename($it));
-        }
-
-        return true;
-      }
-
-      return false;
-    }
-  }
-
-
-  /**
-   * @param $source
-   * @param $dest
-   * @return bool
-   */
-  private function _rename($source, $dest): bool
-  {
-    if ($this->mode !== 'nextcloud') {
-      $file1 = substr($source, strlen($this->prefix));
-      $file2 = substr($dest, strlen($this->prefix));
-      if ($this->mode === 'ssh') {
-        return ssh2_sftp_rename($this->obj, $file1, $file2);
-      }
-
-      if ($this->mode === 'ftp') {
-        return ftp_rename($this->obj, $file1, $file2);
-      }
-
-      return rename($file1, $file2);
-    }
-    else{
-      return $this->obj->rename($source, $dest);
-    }
-  }
-
-
-  private function _get_empty_dirs($path, bool $hidden_is_empty = false): array
-  {
-    $res = [];
-    $all = $this->_get_items($path, 'both', !$hidden_is_empty);
-    foreach ($all as $dir){
-      if (is_dir($dir)) {
-        if (!count($files = $this->_get_items($dir, 'file', !$hidden_is_empty))) {
-          $dirs       = $this->_get_items($dir, 'dir', !$hidden_is_empty);
-          $tot        = count($dirs);
-          $empty_dirs = $this->_get_empty_dirs($dir, !$hidden_is_empty);
-          if ($tot && count($empty_dirs)) {
-            foreach ($dirs as $d){
-              if (in_array($d, $empty_dirs, true)) {
-                $tot--;
-              }
-            }
-          }
-
-          foreach ($empty_dirs as $e){
-            $res[] = $e;
-          }
-
-          if (!$tot) {
-            $res[] = $dir;
-          }
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
-  private function _delete_empty_dirs($path, bool $hidden_is_empty = false): int
-  {
-    $num = 0;
-    $all = $this->_get_items($path, 'both', !$hidden_is_empty);
-    $tot = count($all);
-    foreach ($all as $dir){
-      if (is_dir($dir)) {
-        $num += $this->_delete_empty_dirs($dir, $hidden_is_empty);
-      }
-
-      if ($num && !is_dir($dir)) {
-        $tot--;
-      }
-    }
-
-    if (!$tot) {
-      $this->_delete($path);
-      $num++;
-    }
-
-    return $num;
-  }
-
-
-  private function _is_file(string $path)
-  {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->is_file($path);
-    }
-    else {
-      return is_file($path);
-    }
-  }
-
-
-  private function _is_dir(string $path)
-  {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->is_dir($path);
-    }
-    else {
-      return is_dir($path);
-    }
-  }
-
-
-  private function _filemtime($path)
-  {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->filemtime($path);
-    }
-    else {
-      return filemtime($path);
-    }
-  }
-
-
-  private function _filesize($path):? int
-  {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->get_size($path);
-    }
-    else {
-      if ($this->_is_file($path)) {
-        return filesize($path);
-      }
-
-      return null;
-    }
-  }
-
-
-  /**
-   * @param $file
-   */
-  private function _download($file): String
-  {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->download($file);
-    }
-    else {
-      if (($f = $this->get_file($file)) && $f->check()) {
-        return $file;
-        /*die(var_dump($file));
-        $f->download();*/
-      }
-    }
-  }
-
-
-  private function _upload(array $files, string $path): bool
-  {
-    $success = false;
-    if (!empty($files) && !empty($path)) {
-      foreach($files as $f){
-        if (is_file($f['tmp_name'])) {
-          //replace ' ' with '_' like in nextcloud
-          $full_name = $this->get_real_path($path) . '/' . str_replace(' ', '_',$f['name']);
-          if (!$this->exists($full_name)) {
-            if (move_uploaded_file($f['tmp_name'], $full_name)) {
-              return $success = true;
-            }
-          }
-        }
-      }
-    }
-
-    return $success;
-  }
-
 
   /**
    * system constructor.
@@ -794,6 +89,10 @@ class system extends bbn\models\cls\basic
         $this->mode    = $type;
         $this->current = getcwd();
         break;
+    }
+
+    if (empty($this->mode)) {
+      $this->error = _("Impossible to connect to the SSH server");
     }
   }
 
@@ -1539,5 +838,725 @@ class system extends bbn\models\cls\basic
     return $r;
   }
 
+
+  private function _get_password(array $cfg)
+  {
+    if (isset($cfg['pass'])) {
+      if (!empty($cfg['encrypted'])) {
+        if ($tmp = base64_decode($cfg['pass'])) {
+          return \bbn\util\enc::decrypt($tmp, $cfg['encryption_key'] ?? '');
+        }
+      }
+
+      return $cfg['pass'];
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Connect to a Nextcloud instance
+   * @param array $cfg
+   * @return bool
+   */
+  private function _connect_nextcloud(array $cfg): bool
+  {
+    if (isset($cfg['host'], $cfg['user'], $cfg['pass']) && class_exists('\\Sabre\\DAV\\Client')) {
+      $this->prefix = '/remote.php/webdav/';
+      $this->obj    = new \Sabre\DAV\Client(
+        [
+        'baseUri' => 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'].$this->prefix.$cfg['name'],
+        'userName' => $cfg['user'],
+        'password' => $this->_get_password($cfg)
+        ]
+      );
+      $this->host   = 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'];
+      if ($this->obj->options()) {
+        $this->current = '';
+        return true;
+      }
+
+      $this->error = _('Impossible to connect to the WebDAV host');
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Connect to FTP
+   * @param array $cfg
+   * @return bool
+   */
+  private function _connect_ftp(array $cfg): bool
+  {
+    if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
+      $args = [$cfg['host'], $cfg['port'] ?? 21, $cfg['timeout'] ?? $this->timeout];
+      try {
+        $this->obj = ftp_ssl_connect(...$args);
+      }
+      catch (\Exception $e){
+        $this->error  = _('Impossible to connect to the FTP host through SSL');
+        $this->error .= PHP_EOL.$e->getMessage();
+      }
+
+      if (!$this->obj) {
+        try {
+          $this->obj = ftp_connect(...$args);
+        }
+        catch (\Exception $e){
+          $this->error  = _('Impossible to connect to the FTP host');
+          $this->error .= PHP_EOL.$e->getMessage();
+        }
+      }
+
+      if ($this->obj) {
+        if (!@ftp_login($this->obj, $cfg['user'], $this->_get_password($cfg))) {
+          $this->error  = _('Impossible to login to the FTP host');
+          $this->error .= PHP_EOL.error_get_last()['message'];
+        }
+        else{
+          $this->current = ftp_pwd($this->obj);
+          if (!empty($cfg['passive'])
+              || (defined('BBN_SERVER_NAME') && !@fsockopen(BBN_SERVER_NAME, $args[1]))
+          ) {
+            ftp_pasv($this->obj, true);
+            stream_set_chunk_size($this->obj, 1024 * 1024);
+          }
+
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Connects to SSH
+   * @param array $cfg
+   * @return bool
+   */
+  private function _connect_ssh(array $cfg): bool
+  {
+    if (isset($cfg['host'])) {
+      $param = [];
+      // Keys as parans
+      if (isset($cfg['public'], $cfg['private'])) {
+        $param['hostkey'] = 'ssh-rsa';
+      }
+
+      $this->cn = @ssh2_connect(
+        $cfg['host'], $cfg['port'] ?? 22, $param/*, [
+        'debug' => function($message, $language, $always_display){
+        bbn\x::log([$message, $language, $always_display], 'connect_ssh_debug');
+        },
+        'disconnect' => function($reason, $message, $language){
+        bbn\x::log([$reason, $message, $language], 'connect_ssh_disconnect');
+        }
+        ]*/
+      );
+      if (!$this->cn) {
+        $this->error = _("Could not connect through SSH.");
+      }
+      elseif (x::has_props($cfg, ['user', 'public', 'private'], true)) {
+        stream_set_blocking($this->cn, true);
+        stream_set_chunk_size($this->cn, 1024 * 1024);
+        /*
+        $fingerprint = ssh2_fingerprint($this->cn, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
+        if ( strcmp($this->ssh_server_fp, $fingerprint) !== 0 ){
+          $this->error = _('Unable to verify server identity!');
+        }
+        */
+        if (!ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $this->_get_password($cfg))) {
+          $this->error = _('Authentication rejected by server');
+        }
+        else {
+          try {
+            $this->obj = ssh2_sftp($this->cn);
+          }
+          catch (\Exception $e) {
+            $this->error = _("Could not connect through SFTP.");
+          }
+
+          if ($this->obj) {
+            $this->current = ssh2_sftp_realpath($this->obj, '.');
+            return true;
+          }
+        }
+      }
+      elseif (x::has_props($cfg, ['user', 'pass'], true)) {
+        try {
+          ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg));
+        }
+        catch (\Exception $e) {
+          $this->error = _("Could not authenticate with username and password.");
+        }
+        if (!$this->error) {
+          try {
+            $this->obj = @ssh2_sftp($this->cn);
+          }
+          catch (\Exception $e) {
+            $this->error = _("Could not initialize SFTP subsystem.");
+          }
+
+          if ($this->obj) {
+            $this->current = ssh2_sftp_realpath($this->obj, '.');
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Checks if the given files name ends with the given suffix string
+   *
+   * @todo Nextcloud
+   * @param array|string    $item
+   * @param callable|string $filter
+   * @return bool
+   */
+  private function _check_filter($item, $filter): bool
+  {
+    if ($filter) {
+      if (is_string($filter)) {
+        $extensions = array_map(
+          function ($a) {
+            if (substr($a, 0, 1) !== '.') {
+              $a = '.'.$a;
+            }
+
+            return strtolower($a);
+          }, \bbn\x::split($filter, '|')
+        );
+        foreach ($extensions as $ext) {
+          if (strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($ext))) === $ext) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+      elseif (is_callable($filter)) {
+        return $filter($item);
+      }
+    }
+
+    return true;
+  }
+
+
+  /**
+   * Raw function returning the elements contained in the given directory
+   * @param string          $path
+   * @param string|callable $type
+   * @param bool            $hidden
+   * @param string          $detailed
+   * @return array
+   */
+  private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
+  {
+    if ($this->mode !== 'nextcloud') {
+      $files        = [];
+      $dirs         = [];
+      $has_size     = stripos((string)$detailed, 's') !== false;
+      $has_type     = stripos((string)$detailed, 't') !== false;
+      $has_mod      = stripos((string)$detailed, 'm') !== false;
+      $has_children = stripos((string)$detailed, 'c') !== false;
+      if (($this->mode === 'ftp') && ($detailed || ($type !== 'both'))) {
+        if ($fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)))) {
+          foreach ($fs as $f){
+            if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0))) {
+              $ok = 0;
+              if ($type === 'both') {
+                $ok = 1;
+              }
+              elseif ($type === 'dir') {
+                $ok = $f['type'] === 'dir';
+              }
+              elseif ($type === 'file') {
+                $ok = $f['type'] === 'file';
+              }
+              elseif (!is_string($type) || is_file($path.'/'.$f['name'])) {
+                $ok = $this->_check_filter($f['name'], $type);
+              }
+
+              if ($ok) {
+                if ($detailed) {
+                  $tmp = [
+                    'name' => $path.'/'.$f['name']
+                  ];
+                  if ($has_mod) {
+                    $tmp['mtime'] = mktime(
+                      substr($f['modify'], 8, 2),
+                      substr($f['modify'], 10, 2),
+                      substr($f['modify'], 12, 2),
+                      substr($f['modify'], 4, 2),
+                      substr($f['modify'], 6, 2),
+                      substr($f['modify'], 0, 4)
+                    );
+                  }
+
+                  if ($has_type) {
+                    $tmp['dir']  = $f['type'] === 'dir';
+                    $tmp['file'] = $f['type'] !== 'dir';
+                  }
+
+                  if ($has_size) {
+                    $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
+                  }
+
+                  if ($has_children && ($f['type'] === 'dir')) {
+                    $tmp['num'] = count($this->get_files($path.'/'.$f['name'], true, $hidden));
+                  }
+                }
+                else{
+                  $tmp = $path.'/'.$f['name'];
+                }
+
+                if ($f['type'] === 'dir') {
+                  $dirs[] = $tmp;
+                }
+                else {
+                  $files[] = $tmp;
+                }
+              }
+            }
+          }
+        }
+        else{
+          bbn\x::log(error_get_last(), 'filesystem');
+        }
+      }
+      else {
+        $fs = scandir($path, SCANDIR_SORT_ASCENDING);
+        foreach ($fs as $f){
+          if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0))) {
+            $ok      = 0;
+            $is_dir  = is_dir($path.'/'.$f);
+            $is_file = is_file($path.'/'.$f);
+            if (($type === 'both')
+                || (($type === 'file') && $is_file)
+                || (($type === 'dir') && $is_dir)
+            ) {
+              $ok = 1;
+            }
+            elseif (!is_string($type) || is_file($path.'/'.$f)) {
+              $ok = $this->_check_filter($f, $type);
+            }
+
+            if ($ok) {
+              if ($detailed) {
+                $tmp = [
+                  'name' => $path.'/'.$f
+                ];
+                if ($has_mod) {
+                  $tmp['mtime'] = filemtime($path.'/'.$f);
+                }
+
+                if ($has_type) {
+                  $tmp['dir']  = $is_dir;
+                  $tmp['file'] = $is_file;
+                }
+
+                if ($has_size) {
+                  $tmp['size'] = $is_dir ? 0 : $this->filesize($path.'/'.$f);
+                }
+
+                if ($has_children && $is_dir) {
+                  $tmp['num'] = count($this->get_files($path.'/'.$f, true, $hidden));
+                }
+              }
+              else {
+                $tmp = $path.'/'.$f;
+              }
+
+              if ($is_dir) {
+                $dirs[] = $tmp;
+              }
+              else{
+                $files[] = $tmp;
+              }
+            }
+          }
+        }
+      }
+
+      return array_merge($dirs, $files);
+    }
+    else {
+      return $this->obj->get_items($path, $type, $hidden, $detailed);
+    }
+  }
+
+
+  /**
+   * @param $path
+   * @return bool
+   */
+  private function _exists($path): bool
+  {
+    if ($this->mode === 'nextcloud') {
+      return $this->obj->exists($path);
+    }
+    else {
+      return file_exists($path);
+    }
+  }
+
+
+  /**
+   * @param string               $path
+   * @param string|callable|null $filter
+   * @param bool                 $hidden
+   * @param string               $detailed
+   * @return array
+   */
+  private function _scand(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
+  {
+    $all = [];
+    foreach ($this->_get_items($path, 'dir', $hidden, $detailed) as $it){
+      $p = $detailed ? $it['name'] : $it;
+      if (!$filter || $this->_check_filter($p, $filter)) {
+        $all[] = $it;
+      }
+
+      foreach ($this->_scand($p, $filter, $hidden, $detailed) as $t){
+        $all[] = $t;
+      }
+    }
+
+    return $all;
+  }
+
+
+  /**
+   * @param string               $path
+   * @param string|callable|null $filter
+   * @param bool                 $hidden
+   * @param string               $detailed
+   * @return array
+   */
+  private function _scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
+  {
+    $all = [];
+    if (!$filter) {
+      $filter = 'both';
+    }
+
+    foreach ($this->_get_items($path, 'both', $hidden, $detailed) as $it){
+      $p = $detailed ? $it['name'] : $it;
+      if (!$filter || $this->_check_filter($p, $filter)) {
+        $all[] = $it;
+      }
+
+      if ($this->_is_dir($p)) {
+        foreach ($this->_scan($p, $filter, $hidden, $detailed) as $t){
+          $all[] = $t;
+        }
+      }
+    }
+
+    return $all;
+  }
+
+
+  /**
+   * @param string $dir
+   * @param int    $chmod
+   * @param bool   $recursive
+   * @return bool
+   */
+  private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
+  {
+    if (empty($this->_is_dir($dir))) {
+      return mkdir($dir, $chmod, $recursive);
+    }
+
+    return true;
+  }
+
+
+  /**
+   * @param string $path
+   * @param bool   $full
+   * @return bool
+   */
+  private function _delete(string $path, bool $full = true): bool
+  {
+    $res = false;
+    if ($this->mode === 'nextcloud') {
+      $res = $this->obj->delete($path);
+    }
+    else {
+      if ($this->_is_dir($path)) {
+        $files = $this->_get_items($path, 'both', true);
+        if (!empty($files)) {
+          foreach ($files as $file) {
+            $this->_delete($file);
+          }
+        }
+
+        if ($full) {
+          if ($this->mode === 'ssh') {
+            try {
+              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+            }
+            catch (\Exception $e) {
+              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            }
+          }
+          elseif ($this->mode === 'ftp') {
+            try {
+              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+            }
+            catch (\Exception $e) {
+              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            }
+          }
+          else{
+            try {
+              $res = rmdir($path);
+            }
+            catch (\Exception $e) {
+              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            }
+          }
+        }
+        else {
+          $res = true;
+        }
+      }
+      elseif ($this->_is_file($path)) {
+        if ($this->mode === 'ssh') {
+          try {
+            $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
+          }
+          catch (\Exception $e) {
+            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+          }
+        }
+        elseif ($this->mode === 'ftp') {
+          try {
+            $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
+          }
+          catch (\Exception $e) {
+            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+          }
+        }
+        else {
+          try {
+            $res = unlink($path);
+          }
+          catch (\Exception $e) {
+            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+          }
+        }
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Copy either the file to the new path or the ocntent of the dir inside the new dir
+   * @param string $source
+   * @param string $dest
+   * @return bool
+   */
+  private function _copy(string $source, string $dest): bool
+  {
+    if ($this->mode !== 'nextcloud') {
+      if ($this->_is_file($source)) {
+        return copy($source, $dest);
+      }
+      elseif ($this->_is_dir($source) && $this->_mkdir($dest)) {
+        foreach ($this->_get_items($source, 'both', true) as $it){
+          $this->_copy($it, $dest.'/'.basename($it));
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+  }
+
+
+  /**
+   * @param $source
+   * @param $dest
+   * @return bool
+   */
+  private function _rename($source, $dest): bool
+  {
+    if ($this->mode !== 'nextcloud') {
+      $file1 = substr($source, strlen($this->prefix));
+      $file2 = substr($dest, strlen($this->prefix));
+      if ($this->mode === 'ssh') {
+        return ssh2_sftp_rename($this->obj, $file1, $file2);
+      }
+
+      if ($this->mode === 'ftp') {
+        return ftp_rename($this->obj, $file1, $file2);
+      }
+
+      return rename($file1, $file2);
+    }
+    else{
+      return $this->obj->rename($source, $dest);
+    }
+  }
+
+
+  private function _get_empty_dirs($path, bool $hidden_is_empty = false): array
+  {
+    $res = [];
+    $all = $this->_get_items($path, 'both', !$hidden_is_empty);
+    foreach ($all as $dir){
+      if (is_dir($dir)) {
+        if (!count($files = $this->_get_items($dir, 'file', !$hidden_is_empty))) {
+          $dirs       = $this->_get_items($dir, 'dir', !$hidden_is_empty);
+          $tot        = count($dirs);
+          $empty_dirs = $this->_get_empty_dirs($dir, !$hidden_is_empty);
+          if ($tot && count($empty_dirs)) {
+            foreach ($dirs as $d){
+              if (in_array($d, $empty_dirs, true)) {
+                $tot--;
+              }
+            }
+          }
+
+          foreach ($empty_dirs as $e){
+            $res[] = $e;
+          }
+
+          if (!$tot) {
+            $res[] = $dir;
+          }
+        }
+      }
+    }
+
+    return $res;
+  }
+
+
+  private function _delete_empty_dirs($path, bool $hidden_is_empty = false): int
+  {
+    $num = 0;
+    $all = $this->_get_items($path, 'both', !$hidden_is_empty);
+    $tot = count($all);
+    foreach ($all as $dir){
+      if (is_dir($dir)) {
+        $num += $this->_delete_empty_dirs($dir, $hidden_is_empty);
+      }
+
+      if ($num && !is_dir($dir)) {
+        $tot--;
+      }
+    }
+
+    if (!$tot) {
+      $this->_delete($path);
+      $num++;
+    }
+
+    return $num;
+  }
+
+
+  private function _is_file(string $path)
+  {
+    if ($this->mode === 'nextcloud') {
+      return $this->obj->is_file($path);
+    }
+    else {
+      return is_file($path);
+    }
+  }
+
+
+  private function _is_dir(string $path)
+  {
+    if ($this->mode === 'nextcloud') {
+      return $this->obj->is_dir($path);
+    }
+    else {
+      return is_dir($path);
+    }
+  }
+
+
+  private function _filemtime($path)
+  {
+    if ($this->mode === 'nextcloud') {
+      return $this->obj->filemtime($path);
+    }
+    else {
+      return filemtime($path);
+    }
+  }
+
+
+  private function _filesize($path):? int
+  {
+    if ($this->mode === 'nextcloud') {
+      return $this->obj->get_size($path);
+    }
+    else {
+      if ($this->_is_file($path)) {
+        return filesize($path);
+      }
+
+      return null;
+    }
+  }
+
+
+  /**
+   * @param $file
+   */
+  private function _download($file): String
+  {
+    if ($this->mode === 'nextcloud') {
+      return $this->obj->download($file);
+    }
+    else {
+      if (($f = $this->get_file($file)) && $f->check()) {
+        return $file;
+        /*die(var_dump($file));
+        $f->download();*/
+      }
+    }
+  }
+
+
+  private function _upload(array $files, string $path): bool
+  {
+    $success = false;
+    if (!empty($files) && !empty($path)) {
+      foreach($files as $f){
+        if (is_file($f['tmp_name'])) {
+          //replace ' ' with '_' like in nextcloud
+          $full_name = $this->get_real_path($path) . '/' . str_replace(' ', '_',$f['name']);
+          if (!$this->exists($full_name)) {
+            if (move_uploaded_file($f['tmp_name'], $full_name)) {
+              return $success = true;
+            }
+          }
+        }
+      }
+    }
+
+    return $success;
+  }
 
 }
