@@ -590,7 +590,7 @@ SQL,
           }
         }
         else {
-          die(\bbn\x::dump("Error!", $library, $info, $last));
+          throw new \Exception("No file to add for the library $library");
         }
 
         // Adding language files at the end (default way)
@@ -611,7 +611,7 @@ SQL,
       }
     }
     else {
-      die(\bbn\x::dump($library, $this->db->last()));
+      throw new \Exception("Impossible to retrieve information on library $library");
     }
 
     return $this;

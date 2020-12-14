@@ -6125,7 +6125,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/cron\/manager\/__construct",
-                        "desc": "cron constructor."
+                        "desc": "Cron constructor."
                     },
                     {
                         "type": "method",

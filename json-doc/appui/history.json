@@ -10580,7 +10580,8 @@
                         },
                         "file": {
                             "columns": [
-                                "file"
+                                "file",
+                                "variant"
                             ],
                             "ref_db": null,
                             "ref_table": null,
@@ -10608,6 +10609,9 @@
                             "PRIMARY"
                         ],
                         "file": [
+                            "file"
+                        ],
+                        "variant": [
                             "file"
                         ],
                         "project": [
@@ -10654,25 +10658,26 @@
                             "position": 4,
                             "type": "varchar",
                             "null": 0,
-                            "key": "UNI",
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
                             "maxlength": 100
                         },
-                        "prev": {
+                        "variant": {
                             "position": 5,
-                            "type": "datetime",
+                            "type": "varchar",
                             "null": 1,
                             "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
-                            "default": "NULL"
+                            "default": "",
+                            "maxlength": 255
                         },
-                        "next": {
+                        "prev": {
                             "position": 6,
                             "type": "datetime",
                             "null": 1,
@@ -10683,8 +10688,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "description": {
+                        "next": {
                             "position": 7,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "description": {
+                            "position": 8,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -10695,7 +10711,7 @@
                             "default": "NULL"
                         },
                         "pid": {
-                            "position": 8,
+                            "position": 9,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -10707,7 +10723,7 @@
                             "maxlength": 6
                         },
                         "notification": {
-                            "position": 9,
+                            "position": 10,
                             "type": "decimal",
                             "null": 1,
                             "key": null,
@@ -10720,7 +10736,7 @@
                             "decimals": 4
                         },
                         "cfg": {
-                            "position": 10,
+                            "position": 11,
                             "type": "json",
                             "null": 0,
                             "key": null,
@@ -10730,7 +10746,7 @@
                             "generation": ""
                         },
                         "active": {
-                            "position": 11,
+                            "position": 12,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -15900,13 +15916,14 @@
                         "name": {
                             "position": 3,
                             "type": "varchar",
-                            "null": 0,
+                            "null": 1,
                             "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
-                            "maxlength": 100
+                            "default": "NULL",
+                            "maxlength": 255
                         },
                         "blacklist": {
                             "position": 4,
@@ -15947,6 +15964,19 @@
                             "delete": null,
                             "unique": 1
                         },
+                        "type": {
+                            "columns": [
+                                "type",
+                                "value"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
                         "id_contact": {
                             "columns": [
                                 "id_contact"
@@ -15958,11 +15988,30 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
+                        },
+                        "value": {
+                            "columns": [
+                                "value"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
                         }
                     },
                     "cols": {
                         "id": [
                             "PRIMARY"
+                        ],
+                        "type": [
+                            "type"
+                        ],
+                        "value": [
+                            "type",
+                            "value"
                         ],
                         "id_contact": [
                             "id_contact"
@@ -15993,9 +16042,9 @@
                         },
                         "type": {
                             "position": 3,
-                            "type": "binary",
+                            "type": "varchar",
                             "null": 0,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -16006,7 +16055,7 @@
                             "position": 4,
                             "type": "varchar",
                             "null": 0,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -16053,7 +16102,7 @@
                         },
                         "msguid": {
                             "columns": [
-                                "msguid"
+                                "msg_uid"
                             ],
                             "ref_db": null,
                             "ref_table": null,
@@ -16125,7 +16174,7 @@
                         },
                         "id_mailbox": {
                             "columns": [
-                                "id_mailbox"
+                                "id_folder"
                             ],
                             "ref_db": "apst_app",
                             "ref_table": "bbn_users_options_bits",
@@ -16164,7 +16213,7 @@
                         "id": [
                             "PRIMARY"
                         ],
-                        "msguid": [
+                        "msg_uid": [
                             "msguid"
                         ],
                         "date": [
@@ -16182,7 +16231,7 @@
                         "id_thread": [
                             "id_thread"
                         ],
-                        "id_mailbox": [
+                        "id_folder": [
                             "id_mailbox"
                         ],
                         "id_user": [
@@ -16215,7 +16264,7 @@
                             "generation": "",
                             "maxlength": 16
                         },
-                        "id_mailbox": {
+                        "id_folder": {
                             "position": 3,
                             "type": "binary",
                             "null": 0,
@@ -16226,9 +16275,9 @@
                             "generation": "",
                             "maxlength": 16
                         },
-                        "msguid": {
+                        "msg_uid": {
                             "position": 4,
-                            "type": "varchar",
+                            "type": "int",
                             "null": 1,
                             "key": "MUL",
                             "extra": "",
@@ -16236,10 +16285,21 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL",
-                            "maxlength": 128
+                            "maxlength": 10
+                        },
+                        "msg_unique_id": {
+                            "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 255
                         },
                         "date": {
-                            "position": 5,
+                            "position": 6,
                             "type": "datetime",
                             "null": 0,
                             "key": "MUL",
@@ -16249,7 +16309,7 @@
                             "generation": ""
                         },
                         "id_sender": {
-                            "position": 6,
+                            "position": 7,
                             "type": "binary",
                             "null": 0,
                             "key": "MUL",
@@ -16260,7 +16320,7 @@
                             "maxlength": 16
                         },
                         "subject": {
-                            "position": 7,
+                            "position": 8,
                             "type": "varchar",
                             "null": 0,
                             "key": "MUL",
@@ -16270,18 +16330,30 @@
                             "generation": "",
                             "maxlength": 1000
                         },
-                        "attachments": {
-                            "position": 8,
-                            "type": "json",
+                        "size": {
+                            "position": 9,
+                            "type": "bigint",
                             "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "attachments": {
+                            "position": 10,
+                            "type": "json",
+                            "null": 1,
                             "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
-                            "generation": ""
+                            "generation": "",
+                            "default": "NULL"
                         },
                         "flags": {
-                            "position": 9,
+                            "position": 11,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -16293,7 +16365,7 @@
                             "maxlength": 100
                         },
                         "is_read": {
-                            "position": 10,
+                            "position": 12,
                             "type": "tinyint",
                             "null": 0,
                             "key": "MUL",
@@ -16305,7 +16377,7 @@
                             "maxlength": 1
                         },
                         "id_parent": {
-                            "position": 11,
+                            "position": 13,
                             "type": "binary",
                             "null": 1,
                             "key": "MUL",
@@ -16317,7 +16389,7 @@
                             "maxlength": 16
                         },
                         "id_thread": {
-                            "position": 12,
+                            "position": 14,
                             "type": "binary",
                             "null": 1,
                             "key": "MUL",
@@ -16327,6 +16399,17 @@
                             "generation": "",
                             "default": "NULL",
                             "maxlength": 16
+                        },
+                        "external_uids": {
+                            "position": 15,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
                         }
                     }
                 },
@@ -26673,7 +26756,8 @@
                         },
                         "file": {
                             "columns": [
-                                "file"
+                                "file",
+                                "variant"
                             ],
                             "ref_db": null,
                             "ref_table": null,
@@ -26701,6 +26785,9 @@
                             "PRIMARY"
                         ],
                         "file": [
+                            "file"
+                        ],
+                        "variant": [
                             "file"
                         ],
                         "project": [
@@ -26747,25 +26834,26 @@
                             "position": 4,
                             "type": "varchar",
                             "null": 0,
-                            "key": "UNI",
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
                             "maxlength": 100
                         },
-                        "prev": {
+                        "variant": {
                             "position": 5,
-                            "type": "datetime",
+                            "type": "varchar",
                             "null": 1,
                             "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
-                            "default": "NULL"
+                            "default": "",
+                            "maxlength": 255
                         },
-                        "next": {
+                        "prev": {
                             "position": 6,
                             "type": "datetime",
                             "null": 1,
@@ -26776,8 +26864,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "description": {
+                        "next": {
                             "position": 7,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "description": {
+                            "position": 8,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -26788,7 +26887,7 @@
                             "default": "NULL"
                         },
                         "pid": {
-                            "position": 8,
+                            "position": 9,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -26800,7 +26899,7 @@
                             "maxlength": 6
                         },
                         "notification": {
-                            "position": 9,
+                            "position": 10,
                             "type": "decimal",
                             "null": 1,
                             "key": null,
@@ -26813,7 +26912,7 @@
                             "decimals": 4
                         },
                         "cfg": {
-                            "position": 10,
+                            "position": 11,
                             "type": "json",
                             "null": 0,
                             "key": null,
@@ -26823,7 +26922,7 @@
                             "generation": ""
                         },
                         "active": {
-                            "position": 11,
+                            "position": 12,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -31993,13 +32092,14 @@
                         "name": {
                             "position": 3,
                             "type": "varchar",
-                            "null": 0,
+                            "null": 1,
                             "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
-                            "maxlength": 100
+                            "default": "NULL",
+                            "maxlength": 255
                         },
                         "blacklist": {
                             "position": 4,
@@ -32040,6 +32140,19 @@
                             "delete": null,
                             "unique": 1
                         },
+                        "type": {
+                            "columns": [
+                                "type",
+                                "value"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 1
+                        },
                         "id_contact": {
                             "columns": [
                                 "id_contact"
@@ -32051,11 +32164,30 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
+                        },
+                        "value": {
+                            "columns": [
+                                "value"
+                            ],
+                            "ref_db": null,
+                            "ref_table": null,
+                            "ref_column": null,
+                            "constraint": null,
+                            "update": null,
+                            "delete": null,
+                            "unique": 0
                         }
                     },
                     "cols": {
                         "id": [
                             "PRIMARY"
+                        ],
+                        "type": [
+                            "type"
+                        ],
+                        "value": [
+                            "type",
+                            "value"
                         ],
                         "id_contact": [
                             "id_contact"
@@ -32086,9 +32218,9 @@
                         },
                         "type": {
                             "position": 3,
-                            "type": "binary",
+                            "type": "varchar",
                             "null": 0,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -32099,7 +32231,7 @@
                             "position": 4,
                             "type": "varchar",
                             "null": 0,
-                            "key": null,
+                            "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -32146,7 +32278,7 @@
                         },
                         "msguid": {
                             "columns": [
-                                "msguid"
+                                "msg_uid"
                             ],
                             "ref_db": null,
                             "ref_table": null,
@@ -32218,7 +32350,7 @@
                         },
                         "id_mailbox": {
                             "columns": [
-                                "id_mailbox"
+                                "id_folder"
                             ],
                             "ref_db": "apst_app",
                             "ref_table": "bbn_users_options_bits",
@@ -32257,7 +32389,7 @@
                         "id": [
                             "PRIMARY"
                         ],
-                        "msguid": [
+                        "msg_uid": [
                             "msguid"
                         ],
                         "date": [
@@ -32275,7 +32407,7 @@
                         "id_thread": [
                             "id_thread"
                         ],
-                        "id_mailbox": [
+                        "id_folder": [
                             "id_mailbox"
                         ],
                         "id_user": [
@@ -32308,7 +32440,7 @@
                             "generation": "",
                             "maxlength": 16
                         },
-                        "id_mailbox": {
+                        "id_folder": {
                             "position": 3,
                             "type": "binary",
                             "null": 0,
@@ -32319,9 +32451,9 @@
                             "generation": "",
                             "maxlength": 16
                         },
-                        "msguid": {
+                        "msg_uid": {
                             "position": 4,
-                            "type": "varchar",
+                            "type": "int",
                             "null": 1,
                             "key": "MUL",
                             "extra": "",
@@ -32329,10 +32461,21 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL",
-                            "maxlength": 128
+                            "maxlength": 10
+                        },
+                        "msg_unique_id": {
+                            "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 255
                         },
                         "date": {
-                            "position": 5,
+                            "position": 6,
                             "type": "datetime",
                             "null": 0,
                             "key": "MUL",
@@ -32342,7 +32485,7 @@
                             "generation": ""
                         },
                         "id_sender": {
-                            "position": 6,
+                            "position": 7,
                             "type": "binary",
                             "null": 0,
                             "key": "MUL",
@@ -32353,7 +32496,7 @@
                             "maxlength": 16
                         },
                         "subject": {
-                            "position": 7,
+                            "position": 8,
                             "type": "varchar",
                             "null": 0,
                             "key": "MUL",
@@ -32363,18 +32506,30 @@
                             "generation": "",
                             "maxlength": 1000
                         },
-                        "attachments": {
-                            "position": 8,
-                            "type": "json",
+                        "size": {
+                            "position": 9,
+                            "type": "bigint",
                             "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "maxlength": 16
+                        },
+                        "attachments": {
+                            "position": 10,
+                            "type": "json",
+                            "null": 1,
                             "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
-                            "generation": ""
+                            "generation": "",
+                            "default": "NULL"
                         },
                         "flags": {
-                            "position": 9,
+                            "position": 11,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -32386,7 +32541,7 @@
                             "maxlength": 100
                         },
                         "is_read": {
-                            "position": 10,
+                            "position": 12,
                             "type": "tinyint",
                             "null": 0,
                             "key": "MUL",
@@ -32398,7 +32553,7 @@
                             "maxlength": 1
                         },
                         "id_parent": {
-                            "position": 11,
+                            "position": 13,
                             "type": "binary",
                             "null": 1,
                             "key": "MUL",
@@ -32410,7 +32565,7 @@
                             "maxlength": 16
                         },
                         "id_thread": {
-                            "position": 12,
+                            "position": 14,
                             "type": "binary",
                             "null": 1,
                             "key": "MUL",
@@ -32420,6 +32575,17 @@
                             "generation": "",
                             "default": "NULL",
                             "maxlength": 16
+                        },
+                        "external_uids": {
+                            "position": 15,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
                         }
                     }
                 },

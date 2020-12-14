@@ -9,7 +9,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/api.php",
     "startLine": 10,
-    "endLine": 180,
+    "endLine": 194,
     "contentConstructor": {
         "file": "bbn\\appui\\api",
         "returns": null
@@ -72,8 +72,8 @@
                 }
             ]
         },
-        "register": {
-            "name": "register",
+        "register_project": {
+            "name": "register_project",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -81,54 +81,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, $key)\n  {\n    if ($this->jwt) {\n      $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);\n      if ($res = x::curl(\n        self::REMOTE,\n        ['action' => 'register', 'data' => $jwt]\n      )\n      ) {\n        $key = self::_get_tmp_key();\n        return $this->jwt->set_key($key)->get($res);\n      }\n      else {\n        throw new \\Exception(_(\"Impossible to register\"));\n      }\n    }\n    else {\n      throw new \\Exception(_(\"No JWT\"));\n    }\n  }",
-            "startLine": 55,
-            "endLine": 74,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "cfg",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "key",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "emit": {
-            "name": "emit",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\appui\\api",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($cfg)\n  {\n    if ($this->jwt) {\n      $key = self::_get_key(true);\n      $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);\n      if ($res = x::curl(\n        self::REMOTE.'\/'.BBN_ID_APP,\n        ['action' => 'emit', 'data' => $jwt]\n      )\n      ) {\n        $key = self::_get_key();\n        return $this->jwt->set_key($key)->get($res);\n      }\n      else {\n        throw new \\Exception(_(\"Impossible to emit\"));\n      }\n    }\n    else {\n      throw new \\Exception(_(\"No JWT\"));\n    }\n  }",
-            "startLine": 77,
-            "endLine": 97,
+            "code": "function(array $cfg)\n  {\n    if ($this->jwt) {\n      $key_out = self::_get_tmp_key(true);\n      $jwt = $this->jwt->set_key($key_out)->set(['data' => $cfg]);\n      if ($res = x::curl(\n        self::REMOTE,\n        ['action' => 'register_project', 'data' => $jwt]\n      )\n      ) {\n        $key_in = self::_get_tmp_key();\n        return $this->jwt->set_key($key_in)->get($res);\n      }\n      else {\n        throw new \\Exception(_(\"Impossible to register\"));\n      }\n    }\n    else {\n      throw new \\Exception(_(\"No JWT\"));\n    }\n  }",
+            "startLine": 56,
+            "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -145,13 +100,108 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": null,
+                    "type": "array",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "has_key": {
+            "name": "has_key",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return !!$this->_get_key();\n  }",
+            "startLine": 79,
+            "endLine": 82,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "request": {
+            "name": "request",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($action, array $cfg = [])\n  {\n    if ($this->jwt) {\n      $key = self::_get_key(true);\n      $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);\n      if ($res = x::curl(\n        self::REMOTE.'\/'.BBN_ID_APP,\n        ['action' => $action, 'data' => $jwt]\n      )\n      ) {\n        $key = self::_get_key();\n        return $this->jwt->set_key($key)->get($res);\n      }\n      else {\n        throw new \\Exception(_(\"Impossible to send the request\"));\n      }\n    }\n    else {\n      throw new \\Exception(_(\"No JWT\"));\n    }\n  }",
+            "startLine": 85,
+            "endLine": 105,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "action",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_app_info": {
+            "name": "get_app_info",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request('app_info');\n  }",
+            "startLine": 108,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
         },
         "test": {
             "name": "test",
@@ -601,7 +651,7 @@
         "_rsa_public": null
     },
     "constants": [],
-    "numMethods": 11,
+    "numMethods": 13,
     "numProperties": 1,
     "numConstants": 5,
     "numStaticProperties": 5,

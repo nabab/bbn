@@ -13,29 +13,29 @@ namespace bbn;
 
 /**
  * (Static) content delivery system through requests using filesystem and internal DB for libraries.
- * 
+ *
  * ### Generates in a cache directory a javascript or CSS file based on the request received.
- * 
- * The cdn class will be using all the classes in bbn\cdn in order to 
- * treat a request URL, and return the appropriate content.  
- * 
- * - First it will parse the URL and make a first configuration array out of it, 
+ *
+ * The cdn class will be using all the classes in bbn\cdn in order to
+ * treat a request URL, and return the appropriate content.
+ *
+ * - First it will parse the URL and make a first configuration array out of it,
  * from which a hash will be calculated
  * * Then it will serve a cache file if it exists and create one otherwise by:
  * * Making a full configuration array using libraries database with all the needed file(s)
  * * Then it will compile these files into a single file that will be put in cache
  * * This file should be of type js or css
  * * If files are both types the content returned will be JS which will call the css files
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
  * ### Request can have the following forms:
  * * https://mycdn.net/lib=bbn-vue,jquery
  * * https://mycdn.net/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2
  * * https://mycdn.net/lib/my_library/?dir=true
  * * https://mycdn.net/lib/my_library/?f=file1.js,file2.js,file3.css
- * 
+ *
  * ```php
  * $cdn = new \bbn\cdn($_SERVER['REQUEST_URI']);
  * $cdn->process();
@@ -72,7 +72,7 @@ class cdn extends models\cls\basic
   /**
    * @var string Will be added to the HEAD_COMMENT if it is not minified
    */
-  protected const TEST_ST    = 'You can remove the test parameter to the URL to get a minified version';
+  protected const TEST_ST = 'You can remove the test parameter to the URL to get a minified version';
 
   /**
    * @var string Will be added to the HEAD_COMMENT if it is minified
@@ -174,13 +174,14 @@ class cdn extends models\cls\basic
    */
   public $code;
 
+
   /**
    * Constructor.
-   * 
-   * Generates a configuration based on the given request and instantiate 
-   * a compiler for the response.  
+   *
+   * Generates a configuration based on the given request and instantiate
+   * a compiler for the response.
    * If *$db* is not not given the current instance if any will be used.
-   * 
+   *
    * @param string  $request The original request sent to the server
    * @param db|null $db      The DB connection with the libraries tables
    */
@@ -191,14 +192,17 @@ class cdn extends models\cls\basic
       $this->error('You must define the constant $this->fpath as the root of your public document');
       die('You must define the constant $this->fpath as the root of your public document');
     }
+
     /** @todo Remove? */
     $this->_set_prefix();
     if (!$db) {
       $db = db::get_instance();
     }
+
     if ($db) {
       $this->db = $db;
     }
+
     $this->request = $request;
     // Creation of a config object
     $config = new cdn\config($request, $this->db);
@@ -214,11 +218,13 @@ class cdn extends models\cls\basic
           $this->mode = 'css';
         }
       }
+
       if ($this->mode) {
         $this->cp = new cdn\compiler($this->cfg);
       }
     }
   }
+
 
   /**
    * @return self
@@ -244,6 +250,7 @@ class cdn extends models\cls\basic
           elseif ($this->mode) {
             $codes = $this->cp->compile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);
           }
+
           if ($codes) {
             if ($this->mode === 'css') {
               $code = $this->get_css($codes);
@@ -253,6 +260,7 @@ class cdn extends models\cls\basic
             }
           }
         }
+
         if ($code) {
           if (defined('BBN_IS_DEV') && BBN_IS_DEV) {
             $code = sprintf(
@@ -261,13 +269,16 @@ class cdn extends models\cls\basic
               $c['test'] ? self::TEST_ST : self::NO_TEST_ST
             ).$code;
           }
+
           file_put_contents($c['cache_file'], $code);
           file_put_contents($c['cache_file'].'.gzip', gzencode($code));
         }
       }
     }
+
     return $this;
   }
+
 
   /**
    * @return array|bool|compiler|string
@@ -277,6 +288,7 @@ class cdn extends models\cls\basic
     return $this->cfg;
   }
 
+
   /**
    * @return bool
    */
@@ -285,15 +297,19 @@ class cdn extends models\cls\basic
     if (!parent::check()) {
       return false;
     }
+
     $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];
     if ($file && is_file($file)) {
       return true;
     }
+
     if ($this->cfg['ext'] !== 'map') {
       x::log("Impossible to find $file for ".$this->cfg['url'], 'cdn_errors');
     }
+
     return false;
   }
+
 
   /**
    * @param bool $real
@@ -302,16 +318,17 @@ class cdn extends models\cls\basic
   public function check_cache($real = true)
   {
     if (is_file($this->cfg['cache_file'])) {
-      $last_modified = time();
+      $last_modified    = time();
       $this->file_mtime = filemtime($this->cfg['cache_file']);
-      $c =& $this->cfg;
+      $c                =& $this->cfg;
       // Only checks if the file exists and is valid
-      if (!$real 
-          && \is_array($c['content']) 
+      if (!$real
+          && \is_array($c['content'])
           && (($last_modified - $this->file_mtime) < $this->cache_length)
       ) {
         return true;
       }
+
       clearstatcache();
       // Real research for last mods and generation timestamps
       if ($c['is_component']) {
@@ -325,7 +342,7 @@ class cdn extends models\cls\basic
                 }
               }
               else{
-                die("I can't find the file $f kkk!");
+                throw new \Exception("Impossible to find the file $f!");
               }
             }
           }
@@ -341,14 +358,17 @@ class cdn extends models\cls\basic
           }
           else{
             //adump($this->cfg);
-            die("I can't find the file $f  mmm!");
+            throw new \Exception("Impossible to find the file $f!");
           }
         }
       }
+
       return true;
     }
+
     return false;
   }
+
 
   /**
    *
@@ -362,10 +382,8 @@ class cdn extends models\cls\basic
       // get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)
       $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('"', '', stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;
 
-
       // We get a unique hash of this file (etag)
       $file_tag = md5($file.$this->file_mtime);
-
 
       //die(var_dump($this->file_mtime, $client_tag, $etagFile, $client_if_modified, $_SERVER));
       if ($this->mode === 'css') {
@@ -380,6 +398,7 @@ class cdn extends models\cls\basic
           header('Content-type: '.finfo_file($mime, $file));
         }
       }
+
       // make sure caching is turned on
       header('Cache-Control: max-age=14400');
       header('Expires: '.gmdate('D, d M Y H:i:s', time() + 14400).' GMT');
@@ -391,29 +410,33 @@ class cdn extends models\cls\basic
       //header('Pragma: public');
 
       // check if page has changed. If not, send 304 and exit
-      if ($client_if_modified 
-          && ((strtotime($client_if_modified) == $this->file_mtime) 
+      if ($client_if_modified
+          && ((strtotime($client_if_modified) == $this->file_mtime)
           || ($client_tag == $file_tag)          )
       ) {
         header('HTTP/1.1 304 Not Modified');
       }
       else{
-        if (empty($this->cfg['file']) && (($this->mode === 'js') 
-            || ($this->mode === 'css')            ) 
+        if (empty($this->cfg['file']) && (($this->mode === 'js')
+            || ($this->mode === 'css')            )
         ) {
-          if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) 
+          if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])
               && (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
           ) {
             header('Content-Encoding: gzip');
             $file .= '.gzip';
           }
         }
+
         readfile($file);
       }
-      die();
+
+      exit();
     }
-    die('No cache file '.$file);
+
+    throw new \Exception('No cache file '.$file);
   }
+
 
   /**
    * @param $code
@@ -455,6 +478,7 @@ class cdn extends models\cls\basic
 JS;
   }
 
+
   /**
    * @param array $codes
    * @param bool  $encapsulated
@@ -464,7 +488,7 @@ JS;
   {
     $code = '';
     if (!empty($codes['js'])) {
-      $num = count($codes['js']);
+      $num      = count($codes['js']);
       $root_url = $this->furl;
       foreach ($codes['js'] as $c){
         $tmp = $c['code'];
@@ -480,12 +504,14 @@ window.bbnAddGlobalScript(function(){
 });
 JS;
         }
+
         if (!empty($tmp)) {
           $code .= $tmp.($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
         }
       }
+
       if (!empty($this->cfg['content']['css'])) {
-        $code .= <<<JS
+        $code    .= <<<JS
     return (new Promise(function(bbn_resolve, bbn_reject){
       bbn_resolve()
     }))
@@ -507,6 +533,7 @@ JS;
             );
           }
         }
+
         if (!empty($this->cfg['content']['css'])) {
           $undone_css = [];
           foreach ($this->cfg['content']['css'] as $css) {
@@ -514,17 +541,21 @@ JS;
               $undone_css[] = $css;
             }
           }
+
           if (!empty($undone_css)) {
             $code .= $this->cp->css_links($undone_css, $this->cfg['test']);
           }
         }
       }
+
       if ($encapsulated) {
         $code = $this->js_mask($code);
       }
     }
+
     return $code;
   }
+
 
   /**
    * @param array $codes
@@ -538,8 +569,10 @@ JS;
         $code .= $c['code'].($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
       }
     }
+
     return $code;
   }
+
 
   /**
    * @param array $codes
@@ -547,11 +580,11 @@ JS;
    */
   protected function get_components()
   {
-    $code = '';
+    $code  = '';
     $codes = [];
-    $c =& $this->cfg;
+    $c     =& $this->cfg;
     if (\is_array($c['content'])) {
-      $i = 0;
+      $i        = 0;
       $includes = '';
       foreach ($c['content'] as $name => $cp){
         foreach ($cp['js'] as $js){
@@ -560,7 +593,7 @@ JS;
           // A js file with the component name is mandatory
           if ($ext[0] === $name) {
             // Once found only this js file will be used as it should just define the component
-            $jsc = $this->cp->compile([$js], $c['test']);
+            $jsc       = $this->cp->compile([$js], $c['test']);
             $codes[$i] = [
               'name' => $name,
               'js' => $jsc['js'][0]['code']
@@ -572,12 +605,14 @@ JS;
                   throw new \Exception("Impossible to get the SCSS code from component ".$cp);
                   //die(var_dump($css));
                 }
+
                 if ($this->cp->has_links($css['code'])) {
                   $includes .= $this->cp->css_links($cp['css'], $c['test']);
                   unset($cp['css']);
                   break;
                 }
               }
+
               if (isset($cp['css'])) {
                 $codes[$i]['css'] = array_map(
                   function ($a) {
@@ -586,8 +621,9 @@ JS;
                 );
               }
             }
-            if (!empty($c['lang']) 
-                && !empty($cp['lang']) 
+
+            if (!empty($c['lang'])
+                && !empty($cp['lang'])
                 && \in_array(\dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
             ) {
               $lang = file_get_contents($this->fpath.\dirname($js)."/$name.$c[lang].lang");
@@ -607,26 +643,29 @@ JS;
                 $json = json_decode(file_get_contents($dep_path.'bower.json'), true);
               }
             }
+
             if (!empty($json)) {
               if (!empty($json['dependencies'])) {
                 $lib = new cdn\library($this->db, $this->cfg['lang'], true);
                 foreach ($json['dependencies'] as $l => $version){
                   $lib->add($l);
                 }
+
                 if ($cfg = $lib->get_config()) {
                   if (!empty($cfg['css'])) {
                     $includes .= $this->cp->css_links($cfg['css'], $this->cfg['test']);
                   }
+
                   if (!empty($cfg['js'])) {
                     $includes .= $this->cp->js_links($cfg['js'], $this->cfg['test']);
                   }
                 }
               }
+
               if (!empty($json['components'])) {
                 /** @todo Add dependent components */
               }
             }
-
 
             // HTML inclusion
             $html = [];
@@ -637,6 +676,7 @@ JS;
                   if ($name !== $component_name) {
                     $component_name = $name.'-'.$component_name;
                   }
+
                   $html[] = [
                     'name' => $component_name,
                     'content' => $tmp
@@ -644,9 +684,11 @@ JS;
                 }
               }
             }
+
             if (!empty($html)) {
               $codes[$i]['html'] = $html;
             }
+
             $i++;
             break;
           }
@@ -660,11 +702,14 @@ JS;
           if (!empty($cd['css'])) {
             $str .= ', css: '.json_encode($cd['css']);
           }
+
           if (!empty($cd['html'])) {
             $str .= ', html: '.json_encode($cd['html']);
           }
+
           $str .= '},';
         }
+
         $code = <<<JAVASCRIPT
 
 (function(){
@@ -682,7 +727,10 @@ JS;
 })()
 JAVASCRIPT;
       }
+
       return $code;
     }
   }
+
+
 }
