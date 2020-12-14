@@ -536,10 +536,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
 
       $num = count($this->list_queries) - 1;
-      while ($num
+      while (($num > 0)
           && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
       ) {
         $num--;
+        if (!is_string($this->list_queries[0]['hash'])) {
+          x::log($this->list_queries);
+          x::log(count($this->list_queries));
+        }
         $this->_remove_query($this->list_queries[0]['hash']);
         array_shift($this->list_queries);
       }
@@ -4230,10 +4234,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
         if ($q['structure']) {
           $tmp           = $q;
           $this->queries = [$hash => $tmp];
-          $this->list_queries = [
+          $this->list_queries = [[
             'hash' => $hash,
             'last' => $tmp['last']
-          ];
+          ]];
           unset($tmp);
           /** @todo Clear the cache */
         }

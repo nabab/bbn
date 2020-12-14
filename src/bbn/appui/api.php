@@ -52,17 +52,19 @@ class api extends bbn\models\cls\basic
     }
   }
 
-  public function register(array $cfg, string $key): array
+
+  public function register_project(array $cfg): array
   {
     if ($this->jwt) {
-      $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);
+      $key_out = self::_get_tmp_key(true);
+      $jwt = $this->jwt->set_key($key_out)->set(['data' => $cfg]);
       if ($res = x::curl(
         self::REMOTE,
-        ['action' => 'register', 'data' => $jwt]
+        ['action' => 'register_project', 'data' => $jwt]
       )
       ) {
-        $key = self::_get_tmp_key();
-        return $this->jwt->set_key($key)->get($res);
+        $key_in = self::_get_tmp_key();
+        return $this->jwt->set_key($key_in)->get($res);
       }
       else {
         throw new \Exception(_("Impossible to register"));
@@ -74,26 +76,38 @@ class api extends bbn\models\cls\basic
   }
 
 
-  public function emit($cfg): array
+  public function has_key()
+  {
+    return !!$this->_get_key();
+  }
+
+
+  public function request(string $action, array $cfg = []): array
   {
     if ($this->jwt) {
       $key = self::_get_key(true);
       $jwt = $this->jwt->set_key($key)->set(['data' => $cfg]);
       if ($res = x::curl(
         self::REMOTE.'/'.BBN_ID_APP,
-        ['action' => 'emit', 'data' => $jwt]
+        ['action' => $action, 'data' => $jwt]
       )
       ) {
         $key = self::_get_key();
         return $this->jwt->set_key($key)->get($res);
       }
       else {
-        throw new \Exception(_("Impossible to emit"));
+        throw new \Exception(_("Impossible to send the request"));
       }
     }
     else {
       throw new \Exception(_("No JWT"));
     }
+  }
+
+
+  public function get_app_info(): array
+  {
+    return $this->request('app_info');
   }
 
 
@@ -104,7 +118,7 @@ class api extends bbn\models\cls\basic
    *
    * @return string
    */
-  private function _get_key(bool $out = false): string
+  private function _get_key(bool $out = false): ?string
   {
     if ($out) {
       if (empty(self::$_rsa_out)) {

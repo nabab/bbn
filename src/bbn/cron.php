@@ -27,41 +27,9 @@ class cron extends models\cls\basic
 
   protected $log_file;
 
-  public function get_launcher(): ?cron\launcher
+
+  public function __construct(db $db, mvc\controller $ctrl = null, array $cfg = [])
   {
-    if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {
-      $this->_launcher = new cron\launcher($this);
-    }
-    return $this->_launcher;
-  }
-
-  public function get_runner(array $cfg = []): ?cron\runner
-  {
-    if ($this->check() && $this->controller) {
-      return new cron\runner($this, $cfg);
-    }
-    return null;
-  }
-
-  public function get_controller(array $cfg = []): ?mvc\controller
-  {
-    if ($this->check() && $this->controller) {
-      return $this->controller;
-    }
-    return null;
-  }
-
-  public function get_manager(): ?cron\manager
-  {
-    if (!$this->_manager && $this->check() && $this->controller) {
-      $this->_manager = new cron\manager($this->db);
-    }
-    return $this->_manager;
-  }
-
-
-
-  public function __construct(db $db, mvc\controller $ctrl = null, array $cfg = []) {
     //if ( defined('BBN_DATA_PATH') ){
     if ($db->check()) {
       $this->path = $cfg['data_path'] ?? mvc::get_data_path('appui-cron');
@@ -71,9 +39,11 @@ class cron extends models\cls\basic
       if (!empty($cfg['exe_path'])) {
         $this->exe_path = $cfg['exe_path'];
       }
+
       if (!empty($cfg['log_file'])) {
         $this->log_file = $cfg['log_file'];
       }
+
       if ($ctrl) {
         if (empty($this->exe_path)) {
           $this->exe_path = $ctrl->plugin_url('appui-cron');
@@ -81,10 +51,52 @@ class cron extends models\cls\basic
             $this->exe_path .= '/run';
           }
         }
+
         $this->controller = $ctrl;
       }
     }
   }
+
+
+  public function get_launcher(): ?cron\launcher
+  {
+    if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {
+      $this->_launcher = new cron\launcher($this);
+    }
+
+    return $this->_launcher;
+  }
+
+
+  public function get_runner(array $cfg = []): ?cron\runner
+  {
+    if ($this->check() && $this->controller) {
+      return new cron\runner($this, $cfg);
+    }
+
+    return null;
+  }
+
+
+  public function get_controller(array $cfg = []): ?mvc\controller
+  {
+    if ($this->check() && $this->controller) {
+      return $this->controller;
+    }
+
+    return null;
+  }
+
+
+  public function get_manager(): ?cron\manager
+  {
+    if (!$this->_manager && $this->check() && $this->controller) {
+      $this->_manager = new cron\manager($this->db);
+    }
+
+    return $this->_manager;
+  }
+
 
   public function check(): bool
   {

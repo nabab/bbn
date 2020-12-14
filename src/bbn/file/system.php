@@ -681,7 +681,6 @@ class system extends bbn\models\cls\basic
     return $res;
   }
 
-
   public function delete_empty_dirs($path, bool $hidden_is_empty = false): int
   {
     $num = 0;
@@ -1026,6 +1025,18 @@ class system extends bbn\models\cls\basic
   {
     if ($filter) {
       if (is_string($filter)) {
+        if ($filter === 'file') {
+          return $this->_is_file($item);
+        }
+
+        if ($filter === 'dir') {
+          return $this->_is_dir($item);
+        }
+
+        if ($filter === 'both') {
+          return true;
+        }
+
         $extensions = array_map(
           function ($a) {
             if (substr($a, 0, 1) !== '.') {
@@ -1073,21 +1084,7 @@ class system extends bbn\models\cls\basic
         if ($fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)))) {
           foreach ($fs as $f){
             if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0))) {
-              $ok = 0;
-              if ($type === 'both') {
-                $ok = 1;
-              }
-              elseif ($type === 'dir') {
-                $ok = $f['type'] === 'dir';
-              }
-              elseif ($type === 'file') {
-                $ok = $f['type'] === 'file';
-              }
-              elseif (!is_string($type) || is_file($path.'/'.$f['name'])) {
-                $ok = $this->_check_filter($f['name'], $type);
-              }
-
-              if ($ok) {
+              if ($this->_check_filter($f['name'], $type)) {
                 if ($detailed) {
                   $tmp = [
                     'name' => $path.'/'.$f['name']
@@ -1138,31 +1135,19 @@ class system extends bbn\models\cls\basic
         $fs = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach ($fs as $f){
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0))) {
-            $ok      = 0;
-            $is_dir  = is_dir($path.'/'.$f);
-            $is_file = is_file($path.'/'.$f);
-            if (($type === 'both')
-                || (($type === 'file') && $is_file)
-                || (($type === 'dir') && $is_dir)
-            ) {
-              $ok = 1;
-            }
-            elseif (!is_string($type) || is_file($path.'/'.$f)) {
-              $ok = $this->_check_filter($f, $type);
-            }
-
-            if ($ok) {
+            $file = $path.'/'.$f;
+            if ($this->_check_filter($file, $type)) {
               if ($detailed) {
                 $tmp = [
-                  'name' => $path.'/'.$f
+                  'name' => $file
                 ];
                 if ($has_mod) {
                   $tmp['mtime'] = filemtime($path.'/'.$f);
                 }
 
                 if ($has_type) {
-                  $tmp['dir']  = $is_dir;
-                  $tmp['file'] = $is_file;
+                  $tmp['dir']  = is_dir($path.'/'.$f);
+                  $tmp['file'] = !$tmp['dir'];
                 }
 
                 if ($has_size) {
@@ -1174,14 +1159,22 @@ class system extends bbn\models\cls\basic
                 }
               }
               else {
-                $tmp = $path.'/'.$f;
+                $tmp = $file;
               }
 
-              if ($is_dir) {
+              if ($has_type && !empty($tmp['dir'])) {
                 $dirs[] = $tmp;
               }
-              else{
+              elseif ($has_type && !empty($tmp['file'])) {
                 $files[] = $tmp;
+              }
+              elseif (!$has_type) {
+                if (is_dir($path.'/'.$f)) {
+                  $dirs[] = $tmp;
+                }
+                else{
+                  $files[] = $tmp;
+                }
               }
             }
           }
@@ -1246,9 +1239,6 @@ class system extends bbn\models\cls\basic
   private function _scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
-    if (!$filter) {
-      $filter = 'both';
-    }
 
     foreach ($this->_get_items($path, 'both', $hidden, $detailed) as $it){
       $p = $detailed ? $it['name'] : $it;
@@ -1420,29 +1410,24 @@ class system extends bbn\models\cls\basic
   {
     $res = [];
     $all = $this->_get_items($path, 'both', !$hidden_is_empty);
+    $tot = count($all);
+    // This directory will be added to the result if it is empty or if each of its items is itself an empty directory
     foreach ($all as $dir){
       if (is_dir($dir)) {
-        if (!count($files = $this->_get_items($dir, 'file', !$hidden_is_empty))) {
-          $dirs       = $this->_get_items($dir, 'dir', !$hidden_is_empty);
-          $tot        = count($dirs);
-          $empty_dirs = $this->_get_empty_dirs($dir, !$hidden_is_empty);
-          if ($tot && count($empty_dirs)) {
-            foreach ($dirs as $d){
-              if (in_array($d, $empty_dirs, true)) {
-                $tot--;
-              }
-            }
-          }
+        $empty_dirs = $this->_get_empty_dirs($dir, !$hidden_is_empty);
+        if (in_array($dir, $empty_dirs, true)) {
+          $tot--;
+        }
 
-          foreach ($empty_dirs as $e){
-            $res[] = $e;
-          }
-
-          if (!$tot) {
-            $res[] = $dir;
-          }
+        // Each empty subdirectory will be added to the result
+        foreach ($empty_dirs as $e){
+          $res[] = $e;
         }
       }
+    }
+
+    if (!$tot) {
+      $res[] = $path;
     }
 
     return $res;
@@ -1457,11 +1442,11 @@ class system extends bbn\models\cls\basic
     foreach ($all as $dir){
       if (is_dir($dir)) {
         $num += $this->_delete_empty_dirs($dir, $hidden_is_empty);
+        if (!is_dir($dir)) {
+          $tot--;
+        }
       }
 
-      if ($num && !is_dir($dir)) {
-        $tot--;
-      }
     }
 
     if (!$tot) {

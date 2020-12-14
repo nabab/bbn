@@ -1432,12 +1432,12 @@ class user extends models\cls\basic
   }
 
 
-   /**
-    * Gets or creates (also in database) the user's session for the first time.
-    *
-    * @return self
-    */
-  private function _init_session(): self
+  /**
+   * Gets or creates (also in database) the user's session for the first time.
+   *
+   * @return self
+   */
+  private function _init_session($defaults = []): self
   {
     // Getting or creating the session is it doesn't exist yet
     /** @var user\session */

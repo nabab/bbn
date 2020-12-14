@@ -6,7 +6,7 @@ use bbn;
 use bbn\x;
 use bbn\str;
 
-class mailbox
+class mailbox extends bbn\models\cls\basic
 {
 
   /**

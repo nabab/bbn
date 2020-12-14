@@ -241,8 +241,12 @@ class emails extends bbn\models\cls\basic
             'ssl' => $cfg['ssl'] ?? true
           ]
         ))
+        && $this->_get_password()->user_store($cfg['pass'], $id_pref, $this->user)
     ) {
-      $this->_get_password()->user_store($cfg['pass'], $id_pref, $this->user);
+      $this->get_account($id_pref, true);
+      if (!empty($cfg['folders'])) {
+        $this->sync_folders($id_pref, $cfg['folders']);
+      }
       return $id_pref;
     }
 
@@ -422,7 +426,11 @@ class emails extends bbn\models\cls\basic
         $mb = $this->get_mailbox($folder['id_account']);
         if ($mb->select_folder($folder['uid'])) {
           $start    = $folder['db_uid'] ? $mb->get_msg_no($folder['db_uid']) : 1;
-          $real_end = $folder['last_uid'] ? $mb->get_msg_no($folder['last_uid']): 0;
+          $real_end = $folder['last_uid'] ? $mb->get_msg_no($folder['last_uid']) : 0;
+          if ($limit) {
+            $real_end = min($real_end, $start + $limit);
+          }
+
           $end      = $start;
           $num      = $real_end - $start;
           //var_dump($folder, $num, $real_end);
@@ -437,11 +445,12 @@ class emails extends bbn\models\cls\basic
               }
               else {
                 //throw new \Exception(_("Impossible to insert the email with ID").' '.$a['message_id']);
+                $this->log(_("Impossible to insert the email with ID").' '.$a['message_id']);
               }
             }
 
             if ($end === $real_end) {
-              //$this->pref->update_bit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
+              $this->pref->update_bit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
               break;
             }
           }
@@ -803,13 +812,13 @@ class emails extends bbn\models\cls\basic
   }
 
 
-  public function sync_folders(string $id_account)
+  public function sync_folders(string $id_account, array $subscribed = [])
   {
     if ($mb = $this->get_mailbox($id_account)) {
       $mbParam = $mb->get_params();
       $types   = self::get_folder_types();
 
-      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res) {
+      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed) {
         $ele = array_shift($a);
         $idx = x::find($res, ['text' => $ele]);
         if (null === $idx) {
@@ -817,7 +826,8 @@ class emails extends bbn\models\cls\basic
           $res[] = [
             'text' => $ele,
             'uid' => $prefix.$ele,
-            'items' => []
+            'items' => [],
+            'subscribed' => in_array($prefix.$ele, $subscribed)
           ];
         }
 
@@ -892,7 +902,8 @@ class emails extends bbn\models\cls\basic
       };
 
       $res = [];
-      foreach ($mb->list_all_subscribed() as $dir) {
+      $all = $mb->list_all_folders();
+      foreach ($all as $dir) {
         $tmp = str_replace($mbParam, '', $dir);
         $bits = x::split($tmp, '.');
         $put_in_res($bits, $res);
@@ -902,7 +913,6 @@ class emails extends bbn\models\cls\basic
       $db_tree = $this->pref->get_full_bits($id_account);
 
       $result = $compare($res, $db_tree);
-      //die(x::dump($res, $result));
 
       $import($result['add']);
 
