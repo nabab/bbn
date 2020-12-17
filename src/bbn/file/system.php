@@ -1137,6 +1137,7 @@ class system extends bbn\models\cls\basic
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0))) {
             $file = $path.'/'.$f;
             if ($this->_check_filter($file, $type)) {
+              $is_dir = is_dir($path.'/'.$f);
               if ($detailed) {
                 $tmp = [
                   'name' => $file
@@ -1146,7 +1147,7 @@ class system extends bbn\models\cls\basic
                 }
 
                 if ($has_type) {
-                  $tmp['dir']  = is_dir($path.'/'.$f);
+                  $tmp['dir']  = $is_dir;
                   $tmp['file'] = !$tmp['dir'];
                 }
 
@@ -1162,19 +1163,11 @@ class system extends bbn\models\cls\basic
                 $tmp = $file;
               }
 
-              if ($has_type && !empty($tmp['dir'])) {
+              if ($is_dir) {
                 $dirs[] = $tmp;
               }
-              elseif ($has_type && !empty($tmp['file'])) {
+              else{
                 $files[] = $tmp;
-              }
-              elseif (!$has_type) {
-                if (is_dir($path.'/'.$f)) {
-                  $dirs[] = $tmp;
-                }
-                else{
-                  $files[] = $tmp;
-                }
               }
             }
           }

@@ -13443,12 +13443,13 @@
                         "id_user": {
                             "position": 2,
                             "type": "binary",
-                            "null": 0,
+                            "null": 1,
                             "key": "MUL",
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
+                            "default": "NULL",
                             "maxlength": 16
                         },
                         "url": {

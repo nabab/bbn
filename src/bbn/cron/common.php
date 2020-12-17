@@ -186,7 +186,7 @@ trait common {
         ($file = \json_decode(\file_get_contents($file), true))
       ){
         return array_reverse(array_filter($file, function($f) use($task){
-          return $f['file'] === $task['file'];
+          return isset($f['file']) && ($f['file'] === $task['file']);
         }));
       }
       return [];

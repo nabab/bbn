@@ -355,10 +355,19 @@ class runner extends bbn\models\cls\basic
         if (!is_file($json_file)) {
           $logs = [];
         }
-        else {
-          $logs = json_decode(file_get_contents($json_file), true);
+        elseif ($logs = file_get_contents($json_file)) {
+          try {
+            $logs = json_decode($logs, true);
+          }
+          catch (\Exception $e) {
+            $logs = [];
+          }
+
+          if (is_array($logs)) {
+            $idx = count($logs);
+          }
         }
-        $idx = count($logs);
+
         $logs[] = $log;
         file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
         $this->timer->start($cfg['file']);
@@ -373,6 +382,7 @@ class runner extends bbn\models\cls\basic
         else {
           $logs[$idx]['content'] = $path;
         }
+
         $logs[$idx]['end'] = date('Y-m-d H:i:s');
         file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
         if (!is_file($month_file)) {

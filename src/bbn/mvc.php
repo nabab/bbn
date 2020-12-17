@@ -403,12 +403,16 @@ class mvc implements mvc\api
         }
 
         unset($bbn_inc_data);
+        /*
         try{
           eval('?>'.$bbn_inc_content);
         }
         catch (\Exception $e){
-          x::log_error($e->getCode(), $e->getMessage(), $bbn_inc_file, 1);
+          //error_log($e->getMessage());
+          x::log_error($e->getCode(), , $bbn_inc_file, 1);
         }
+        */
+        eval('?>'.$bbn_inc_content);
 
         $c = ob_get_contents();
         ob_end_clean();

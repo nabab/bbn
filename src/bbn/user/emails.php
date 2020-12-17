@@ -425,8 +425,30 @@ class emails extends bbn\models\cls\basic
       if ($folder['last_uid'] && ($folder['last_uid'] !== $folder['db_uid'])) {
         $mb = $this->get_mailbox($folder['id_account']);
         if ($mb->select_folder($folder['uid'])) {
-          $start    = $folder['db_uid'] ? $mb->get_msg_no($folder['db_uid']) : 1;
-          $real_end = $folder['last_uid'] ? $mb->get_msg_no($folder['last_uid']) : 0;
+          $start = 1;
+          if (!empty($folder['db_uid'])) {
+            try {
+              $start = $mb->get_msg_no($folder['db_uid']);
+            }
+            catch (\Exception $e) {
+              $start = 1;
+            }
+          }
+          $real_end = 1;
+          if (!empty($folder['last_uid'])) {
+            try {
+              $real_end = $mb->get_msg_no($folder['last_uid']);
+            }
+            catch (\Exception $e) {
+              $real_end = 1;
+            }
+          }
+
+          /** @todo temporary solution to avoid errors */
+          if ($start === $real_end) {
+            return 0;
+          }
+
           if ($limit) {
             $real_end = min($real_end, $start + $limit);
           }
@@ -436,22 +458,32 @@ class emails extends bbn\models\cls\basic
           //var_dump($folder, $num, $real_end);
           while ($end <= $real_end) {
             $end = min($real_end, $start + 999);
-            $all = $mb->get_emails_list($folder['uid'], $start, $end);
-            $start += 1000;
-            //var_dump($start, $end);
-            foreach ($all as $a) {
-              if ($this->insert_email($folder, $a)) {
-                $res++;
+            if ($all = $mb->get_emails_list($folder['uid'], $start, $end)) {
+              $start += 1000;
+              //var_dump($start, $end);
+              foreach ($all as $a) {
+                if ($this->insert_email($folder, $a)) {
+                  $res++;
+                }
+                else {
+                  //throw new \Exception(_("Impossible to insert the email with ID").' '.$a['message_id']);
+                  $this->log(_("Impossible to insert the email with ID").' '.$a['message_id']);
+                }
               }
-              else {
-                //throw new \Exception(_("Impossible to insert the email with ID").' '.$a['message_id']);
-                $this->log(_("Impossible to insert the email with ID").' '.$a['message_id']);
+
+              if ($end === $real_end) {
+                $this->pref->update_bit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
+                break;
               }
             }
-
-            if ($end === $real_end) {
-              $this->pref->update_bit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
-              break;
+            else {
+              throw new \Exception(
+                _("Impossible to get the emails for folder")
+                .' '.$folder['uid']
+                .' '._("from").' '.$start
+                .' '._("to").' '.$end
+                .' ('.$real_end.')'
+              );
             }
           }
         }
@@ -596,7 +628,7 @@ class emails extends bbn\models\cls\basic
           $cfg['msg_unique_id'] => $email['message_id'],
           $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),
           $cfg['id_sender'] => $id_sender,
-          $cfg['subject'] => $email['subject'] ? mb_decode_mimeheader($email['subject']) : '',
+          $cfg['subject'] => empty($email['subject']) ? '' : mb_decode_mimeheader($email['subject']),
           $cfg['size'] => $email['Size'],
           $cfg['attachments'] => empty($email['attachments']) ? null : json_encode($email['attachments']),
           $cfg['flags'] => $email['Flagged'] ?: null,

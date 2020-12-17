@@ -511,11 +511,17 @@ class mailbox extends bbn\models\cls\basic
 
   public function get_emails_list(string $folder, int $start, int $end)
   {
-    if (isset($this->folders[$folder]) && ($end > $start) && $this->select_folder($folder)) {
+    if (isset($this->folders[$folder]) && ($end > $start)
+        && $this->select_folder($folder)
+    ) {
       $res = [];
       while ($start <= $end) {
         $tmp = (array)$this->get_msg_headerinfo($start);
         $structure = $this->get_msg_structure($start);
+        if (!$tmp || !$structure) {
+          throw new \Exception("Wrong number? $start");
+        }
+
         $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
         $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
         $tmp['uid'] = $this->get_msg_uid($start);
@@ -801,13 +807,18 @@ class mailbox extends bbn\models\cls\basic
    * @param int $msgnum
    * @return bool|object
    */
-  public function get_msg_headerinfo($msgnum)
+  public function get_msg_headerinfo(int $msgnum)
   {
-    if ($this->_is_connected()) {
-      return imap_header($this->stream, $msgnum);
+    if ($msgnum && $this->_is_connected()) {
+      try {
+        $res = imap_header($this->stream, $msgnum);
+      }
+      catch (\Exception $e) {
+        throw new \Exception($e->getMessage().' '.(string)$msgnum);
+      }
     }
 
-    return false;
+    return $res ?? null;
   }
 
 
@@ -819,7 +830,7 @@ class mailbox extends bbn\models\cls\basic
    */
   public function get_msg_uid($msgnum)
   {
-    if ($this->_is_connected()) {
+    if ($msgnum && $this->_is_connected()) {
       return imap_uid($this->stream, $msgnum);
     }
 

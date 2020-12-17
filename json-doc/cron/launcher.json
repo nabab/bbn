@@ -1008,7 +1008,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    if ( bbn\\str::is_uid($cfg['id']) && bbn\\str::is_date_sql($cfg['day']) ){\n      $p = \\explode('-', $cfg['day']);\n      \\array_pop($p);\n      $p = \\implode('\/', $p).'\/';\n      if (\n        ($task = $this->get_manager()->get_cron($cfg['id'])) &&\n        !empty($task['file']) &&\n        ($path = $this->get_log_path($cfg, false, true)) &&\n        ($file = $path.$p.$cfg['day'].'.json') &&\n        \\is_file($file) &&\n        ($file = \\json_decode(\\file_get_contents($file), true))\n      ){\n        return array_reverse(array_filter($file, function($f) use($task){\n          return $f['file'] === $task['file'];\n        }));\n      }\n      return [];\n    }\n    return null;\n  }",
+            "code": "function(array $cfg)\n  {\n    if ( bbn\\str::is_uid($cfg['id']) && bbn\\str::is_date_sql($cfg['day']) ){\n      $p = \\explode('-', $cfg['day']);\n      \\array_pop($p);\n      $p = \\implode('\/', $p).'\/';\n      if (\n        ($task = $this->get_manager()->get_cron($cfg['id'])) &&\n        !empty($task['file']) &&\n        ($path = $this->get_log_path($cfg, false, true)) &&\n        ($file = $path.$p.$cfg['day'].'.json') &&\n        \\is_file($file) &&\n        ($file = \\json_decode(\\file_get_contents($file), true))\n      ){\n        return array_reverse(array_filter($file, function($f) use($task){\n          return isset($f['file']) && ($f['file'] === $task['file']);\n        }));\n      }\n      return [];\n    }\n    return null;\n  }",
             "startLine": 174,
             "endLine": 195,
             "isDeprecated": false,

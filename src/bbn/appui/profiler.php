@@ -15,7 +15,11 @@ class profiler extends bbn\models\cls\db
 {
   use bbn\models\tts\dbconfig;
 
+  protected $is_started = false;
+
   protected $chrono;
+
+  protected static $delay = 2;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -35,6 +39,10 @@ class profiler extends bbn\models\cls\db
     ]
   ];
 
+  public static function set_delay(int $delay)
+  {
+    self::$delay = $delay;
+  }
 
   /**
    * Constructor.
@@ -54,29 +62,38 @@ class profiler extends bbn\models\cls\db
    *
    * @return bool
    */
-  public function start(): bool
+  public function start(bool $force = false): bool
   {
-    if ($this->check()) {
-      $this->chrono->start();
-      if (function_exists('tideways_xhprof_enable')) {
-        tideways_xhprof_enable(
-          TIDEWAYS_XHPROF_FLAGS_MEMORY | 
-          TIDEWAYS_XHPROF_FLAGS_CPU |
-          TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |
-          TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC |
-          TIDEWAYS_XHPROF_FLAGS_MEMORY_MU
-        );
-        return true;
-      }
-      elseif (function_exists('xhprof_enable')) {
-        xhprof_enable(
-          XHPROF_FLAGS_MEMORY | 
-          XHPROF_FLAGS_CPU |
-          XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |
-          XHPROF_FLAGS_MEMORY_ALLOC |
-          XHPROF_FLAGS_MEMORY_MU
-        );
-        return true;
+    if ($this->check() && !$this->is_started) {
+      $c = &$this->class_cfg['arch']['bbn_profiler'];
+      $last = $this->db->select_one(
+        $this->class_table,
+        "MAX(`$c[time]`)"
+      );
+      if ($force || !$last || (time() - strtotime($last) > self::$delay)) {
+        $this->chrono->start();
+        if (function_exists('tideways_xhprof_enable')) {
+          tideways_xhprof_enable(
+            TIDEWAYS_XHPROF_FLAGS_MEMORY | 
+            TIDEWAYS_XHPROF_FLAGS_CPU |
+            TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |
+            TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC |
+            TIDEWAYS_XHPROF_FLAGS_MEMORY_MU
+          );
+          $this->is_started = true;
+          return true;
+        }
+        elseif (function_exists('xhprof_enable')) {
+          xhprof_enable(
+            XHPROF_FLAGS_MEMORY | 
+            XHPROF_FLAGS_CPU |
+            XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |
+            XHPROF_FLAGS_MEMORY_ALLOC |
+            XHPROF_FLAGS_MEMORY_MU
+          );
+          $this->is_started = true;
+          return true;
+        }
       }
     }
 
@@ -93,7 +110,8 @@ class profiler extends bbn\models\cls\db
    */
   public function finish(bbn\mvc $mvc): bool
   {
-    if ($this->check()) {
+    if ($this->$is_started && $this->check()) {
+      $this->is_started = false;
       $data = tideways_xhprof_disable();
       $c = &$this->class_cfg['arch']['bbn_profiler'];
       return !!$this->db->insert(

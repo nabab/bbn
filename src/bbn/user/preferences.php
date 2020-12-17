@@ -1251,7 +1251,7 @@ class preferences extends bbn\models\cls\db
         unset($cfg[$c['id']]);
       }
 
-      if (\bbn\str::is_json($cfg[$c['cfg']])) {
+      if (!empty($cfg[$c['cfg']]) && \bbn\str::is_json($cfg[$c['cfg']])) {
         $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
       }
 

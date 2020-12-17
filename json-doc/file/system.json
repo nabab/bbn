@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/file\/system.php",
     "startLine": 26,
-    "endLine": 1547,
+    "endLine": 1540,
     "contentConstructor": {
         "file": "bbn\\file\\system",
         "returns": null
