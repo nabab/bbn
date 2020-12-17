@@ -51,7 +51,7 @@
 		"phploc/phploc": "7.0.*",
 		"sebastian/phpcpd": "6.0.*",
     "bartlett/umlwriter": "2.0.*",
-    "friendsofphp/php-cs-fixer": "^2.17.*",
+    "friendsofphp/php-cs-fixer": "2.17.*",
     "phpunitgen/core": "1.1.*"
   },
   "autoload": {
