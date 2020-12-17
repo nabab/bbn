@@ -157,19 +157,6 @@ class compiler extends bbn\models\cls\basic
           }
           break;
 
-        case 'coffee':
-          try {
-            $tmp = \CoffeeScript\Compiler::compile($c);
-            if ($tmp && !$test) {
-              $c = $this->minify($c, 'js');
-            }
-          }
-          catch (\Exception $e){
-            $this->set_error("Error during CoffeeScript compilation with file $file: ".$e->getMessage());
-            die("Compilation error with file $file : ".$e->getMessage());
-          }
-          break;
-
         case 'less':
           $less = new \lessc();
           $less->setImportDir([\dirname($this->fpath.$file)]);

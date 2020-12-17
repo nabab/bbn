@@ -28,7 +28,7 @@ trait common
   private $furl = '';
 
   static public $types = [
-    'js' => ['js', 'coffee'],
+    'js' => ['js', 'ts'],
     'css' => ['css', 'less', 'sass', 'scss'],
     'html' => ['html', 'php'],
     'lang' => ['lang']

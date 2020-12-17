@@ -49,7 +49,7 @@ class router
   private static $_filetypes = [
     'model' => ['php'],
     'html' => ['html', 'php'],
-    'js' => ['js', 'coffee'],
+    'js' => ['js'],
     'css' => ['css', 'less', 'scss'],
   ];
   /**

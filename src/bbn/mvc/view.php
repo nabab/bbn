@@ -136,8 +136,6 @@ JAVASCRIPT;
             \bbn\x::log([$e->getMessage(), $this->_file], 'js_shrink');
           }
           return $tmp ?: $this->_content;
-        case 'coffee':
-          return $this->_content;
         case 'css':
           return $this->_content;
         case 'less':
