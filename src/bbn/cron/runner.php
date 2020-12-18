@@ -58,8 +58,10 @@ class runner extends bbn\models\cls\basic
         exit("GETTING OUT of $type BECAUSE one of the manual files is missing");
       }
       // Loooking for a running PID
-      if (is_file($pid_file)) {
-        [$pid, $time] = explode('|', file_get_contents($pid_file));
+      if (is_file($pid_file)
+        && ($file_content = file_get_contents($pid_file))
+      ) {
+        [$pid, $time] = explode('|', $file_content);
         // If the process file really exists the process is ongoing and it stops
         if (file_exists('/proc/' . $pid)) {
           $this->log("There is already a process running with PID " . $pid);
@@ -362,12 +364,10 @@ class runner extends bbn\models\cls\basic
           catch (\Exception $e) {
             $logs = [];
           }
-
-          if (is_array($logs)) {
-            $idx = count($logs);
-          }
         }
-
+        if (is_array($logs)) {
+          $idx = count($logs);
+        }
         $logs[] = $log;
         file_put_contents($json_file, json_encode($logs, JSON_PRETTY_PRINT));
         $this->timer->start($cfg['file']);
