@@ -12,6 +12,8 @@ class apache
 
   protected static $file_limit = 500;
 
+  protected static $last_errors = 0;
+
   protected static $err1 = '/^\[([^\]]+)\]\s+PHP\s+([^:]+):\s+(.+)\s+called\s+in\s+\/([^\s]+)\s+on\s+line\s+(\d+)(.*)$/';
 
   protected static $err2 = '/^\[([^\]]+)\]\s+PHP\s+([^:]+):\s+(.+)\s+in\s+\/([^\s]+)(?:\s+on\s+line\s+|:)(\d+)$/';
@@ -21,6 +23,47 @@ class apache
   protected static $err_line2 = '/^\s*#\d+\s+\/([^\(]+)\((\d+)\):\s+(.+)$/';
 
   protected static $err_trace = '/^(\[[^\]]+\]\s+PHP)?\s*Stack\s+trace:$/';
+
+  protected static function set_last_errors(int $num)
+  {
+    self::$last_errors = $num;
+  }
+
+  public static function get_last_errors(): int
+  {
+    return self::$last_errors;
+  }
+
+
+  public static function cut_log_file($file, $size)
+  {
+    if (file_exists($file)) {
+      if (filesize($file) > $size) {
+        $handle = fopen($file, "r");
+        if ($handle) {
+          $current_error = false;
+          $fsize = 0;
+          $res = [];
+          while (($buffer = fgets($handle)) !== false) {
+            $fsize += strlen($buffer);
+            $res[] = $buffer;
+            while ($fsize > $size) {
+              array_shift($res);
+              $fsize = strlen(implode('', $res));
+            }
+          }
+
+          if (file_put_contents($file, implode('', $res))) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    return null;
+  }
 
 
   public static function get_parse_limit(): int
@@ -37,39 +80,25 @@ class apache
 
   public static function parse_file($file, array $res = []): array
   {
-    /*
-    $mvc       = bbn\mvc::get_instance();
-    $log_dir   = $mvc->data_path().'logs/';
-    $log_file  = '_php_error.log';
-    $json_file = '_php_error.json';
-    if (file_exists($log_dir.'.'.$log_file)) {
-      return null;
-    }
-    */
-
-
+    $num = 0;
+    self::set_last_errors($num);
     if (file_exists($file)) {
-      /*
-      rename($log_dir.$log_file, $log_dir.'.'.$log_file);
-      if (is_file($log_dir.$json_file)) {
-        try {
-          $res = json_decode(file_get_contents($log_dir.$json_file), true);
-        }
-        catch (\Exception $e) {
-          $res = [];
-        }
-      }
-      else {
-        $res = [];
-      }
-      */
-
       $handle = fopen($file, "r");
       if ($handle) {
         $current_error = false;
-        while (($buffer = fgets($handle, 4096)) !== false) {
+        $min = 0;
+        if ($res) {
+          $min = x::max_with_key($res, 'last_date');
+        }
+
+        while (($buffer = fgets($handle)) !== false) {
           if ($parsed = self::parse_line($buffer)) {
             if (isset($parsed['error'])) {
+              if ($min > $parsed['date']) {
+                continue;
+              }
+
+              $num++;
               $idx = x::find(
                 $res,
                 [
@@ -104,6 +133,7 @@ class apache
                   $current_error = x::find($res, $tmp);
                   array_pop($res);
                 }
+                self::set_last_errors($num);
               }
             }
             elseif (isset($parsed['action'], $res[$current_error])) {
@@ -218,7 +248,8 @@ class apache
         }
         elseif (isset($parsed['action'])) {
           if (!$err) {
-            throw new \Exception(_("A trace is starting so an error should exist"));
+            continue;
+            //throw new \Exception(_("A trace is starting so an error should exist"));
           }
 
           if (!isset($err['trace'])) {

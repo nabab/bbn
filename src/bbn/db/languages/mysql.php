@@ -21,6 +21,7 @@ use bbn\x;
  */
 class mysql implements bbn\db\engines
 {
+
   /** @var bbn\db The connection object */
   private $db;
 
@@ -73,6 +74,13 @@ class mysql implements bbn\db\engines
     'json',
   ];
 
+  public static $interoperability = [
+    'integer' => 'int',
+    'real' => 'decimal',
+    'text' => 'text',
+    'blob' => 'blob'
+  ];
+
   public static $aggr_functions = [
     'AVG',
     'BIT_AND',
@@ -90,8 +98,10 @@ class mysql implements bbn\db\engines
     'VAR_SAMP',
     'VARIANCE',
   ];
+
   /** @var string The quote character */
   public $qte = '`';
+
 
   /**
    * Returns true if the column name is an aggregate function
@@ -106,8 +116,10 @@ class mysql implements bbn\db\engines
         return true;
       }
     }
+
     return false;
   }
+
 
   /**
    * Constructor
@@ -118,8 +130,10 @@ class mysql implements bbn\db\engines
     if (!\extension_loaded('pdo_mysql')) {
       die('The MySQL driver for PDO is not installed...');
     }
+
     $this->db = $db;
   }
+
 
   /*****************************************************************************************************************
    *                                                                                                                *
@@ -128,6 +142,7 @@ class mysql implements bbn\db\engines
    *                                                                                                                *
    *                                                                                                                *
    *****************************************************************************************************************/
+
 
   /**
    * @param array $cfg The user's options
@@ -139,6 +154,7 @@ class mysql implements bbn\db\engines
       if (!defined('BBN_DB_HOST')) {
         die("No DB host defined");
       }
+
       $cfg = [
         'host' => BBN_DB_HOST,
         'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
@@ -146,16 +162,20 @@ class mysql implements bbn\db\engines
         'db' => defined('BBN_DATABASE') ? BBN_DATABASE : '',
       ];
     }
+
     $cfg['engine'] = 'mysql';
     if (empty($cfg['host'])) {
       $cfg['host'] = '127.0.0.1';
     }
+
     if (empty($cfg['user'])) {
       $cfg['user'] = 'root';
     }
+
     if (!isset($cfg['pass'])) {
       $cfg['pass'] = '';
     }
+
     $cfg['args'] = [
       'mysql:host=' .
       ($cfg['host'] === 'localhost' ? '127.0.0.1' : $cfg['host']) .
@@ -169,6 +189,7 @@ class mysql implements bbn\db\engines
     return $cfg;
   }
 
+
   /**
    * Actions to do once the PDO object has been created
    *
@@ -178,6 +199,7 @@ class mysql implements bbn\db\engines
   {
     return;
   }
+
 
   /**
    * Changes the current database to the given one.
@@ -190,8 +212,10 @@ class mysql implements bbn\db\engines
       $this->db->raw_query("USE `$db`");
       return true;
     }
+
     return false;
   }
+
 
   /**
    * Returns a database item expression escaped like database, table, column, key names
@@ -202,15 +226,18 @@ class mysql implements bbn\db\engines
   public function escape(string $item): string
   {
     $items = explode('.', str_replace($this->qte, '', $item));
-    $r = [];
+    $r     = [];
     foreach ($items as $m) {
       if (!bbn\str::check_name($m)) {
         return false;
       }
+
       $r[] = $this->qte . $m . $this->qte;
     }
+
     return implode('.', $r);
   }
+
 
   /**
    * Returns a table's full name i.e. database.table
@@ -223,20 +250,23 @@ class mysql implements bbn\db\engines
   {
     $bits = explode('.', $table);
     if (\count($bits) === 3) {
-      $db = trim($bits[0], ' ' . $this->qte);
+      $db    = trim($bits[0], ' ' . $this->qte);
       $table = trim($bits[1]);
     } elseif (\count($bits) === 2) {
-      $db = trim($bits[0], ' ' . $this->qte);
+      $db    = trim($bits[0], ' ' . $this->qte);
       $table = trim($bits[1], ' ' . $this->qte);
     } else {
-      $db = $this->db->get_current();
+      $db    = $this->db->get_current();
       $table = trim($bits[0], ' ' . $this->qte);
     }
+
     if (bbn\str::check_name($db, $table)) {
       return $escaped ? $this->qte . $db . $this->qte . '.' . $this->qte . $table . $this->qte : $db . '.' . $table;
     }
+
     return null;
   }
+
 
   /**
    * Returns a table's simple name i.e. table
@@ -260,12 +290,15 @@ class mysql implements bbn\db\engines
           $table = trim($bits[1], ' ' . $this->qte);
           break;
       }
+
       if (bbn\str::check_name($table)) {
         return $escaped ? $this->qte . $table . $this->qte : $table;
       }
     }
+
     return null;
   }
+
 
   /**
    * Returns a column's full name i.e. table.column
@@ -279,20 +312,23 @@ class mysql implements bbn\db\engines
   {
     if ($col = trim($col)) {
       $bits = explode('.', $col);
-      $ok = null;
-      $col = trim(array_pop($bits), ' ' . $this->qte);
+      $ok   = null;
+      $col  = trim(array_pop($bits), ' ' . $this->qte);
       if ($table && ($table = $this->table_simple_name($table))) {
         $ok = 1;
       } elseif (\count($bits)) {
         $table = trim(array_pop($bits), ' ' . $this->qte);
-        $ok = 1;
+        $ok    = 1;
       }
+
       if ((null !== $ok) && bbn\str::check_name($table, $col)) {
         return $escaped ? $this->qte . $table . $this->qte . '.' . $this->qte . $col . $this->qte : $table . '.' . $col;
       }
     }
+
     return null;
   }
+
 
   /**
    * Returns a column's simple name i.e. column
@@ -309,8 +345,10 @@ class mysql implements bbn\db\engines
         return $escaped ? $this->qte . $col . $this->qte : $col;
       }
     }
+
     return null;
   }
+
 
   /**
    * Returns true if the given string is the full name of a table ('database.table').
@@ -322,6 +360,7 @@ class mysql implements bbn\db\engines
     return strpos($table, '.') ? true : false;
   }
 
+
   /**
    * Returns true if the given string is the full name of a column ('table.column').
    * @param string $col
@@ -329,8 +368,9 @@ class mysql implements bbn\db\engines
    */
   public function is_col_full_name(string $col): bool
   {
-    return (bool) strpos($col, '.');
+    return (bool)strpos($col, '.');
   }
+
 
   /**
    * Disables foreign keys check.
@@ -343,6 +383,7 @@ class mysql implements bbn\db\engines
     return $this->db;
   }
 
+
   /**
    * Enables foreign keys check.
    *
@@ -354,6 +395,7 @@ class mysql implements bbn\db\engines
     return $this->db;
   }
 
+
   /**
    * @return null|array
    */
@@ -362,6 +404,7 @@ class mysql implements bbn\db\engines
     if (!$this->db->check()) {
       return null;
     }
+
     $x = [];
     if ($r = $this->db->raw_query('SHOW DATABASES')) {
       $x = array_map(
@@ -375,8 +418,10 @@ class mysql implements bbn\db\engines
       );
       sort($x);
     }
+
     return $x;
   }
+
 
   /**
    * @param string $database Database name
@@ -387,19 +432,23 @@ class mysql implements bbn\db\engines
     if (!$this->db->check()) {
       return null;
     }
+
     if (empty($database) || !bbn\str::check_name($database)) {
       $database = $this->db->get_current();
     }
+
     $t2 = [];
-    if (($r = $this->db->raw_query("SHOW TABLES FROM `$database`")) 
+    if (($r = $this->db->raw_query("SHOW TABLES FROM `$database`"))
         && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];
       }
     }
+
     return $t2;
   }
+
 
   /**
    * Returns the columns' configuration of the given table.
@@ -411,11 +460,12 @@ class mysql implements bbn\db\engines
     if (!$this->db->check()) {
       return null;
     }
+
     $r = [];
     if ($full = $this->table_full_name($table)) {
-      $t = explode('.', $full);
+      $t            = explode('.', $full);
       [$db, $table] = $t;
-      $sql = <<<MYSQL
+      $sql          = <<<MYSQL
         SELECT *
         FROM `information_schema`.`COLUMNS`
         WHERE `TABLE_NAME` LIKE ?
@@ -425,11 +475,11 @@ MYSQL;
       if ($rows = $this->db->get_rows($sql, $table, $db)) {
         $p = 1;
         foreach ($rows as $row) {
-          $f = $row['COLUMN_NAME'];
+          $f          = $row['COLUMN_NAME'];
           $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
             && (stripos($row['DATA_TYPE'], 'blob') === false)
             && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
-          $r[$f] = [
+          $r[$f]      = [
             'position' => $p++,
             'type' => $row['DATA_TYPE'],
             'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
@@ -442,28 +492,30 @@ MYSQL;
           if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
             $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
           }
+
           if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
-            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches) 
-                && !empty($matches[1]) 
-                && \is_string($matches[1][0]) 
+            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
+                && !empty($matches[1])
+                && \is_string($matches[1][0])
                 && ($matches[1][0][0] === "'")
             ) {
               $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
-              $r[$f]['extra'] = $matches[1][0];
+              $r[$f]['extra']  = $matches[1][0];
             } else {
               $r[$f]['values'] = [];
             }
           } elseif (preg_match_all('/\((\d+)?(?:,)|(\d+)\)/', $row['COLUMN_TYPE'], $matches)) {
             if (empty($matches[1][0])) {
               if (!empty($matches[2][0])) {
-                $r[$f]['maxlength'] = (int) $matches[2][0];
+                $r[$f]['maxlength'] = (int)$matches[2][0];
               }
             } else {
-              $r[$f]['maxlength'] = (int) $matches[1][0];
-              $r[$f]['decimals'] = (int) $matches[2][1];
+              $r[$f]['maxlength'] = (int)$matches[1][0];
+              $r[$f]['decimals']  = (int)$matches[2][1];
             }
           }
         }
+
         /*
         else{
         preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
@@ -489,8 +541,10 @@ MYSQL;
         */
       }
     }
+
     return $r;
   }
+
 
   /**
    * Returns the keys of the given table.
@@ -502,14 +556,15 @@ MYSQL;
     if (!$this->db->check()) {
       return null;
     }
+
     $r = [];
     if ($full = $this->table_full_name($table)) {
-      $t = explode('.', $full);
+      $t            = explode('.', $full);
       [$db, $table] = $t;
-      $r = [];
-      $indexes = $this->db->get_rows('SHOW INDEX FROM ' . $this->table_full_name($full, 1));
-      $keys = [];
-      $cols = [];
+      $r            = [];
+      $indexes      = $this->db->get_rows('SHOW INDEX FROM ' . $this->table_full_name($full, 1));
+      $keys         = [];
+      $cols         = [];
       foreach ($indexes as $i => $index) {
         $a = $this->db->get_row(
           <<<MYSQL
@@ -556,6 +611,7 @@ MYSQL
         } elseif (isset($b)) {
           unset($b);
         }
+
         if (!isset($keys[$index['Key_name']])) {
           $keys[$index['Key_name']] = [
             'columns' => [$index['Column_name']],
@@ -569,19 +625,23 @@ MYSQL
           ];
         } else {
           $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
-          $keys[$index['Key_name']]['ref_db'] = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
+          $keys[$index['Key_name']]['ref_db']    = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
         }
+
         if (!isset($cols[$index['Column_name']])) {
           $cols[$index['Column_name']] = [$index['Key_name']];
         } else {
           $cols[$index['Column_name']][] = $index['Key_name'];
         }
       }
+
       $r['keys'] = $keys;
       $r['cols'] = $cols;
     }
+
     return $r;
   }
+
 
   /**
    * Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise
@@ -608,24 +668,23 @@ MYSQL
           if (!array_key_exists('value', $f)) {
             $f['value'] = false;
           }
+
           $is_number = false;
-          $is_null = true;
-          $is_uid = false;
-          $is_date = false;
-          $is_bool = false;
-          $model = null;
+          $is_null   = true;
+          $is_uid    = false;
+          $is_date   = false;
+          $is_bool   = false;
+          $model     = null;
           if ($is_having) {
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
           }
           elseif (isset($cfg['available_fields'][$field])) {
-            $table = $cfg['available_fields'][$field];
+            $table  = $cfg['available_fields'][$field];
             $column = $this->col_simple_name($cfg['fields'][$field] ?? $field);
             if ($table && $column && isset($cfg['models'][$table]['fields'][$column])) {
               $model = $cfg['models'][$table]['fields'][$column];
-              $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") .
-                (!empty($cfg['available_fields'][$field]) ?
-                $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true)
-                : $this->col_simple_name($column, true)
+              $res  .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") .
+                (!empty($cfg['available_fields'][$field]) ? $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true) : $this->col_simple_name($column, true)
               ) . ' ';
             }
             else {
@@ -637,10 +696,12 @@ MYSQL
                   $f['exp'] = $cfg['fields'][$f['exp']];
                 }
               }
+
               $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
             }
+
             if (!empty($model)) {
-              $is_null = (bool) $model['null'];
+              $is_null = (bool)$model['null'];
               if ($model['type'] === 'binary') {
                 $is_number = true;
                 if (($model['maxlength'] === 16) && !empty($model['key'])) {
@@ -664,10 +725,12 @@ MYSQL
           else {
             $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
           }
+
           if (empty($f['exp']) && isset($f['value']) && in_array($f['value'], [1, 0, true, false], true)) {
             // Always use LIKE as booleans and 1 and 0 are interpretated badly by MySQL
             $is_bool = true;
           }
+
           switch (strtolower($f['operator'])) {
             case '=':
               if ($is_uid && $is_bool) {
@@ -806,11 +869,14 @@ MYSQL
         }
       }
     }
+
     if (!empty($res)) {
       return str_replace(PHP_EOL . PHP_EOL, PHP_EOL, $res . PHP_EOL);
     }
+
     return $res;
   }
+
 
   /**
    * Generates a string starting with SELECT ... FROM with corresponding parameters
@@ -826,12 +892,13 @@ MYSQL
       if (!empty($cfg['count'])) {
         if ($cfg['group_by']) {
           $indexes = [];
-          $idxs = [];
+          $idxs    = [];
           foreach ($cfg['group_by'] as $g) {
             // Alias
             if (isset($cfg['fields'][$g])) {
               $g = $cfg['fields'][$g];
             }
+
             if (($t = $cfg['available_fields'][$g])
                 && ($cfn = $this->col_full_name($g, $t))
             ) {
@@ -841,13 +908,14 @@ MYSQL
               $idxs[] = $this->col_simple_name($cfg['aliases'][$g] ?? $g, true);
             } else {
               $indexes[] = $g;
-              $idxs[] = $g;
+              $idxs[]    = $g;
             }
           }
+
           if (!empty($cfg['having'])) {
             if (count($indexes) === count($cfg['group_by'])) {
               $res .= 'COUNT(*) FROM ( SELECT ';
-              $tmp = [];
+              $tmp  = [];
               if ($extracted_fields = $this->db->extract_fields($cfg, $cfg['having']['conditions'])) {
                 //die(var_dump($extracted_fields));
                 foreach ($extracted_fields as $ef) {
@@ -860,6 +928,7 @@ MYSQL
                   }
                 }
               }
+
               $cfg['fields'] = $indexes;
               foreach ($tmp as $k => $v) {
                 if (is_string($k)) {
@@ -867,7 +936,6 @@ MYSQL
                 } else {
                   $cfg['fields'][] = $v;
                 }
-
               }
             } else {
               $res .= 'COUNT(*) FROM ( SELECT ';
@@ -883,28 +951,30 @@ MYSQL
             }
           }
         } else {
-          $res .= 'COUNT(*)';
+          $res          .= 'COUNT(*)';
           $cfg['fields'] = [];
         }
       }
+
       if (!empty($cfg['fields'])) {
         $fields_to_put = [];
         // Checking the selected fields
         foreach ($cfg['fields'] as $alias => $f) {
           $is_distinct = false;
-          $f = trim($f);
-          $bits = explode(' ', $f);
+          $f           = trim($f);
+          $bits        = explode(' ', $f);
           if ((count($bits) > 1) && (strtolower($bits[0]) === 'distinct')) {
             $is_distinct = true;
             array_shift($bits);
             $f = implode(' ', $bits);
           }
+
           // Adding the alias in $fields
           if (strpos($f, '(')) {
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $f . (\is_string($alias) ? ' AS ' . $this->escape($alias) : '');
           } elseif (array_key_exists($f, $cfg['available_fields'])) {
-            $idx = $cfg['available_fields'][$f];
-            $csn = $this->col_simple_name($f);
+            $idx    = $cfg['available_fields'][$f];
+            $csn    = $this->col_simple_name($f);
             $is_uid = false;
             //die(var_dump($idx, $f, $tables[$idx]));
             if (($idx !== false) && isset($cfg['models'][$idx]['fields'][$csn])) {
@@ -916,6 +986,7 @@ MYSQL
                 }
               }
             }
+
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
             if ($is_uid) {
               $st = 'LOWER(HEX(' . $this->col_full_name($csn, $cfg['available_fields'][$f], true) . '))';
@@ -926,9 +997,11 @@ MYSQL
             } else {
               $st = $this->col_full_name($csn, $cfg['available_fields'][$f], true);
             }
+
             if (\is_string($alias)) {
               $st .= ' AS ' . $this->escape($alias);
             }
+
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $st;
           } elseif (isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false)) {
             $this->db->error("Error! The column '$f' exists on several tables in '" . implode(', ', $cfg['tables']));
@@ -936,22 +1009,28 @@ MYSQL
             $this->db->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
           }
         }
+
         $res .= implode(', ', $fields_to_put);
       }
-      $res .= PHP_EOL;
+
+      $res          .= PHP_EOL;
       $tables_to_put = [];
       foreach ($cfg['tables'] as $alias => $tfn) {
         $st = $this->table_full_name($tfn, true);
         if ($alias !== $tfn) {
           $st .= ' AS ' . $this->escape($alias);
         }
+
         $tables_to_put[] = $st;
       }
+
       $res .= 'FROM ' . implode(', ', $tables_to_put) . PHP_EOL;
       return $res;
     }
+
     return $res;
   }
+
 
   /**
    * Generates a string for the insert from a cfg array.
@@ -964,11 +1043,11 @@ MYSQL
       'values' => [],
       'fields' => [],
     ];
-    $i = 0;
+    $i             = 0;
     foreach ($cfg['fields'] as $alias => $f) {
       if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model = $cfg['models'][$cfg['available_fields'][$f]];
-        $csn = $this->col_simple_name($f);
+        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+        $csn    = $this->col_simple_name($f);
         $is_uid = false;
         //x::hdump('---------------', $idx, $f, $tables[$idx]['model']['fields'][$csn], $args['values'],
         // $res['values'], '---------------');
@@ -977,21 +1056,26 @@ MYSQL
           if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
             $is_uid = true;
           }
+
           $fields_to_put['fields'][] = $this->col_simple_name($f, true);
           $fields_to_put['values'][] = '?';
         }
       } else {
         $this->db->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
+
       $i++;
     }
+
     if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
       return 'INSERT ' . ($cfg['ignore'] ? 'IGNORE ' : '') . 'INTO ' . $this->table_full_name(current($cfg['tables']), true) . PHP_EOL .
       '(' . implode(', ', $fields_to_put['fields']) . ')' . PHP_EOL . ' VALUES (' .
       implode(', ', $fields_to_put['values']) . ')' . PHP_EOL;
     }
+
     return '';
   }
+
 
   /**
    * @param array $cfg The configuration array
@@ -999,21 +1083,22 @@ MYSQL
    */
   public function get_update(array $cfg): string
   {
-    $res = '';
+    $res           = '';
     $fields_to_put = [
       'values' => [],
       'fields' => [],
     ];
     foreach ($cfg['fields'] as $alias => $f) {
       if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model = $cfg['models'][$cfg['available_fields'][$f]];
-        $csn = $this->col_simple_name($f);
+        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+        $csn    = $this->col_simple_name($f);
         $is_uid = false;
         if (isset($model['fields'][$csn])) {
           $column = $model['fields'][$csn];
           if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
             $is_uid = true;
           }
+
           $fields_to_put['fields'][] = $this->col_simple_name($f, true);
           $fields_to_put['values'][] = '?';
         }
@@ -1021,6 +1106,7 @@ MYSQL
         $this->db->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
     }
+
     if (count($fields_to_put['fields'])) {
       $res .= 'UPDATE ' . ($cfg['ignore'] ? 'IGNORE ' : '') . $this->table_full_name(current($cfg['tables']), true) . ' SET ';
       $last = count($fields_to_put['fields']) - 1;
@@ -1029,11 +1115,14 @@ MYSQL
         if ($i < $last) {
           $res .= ',';
         }
+
         $res .= PHP_EOL;
       }
     }
+
     return $res;
   }
+
 
   /**
    * Return SQL code for row(s) DELETE.
@@ -1054,8 +1143,10 @@ MYSQL
       (count($cfg['join']) ? current($cfg['tables']) . ' ' : '') .
       'FROM ' . $this->table_full_name(current($cfg['tables']), true) . PHP_EOL;
     }
+
     return $res;
   }
+
 
   /**
    * Returns a string with the JOIN part of the query if there is, empty otherwise
@@ -1069,8 +1160,7 @@ MYSQL
     if (!empty($cfg['join'])) {
       foreach ($cfg['join'] as $join) {
         if (isset($join['table'], $join['on']) && ($cond = $this->db->get_conditions($join['on'], $cfg, false, 4))) {
-          $res .=
-          '  ' .
+          $res .= '  ' .
           (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '') .
           'JOIN ' . $this->table_full_name($join['table'], true) .
             (!empty($join['alias']) ? ' AS ' . $this->escape($join['alias']) : '')
@@ -1078,8 +1168,10 @@ MYSQL
         }
       }
     }
+
     return $res;
   }
+
 
   /**
    * Returns a string with the JOIN part of the query if there is, empty otherwise
@@ -1093,8 +1185,10 @@ MYSQL
     if (!empty($res)) {
       $res = 'WHERE ' . $res;
     }
+
     return $res;
   }
+
 
   /**
    * Returns a string with the GROUP BY part of the query if there is, empty otherwise
@@ -1104,7 +1198,7 @@ MYSQL
    */
   public function get_group_by(array $cfg): string
   {
-    $res = '';
+    $res          = '';
     $group_to_put = [];
     if (!empty($cfg['group_by'])) {
       foreach ($cfg['group_by'] as $g) {
@@ -1115,12 +1209,15 @@ MYSQL
           $this->db->error("Error! The column '$g' doesn't exist for group by " . print_r($cfg, true));
         }
       }
+
       if (count($group_to_put)) {
         $res .= 'GROUP BY ' . implode(', ', $group_to_put) . PHP_EOL;
       }
     }
+
     return $res;
   }
+
 
   /**
    * Returns a string with the HAVING part of the query if there is, empty otherwise
@@ -1141,8 +1238,10 @@ MYSQL
         $res .= '  HAVING ' . $cond . PHP_EOL;
       }
     }
+
     return $res;
   }
+
 
   /**
    * @param array $cfg
@@ -1157,6 +1256,7 @@ MYSQL
           $col = $dir['field'];
           $dir = $dir['dir'] ?? 'ASC';
         }
+
         if (isset($cfg['available_fields'][$col])) {
           // If it's an alias we use the simple name
           if (isset($cfg['fields'][$col])) {
@@ -1166,15 +1266,19 @@ MYSQL
           } else {
             $f = $this->col_full_name($col, $cfg['available_fields'][$col], true);
           }
+
           $res .= $f . ' ' . (strtolower($dir) === 'desc' ? 'DESC' : 'ASC') . ',' . PHP_EOL;
         }
       }
+
       if (!empty($res)) {
         return 'ORDER BY ' . substr($res, 0, strrpos($res, ',')) . PHP_EOL;
       }
     }
+
     return $res;
   }
+
 
   /**
    * Get a string starting with LIMIT with corresponding parameters to $where
@@ -1186,10 +1290,12 @@ MYSQL
   {
     $res = '';
     if (!empty($cfg['limit']) && bbn\str::is_integer($cfg['limit'])) {
-      $res .= 'LIMIT ' . (!empty($cfg['start']) && bbn\str::is_integer($cfg['start']) ? (string) $cfg['start'] : '0') . ', ' . $cfg['limit'];
+      $res .= 'LIMIT ' . (!empty($cfg['start']) && bbn\str::is_integer($cfg['start']) ? (string)$cfg['start'] : '0') . ', ' . $cfg['limit'];
     }
+
     return $res;
   }
+
 
   /**
    * @param null|string $table The table for which to create the statement
@@ -1197,48 +1303,67 @@ MYSQL
    */
   public function get_raw_create(string $table): string
   {
-    if (($table = $this->table_full_name($table, true)) 
+    if (($table = $this->table_full_name($table, true))
         && ($r = $this->db->raw_query("SHOW CREATE TABLE $table"))
     ) {
       return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
     }
+
     return '';
   }
+
 
   public function get_create_table(string $table, array $model = null): string
   {
     if (!$model) {
       $model = $this->db->modelize($table);
     }
-    $st = 'CREATE TABLE ' . $this->db->escape($table) . ' (' . PHP_EOL;
+
+    $st   = 'CREATE TABLE ' . $this->db->escape($table) . ' (' . PHP_EOL;
     $done = false;
     foreach ($model['fields'] as $name => $col) {
       if (!$done) {
         $done = true;
-      } else {
+      }
+      else {
         $st .= ',' . PHP_EOL;
       }
+
       $st .= '  ' . $this->db->escape($name) . ' ';
-      $st .= $col['type'];
+      if (!in_array($col['type'], self::$types)) {
+        if (isset(self::$interoperability[$col['type']])) {
+          $st .= self::$interoperability[$col['type']];
+        }
+        else {
+          throw new \Exception(_("Impossible to recognize the column type")." $col[type]");
+        }
+      }
+      else {
+        $st .= $col['type'];
+      }
+
       if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
         $st .= ' (' . $col['extra'] . ')';
-      } elseif (!empty($col['maxlength'])) {
+      }
+      elseif (!empty($col['maxlength'])) {
         $st .= '(' . $col['maxlength'];
         if (!empty($col['decimals'])) {
           $st .= ',' . $col['decimals'];
         }
+
         $st .= ')';
       }
-      if (((strpos($col['type'], 'int') !== false)
-          || (strpos($col['type'], 'decimal') !== false)
-          || (strpos($col['type'], 'float') !== false)          )
-          && !$col['signed']
+
+      if (in_array($col['type'], self::$numeric_types)
+          && empty($col['signed'])
       ) {
         $st .= ' UNSIGNED';
       }
+
       if (empty($col['null'])) {
         $st .= ' NOT NULL';
       }
+
       if (!empty($col['virtual'])) {
         $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
       } elseif (array_key_exists('default', $col)) {
@@ -1248,15 +1373,17 @@ MYSQL
             || strpos($col['default'], '(')
             || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
         ) {
-          $st .= (string) $col['default'];
+          $st .= (string)$col['default'];
         } else {
           $st .= "'" . bbn\str::escape_squotes($col['default']) . "'";
         }
       }
     }
+
     $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
     return $st;
   }
+
 
   public function get_create_keys(string $table, array $model = null)
   {
@@ -1264,11 +1391,12 @@ MYSQL
     if (!$model) {
       $model = $this->db->modelize($table);
     }
+
     if ($model && !empty($model['keys'])) {
-      $st .= 'ALTER TABLE ' . $this->db->escape($table) . PHP_EOL;
-      $last = count($model['keys']) - 1;
+      $st   .= 'ALTER TABLE ' . $this->db->escape($table) . PHP_EOL;
+      $last  = count($model['keys']) - 1;
       $dbcls = &$this->db;
-      $i = 0;
+      $i     = 0;
       foreach ($model['keys'] as $name => $key) {
         $st .= '  ADD ';
         if ($key['unique']
@@ -1281,6 +1409,7 @@ MYSQL
         } else {
           $st .= 'KEY ' . $this->db->escape($name);
         }
+
         $st .= ' (' . implode(
           ',', array_map(
             function ($a) use (&$dbcls) {
@@ -1292,8 +1421,10 @@ MYSQL
         $i++;
       }
     }
+
     return $st;
   }
+
 
   public function get_create_constraints(string $table, array $model = null): string
   {
@@ -1301,6 +1432,7 @@ MYSQL
     if (!$model) {
       $model = $this->db->modelize($table);
     }
+
     if ($model && !empty($model['keys'])) {
       $constraints = array_filter(
         $model['keys'], function ($a) {
@@ -1309,7 +1441,7 @@ MYSQL
       );
       if ($last = count($constraints)) {
         $st .= 'ALTER TABLE ' . $this->db->escape($table) . PHP_EOL;
-        $i = 0;
+        $i   = 0;
         foreach ($constraints as $name => $key) {
           $i++;
           $st .= '  ADD ' .
@@ -1321,8 +1453,10 @@ MYSQL
         }
       }
     }
+
     return $st;
   }
+
 
   public function get_create(string $table, array $model = null): string
   {
@@ -1330,10 +1464,11 @@ MYSQL
     if (!$model) {
       $model = $this->db->modelize($table);
     }
+
     if ($st = $this->get_create_table($table, $model)) {
       $lines = x::split($st, PHP_EOL);
-      $end = array_pop($lines);
-      $st = x::join($lines, PHP_EOL);
+      $end   = array_pop($lines);
+      $st    = x::join($lines, PHP_EOL);
       foreach ($model['keys'] as $name => $key) {
         $st .= ',' . PHP_EOL . '  ';
         if ($key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')) {
@@ -1343,8 +1478,9 @@ MYSQL
         } else {
           $st .= 'KEY ' . $this->db->escape($name);
         }
+
         $dbcls = &$this->db;
-        $st .= ' (' . implode(
+        $st   .= ' (' . implode(
           ',', array_map(
             function ($a) use (&$dbcls) {
               return $dbcls->escape($a);
@@ -1352,19 +1488,27 @@ MYSQL
           )
         ) . ')';
       }
+
+      // For avoiding constraint names conflicts
+      $keybase = strtolower(bbn\str::genpwd(8, 4));
+      $i       = 1;
       foreach ($model['keys'] as $name => $key) {
         if (!empty($key['ref_table'])) {
           $st .= ',' . PHP_EOL . '  ' .
-          'CONSTRAINT ' . $this->db->escape($key['constraint']) . ' FOREIGN KEY (' . $this->db->escape($name) . ') ' .
+          'CONSTRAINT ' . $this->db->escape($keybase.$i) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
           'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
             ($key['delete'] ? ' ON DELETE ' . $key['delete'] : '') .
             ($key['update'] ? ' ON UPDATE ' . $key['update'] : '');
+          $i++;
         }
       }
+
       $st .= PHP_EOL . $end;
     }
+
     return $st;
   }
+
 
   /**
    * Creates an index
@@ -1377,30 +1521,35 @@ MYSQL
    */
   public function create_index(string $table, $column, bool $unique = false, $length = null): bool
   {
-    $column = (array) $column;
+    $column = (array)$column;
     if ($length) {
-      $length = (array) $length;
+      $length = (array)$length;
     }
+
     $name = bbn\str::encode_filename($table);
     if ($table = $this->table_full_name($table, true)) {
       foreach ($column as $i => $c) {
         if (!bbn\str::check_name($c)) {
           $this->db->error("Illegal column $c");
         }
-        $name .= '_' . $c;
+
+        $name      .= '_' . $c;
         $column[$i] = $this->escape($column[$i]);
         if (\is_int($length[$i]) && $length[$i] > 0) {
           $column[$i] .= '(' . $length[$i] . ')';
         }
       }
+
       $name = bbn\str::cut($name, 50);
-      return (bool) $this->db->query(
+      return (bool)$this->db->query(
         'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
         implode(', ', $column) . ' )'
       );
     }
+
     return false;
   }
+
 
   /**
    * Deletes an index
@@ -1411,18 +1560,20 @@ MYSQL
    */
   public function delete_index(string $table, string $key): bool
   {
-    if (($table = $this->table_full_name($table, true)) 
+    if (($table = $this->table_full_name($table, true))
         && bbn\str::check_name($key)
     ) {
-      return (bool) $this->db->query(
+      return (bool)$this->db->query(
         <<<MYSQL
 ALTER TABLE $table
 DROP INDEX `$key`
 MYSQL
       );
     }
+
     return false;
   }
+
 
   /**
    * Creates a database
@@ -1435,10 +1586,12 @@ MYSQL
   public function create_mysql_database(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
     if (bbn\str::check_name($database, $enc, $collation)) {
-      return (bool) $this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
+      return (bool)$this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
     }
+
     return false;
   }
+
 
   /**
    * Creates a database
@@ -1453,6 +1606,7 @@ MYSQL
     return $this->create_mysql_database($database);
   }
 
+
   /**
    * Creates a database user
    *
@@ -1466,11 +1620,12 @@ MYSQL
     if (null === $db) {
       $db = $this->db->get_current();
     }
-    if (($db = $this->escape($db)) 
-        && bbn\str::check_name($user, $db) 
+
+    if (($db = $this->escape($db))
+        && bbn\str::check_name($user, $db)
         && (strpos($pass, "'") === false)
     ) {
-      return (bool) $this->db->raw_query(
+      return (bool)$this->db->raw_query(
         <<<MYSQL
 GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 ON $db . *
@@ -1479,8 +1634,10 @@ IDENTIFIED BY '$pass'
 MYSQL
       );
     }
+
     return false;
   }
+
 
   /**
    * There's an error in the query REVOKE ALL PRIVILEGES ON *.*
@@ -1498,10 +1655,12 @@ MYSQL
 			REVOKE ALL PRIVILEGES ON *.*
       FROM $user"
       );
-      return (bool) $this->db->query("DROP USER $user");
+      return (bool)$this->db->query("DROP USER $user");
     }
+
     return false;
   }
+
 
   /**
    * @param string $user
@@ -1515,9 +1674,11 @@ MYSQL
       if (!empty($user) && bbn\str::check_name($user)) {
         $cond .= " AND  user LIKE '$user' ";
       }
+
       if (!empty($host) && bbn\str::check_name($host)) {
         $cond .= " AND  host LIKE '$host' ";
       }
+
       $us = $this->db->get_rows(
         <<<MYSQL
 SELECT DISTINCT host, user
@@ -1526,17 +1687,20 @@ WHERE 1
 $cond
 MYSQL
       );
-      $q = [];
+      $q  = [];
       foreach ($us as $u) {
         $gs = $this->db->get_col_array("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
         foreach ($gs as $g) {
           $q[] = $g;
         }
       }
+
       return $q;
     }
+
     return null;
   }
+
 
   public function db_size(string $database = '', string $type = ''): int
   {
@@ -1545,21 +1709,26 @@ MYSQL
       $cur = $this->db->get_current();
       $this->db->change($database);
     }
-    $q = $this->db->query('SHOW TABLE STATUS');
+
+    $q    = $this->db->query('SHOW TABLE STATUS');
     $size = 0;
     while ($row = $q->get_row()) {
       if (!$type || ($type === 'data')) {
         $size += $row['Data_length'];
       }
+
       if (!$type || ($type === 'index')) {
         $size += $row['Index_length'];
       }
     }
+
     if ($cur !== null) {
       $this->db->change($cur);
     }
+
     return $size;
   }
+
 
   public function table_size(string $table, string $type = ''): int
   {
@@ -1569,12 +1738,15 @@ MYSQL
       if (!$type || (strtolower($type) === 'index')) {
         $size += $row['Index_length'];
       }
+
       if (!$type || (strtolower($type) === 'data')) {
         $size += $row['Data_length'];
       }
     }
+
     return $size;
   }
+
 
   public function status(string $table = '', string $database = '')
   {
@@ -1583,12 +1755,15 @@ MYSQL
       $cur = $this->db->get_current();
       $this->db->change($database);
     }
+
     $r = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
     if (null !== $cur) {
       $this->db->change($cur);
     }
+
     return $r;
   }
+
 
   public function get_uid(): string
   {
@@ -1597,13 +1772,15 @@ MYSQL
     while (!bbn\str::is_buid(hex2bin($uid))) {
       $uid = $this->db->get_one("SELECT replace(uuid(),'-','')");
     }
+
     return $uid;
   }
+
 
   public function create_table($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', $engine = 'InnoDB')
   {
     $lines = [];
-    $sql = '';
+    $sql   = '';
     foreach ($columns as $n => $c) {
       $name = $c['name'] ?? $n;
       if (isset($c['type']) && bbn\str::check_name($name)) {
@@ -1618,24 +1795,33 @@ MYSQL
               $st .= ',';
             }
           }
+
           $st .= ')';
         }
+
         if ((strpos($c['type'], 'int') !== false) && empty($c['signed'])) {
           $st .= ' UNSIGNED';
         }
+
         if (empty($c['null'])) {
           $st .= ' NOT NULL';
         }
+
         if (isset($c['default'])) {
           $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . bbn\str::escape_squotes($c['default']) . "'");
         }
+
         $lines[] = $st;
       }
     }
+
     if (count($lines)) {
       $sql = 'CREATE TABLE ' . $this->table_simple_name($table_name, true) . ' (' . PHP_EOL . implode(',' . PHP_EOL, $lines) .
         PHP_EOL . ') ENGINE=' . $engine . ' DEFAULT CHARSET=' . $charset . ';';
     }
+
     return $sql;
   }
+
+
 }
