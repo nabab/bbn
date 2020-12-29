@@ -19,24 +19,24 @@ namespace bbn;
 use bbn\mvc\router;
 
 if (!\defined("BBN_DEFAULT_MODE")) {
-    define("BBN_DEFAULT_MODE", 'public');
+  define("BBN_DEFAULT_MODE", 'public');
 }
 
 // Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
 if (!\defined("BBN_CUR_PATH")) {
-    define('BBN_CUR_PATH', '/');
+  define('BBN_CUR_PATH', '/');
 }
 
 if (!\defined("BBN_APP_NAME")) {
-    die("BBN_APP_NAME must be defined");
+  throw new \Exception("BBN_APP_NAME must be defined");
 }
 
 if (!\defined("BBN_APP_PATH")) {
-    die("BBN_APP_PATH must be defined");
+  throw new \Exception("BBN_APP_PATH must be defined");
 }
 
 if (!\defined("BBN_DATA_PATH")) {
-    die("BBN_DATA_PATH must be defined");
+  throw new \Exception("BBN_DATA_PATH must be defined");
 }
 
 class mvc implements mvc\api
@@ -164,6 +164,11 @@ class mvc implements mvc\api
   public static $reserved = ['_private', '_common', '_htaccess'];
 
 
+  /**
+   * Sets all the different paths' properties.
+   *
+   * @return void
+   */
   public static function init_path()
   {
     if (!self::$_app_name) {
@@ -177,66 +182,139 @@ class mvc implements mvc\api
   }
 
 
+  /**
+   * Returns the current app's name.
+   *
+   * @return string
+   */
   public static function get_app_name(): string
   {
     return self::$_app_name;
   }
 
 
+  /**
+   * Returns the current app's prefix if any.
+   *
+   * @return string|null
+   */
   public static function get_app_prefix(): ?string
   {
     return self::$_app_prefix;
   }
 
 
+  /**
+   * Returns the current app's full path (with src/ at the end if raw if false).
+   *
+   * @param boolean $raw
+   *
+   * @return string
+   */
   public static function get_app_path($raw = false): string
   {
     return self::$_app_path.($raw ? '' : 'src/');
   }
 
 
+  /**
+   * Returns the web public path of the app.
+   *
+   * @return string
+   */
   public static function get_cur_path(): string
   {
     return self::$_cur_path;
   }
 
 
+  /**
+   * Returns the full path of the libraries (vendor folder).
+   *
+   * @return string
+   */
   public static function get_lib_path(): string
   {
     return self::$_lib_path;
   }
 
 
+  /**
+   * Returns the full path of the data; if plugin is provided gives the path for the plugin's data.
+   *
+   * @param string $plugin
+   *
+   * @return string
+   */
   public static function get_data_path(string $plugin = null): string
   {
     return BBN_DATA_PATH.($plugin ? 'plugins/'.$plugin.'/' : '');
   }
 
 
+  /**
+   * Returns the full path of the temp data; if plugin is provided gives the path for the plugin's temp data.
+   *
+   * @param string $plugin
+   *
+   * @return string
+   */
   public static function get_tmp_path(string $plugin = null): string
   {
     return self::$_app_name ? self::get_data_path().'tmp/'.($plugin ? $plugin.'/' : '') : '';
   }
 
 
+  /**
+   * Returns the full path of the logs.
+   * 
+   * @todo Not sure it makes sense to have the plugin as for now all logs are in the same directory.
+   *
+   * @param string $plugin
+   *
+   * @return string
+   */
   public static function get_log_path(string $plugin = null): string
   {
     return self::$_app_name ? self::get_data_path().'logs/'.($plugin ? $plugin.'/' : '') : '';
   }
 
 
+  /**
+   * Returns ths full path of the cache
+   *
+   * @todo Not sure it makes sense to have the plugin as for now all logs are in the same directory.
+   * 
+   * @param string $plugin
+   *
+   * @return string
+   */
   public static function get_cache_path(string $plugin = null): string
   {
     return BBN_DATA_PATH.'cache/'.($plugin ? $plugin.'/' : '');
   }
 
 
+  /**
+   * Returns the full path of the content data; if plugin is provided gives the path for the plugin's content data.
+   *
+   * @param string $plugin
+   *
+   * @return string
+   */
   public static function get_content_path(string $plugin = null): string
   {
     return self::$_app_name ? self::get_data_path().($plugin ? 'plugins/'.$plugin.'/' : 'content/') : '';
   }
 
 
+  /**
+   * Returns the URL part of the given plugin.
+   * 
+   * @param string $plugin_name the plugin
+   * 
+   * @return null|string
+   */
   public static function get_plugin_url(string $plugin_name): ?string
   {
     if ($mvc = self::get_instance()) {
@@ -247,6 +325,14 @@ class mvc implements mvc\api
   }
 
 
+  /**
+   * Returns 
+   *
+   * @param string $id_user
+   * @param string $plugin
+   *
+   * @return string|null
+   */
   public static function get_user_tmp_path(string $id_user = null, string $plugin = null):? string
   {
     if (!self::$_app_name) {
@@ -404,7 +490,7 @@ class mvc implements mvc\api
 
         unset($bbn_inc_data);
         /*
-        try{
+        try {
           eval('?>'.$bbn_inc_content);
         }
         catch (\Exception $e){
