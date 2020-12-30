@@ -291,7 +291,7 @@ class image extends bbn\file
             $this->img = new \Imagick($this->file);
             switch ( $this->get_extension() ) {
               case 'gif':
-                $this->img->setInterlaceScheme(Imagick::INTERLACE_GIF);
+                $this->img->setInterlaceScheme(\Imagick::INTERLACE_GIF);
                 break;
 
               case 'jpeg':

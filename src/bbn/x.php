@@ -1553,6 +1553,7 @@ class x
     $ch               = curl_init();
     self::$_last_curl = $ch;
     $defined          = array_map('strtolower', array_keys($options));
+   
     if (!in_array('returntransfer', $defined)) {
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     }
@@ -1615,6 +1616,7 @@ class x
     }
 
     $r = curl_exec($ch);
+    
     if (!$r) {
       self::log(["PROBLEME AVEC L'URL $url", curl_error($ch), curl_getinfo($ch)], 'curl');
     }

@@ -86,7 +86,6 @@ class medias extends bbn\models\cls\db
                 'size' => $fs->filesize($name),
                 'extension' => bbn\str::file_ext($file)
               ];
-              
               if ( empty($title) ){
                 $title = basename($file);
               }
