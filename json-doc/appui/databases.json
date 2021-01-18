@@ -10,8 +10,8 @@
     ],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/databases.php",
-    "startLine": 13,
-    "endLine": 1196,
+    "startLine": 15,
+    "endLine": 1468,
     "contentConstructor": {
         "file": "bbn\\appui\\databases",
         "returns": null
@@ -26,9 +26,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db)\n  {\n    parent::__construct($db);\n    self::optional_init();\n    $this->o = bbn\\appui\\options::get_instance();\n  }",
-            "startLine": 55,
-            "endLine": 60,
+            "code": "function(bbn\\db $db)\n  {\n    parent::__construct($db);\n    self::optional_init();\n    $this->o = bbn\\appui\\options::get_instance();\n\n  }",
+            "startLine": 67,
+            "endLine": 73,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -93,20 +93,19 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host, $db)\n  {\n    $id_host = !bbn\\str::is_uid($host) ? $this->host_id($host) : $host;\n    if ($id_host && ($cfg = $this->o->option($id_host))) {\n      $cfg = $this->o->option($id_host);\n      if (strpos($cfg['code'], '@')) {\n        $bits = bbn\\x::split($cfg['code'], '@');\n        if ((count($bits) === 2) && ($password = $this->get_password($id_host))) {\n          $db = [\n            'user' => $bits[0],\n            'host' => $bits[1],\n            'db' => $db,\n            'pass' => $password\n          ];\n        }\n        else {\n          $db = [\n            'host' => $cfg['code'],\n            'db' => $db\n          ];\n        }\n        $this->db_alt = new bbn\\db($db);\n        return $this->db_alt;\n      }\n    }\n    return null;\n  }",
-            "startLine": 69,
-            "endLine": 95,
+            "code": "function($host = NULL, $engine = 'mysql', $db = '')\n  {\n    if (bbn\\str::is_uid($host)) {\n      $id_host = $host;\n    }\n    elseif (!($id_host = $this->host_id($host, $engine))) {\n      throw new \\Exception(_(\"Impossible to find the host\").' '.\"$host ($engine)\");\n    }\n\n    if (!($cfg = $this->o->option($id_host))) {\n      throw new \\Exception(_(\"Impossible to find the option corresponding to host\").' '.\"$host ($engine)\");\n    }\n\n    $parent = $this->o->parent($this->o->get_id_parent($id_host));\n    if (!isset($this->connections[$parent['code']])) {\n      throw new \\Exception(_(\"Unknown engine\").\" \".$parent['code']);\n    }\n\n    if (!isset($this->connections[$parent['code']][$cfg['code']])) {\n      switch ($parent['code']) {\n        case 'mysql':\n          if (strpos($cfg['code'], '@')) {\n            $bits = bbn\\x::split($cfg['code'], '@');\n            if ((count($bits) === 2) && ($password = $this->get_password($id_host))) {\n              $db_cfg = [\n                'engine' => 'mysql',\n                'user' => $bits[0],\n                'host' => $bits[1],\n                'db' => $db,\n                'pass' => $password\n              ];\n            }\n            else {\n              $db_cfg = [\n                'engine' => 'mysql',\n                'host' => $cfg['code'],\n                'db' => $db\n              ];\n            }\n\n            try {\n              $this->connections[$parent['code']][$cfg['code']] = new bbn\\db($db_cfg);\n            }\n            catch (\\Exception $e) {\n              throw new \\Exception($e->getMessage());\n            }\n          }\n          break;\n\n        case 'postgre':\n          if (empty($db) || empty($cfg['path'])) {\n            throw new \\Exception(_('db or path empty'));\n          }\n          break;\n\n        case 'sqlite':\n          if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'\/'.$db)) {\n            throw new \\Exception(_('db or path empty'));\n          }\n          \n          $db_cfg = [\n            'engine' => 'sqlite',\n            'db' => $cfg['path'].'\/'.$db\n          ];\n          try {\n            $this->connections[$parent['code']][$cfg['code']] = new bbn\\db($db_cfg);\n          }\n          catch (\\Exception $e) {\n            throw new \\Exception($e->getMessage());\n          }\n          break;\n\n        default:\n          throw new \\Exception(_('Impossible to find the engine').' '.$cfg['engine']);\n      }\n    }\n\n    if (isset($this->connections[$parent['code']][$cfg['code']])) {\n      return $this->connections[$parent['code']][$cfg['code']];\n    }\n\n    throw new \\Exception(_(\"Impossible to get a connection for\").' '.$cfg['code']);\n  }",
+            "startLine": 83,
+            "endLine": 165,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
             "returns": [
-                "bbn\\db",
-                null
+                "bbn\\db"
             ],
             "parent": false,
             "arguments": [
@@ -114,18 +113,27 @@
                     "name": "host",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": "",
                     "description": "The database name"
                 },
                 {
-                    "name": "db",
+                    "name": "engine",
                     "position": 1,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -140,17 +148,17 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host = '')\n  {\n    if (!$host) {\n      if ($this->username) {\n        $host .= $this->username.'@';\n      }\n      $host .= $this->host;\n    }\n    \n    $r = self::get_option_id($host, 'connections');\n    return $r ?: null;\n  }",
-            "startLine": 103,
-            "endLine": 114,
+            "code": "function($host, $engine = 'mysql')\n  {\n    $r = self::get_option_id($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine);\n    return $r ?: null;\n  }",
+            "startLine": 174,
+            "endLine": 178,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "string",
                 null
@@ -161,11 +169,19 @@
                     "name": "host",
                     "position": 0,
                     "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
                     "required": false,
                     "has_default": true,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The connection code (user@host or host)"
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -178,23 +194,33 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (($id_parent = self::get_option_id('connections')) \n        && ($num = $this->o->count($id_parent))\n    ) {\n      return $num;\n    }\n    return 0;\n  }",
-            "startLine": 121,
-            "endLine": 129,
+            "code": "function($engine = 'mysql')\n  {\n    if (($id_parent = self::get_option_id($engine === 'sqlite' ? 'paths' : 'connections', $engine))\n        && ($num = $this->o->count($id_parent))\n    ) {\n      return $num;\n    }\n\n    return 0;\n  }",
+            "startLine": 186,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "int",
                 null
             ],
             "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
+                }
+            ]
         },
         "hosts": {
             "name": "hosts",
@@ -205,22 +231,32 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (($id_parent = self::get_option_id('connections')) \n        && ($co = array_values($this->o->code_options($id_parent)))\n    ) {\n      return $co;\n    }\n    return [];\n  }",
-            "startLine": 136,
-            "endLine": 144,
+            "code": "function($engine = 'mysql')\n  {\n    if (($id_parent = self::get_option_id($engine === 'sqlite' ? 'paths' : 'connections', $engine))\n        && ($co = array_values($this->o->code_options($id_parent)))\n    ) {\n      return $co;\n    }\n\n    return [];\n  }",
+            "startLine": 203,
+            "endLine": 212,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array"
             ],
             "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
+                }
+            ]
         },
         "full_hosts": {
             "name": "full_hosts",
@@ -231,23 +267,33 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (($id_parent = self::get_option_id('connections'))\n        && ($opt = $this->o->full_options($id_parent))\n    ) {\n      return $opt;\n    }\n    return null;\n  }",
-            "startLine": 151,
-            "endLine": 159,
+            "code": "function($engine = 'mysql')\n  {\n    if (($id_parent = self::get_option_id($engine === 'sqlite' ? 'paths' : 'connections', $engine))\n        && ($opt = $this->o->full_options($id_parent))\n    ) {\n      return $opt;\n    }\n\n    return null;\n  }",
+            "startLine": 220,
+            "endLine": 229,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array",
                 null
             ],
             "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
+                }
+            ]
         },
         "db_id": {
             "name": "db_id",
@@ -258,16 +304,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db = '')\n  {\n    if (($id_parent = self::get_option_id('dbs'))\n        && ($res = $this->o->from_code($db ?: $this->db->get_current(), $id_parent))\n    ) {\n      \n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 167,
-            "endLine": 176,
+            "code": "function($db = '', $engine = 'mysql')\n  {\n    if (($id_parent = self::get_option_id('dbs', $engine))\n        && ($res = $this->o->from_code($db ?: $this->db->get_current(), $id_parent))\n    ) {\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 238,
+            "endLine": 247,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "string",
@@ -282,8 +328,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -296,16 +350,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host = '')\n  {\n    if (!$host) {\n      $num = $this->o->count(self::get_option_id('dbs'));\n      return $num;\n    }\n    elseif (!bbn\\str::is_uid($host)) {\n      $host = $this->host_id($host);\n    }\n    $all = $this->o->get_aliases($host);\n    $num = $all ? count($all) : 0;\n    return $num;\n  }",
-            "startLine": 184,
-            "endLine": 196,
+            "code": "function($host = '', $engine = 'mysql')\n  {\n    if (!$host) {\n      $num = $this->o->count(self::get_option_id('dbs', $engine));\n      return $num;\n    }\n    elseif (!bbn\\str::is_uid($host)) {\n      $host = $this->host_id($host, $engine);\n    }\n\n    $all = $this->o->get_aliases($host);\n    $num = $all ? count($all) : 0;\n    return $num;\n  }",
+            "startLine": 256,
+            "endLine": 269,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "int"
@@ -320,6 +374,15 @@
                     "has_default": true,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -332,16 +395,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host = '')\n  {\n    if (!$host) {\n      $arr = $this->o->full_options(self::get_option_id('dbs'));\n    }\n    elseif (!bbn\\str::is_uid($host)) {\n      $host = $this->host_id($host);\n    }\n    if ($host) {\n      $o = &$this->o;\n      $arr = array_map(\n        function ($a) use ($o) {\n          return $o->parent($a['id_parent']);\n        },\n        $this->o->get_aliases($host)\n      );\n    }\n    if (!empty($arr)) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $arr\n      );\n      return $res;\n    }\n    return [];\n  }",
-            "startLine": 204,
-            "endLine": 235,
+            "code": "function($host = '', $engine = 'mysql')\n  {\n    if (!$host) {\n      $arr = $this->o->full_options(self::get_option_id('dbs', $engine));\n    }\n    elseif (!bbn\\str::is_uid($host)) {\n      $host = $this->host_id($host, $engine);\n    }\n\n    if ($host) {\n      $o   = &$this->o;\n      $arr = array_map(\n        function ($a) use ($o) {\n          return $o->parent($a['id_parent']);\n        },\n        $this->o->get_aliases($host)\n      );\n    }\n\n    if (!empty($arr)) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $arr\n      );\n      return $res;\n    }\n\n    return [];\n  }",
+            "startLine": 278,
+            "endLine": 312,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array"
@@ -355,8 +418,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code, all DBs are returned if empty."
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -369,16 +440,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host = '')\n  {\n    $o =& $this->o;\n    if ($dbs = $this->dbs($host)) {\n      $res = array_map(\n        function ($a) use ($o) {\n          $r = [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['name'],\n            'num_tables' => 0,\n            'num_connections' => 0,\n            'num_procedures' => 0,\n            'num_functions' => 0\n          ];\n          \/\/die(var_dump( $o->from_code('tables', $a['id'])));\n          if ($id_tables = $o->from_code('tables', $a['id'])) {\n            $r['num_tables'] = $o->count($id_tables);\n          }\n          if ($id_connections = $o->from_code('connections', $a['id'])) {\n            $r['num_connection'] = $o->count($id_connections);\n          }\n          if ($id_procedures = $o->from_code('procedures', $a['id'])) {\n            $r['num_procedures'] = $o->count($id_procedures);\n          }\n          if ($id_functions = $o->from_code('functions', $a['id'])) {\n            $r['num_functions'] = $o->count($id_functions);\n          }\n          return $r;\n        },\n        $dbs\n      );\n      return $res ?: [];\n    }\n    return [];\n  }",
-            "startLine": 243,
-            "endLine": 278,
+            "code": "function($host = '', $engine = 'mysql')\n  {\n    $o =& $this->o;\n    if ($dbs = $this->dbs($host, $engine)) {\n      $res = array_map(\n        function ($a) use ($o, $engine) {\n          $r = [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['name'],\n            'num_tables' => 0,\n            'num_connections' => 0,\n            'num_procedures' => 0,\n            'num_functions' => 0\n          ];\n          \/\/die(var_dump( $o->from_code('tables', $a['id'])));\n          if ($id_tables = $o->from_code('tables', $a['id'])) {\n            $r['num_tables'] = $o->count($id_tables);\n          }\n\n          if ($id_connections = $o->from_code($engine === 'sqlite' ? 'paths' : 'connections', $a['id'])) {\n            $r['num_connection'] = $o->count($id_connections);\n          }\n\n          if ($id_procedures = $o->from_code('procedures', $a['id'])) {\n            $r['num_procedures'] = $o->count($id_procedures);\n          }\n\n          if ($id_functions = $o->from_code('functions', $a['id'])) {\n            $r['num_functions'] = $o->count($id_functions);\n          }\n\n          return $r;\n        },\n        $dbs\n      );\n      return $res ?: [];\n    }\n\n    return [];\n  }",
+            "startLine": 321,
+            "endLine": 361,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array"
@@ -392,8 +463,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code, all DBs are returned if empty."
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -406,16 +485,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '', $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db, $host);\n    }\n    if (bbn\\str::is_uid($db)\n        && ($id_parent = $this->o->from_code('tables', $db))\n        && ($id = $this->o->from_code($table, $id_parent))\n    ) {\n      return $id;\n    }\n    return null;\n  }",
-            "startLine": 288,
-            "endLine": 300,
+            "code": "function($table, $db = '', $host = '', $engine = 'mysql')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      if (str::is_uid($host)) {\n        if (!($parent = $this->o->parent($this->o->get_id_parent($host)))) {\n          throw new \\Exception(_(\"Impossible to find the host engine\"));\n        }\n\n        $engine = $parent['code'];\n        $db     = $this->db_id($db, $engine);\n      }\n      else {\n        $db = $this->db_id($db, $engine);\n      }\n    }\n\n    if (bbn\\str::is_uid($db)\n        && ($id_parent = $this->o->from_code('tables', $db))\n        && ($id = $this->o->from_code($table, $id_parent))\n    ) {\n      return $id;\n    }\n\n    return null;\n  }",
+            "startLine": 372,
+            "endLine": 396,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
                 "string",
@@ -431,7 +510,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the table"
+                    "description": "The name of the DB"
                 },
                 {
                     "name": "db",
@@ -441,7 +520,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the DB"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "host",
@@ -450,8 +529,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -464,16 +551,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db, $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db, $host);\n    }\n    if (bbn\\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {\n      $num = $this->o->count($id_parent);\n      return $num ?: 0;\n    }\n    return null;\n  }",
-            "startLine": 309,
-            "endLine": 319,
+            "code": "function($db, $host = '', $engine = 'mysql')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      if (str::is_uid($host)) {\n        $db = $this->db_id($db, $host);\n      }\n      else {\n        $db = $this->db_id($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {\n      $num = $this->o->count($id_parent);\n      return $num ?: 0;\n    }\n\n    return null;\n  }",
+            "startLine": 406,
+            "endLine": 423,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
                 "int",
@@ -499,6 +586,15 @@
                     "has_default": true,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -511,16 +607,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db = '', $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db, $host);\n    }\n    if (bbn\\str::is_uid($db)\n        && ($id_parent = $this->o->from_code('tables', $db))\n        && ($fo = array_values($this->o->code_options($id_parent)))\n    ) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $fo\n      );\n      return $res ?: [];\n    }\n    return null;\n  }",
-            "startLine": 328,
-            "endLine": 350,
+            "code": "function($db = '', $host = '', $engine = 'mysql')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      if (str::is_uid($host)) {\n        $db = $this->db_id($db, $host);\n      }\n      else {\n        $db = $this->db_id($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\str::is_uid($db)\n        && ($id_parent = $this->o->from_code('tables', $db))\n        && ($fo = array_values($this->o->code_options($id_parent)))\n    ) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $fo\n      );\n      return $res ?: [];\n    }\n\n    return null;\n  }",
+            "startLine": 433,
+            "endLine": 462,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array",
@@ -536,7 +632,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The database name"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "host",
@@ -545,8 +641,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -559,16 +663,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db = '', $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db ?: $this->db->get_current(), $host);\n    }\n    if (bbn\\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {\n      $o =& $this->o;\n      if ($fo = $this->o->full_options($id_parent)) {\n        $res = array_map(\n          function ($a) use ($o) {\n            $r = [\n              'id' => $a['id'],\n              'text' => $a['text'],\n              'name' => $a['code'],\n              'num_columns' => 0,\n              'num_keys' => 0\n            ];\n            if ($id_columns = $o->from_code('columns', $a['id'])) {\n              $r['num_columns'] = $o->count($id_columns);\n            }\n            if ($id_keys = $o->from_code('keys', $a['id'])) {\n              $r['num_keys'] = $o->count($id_keys);\n            }\n            return $r;\n          },\n          $fo\n        );\n        return $res ?: [];\n      }\n    }\n    return null;\n  }",
-            "startLine": 359,
-            "endLine": 390,
+            "code": "function($db = '', $host = '', $engine = 'mysql')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      if (str::is_uid($host)) {\n        $db = $this->db_id($db, $host);\n      }\n      else {\n        $db = $this->db_id($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {\n      $o =& $this->o;\n      if ($fo = $this->o->full_options($id_parent)) {\n        $res = array_map(\n          function ($a) use ($o) {\n            $r = [\n              'id' => $a['id'],\n              'text' => $a['text'],\n              'name' => $a['code'],\n              'num_columns' => 0,\n              'num_keys' => 0\n            ];\n            if ($id_columns = $o->from_code('columns', $a['id'])) {\n              $r['num_columns'] = $o->count($id_columns);\n            }\n\n            if ($id_keys = $o->from_code('keys', $a['id'])) {\n              $r['num_keys'] = $o->count($id_keys);\n            }\n\n            return $r;\n          },\n          $fo\n        );\n        return $res ?: [];\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 472,
+            "endLine": 512,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array",
@@ -584,7 +688,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The database name"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "host",
@@ -593,8 +697,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The connection's code"
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -607,9 +719,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_keycol)\n  {\n    if (($table = $this->table_id_from_item($id_keycol))\n        && ($r = $this->o->code($table))\n    ) {\n      return $r;\n    }\n    return null;\n  }",
-            "startLine": 398,
-            "endLine": 406,
+            "code": "function($id_keycol)\n  {\n    if (($table = $this->table_id_from_item($id_keycol))\n        && ($r = $this->o->code($table))\n    ) {\n      return $r;\n    }\n\n    return null;\n  }",
+            "startLine": 521,
+            "endLine": 530,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -644,9 +756,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_keycol)\n  {\n    if (bbn\\str::is_uid($id_keycol)\n        && ($id_cols = $this->o->get_id_parent($id_keycol))\n        && ($id_table = $this->o->get_id_parent($id_cols))\n    ) {\n      return $id_table;\n    }\n    return null;\n  }",
-            "startLine": 414,
-            "endLine": 423,
+            "code": "function($id_keycol)\n  {\n    if (bbn\\str::is_uid($id_keycol)\n        && ($id_cols = $this->o->get_id_parent($id_keycol))\n        && ($id_table = $this->o->get_id_parent($id_cols))\n    ) {\n      return $id_table;\n    }\n\n    return null;\n  }",
+            "startLine": 539,
+            "endLine": 549,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -681,9 +793,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_table)\n  {\n    if (($id_db = $this->db_id_from_table($id_table))\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n    return null;\n  }",
-            "startLine": 431,
-            "endLine": 439,
+            "code": "function($id_table)\n  {\n    if (($id_db = $this->db_id_from_table($id_table))\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n\n    return null;\n  }",
+            "startLine": 558,
+            "endLine": 567,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -718,9 +830,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_table)\n  {\n    if (bbn\\str::is_uid($id_table)\n        && ($id_tables = $this->o->get_id_parent($id_table))\n        && ($id_db = $this->o->get_id_parent($id_tables))\n    ) {\n      return $id_db;\n    }\n    return null;\n  }",
-            "startLine": 447,
-            "endLine": 456,
+            "code": "function($id_table)\n  {\n    if (bbn\\str::is_uid($id_table)\n        && ($id_tables = $this->o->get_id_parent($id_table))\n        && ($id_db = $this->o->get_id_parent($id_tables))\n    ) {\n      return $id_db;\n    }\n\n    return null;\n  }",
+            "startLine": 576,
+            "endLine": 586,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -755,9 +867,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_keycol)\n  {\n    if ($id_db = $this->db_id_from_item($id_keycol)\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n    return null;\n  }",
-            "startLine": 464,
-            "endLine": 472,
+            "code": "function($id_keycol)\n  {\n    if ($id_db = $this->db_id_from_item($id_keycol)\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n\n    return null;\n  }",
+            "startLine": 595,
+            "endLine": 604,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -792,9 +904,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_keycol)\n  {\n    if (($id_table = $this->table_id_from_item($id_keycol))\n        && ($id_db = $this->db_id_from_table($id_table))\n    ) {\n      return $id_db;\n    }\n    return null;\n  }",
-            "startLine": 480,
-            "endLine": 488,
+            "code": "function($id_keycol)\n  {\n    if (($id_table = $this->table_id_from_item($id_keycol))\n        && ($id_db = $this->db_id_from_table($id_table))\n    ) {\n      return $id_db;\n    }\n\n    return null;\n  }",
+            "startLine": 613,
+            "endLine": 622,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -829,9 +941,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($column, $table, $db = '')\n  {\n    $res = null;\n    if (bbn\\str::is_uid($table)) {\n      $res = $this->o->from_code($this->db->csn($column), 'columns', $table);\n      return $res;\n    }\n    $c = $this->db->csn($column);\n    $t = $this->db->tsn($table);\n    if ($tmp = self::get_option_id($c, 'columns', $t, 'tables', $db ?: $this->db->get_current(), 'dbs')) {\n      $res = $tmp;\n    }\n    return $res;\n  }",
-            "startLine": 498,
-            "endLine": 511,
+            "code": "function($column, $table, $db = '')\n  {\n    $res = null;\n    if (str::is_uid($table)) {\n      $res = $this->o->from_code($this->db->csn($column), 'columns', $table);\n      return $res;\n    }\n\n    $c = $this->db->csn($column);\n    $t = $this->db->tsn($table);\n    if (str::is_uid($db)\n        && ($tmp = self::get_option_id($c, 'columns', $t, 'tables', $db))\n    ) {\n      $res = $tmp;\n    }\n\n    return $res;\n  }",
+            "startLine": 633,
+            "endLine": 650,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -854,7 +966,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The column's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "table",
@@ -864,7 +976,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The DB's name"
                 },
                 {
                     "name": "db",
@@ -873,8 +985,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The DB's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -887,9 +998,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '')\n  {\n    $num = 0;\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n    return $num;\n  }",
-            "startLine": 520,
-            "endLine": 532,
+            "code": "function($table, $db = '')\n  {\n    $num = 0;\n    if (!str::is_uid($table) && str::is_uid($db)) {\n      $table = $this->table_id($table, $db);\n    }\n\n    if (str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n\n    return $num;\n  }",
+            "startLine": 660,
+            "endLine": 674,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -911,7 +1022,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The database's UID"
                 },
                 {
                     "name": "db",
@@ -933,9 +1044,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '')\n  {\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($this->db->tsn($table), $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n        && ($res = $this->o->options($id_parent))\n    ) {\n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 541,
-            "endLine": 553,
+            "code": "function($table, $db = '')\n  {\n    if (!bbn\\str::is_uid($table) && str::is_uid($db)) {\n      $table = $this->table_id($this->db->tsn($table), $db);\n    }\n\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n        && ($res = $this->o->options($id_parent))\n    ) {\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 684,
+            "endLine": 698,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -958,7 +1069,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's UID"
                 },
                 {
                     "name": "db",
@@ -967,8 +1078,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -981,9 +1091,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '')\n  {\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n        && ($res = $this->o->full_options($id_parent))\n    ) {\n      return $res;\n    }\n    return [];\n  }",
-            "startLine": 562,
-            "endLine": 574,
+            "code": "function($table, $db = '')\n  {\n    if (!bbn\\str::is_uid($table) && str::is_uid($db)) {\n      $table = $this->table_id($table, $db);\n    }\n\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n        && ($res = $this->o->full_options($id_parent))\n    ) {\n      return $res;\n    }\n\n    return [];\n  }",
+            "startLine": 708,
+            "endLine": 722,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1005,7 +1115,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database UID"
                 },
                 {
                     "name": "db",
@@ -1014,8 +1124,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1028,9 +1137,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($key, $table, $db = '')\n  {\n    $res = null;\n    if (bbn\\str::is_uid($key)) {\n      $res = $this->o->from_code($key, $table);\n    }\n    elseif ($tmp = self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->get_current(), 'dbs')) {\n      $res = $tmp;\n    }\n    return $res;\n  }",
-            "startLine": 584,
-            "endLine": 594,
+            "code": "function($key, $table, $db = '')\n  {\n    $res = null;\n    if (bbn\\str::is_uid($key)) {\n      $res = $this->o->from_code($key, $table);\n    }\n    elseif (str::is_uid($table) && ($tmp = self::get_option_id($key, 'keys', $table))) {\n      $res = $tmp;\n    }\n    elseif (str::is_uid($db) && ($tmp = self::get_option_id($key, 'keys', $table, 'tables', $db))) {\n      $res = $tmp;\n    }\n\n    return $res;\n  }",
+            "startLine": 733,
+            "endLine": 747,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1053,7 +1162,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The key;s name."
+                    "description": "The table's name"
                 },
                 {
                     "name": "table",
@@ -1063,7 +1172,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -1072,8 +1181,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1086,9 +1194,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '')\n  {\n    $num = 0;\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('keys', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n    return $num;\n  }",
-            "startLine": 603,
-            "endLine": 615,
+            "code": "function($table, $db = '')\n  {\n    $num = 0;\n    if (!bbn\\str::is_uid($table) && str::is_uid($db)) {\n      $table = $this->table_id($table, $db);\n    }\n\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('keys', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n\n    return $num;\n  }",
+            "startLine": 757,
+            "endLine": 771,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1132,9 +1240,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '')\n  {\n    $res = [];\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('keys', $table))\n        && ($tree = $this->o->full_tree($id_parent))\n        && $tree['items']\n    ) {\n      $t =& $this;\n      $res = array_map(\n        function ($a) use ($t) {\n          $key = [\n            'name' => $a['code'],\n            'unique' => $a['unique'],\n            'columns' => [],\n            'ref_column' => $a['id_alias'] ? $a['alias']['code'] : null,\n            'ref_table' => $a['id_alias'] &&\n                          ($id_table = $t->o->get_id_parent($a['alias']['id_parent'])) ?\n                          $t->o->code($id_table) : null,\n            'ref_db' => !empty($id_table) &&\n                        ($id_db = $t->o->get_id_parent($t->o->get_id_parent($id_table))) ?\n                        $t->o->code($id_db) : null\n          ];\n          foreach ($a['items'] as $col){\n            $key['columns'][] = $col['code'];\n          }\n          return $key;\n        },\n        $tree['items']\n      );\n    }\n    return $res;\n  }",
-            "startLine": 624,
-            "endLine": 659,
+            "code": "function($table, $db = '')\n  {\n    $res = [];\n    if (!bbn\\str::is_uid($table) && bbn\\str::is_uid($db)) {\n      $table = $this->table_id($table, $db);\n    }\n\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('keys', $table))\n        && ($tree = $this->o->full_tree($id_parent))\n        && $tree['items']\n    ) {\n      $t   =& $this;\n      $res = array_map(\n        function ($a) use ($t) {\n          $key = [\n            'name' => $a['code'],\n            'unique' => $a['unique'],\n            'columns' => [],\n            'ref_column' => $a['id_alias'] ? $a['alias']['code'] : null,\n            'ref_table' => $a['id_alias'] &&\n                          ($id_table = $t->o->get_id_parent($a['alias']['id_parent'])) ? $t->o->code($id_table) : null,\n            'ref_db' => !empty($id_table) &&\n                        ($id_db = $t->o->get_id_parent($t->o->get_id_parent($id_table))) ? $t->o->code($id_db) : null\n          ];\n          foreach ($a['items'] as $col){\n            $key['columns'][] = $col['code'];\n          }\n\n          return $key;\n        },\n        $tree['items']\n      );\n    }\n\n    return $res;\n  }",
+            "startLine": 781,
+            "endLine": 817,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1156,7 +1264,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -1165,8 +1273,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1179,9 +1286,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $db = '')\n  {\n    return $this->keys($table, $db, $host);\n  }",
-            "startLine": 668,
-            "endLine": 671,
+            "code": "function($table, $db = '')\n  {\n    return $this->keys($table, $db);\n  }",
+            "startLine": 827,
+            "endLine": 830,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1203,7 +1310,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The database's name"
                 },
                 {
                     "name": "db",
@@ -1212,8 +1319,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "The database's name"
+                    "default_name": ""
                 }
             ]
         },
@@ -1227,8 +1333,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $db = '')\n  {\n    $id = $this->table_id($table, $db);\n    return $this->o->remove_full($id);\n  }",
-            "startLine": 680,
-            "endLine": 684,
+            "startLine": 840,
+            "endLine": 844,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1273,8 +1379,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($db = '')\n  {\n    $id = $this->db_id($db);\n    return $this->o->remove_full($id);\n  }",
-            "startLine": 692,
-            "endLine": 696,
+            "startLine": 853,
+            "endLine": 857,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1309,8 +1415,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($connection)\n  {\n    $id = $this->host_id($connection);\n    return $this->o->remove_full($id);\n  }",
-            "startLine": 704,
-            "endLine": 708,
+            "startLine": 866,
+            "endLine": 870,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1344,16 +1450,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table = '', $db = '')\n  {\n    if (($mod = $this->db->modelize($table)) && \\is_array($mod)) {\n      $keys = function (&$a) use (&$table, &$db) {\n        if (\\is_array($a['keys'])) {\n          array_walk(\n            $a['keys'],\n            function (&$w, $k) use (&$table, &$db) {\n              $w['id_option'] = $this->key_id($k, $table, $db);\n            }\n          );\n        }\n      };\n      $fields = function (&$a) use (&$table, &$db) {\n        if (\\is_array($a['fields'])) {\n          array_walk(\n            $a['fields'],\n            function (&$w, $k) use (&$table, &$db) {\n              $w['id_option'] = $this->column_id($k, $table, $db);\n            }\n          );\n        }\n      };\n      if (empty($table)) {\n        array_walk(\n          $mod,\n          function (&$w, $k) use (&$table, &$db, $keys, $fields) {\n            $table = $this->db->tsn($k);\n            $db = substr($k, 0, strrpos($k, $table)-1);\n            $w['id_option'] = $this->table_id($table, $db);\n            $keys($w);\n            $fields($w);\n          }\n        );\n      }\n      else {\n        $keys($mod);\n        $fields($mod);\n      }\n      return $mod;\n    }\n    return null;\n  }",
-            "startLine": 717,
-            "endLine": 759,
+            "code": "function($table = '', $db = '', $host = '', $engine = 'mysql')\n  {\n    if (!$host) {\n      $conn = $this->db;\n      $host = $this->db->get_host();\n      if (str::is_uid($db)) {\n        $db = $this->o->get_code($db);\n      }\n\n      if ($db && ($conn->get_current() !== $db)) {\n        try {\n          $conn->change($db);\n        }\n        catch (\\Exception $e) {\n          throw new \\Exception(_(\"Impossible to use the database\").\" $db\");\n        }\n      }\n      elseif (!$db) {\n        $db = $this->db->get_current();\n      }\n    }\n    elseif ($db) {\n      try {\n        $conn = $this->connection($host, $engine, $db);\n      }\n      catch (\\Exception $e) {\n        throw new \\Exception($e->getMessage());\n      }\n    }\n\n    if (!$conn || !$conn->check()) {\n      throw new \\Exception(_(\"Impossible to connect\"));\n    }\n\n    $table_id = null;\n    $table    = $conn->tsn($table);\n    $ftable   = $conn->tfn($db.'.'.$table);\n    $keys     = function (&$a) use (&$table_id, $table, &$conn) {\n      if (\\is_array($a['keys'])) {\n        array_walk(\n          $a['keys'],\n          function (&$w, $k) use ($table_id, $table) {\n            $w['id_option'] = $this->key_id($k, $table_id);\n          }\n        );\n      }\n    };\n    $fields   = function (&$a) use (&$table_id, $table, &$conn) {\n      if (\\is_array($a['fields'])) {\n        array_walk(\n          $a['fields'],\n          function (&$w, $k) use ($table_id, $table) {\n            if (!$table_id) {\n              throw new \\Exception(_(\"Table undefined\").\" $table\");\n            }\n\n            $w['id_option'] = $this->column_id($k, $table_id);\n          }\n        );\n      }\n    };\n    if ($model = $conn->modelize($ftable)) {\n      if ($table\n          && ($table_id = $this->table_id($table, $db, $host, $engine))\n      ) {\n        $keys($model);\n        $fields($model);\n      }\n      elseif (empty($table)) {\n        array_walk(\n          $model,\n          function (&$w, $k) use (&$table_id, &$keys, &$fields, $host, $engine) {\n            $table          = $this->db->tsn($k);\n            $db             = substr($k, 0, strrpos($k, $table) - 1);\n            if ($table_id = $this->table_id($table, $db, $host, $engine)) {\n              $w['id_option'] = $table_id;\n              $keys($w);\n              $fields($w);\n            }\n          }\n        );\n      }\n\n      \/*\n      else {\n        $keys($model);\n        $fields($model);\n      }\n      *\/\n\n      return $model;\n    }\n\n    return null;\n  }",
+            "startLine": 880,
+            "endLine": 974,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 4,
             "numberOfRequiredParameters": 0,
             "returns": [
                 "array",
@@ -1379,6 +1485,24 @@
                     "has_default": true,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "host",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "mysql",
+                    "default_name": ""
                 }
             ]
         },
@@ -1391,17 +1515,17 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host, $full = false)\n  {\n    if (!($id_host = self::get_option_id($host, 'connections'))) {\n      $id_host = $this->o->add(\n        [\n          'id_parent' => self::get_option_id('connections'),\n          'text' => $host,\n          'code' => $host,\n        ]\n      );\n    }\n    if ($id_host && $full) {\n      \/** @todo but might be heavy *\/\n    }\n    return $id_host ?: null;\n  }",
-            "startLine": 768,
-            "endLine": 783,
+            "code": "function($host, $engine, array $cfg, $full = false)\n  {\n    if (($id_parent = self::get_option_id('connections', $engine))\n        && !($id_host = $this->o->from_code($host, $id_parent))\n    ) {\n      $id_host = $this->o->add(\n        [\n          'id_parent' => $id_parent,\n          'text' => $cfg['name'] ?? $host,\n          'code' => $host\n        ]\n      );\n    }\n\n    if ($id_host) {\n      if (!empty($cfg['password'])) {\n        if (!$this->pw) {\n          $this->pw = new passwords($this->db);\n        }\n\n        $this->pw->store($cfg['password'], $id_host);\n      }\n      \/** @todo but might be heavy *\/\n      \/* if ($full) {\n\n      }*\/\n    }\n\n    return $id_host ?: null;\n  }",
+            "startLine": 986,
+            "endLine": 1015,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
             "returns": [
                 "string",
                 null
@@ -1416,11 +1540,31 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
+                    "description": "The connection's engine"
+                },
+                {
+                    "name": "engine",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's config"
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
                     "description": "If true will connect to the database and get its structure"
                 },
                 {
                     "name": "full",
-                    "position": 1,
+                    "position": 3,
                     "type": "bool",
                     "required": false,
                     "has_default": true,
@@ -1438,9 +1582,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db, $host = '', $full = false)\n  {\n    $id_db = null;\n    if ($id_dbs = self::get_option_id('dbs')) {\n      if (!($id_db = $this->o->from_code($db, $id_dbs))) {\n        if ($id_db = $this->o->add(\n          [\n            'id_parent' => $id_dbs,\n            'text' => $db,\n            'code' => $db,\n          ]\n        )\n        ) {\n          $this->o->set_cfg($id_db, ['allow_children' => 1, 'show_code' => 1]);\n        }\n      }\n      if ($id_db) {\n        if (!($id_procedures = $this->o->from_code('procedures', $id_db))\n            && ($id_procedures = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Procedures'),\n                'code' => 'procedures',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_procedures,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n        if (!($id_connections = $this->o->from_code('connections', $id_db))\n            && ($id_connections = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Connections'),\n                'code' => 'connections',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_connections,\n            [\n              'show_alias' => 1,\n              'notext' => 1,\n              'id_root_alias' => self::get_option_id('connections'),\n              'root_alias' => 'Connections'\n            ]\n          );\n        }\n        if (!($id_functions = $this->o->from_code('functions', $id_db))\n            && ($id_functions = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Function'),\n                'code' => 'functions',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_functions,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n        if (!($id_tables = $this->o->from_code('tables', $id_db))\n            && ($id_tables = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Tables'),\n                'code' => 'tables',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_tables,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n        if ($host) {\n          $host_id = bbn\\str::is_uid($host) ? $host : $this->host_id($host);\n        }\n        else {\n          $host_id = $this->retrieve_host($id_db);\n        }\n        if ($host_id && $id_connections && $id_functions && $id_procedures && $id_tables) {\n          if (!$this->db->count(\n            'bbn_options', [\n            'id_parent' => $id_connections,\n            'id_alias' => $host_id\n            ]\n          )\n          ) {\n            $this->o->add(\n              [\n              'id_parent' => $id_connections,\n              'id_alias' => $host_id\n              ]\n            );\n          }\n          if ($full) {\n            if (!empty($host_id)) {\n              $tables = $this->connection($host_id, $db)->get_tables();\n              if (!empty($tables)) {\n                foreach ($tables as $t) {\n                  $this->import_table($t, $id_db, $host_id);\n                }\n              }\n            }\n          }\n        }\n        else{\n          bbn\\x::log(\"Impossible to find an host ID for DB \".$this->o->code($id_db));\n        }\n      }\n    }\n    return $id_db;\n  }",
-            "startLine": 793,
-            "endLine": 921,
+            "code": "function($db, $host = '', $full = false)\n  {\n    $id_db = null;\n    if (str::is_uid($host)\n        && ($parent = $this->o->parent($this->o->get_id_parent($host)))\n        && ($id_dbs = self::get_option_id('dbs', $parent['code']))\n    ) {\n      if (!($id_db = $this->o->from_code($db, $id_dbs))) {\n        if ($id_db = $this->o->add(\n          [\n            'id_parent' => $id_dbs,\n            'text' => $db,\n            'code' => $db,\n          ]\n        )\n        ) {\n          $this->o->set_cfg($id_db, ['allow_children' => 1, 'show_code' => 1]);\n        }\n      }\n\n      if ($id_db) {\n        if (!($id_procedures = $this->o->from_code('procedures', $id_db))\n            && ($id_procedures = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Procedures'),\n                'code' => 'procedures',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_procedures,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n\n        if (!($id_connections = $this->o->from_code('connections', $id_db))\n            && ($id_connections = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Connections'),\n                'code' => 'connections',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_connections,\n            [\n              'show_alias' => 1,\n              'notext' => 1,\n              'id_root_alias' => self::get_option_id('connections'),\n              'root_alias' => 'Connections'\n            ]\n          );\n        }\n\n        if (!($id_functions = $this->o->from_code('functions', $id_db))\n            && ($id_functions = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Function'),\n                'code' => 'functions',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_functions,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n\n        if (!($id_tables = $this->o->from_code('tables', $id_db))\n            && ($id_tables = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => _('Tables'),\n                'code' => 'tables',\n              ]\n            ))\n        ) {\n          $this->o->set_cfg(\n            $id_tables,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n\n        if ($host) {\n          $host_id = bbn\\str::is_uid($host) ? $host : $this->host_id($host);\n        }\n        else {\n          $host_id = $this->retrieve_host($id_db);\n        }\n\n        if ($host_id && $id_connections && $id_functions && $id_procedures && $id_tables) {\n          if (!$this->db->count(\n            'bbn_options', [\n            'id_parent' => $id_connections,\n            'id_alias' => $host_id\n            ]\n          )\n          ) {\n            $this->o->add(\n              [\n              'id_parent' => $id_connections,\n              'id_alias' => $host_id\n              ]\n            );\n          }\n\n          if ($full) {\n            if (!empty($host_id)) {\n              try {\n                $conn = $this->connection($host_id, $db);\n              }\n              catch (\\Exception $e) {\n                throw new \\Exception(_(\"Impossible to connect\"));\n              }\n\n              $tables = $conn->get_tables($db);\n              if (!empty($tables)) {\n                foreach ($tables as $t) {\n                  $this->import_table($t, $id_db, $host_id);\n                }\n              }\n            }\n          }\n        }\n        else{\n          throw new \\Exception(_(\"Impossible to find an host ID for DB\").\" \".$this->o->code($id_db));\n        }\n      }\n    }\n\n    return $id_db;\n  }",
+            "startLine": 1026,
+            "endLine": 1172,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1463,7 +1607,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "The connection's UID"
                 },
                 {
                     "name": "host",
@@ -1495,9 +1639,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_db)\n  {\n    \n    if ($this->check()\n        && defined('BBN_DB_USER')\n        && defined('BBN_DB_HOST')\n        && ($connections = $this->o->full_options('connections', $id_db))\n    ) {\n      foreach ($connections as $c) {\n        if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {\n          return $c['alias']['id'];\n        }\n      }    \n    }\n    return null;\n  }",
-            "startLine": 929,
-            "endLine": 944,
+            "code": "function($id_db)\n  {\n    if ($this->check()\n        && defined('BBN_DB_USER')\n        && defined('BBN_DB_HOST')\n        && ($connections = $this->o->full_options('connections', $id_db))\n    ) {\n      foreach ($connections as $c) {\n        if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {\n          return $c['alias']['id'];\n        }\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 1181,
+            "endLine": 1196,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1532,9 +1676,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $id_db, $host = '')\n  {\n    if (empty($host)) {\n      $host_id = $this->retrieve_host($id_db);\n    }\n    else{\n      $host_id = bbn\\str::is_uid($host) ? $host : $this->host_id($host);\n    }\n    if ($host_id && ($id_tables = $this->o->from_code('tables', $id_db))) {\n      if (!($id_table = $this->o->from_code($table, $id_tables))\n          && ($id_table = $this->o->add(\n            [\n              'id_parent' => $id_tables,\n              'text' => $table,\n              'code' => $table,\n            ]\n          ))\n      ) {\n        $this->o->set_cfg($id_table, ['allow_children' => 1]);\n        if ($id_columns = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => _(\"Columns\"),\n            'code' => 'columns'\n          ]\n        )\n        ) {\n          $this->o->set_cfg(\n            $id_columns,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'sortable' => 1\n            ]\n          );\n        }\n        if ($id_keys = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => _(\"Keys\"),\n            'code' => 'keys',\n          ]\n        )\n        ) {\n          $this->o->set_cfg(\n            $id_keys,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'show_alias' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n      }\n      else{\n        $id_columns = $this->o->from_code('columns', $id_table);\n        $id_keys = $this->o->from_code('keys', $id_table);\n      }\n      $db = $this->o->code($id_db);\n      if ($id_table\n          && $id_columns\n          && $id_keys\n          && $db\n          && ($conn = $this->connection($host_id, $db))\n          && ($m = $conn->modelize($table))\n          && !empty($m['fields'])\n      ) {\n        $num_cols = 0;\n        $num_cols_rem = 0;\n        $fields = [];\n        $ocols = array_flip($this->o->options($id_columns));\n        foreach ($m['fields'] as $col => $cfg) {\n          if ($opt_col = $this->o->option($col, $id_columns)) {\n            $num_cols += (int)$this->o->set($opt_col['id'], bbn\\x::merge_arrays($opt_col, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\x::merge_arrays(\n              $cfg,\n              [\n                'id_parent' => $id_columns,\n                'text' => $col,\n                'code' => $col,\n                'num' => $cfg['position']\n              ]\n            )\n          )\n          ) {\n            $num_cols++;\n            $opt_col = $cfg;\n            $opt_col['id'] = $id;\n          }\n          if ($opt_col) {\n            $fields[$col] = $opt_col['id'];\n          }\n          if (isset($ocols[$col])) {\n            unset($ocols[$col]);\n          }\n        }\n        if (!empty($ocols)) {\n          foreach ($ocols as $col => $id) {\n            if (bbn\\str::is_uid($id)) {\n              $num_cols_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n        $num_keys = 0;\n        $num_keys_rem = 0;\n        $okeys = array_flip($this->o->options($id_keys));\n        foreach ($m['keys'] as $key => $cfg) {\n          $cols = $cfg['columns'] ?? [];\n          unset($cfg['columns']);\n          if (isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']) \n              && ($id_alias = $this->column_id($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))\n          ) {\n            $cfg['id_alias'] = $id_alias;\n            unset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']);\n          }\n          if ($opt_key = $this->o->option($key, $id_keys)) {\n            $num_keys += (int)$this->o->set($opt_key['id'], bbn\\x::merge_arrays($opt_key, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\x::merge_arrays(\n              $cfg, [\n              'id_parent' => $id_keys,\n              'text' => $key,\n              'code' => $key\n              ]\n            )\n          ) \n          ) {\n            $this->o->set_cfg(\n              $id, [\n              'show_code' => 1,\n              'show_alias' => 1\n              ]\n            );\n            $num_keys++;\n            $opt_key = $cfg;\n            $opt_key['id'] = $id;\n          }\n          if (isset($okeys[$key])) {\n            unset($okeys[$key]);\n          }\n          if ($opt_key && $cols) {\n\n            foreach ($cols as $col){\n              if (isset($fields[$col])) {\n                if ($opt = $this->o->option($col, $opt_key['id'])) {\n                  $this->o->set(\n                    $opt['id'], bbn\\x::merge_arrays(\n                      $opt, [\n                      'id_alias' => $fields[$col]\n                      ]\n                    )\n                  );\n                }\n                else{\n                  $tmp = [\n                    'id_parent' => $opt_key['id'],\n                    'id_alias' => $fields[$col],\n                    'code' => $col,\n                    'text' => $col\n                  ];\n                  if ($this->o->add($tmp)) {\n                    $opt = $tmp;\n                  }\n                }\n              }\n            }\n          }\n        }\n        if (!empty($okeys)) {\n          foreach (array_values($okeys) as $id) {\n            if (bbn\\str::is_uid($id)) {\n              $children = $this->o->items($id);\n              foreach ($children as $cid) {\n                $num_keys_rem += (int)$this->o->remove_full($cid);\n              }\n              $num_keys_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n        return [\n          'columns' => $num_cols,\n          'keys' => $num_keys,\n          'columns_removed' => $num_cols_rem,\n          'keys_removed' => $num_keys_rem\n        ];\n      }\n    }\n    return null;\n  }",
-            "startLine": 954,
-            "endLine": 1146,
+            "code": "function($table, $id_db, $host = '')\n  {\n    if (empty($host)) {\n      $host_id = $this->retrieve_host($id_db);\n    }\n    else{\n      $host_id = bbn\\str::is_uid($host) ? $host : $this->host_id($host);\n    }\n\n    if ($host_id && ($id_tables = $this->o->from_code('tables', $id_db))) {\n      if (!($id_table = $this->o->from_code($table, $id_tables))\n          && ($id_table = $this->o->add(\n            [\n              'id_parent' => $id_tables,\n              'text' => $table,\n              'code' => $table,\n            ]\n          ))\n      ) {\n        $this->o->set_cfg($id_table, ['allow_children' => 1]);\n        if ($id_columns = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => _(\"Columns\"),\n            'code' => 'columns'\n          ]\n        )\n        ) {\n          $this->o->set_cfg(\n            $id_columns,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'sortable' => 1\n            ]\n          );\n        }\n\n        if ($id_keys = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => _(\"Keys\"),\n            'code' => 'keys',\n          ]\n        )\n        ) {\n          $this->o->set_cfg(\n            $id_keys,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'show_alias' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n      }\n      else{\n        $id_columns = $this->o->from_code('columns', $id_table);\n        $id_keys    = $this->o->from_code('keys', $id_table);\n      }\n\n      $db = $this->o->code($id_db);\n      if ($id_table\n          && $id_columns\n          && $id_keys\n          && $db\n          && ($conn = $this->connection($host_id, $db))\n          && ($m = $conn->modelize($table))\n          && !empty($m['fields'])\n      ) {\n        $num_cols     = 0;\n        $num_cols_rem = 0;\n        $fields       = [];\n        $ocols        = array_flip($this->o->options($id_columns));\n        foreach ($m['fields'] as $col => $cfg) {\n          if ($opt_col = $this->o->option($col, $id_columns)) {\n            $num_cols += (int)$this->o->set($opt_col['id'], bbn\\x::merge_arrays($opt_col, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\x::merge_arrays(\n              $cfg,\n              [\n                'id_parent' => $id_columns,\n                'text' => $col,\n                'code' => $col,\n                'num' => $cfg['position']\n              ]\n            )\n          )\n          ) {\n            $num_cols++;\n            $opt_col       = $cfg;\n            $opt_col['id'] = $id;\n          }\n\n          if ($opt_col) {\n            $fields[$col] = $opt_col['id'];\n          }\n\n          if (isset($ocols[$col])) {\n            unset($ocols[$col]);\n          }\n        }\n\n        if (!empty($ocols)) {\n          foreach ($ocols as $col => $id) {\n            if (bbn\\str::is_uid($id)) {\n              $num_cols_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n\n        $num_keys     = 0;\n        $num_keys_rem = 0;\n        $okeys        = array_flip($this->o->options($id_keys));\n        foreach ($m['keys'] as $key => $cfg) {\n          $cols = $cfg['columns'] ?? [];\n          unset($cfg['columns']);\n          if (isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column'])\n              && ($id_alias = $this->column_id($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))\n          ) {\n            $cfg['id_alias'] = $id_alias;\n            unset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']);\n          }\n\n          if ($opt_key = $this->o->option($key, $id_keys)) {\n            $num_keys += (int)$this->o->set($opt_key['id'], bbn\\x::merge_arrays($opt_key, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\x::merge_arrays(\n              $cfg, [\n              'id_parent' => $id_keys,\n              'text' => $key,\n              'code' => $key\n              ]\n            )\n          )\n          ) {\n            $this->o->set_cfg(\n              $id, [\n              'show_code' => 1,\n              'show_alias' => 1\n              ]\n            );\n            $num_keys++;\n            $opt_key       = $cfg;\n            $opt_key['id'] = $id;\n          }\n\n          if (isset($okeys[$key])) {\n            unset($okeys[$key]);\n          }\n\n          if ($opt_key && $cols) {\n            foreach ($cols as $col){\n              if (isset($fields[$col])) {\n                if ($opt = $this->o->option($col, $opt_key['id'])) {\n                  $this->o->set(\n                    $opt['id'], bbn\\x::merge_arrays(\n                      $opt, [\n                      'id_alias' => $fields[$col]\n                      ]\n                    )\n                  );\n                }\n                else{\n                  $tmp = [\n                    'id_parent' => $opt_key['id'],\n                    'id_alias' => $fields[$col],\n                    'code' => $col,\n                    'text' => $col\n                  ];\n                  if ($this->o->add($tmp)) {\n                    $opt = $tmp;\n                  }\n                }\n              }\n            }\n          }\n        }\n\n        if (!empty($okeys)) {\n          foreach (array_values($okeys) as $id) {\n            if (bbn\\str::is_uid($id)) {\n              $children = $this->o->items($id);\n              foreach ($children as $cid) {\n                $num_keys_rem += (int)$this->o->remove_full($cid);\n              }\n\n              $num_keys_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n\n        return [\n          'columns' => $num_cols,\n          'keys' => $num_keys,\n          'columns_removed' => $num_cols_rem,\n          'keys_removed' => $num_keys_rem\n        ];\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 1207,
+            "endLine": 1412,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1589,9 +1733,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table)\n  {\n    $res = null;\n    if ($m = $this->db->modelize($table)) {\n      $tf = explode('.', $this->db->tfn($table));\n      $db = $tf[0];\n      $table = $tf[1];\n\n      if (($id_host = $this->import_host($this->db->host)) \n          && ($id_db = $this->import_db($db, $id_host))\n      ) {\n        $res = $this->import_table($table, $id_db);\n      }\n    }\n    return $res;\n  }",
-            "startLine": 1154,
-            "endLine": 1169,
+            "code": "function($table)\n  {\n    $res = null;\n    if ($m = $this->db->modelize($table)) {\n      $tf    = explode('.', $this->db->tfn($table));\n      $db    = $tf[0];\n      $table = $tf[1];\n\n      if (($id_host = $this->import_host($this->db->host))\n          && ($id_db = $this->import_db($db, $id_host))\n      ) {\n        $res = $this->import_table($table, $id_db);\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1421,
+            "endLine": 1437,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1626,9 +1770,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db = '')\n  {\n    $res = null;\n    if ($tables = $this->db->get_tables($db)) {\n      $res = [\n        'tables' => 0,\n        'columns' => 0,\n        'keys' => 0\n      ];\n      foreach ($tables as $t){\n        if ($tmp = $this->import(($db ?: $this->db->get_current()).'.'.$t)) {\n          $res['tables']++;\n          $res['columns'] += $tmp['columns'];\n          $res['keys'] += $tmp['keys'];\n        }\n      }\n    }\n    return $res;\n  }",
-            "startLine": 1177,
-            "endLine": 1195,
+            "code": "function($db = '')\n  {\n    $res = null;\n    if ($tables = $this->db->get_tables($db)) {\n      $res = [\n        'tables' => 0,\n        'columns' => 0,\n        'keys' => 0\n      ];\n      foreach ($tables as $t){\n        if ($tmp = $this->import(($db ?: $this->db->get_current()).'.'.$t)) {\n          $res['tables']++;\n          $res['columns'] += $tmp['columns'];\n          $res['keys']    += $tmp['keys'];\n        }\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1446,
+            "endLine": 1465,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3055,7 +3199,11 @@
         "option_appui_id": null,
         "o": null,
         "pw": null,
-        "db_alt": null,
+        "connections": {
+            "mysql": [],
+            "postgre": [],
+            "sqlite": []
+        },
         "db": null,
         "_cache_prefix": null,
         "cacher": null,

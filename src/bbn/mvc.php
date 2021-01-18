@@ -141,6 +141,8 @@ class mvc implements mvc\api
 
   protected $authorized_routes = [];
 
+  protected $forbidden_routes = [];
+
   /**
    * @var stdClass An external object that can be filled after the object creation and can be used as a global with the function add_inc
    */
@@ -418,6 +420,20 @@ class mvc implements mvc\api
   }
 
 
+  public function add_forbidden_route(): int
+  {
+    $res = 0;
+    foreach (\func_get_args() as $a) {
+      if (!in_array($a, $this->forbidden_routes, true)) {
+        $this->forbidden_routes[] = $a;
+        $res++;
+      }
+    }
+
+    return $res;
+  }
+
+
   public function is_authorized_route($url): bool
   {
     if (in_array($url, $this->authorized_routes, true)) {
@@ -426,7 +442,17 @@ class mvc implements mvc\api
 
     foreach ($this->authorized_routes as $ar) {
       if (substr($ar, -1) === '*') {
-        if (strpos($url, substr($ar, 0, -1)) === 0) {
+        if ((strpos($url, substr($ar, 0, -1)) === 0) || (strlen($ar) === 1)) {
+          if (in_array($url, $this->forbidden_routes, true)) {
+            return false;
+          }
+          foreach ($this->forbidden_routes as $ar) {
+            if (substr($ar, -1) === '*') {
+              if (strpos($url, substr($ar, 0, -1)) === 0) {
+                return false;
+              }
+            }
+          }
           return true;
         }
       }
@@ -711,7 +737,7 @@ class mvc implements mvc\api
   public function plugin_name($path)
   {
     foreach ($this->plugins as $name => $p){
-      if ($p['url'] === $path) {
+      if (strpos($path, $p['url']) === 0) {
         return $name;
       }
     }

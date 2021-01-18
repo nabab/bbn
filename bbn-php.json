@@ -1058,7 +1058,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/appui\/dashboard\/__construct",
-                        "desc": "dashboard contrusctor."
+                        "desc": "dashboard constructor."
                     },
                     {
                         "type": "method",
@@ -8038,7 +8038,7 @@
                         "text": "get_conditions",
                         "value": "get_conditions",
                         "url": "bbn-php\/doc\/method\/db\/engines\/get_conditions",
-                        "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise"
+                        "desc": "Returns a string with the conditions for any filter clause."
                     },
                     {
                         "type": "method",
@@ -8110,7 +8110,7 @@
                         "text": "get_keys",
                         "value": "get_keys",
                         "url": "bbn-php\/doc\/method\/db\/engines\/get_keys",
-                        "desc": "Fetches the database and returns an array of objects"
+                        "desc": "Fetches the database and returns an array of objects."
                     },
                     {
                         "type": "method",
@@ -16000,7 +16000,7 @@
                 "text": "get_app_name",
                 "value": "get_app_name",
                 "url": "bbn-php\/doc\/method\/mvc\/get_app_name",
-                "desc": ""
+                "desc": "Returns the current app's name."
             },
             {
                 "type": "method",
@@ -16008,7 +16008,7 @@
                 "text": "get_app_path",
                 "value": "get_app_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_app_path",
-                "desc": ""
+                "desc": "Returns the current app's full path (with src\/ at the end if raw if false)."
             },
             {
                 "type": "method",
@@ -16016,7 +16016,7 @@
                 "text": "get_app_prefix",
                 "value": "get_app_prefix",
                 "url": "bbn-php\/doc\/method\/mvc\/get_app_prefix",
-                "desc": ""
+                "desc": "Returns the current app's prefix if any."
             },
             {
                 "type": "method",
@@ -16024,7 +16024,7 @@
                 "text": "get_cache_path",
                 "value": "get_cache_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_cache_path",
-                "desc": ""
+                "desc": "Returns ths full path of the cache"
             },
             {
                 "type": "method",
@@ -16040,7 +16040,7 @@
                 "text": "get_content_path",
                 "value": "get_content_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_content_path",
-                "desc": ""
+                "desc": "Returns the full path of the content data; if plugin is provided gives the path for the plugin's content data."
             },
             {
                 "type": "method",
@@ -16056,7 +16056,7 @@
                 "text": "get_cur_path",
                 "value": "get_cur_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_cur_path",
-                "desc": ""
+                "desc": "Returns the web public path of the app."
             },
             {
                 "type": "method",
@@ -16064,7 +16064,7 @@
                 "text": "get_data_path",
                 "value": "get_data_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_data_path",
-                "desc": ""
+                "desc": "Returns the full path of the data; if plugin is provided gives the path for the plugin's data."
             },
             {
                 "type": "method",
@@ -16120,7 +16120,7 @@
                 "text": "get_lib_path",
                 "value": "get_lib_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_lib_path",
-                "desc": ""
+                "desc": "Returns the full path of the libraries (vendor folder)."
             },
             {
                 "type": "method",
@@ -16128,7 +16128,7 @@
                 "text": "get_log_path",
                 "value": "get_log_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_log_path",
-                "desc": ""
+                "desc": "Returns the full path of the logs."
             },
             {
                 "type": "method",
@@ -16176,7 +16176,7 @@
                 "text": "get_plugin_url",
                 "value": "get_plugin_url",
                 "url": "bbn-php\/doc\/method\/mvc\/get_plugin_url",
-                "desc": ""
+                "desc": "Returns the URL part of the given plugin."
             },
             {
                 "type": "method",
@@ -16248,7 +16248,7 @@
                 "text": "get_tmp_path",
                 "value": "get_tmp_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_tmp_path",
-                "desc": ""
+                "desc": "Returns the full path of the temp data; if plugin is provided gives the path for the plugin's temp data."
             },
             {
                 "type": "method",
@@ -16272,7 +16272,7 @@
                 "text": "get_user_tmp_path",
                 "value": "get_user_tmp_path",
                 "url": "bbn-php\/doc\/method\/mvc\/get_user_tmp_path",
-                "desc": ""
+                "desc": "Returns"
             },
             {
                 "type": "method",
@@ -16344,7 +16344,7 @@
                 "text": "init_path",
                 "value": "init_path",
                 "url": "bbn-php\/doc\/method\/mvc\/init_path",
-                "desc": ""
+                "desc": "Sets all the different paths' properties."
             },
             {
                 "type": "method",

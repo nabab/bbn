@@ -284,12 +284,14 @@ class environment
     if (!isset($this->_post)) {
       if (self::$_input && \bbn\str::is_json(self::$_input)) {
         $this->_post = json_decode(self::$_input, 1);
-      } else if (!empty($_POST)) {
+      }
+      elseif (!empty($_POST)) {
         $this->_post = $_POST;
       }
       if (!$this->_post) {
         $this->_post = [];
-      } else {
+      }
+      else {
         $this->_has_post = true;
         $this->_post = bbn\str::correct_types($this->_post);
         foreach ($this->_post as $k => $v) {

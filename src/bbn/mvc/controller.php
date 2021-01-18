@@ -1023,6 +1023,7 @@ class controller implements api
         $die = $a;
       }
     }
+
     if (empty($path)) {
       $path = $this->_path;
       if (($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))) {
@@ -1162,12 +1163,29 @@ class controller implements api
     return $this;
   }
 
+
   public function get_object_model(): ?object
   {
-    $m = $this->get_model(...func_get_args());
+    $args = \func_get_args();
+    $has_cache = false;
+    foreach ($args as $a) {
+      if (\is_int($a)) {
+        $has_cache = true;
+        break;
+      }
+    }
+
+    if ($has_cache) {
+      $m = $this->get_cached_model(...$args);
+    }
+    else {
+      $m = $this->get_model(...$args);
+    }
+
     if (\is_array($m)) {
       $m = bbn\x::to_object($m);
     }
+
     return \is_object($m) ? $m : null;
   }
 

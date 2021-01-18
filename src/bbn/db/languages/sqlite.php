@@ -25,7 +25,7 @@ class sqlite implements bbn\db\engines
   private $sqlite_keys_enabled = false;
 
   /** @var bbn\db The connection object */
-  private $db;
+  protected $db;
 
   /** @var array Allowed operators */
   public static $operators = ['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'];
@@ -167,6 +167,8 @@ class sqlite implements bbn\db\engines
 
       if (isset($cfg['host'])) {
         $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];
+        $cfg['code_db'] = $cfg['db'];
+        $cfg['code_host'] = $cfg['host'];
         $cfg['db']   = 'main';
         return $cfg;
       }
@@ -1422,6 +1424,29 @@ class sqlite implements bbn\db\engines
 
       if(empty(file_exists($this->db->host.$database))) {
         fopen($this->db->host.$database, 'w');
+        return file_exists($this->db->host.$database);
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Drops the given database
+   *
+   * @param string $database
+   * @return bool
+   */
+  public function drop_database(string $database): bool
+  {
+    if (bbn\str::check_filename($database)) {
+      if(empty(strpos($database, '.sqlite'))) {
+        $database = $database.'.sqlite';
+      }
+
+      if(file_exists($this->db->host.$database)) {
+        unlink($this->db->host.$database);
         return file_exists($this->db->host.$database);
       }
     }

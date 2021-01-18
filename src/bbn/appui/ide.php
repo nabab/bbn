@@ -1408,7 +1408,7 @@ class ide
       $pref = $this->pref->get_by_option($perm);
       if (!empty($pref['id'])) {
         $pref_arch = $this->pref->get_class_cfg();
-        $arch =& $pref_arch['arch']['user_options_bits'];
+        $arch      =& $pref_arch['arch']['user_options_bits'];
         $recents   = $this->db->rselect_all(
           [
           'table' => $pref_arch['tables']['user_options_bits'],
@@ -1821,18 +1821,18 @@ class ide
                $time      = date('H:i:s', $moment);
 
                if (($i = \bbn\x::find($history_ctrl['items'], ['text' => $date])) === null) {
-                 array_push(
+                array_push(
                   $history_ctrl['items'], [
                   'text' => $date,
                   'items' => [],
                   'folder' => true,
                   'icon' => 'folder-icon'
                     ]
-                 );
+                );
 
                  $i = \count($history_ctrl['items']) - 1;
                  if (($idx = \bbn\x::find($history_ctrl['items'][$i]['items'], ['text' => $time])) === null) {
-                   array_push(
+                  array_push(
                     $history_ctrl['items'][$i]['items'], [
                     'text' => $time,
                     'mode' => basename($ctrl_path),
@@ -1841,13 +1841,13 @@ class ide
                     'uid' => $url,
                     'folder' => false
                       ]
-                   );
+                  );
                  }
                }
                else {
                  $j = \bbn\x::find($history_ctrl['items'], ['text' => $date]);
                  if (($idx = \bbn\x::find($history_ctrl['items'][$j]['items'], ['text' => $time])) === null) {
-                   array_push(
+                  array_push(
                     $history_ctrl['items'][$j]['items'], [
                     'text' => $time,
                     'code' => $this->fs->get_contents($file),
@@ -1855,7 +1855,7 @@ class ide
                     'mode' => basename($ctrl_path),
                     'folder' => false
                       ]
-                   );
+                  );
                  }
                }
              }

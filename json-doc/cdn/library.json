@@ -291,7 +291,7 @@
             "value": {
                 "js": [
                     "js",
-                    "coffee"
+                    "ts"
                 ],
                 "css": [
                     "css",
@@ -313,7 +313,7 @@
         "types": {
             "js": [
                 "js",
-                "coffee"
+                "ts"
             ],
             "css": [
                 "css",
@@ -351,7 +351,7 @@
         "types": {
             "js": [
                 "js",
-                "coffee"
+                "ts"
             ],
             "css": [
                 "css",

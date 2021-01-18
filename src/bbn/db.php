@@ -104,6 +104,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   private $_triggers_disabled = false;
 
+  /** @var string The connection code as it would be stored in option */
+  protected $connection_code;
+
   /**
    * @todo is bool or string??
    * Unique string identifier for current connection
@@ -242,6 +245,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /** @var array The 'kinds' of structure alteration statement */
   protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
 
+  /** @var array The database engines allowed */
+  protected static $engines = [
+    'mysql' => 'nf nf-dev-mysql',
+    'pgsql' => 'nf nf-dev-postgresql',
+    'sqlite' => 'nf nf-dev-sqllite'
+  ];
+
   /**
    * Error state of the current connection
    * @var bool
@@ -250,13 +260,134 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
 
   /**
-   * Sets the has_error_all variable to true.
+   * Says if the given database engine is supported or not
+   *
+   * @param string $engine
+   *
+   * @return bool
+   */
+  public static function is_engine_supported(string $engine): bool
+  {
+    return isset(self::$engines[$engine]);
+  }
+
+
+  /**
+   * Returns the icon (CSS class from nerd fonts) for the given db engine
+   *
+   * @param string $engine
+   *
+   * @return string|null
+   */
+  public static function get_engine_icon(string $engine): ?string
+  {
+    return self::$engines[$engine] ?? null;
+  }
+
+
+  /**
+   * test
+   */
+  public static function create_database_sqlite(string $database)
+  {
+    if (!is_file($database)) {
+      file_put_contents($database,'');
+      if (is_file($database)) {
+        return [
+          'engine' => 'sqlite',
+          'db' => $database
+        ];
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Returns a string with the given text in the middle of a "line" of logs.
+   *
+   * @param string $text The text to write
    *
    * @return void
    */
-  private static function _set_has_error_all(): void
+  public static function get_log_line(string $text = '')
   {
-    self::$_has_error_all = true;
+    if ($text) {
+      $text = ' '.$text.' ';
+    }
+
+    $tot  = \strlen(self::LINE) - \strlen($text);
+    $char = \substr(self::LINE, 0, 1);
+    return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
+  }
+
+
+  /**
+   * Constructor
+   *
+   * ```php
+   * $dbtest = new bbn\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
+   *  // (void)
+   * ```
+   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
+   */
+  public function __construct(array $cfg = [])
+  {
+    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
+      $cfg['engine'] = BBN_DB_ENGINE;
+    }
+
+    if (isset($cfg['engine'])) {
+      $engine = $cfg['engine'];
+      $db     = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');
+      $cls    = '\\bbn\\db\\languages\\'.$engine;
+      if (!class_exists($cls)) {
+        die("Sorry the engine class $engine does not exist");
+      }
+
+      self::retriever_init($this);
+      $this->cache_init();
+      $this->language = new $cls($this);
+      if (isset($cfg['on_error'])) {
+        $this->on_error = $cfg['on_error'];
+      }
+
+      if ($cfg = $this->get_connection($cfg)) {
+        $this->qte = $this->language->qte;
+        try{
+          parent::__construct(...($cfg['args'] ?: []));
+        }
+        catch (\PDOException $e){
+          $err = _("Impossible to create the connection")." $engine/$db "
+                 ._("with the following error").$e->getMessage();
+          throw new \Exception($err);
+        }
+        $this->language->post_creation();
+        $this->current  = $cfg['db'] ?? null;
+        $this->engine   = $cfg['engine'];
+        $this->host     = $cfg['host'] ?? '127.0.0.1';
+        $this->username = $cfg['user'] ?? null;
+        $this->connection_code = $cfg['code_host'];
+        $this->hash     = $this->_make_hash($cfg['args']);
+        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        if (!empty($cfg['cache_length'])) {
+          $this->cache_renewal = (int)$cfg['cache_length'];
+        }
+
+        $this->start_fancy_stuff();
+        if (!empty($cfg['error_mode'])) {
+          $this->set_error_mode($cfg['error_mode']);
+        }
+      }
+    }
+
+    if (!$this->engine) {
+      $connection  = $cfg['engine'] ?? 'No engine';
+      $connection .= '/'.($cfg['db'] ?? 'No DB');
+      $this->log(_("Impossible to create the connection for").' '.$connection);
+      throw new \Exception(_("Impossible to create the connection for").' '.$connection);
+    }
   }
 
 
@@ -328,965 +459,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
 
-  /**
-   * Returns a string with the given text in the middle of a "line" of logs.
-   *
-   * @param string $text The text to write
-   *
-   * @return void
-   */
-  public static function get_log_line(string $text = '')
+  public function get_connection_code()
   {
-    if ($text) {
-      $text = ' '.$text.' ';
-    }
-
-    $tot  = \strlen(self::LINE) - \strlen($text);
-    $char = \substr(self::LINE, 0, 1);
-    return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
-  }
-
-
-  /**
-   * Gets the cache name of a database structure or part.
-   *
-   * @param string $item 'db_name' or 'table'
-   * @param string $mode 'columns','tables' or 'databases'
-   *
-   * @return bool|string
-   */
-  private function _db_cache_name(string $item, string $mode)
-  {
-    $r = false;
-    if ($this->engine === 'sqlite') {
-      $h = md5($this->host.dirname($this->current));
-    }
-    else {
-      $h = str::sanitize($this->host);
-    }
-
-    switch ($mode){
-      case 'columns':
-        $r = $this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
-        break;
-      case 'tables':
-        $r = $this->engine.'/'.$h.'/'.($item ?: $this->current);
-        break;
-      case 'databases':
-        $r = $this->engine.'/'.$h.'/_bbn-database';
-        break;
-    }
-
-    return $r;
-  }
-
-
-  /**
-   * Returns the table's structure's array, either from the cache or from _modelize().
-   *
-   * @param string $item  The item to get
-   * @param string $mode  The type of item to get (columns, rables, databases)
-   * @param bool   $force If true the cache is recreated even if it exists
-   * @return array|null
-   */
-  private function _get_cache($item, $mode = 'columns', $force = false): ?array
-  {
-    $cache_name = $this->_db_cache_name($item, $mode);
-    if ($force && isset($this->cache[$cache_name])) {
-      unset($this->cache[$cache_name]);
-    }
-
-    if (!isset($this->cache[$cache_name])) {
-      if ($force || !($tmp = $this->cache_get($cache_name))) {
-        switch ($mode){
-          case 'columns':
-            $keys = $this->language->get_keys($item);
-            $cols = $this->language->get_columns($item);
-            if (\is_array($keys) && \is_array($cols)) {
-              $tmp = [
-                'keys' => $keys['keys'],
-                'cols' => $keys['cols'],
-                'fields' => $cols
-              ];
-            }
-            break;
-          case 'tables':
-            $tmp = $this->language->get_tables($item);
-            break;
-          case 'databases':
-            $tmp = $this->language->get_databases();
-            break;
-        }
-
-        if (!\is_array($tmp)) {
-          $st = "Error while creating the cache for the table $item in mode $mode";
-          $this->log($st);
-          throw new \Exception($st);
-        }
-
-        $this->cache_set($cache_name, '', $tmp, $this->cache_renewal);
-      }
-
-      if ($tmp) {
-        $this->cache[$cache_name] = $tmp;
-      }
-    }
-
-    return $this->cache[$cache_name] ?? null;
-  }
-
-
-  /**
-   * Removes values from the given conditions array and returns an array with values and hashed.
-   *
-   * @param array $where  Conditions
-   * @param array $values Values
-   * @return array
-   */
-  private function _remove_conditions_value(array $where, array &$values = []): array
-  {
-    if (isset($where['conditions'])) {
-      foreach ($where['conditions'] as &$f){
-        ksort($f);
-        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
-          $tmp = $this->_remove_conditions_value($f, $values);
-          $f   = $tmp['hashed'];
-        }
-        elseif (array_key_exists('value', $f)) {
-          $values[] = $f['value'];
-          unset($f['value']);
-        }
-      }
-    }
-
-    return [
-      'hashed' => $where,
-      'values' => $values
-    ];
-  }
-
-
-  /**
-   * Adds the specs of a query to the $queries object.
-   *
-   * @param string $hash         The hash of the statement.
-   * @param string $statement    The SQL full statement.
-   * @param string $kind         The type of statement.
-   * @param int    $placeholders The number of placeholders.
-   * @param array  $options      The driver options.
-   */
-  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
-  {
-    $now                  = microtime(true);
-    $this->queries[$hash] = [
-      'sql' => $statement,
-      'kind' => $kind,
-      'write' => \in_array($kind, self::$write_kinds, true),
-      'structure' => \in_array($kind, self::$structure_kinds, true),
-      'placeholders' => $placeholders,
-      'options' => $options,
-      'num' => 0,
-      'exe_time' => 0,
-      'first' => $now,
-      'last' => 0,
-      'prepared' => false
-    ];
-    $this->list_queries[] = [
-      'hash' => $hash,
-      'last' => $now
-    ];
-    $num = count($this->list_queries);
-    while ($num > $this->max_queries) {
-      $num--;
-      $this->_remove_query($this->list_queries[0]['hash']);
-      array_shift($this->list_queries);
-    }
-  }
-
-
-  private function _remove_query(string $hash): void
-  {
-    if (x::has_prop($this->queries, $hash)) {
-      unset($this->queries[$hash]);
-      while ($idx = \array_search($hash, $this->queries, true)) {
-        unset($this->queries[$idx]);
-      }
-    }
-  }
-
-
-  private function _update_query($hash)
-  {
-    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
-      $last_index                   = count($this->list_queries) - 1;
-      $now                          = \microtime(true);
-      $this->queries[$hash]['last'] = $now;
-      $this->queries[$hash]['num']++;
-      if ($this->list_queries[$last_index]['hash'] !== $hash) {
-        if (($idx = x::find($this->list_queries, ['hash' => $hash])) !== null) {
-          $this->list_queries[$idx]['last'] = $now;
-          x::move($this->list_queries, $idx, $last_index);
-        }
-        else {
-          throw new \Exception(_("Impossible to find the corresponding hash"));
-        }
-      }
-      else {
-        $this->list_queries[$last_index]['last'] = $now;
-      }
-
-      $num = count($this->list_queries) - 1;
-      while (($num > 0)
-          && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
-      ) {
-        $num--;
-        if (!is_string($this->list_queries[0]['hash'])) {
-          x::log($this->list_queries);
-          x::log(count($this->list_queries));
-        }
-        $this->_remove_query($this->list_queries[0]['hash']);
-        array_shift($this->list_queries);
-      }
-
-      if (empty($this->queries)) {
-        $debug = debug_backtrace();
-        x::log($debug, 'db_explained');
-        throw new \Exception(_("The queries object is empty!"));
-      }
-    }
-    else {
-      throw new \Exception(_("Impossible to find the query corresponding to this hash"));
-    }
-
-  }
-
-
-  /**
-   * Makes a string that will be the id of the request.
-   *
-   * @return string
-   *
-   */
-  private function _make_hash(): string
-  {
-    $args = \func_get_args();
-    if ((\count($args) === 1) && \is_array($args[0])) {
-      $args = $args[0];
-    }
-
-    $st = '';
-    foreach ($args as $a){
-      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
-    }
-
-    return $this->hash_contour.md5($st).$this->hash_contour;
-  }
-
-
-  /**
-   * Launches a function before or after
-   *
-   * @param array $cfg
-   * @return array
-   */
-  private function _trigger(array $cfg): array
-  {
-    if ($this->_triggers_disabled) {
-      if ($cfg['moment'] === 'after') {
-        return $cfg;
-      }
-
-      $cfg['run']  = 1;
-      $cfg['trig'] = 1;
-      return $cfg;
-    }
-
-    if (!isset($cfg['trig'])) {
-      $cfg['trig'] = 1;
-    }
-
-    if (!isset($cfg['run'])) {
-      $cfg['run'] = 1;
-    }
-
-    if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
-      $table = $this->tfn(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
-      // Specific to a table
-      if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
-        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
-          if ($f && \is_callable($f)) {
-            if (!($tmp = $f($cfg))) {
-              $cfg['run']  = false;
-              $cfg['trig'] = false;
-            }
-            else{
-              $cfg = $tmp;
-            }
-          }
-        }
-
-        //echo x::make_tree($trig);
-        //echo x::make_tree($cfg);
-      }
-    }
-
-    return $cfg;
-  }
-
-
-  /**
-   * @param array  $args
-   * @param string $kind
-   * @return array
-   */
-  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
-  {
-    $kind = strtoupper($kind);
-    if (!isset($args[0])) {
-      return null;
-    }
-
-    if (!\is_array($args[0])) {
-      array_unshift($args, $kind);
-    }
-    else {
-      $args[0]['kind'] = $kind;
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * Adds a random primary value when it is absent from the set and present in the fields
-   * @param array $cfg
-   */
-  private function _add_primary(array &$cfg): void
-  {
-    // Inserting a row without primary when primary is needed and no auto-increment
-    if (!empty($cfg['primary'])
-        && empty($cfg['auto_increment'])
-        && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1)
-        && (count($cfg['values']) === (count($cfg['fields']) - 1))
-    ) {
-      $val = false;
-      switch ($cfg['primary_type']){
-        case 'int':
-          $val = random_int(
-            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] - 3 : 1) / 2),
-            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
-          );
-          break;
-        case 'binary':
-          if ($cfg['primary_length'] === 16) {
-            $val = $this->get_uid();
-          }
-          break;
-      }
-
-      if ($val) {
-        array_splice($cfg['values'], $idx, 0, $val);
-        $this->set_last_insert_id($val);
-      }
-    }
-  }
-
-
-  public function get_query_values(array $cfg): array
-  {
-    $res = [];
-    if (!empty($cfg['values'])) {
-      foreach ($cfg['values'] as $i => $v) {
-        // Transforming the values if needed
-        if (($cfg['values_desc'][$i]['type'] === 'binary')
-            && ($cfg['values_desc'][$i]['maxlength'] === 16)
-            && str::is_uid($v)
-        ) {
-          $res[] = hex2bin($v);
-        }
-        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
-            && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
-            && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
-            && (\strlen($v) < 19))            )
-        ) {
-          $res[] = $v.'%';
-        }
-        elseif (!empty($cfg['values_desc'][$i]['operator'])) {
-          switch ($cfg['values_desc'][$i]['operator']){
-            case 'contains':
-            case 'doesnotcontain':
-              $res[] = '%'.$v.'%';
-              break;
-            case 'startswith':
-              $res[] = $v.'%';
-              break;
-            case 'endswith':
-              $res[] = '%'.$v;
-              break;
-            default:
-              $res[] = $v;
-          }
-        }
-        else{
-          $res[] = $v;
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * @returns null|db\query|int A selection query or the number of affected rows by a writing query
-   */
-  private function _exec()
-  {
-    if ($this->check()
-        && ($cfg = $this->process_cfg(\func_get_args()))
-        && !empty($cfg['sql'])
-    ) {
-      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
-      $cfg['moment'] = 'before';
-      $cfg['trig']   = null;
-      if ($cfg['kind'] === 'INSERT') {
-        // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
-        $this->_add_primary($cfg);
-      }
-
-      if (count($cfg['values']) !== count($cfg['values_desc'])) {
-        x::dump($cfg);
-        die('Database error in values count');
-      }
-
-      // Launching the trigger BEFORE execution
-      if ($cfg = $this->_trigger($cfg)) {
-        if (!empty($cfg['run'])) {
-          //$this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
-          // Executing the query
-          /** @todo Put hash back! */
-          //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
-          /** @var \bbn\db\query */
-          $cfg['run'] = $this->query($cfg['sql'], $this->get_query_values($cfg));
-        }
-
-        if (!empty($cfg['force'])) {
-          $cfg['trig'] = 1;
-        }
-        elseif (null === $cfg['trig']) {
-          $cfg['trig'] = (bool)$cfg['run'];
-        }
-
-        if ($cfg['trig']) {
-          $cfg['moment'] = 'after';
-          $cfg           = $this->_trigger($cfg);
-        }
-
-        $this->last_cfg = $cfg;
-        if (!\in_array($cfg['kind'], self::$write_kinds, true)) {
-          return $cfg['run'] ?? null;
-        }
-
-        if (isset($cfg['value'])) {
-          return $cfg['value'];
-        }
-
-        if (isset($cfg['run'])) {
-          return $cfg['run'];
-        }
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Normalizes arguments by making it a uniform array.
-   *
-   * <ul><h3>The array will have the following indexes:</h3>
-   * <li>fields</li>
-   * <li>where</li>
-   * <li>filters</li>
-   * <li>order</li>
-   * <li>limit</li>
-   * <li>start</li>
-   * <li>join</li>
-   * <li>group_by</li>
-   * <li>having</li>
-   * <li>values</li>
-   * <li>hashed_join</li>
-   * <li>hashed_where</li>
-   * <li>hashed_having</li>
-   * <li>php</li>
-   * <li>done</li>
-   * </ul>
-   *
-   * @todo Check for the tables and column names legality!
-   *
-   * @param $cfg
-   * @return array
-   */
-  private function _treat_arguments($cfg): array
-  {
-    while (isset($cfg[0]) && \is_array($cfg[0])){
-      $cfg = $cfg[0];
-    }
-
-    if (\is_array($cfg)
-        && array_key_exists('tables', $cfg)
-        && !empty($cfg['bbn_db_treated'])
-        && ($cfg['bbn_db_treated'] === true)
-    ) {
-      return $cfg;
-    }
-
-    $res = [
-      'kind' => 'SELECT',
-      'fields' => [],
-      'where' => [],
-      'order' => [],
-      'limit' => 0,
-      'start' => 0,
-      'group_by' => [],
-      'having' => [],
-    ];
-    if (x::is_assoc($cfg)) {
-      if (isset($cfg['table']) && !isset($cfg['tables'])) {
-        $cfg['tables'] = $cfg['table'];
-        unset($cfg['table']);
-      }
-
-      $res = array_merge($res, $cfg);
-    }
-    elseif (count($cfg) > 1) {
-      $res['kind']   = strtoupper($cfg[0]);
-      $res['tables'] = $cfg[1];
-      if (isset($cfg[2])) {
-        $res['fields'] = $cfg[2];
-      }
-
-      if (isset($cfg[3])) {
-        $res['where'] = $cfg[3];
-      }
-
-      if (isset($cfg[4])) {
-        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
-      }
-
-      if (isset($cfg[5]) && str::is_integer($cfg[5])) {
-        $res['limit'] = $cfg[5];
-      }
-
-      if (isset($cfg[6]) && !empty($res['limit'])) {
-        $res['start'] = $cfg[6];
-      }
-    }
-
-    $res           = array_merge(
-      $res, [
-      'aliases' => [],
-      'values' => [],
-      'filters' => [],
-      'join' => [],
-      'hashed_join' => [],
-      'hashed_where' => [],
-      'hashed_having' => [],
-      'bbn_db_treated' => true
-      ]
-    );
-    $res['kind']   = strtoupper($res['kind']);
-    $res['write']  = \in_array($res['kind'], self::$write_kinds, true);
-    $res['ignore'] = $res['write'] && !empty($res['ignore']);
-    $res['count']  = !$res['write'] && !empty($res['count']);
-    if (!\is_array($res['tables'])) {
-      $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
-    }
-
-    if (!empty($res['tables'])) {
-      foreach ($res['tables'] as &$t){
-        if (!is_string($t)) {
-          x::log([$cfg, debug_backtrace()], 'db_explained');
-          throw new \Exception("Impossible to identify the tables, check the log");
-        }
-
-        $t = $this->tfn($t);
-      }
-
-      unset($t);
-    }
-    else{
-      throw new \Error(_('No table given'));
-      return [];
-    }
-
-    if (!empty($res['fields'])) {
-      if (\is_string($res['fields'])) {
-        $res['fields'] = [$res['fields']];
-      }
-    }
-    elseif (!empty($res['columns'])) {
-      $res['fields'] = (array)$res['columns'];
-    }
-
-    if (!empty($res['fields'])) {
-      if ($res['kind'] === 'SELECT') {
-        foreach ($res['fields'] as $k => $col) {
-          if (\is_string($k)) {
-            $res['aliases'][$col] = $k;
-          }
-        }
-      }
-      elseif ((($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
-          && \is_string(array_keys($res['fields'])[0])
-      ) {
-        $res['values'] = array_values($res['fields']);
-        $res['fields'] = array_keys($res['fields']);
-      }
-    }
-
-    if (!\is_array($res['group_by'])) {
-      $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
-    }
-
-    if (!\is_array($res['where'])) {
-      $res['where'] = [];
-    }
-
-    if (!\is_array($res['order'])) {
-      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
-    }
-
-    if (!str::is_integer($res['limit'])) {
-      unset($res['limit']);
-    }
-
-    if (!str::is_integer($res['start'])) {
-      unset($res['start']);
-    }
-
-    if (!empty($cfg['join'])) {
-      foreach ($cfg['join'] as $k => $join){
-        if (\is_array($join)) {
-          if (\is_string($k)) {
-            if (empty($join['table'])) {
-              $join['table'] = $k;
-            }
-            elseif (empty($join['alias'])) {
-              $join['alias'] = $k;
-            }
-          }
-
-          if (isset($join['table'], $join['on']) && ($tmp = $this->treat_conditions($join['on'], false))) {
-            if (!isset($join['type'])) {
-              $join['type'] = 'right';
-            }
-
-            $res['join'][] = array_merge($join, ['on' => $tmp]);
-          }
-        }
-      }
-    }
-
-    if ($tmp = $this->treat_conditions($res['where'], false)) {
-      $res['filters'] = $tmp;
-    }
-
-    if (!empty($res['having']) && ($tmp = $this->treat_conditions($res['having'], false))) {
-      $res['having'] = $tmp;
-    }
-
-    if (!empty($res['group_by'])) {
-      $this->_adapt_filters($res);
-    }
-
-    if (!empty($res['join'])) {
-      $new_join = [];
-      foreach ($res['join'] as $k => $join){
-        if ($tmp = $this->treat_conditions($join['on'])) {
-          $new_item             = $join;
-          $new_item['on']       = $tmp['where'];
-          $res['hashed_join'][] = $tmp['hashed'];
-          if (!empty($tmp['values'])) {
-            foreach ($tmp['values'] as $v){
-              $res['values'][] = $v;
-            }
-          }
-
-          $new_join[] = $new_item;
-        }
-      }
-
-      $res['join'] = $new_join;
-    }
-
-    if (!empty($res['filters']) && ($tmp = $this->treat_conditions($res['filters']))) {
-      $res['filters']      = $tmp['where'];
-      $res['hashed_where'] = $tmp['hashed'];
-      if (\is_array($tmp) && isset($tmp['values'])) {
-        foreach ($tmp['values'] as $v){
-          $res['values'][] = $v;
-        }
-      }
-    }
-
-    if (!empty($res['having']) && ($tmp = $this->treat_conditions($res['having']))) {
-      $res['having']        = $tmp['where'];
-      $res['hashed_having'] = $tmp['hashed'];
-      foreach ($tmp['values'] as $v){
-        $res['values'][] = $v;
-      }
-    }
-
-    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
-      $res['kind'],
-      $res['ignore'],
-      $res['count'],
-      $res['tables'],
-      $res['fields'],
-      $res['hashed_join'],
-      $res['hashed_where'],
-      $res['hashed_having'],
-      $res['group_by'],
-      $res['order'],
-      $res['limit'] ?? 0,
-      $res['start'] ?? 0
-    );
-    return $res;
-  }
-
-
-  private function _adapt_filters(&$cfg): void
-  {
-    if (!empty($cfg['filters'])) {
-      [$cfg['filters'], $having] = $this->_adapt_bit($cfg, $cfg['filters']);
-      if (empty($cfg['having']['conditions'])) {
-        $cfg['having'] = $having;
-      }
-      else {
-        $cfg['having'] = [
-          'logic' => 'AND',
-          'conditions' => [
-            $cfg['having'],
-            $having
-          ]
-        ];
-      }
-    }
-  }
-
-
-  private function _adapt_bit($cfg, $where, $having = [])
-  {
-    if (x::has_props($where, ['logic', 'conditions'])) {
-      $new = [
-        'logic' => $where['logic'],
-        'conditions' => []
-      ];
-      foreach ($where['conditions'] as $c) {
-        $is_aggregate = false;
-        if (isset($c['field'])) {
-          $is_aggregate = $this->is_aggregate_function($c['field']);
-          if (!$is_aggregate && isset($cfg['fields'][$c['field']])) {
-            $is_aggregate = $this->is_aggregate_function($cfg['fields'][$c['field']]);
-          }
-        }
-
-        if (!$is_aggregate && isset($c['exp'])) {
-          $is_aggregate = $this->is_aggregate_function($c['exp']);
-          if (!$is_aggregate && isset($cfg['fields'][$c['exp']])) {
-            $is_aggregate = $this->is_aggregate_function($cfg['fields'][$c['exp']]);
-          }
-        }
-
-        if (!$is_aggregate) {
-          if (x::has_props($c, ['conditions', 'logic'])) {
-            $tmp = $this->_adapt_bit($cfg, $c, $having);
-            if (!empty($tmp[0]['conditions'])) {
-              $new['conditions'][] = $c;
-            }
-
-            if (!empty($tmp[1]['conditions'])) {
-              $having = $tmp[1];
-            }
-          }
-          else {
-            $new['conditions'][] = $c;
-          }
-        }
-        else {
-          if (!isset($having['conditions'])) {
-            $having = [
-              'logic' => $where['logic'],
-              'conditions' => []
-            ];
-          }
-
-          if (isset($cfg['aliases'][$c['field']])) {
-            $c['field'] = $cfg['aliases'][$c['field']];
-          }
-          elseif (isset($c['exp'], $cfg['aliases'][$c['exp']])) {
-            $c['exp'] = $cfg['aliases'][$c['exp']];
-          }
-
-          $having['conditions'][] = $c;
-        }
-      }
-
-      return [$new, $having];
-    }
-  }
-
-
-  /**
-   * @param array $args
-   * @return array
-   */
-  private function _set_limit_1(array $args): array
-  {
-    if (\is_array($args[0])
-        && (isset($args[0]['tables']) || isset($args[0]['table']))
-    ) {
-      $args[0]['limit'] = 1;
-    }
-    else {
-      $start = $args[4] ?? 0;
-      $num   = count($args);
-      // Adding fields
-      if ($num === 1) {
-        $args[] = [];
-        $num++;
-      }
-
-      // Adding where
-      if ($num === 2) {
-        $args[] = [];
-        $num++;
-      }
-
-      // Adding order
-      if ($num === 3) {
-        $args[] = [];
-        $num++;
-      }
-
-      if ($num === 4) {
-        $args[] = 1;
-        $num++;
-      }
-
-      $args   = array_slice($args, 0, 5);
-      $args[] = $start;
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * @param array $args
-   * @return array
-   */
-  private function _set_start(array $args, int $start): array
-  {
-    if (\is_array($args[0])
-        && (isset($args[0]['tables']) || isset($args[0]['table']))
-    ) {
-      $args[0]['start'] = $start;
-    }
-    else {
-      if (isset($args[5])) {
-        $args[5] = $start;
-      }
-      else{
-        while (count($args) < 6){
-          switch (count($args)){
-            case 1:
-            case 2:
-            case 3:
-              $args[] = [];
-              break;
-            case 4:
-              $args[] = 1;
-              break;
-            case 5:
-              $args[] = $start;
-              break;
-          }
-        }
-      }
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * Constructor
-   *
-   * ```php
-   * $dbtest = new bbn\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
-   *  // (void)
-   * ```
-   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
-   */
-  public function __construct(array $cfg = [])
-  {
-    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
-      $cfg['engine'] = BBN_DB_ENGINE;
-    }
-
-    if (isset($cfg['engine'])) {
-      $engine = $cfg['engine'];
-      $db     = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');
-      $cls    = '\\bbn\\db\\languages\\'.$engine;
-      if (!class_exists($cls)) {
-        die("Sorry the engine class $engine does not exist");
-      }
-
-      self::retriever_init($this);
-      $this->cache_init();
-      $this->language = new $cls($this);
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
-      if ($cfg = $this->get_connection($cfg)) {
-        $this->qte = $this->language->qte;
-        try{
-          parent::__construct(...($cfg['args'] ?: []));
-          $this->language->post_creation();
-          $this->current  = $cfg['db'] ?? null;
-          $this->engine   = $cfg['engine'];
-          $this->host     = $cfg['host'] ?? '127.0.0.1';
-          $this->username = $cfg['user'] ?? null;
-          $this->hash     = $this->_make_hash($cfg['args']);
-          $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-          if (!empty($cfg['cache_length'])) {
-            $this->cache_renewal = (int)$cfg['cache_length'];
-          }
-
-          $this->start_fancy_stuff();
-          if (!empty($cfg['error_mode'])) {
-            $this->set_error_mode($cfg['error_mode']);
-          }
-        }
-        catch (\PDOException $e){
-          $err = _("Impossible to create the connection")." $engine/$db ".PHP_EOL
-                 ._("with the following error").PHP_EOL
-                 .$e->getMessage();
-          $this->log($err);
-          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? $err : _('Impossible to create the database connection'));
-        }
-      }
-    }
-
-    if (!$this->engine) {
-      $connection  = $cfg['engine'] ?? 'No engine';
-      $connection .= '/'.($cfg['db'] ?? 'No DB');
-      $this->log(_("Impossible to create the connection for").' '.$connection);
-      throw new \Exception(_("Impossible to create the connection for").' '.$connection);
-    }
+    return $this->connection_code;
   }
 
 
@@ -2089,7 +1264,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $item 'db_name' or 'table_name'
-   * @param string $mode 'columns','tables' or'databases'
+   * @param string $mode 'columns','tables' or 'databases'
    * @return self
    */
   public function clear_cache($item, $mode): self
@@ -2167,7 +1342,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function clear(): self
   {
-    $this->queries = [];
+    $this->queries      = [];
     $this->list_queries = [];
     return $this;
   }
@@ -2436,7 +1611,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
 
     if (\is_array($tables)) {
-      foreach ($tables as $t){
+      foreach ($tables as $t) {
         if ($full = $this->tfn($t)) {
           $r[$full] = $this->_get_cache($full, 'columns', $force);
         }
@@ -2833,8 +2008,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function flush(): int
   {
-    $num           = \count($this->queries);
-    $this->queries = [];
+    $num                = \count($this->queries);
+    $this->queries      = [];
     $this->list_queries = [];
     return $num;
   }
@@ -4125,7 +3300,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $hash_sent = array_shift($args);
         }
         else {
-          $hash      = $this->_make_hash($statement);
+          $hash = $this->_make_hash($statement);
         }
 
         $driver_options = [];
@@ -4232,8 +3407,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $this->add_statement($q['sql'], $params);
         // If the statement is a structure modifier we need to clear the cache
         if ($q['structure']) {
-          $tmp           = $q;
-          $this->queries = [$hash => $tmp];
+          $tmp                = $q;
+          $this->queries      = [$hash => $tmp];
           $this->list_queries = [[
             'hash' => $hash,
             'last' => $tmp['last']
@@ -5438,21 +4613,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
 
   /**
-   * test
+   * Drops the given database
+   *
+   * @param string $database
+   * @return bool
    */
-  public static function create_database_sqlite(string $database)
+  public function drop_database(string $database): bool
   {
-    if (!is_file($database)) {
-      file_put_contents($database,'');
-      if (is_file($database)) {
-        return [
-          'engine' => 'sqlite',
-          'db' => $database
-        ];
-      }
-    }
-
-    return false;
+    return $this->language->drop_database($database);
   }
 
 
@@ -5489,6 +4657,892 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function get_last_values(): ?array
   {
     return $this->last_params ? $this->last_params['values'] : null;
+  }
+
+
+  public function get_query_values(array $cfg): array
+  {
+    $res = [];
+    if (!empty($cfg['values'])) {
+      foreach ($cfg['values'] as $i => $v) {
+        // Transforming the values if needed
+        if (($cfg['values_desc'][$i]['type'] === 'binary')
+            && ($cfg['values_desc'][$i]['maxlength'] === 16)
+            && str::is_uid($v)
+        ) {
+          $res[] = hex2bin($v);
+        }
+        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
+            && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
+            && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
+            && (\strlen($v) < 19))            )
+        ) {
+          $res[] = $v.'%';
+        }
+        elseif (!empty($cfg['values_desc'][$i]['operator'])) {
+          switch ($cfg['values_desc'][$i]['operator']){
+            case 'contains':
+            case 'doesnotcontain':
+              $res[] = '%'.$v.'%';
+              break;
+            case 'startswith':
+              $res[] = $v.'%';
+              break;
+            case 'endswith':
+              $res[] = '%'.$v;
+              break;
+            default:
+              $res[] = $v;
+          }
+        }
+        else{
+          $res[] = $v;
+        }
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Sets the has_error_all variable to true.
+   *
+   * @return void
+   */
+  private static function _set_has_error_all(): void
+  {
+    self::$_has_error_all = true;
+  }
+
+
+  /**
+   * Gets the cache name of a database structure or part.
+   *
+   * @param string $item 'db_name' or 'table'
+   * @param string $mode 'columns','tables' or 'databases'
+   *
+   * @return bool|string
+   */
+  private function _db_cache_name(string $item, string $mode)
+  {
+    $r = false;
+    if ($this->engine === 'sqlite') {
+      $h = md5($this->host.dirname($this->current));
+    }
+    else {
+      $h = str_replace('/', '-', $this->get_connection_code());
+    }
+
+    switch ($mode){
+      case 'columns':
+        $r = $this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
+        break;
+      case 'tables':
+        $r = $this->engine.'/'.$h.'/'.($item ?: $this->current);
+        break;
+      case 'databases':
+        $r = $this->engine.'/'.$h.'/_bbn-database';
+        break;
+    }
+
+    return $r;
+  }
+
+
+  /**
+   * Returns the table's structure's array, either from the cache or from _modelize().
+   *
+   * @param string $item  The item to get
+   * @param string $mode  The type of item to get (columns, rables, databases)
+   * @param bool   $force If true the cache is recreated even if it exists
+   * @return array|null
+   */
+  private function _get_cache($item, $mode = 'columns', $force = false): ?array
+  {
+    $cache_name = $this->_db_cache_name($item, $mode);
+    if ($force && isset($this->cache[$cache_name])) {
+      unset($this->cache[$cache_name]);
+    }
+
+    if (!isset($this->cache[$cache_name])) {
+      if ($force || !($tmp = $this->cache_get($cache_name))) {
+        switch ($mode){
+          case 'columns':
+            $keys = $this->language->get_keys($item);
+            $cols = $this->language->get_columns($item);
+            if (\is_array($keys) && \is_array($cols)) {
+              $tmp = [
+                'keys' => $keys['keys'],
+                'cols' => $keys['cols'],
+                'fields' => $cols
+              ];
+            }
+            break;
+          case 'tables':
+            $tmp = $this->language->get_tables($item);
+            break;
+          case 'databases':
+            $tmp = $this->language->get_databases();
+            break;
+        }
+
+        if (!\is_array($tmp)) {
+          $st = "Error while creating the cache for the table $item in mode $mode";
+          $this->log($st);
+          throw new \Exception($st);
+        }
+
+        $this->cache_set($cache_name, '', $tmp, $this->cache_renewal);
+      }
+
+      if ($tmp) {
+        $this->cache[$cache_name] = $tmp;
+      }
+    }
+
+    return $this->cache[$cache_name] ?? null;
+  }
+
+
+  /**
+   * Removes values from the given conditions array and returns an array with values and hashed.
+   *
+   * @param array $where  Conditions
+   * @param array $values Values
+   * @return array
+   */
+  private function _remove_conditions_value(array $where, array &$values = []): array
+  {
+    if (isset($where['conditions'])) {
+      foreach ($where['conditions'] as &$f){
+        ksort($f);
+        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
+          $tmp = $this->_remove_conditions_value($f, $values);
+          $f   = $tmp['hashed'];
+        }
+        elseif (array_key_exists('value', $f)) {
+          $values[] = $f['value'];
+          unset($f['value']);
+        }
+      }
+    }
+
+    return [
+      'hashed' => $where,
+      'values' => $values
+    ];
+  }
+
+
+  /**
+   * Adds the specs of a query to the $queries object.
+   *
+   * @param string $hash         The hash of the statement.
+   * @param string $statement    The SQL full statement.
+   * @param string $kind         The type of statement.
+   * @param int    $placeholders The number of placeholders.
+   * @param array  $options      The driver options.
+   */
+  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
+  {
+    $now                  = microtime(true);
+    $this->queries[$hash] = [
+      'sql' => $statement,
+      'kind' => $kind,
+      'write' => \in_array($kind, self::$write_kinds, true),
+      'structure' => \in_array($kind, self::$structure_kinds, true),
+      'placeholders' => $placeholders,
+      'options' => $options,
+      'num' => 0,
+      'exe_time' => 0,
+      'first' => $now,
+      'last' => 0,
+      'prepared' => false
+    ];
+    $this->list_queries[] = [
+      'hash' => $hash,
+      'last' => $now
+    ];
+    $num                  = count($this->list_queries);
+    while ($num > $this->max_queries) {
+      $num--;
+      $this->_remove_query($this->list_queries[0]['hash']);
+      array_shift($this->list_queries);
+    }
+  }
+
+
+  private function _remove_query(string $hash): void
+  {
+    if (x::has_prop($this->queries, $hash)) {
+      unset($this->queries[$hash]);
+      while ($idx = \array_search($hash, $this->queries, true)) {
+        unset($this->queries[$idx]);
+      }
+    }
+  }
+
+
+  private function _update_query($hash)
+  {
+    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
+      $last_index                   = count($this->list_queries) - 1;
+      $now                          = \microtime(true);
+      $this->queries[$hash]['last'] = $now;
+      $this->queries[$hash]['num']++;
+      if ($this->list_queries[$last_index]['hash'] !== $hash) {
+        if (($idx = x::find($this->list_queries, ['hash' => $hash])) !== null) {
+          $this->list_queries[$idx]['last'] = $now;
+          x::move($this->list_queries, $idx, $last_index);
+        }
+        else {
+          throw new \Exception(_("Impossible to find the corresponding hash"));
+        }
+      }
+      else {
+        $this->list_queries[$last_index]['last'] = $now;
+      }
+
+      $num = count($this->list_queries) - 1;
+      while (($num > 0)
+          && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
+      ) {
+        $num--;
+        if (!is_string($this->list_queries[0]['hash'])) {
+          x::log($this->list_queries);
+          x::log(count($this->list_queries));
+        }
+
+        $this->_remove_query($this->list_queries[0]['hash']);
+        array_shift($this->list_queries);
+      }
+
+      if (empty($this->queries)) {
+        $debug = debug_backtrace();
+        x::log($debug, 'db_explained');
+        throw new \Exception(_("The queries object is empty!"));
+      }
+    }
+    else {
+      throw new \Exception(_("Impossible to find the query corresponding to this hash"));
+    }
+
+  }
+
+
+  /**
+   * Makes a string that will be the id of the request.
+   *
+   * @return string
+   *
+   */
+  private function _make_hash(): string
+  {
+    $args = \func_get_args();
+    if ((\count($args) === 1) && \is_array($args[0])) {
+      $args = $args[0];
+    }
+
+    $st = '';
+    foreach ($args as $a){
+      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+    }
+
+    return $this->hash_contour.md5($st).$this->hash_contour;
+  }
+
+
+  /**
+   * Launches a function before or after
+   *
+   * @param array $cfg
+   * @return array
+   */
+  private function _trigger(array $cfg): array
+  {
+    if ($this->_triggers_disabled) {
+      if ($cfg['moment'] === 'after') {
+        return $cfg;
+      }
+
+      $cfg['run']  = 1;
+      $cfg['trig'] = 1;
+      return $cfg;
+    }
+
+    if (!isset($cfg['trig'])) {
+      $cfg['trig'] = 1;
+    }
+
+    if (!isset($cfg['run'])) {
+      $cfg['run'] = 1;
+    }
+
+    if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
+      $table = $this->tfn(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
+      // Specific to a table
+      if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
+        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
+          if ($f && \is_callable($f)) {
+            if (!($tmp = $f($cfg))) {
+              $cfg['run']  = false;
+              $cfg['trig'] = false;
+            }
+            else{
+              $cfg = $tmp;
+            }
+          }
+        }
+
+        //echo x::make_tree($trig);
+        //echo x::make_tree($cfg);
+      }
+    }
+
+    return $cfg;
+  }
+
+
+  /**
+   * @param array  $args
+   * @param string $kind
+   * @return array
+   */
+  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
+  {
+    $kind = strtoupper($kind);
+    if (!isset($args[0])) {
+      return null;
+    }
+
+    if (!\is_array($args[0])) {
+      array_unshift($args, $kind);
+    }
+    else {
+      $args[0]['kind'] = $kind;
+    }
+
+    return $args;
+  }
+
+
+  /**
+   * Adds a random primary value when it is absent from the set and present in the fields
+   * @param array $cfg
+   */
+  private function _add_primary(array &$cfg): void
+  {
+    // Inserting a row without primary when primary is needed and no auto-increment
+    if (!empty($cfg['primary'])
+        && empty($cfg['auto_increment'])
+        && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1)
+        && (count($cfg['values']) === (count($cfg['fields']) - 1))
+    ) {
+      $val = false;
+      switch ($cfg['primary_type']){
+        case 'int':
+          $val = random_int(
+            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] - 3 : 1) / 2),
+            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
+          );
+          break;
+        case 'binary':
+          if ($cfg['primary_length'] === 16) {
+            $val = $this->get_uid();
+          }
+          break;
+      }
+
+      if ($val) {
+        array_splice($cfg['values'], $idx, 0, $val);
+        $this->set_last_insert_id($val);
+      }
+    }
+  }
+
+
+  /**
+   * @returns null|db\query|int A selection query or the number of affected rows by a writing query
+   */
+  private function _exec()
+  {
+    if ($this->check()
+        && ($cfg = $this->process_cfg(\func_get_args()))
+        && !empty($cfg['sql'])
+    ) {
+      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
+      $cfg['moment'] = 'before';
+      $cfg['trig']   = null;
+      if ($cfg['kind'] === 'INSERT') {
+        // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
+        $this->_add_primary($cfg);
+      }
+
+      if (count($cfg['values']) !== count($cfg['values_desc'])) {
+        x::dump($cfg);
+        die('Database error in values count');
+      }
+
+      // Launching the trigger BEFORE execution
+      if ($cfg = $this->_trigger($cfg)) {
+        if (!empty($cfg['run'])) {
+          //$this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
+          // Executing the query
+          /** @todo Put hash back! */
+          //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
+          /** @var \bbn\db\query */
+          $cfg['run'] = $this->query($cfg['sql'], $this->get_query_values($cfg));
+        }
+
+        if (!empty($cfg['force'])) {
+          $cfg['trig'] = 1;
+        }
+        elseif (null === $cfg['trig']) {
+          $cfg['trig'] = (bool)$cfg['run'];
+        }
+
+        if ($cfg['trig']) {
+          $cfg['moment'] = 'after';
+          $cfg           = $this->_trigger($cfg);
+        }
+
+        $this->last_cfg = $cfg;
+        if (!\in_array($cfg['kind'], self::$write_kinds, true)) {
+          return $cfg['run'] ?? null;
+        }
+
+        if (isset($cfg['value'])) {
+          return $cfg['value'];
+        }
+
+        if (isset($cfg['run'])) {
+          return $cfg['run'];
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Normalizes arguments by making it a uniform array.
+   *
+   * <ul><h3>The array will have the following indexes:</h3>
+   * <li>fields</li>
+   * <li>where</li>
+   * <li>filters</li>
+   * <li>order</li>
+   * <li>limit</li>
+   * <li>start</li>
+   * <li>join</li>
+   * <li>group_by</li>
+   * <li>having</li>
+   * <li>values</li>
+   * <li>hashed_join</li>
+   * <li>hashed_where</li>
+   * <li>hashed_having</li>
+   * <li>php</li>
+   * <li>done</li>
+   * </ul>
+   *
+   * @todo Check for the tables and column names legality!
+   *
+   * @param $cfg
+   * @return array
+   */
+  private function _treat_arguments($cfg): array
+  {
+    while (isset($cfg[0]) && \is_array($cfg[0])){
+      $cfg = $cfg[0];
+    }
+
+    if (\is_array($cfg)
+        && array_key_exists('tables', $cfg)
+        && !empty($cfg['bbn_db_treated'])
+        && ($cfg['bbn_db_treated'] === true)
+    ) {
+      return $cfg;
+    }
+
+    $res = [
+      'kind' => 'SELECT',
+      'fields' => [],
+      'where' => [],
+      'order' => [],
+      'limit' => 0,
+      'start' => 0,
+      'group_by' => [],
+      'having' => [],
+    ];
+    if (x::is_assoc($cfg)) {
+      if (isset($cfg['table']) && !isset($cfg['tables'])) {
+        $cfg['tables'] = $cfg['table'];
+        unset($cfg['table']);
+      }
+
+      $res = array_merge($res, $cfg);
+    }
+    elseif (count($cfg) > 1) {
+      $res['kind']   = strtoupper($cfg[0]);
+      $res['tables'] = $cfg[1];
+      if (isset($cfg[2])) {
+        $res['fields'] = $cfg[2];
+      }
+
+      if (isset($cfg[3])) {
+        $res['where'] = $cfg[3];
+      }
+
+      if (isset($cfg[4])) {
+        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
+      }
+
+      if (isset($cfg[5]) && str::is_integer($cfg[5])) {
+        $res['limit'] = $cfg[5];
+      }
+
+      if (isset($cfg[6]) && !empty($res['limit'])) {
+        $res['start'] = $cfg[6];
+      }
+    }
+
+    $res           = array_merge(
+      $res, [
+      'aliases' => [],
+      'values' => [],
+      'filters' => [],
+      'join' => [],
+      'hashed_join' => [],
+      'hashed_where' => [],
+      'hashed_having' => [],
+      'bbn_db_treated' => true
+      ]
+    );
+    $res['kind']   = strtoupper($res['kind']);
+    $res['write']  = \in_array($res['kind'], self::$write_kinds, true);
+    $res['ignore'] = $res['write'] && !empty($res['ignore']);
+    $res['count']  = !$res['write'] && !empty($res['count']);
+    if (!\is_array($res['tables'])) {
+      $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
+    }
+
+    if (!empty($res['tables'])) {
+      foreach ($res['tables'] as &$t){
+        if (!is_string($t)) {
+          x::log([$cfg, debug_backtrace()], 'db_explained');
+          throw new \Exception("Impossible to identify the tables, check the log");
+        }
+
+        $t = $this->tfn($t);
+      }
+
+      unset($t);
+    }
+    else{
+      throw new \Error(_('No table given'));
+      return [];
+    }
+
+    if (!empty($res['fields'])) {
+      if (\is_string($res['fields'])) {
+        $res['fields'] = [$res['fields']];
+      }
+    }
+    elseif (!empty($res['columns'])) {
+      $res['fields'] = (array)$res['columns'];
+    }
+
+    if (!empty($res['fields'])) {
+      if ($res['kind'] === 'SELECT') {
+        foreach ($res['fields'] as $k => $col) {
+          if (\is_string($k)) {
+            $res['aliases'][$col] = $k;
+          }
+        }
+      }
+      elseif ((($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
+          && \is_string(array_keys($res['fields'])[0])
+      ) {
+        $res['values'] = array_values($res['fields']);
+        $res['fields'] = array_keys($res['fields']);
+      }
+    }
+
+    if (!\is_array($res['group_by'])) {
+      $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
+    }
+
+    if (!\is_array($res['where'])) {
+      $res['where'] = [];
+    }
+
+    if (!\is_array($res['order'])) {
+      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
+    }
+
+    if (!str::is_integer($res['limit'])) {
+      unset($res['limit']);
+    }
+
+    if (!str::is_integer($res['start'])) {
+      unset($res['start']);
+    }
+
+    if (!empty($cfg['join'])) {
+      foreach ($cfg['join'] as $k => $join){
+        if (\is_array($join)) {
+          if (\is_string($k)) {
+            if (empty($join['table'])) {
+              $join['table'] = $k;
+            }
+            elseif (empty($join['alias'])) {
+              $join['alias'] = $k;
+            }
+          }
+
+          if (isset($join['table'], $join['on']) && ($tmp = $this->treat_conditions($join['on'], false))) {
+            if (!isset($join['type'])) {
+              $join['type'] = 'right';
+            }
+
+            $res['join'][] = array_merge($join, ['on' => $tmp]);
+          }
+        }
+      }
+    }
+
+    if ($tmp = $this->treat_conditions($res['where'], false)) {
+      $res['filters'] = $tmp;
+    }
+
+    if (!empty($res['having']) && ($tmp = $this->treat_conditions($res['having'], false))) {
+      $res['having'] = $tmp;
+    }
+
+    if (!empty($res['group_by'])) {
+      $this->_adapt_filters($res);
+    }
+
+    if (!empty($res['join'])) {
+      $new_join = [];
+      foreach ($res['join'] as $k => $join){
+        if ($tmp = $this->treat_conditions($join['on'])) {
+          $new_item             = $join;
+          $new_item['on']       = $tmp['where'];
+          $res['hashed_join'][] = $tmp['hashed'];
+          if (!empty($tmp['values'])) {
+            foreach ($tmp['values'] as $v){
+              $res['values'][] = $v;
+            }
+          }
+
+          $new_join[] = $new_item;
+        }
+      }
+
+      $res['join'] = $new_join;
+    }
+
+    if (!empty($res['filters']) && ($tmp = $this->treat_conditions($res['filters']))) {
+      $res['filters']      = $tmp['where'];
+      $res['hashed_where'] = $tmp['hashed'];
+      if (\is_array($tmp) && isset($tmp['values'])) {
+        foreach ($tmp['values'] as $v){
+          $res['values'][] = $v;
+        }
+      }
+    }
+
+    if (!empty($res['having']) && ($tmp = $this->treat_conditions($res['having']))) {
+      $res['having']        = $tmp['where'];
+      $res['hashed_having'] = $tmp['hashed'];
+      foreach ($tmp['values'] as $v){
+        $res['values'][] = $v;
+      }
+    }
+
+    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
+      $res['kind'],
+      $res['ignore'],
+      $res['count'],
+      $res['tables'],
+      $res['fields'],
+      $res['hashed_join'],
+      $res['hashed_where'],
+      $res['hashed_having'],
+      $res['group_by'],
+      $res['order'],
+      $res['limit'] ?? 0,
+      $res['start'] ?? 0
+    );
+    return $res;
+  }
+
+
+  private function _adapt_filters(&$cfg): void
+  {
+    if (!empty($cfg['filters'])) {
+      [$cfg['filters'], $having] = $this->_adapt_bit($cfg, $cfg['filters']);
+      if (empty($cfg['having']['conditions'])) {
+        $cfg['having'] = $having;
+      }
+      else {
+        $cfg['having'] = [
+          'logic' => 'AND',
+          'conditions' => [
+            $cfg['having'],
+            $having
+          ]
+        ];
+      }
+    }
+  }
+
+
+  private function _adapt_bit($cfg, $where, $having = [])
+  {
+    if (x::has_props($where, ['logic', 'conditions'])) {
+      $new = [
+        'logic' => $where['logic'],
+        'conditions' => []
+      ];
+      foreach ($where['conditions'] as $c) {
+        $is_aggregate = false;
+        if (isset($c['field'])) {
+          $is_aggregate = $this->is_aggregate_function($c['field']);
+          if (!$is_aggregate && isset($cfg['fields'][$c['field']])) {
+            $is_aggregate = $this->is_aggregate_function($cfg['fields'][$c['field']]);
+          }
+        }
+
+        if (!$is_aggregate && isset($c['exp'])) {
+          $is_aggregate = $this->is_aggregate_function($c['exp']);
+          if (!$is_aggregate && isset($cfg['fields'][$c['exp']])) {
+            $is_aggregate = $this->is_aggregate_function($cfg['fields'][$c['exp']]);
+          }
+        }
+
+        if (!$is_aggregate) {
+          if (x::has_props($c, ['conditions', 'logic'])) {
+            $tmp = $this->_adapt_bit($cfg, $c, $having);
+            if (!empty($tmp[0]['conditions'])) {
+              $new['conditions'][] = $c;
+            }
+
+            if (!empty($tmp[1]['conditions'])) {
+              $having = $tmp[1];
+            }
+          }
+          else {
+            $new['conditions'][] = $c;
+          }
+        }
+        else {
+          if (!isset($having['conditions'])) {
+            $having = [
+              'logic' => $where['logic'],
+              'conditions' => []
+            ];
+          }
+
+          if (isset($cfg['aliases'][$c['field']])) {
+            $c['field'] = $cfg['aliases'][$c['field']];
+          }
+          elseif (isset($c['exp'], $cfg['aliases'][$c['exp']])) {
+            $c['exp'] = $cfg['aliases'][$c['exp']];
+          }
+
+          $having['conditions'][] = $c;
+        }
+      }
+
+      return [$new, $having];
+    }
+  }
+
+
+  /**
+   * @param array $args
+   * @return array
+   */
+  private function _set_limit_1(array $args): array
+  {
+    if (\is_array($args[0])
+        && (isset($args[0]['tables']) || isset($args[0]['table']))
+    ) {
+      $args[0]['limit'] = 1;
+    }
+    else {
+      $start = $args[4] ?? 0;
+      $num   = count($args);
+      // Adding fields
+      if ($num === 1) {
+        $args[] = [];
+        $num++;
+      }
+
+      // Adding where
+      if ($num === 2) {
+        $args[] = [];
+        $num++;
+      }
+
+      // Adding order
+      if ($num === 3) {
+        $args[] = [];
+        $num++;
+      }
+
+      if ($num === 4) {
+        $args[] = 1;
+        $num++;
+      }
+
+      $args   = array_slice($args, 0, 5);
+      $args[] = $start;
+    }
+
+    return $args;
+  }
+
+
+  /**
+   * @param array $args
+   * @return array
+   */
+  private function _set_start(array $args, int $start): array
+  {
+    if (\is_array($args[0])
+        && (isset($args[0]['tables']) || isset($args[0]['table']))
+    ) {
+      $args[0]['start'] = $start;
+    }
+    else {
+      if (isset($args[5])) {
+        $args[5] = $start;
+      }
+      else{
+        while (count($args) < 6){
+          switch (count($args)){
+            case 1:
+            case 2:
+            case 3:
+              $args[] = [];
+              break;
+            case 4:
+              $args[] = 1;
+              break;
+            case 5:
+              $args[] = $start;
+              break;
+          }
+        }
+      }
+    }
+
+    return $args;
   }
 
 

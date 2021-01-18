@@ -482,21 +482,22 @@ class menus extends bbn\models\cls\basic
    * @param string $k_value The key used for the value. Default 'value'
    * @return array
    */
-  public function get_menus($k_text = 'text', $k_value = 'value'): ?array
+  public function get_menus($k_text = 'text', $k_value = 'value'): array
   {
     $c    = $this->pref->get_class_cfg();
     $pref =& $this->pref;
     return array_map(
       function ($e) use ($c, $k_text, $k_value, $pref) {
         return [
-        $k_text => $e[$c['arch']['user_options']['text']],
-        $k_value => $e[$c['arch']['user_options']['id']],
-        $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],
-        $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],
-        $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],
-        'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))
-        ];
-      }, $this->pref->get_all(self::get_appui_option_id('menus'))
+          $k_text => $e[$c['arch']['user_options']['text']],
+          $k_value => $e[$c['arch']['user_options']['id']],
+          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],
+          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],
+          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],
+          'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))
+          ];
+      },
+      $this->pref->get_all(self::get_appui_option_id('menus'))
     );
   }
 

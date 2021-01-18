@@ -138,7 +138,7 @@ class dashboard
   }
 
   /**
-   * dashboard contrusctor.
+   * dashboard constructor.
    */
   public function __construct(string $id)
   {
@@ -155,6 +155,7 @@ class dashboard
     if (!bbn\str::is_uid($id)) {
       $id = $this->get_option_id($id);
     }
+
     if (bbn\str::is_uid($id)) {
       $this->dashboard = $id;
     }

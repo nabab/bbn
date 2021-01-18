@@ -871,44 +871,51 @@ class str
    * @param mixed $st
    * @return mixed
    */
-  public static function correct_types($st){
-    if ( \is_string($st) ){
-      if ( self::is_buid($st) ){
+  public static function correct_types($st)
+  {
+    if (\is_string($st)) {
+      if (self::is_buid($st)) {
         $st = bin2hex($st);
       }
       else{
-        if ( self::is_json($st) ){
-          if ( strpos($st, '": ') && ($json = json_decode($st)) ){
+        if (self::is_json($st)) {
+          if (strpos($st, '": ') && ($json = json_decode($st))) {
             return json_encode($json);
           }
+
           return $st;
         }
-        $st = trim($st);
-        if ( self::is_integer($st) && ((substr((string)$st, 0, 1) !== '0') || ($st === '0')) ){
+
+        $st = trim(trim($st, " "), "\t");
+        if (self::is_integer($st)
+            && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))
+        ) {
           $tmp = (int)$st;
-          if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
+          if (($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX)) {
             return $tmp;
           }
         }
         // If it is a decimal, not starting or ending with a zero
-        else if ( self::is_decimal($st) ){
+        elseif (self::is_decimal($st)) {
           return (float)$st;
         }
       }
     }
-    else if ( \is_array($st) ){
-      foreach ( $st as $k => $v ){
+    elseif (\is_array($st)) {
+      foreach ($st as $k => $v) {
         $st[$k] = self::correct_types($v);
       }
     }
-    else if ( \is_object($st) ){
+    elseif (\is_object($st)) {
       $vs = get_object_vars($st);
-      foreach ( $vs as $k => $v ){
+      foreach ($vs as $k => $v) {
         $st->$k = self::correct_types($v);
       }
     }
+
     return $st;
   }
+
 
   /**
    * Returns an array containing any of the various components of the URL that are present.

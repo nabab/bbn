@@ -2308,7 +2308,7 @@
         "retriever_instance": {
             "db": {
                 "cache": {
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_sessions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_sessions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -2444,7 +2444,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_options": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_options": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -2634,7 +2634,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app": [
+                    "mysql\/bbn@mysql.lan\/apst_app": [
                         "apst_adherents",
                         "apst_adherents_emails",
                         "apst_adherents_full",
@@ -2727,9 +2727,10 @@
                         "bbn_users_tokens",
                         "bbn_users_usergroups",
                         "bbn_vcs",
+                        "my_new_table",
                         "test"
                     ],
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -4327,7 +4328,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_emails": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_emails": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -4402,7 +4403,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_full": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_full": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7158,7 +7159,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7300,7 +7301,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_tasks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_tasks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7375,7 +7376,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_altares": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_altares": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7467,7 +7468,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_attestations": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_attestations": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7570,7 +7571,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_baremes_annuels": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_baremes_annuels": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7692,7 +7693,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_changes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_changes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7798,7 +7799,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_changes_files": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_changes_files": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7885,7 +7886,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_clotures": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_clotures": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -7972,7 +7973,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_consultations": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_consultations": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -8068,7 +8069,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_cotisations": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_cotisations": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -8279,7 +8280,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_cotisations_annuelles": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_cotisations_annuelles": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -8569,7 +8570,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_cp": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_cp": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -8753,7 +8754,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_demandes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_demandes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -8858,7 +8859,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_demandes_documents": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_demandes_documents": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -8971,7 +8972,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_documents": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_documents": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -9228,7 +9229,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -9300,7 +9301,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale_events": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -9431,7 +9432,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale_info": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale_info": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -9536,7 +9537,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale_infos": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale_infos": {
                         "keys": {
                             "id_adherent": {
                                 "columns": [
@@ -9603,7 +9604,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infos_complementaires": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infos_complementaires": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -9715,7 +9716,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_liens": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_liens": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -9894,7 +9895,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_liens_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_liens_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10007,7 +10008,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_marques": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_marques": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10090,7 +10091,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_passages": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_passages": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10199,7 +10200,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_prospects": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_prospects": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10292,7 +10293,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_prospects_files": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_prospects_files": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10379,7 +10380,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_stats": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_stats": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10506,7 +10507,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_suivi": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_suivi": {
                         "keys": {
                             "id_adherent_2": {
                                 "columns": [
@@ -10581,7 +10582,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_tmp_files": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_tmp_files": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10663,7 +10664,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_addresses": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_addresses": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -10878,7 +10879,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_chats": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_chats": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -11020,7 +11021,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_chats_users": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_chats_users": {
                         "keys": {
                             "id_chat_2": {
                                 "columns": [
@@ -11202,7 +11203,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_clients": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_clients": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -11247,7 +11248,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_cron": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_cron": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -11442,7 +11443,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_emailings": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_emailings": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -11602,7 +11603,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_emails": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_emails": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -11791,7 +11792,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_events": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -11935,7 +11936,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_events_exceptions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_events_exceptions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12085,7 +12086,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_events_recurring": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_events_recurring": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12228,7 +12229,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_history": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_history": {
                         "keys": {
                             "line": {
                                 "columns": [
@@ -12428,7 +12429,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_history_uids": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_history_uids": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12501,7 +12502,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_hr_planning": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_hr_planning": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12640,7 +12641,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_hr_staff": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_hr_staff": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12701,7 +12702,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_hr_staff_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_hr_staff_events": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12803,7 +12804,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_i18n": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_i18n": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12878,7 +12879,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_i18n_exp": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_i18n_exp": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -12990,7 +12991,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_imessages": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_imessages": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -13152,7 +13153,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_imessages_users": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_imessages_users": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -13249,7 +13250,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_invoices": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_invoices": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -13391,7 +13392,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_medias": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_medias": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -13524,7 +13525,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_mvc_logs": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_mvc_logs": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -13653,7 +13654,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -13842,7 +13843,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_events": {
                         "keys": {
                             "id_note": {
                                 "columns": [
@@ -13902,7 +13903,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_masks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_masks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14001,7 +14002,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_medias": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_medias": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14149,7 +14150,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_url": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_url": {
                         "keys": {
                             "id_note": {
                                 "columns": [
@@ -14209,7 +14210,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_versions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_versions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14329,7 +14330,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notifications": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notifications": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14535,7 +14536,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notifications_content": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notifications_content": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14612,7 +14613,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notifications_old": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notifications_old": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14733,7 +14734,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_observers": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_observers": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -14941,7 +14942,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_passwords": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_passwords": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15039,7 +15040,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_people": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_people": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15163,7 +15164,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_profiler": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_profiler": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15267,7 +15268,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_projects": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_projects": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15373,7 +15374,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_projects_assets": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_projects_assets": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15474,7 +15475,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_statistics": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_statistics": {
                         "keys": {
                             "id_option_2": {
                                 "columns": [
@@ -15562,7 +15563,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15809,7 +15810,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_invoices": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_invoices": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15871,7 +15872,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_logs": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_logs": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -15990,7 +15991,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -16088,7 +16089,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_roles": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_roles": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -16200,7 +16201,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_sessions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_sessions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -16346,7 +16347,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -16524,7 +16525,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_contacts": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_contacts": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -16634,7 +16635,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_contacts_links": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_contacts_links": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -16770,7 +16771,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_emails": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_emails": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17097,7 +17098,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_emails_aliases": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_emails_aliases": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17184,7 +17185,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_emails_recipients": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_emails_recipients": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17291,7 +17292,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_groups": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_groups": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17417,7 +17418,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_hotlinks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_hotlinks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17498,7 +17499,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_options": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_options": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17751,7 +17752,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_options_bits": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_options_bits": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17899,7 +17900,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_passwords": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_passwords": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -17980,7 +17981,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_tokens": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_tokens": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -18139,7 +18140,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_usergroups": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_usergroups": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -18225,7 +18226,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_vcs": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_vcs": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -18305,7 +18306,202 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/test": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/my_new_table": {
+                        "keys": {
+                            "PRIMARY": {
+                                "columns": [
+                                    "id"
+                                ],
+                                "ref_db": "apst_app",
+                                "ref_table": "bbn_history_uids",
+                                "ref_column": "bbn_uid",
+                                "constraint": "y40wncx1",
+                                "update": "CASCADE",
+                                "delete": "CASCADE",
+                                "unique": 1
+                            },
+                            "file": {
+                                "columns": [
+                                    "file",
+                                    "variant"
+                                ],
+                                "ref_db": null,
+                                "ref_table": null,
+                                "ref_column": null,
+                                "constraint": null,
+                                "update": null,
+                                "delete": null,
+                                "unique": 1
+                            },
+                            "project": {
+                                "columns": [
+                                    "project"
+                                ],
+                                "ref_db": "apst_app",
+                                "ref_table": "bbn_projects",
+                                "ref_column": "id",
+                                "constraint": "y40wncx2",
+                                "update": "CASCADE",
+                                "delete": "CASCADE",
+                                "unique": 0
+                            }
+                        },
+                        "cols": {
+                            "id": [
+                                "PRIMARY"
+                            ],
+                            "file": [
+                                "file"
+                            ],
+                            "variant": [
+                                "file"
+                            ],
+                            "project": [
+                                "project"
+                            ]
+                        },
+                        "fields": {
+                            "id": {
+                                "position": 1,
+                                "type": "binary",
+                                "null": 0,
+                                "key": "PRI",
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "maxlength": 16
+                            },
+                            "project": {
+                                "position": 2,
+                                "type": "binary",
+                                "null": 1,
+                                "key": "MUL",
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL",
+                                "maxlength": 16
+                            },
+                            "priority": {
+                                "position": 3,
+                                "type": "tinyint",
+                                "null": 0,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": 5,
+                                "maxlength": 1
+                            },
+                            "file": {
+                                "position": 4,
+                                "type": "varchar",
+                                "null": 0,
+                                "key": "MUL",
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "maxlength": 100
+                            },
+                            "variant": {
+                                "position": 5,
+                                "type": "varchar",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "",
+                                "maxlength": 255
+                            },
+                            "prev": {
+                                "position": 6,
+                                "type": "datetime",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL"
+                            },
+                            "next": {
+                                "position": 7,
+                                "type": "datetime",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL"
+                            },
+                            "description": {
+                                "position": 8,
+                                "type": "text",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL"
+                            },
+                            "pid": {
+                                "position": 9,
+                                "type": "int",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL",
+                                "maxlength": 6
+                            },
+                            "notification": {
+                                "position": 10,
+                                "type": "decimal",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL",
+                                "maxlength": 14,
+                                "decimals": 4
+                            },
+                            "cfg": {
+                                "position": 11,
+                                "type": "json",
+                                "null": 0,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": ""
+                            },
+                            "active": {
+                                "position": 12,
+                                "type": "tinyint",
+                                "null": 0,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": 0,
+                                "maxlength": 1
+                            }
+                        }
+                    },
+                    "mysql\/bbn@mysql.lan\/apst_app\/test": {
                         "keys": [],
                         "cols": [],
                         "fields": {
@@ -18487,7 +18683,7 @@
         "retriever_instance": {
             "db": {
                 "cache": {
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_sessions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_sessions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -18623,7 +18819,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_options": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_options": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -18813,7 +19009,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app": [
+                    "mysql\/bbn@mysql.lan\/apst_app": [
                         "apst_adherents",
                         "apst_adherents_emails",
                         "apst_adherents_full",
@@ -18906,9 +19102,10 @@
                         "bbn_users_tokens",
                         "bbn_users_usergroups",
                         "bbn_vcs",
+                        "my_new_table",
                         "test"
                     ],
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -20506,7 +20703,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_emails": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_emails": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -20581,7 +20778,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_full": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_full": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23337,7 +23534,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23479,7 +23676,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_adherents_tasks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents_tasks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23554,7 +23751,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_altares": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_altares": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23646,7 +23843,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_attestations": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_attestations": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23749,7 +23946,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_baremes_annuels": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_baremes_annuels": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23871,7 +24068,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_changes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_changes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -23977,7 +24174,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_changes_files": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_changes_files": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -24064,7 +24261,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_clotures": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_clotures": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -24151,7 +24348,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_consultations": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_consultations": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -24247,7 +24444,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_cotisations": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_cotisations": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -24458,7 +24655,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_cotisations_annuelles": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_cotisations_annuelles": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -24748,7 +24945,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_cp": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_cp": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -24932,7 +25129,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_demandes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_demandes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25037,7 +25234,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_demandes_documents": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_demandes_documents": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25150,7 +25347,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_documents": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_documents": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25407,7 +25604,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25479,7 +25676,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale_events": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25610,7 +25807,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale_info": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale_info": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25715,7 +25912,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infolegale_infos": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infolegale_infos": {
                         "keys": {
                             "id_adherent": {
                                 "columns": [
@@ -25782,7 +25979,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_infos_complementaires": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_infos_complementaires": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -25894,7 +26091,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_liens": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_liens": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26073,7 +26270,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_liens_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_liens_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26186,7 +26383,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_marques": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_marques": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26269,7 +26466,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_passages": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_passages": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26378,7 +26575,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_prospects": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_prospects": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26471,7 +26668,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_prospects_files": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_prospects_files": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26558,7 +26755,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_stats": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_stats": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26685,7 +26882,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_suivi": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_suivi": {
                         "keys": {
                             "id_adherent_2": {
                                 "columns": [
@@ -26760,7 +26957,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/apst_tmp_files": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/apst_tmp_files": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -26842,7 +27039,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_addresses": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_addresses": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -27057,7 +27254,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_chats": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_chats": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -27199,7 +27396,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_chats_users": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_chats_users": {
                         "keys": {
                             "id_chat_2": {
                                 "columns": [
@@ -27381,7 +27578,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_clients": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_clients": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -27426,7 +27623,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_cron": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_cron": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -27621,7 +27818,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_emailings": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_emailings": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -27781,7 +27978,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_emails": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_emails": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -27970,7 +28167,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_events": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28114,7 +28311,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_events_exceptions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_events_exceptions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28264,7 +28461,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_events_recurring": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_events_recurring": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28407,7 +28604,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_history": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_history": {
                         "keys": {
                             "line": {
                                 "columns": [
@@ -28607,7 +28804,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_history_uids": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_history_uids": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28680,7 +28877,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_hr_planning": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_hr_planning": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28819,7 +29016,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_hr_staff": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_hr_staff": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28880,7 +29077,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_hr_staff_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_hr_staff_events": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -28982,7 +29179,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_i18n": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_i18n": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29057,7 +29254,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_i18n_exp": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_i18n_exp": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29169,7 +29366,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_imessages": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_imessages": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29331,7 +29528,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_imessages_users": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_imessages_users": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29428,7 +29625,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_invoices": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_invoices": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29570,7 +29767,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_medias": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_medias": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29703,7 +29900,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_mvc_logs": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_mvc_logs": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -29832,7 +30029,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30021,7 +30218,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_events": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_events": {
                         "keys": {
                             "id_note": {
                                 "columns": [
@@ -30081,7 +30278,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_masks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_masks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30180,7 +30377,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_medias": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_medias": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30328,7 +30525,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_url": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_url": {
                         "keys": {
                             "id_note": {
                                 "columns": [
@@ -30388,7 +30585,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notes_versions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notes_versions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30508,7 +30705,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notifications": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notifications": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30714,7 +30911,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notifications_content": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notifications_content": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30791,7 +30988,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_notifications_old": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_notifications_old": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -30912,7 +31109,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_observers": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_observers": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31120,7 +31317,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_passwords": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_passwords": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31218,7 +31415,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_people": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_people": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31342,7 +31539,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_profiler": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_profiler": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31446,7 +31643,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_projects": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_projects": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31552,7 +31749,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_projects_assets": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_projects_assets": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31653,7 +31850,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_statistics": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_statistics": {
                         "keys": {
                             "id_option_2": {
                                 "columns": [
@@ -31741,7 +31938,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -31988,7 +32185,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_invoices": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_invoices": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32050,7 +32247,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_logs": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_logs": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32169,7 +32366,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_notes": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_notes": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32267,7 +32464,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_roles": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_roles": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32379,7 +32576,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_tasks_sessions": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_tasks_sessions": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32525,7 +32722,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32703,7 +32900,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_contacts": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_contacts": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32813,7 +33010,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_contacts_links": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_contacts_links": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -32949,7 +33146,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_emails": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_emails": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -33276,7 +33473,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_emails_aliases": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_emails_aliases": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -33363,7 +33560,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_emails_recipients": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_emails_recipients": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -33470,7 +33667,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_groups": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_groups": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -33596,7 +33793,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_hotlinks": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_hotlinks": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -33677,7 +33874,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_options": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_options": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -33930,7 +34127,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_options_bits": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_options_bits": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -34078,7 +34275,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_passwords": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_passwords": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -34159,7 +34356,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_tokens": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_tokens": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -34318,7 +34515,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_users_usergroups": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_users_usergroups": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -34404,7 +34601,7 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/bbn_vcs": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/bbn_vcs": {
                         "keys": {
                             "PRIMARY": {
                                 "columns": [
@@ -34484,7 +34681,202 @@
                             }
                         }
                     },
-                    "mysql\/mysql.lan\/apst_app\/test": {
+                    "mysql\/bbn@mysql.lan\/apst_app\/my_new_table": {
+                        "keys": {
+                            "PRIMARY": {
+                                "columns": [
+                                    "id"
+                                ],
+                                "ref_db": "apst_app",
+                                "ref_table": "bbn_history_uids",
+                                "ref_column": "bbn_uid",
+                                "constraint": "y40wncx1",
+                                "update": "CASCADE",
+                                "delete": "CASCADE",
+                                "unique": 1
+                            },
+                            "file": {
+                                "columns": [
+                                    "file",
+                                    "variant"
+                                ],
+                                "ref_db": null,
+                                "ref_table": null,
+                                "ref_column": null,
+                                "constraint": null,
+                                "update": null,
+                                "delete": null,
+                                "unique": 1
+                            },
+                            "project": {
+                                "columns": [
+                                    "project"
+                                ],
+                                "ref_db": "apst_app",
+                                "ref_table": "bbn_projects",
+                                "ref_column": "id",
+                                "constraint": "y40wncx2",
+                                "update": "CASCADE",
+                                "delete": "CASCADE",
+                                "unique": 0
+                            }
+                        },
+                        "cols": {
+                            "id": [
+                                "PRIMARY"
+                            ],
+                            "file": [
+                                "file"
+                            ],
+                            "variant": [
+                                "file"
+                            ],
+                            "project": [
+                                "project"
+                            ]
+                        },
+                        "fields": {
+                            "id": {
+                                "position": 1,
+                                "type": "binary",
+                                "null": 0,
+                                "key": "PRI",
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "maxlength": 16
+                            },
+                            "project": {
+                                "position": 2,
+                                "type": "binary",
+                                "null": 1,
+                                "key": "MUL",
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL",
+                                "maxlength": 16
+                            },
+                            "priority": {
+                                "position": 3,
+                                "type": "tinyint",
+                                "null": 0,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": 5,
+                                "maxlength": 1
+                            },
+                            "file": {
+                                "position": 4,
+                                "type": "varchar",
+                                "null": 0,
+                                "key": "MUL",
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "maxlength": 100
+                            },
+                            "variant": {
+                                "position": 5,
+                                "type": "varchar",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "",
+                                "maxlength": 255
+                            },
+                            "prev": {
+                                "position": 6,
+                                "type": "datetime",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL"
+                            },
+                            "next": {
+                                "position": 7,
+                                "type": "datetime",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL"
+                            },
+                            "description": {
+                                "position": 8,
+                                "type": "text",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL"
+                            },
+                            "pid": {
+                                "position": 9,
+                                "type": "int",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL",
+                                "maxlength": 6
+                            },
+                            "notification": {
+                                "position": 10,
+                                "type": "decimal",
+                                "null": 1,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": "NULL",
+                                "maxlength": 14,
+                                "decimals": 4
+                            },
+                            "cfg": {
+                                "position": 11,
+                                "type": "json",
+                                "null": 0,
+                                "key": null,
+                                "extra": "",
+                                "signed": true,
+                                "virtual": false,
+                                "generation": ""
+                            },
+                            "active": {
+                                "position": 12,
+                                "type": "tinyint",
+                                "null": 0,
+                                "key": null,
+                                "extra": "",
+                                "signed": false,
+                                "virtual": false,
+                                "generation": "",
+                                "default": 0,
+                                "maxlength": 1
+                            }
+                        }
+                    },
+                    "mysql\/bbn@mysql.lan\/apst_app\/test": {
                         "keys": [],
                         "cols": [],
                         "fields": {
