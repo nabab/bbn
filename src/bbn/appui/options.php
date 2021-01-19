@@ -3368,17 +3368,13 @@ class options extends bbn\models\cls\db
       $root_id = false;
       foreach ($options as $i => $o) {
         if (!$i) {
+          $ids[$o['id_parent']] = $id_parent ?: $this->default;
           $o['id_parent'] = $id_parent ?: $this->default;
           if ($o['id_alias']) {
             $o['id_alias'] = is_array($o['id_alias']) ? $this->from_code(...$o['id_alias']) : null;
           }
         }
-        elseif ($root_id) {
-          if (!isset($ids[$o['id_parent']])) {
-            $this->remove_full($root_id);
-            throw new \Exception(_("Error while importing: no parent"));
-          }
-
+        elseif (isset($ids[$o['id_parent']])) {
           $o['id_parent'] = $ids[$o['id_parent']];
           if (!empty($o['id_alias'])) {
             if (is_array($o['id_alias'])) {
@@ -3392,11 +3388,11 @@ class options extends bbn\models\cls\db
             }
           }
         }
+        else {
+          throw new \Exception(_("Error while importing: no parent"));
+        }
 
         if ($id = $this->add($o, true)) {
-          if (!$i) {
-            $root_id = $id;
-          }
 
           $ids[$o['id']] = $id;
           $num++;
