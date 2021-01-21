@@ -19,7 +19,7 @@ class ide
   const BBN_APPUI       = 'appui';
   const BBN_PERMISSIONS = 'permissions';
   const BBN_PAGE        = 'page';
-  const IDE_PROJECTS    = 'projects';
+  const IDE_PROJECTS    = 'project';
   const IDE_PATH        = 'ide';
   const DEV_PATH        = 'PATHS';
   const PATH_TYPE       = 'PTYPES';
@@ -63,7 +63,7 @@ class ide
   /** @var bbn\db $db */
   protected $db;
 
-  /** @var \bbn\appui\options $options */
+  /** @var \bbn\appui\option $options */
   protected $options;
 
   /** @var null|string The last error recorded by the class */
@@ -98,11 +98,11 @@ class ide
   /**
    * ide constructor.
    *
-   * @param \bbn\appui\options    $options
+   * @param \bbn\appui\option    $options
    * @param $routes
    * @param \bbn\user\preferences $pref
    */
-  public function __construct(\bbn\db $db,  \bbn\appui\options $options, $routes, \bbn\user\preferences $pref, string $project = '', string $plugin = 'appui-ide')
+  public function __construct(\bbn\db $db,  \bbn\appui\option $options, $routes, \bbn\user\preferences $pref, string $project = '', string $plugin = 'appui-ide')
   {
     $this->db      = $db;
     $this->options = $options;
@@ -148,12 +148,12 @@ class ide
       $project_name   = $rep['name'];
     }
     //case project is name
-    elseif((strlen($project) > 0) && !empty($opt = $this->options->from_code($project, self::IDE_PROJECTS, self::BBN_APPUI))) {
+    elseif((strlen($project) > 0) && !empty($opt = $this->options->from_code($project, 'list', self::IDE_PROJECTS, self::BBN_APPUI))) {
       $this->projects = new \bbn\appui\project($this->db, $opt);
       $project_name   = $project;
     }
     // case project is not defined get default
-    elseif (defined('BBN_APP_NAME') && !empty($opt = $this->options->from_code(constant('BBN_APP_NAME'), self::IDE_PROJECTS, self::BBN_APPUI))) {
+    elseif (defined('BBN_APP_NAME') && !empty($opt = $this->options->from_code(constant('BBN_APP_NAME'), 'list', self::IDE_PROJECTS, self::BBN_APPUI))) {
       $this->projects = new \bbn\appui\project($this->db, $opt);
       $project_name   = constant('BBN_APP_NAME');
     }
@@ -2092,7 +2092,6 @@ class ide
    */
   public function get_types()
   {
-    //$this->options->option($this->options->from_code(self::PATH_TYPE, 'ide', 'projects', 'appui'));
     return self::get_appui_option(self::PATH_TYPE);
   }
 

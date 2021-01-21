@@ -77,7 +77,7 @@ class emails extends bbn\models\cls\basic
   /** @var preferences The preferences object */
   protected $pref;
 
-  /** @var bbn\appui\options The options object */
+  /** @var bbn\appui\option The options object */
   protected $opt;
 
   /** @var bbn\appui\passwords The passwords object */

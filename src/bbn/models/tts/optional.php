@@ -40,7 +40,7 @@ trait optional
   protected static function optional_init(array $path = null)
   {
     if (!self::$optional_is_init) {
-      $opt = bbn\appui\options::get_instance();
+      $opt = bbn\appui\option::get_instance();
       if (!$opt) {
         throw new \Exception(_("There is no options object as needed by").' '.__CLASS__);
       }
@@ -71,8 +71,7 @@ trait optional
       self::$option_root_id = $opt->from_code(...$path);
       //if ( !self::$option_appui_id || !self::$option_root_id ){
       if (!self::$option_root_id) {
-        \bbn\x::log("Impossible to find the option $cls for ".__CLASS__, 'errors');
-        return;
+        throw new \Exception("Impossible to find the option $cls for ".__CLASS__);
       }
 
       self::$optional_is_init = true;
@@ -83,11 +82,11 @@ trait optional
   /**
    * Sets only once all the constants used by the class.
    *
-   * @param bbn\appui\options $opt
+   * @param bbn\appui\option $opt
    * @param array             $path
    * @return void
    */
-  protected static function init_optional_global(bbn\appui\options $opt, array $path = null)
+  protected static function init_optional_global(bbn\appui\option $opt, array $path = null)
   {
     if (!self::$optional_is_init) {
       if (!\defined("BBN_APPUI")) {
@@ -133,7 +132,7 @@ trait optional
    */
   protected function init_optional(array $path = null)
   {
-    $this->options = bbn\appui\options::get_instance();
+    $this->options = bbn\appui\option::get_instance();
     if (!$this->options) {
       throw new \Exception(_("There is no options object as needed by").' '.__CLASS__);
     }
@@ -156,9 +155,9 @@ trait optional
   }
 
 
-  public static function get_options_object(): bbn\appui\options
+  public static function get_options_object(): bbn\appui\option
   {
-    $o = bbn\appui\options::get_instance();
+    $o = bbn\appui\option::get_instance();
     if (!$o) {
       throw new \Exception(_("Impossible to get the options object from class").' '.__CLASS__);
     }

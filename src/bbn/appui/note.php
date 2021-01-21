@@ -14,7 +14,7 @@ if (!\defined('BBN_DATA_PATH')) {
   die("The constant BBN_DATA_PATH must be defined in order to use note");
 }
 
-class notes extends bbn\models\cls\db
+class note extends bbn\models\cls\db
 {
 
   use

@@ -26,7 +26,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db, $code = NULL)\n  {\n    parent::__construct($db);\n    $this->parser = new \\Gettext\\Translations();\n    $this->user = \\bbn\\user::get_instance();\n    $this->options = new \\bbn\\appui\\options($db);\n    if (empty($code)) {\n      $code = 'apst-app';\n    }  \n    $this->id_project = \\bbn\\str::is_uid($code) ? $code : $this->options->from_code($code, 'projects', 'appui');\n  }",
+            "code": "function(bbn\\db $db, $code = NULL)\n  {\n    parent::__construct($db);\n    $this->parser = new \\Gettext\\Translations();\n    $this->user = \\bbn\\user::get_instance();\n    $this->options = new \\bbn\\appui\\options($db);\n    if (empty($code)) {\n      $code = 'apst-app';\n    }  \n    $this->id_project = \\bbn\\str::is_uid($code) ? $code : $this->options->from_code($code, 'project', 'appui');\n  }",
             "startLine": 35,
             "endLine": 45,
             "isDeprecated": false,

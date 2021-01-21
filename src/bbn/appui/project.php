@@ -46,16 +46,16 @@ class project extends bbn\models\cls\db
   public function __construct(bbn\db $db, string $id = null)
   {
     parent::__construct($db);
-    $this->options = bbn\appui\options::get_instance();
+    $this->options = bbn\appui\option::get_instance();
     $this->fs      = new \bbn\file\system();
     if (\bbn\str::is_uid($id)) {
       $this->id = $id;
     }
     elseif (\is_string($id)) {
-      $this->id = $this->options->from_code($id, 'projects', 'appui');
+      $this->id = $this->options->from_code($id, 'list', 'project', 'appui');
     }
     elseif (defined('BBN_APP_NAME')) {
-      $this->id = $this->options->from_code(BBN_APP_NAME, 'projects', 'appui');
+      $this->id = $this->options->from_code(BBN_APP_NAME, 'list', 'project', 'appui');
     }
 
     if (!empty($this->id)) {
@@ -395,7 +395,7 @@ class project extends bbn\models\cls\db
       $project_name = $this->name;
     }
 
-    $projects = $this->options->full_tree($this->options->from_code('path',$project_name, 'projects', 'appui'));
+    $projects = $this->options->full_tree($this->options->from_code('path', $project_name, 'list', 'project', 'appui'));
     if (!empty($projects) && !empty($projects['items'])) {
       $projects = $projects['items'];
       foreach ($projects as $i => $project){
@@ -570,12 +570,12 @@ class project extends bbn\models\cls\db
       $this->option       = $o;
       $this->repositories = $this->get_repositories($o['text']);
       //the id of the child option 'lang' (children of this option are all languages for which the project is configured)
-      if (!$this->id_langs = $this->options->from_code('lang', $o['code'], 'projects', 'appui')) {
+      if (!$this->id_langs = $this->options->from_code('lang', $o['code'], 'project', 'appui')) {
         $this->set_id_langs();
       }
 
       //the id of the child option 'path'
-      $this->id_path = $this->options->from_code('path', $o['code'], 'projects', 'appui') ?: null;
+      $this->id_path = $this->options->from_code('path', $o['code'], 'project', 'appui') ?: null;
       return true;
     }
 

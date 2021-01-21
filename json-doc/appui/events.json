@@ -26,7 +26,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db)\n  {\n    $this->_init_class_cfg();\n    $this->opt = bbn\\appui\\options::get_instance();\n    $this->usr = bbn\\user::get_instance();\n    \/\/$this->opt_id = $this->opt->from_root_code('events', 'appui');\n  }",
+            "code": "function(bbn\\db $db)\n  {\n    $this->_init_class_cfg();\n    $this->opt = bbn\\appui\\options::get_instance();\n    $this->usr = bbn\\user::get_instance();\n    \/\/$this->opt_id = $this->opt->from_root_code('event', 'appui');\n  }",
             "startLine": 138,
             "endLine": 144,
             "isDeprecated": false,

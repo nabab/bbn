@@ -704,13 +704,13 @@ class system extends bbn\models\cls\basic
    * @param string  $filter
    * @return array|null
    */
-  public function search($search, $path, $deep = false, $hidden = false, $filter = 'both'): ?array
+  public function search_contents($search, $path, $deep = false, $hidden = false, $filter = 'file'): ?array
   {
+    $res = [];
     if ($this->is_dir($path)) {
       $files = $deep ? $this->scan($path, $filter) : $this->get_files($path, false, $hidden, $filter);
-      $res   = [];
       foreach ($files as $f) {
-        $r = $this->search($search, $f);
+        $r = $this->search_contents($search, $f);
         if (count($r)) {
           if (is_array($search)) {
             foreach ($r as $s => $found) {
@@ -733,7 +733,6 @@ class system extends bbn\models\cls\basic
     }
     elseif ($this->is_file($path)) {
       $content = $this->get_contents($path);
-      $res     = [];
       if (is_array($search)) {
         foreach ($search as $s) {
           $idx     = 0;
@@ -756,6 +755,66 @@ class system extends bbn\models\cls\basic
     }
 
     return null;
+
+  }
+
+
+  /**
+   * Replaces search with replace in the given content.
+   * @todo nextcloud
+   *
+   * @param string|array $search
+   * @param string|array $replace
+   * @param string|array $path
+   * @param boolean      $deep
+   * @param boolean      $hidden
+   * @param string       $filter
+   * @return array|null
+   */
+  public function replace_contents($search, $replace, $path, $deep = false, $hidden = false, $filter = 'file'): int
+  {
+    if (\is_array($replace)) {
+      if (!\is_array($search) || (count($replace) === count($search))) {
+        throw new \Exception(_("If replace is an array, search must be an array of equal length"));
+      }
+
+      $replace_array = true;
+    }
+    $res = 0;
+    if ($this->is_dir($path)) {
+      $files = $deep ? $this->scan($path, $filter) : $this->get_files($path, false, $hidden, $filter);
+      foreach ($files as $f) {
+        $res += $this->replace_contents($search, $replace, $f);
+      }
+
+      return $res;
+    }
+    elseif ($this->is_file($path)) {
+      $content = $this->get_contents($path);
+      $changed = false;
+      if (is_array($search)) {
+        foreach ($search as $idx => $s) {
+          if (\bbn\x::indexOf($content, $s) === -1) {
+            continue;
+          }
+
+          $changed = true;
+          $content = str_replace($s, $replace_array ? $replace[$idx] : $replace, $content);
+        }
+      }
+      elseif (\bbn\x::indexOf($content, $search) > -1) {
+        $changed = true;
+        $content = str_replace($search, $replace, $content);
+      }
+      if ($changed) {
+        $this->put_contents($path, $content);
+        return 1;
+      }
+
+      return $res;
+    }
+
+    return 0;
 
   }
 

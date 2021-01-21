@@ -40,9 +40,9 @@ class medias extends bbn\models\cls\db
   public function __construct(bbn\db $db){
     parent::__construct($db);
     $this->_init_class_cfg();
-    $this->opt = bbn\appui\options::get_instance();
+    $this->opt = bbn\appui\option::get_instance();
     $this->usr = bbn\user::get_instance();
-    $this->opt_id = $this->opt->from_root_code('media', 'notes', 'appui');
+    $this->opt_id = $this->opt->from_root_code('media', 'note', 'appui');
   }
 
   /**
@@ -75,8 +75,8 @@ class medias extends bbn\models\cls\db
           $fs = new bbn\file\system();
           if ( $fs->is_file($name) ){
             $root = $fs->create_path($private && $this->usr->check() ? 
-              bbn\mvc::get_user_data_path($this->usr->get_id(), 'appui-notes').'media/' : 
-              bbn\mvc::get_data_path('appui-notes').'media/');
+              bbn\mvc::get_user_data_path($this->usr->get_id(), 'appui-note').'media/' : 
+              bbn\mvc::get_data_path('appui-note').'media/');
             if ( $root ){
               $path = bbn\x::make_storage_path($root, '', 0, $fs);
               $dpath = substr($path, strlen($root) + 1);
@@ -256,8 +256,8 @@ class medias extends bbn\models\cls\db
       }
       $media['file'] = (
         $media['private'] ?
-          bbn\mvc::get_user_data_path('appui-notes') :
-          bbn\mvc::get_data_path('appui-notes')
+          bbn\mvc::get_user_data_path('appui-note') :
+          bbn\mvc::get_data_path('appui-note')
       ).'media/'.($media['path'] ?? '').$id.'/'.$media[$cf['arch']['medias']['name']];
       if ($fs->is_file($media['file']) && $this->is_image($media['file']) ){
         $media['is_image'] = true;
@@ -308,7 +308,7 @@ class medias extends bbn\models\cls\db
     //the old media
     $fs = new bbn\file\system();
     $old = $this->get_media($id_media, true);
-    $root = bbn\mvc::get_data_path('appui-notes').'media/';
+    $root = bbn\mvc::get_data_path('appui-note').'media/';
     if ( $old && 
         (($old['name'] !== $name) || ($old['title'] !== $title)) 
        ){
@@ -390,7 +390,7 @@ class medias extends bbn\models\cls\db
     $new_media = [];
     if ( $fs->is_file($tmp_path) ){
       $file_content = file_get_contents($tmp_path);
-      $root = \bbn\mvc::get_data_path('appui-notes').'media/';
+      $root = \bbn\mvc::get_data_path('appui-note').'media/';
       
       if ( ($media = $this->get_media($id_media, true)) ){
         $old_path = $this->get_media_path($id_media, $oldName);
@@ -426,7 +426,7 @@ class medias extends bbn\models\cls\db
   public function get_media_path(string $id_media, string $name = null){
     if ( $media = $this->get_media($id_media, true) ){
       $content = json_decode($media['content'], true);
-      $path = bbn\mvc::get_data_path('appui-notes').'media/'.$content['path'].$id_media.'/'.($name ? $name : $media['name']);
+      $path = bbn\mvc::get_data_path('appui-note').'media/'.$content['path'].$id_media.'/'.($name ? $name : $media['name']);
       return $path;
     }
     return null;

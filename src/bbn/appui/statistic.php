@@ -31,7 +31,7 @@ class statistic extends bbn\models\cls\db
   /**
    * @var appui\database The DB object used to retrieve columns IDs
    */
-  protected bbn\appui\databases $dbo;
+  protected bbn\appui\database $dbo;
 
   /**
    * @var array The whole request config for $db
@@ -130,7 +130,7 @@ class statistic extends bbn\models\cls\db
         }
 
         $this->code = $code;
-        $this->dbo  = new \bbn\appui\databases($this->db);
+        $this->dbo  = new \bbn\appui\database($this->db);
         if (isset($cfg['field'])) {
           if (!($this->_id_field = $this->dbo->column_id($cfg['field'], $cfg['table']))) {
             throw new \Error(_("The field parameter must be a known field of the table"));

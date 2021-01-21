@@ -4,7 +4,7 @@ namespace bbn\appui;
 
 use bbn;
 
-class notifications extends bbn\models\cls\db
+class notification extends bbn\models\cls\db
 {
   use
     bbn\models\tts\optional,

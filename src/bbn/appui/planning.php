@@ -53,7 +53,7 @@ class planning {
     $this->_init_class_cfg();
     $this->events = new \bbn\appui\events($this->db);
     $this->ecfg = $this->events->get_class_cfg();
-    $this->options = new \bbn\appui\options($this->db);
+    $this->options = new \bbn\appui\option($this->db);
     $this->ocfg = $this->options->get_class_cfg();
   }
 

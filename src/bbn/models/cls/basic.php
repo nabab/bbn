@@ -3,7 +3,10 @@
  * @package bbn
  */
 namespace bbn\models\cls;
+
+
 use bbn;
+
 /**
  * Basic object Class
  *
@@ -20,7 +23,8 @@ use bbn;
  */
 abstract class basic
 {
-	protected
+
+  protected
     /**
      * @var array
      */
@@ -29,39 +33,47 @@ abstract class basic
      * @var false|string
      */
     $error = false,
-		/**
-		 * @var boolean
-		 */
-		$debug = false,
-		/**
-		 * @var array
-		 */
-		$log = [];
+        /**
+         * @var boolean
+         */
+        $debug = false,
+        /**
+         * @var array
+         */
+        $log = [];
+
 
   /**
    * Checks whether the error property has been set (so an error happened).
    * @return bool
    */
-  public function test(){
-    if ( $this->error ){
+  public function test()
+  {
+    if ($this->error) {
       return false;
     }
+
     return true;
   }
+
 
   /**
    * Checks whether the error property has been set (so an error happened).
    * @return bool
    */
-  public function check(){
-    if ( $this->error ){
+  public function check()
+  {
+    if ($this->error) {
       return false;
     }
+
     return true;
   }
 
-  protected function set_error($err){
-    $this->error = $err;
+
+  protected function set_error($err)
+  {
+    $this->error    = $err;
     $this->errors[] = [
       'time' => time(),
       'msg' => $err
@@ -69,85 +81,104 @@ abstract class basic
     return $this;
   }
 
-  public function get_error(){
+
+  public function get_error()
+  {
     return $this->error;
   }
 
-  public function get_errors(){
+
+  public function get_errors()
+  {
 
   }
 
-  public function log(){
-		if ( $this->is_debug() ){
-			$ar = \func_get_args();
-			$cn = bbn\str::encode_filename(str_replace('\\', '_', \get_class($this)));
-			foreach ( $ar as $a ){
-				bbn\x::log($a, $cn);
-			}
-		}
+
+  public function log()
+  {
+    if ($this->is_debug()) {
+        $ar = \func_get_args();
+        $cn = bbn\str::encode_filename(str_replace('\\', '_', \get_class($this)));
+      foreach ($ar as $a){
+            bbn\x::log($a, $cn);
+      }
+    }
   }
-  
+
+
   /**
-	 * @param string $name
-	 * @param array $arguments
-	 * @return void 
-	 */
-	public function __call($name, $arguments){
-	  $class = \get_class($this);
-    $this->log(["Wrong method used for the class $class: $name with the following arguments:", $arguments]);
-    die(var_dump(["Wrong method used for the class $class: $name with the following arguments:", $arguments]));
-	}
+   * @param string $name
+   * @param array  $arguments
+   * @return void
+   */
+  public function __call($name, $arguments)
+  {
+    $class = \get_class($this);
+    throw new \Exception(
+      sprintf(
+        _("Wrong method used for the class %s: %s with the following arguments:"),
+        $class,
+        $name,
+        implode(', ', $arguments)
+      )
+    );
+  }
+
 
   /**
    * @return boolean
    */
-  public function is_debug(){
+  public function is_debug()
+  {
     return $this->debug || (defined("BBN_IS_DEV") && BBN_IS_DEV);
   }
+
 
   /**
    * @param boolean $debug
    * @return self
    */
-  public function set_debug(bool $debug){
+  public function set_debug(bool $debug)
+  {
     $this->debug = $debug;
   }
 
+
   /**
-	 * @param string $name
-	 * @param array $arguments
-	 * @return void 
-	public static function __callStatic($name, $arguments)
-	{
+   * @param string $name
+   * @param array $arguments
+   * @return void
+  public static function __callStatic($name, $arguments)
+  {
     $this->log(["Wrong static method used: $name with arguments:", $arguments]);
-		return false;
-	}
-	 */
-
-	/**
-	 * get property from delegate link.
-	 *
-	 * @param string $name
-	 * @return void 
-	public function __get($name)
-	{
-		return ($name === 'error') && isset($this->error) ? $this->error : false;
-	}
-
-	/**
-	 * set property from delegate link.
-	 *
-	 * @param string $name
-	 * @param mixed $value
-	 * @return void 
-	public function __set($name, $value)
-	{
-		if ( $name === 'error' ){
-			$this->error = $value;
+      return false;
     }
-		/*
+   */
+
+    /**
+     * get property from delegate link.
+     *
+     * @param string $name
+     * @return void
+    public function __get($name)
+    {
+        return ($name === 'error') && isset($this->error) ? $this->error : false;
+    }
+
+    /**
+     * set property from delegate link.
+     *
+     * @param string $name
+     * @param mixed $value
+     * @return void
+    public function __set($name, $value)
+    {
+        if ( $name === 'error' ){
+            $this->error = $value;
+    }
+        /*
      * else if ( $name === 'log' )
-			array_push(bbn\x::log, $value);
-	}
-	 */
+            array_push(bbn\x::log, $value);
+    }
+     */
 }

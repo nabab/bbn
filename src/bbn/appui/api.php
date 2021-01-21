@@ -129,8 +129,8 @@ class api extends bbn\models\cls\basic
     }
 
     if (empty(self::$_rsa_in)) {
-      $opt = bbn\appui\options::get_instance();
-      $id_envs = $opt->from_code('env', BBN_APP_NAME, 'projects', 'appui');
+      $opt = bbn\appui\option::get_instance();
+      $id_envs = $opt->from_code('env', BBN_APP_NAME, 'project', 'appui');
       $id_app = $this->db->select_one(
         'bbn_options',
         'id',

@@ -9,7 +9,8 @@
 namespace bbn\appui;
 use bbn;
 
-class tasks extends bbn\models\cls\db{
+class task extends bbn\models\cls\db
+{
 
   use bbn\models\tts\references,
       bbn\models\tts\optional;

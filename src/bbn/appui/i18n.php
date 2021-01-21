@@ -37,11 +37,11 @@ class i18n extends bbn\models\cls\cache
     parent::__construct($db);
     $this->parser = new \Gettext\Translations();
     $this->user = \bbn\user::get_instance();
-    $this->options = new \bbn\appui\options($db);
+    $this->options = new \bbn\appui\option($db);
     if (empty($code)) {
       $code = 'apst-app';
     }  
-    $this->id_project = \bbn\str::is_uid($code) ? $code : $this->options->from_code($code, 'projects', 'appui');
+    $this->id_project = \bbn\str::is_uid($code) ? $code : $this->options->from_code($code, 'project', 'appui');
   }
   /**
    * Returns the strings contained in the given php file

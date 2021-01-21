@@ -11,7 +11,7 @@ namespace bbn\appui;
 use bbn;
 use Error;
 
-class mailings extends bbn\models\cls\db
+class mailing extends bbn\models\cls\db
 {
   use bbn\models\tts\optional;
 

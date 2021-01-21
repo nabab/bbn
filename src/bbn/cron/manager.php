@@ -427,7 +427,7 @@ class manager extends bbn\models\cls\basic
 
   public function notify_failed()
   {
-    $notifications = new \bbn\appui\notifications($this->db);
+    $notifications = new \bbn\appui\notification($this->db);
     foreach ($this->get_failed() as $f) {
       $content = _('The task') . ' ' . $f['file'] . ' ' . _('failed.');
       if (empty($f['notification'])

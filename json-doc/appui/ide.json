@@ -1908,7 +1908,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    \/\/$this->options->option($this->options->from_code(self::PATH_TYPE, 'ide', 'projects', 'appui'));\n    return self::get_appui_option(self::PATH_TYPE);\n  }",
+            "code": "function()\n  {\n    \/\/$this->options->option($this->options->from_code(self::PATH_TYPE, 'ide', 'project', 'appui'));\n    return self::get_appui_option(self::PATH_TYPE);\n  }",
             "startLine": 2093,
             "endLine": 2097,
             "isDeprecated": false,

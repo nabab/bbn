@@ -48,9 +48,9 @@ class pages extends bbn\models\cls\db
   public function __construct(bbn\db $db){
     parent::__construct($db);
     self::_init_class_cfg(self::$default_class_cfg);
-    $this->opt = bbn\appui\options::get_instance();
-    $this->opt_id = $this->opt->from_root_code('pages', 'types', 'notes', 'appui');
-    $this->notes = new bbn\appui\notes($this->db);
+    $this->opt = bbn\appui\option::get_instance();
+    $this->opt_id = $this->opt->from_root_code('pages', 'types', 'note', 'appui');
+    $this->notes = new bbn\appui\note($this->db);
   }
 
   public function insert($url, $content, $title = ''){

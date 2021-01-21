@@ -32,7 +32,7 @@ use PhpOffice\PhpWord\Element\PageBreakTest;
  */
 
 
-class options extends bbn\models\cls\db
+class option extends bbn\models\cls\db
 {
   use bbn\models\tts\retriever;
   use bbn\models\tts\cache;
@@ -337,7 +337,7 @@ class options extends bbn\models\cls\db
    *
    * ```php
    * $db = new bbn\db();
-   * $opt = new bbn\appui\option($db);
+   * $opt = new bbn\appui\options($db);
    * ```
    *
    * @param bbn\db $db  a database connection object

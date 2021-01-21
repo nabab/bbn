@@ -27,7 +27,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db)\n  {\n    self::_init_class_cfg(self::$default_class_cfg);\n    $this->opt = bbn\\appui\\options::get_instance();\n    $this->opt_id = $this->opt->from_root_code('pages', 'types', 'notes', 'appui');\n    $this->notes = new bbn\\appui\\notes($this->db);\n  }",
+            "code": "function(bbn\\db $db)\n  {\n    self::_init_class_cfg(self::$default_class_cfg);\n    $this->opt = bbn\\appui\\options::get_instance();\n    $this->opt_id = $this->opt->from_root_code('pages', 'types', 'note', 'appui');\n    $this->notes = new bbn\\appui\\notes($this->db);\n  }",
             "startLine": 48,
             "endLine": 54,
             "isDeprecated": false,

@@ -16,7 +16,7 @@ class imessages extends \bbn\models\cls\db
   use bbn\models\tts\dbconfig;
 
   const BBN_APPUI = 'appui';
-  const BBN_NOTES = 'notes';
+  const BBN_NOTES = 'note';
   const BBN_NOTES_TYPES = 'types';
   const BBN_IMESSAGES = 'imessages';
   const BBN_DEFAULT_PERM = 'dashboard/home';
@@ -114,8 +114,8 @@ class imessages extends \bbn\models\cls\db
   {
     parent::__construct($db);
     $this->_init_class_cfg($cfg);
-    $this->notes = new \bbn\appui\notes($this->db);
-    $this->options = \bbn\appui\options::get_instance();
+    $this->notes = new \bbn\appui\note($this->db);
+    $this->options = \bbn\appui\option::get_instance();
   }
 
   /**

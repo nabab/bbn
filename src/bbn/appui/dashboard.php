@@ -12,7 +12,7 @@ class dashboard
 
   use bbn\models\tts\optional;
 
-  /** @var \bbn\appui\options */
+  /** @var \bbn\appui\option */
   protected $opt;
 
   /** @var \bbn\user */
@@ -143,7 +143,7 @@ class dashboard
   public function __construct(string $id)
   {
     $oid = $id;
-    $this->opt = bbn\appui\options::get_instance();
+    $this->opt = bbn\appui\option::get_instance();
     $this->user = bbn\user::get_instance();
     $this->perm = bbn\user\permissions::get_instance();
     $this->pref = bbn\user\preferences::get_instance();

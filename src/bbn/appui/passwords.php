@@ -11,7 +11,7 @@ class passwords extends bbn\models\cls\db
 {
   use bbn\models\tts\dbconfig;
 
-  /** @var bbn\appui\options An options object */
+  /** @var bbn\appui\option An options object */
   private $_o;
 
   /** @var array Database architecture schema */
@@ -40,7 +40,7 @@ class passwords extends bbn\models\cls\db
   {
     parent::__construct($db);
     $this->_init_class_cfg();
-    $this->_o = options::get_instance();
+    $this->_o = option::get_instance();
   }
 
 

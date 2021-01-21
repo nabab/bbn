@@ -141,13 +141,13 @@ class cms extends bbn\models\cls\db
 		parent::__construct($db);
 		$this->_init_class_cfg();
 		$this->_events = new bbn\appui\events($this->db);
-		$this->_options = bbn\appui\options::get_instance();
+		$this->_options = bbn\appui\option::get_instance();
 		if (!self::$_id_event) {
-			$id = $this->_options->from_code('publication', 'events', 'appui');
+			$id = $this->_options->from_code('publication', 'event', 'appui');
 			self::_set_id_event($id);
 		}
 		if ( $notes === null ){
-			$this->_notes = new \bbn\appui\notes($this->db);
+			$this->_notes = new \bbn\appui\note($this->db);
 		} else {
 			$this->_notes = $notes;
 		}
@@ -190,7 +190,7 @@ class cms extends bbn\models\cls\db
 	 */
 	public function get_all(int $limit = 50, int $start = 0): array 
 	{
-		$pages = $this->_notes->get_by_type($this->_options->from_code('pages', 'types', 'notes', 'appui'), false,$limit, $start);
+		$pages = $this->_notes->get_by_type($this->_options->from_code('pages', 'types', 'note', 'appui'), false,$limit, $start);
 		$tmp = array_map(function($a){
 			$a['is_published'] = $this->is_published($a['id_note']);
 			$a['url'] = $this->has_url($a['id_note']) ? $this->get_url($a['id_note']) : '';

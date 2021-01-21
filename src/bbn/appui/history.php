@@ -13,8 +13,8 @@ class history
   private static $dbs = [];
   /** @var array A collection of DB connections  */
   private static $structures = [];
-  /** @var databases The databases class which collects the columns IDs */
-  private static $databases_obj;
+  /** @var database The database class which collects the columns IDs */
+  private static $database_obj;
   /** @var string Name of the database where the history table is */
   private static $admin_db = '';
   /** @var string User's ID  */
@@ -57,15 +57,15 @@ class history
   /**
    * Returns an instance of the appui\database class.
    *
-   * @return databases
+   * @return database
    */
-  private static function _get_databases(): ?databases
+  private static function _get_database(): ?database
   {
     if ( self::check() ){
-      if ( !self::$databases_obj && ($db = self::_get_db()) ){
-        self::$databases_obj = new databases($db);
+      if ( !self::$database_obj && ($db = self::_get_db()) ){
+        self::$database_obj = new database($db);
       }
-      return self::$databases_obj;
+      return self::$database_obj;
     }
     return null;
   }
@@ -132,8 +132,8 @@ class history
     if (
       bbn\str::check_name($table) &&
       ($db = self::_get_db()) &&
-      ($databases_obj = self::_get_databases()) &&
-      ($model = $databases_obj->modelize($table))
+      ($database_obj = self::_get_database()) &&
+      ($model = $database_obj->modelize($table))
     ){
       $col = $db->escape('col');
       $where_ar = [];
@@ -160,10 +160,10 @@ class history
     if (
       ($db = self::_get_db()) &&
       ($full_table = $db->tfn($table)) &&
-      ($databases_obj = self::_get_databases())
+      ($database_obj = self::_get_database())
     ){
       [$database, $table] = explode('.', $full_table);
-      return $databases_obj->column_id($column, $table, $database, self::$db->get_host());
+      return $database_obj->column_id($column, $table, $database, self::$db->get_host());
     }
     return false;
   }
@@ -390,7 +390,7 @@ class history
   {
     if (
       ($db = self::_get_db()) &&
-      ($dbc = self::_get_databases()) &&
+      ($dbc = self::_get_database()) &&
       ($id_table = $dbc->table_id($table, self::$db->get_current()))
     ){
       $tab = $db->escape(self::$table);
@@ -425,7 +425,7 @@ MYSQL;
     $r = [];
     if (
       ($db = self::_get_db()) &&
-      ($dbc = self::_get_databases()) &&
+      ($dbc = self::_get_database()) &&
       ($id_table = $dbc->table_id($table, self::$db->get_current()))
     ){
       $tab = $db->escape(self::$table);
@@ -464,7 +464,7 @@ MYSQL;
       bbn\str::check_name($table) &&
       ($date = self::valid_date($from_when)) &&
       ($db = self::_get_db()) &&
-      ($dbc = self::_get_databases()) &&
+      ($dbc = self::_get_database()) &&
       ($id_table = $dbc->table_id($table))
     ){
       self::disable();
@@ -529,7 +529,7 @@ MYSQL;
     if (
       bbn\str::check_name($table) &&
       ($date = self::valid_date($from_when)) &&
-      ($dbc = self::_get_databases()) &&
+      ($dbc = self::_get_database()) &&
       ($db = self::_get_db())
     ){
       $tab = $db->escape(self::$table);
@@ -602,7 +602,7 @@ MYSQL;
     }
     else if (
       ($db = self::_get_db()) &&
-      ($dbc = self::_get_databases()) &&
+      ($dbc = self::_get_database()) &&
       ($model = $dbc->modelize($table)) &&
       ($cfg = self::get_table_cfg($table))
     ){
@@ -766,7 +766,7 @@ MYSQL;
       if ( !empty($col) ){
         if ( !\bbn\str::is_uid($col) ){
           $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? 'ref' : 'val';
-          $col = self::$databases_obj->column_id($col, $table);
+          $col = self::$database_obj->column_id($col, $table);
         }
         else {
           $idx = \bbn\x::find($modelize['fields'], ['id_option' => strtolower($col)]);
@@ -892,7 +892,7 @@ MYSQL;
     // Check history is enabled and table's name correct
     if (
       ($db = self::_get_db()) &&
-      ($dbc = self::_get_databases()) &&
+      ($dbc = self::_get_database()) &&
       ($table = $db->tfn($table))
     ){
       if ( $force || !isset(self::$structures[$table]) ){

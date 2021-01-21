@@ -327,7 +327,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $id_type, $title, $content)\n  {\n    if (!bbn\\str::is_uid($id_type)) {\n      $id_type = self::get_option_id($id_type);\n    }\n    if ($this->o->exists($id_type) \n        && ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'notes', 'appui')))\n    ) {\n      $data = [\n        'id_note' => $id_note,\n        'id_type' => $id_type,\n        'name' => $name\n      ];\n      if (!$this->count($id_type)) {\n        $data['def'] = 1;\n      }\n      if ($this->db->insert('bbn_notes_masks', $data)) {\n        return $id_note;\n      }\n    }\n    return null;\n  }",
+            "code": "function($name, $id_type, $title, $content)\n  {\n    if (!bbn\\str::is_uid($id_type)) {\n      $id_type = self::get_option_id($id_type);\n    }\n    if ($this->o->exists($id_type) \n        && ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'note', 'appui')))\n    ) {\n      $data = [\n        'id_note' => $id_note,\n        'id_type' => $id_type,\n        'name' => $name\n      ];\n      if (!$this->count($id_type)) {\n        $data['def'] = 1;\n      }\n      if ($this->db->insert('bbn_notes_masks', $data)) {\n        return $id_note;\n      }\n    }\n    return null;\n  }",
             "startLine": 150,
             "endLine": 171,
             "isDeprecated": false,

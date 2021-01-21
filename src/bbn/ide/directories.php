@@ -24,7 +24,7 @@ class directories {
 
 
   protected
-    /** @var bbn\appui\options $options */
+    /** @var bbn\appui\option $options */
     $options,
     /** @var null|string The last error recorded by the class */
     $last_error,
@@ -201,9 +201,9 @@ class directories {
   /**
    * Constructor.
    *
-   * @param bbn\appui\options $options
+   * @param bbn\appui\option $options
    */
-  public function __construct(bbn\appui\options $options, $routes){
+  public function __construct(bbn\appui\option $options, $routes){
     $this->options = $options;
     $this->routes = $routes;
     $this->_ide_path();

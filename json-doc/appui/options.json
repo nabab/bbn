@@ -686,7 +686,7 @@
         "raw_option": {
             "name": "raw_option",
             "summary": "Returns an option's row as stored in its original form in the database, including cfg",
-            "description": "*\n```php\nbbn\\x::dump($opt->raw_option('databases', 'appui'));\n\/*\narray [\n  'id' => \"77cea323f0ce11e897fd525400007196\",\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'cfg' => null,\n  'id_alias' => null,\n  'value' => \"{\\\"num\\\":1}\"\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->raw_option('database', 'appui'));\n\/*\narray [\n  'id' => \"77cea323f0ce11e897fd525400007196\",\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'cfg' => null,\n  'id_alias' => null,\n  'value' => \"{\\\"num\\\":1}\"\n]\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -694,7 +694,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->raw_option('databases', 'appui'));\n\/*\narray [\n  'id' => \"77cea323f0ce11e897fd525400007196\",\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'cfg' => null,\n  'id_alias' => null,\n  'value' => \"{\\\"num\\\":1}\"\n]"
+                    "content": "bbn\\x::dump($opt->raw_option('database', 'appui'));\n\/*\narray [\n  'id' => \"77cea323f0ce11e897fd525400007196\",\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'cfg' => null,\n  'id_alias' => null,\n  'value' => \"{\\\"num\\\":1}\"\n]"
                 }
             ],
             "file": "bbn\\appui\\options",
@@ -732,7 +732,7 @@
         "raw_options": {
             "name": "raw_options",
             "summary": "Returns an option's items  as stored in its original form in the database, including cfg",
-            "description": "*\n```php\nbbn\\x::dump($opt->raw_options('databases', 'appui'));\n\/*\n[\n  [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ], [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ]\n]\n```",
+            "description": "*\n```php\nbbn\\x::dump($opt->raw_options('database', 'appui'));\n\/*\n[\n  [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ], [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ]\n]\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -740,7 +740,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "bbn\\x::dump($opt->raw_options('databases', 'appui'));\n\/*\n[\n  [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ], [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ]\n]"
+                    "content": "bbn\\x::dump($opt->raw_options('database', 'appui'));\n\/*\n[\n  [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ], [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ]\n]"
                 }
             ],
             "file": "bbn\\appui\\options",

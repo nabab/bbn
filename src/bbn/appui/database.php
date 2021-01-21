@@ -12,7 +12,7 @@ use bbn;
 use bbn\str;
 use bbn\x;
 
-class databases extends bbn\models\cls\cache
+class database extends bbn\models\cls\cache
 {
   use bbn\models\tts\optional;
 
@@ -26,7 +26,7 @@ class databases extends bbn\models\cls\cache
 
 
   /**
-   * The options object.
+   * The passwords object.
    *
    * @var passwords
    */

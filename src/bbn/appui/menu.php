@@ -2,33 +2,612 @@
 namespace bbn\appui;
 
 use bbn;
+use bbn\x;
+use bbn\str;
 
-class menus extends bbn\models\cls\basic
+class menu extends bbn\models\cls\basic
 {
 
-  use
-    bbn\models\tts\cache,
-    bbn\models\tts\optional;
+  use bbn\models\tts\cache;
+  use bbn\models\tts\optional;
 
-  private static /** @var int The ID of the option's for the root path / */
-    $id_public_root;
+  /** @var int The ID of the option's for the root path / */
+  private static $id_public_root;
 
-  protected static /** @var string path where the permissions and real path are */
-    $public_root = 'permissions|page';
+  /** @var string path where the permissions and real path are */
+  protected static $public_root = 'permissions|access';
 
-  protected
-    /** @var bbn\appui\option The options object */
-    $options,
-    /** @var bbn\user\preferences The preferences object */
-    $pref;
+  /** @var bbn\appui\option The options object */
+  protected $options;
+
+  /** @var bbn\user\preferences The preferences object */
+  protected $pref;
+
+  /** @var bbn\user\permissions The permissions object */
+  protected $perm;
+    
 
 
   public function __construct()
   {
     $this->options = bbn\appui\option::get_instance();
     $this->pref    = bbn\user\preferences::get_instance();
+    $this->perm    = bbn\user\permissions::get_instance();
     $this->cache_init();
     self::optional_init();
+  }
+
+
+  /**
+   *
+   *
+   * @param string $path
+   * @return bool|false|int
+   */
+  public function from_path(string $path)
+  {
+    $id = null;
+    if (!str::is_uid($path)) {
+      //$path = $this->options->from_code($path, self::$option_root_id);
+      if (!($id = self::get_appui_option_id($path))) {
+        $id = $this->perm->from_path($path);
+      }
+    }
+
+    return str::is_uid($id) ? $id : null;
+  }
+
+
+  /**
+   * Returns the path corresponding to an ID
+   *
+   * @param string $id
+   * @return int|boolean
+   */
+  public function to_path(string $id)
+  {
+    $path = null;
+    if (str::is_uid($id)) {
+      if (!($path = $this->options->to_path($id, '', $this->_get_public_root()))) {
+        $path = $this->perm->to_path($id);
+      }
+
+    }
+
+    return \is_string($path) ? $path : null;
+  }
+
+
+  /**
+   *
+   *
+   * @param string $path
+   * @return bool|false|int
+   */
+  /*
+  public function from_path(string $path): ?string
+  {
+    if (!str::is_uid($path)) {
+      //$path = $this->options->from_code($path, self::$option_root_id);
+      $path = $this->perm->from_path($path);
+    }
+
+    return str::is_uid($path) ? $path : null;
+  }
+
+
+  /**
+   * Returns the path corresponding to an ID
+   *
+   * @param string $id
+   * @return int|boolean
+   */
+  /*
+  public function to_path(string $id)
+  {
+    if (str::is_uid($id)) {
+      return $this->perm->to_path($id);
+    }
+
+    return false;
+  }
+  */
+
+
+  public function tree($id, $prepath = false)
+  {
+    if (str::is_uid($id)) {
+      if ($this->cache_has($id, __FUNCTION__)) {
+        return $this->cache_get($id, __FUNCTION__);
+      }
+
+      $tree = $this->pref->get_tree($id);
+      $res  = $this->_arrange($tree, $prepath);
+      $this->cache_set($id, __FUNCTION__, $res['items'] ?? []);
+      return $res['items'] ?? [];
+    }
+  }
+
+
+  public function custom_tree($id, $prepath = false)
+  {
+    if ($tree = $this->tree($id, $prepath)) {
+      return $this->_adapt($tree, $this->pref, $prepath);
+    }
+  }
+
+
+  /**
+   * Adds an user'shortcut from a menu
+   *
+   * @param string $id The menu item's ID to link
+   * @return string|null
+   */
+  public function add_shortcut(string $id): ?string
+  {
+    if (($bit = $this->pref->get_bit($id, false))
+        && ($id_option = $this->from_path('shortcuts'))
+        && ($c = $this->pref->get_class_cfg())
+    ) {
+      if ($id_menu = $this->pref->get_by_option($id_option)) {
+        $id_menu = $id_menu[$c['arch']['user_options']['id']];
+      }
+      else {
+        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);
+      }
+
+      if (!empty($id_menu)
+          && ($arch = $c['arch']['user_options_bits'])
+      ) {
+        if (($bits = $this->pref->get_bits($id_menu, false, false))
+            && ( x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)
+        ) {
+          return null;
+        }
+
+        return $this->pref->add_bit(
+          $id_menu, [
+          $arch['id_option'] => $bit[$arch['id_option']],
+          $arch['text'] => $bit[$arch['text']],
+          $arch['cfg'] => $bit[$arch['cfg']],
+          $arch['num'] => $this->pref->next_bit_num($id_menu) ?: 1
+          ]
+        );
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Removes an user'shortcut
+   *
+   * @param string $id The shortcut's ID
+   * @return null|int
+   */
+  public function remove_shortcut($id): ?int
+  {
+    if (\str::is_uid($id)) {
+      return $this->pref->delete_bit($id);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Gets the user' shortcuts list
+   *
+   * @return null|array
+   */
+  public function shortcuts(): ?array
+  {
+    if (($id_option = $this->from_path('shortcuts'))
+        && ($menu = $this->pref->get_by_option($id_option))
+    ) {
+      $links = $this->pref->get_bits($menu['id']);
+      $res   = [];
+      foreach ($links as $link){
+        if (($url = $this->to_path($link['id_option']))) {
+          $res[] = [
+            'id' => $link['id'],
+            'id_option' => $link['id_option'],
+            'url' => $url,
+            'text' => $link['text'],
+            'icon' => $link['icon'],
+            'num' => $link['num']
+          ];
+        }
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the menu's ID form an its item
+   *
+   * @param string $id The ID of the menu's item
+   * @return null|string
+   */
+  public function get_id_menu(string $id): ?string
+  {
+    return $this->pref->get_id_by_bit($id);
+  }
+
+
+  /**
+   * Removes menu and deletes parent cache
+   * @param string $id
+   * @return int|boolean
+   */
+  public function remove(string $id)
+  {
+    if (\str::is_uid($id)) {
+      if ($id_menu = $this->get_id_menu($id)) {
+        if ($this->pref->delete_bit($id)) {
+          $this->delete_cache($id_menu);
+          return true;
+        }
+      }
+      elseif ($this->pref->delete($id)) {
+        $this->options->delete_cache($this->from_path('menu'));
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Add menu and delete the chache.
+   *
+   * @param string|array $id_menu
+   * @param array        $cfg
+   * @return null|string
+   * @internal param $id
+   */
+  public function add($id_menu, array $cfg = null): ?string
+  {
+    $id     = false;
+    $id_opt = $this->from_path('menu');
+    if (\is_array($id_menu)) {
+      $cfg = $id_menu;
+    }
+
+    if (\str::is_uid($id_menu)) {
+      $this->delete_cache($id_menu);
+    }
+    if (!empty($cfg)
+        && ($id = \str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg))
+    ) {
+
+      $this->options->delete_cache($id_opt);
+      return $id;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Updates a menu item and deletes the menu cache
+   *
+   * @param string $id
+   * @param array  $cfg
+   * @return bool
+   */
+  public function set(string $id, array $cfg): bool
+  {
+    if (\str::is_uid($id)
+        && ($id_menu = $this->get_id_menu($id))
+        && $this->pref->update_bit($id, $cfg)
+    ) {
+      $this->delete_cache($id_menu);
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Sets the menu's text and deletes its chache
+   *
+   * @param string $id   The menu's ID
+   * @param array  $text The new text tp set
+   * @return bool
+   */
+  public function set_text(string $id, string $text): bool
+  {
+    if (\str::is_uid($id) && $this->pref->set_text($id, $text)) {
+      $this->delete_cache($id);
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Clears the menu cache
+   */
+  public function delete_cache($id_menu)
+  {
+    $this->options->delete_cache($this->from_path('menu'), true);
+    return $this->cache_delete($id_menu);
+  }
+
+
+  /**
+   * Gets the user's default menu
+   *
+   * @return string
+   */
+  public function get_default(): ?string
+  {
+    if (($id_opt = $this->from_path('default'))
+        && ($all = $this->pref->get_all($id_opt))
+    ) {
+      $id = null;
+      if ($by_id_user = \array_filter(
+        $all, function ($a) {
+          return !empty($a['id_user']) && !empty($a['id_alias']);
+        }
+      )
+      ) {
+        $id = $by_id_user[0]['id_alias'];
+      }
+      elseif ($by_id_group = \array_filter(
+        $all, function ($a) {
+          return !empty($a['id_group']) && !empty($a['id_alias']);
+        }
+      )
+      ) {
+        $id = $by_id_group[0]['id_alias'];
+      }
+      elseif ($by_public = \array_filter(
+        $all, function ($a) {
+          return !empty($a['public']) && !empty($a['id_alias']);
+        }
+      )
+      ) {
+        $id = $by_public[0]['id_alias'];
+      }
+
+      return $id;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Gets the user's menus list (text-value form)
+   *
+   * @param string $k_text  The key used for the text. Default: 'text'
+   * @param string $k_value The key used for the value. Default 'value'
+   * @return array
+   */
+  public function get_menus($k_text = 'text', $k_value = 'value'): array
+  {
+    $c    = $this->pref->get_class_cfg();
+    $pref =& $this->pref;
+    if (!($id_menus = self::get_appui_option_id('menus'))) {
+      throw new \Exception("Impossible to find the option for menus");
+    }
+
+    if (!($menus = $this->pref->get_all($id_menus))) {
+      throw new \Exception("Impossible to get the  menus items");
+    }
+
+    return array_map(
+      function ($e) use ($c, $k_text, $k_value, $pref) {
+        return [
+          $k_text => $e[$c['arch']['user_options']['text']],
+          $k_value => $e[$c['arch']['user_options']['id']],
+          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],
+          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],
+          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],
+          'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))
+          ];
+      },
+      $menus
+    );
+  }
+
+
+  public function get(string $id_menu): ?array
+  {
+    $res = $this->pref->get_bits($id_menu);
+    if (\is_array($res) && !empty($res)) {
+      foreach ($res as $k => &$d) {
+        $d['numChildren'] = count($this->pref->get_bits($id_menu, $d['id']));
+        if (!is_null($d['id_option'])
+            && ($sequence = $this->opt->sequence($d['id_option'], $this->perm->get_option_id('access')))
+        ) {
+          $d['path'][] = $sequence;
+        }
+        else{
+          $d['path'] = [];
+        }
+
+        if (!empty($d['path'][0])) {
+          array_shift($d['path'][0]);
+        }
+  
+        if (!$d['numChildren']
+            && isset($d['id_option'])
+            && ($tmp = $this->perm->to_path($d['id_option']))
+        ) {
+          $d['link'] = $tmp;
+        }
+      }
+  
+      unset($d);
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Clones a menu
+   *
+   * @param string $id   The menu's ID to clone
+   * @param string $name The new menu's name
+   * @return null|string The new ID
+   */
+  public function clone(string $id, string $name): ?string
+  {
+    if (\str::is_uid($id) && ($id_menu = $this->add(['text' => $name]))) {
+      if (($bits = $this->pref->get_full_bits($id)) && !$this->_clone($id_menu, $bits)) {
+        return null;
+      }
+
+      return $id_menu;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Copies a menu into another one.
+   *
+   * @param string $id         The menu's ID to copy
+   * @param string $id_menu_to The target menu's ID
+   * @param array  $cfg
+   * @return null|string The new ID
+   */
+
+
+  public function copy(string $id_menu, string $id_menu_to, array $cfg): ?string
+  {
+    if (\str::is_uid($id_menu)
+        && \str::is_uid($id_menu_to)
+        && ($bits = $this->pref->get_full_bits($id_menu))
+        && ($id = $this->add($id_menu_to, $cfg))
+        && $this->_clone($id_menu_to, $bits, $id)
+    ) {
+      return $id;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Clones a section/link to an other menu.
+   *
+   * @param string $id_bit     The bit's ID to clone
+   * @param string $id_menu_to The menu's ID to clone
+   * @param string $cfgvaule   of bit
+   * @return null|string The new ID
+   */
+
+
+  public function copy_to(string $id_bit, string $id_menu_to, array $cfg): ?string
+  {
+    if (\str::is_uid($id_bit)
+        && \str::is_uid($id_menu_to)
+        && ($bit = $this->pref->get_bit($id_bit))
+        && ($id_menu = $this->get_id_menu($id_bit))
+    ) {
+      $bit  = array_merge(
+        $bit, $cfg, [
+        'id_parent' => null,
+        'num' => $this->pref->get_max_bit_num($id_menu_to, null, true)
+        ]
+      );
+      $bits = $this->pref->get_full_bits($id_menu, $id_bit, true);
+      if ($id = $this->add($id_menu_to, $bit)) {
+        if (!empty($bits) && !$this->_clone($id_menu_to, $bits, $id)) {
+          return null;
+        }
+
+        return $id;
+      }
+    }
+
+    return null;
+  }
+
+
+  public function fix_order(string $id, $id_parent = null, $deep = false): ?int
+  {
+    if (\str::is_uid($id)
+        && (empty($id_parent) || \str::is_uid($id_parent))
+    ) {
+      $fixed = $this->pref->fix_bits_order($id, $id_parent, $deep);
+      if ($fixed) {
+        $this->delete_cache($id);
+      }
+
+      return (int)$fixed;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Orders a section/link.
+   *
+   * @param string $id  The section/link's ID
+   * @param int    $pos The new position.
+   * @return bool
+   */
+  public function order(string $id, int $pos): bool
+  {
+    if (\str::is_uid($id)
+        && $this->pref->order_bit($id, $pos)
+    ) {
+      $this->delete_cache($this->get_id_menu($id));
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Moves a section/link inside to another one.
+   *
+   * @param string      $id        The section/link's ID.
+   * @param string|null $id_parent The parent's ID.
+   * @return bool
+   */
+  public function move(string $id, string $id_parent = null): bool
+  {
+    if ($this->pref->move_bit($id, $id_parent)) {
+      $this->delete_cache($this->get_id_menu($id));
+      return true;
+    }
+
+    return false;
+  }
+
+
+  public function get_options_menus()
+  {
+    //$items = $this->options->full_options('menus', self::$option_root_id);
+    $items = self::get_appui_option('menu');
+    $res   = [];
+    foreach ($items as $it){
+      $res[] = [
+        'text' => $it['text'],
+        'value' => $it['id']
+      ];
+    }
+
+    return $res;
   }
 
 
@@ -120,7 +699,7 @@ class menus extends bbn\models\cls\basic
         $opt                  = $this->options->option($menu['id_option']);
         $res['public']        = !empty($opt['public']) ? 1 : 0;
         $res['id_permission'] = $menu['id_option'];
-        $res['link']          = $this->options->to_path($menu['id_option'], '', $this->_get_public_root());
+        $res['link']          = $this->perm->to_path($menu['id_option']);
         if ($prepath && (strpos($res['link'], $prepath) === 0)) {
           $res['link'] = substr($res['link'], \strlen($prepath));
         }
@@ -150,7 +729,7 @@ class menus extends bbn\models\cls\basic
   private function _clone(string $id_menu, array $bits, string $id_parent = null)
   {
     $c = $this->pref->get_class_cfg();
-    if (\bbn\str::is_uid($id_menu)) {
+    if (\str::is_uid($id_menu)) {
       foreach ($bits as $bit){
         unset($bit[$c['arch']['user_options_bits']['id']]);
         $bit[$c['arch']['user_options_bits']['id_user_option']] = $id_menu;
@@ -166,499 +745,6 @@ class menus extends bbn\models\cls\basic
     }
 
     return false;
-  }
-
-
-  /**
-   *
-   *
-   * @param string $path
-   * @return bool|false|int
-   */
-  public function from_path(string $path)
-  {
-    if (!bbn\str::is_uid($path)) {
-      //$path = $this->options->from_code($path, self::$option_root_id);
-      $path = self::get_appui_option_id($path);
-    }
-
-    return bbn\str::is_uid($path) ? $path : false;
-  }
-
-
-  /**
-   * Returns the path corresponding to an ID
-   *
-   * @param string $id
-   * @return int|boolean
-   */
-  public function to_path(string $id)
-  {
-    if (bbn\str::is_uid($id)) {
-      return $this->options->to_path($id, '', $this->_get_public_root());
-    }
-
-    return false;
-  }
-
-
-  public function tree($id, $prepath = false)
-  {
-    if (\bbn\str::is_uid($id)) {
-      if ($this->cache_has($id, __FUNCTION__)) {
-        return $this->cache_get($id, __FUNCTION__);
-      }
-
-      $tree = $this->pref->get_tree($id);
-      $res  = $this->_arrange($tree, $prepath);
-      $this->cache_set($id, __FUNCTION__, $res['items'] ?? []);
-      return $res['items'] ?? [];
-    }
-  }
-
-
-  public function custom_tree($id, $prepath = false)
-  {
-    if ($tree = $this->tree($id, $prepath)) {
-      return $this->_adapt($tree, $this->pref, $prepath);
-    }
-  }
-
-
-  /**
-   * Adds an user'shortcut from a menu
-   *
-   * @param string $id The menu item's ID to link
-   * @return string|null
-   */
-  public function add_shortcut(string $id): ?string
-  {
-    if (($bit = $this->pref->get_bit($id, false))
-        && ($id_option = $this->from_path('shortcuts'))
-        && ($c = $this->pref->get_class_cfg())
-    ) {
-      if ($id_menu = $this->pref->get_by_option($id_option)) {
-        $id_menu = $id_menu[$c['arch']['user_options']['id']];
-      }
-      else {
-        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);
-      }
-
-      if (!empty($id_menu)
-          && ($arch = $c['arch']['user_options_bits'])
-      ) {
-        if (($bits = $this->pref->get_bits($id_menu, false, false))
-            && ( \bbn\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)
-        ) {
-          return null;
-        }
-
-        return $this->pref->add_bit(
-          $id_menu, [
-          $arch['id_option'] => $bit[$arch['id_option']],
-          $arch['text'] => $bit[$arch['text']],
-          $arch['cfg'] => $bit[$arch['cfg']],
-          $arch['num'] => $this->pref->next_bit_num($id_menu) ?: 1
-          ]
-        );
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Removes an user'shortcut
-   *
-   * @param string $id The shortcut's ID
-   * @return null|int
-   */
-  public function remove_shortcut($id): ?int
-  {
-    if (\bbn\str::is_uid($id)) {
-      return $this->pref->delete_bit($id);
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Gets the user' shortcuts list
-   *
-   * @return null|array
-   */
-  public function shortcuts(): ?array
-  {
-    if (($id_option = $this->from_path('shortcuts'))
-        && ($menu = $this->pref->get_by_option($id_option))
-    ) {
-      $links = $this->pref->get_bits($menu['id']);
-      $res   = [];
-      foreach ($links as $link){
-        if (($url = $this->to_path($link['id_option']))) {
-          $res[] = [
-            'id' => $link['id'],
-            'id_option' => $link['id_option'],
-            'url' => $url,
-            'text' => $link['text'],
-            'icon' => $link['icon'],
-            'num' => $link['num']
-          ];
-        }
-      }
-
-      return $res;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Returns the menu's ID form an its item
-   *
-   * @param string $id The ID of the menu's item
-   * @return null|string
-   */
-  public function get_id_menu(string $id): ?string
-  {
-    return $this->pref->get_id_by_bit($id);
-  }
-
-
-  /**
-   * Removes menu and deletes parent cache
-   * @param string $id
-   * @return int|boolean
-   */
-  public function remove(string $id)
-  {
-    if (\bbn\str::is_uid($id)) {
-      if ($id_menu = $this->get_id_menu($id)) {
-        if ($this->pref->delete_bit($id)) {
-          $this->delete_cache($id_menu);
-          return true;
-        }
-      }
-      elseif ($this->pref->delete($id)) {
-        $this->options->delete_cache($this->from_path('menus'));
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Add menu and delete the chache.
-   *
-   * @param string|array $id_menu
-   * @param array        $cfg
-   * @return null|string
-   * @internal param $id
-   */
-  public function add($id_menu, array $cfg = null): ?string
-  {
-    $id     = false;
-    $id_opt = $this->from_path('menus');
-    if (\is_array($id_menu)) {
-      $cfg = $id_menu;
-    }
-
-    if (\bbn\str::is_uid($id_menu)) {
-      $this->delete_cache($id_menu);
-    }
-    if (!empty($cfg)
-        && ($id = \bbn\str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg))
-    ) {
-
-      $this->options->delete_cache($id_opt);
-      return $id;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Updates a menu item and deletes the menu cache
-   *
-   * @param string $id
-   * @param array  $cfg
-   * @return bool
-   */
-  public function set(string $id, array $cfg): bool
-  {
-    if (\bbn\str::is_uid($id)
-        && ($id_menu = $this->get_id_menu($id))
-        && $this->pref->update_bit($id, $cfg)
-    ) {
-      $this->delete_cache($id_menu);
-      return true;
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Sets the menu's text and deletes its chache
-   *
-   * @param string $id   The menu's ID
-   * @param array  $text The new text tp set
-   * @return bool
-   */
-  public function set_text(string $id, string $text): bool
-  {
-    if (\bbn\str::is_uid($id) && $this->pref->set_text($id, $text)) {
-      $this->delete_cache($id);
-      return true;
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Clears the menu cache
-   */
-  public function delete_cache($id_menu)
-  {
-    $this->options->delete_cache($this->from_path('menus'), true);
-    return $this->cache_delete($id_menu);
-  }
-
-
-  /**
-   * Gets the user's default menu
-   *
-   * @return string
-   */
-  public function get_default(): ?string
-  {
-    if (($id_opt = $this->from_path('default'))
-        && ($all = $this->pref->get_all($id_opt))
-    ) {
-      $id = null;
-      if ($by_id_user = \array_filter(
-        $all, function ($a) {
-          return !empty($a['id_user']) && !empty($a['id_alias']);
-        }
-      )
-      ) {
-        $id = $by_id_user[0]['id_alias'];
-      }
-      elseif ($by_id_group = \array_filter(
-        $all, function ($a) {
-          return !empty($a['id_group']) && !empty($a['id_alias']);
-        }
-      )
-      ) {
-        $id = $by_id_group[0]['id_alias'];
-      }
-      elseif ($by_public = \array_filter(
-        $all, function ($a) {
-          return !empty($a['public']) && !empty($a['id_alias']);
-        }
-      )
-      ) {
-        $id = $by_public[0]['id_alias'];
-      }
-
-      return $id;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Gets the user's menus list (text-value form)
-   *
-   * @param string $k_text  The key used for the text. Default: 'text'
-   * @param string $k_value The key used for the value. Default 'value'
-   * @return array
-   */
-  public function get_menus($k_text = 'text', $k_value = 'value'): array
-  {
-    $c    = $this->pref->get_class_cfg();
-    $pref =& $this->pref;
-    return array_map(
-      function ($e) use ($c, $k_text, $k_value, $pref) {
-        return [
-          $k_text => $e[$c['arch']['user_options']['text']],
-          $k_value => $e[$c['arch']['user_options']['id']],
-          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],
-          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],
-          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],
-          'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))
-          ];
-      },
-      $this->pref->get_all(self::get_appui_option_id('menu'))
-    );
-  }
-
-
-  /**
-   * Clones a menu
-   *
-   * @param string $id   The menu's ID to clone
-   * @param string $name The new menu's name
-   * @return null|string The new ID
-   */
-  public function clone(string $id, string $name): ?string
-  {
-    if (\bbn\str::is_uid($id) && ($id_menu = $this->add(['text' => $name]))) {
-      if (($bits = $this->pref->get_full_bits($id)) && !$this->_clone($id_menu, $bits)) {
-        return null;
-      }
-
-      return $id_menu;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Copies a menu into another one.
-   *
-   * @param string $id         The menu's ID to copy
-   * @param string $id_menu_to The target menu's ID
-   * @param array  $cfg
-   * @return null|string The new ID
-   */
-
-
-  public function copy(string $id_menu, string $id_menu_to, array $cfg): ?string
-  {
-    if (\bbn\str::is_uid($id_menu)
-        && \bbn\str::is_uid($id_menu_to)
-        && ($bits = $this->pref->get_full_bits($id_menu))
-        && ($id = $this->add($id_menu_to, $cfg))
-        && $this->_clone($id_menu_to, $bits, $id)
-    ) {
-      return $id;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Clones a section/link to an other menu.
-   *
-   * @param string $id_bit     The bit's ID to clone
-   * @param string $id_menu_to The menu's ID to clone
-   * @param string $cfgvaule   of bit
-   * @return null|string The new ID
-   */
-
-
-  public function copy_to(string $id_bit, string $id_menu_to, array $cfg): ?string
-  {
-    if (\bbn\str::is_uid($id_bit)
-        && \bbn\str::is_uid($id_menu_to)
-        && ($bit = $this->pref->get_bit($id_bit))
-        && ($id_menu = $this->get_id_menu($id_bit))
-    ) {
-      $bit  = array_merge(
-        $bit, $cfg, [
-        'id_parent' => null,
-        'num' => $this->pref->get_max_bit_num($id_menu_to, null, true)
-        ]
-      );
-      $bits = $this->pref->get_full_bits($id_menu, $id_bit, true);
-      if ($id = $this->add($id_menu_to, $bit)) {
-        if (!empty($bits) && !$this->_clone($id_menu_to, $bits, $id)) {
-          return null;
-        }
-
-        return $id;
-      }
-    }
-
-    return null;
-  }
-
-
-  public function fix_order(string $id, $id_parent = null, $deep = false): ?int
-  {
-    if (\bbn\str::is_uid($id)
-        && (empty($id_parent) || \bbn\str::is_uid($id_parent))
-    ) {
-      $fixed = $this->pref->fix_bits_order($id, $id_parent, $deep);
-      if ($fixed) {
-        $this->delete_cache($id);
-      }
-
-      return (int)$fixed;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Orders a section/link.
-   *
-   * @param string $id  The section/link's ID
-   * @param int    $pos The new position.
-   * @return bool
-   */
-  public function order(string $id, int $pos): bool
-  {
-    if (\bbn\str::is_uid($id)
-        && $this->pref->order_bit($id, $pos)
-    ) {
-      $this->delete_cache($this->get_id_menu($id));
-      return true;
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Moves a section/link inside to another one.
-   *
-   * @param string      $id        The section/link's ID.
-   * @param string|null $id_parent The parent's ID.
-   * @return bool
-   */
-  public function move(string $id, string $id_parent = null): bool
-  {
-    if ($this->pref->move_bit($id, $id_parent)) {
-      $this->delete_cache($this->get_id_menu($id));
-      return true;
-    }
-
-    return false;
-  }
-
-
-  public function get_options_menus()
-  {
-    //$items = $this->options->full_options('menus', self::$option_root_id);
-    $items = self::get_appui_option('menu');
-    $res   = [];
-    foreach ($items as $it){
-      $res[] = [
-        'text' => $it['text'],
-        'value' => $it['id']
-      ];
-    }
-
-    return $res;
-  }
-
-
-  public function get($id, $prefix = '')
-  {
-    $id = $this->from_path($id);
   }
 
 

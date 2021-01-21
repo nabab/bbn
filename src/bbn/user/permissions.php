@@ -5,6 +5,8 @@
 namespace bbn\user;
 
 use bbn;
+use bbn\x;
+use bbn\str;
 
 /**
  * A permission system linked to options, user classes and preferences.
@@ -22,45 +24,32 @@ use bbn;
 
 class permissions extends bbn\models\cls\basic
 {
-  use bbn\models\tts\retriever,
-      bbn\models\tts\optional,
-      bbn\models\tts\current;
+  use bbn\models\tts\retriever;
+  use bbn\models\tts\optional;
+  use bbn\models\tts\current;
 
-  protected
-    $opt,
-    $pref,
-    $user,
-    $db;
+  /** @var bbn\appui\option */
+  protected $opt;
 
+  /** @var bbn\user\preferences */
+  protected $pref;
 
-  /**
-   * @param string|null $id_option
-   * @param string      $type
-   * @return null|string
-   */
-  private function _get_id_option(string $id_option = null, $type = 'page'): ?string
-  {
-    if ($id_option && !bbn\str::is_uid($id_option)) {
-      $id_option = $this->from_path($id_option, $type);
-    }
-    elseif (null === $id_option) {
-      $id_option = $this->get_current();
-    }
+  /** @var bbn\user */
+  protected $user;
 
-    if (bbn\str::is_uid($id_option)) {
-      return $id_option;
-    }
+  /** @var bbn\db */
+  protected $db;
 
-    return null;
-  }
+  /** @var array */
+  protected $plugins = [];
 
 
   /**
    * permissions constructor.
    */
-  public function __construct()
+  public function __construct(array $routes = null)
   {
-    if (!($this->opt = bbn\appui\options::get_instance())) {
+    if (!($this->opt = bbn\appui\option::get_instance())) {
       die('Impossible to construct permissions: you need to instantiate options before');
     }
 
@@ -68,13 +57,20 @@ class permissions extends bbn\models\cls\basic
       die('Impossible to construct permissions: you need to instantiate user before');
     }
 
-    if (!($this->pref = bbn\user\preferences::get_instance())) {
+    if (!($this->pref = preferences::get_instance())) {
       die('Impossible to construct permissions: you need to instantiate preferences before');
+    }
+
+    if ($routes) {
+      foreach ($routes as $url => $plugin) {
+        $plugin['url'] = $url;
+        $this->plugins[] = $plugin;
+      }
     }
 
     self::retriever_init($this);
     self::optional_init();
-    $this->db = \bbn\db::get_instance();
+    $this->db = bbn\db::get_instance();
   }
 
 
@@ -85,22 +81,45 @@ class permissions extends bbn\models\cls\basic
    * @param string $type
    * @return null|string
    */
-  public function from_path(string $path, $type = 'page'): ?string
+  public function from_path(string $path, $type = 'access'): ?string
   {
     $parent = null;
-    if ($root = $this->opt->from_code($type, self::$option_root_id)) {
-      $parts  = explode('/', $path);
-      $parent = $root;
-      foreach ($parts as $i => $p){
-        $is_not_last = $i < (\count($parts) - 1);
-        if (!empty($p)) {
-          $prev_parent = $parent;
-          // Adds a slash for each bit of the path except the last one
-          $parent = $this->opt->from_code($p.($is_not_last ? '/' : ''), $prev_parent);
-          // If not found looking for a subpermission
-          if (!$parent && $is_not_last) {
-            $parent = $this->opt->from_code($p, $prev_parent);
+    $root = false;
+    if (($type === 'access') && $this->plugins && !empty($path)) {
+      foreach ($this->plugins as $plugin) {
+        if (strpos($path, $plugin['url'].'/') === 0) {
+          if (strpos($plugin['name'], 'appui-') === 0) {
+            $root = $this->opt->from_code(
+              'access',
+              'permissions',
+              substr($plugin['name'], 6),
+              BBN_APPUI
+            );
+            $path = substr($path, strlen($plugin['url']));
           }
+        }
+      }
+    }
+
+    if (!$root) {
+      $root = $this->opt->from_code($type, self::$option_root_id);
+    }
+
+    if (!$root) {
+      throw new \Exception(_("Impossible to find the permission code"));
+    }
+
+    $parts  = explode('/', $path);
+    $parent = $root;
+    foreach ($parts as $i => $p){
+      $is_not_last = $i < (\count($parts) - 1);
+      if (!empty($p)) {
+        $prev_parent = $parent;
+        // Adds a slash for each bit of the path except the last one
+        $parent = $this->opt->from_code($p.($is_not_last ? '/' : ''), $prev_parent);
+        // If not found looking for a subpermission
+        if (!$parent && $is_not_last) {
+          $parent = $this->opt->from_code($p, $prev_parent);
         }
       }
     }
@@ -112,26 +131,39 @@ class permissions extends bbn\models\cls\basic
   public function to_path(string $id_option): ?string
   {
     $p = [];
-    while ($id_option && ($id_option !== self::$option_root_id)){
-      if (($code = $this->opt->code($id_option))) {
-        //\bbn\x::dump($code);
-        array_unshift($p, $code);
-        $id_option = $this->opt->get_id_parent($id_option);
-      }
-      else{
-        return null;
-      }
+    $bits = $this->opt->get_code_path($id_option);
+    if (empty($bits) || (count($bits) < 4)) {
+      return null;
     }
 
-    if (count($p) > 1) {
-      if ($p[0] === 'page') {
-        array_shift($p);
-      }
-      else{
-        //$p[0] = bbn\mvc::
+    $bits = array_reverse($bits);
+    if (array_shift($bits) !== 'appui') {
+      return null;
+    }
+
+    $root = array_shift($bits);
+    $ok = false;
+    $prefix = '';
+    // Main application
+    if ($root === 'permissions') {
+      if (array_shift($bits) !== 'access') {
+        throw new \Exception("The permission should be under access");
       }
 
-      return bbn\x::join($p, '');
+      $ok = true;
+    }
+    // Plugins
+    elseif ($plugin = x::get_row($this->plugins, ['name' => 'appui-'.$root])) {
+      if ((array_shift($bits) !== 'permissions') || (array_shift($bits) !== 'access')) {
+        throw new \Exception("The permission should be under permissions/access of the plugin");
+      }
+
+      $prefix = $plugin['url'].'/';
+      $ok = true;
+    }
+
+    if ($ok) {
+      return $prefix.x::join($bits, '');
     }
 
     return null;
@@ -139,13 +171,13 @@ class permissions extends bbn\models\cls\basic
 
 
   /**
-   * Returns the result of appui\options::options filtered with only the ones authorized to the current user.
+   * Returns the result of appui\option::options filtered with only the ones authorized to the current user.
    *
    * @param string|null $id_option
    * @param string      $type
    * @return array|null
    */
-  public function options(string $id_option = null, string $type = 'page'): ?array
+  public function options(string $id_option = null, string $type = 'access'): ?array
   {
     if (($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->options(\func_get_args()))
@@ -165,13 +197,13 @@ class permissions extends bbn\models\cls\basic
 
 
   /**
-   * Returns the result of appui\options::full_options filtered with only the ones authorized to the current user.
+   * Returns the result of appui\option::full_options filtered with only the ones authorized to the current user.
    *
    * @param string|null $id_option
    * @param string      $type
    * @return array|null
    */
-  public function full_options(string $id_option = null, string $type = 'page'): ?array
+  public function full_options(string $id_option = null, string $type = 'access'): ?array
   {
     if (($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->full_options(\func_get_args()))
@@ -200,7 +232,7 @@ class permissions extends bbn\models\cls\basic
    * @param string      $type
    * @return null|array
    */
-  public function get_all(string $id_option = null, string $type = 'page'): ?array
+  public function get_all(string $id_option = null, string $type = 'access'): ?array
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->options($id_option ?: $this->get_current());
@@ -217,7 +249,7 @@ class permissions extends bbn\models\cls\basic
    * @param string      $type
    * @return array|bool|false
    */
-  public function get_full($id_option = null, string $type = 'page'): ?array
+  public function get_full($id_option = null, string $type = 'access'): ?array
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->full_options($id_option ?: $this->get_current());
@@ -235,7 +267,7 @@ class permissions extends bbn\models\cls\basic
    * @param bool   $force
    * @return array|bool
    */
-  public function get(string $id_option = null, string $type = 'page', bool $force = false): ?array
+  public function get(string $id_option = null, string $type = 'access', bool $force = false): ?array
   {
     /*
     if ( $all = $this->get_all($id_option, $type) ){
@@ -266,7 +298,7 @@ class permissions extends bbn\models\cls\basic
    * @param bool   $force
    * @return bool
    */
-  public function has(string $id_option = null, string $type = 'page', bool $force = false): bool
+  public function has(string $id_option = null, string $type = 'access', bool $force = false): bool
   {
     if (!$force && $this->user && $this->user->is_dev()) {
       return true;
@@ -293,7 +325,7 @@ class permissions extends bbn\models\cls\basic
    * @param bool   $force
    * @return bool
    */
-  public function has_deep(string $id_option = null, string $type = 'page', bool $force = false): bool
+  public function has_deep(string $id_option = null, string $type = 'access', bool $force = false): bool
   {
     if (!$force && $this->user && $this->user->is_dev()) {
       return true;
@@ -324,7 +356,7 @@ class permissions extends bbn\models\cls\basic
    * @param string $type
    * @return null|string
    */
-  public function is(string $path, string $type = 'page'): ?string
+  public function is(string $path, string $type = 'access'): ?string
   {
     return $this->from_path($path, $type);
   }
@@ -370,7 +402,7 @@ class permissions extends bbn\models\cls\basic
    * @param string      $type
    * @return int
    */
-  public function add(string $id_option, string $type = 'page'): ?int
+  public function add(string $id_option, string $type = 'access'): ?int
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->set_by_option($id_option, []);
@@ -387,7 +419,7 @@ class permissions extends bbn\models\cls\basic
    * @param string      $type
    * @return null|int
    */
-  public function remove($id_option, string $type = 'page'): ?int
+  public function remove($id_option, string $type = 'access'): ?int
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->delete($id_option);
@@ -454,12 +486,12 @@ class permissions extends bbn\models\cls\basic
       }
 
       /** @var int The option's ID of the permissions on pages (controllers) $id_page */
-      $id_page = $this->get_option_id('page');
+      $id_page = $this->get_option_id('access');
       if (!$id_page) {
         $id_page = $this->opt->add(
           [
           'id_parent' => $id_permission,
-          'code' => 'page',
+          'code' => 'access',
           'text' => _("Pages"),
           'value' => [
             'icon' => 'nf nf-fa-files'
@@ -508,7 +540,7 @@ class permissions extends bbn\models\cls\basic
         usort($all, [$this, '_sort']);
         array_walk($all, [$this, '_walk']);
         $res['total'] = 0;
-        //die(\bbn\x::dump($all));
+        //die(x::dump($all));
         foreach ($all as $i => $it){
           $it['cfg']     = json_encode(['order' => $i + 1]);
           $res['total'] += $this->_add($it, $id_page);
@@ -570,7 +602,7 @@ class permissions extends bbn\models\cls\basic
   {
     $res = [];
     foreach ($tree as $i => $t){
-      $t['name'] = \bbn\str::change_case($t['name'], 'lower');
+      $t['name'] = str::change_case($t['name'], 'lower');
       $code      = $t['type'] === 'dir' ? basename($t['name']).'/' : basename($t['name'], '.php');
       $text      = $t['type'] === 'dir' ? basename($t['name']) : basename($t['name'], '.php');
       $o         = [
@@ -603,8 +635,8 @@ class permissions extends bbn\models\cls\basic
       $b['code'] = '00'.$b['code'];
     }
 
-    $a = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($a['code'], 'lower')));
-    $b = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($b['code'], 'lower')));
+    $a = str_replace('.', '0', str_replace('_', '1', str::change_case($a['code'], 'lower')));
+    $b = str_replace('.', '0', str_replace('_', '1', str::change_case($b['code'], 'lower')));
     return strcmp($a, $b);
   }
 
@@ -666,6 +698,28 @@ class permissions extends bbn\models\cls\basic
         );
       }
     }
+  }
+
+
+  /**
+   * @param string|null $id_option
+   * @param string      $type
+   * @return null|string
+   */
+  private function _get_id_option(string $id_option = null, $type = 'access'): ?string
+  {
+    if ($id_option && !bbn\str::is_uid($id_option)) {
+      $id_option = $this->from_path($id_option, $type);
+    }
+    elseif (null === $id_option) {
+      $id_option = $this->get_current();
+    }
+
+    if (bbn\str::is_uid($id_option)) {
+      return $id_option;
+    }
+
+    return null;
   }
 
 

@@ -68,7 +68,7 @@ class preferences extends bbn\models\cls\db
     ]
   ];
 
-  /** @var bbn\appui\options */
+  /** @var bbn\appui\option */
   protected $opt;
 
   /** @var bbn\user */
@@ -103,7 +103,7 @@ class preferences extends bbn\models\cls\db
       $this->_init_user($user);
     }
 
-    $this->opt = bbn\appui\options::get_instance();
+    $this->opt = bbn\appui\option::get_instance();
     if ($this->user && $this->opt) {
       self::retriever_init($this);
     }
@@ -1840,7 +1840,7 @@ class preferences extends bbn\models\cls\db
 
 
   /**
-   * Retrieves or confirm the ID of an option based on the same parameters as options::from_path
+   * Retrieves or confirm the ID of an option based on the same parameters as option::from_path
    *
    * @param string|null $id_option
    * @return null|string

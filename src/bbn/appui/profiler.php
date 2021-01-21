@@ -110,7 +110,7 @@ class profiler extends bbn\models\cls\db
    */
   public function finish(bbn\mvc $mvc): bool
   {
-    if ($this->$is_started && $this->check()) {
+    if ($this->is_started && $this->check()) {
       $this->is_started = false;
       $data = tideways_xhprof_disable();
       $c = &$this->class_cfg['arch']['bbn_profiler'];

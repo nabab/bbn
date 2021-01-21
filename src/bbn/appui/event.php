@@ -3,7 +3,7 @@ namespace bbn\appui;
 use bbn;
 use DateTime;
 
-class events extends bbn\models\cls\db
+class event extends bbn\models\cls\db
 {
 
   use

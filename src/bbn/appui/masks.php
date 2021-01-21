@@ -23,8 +23,8 @@ class masks extends bbn\models\cls\db
   {
     parent::__construct($db);
     self::optional_init();
-    $this->notes = new notes($this->db);
-    $this->o = bbn\appui\options::get_instance();
+    $this->notes = new note($this->db);
+    $this->o = bbn\appui\option::get_instance();
   }
 
   public function count($id_type = null)
@@ -153,7 +153,7 @@ class masks extends bbn\models\cls\db
       $id_type = self::get_option_id($id_type);
     }
     if ($this->o->exists($id_type) 
-        && ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'notes', 'appui')))
+        && ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'note', 'appui')))
     ) {
       $data = [
         'id_note' => $id_note,
