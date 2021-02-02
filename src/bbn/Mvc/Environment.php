@@ -35,7 +35,7 @@ class Environment
    */
   private $_params;
   /**
-   * The mode of the output (doc, Html, Json, txt, Xml...)
+   * The mode of the output (doc, html, json, txt, Xml...)
    * @var null|string
    */
   private $_mode;

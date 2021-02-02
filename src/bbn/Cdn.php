@@ -704,7 +704,7 @@ JS;
           }
 
           if (!empty($cd['html'])) {
-            $str .= ', Html: '.json_encode($cd['html']);
+            $str .= ', html: '.json_encode($cd['html']);
           }
 
           $str .= '},';

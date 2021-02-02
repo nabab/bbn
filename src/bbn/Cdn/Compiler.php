@@ -251,9 +251,9 @@ class Compiler extends bbn\Models\Cls\Basic
             $code .= <<<JAVASCRIPT
   .then(function(){
     return new Promise(function(bbn_resolve, bbn_reject){
-      var files = $files_json,
-          rFiles = [];
-      for ( var i = 0; i < files.length; i++ ){
+      let files = $files_json;
+      let rFiles = [];
+      for (let i = 0; i < files.length; i++) {
         if ( bbnLoadFile(files[i]) ){
           rFiles.push(files[i]);
         }
@@ -262,7 +262,7 @@ class Compiler extends bbn\Models\Cls\Basic
         bbn_resolve();
         return;
       }
-      var script = document.createElement("script");
+      let script = document.createElement("script");
       script.type = "text/javascript";
       script.src = "$url".replace("%s", rFiles.join(","));
       script.onload = function(){
@@ -369,10 +369,10 @@ JAVASCRIPT;
       $code .= <<<JAVASCRIPT
 .then(function(){
   return new Promise(function(bbn_resolve, bbn_reject){
-    var dir = "$jsdir",
-        files = $files_json,
-        url = "$url",
-        rFiles = [];
+    let dir = "$jsdir";
+    let files = $files_json;
+    let url = "$url";
+    let rFiles = [];
     for ( var i = 0; i < files.length; i++ ){
       if ( bbnLoadFile(dir + files[i]) ){
         rFiles.push(files[i]);
@@ -382,9 +382,9 @@ JAVASCRIPT;
       bbn_resolve();
       return;
     }
-    var css = document.createElement("link");
+    let css = document.createElement("link");
     css.rel = "stylesheet";
-    css.href = url.replace('~~~BBN~~~', Dir + '?grouped=1&f=' + rFiles.join(",") + '&');
+    css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(",") + '&');
     css.onload = function(){
       bbn_resolve();
     };
@@ -402,7 +402,7 @@ JAVASCRIPT;
             if (!isset($dirs[$root])) {
               $dirs[$root] = [];
             }
-            $dirs[$root][] = substr($file, Strlen($root));
+            $dirs[$root][] = substr($file, strlen($root));
           }
           else {
             if (!isset($dirs[\dirname($file)])) {
@@ -440,11 +440,11 @@ JAVASCRIPT;
             
   .then(function(){
     return new Promise(function(bbn_resolve, bbn_reject){
-      var dir = "$jsdir",
-          files = $files_json,
-          url = "$url",
-          rFiles = [];
-      for ( var i = 0; i < files.length; i++ ){
+      let dir = "$jsdir";
+      let files = $files_json;
+      let url = "$url";
+      let rFiles = [];
+      for (let i = 0; i < files.length; i++) {
         if ( bbnLoadFile(dir + files[i]) ){
           rFiles.push(files[i]);
         }
@@ -453,9 +453,9 @@ JAVASCRIPT;
         bbn_resolve();
         return;
       }
-      var css = document.createElement("link");
+      let css = document.createElement("link");
       css.rel = "stylesheet";
-      css.href = url.replace('~~~BBN~~~', Dir + '?f=' + rFiles.join(",") + '&');
+      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
       css.onload = function(){
         bbn_resolve();
       };
@@ -491,9 +491,9 @@ JAVASCRIPT;
     $head = $code.'2';
     $style = $code.'3';
     return <<<JAVASCRIPT
-  let $code = `$css`,
-      $head = document.head || document.getElementsByTagName('head')[0],
-      $style = document.createElement('style');
+  let $code = `$css`;
+  let $head = document.head || document.getElementsByTagName('head')[0];
+  let $style = document.createElement('style');
   $style.type = 'text/css';
   if ( $style.styleSheet ){
     $style.styleSheet.cssText = $code;

@@ -837,7 +837,7 @@ class X
    */
   public static function getHdump(): string
   {
-    return nl2br(str_replace("  ", "&nbsp;&nbsp;", Htmlentities(self::getDump(...\func_get_args()))), false);
+    return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::getDump(...\func_get_args()))), false);
   }
 
 
