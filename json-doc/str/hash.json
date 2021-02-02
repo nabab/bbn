@@ -9,7 +9,7 @@
             "version": "0.2r89"
         }
     },
-    "name": "bbn\\str\\hash",
+    "name": "bbn\\Str\\Hash",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -17,7 +17,7 @@
     "startLine": 18,
     "endLine": 151,
     "contentConstructor": {
-        "file": "bbn\\str\\hash",
+        "file": "bbn\\Str\\Hash",
         "returns": null
     },
     "methods": {
@@ -26,7 +26,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\str\\hash",
+            "file": "bbn\\Str\\Hash",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -60,7 +60,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\str\\hash",
+            "file": "bbn\\Str\\Hash",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -103,7 +103,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\str\\hash",
+            "file": "bbn\\Str\\Hash",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -137,7 +137,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\str\\hash",
+            "file": "bbn\\Str\\Hash",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -171,7 +171,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\str\\hash",
+            "file": "bbn\\Str\\Hash",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -255,7 +255,7 @@
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\str",
+    "namespaceName": "bbn\\Str",
     "shortName": "hash",
     "summary": "A Class for hashes"
 }

@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\models\\tts\\cache",
+    "name": "bbn\\Models\\Tts\\Cache",
     "namespace": true,
     "traits": [],
     "interfaces": [],

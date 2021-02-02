@@ -9,7 +9,7 @@
             "version": "0.2r89"
         }
     },
-    "name": "bbn\\file\\dir",
+    "name": "bbn\\File\\Dir",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -21,7 +21,7 @@
         "clean": {
             "name": "clean",
             "summary": "Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\"\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\"\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -29,10 +29,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\""
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\""
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -66,7 +66,7 @@
         "has_file": {
             "name": "has_file",
             "summary": "Checks if the given file(s) exists in the directory.",
-            "description": "Accepts unlimited arguments (files name).\n\t\t*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true\n```",
+            "description": "Accepts unlimited arguments (files name).\n\t\t*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -74,10 +74,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::has_file(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true"
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -111,7 +111,7 @@
         "cur": {
             "name": "cur",
             "summary": "If the directory's path starts with '.\/' returns the path without '.\/' else returns the complete path.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\"\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\"\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -119,10 +119,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\x::dump(\\bbn\\file\\dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\""
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\""
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -163,11 +163,11 @@
                     "content": "<p>It will return directories' full path.<\/p>"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $hidden = false)\n  {\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n\t\t}\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$dirs = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' && is_dir($dir.'\/'.$f) ){\n\t\t\t\t\t$dirs[] = self::cur($dir.'\/').$f;\n        }\n\t\t\t}\n      if ( !empty($dirs) ){\n        bbn\\x::sort($dirs);\n      }\n\t\t\treturn $dirs;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "function($dir, $hidden = false)\n  {\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n\t\t}\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$dirs = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' && is_dir($dir.'\/'.$f) ){\n\t\t\t\t\t$dirs[] = self::cur($dir.'\/').$f;\n        }\n\t\t\t}\n      if ( !empty($dirs) ){\n        bbn\\X::sort($dirs);\n      }\n\t\t\treturn $dirs;\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 100,
             "endLine": 120,
             "isDeprecated": false,
@@ -205,7 +205,7 @@
         "get_files": {
             "name": "get_files",
             "summary": "Returns an array of files contained in the given directory.",
-            "description": "Returns the full path of files.\n\t\t*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n```",
+            "description": "Returns the full path of files.\n\t\t*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -213,14 +213,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\x::dump(\\bbn\\file\\dir::get_files(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']"
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $including_dirs = false, $hidden = false, $extension = NULL)\n  {\n    $dir = self::clean($dir);\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n    }\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$files = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n      \/\/$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' ){\n          \/*\n          $enc = mb_detect_encoding($f, $encodings);\n          if ( $enc !== 'UTF-8' ){\n            $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');\n          }\n          *\/\n          if ( $hidden || (strpos(basename($f), '.') !== 0) ){\n            if ( $including_dirs ){\n              $files[] = self::cur($dir.'\/').$f;\n            }\n            else if ( is_file($dir.'\/'.$f) ){\n              if ( !$extension || (strtolower($extension) === strtolower(bbn\\str::file_ext($f))) ){\n                $files[] = self::cur($dir.'\/').$f;\n              }\n            }\n          }\n\t\t\t\t}\n\t\t\t}\n      if ( \\count($files) > 0 ){\n        bbn\\x::sort($files);\n      }\n\t\t\treturn $files;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "function($dir, $including_dirs = false, $hidden = false, $extension = NULL)\n  {\n    $dir = self::clean($dir);\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n    }\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$files = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n      \/\/$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' ){\n          \/*\n          $enc = mb_detect_encoding($f, $encodings);\n          if ( $enc !== 'UTF-8' ){\n            $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');\n          }\n          *\/\n          if ( $hidden || (strpos(basename($f), '.') !== 0) ){\n            if ( $including_dirs ){\n              $files[] = self::cur($dir.'\/').$f;\n            }\n            else if ( is_file($dir.'\/'.$f) ){\n              if ( !$extension || (strtolower($extension) === strtolower(bbn\\Str::fileExt($f))) ){\n                $files[] = self::cur($dir.'\/').$f;\n              }\n            }\n          }\n\t\t\t\t}\n\t\t\t}\n      if ( \\count($files) > 0 ){\n        bbn\\X::sort($files);\n      }\n\t\t\treturn $files;\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 142,
             "endLine": 179,
             "isDeprecated": false,
@@ -277,7 +277,7 @@
         "delete": {
             "name": "delete",
             "summary": "Deletes the given directory and all its content.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -285,14 +285,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\x::dump(\\bbn\\file\\dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false"
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $full = true)\n  {\n    $dir = self::clean($dir);\n\t\tif ( is_dir($dir) ){\n\t\t\t$files = self::get_files($dir, 1, 1);\n\t\t\tforeach ( $files as $file ){\n        self::delete($file);\n\t\t\t}\n\t\t\tif ( $full ){\n\t\t\t\treturn rmdir($dir);\n      }\n\t\t\treturn true;\n\t\t}\n    if ( is_file($dir) ){\n      return unlink($dir);\n    }\n\t\treturn false;\n  }",
+            "code": "function($dir, $full = true)\n  {\n    $dir = self::clean($dir);\n\t\tif ( is_dir($dir) ){\n\t\t\t$files = self::getFiles($dir, 1, 1);\n\t\t\tforeach ( $files as $file ){\n        self::delete($file);\n\t\t\t}\n\t\t\tif ( $full ){\n\t\t\t\treturn rmdir($dir);\n      }\n\t\t\treturn true;\n\t\t}\n    if ( is_file($dir) ){\n      return unlink($dir);\n    }\n\t\treturn false;\n  }",
             "startLine": 197,
             "endLine": 214,
             "isDeprecated": false,
@@ -334,11 +334,11 @@
             "summary": "Returns an array with all the content of the given directory.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $type = NULL, $hidden = false)\n  {\n\t   $all = [];\n\t   $dir = self::clean($dir);\n\t   $dirs = self::get_dirs($dir);\n\t   if ( \\is_array($dirs) ){\n\t     if ( $type && (strpos($type, 'file') === 0) ){\n\t       $all = self::get_files($dir, false, $hidden);\n\t     }\n\t     else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){\n\t       $all = $dirs;\n\t     }\n\t     else if ( $type ){\n\t       $all = array_filter(self::get_files($dir, false, $hidden), function($a)use($type){\n\t         $ext = bbn\\str::file_ext($a);\n\t         return strtolower($ext) === strtolower($type);\n\t       });\n\t     }\n\t     else{\n\t       $files = self::get_files($dir, false, $hidden);\n\t       if ( \\is_array($files) ){\n\t         $all = array_merge($dirs, $files);\n\t       }\n\t     }\n\t     foreach ( $dirs as $d ){\n\t       $all = array_merge(\\is_array($all) ? $all : [], self::scan($d, $type, $hidden));\n\t     }\n\t   }\n\t   return $all;\n  }",
+            "code": "function($dir, $type = NULL, $hidden = false)\n  {\n\t   $all = [];\n\t   $dir = self::clean($dir);\n\t   $dirs = self::getDirs($dir);\n\t   if ( \\is_array($dirs) ){\n\t     if ( $type && (strpos($type, 'file') === 0) ){\n\t       $all = self::getFiles($dir, false, $hidden);\n\t     }\n\t     else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){\n\t       $all = $dirs;\n\t     }\n\t     else if ( $type ){\n\t       $all = array_filter(self::getFiles($dir, false, $hidden), function($a)use($type){\n\t         $ext = bbn\\Str::fileExt($a);\n\t         return strtolower($ext) === strtolower($type);\n\t       });\n\t     }\n\t     else{\n\t       $files = self::getFiles($dir, false, $hidden);\n\t       if ( \\is_array($files) ){\n\t         $all = array_merge($dirs, $files);\n\t       }\n\t     }\n\t     foreach ( $dirs as $d ){\n\t       $all = array_merge(\\is_array($all) ? $all : [], self::scan($d, $type, $hidden));\n\t     }\n\t   }\n\t   return $all;\n  }",
             "startLine": 238,
             "endLine": 267,
             "isDeprecated": false,
@@ -388,7 +388,7 @@
         "mscan": {
             "name": "mscan",
             "summary": "Returns an array of indexed arrays with the 'name' of the file\/folder contained in the given directory, the 'mtime', and the 'date' of creation the file\/folder.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -396,10 +396,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]"
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n\t\t*\t[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -453,7 +453,7 @@
         "get_tree": {
             "name": "get_tree",
             "summary": "Return an array with the tree of the folder's content.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -461,14 +461,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\x::dump(\\bbn\\file\\dir::get_tree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]"
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $only_dir = false, $filter = NULL, $hidden = false)\n  {\n    $r = [];\n    $dir = self::clean($dir);\n    $dirs = self::get_dirs($dir, $hidden);\n    if ( \\is_array($dirs) ){\n      foreach ( $dirs as $d ){\n        $x = [\n          'name' => $d,\n          'type' => 'dir',\n          'num_children' => 0,\n          'items' => self::get_tree($d, $only_dir, $filter, $hidden)\n        ];\n        $x['num_children'] = \\count($x['items']);\n        if ( $filter ){\n          if ( $filter($x) ){\n            $r[] = $x;\n          }\n        }\n        else{\n          $r[] = $x;\n        }\n      }\n      if ( !$only_dir ){\n        $files = self::get_files($dir, false, $hidden);\n        foreach ( $files as $f ){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\str::file_ext($f)\n          ];\n          if ( $filter ){\n            if ( $filter($x) ){\n              $r[] = $x;\n            }\n          }\n          else{\n            $r[] = $x;\n          }\n        }\n      }\n    }\n    return $r;\n  }",
+            "code": "function($dir, $only_dir = false, $filter = NULL, $hidden = false)\n  {\n    $r = [];\n    $dir = self::clean($dir);\n    $dirs = self::getDirs($dir, $hidden);\n    if ( \\is_array($dirs) ){\n      foreach ( $dirs as $d ){\n        $x = [\n          'name' => $d,\n          'type' => 'dir',\n          'num_children' => 0,\n          'items' => self::getTree($d, $only_dir, $filter, $hidden)\n        ];\n        $x['num_children'] = \\count($x['items']);\n        if ( $filter ){\n          if ( $filter($x) ){\n            $r[] = $x;\n          }\n        }\n        else{\n          $r[] = $x;\n        }\n      }\n      if ( !$only_dir ){\n        $files = self::getFiles($dir, false, $hidden);\n        foreach ( $files as $f ){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\Str::fileExt($f)\n          ];\n          if ( $filter ){\n            if ( $filter($x) ){\n              $r[] = $x;\n            }\n          }\n          else{\n            $r[] = $x;\n          }\n        }\n      }\n    }\n    return $r;\n  }",
             "startLine": 425,
             "endLine": 468,
             "isDeprecated": false,
@@ -528,7 +528,7 @@
         "create_path": {
             "name": "create_path",
             "summary": "Creates a folder with the given path.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::create_path(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\"\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::createPath(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\"\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -536,14 +536,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::create_path(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\""
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::createPath(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\""
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $chmod = false)\n  {\n    if ( !$dir || !\\is_string($dir) ){\n      return null;\n\t\t}\n\t\t$bits = [];\n\t\t\/\/clearstatcache();\n\t\t$path = self::clean($dir);\n    while ( $path && !is_dir($path) ){\n\t\t\t$bits[] = basename($path);\n\t\t\t$path = dirname($path);\n\t\t}\n\t\tif (is_dir($path)) {\n\t\t\tforeach (array_reverse($bits) as $b) {\n\t\t\t\tif (!empty($b)) {\n\t\t\t\t\t$path .= '\/'.$b;\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tmkdir($path);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\x::error_log($e->getMessage());\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t}\n\t\t\t\t\tif ($chmod) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tchmod($path, $chmod);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\x::error_log($e->getMessage());\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n    return $dir;\n  }",
+            "code": "function($dir, $chmod = false)\n  {\n    if ( !$dir || !\\is_string($dir) ){\n      return null;\n\t\t}\n\t\t$bits = [];\n\t\t\/\/clearstatcache();\n\t\t$path = self::clean($dir);\n    while ( $path && !is_dir($path) ){\n\t\t\t$bits[] = basename($path);\n\t\t\t$path = dirname($path);\n\t\t}\n\t\tif (is_dir($path)) {\n\t\t\tforeach (array_reverse($bits) as $b) {\n\t\t\t\tif (!empty($b)) {\n\t\t\t\t\t$path .= '\/'.$b;\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tmkdir($path);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\X::error_log($e->getMessage());\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t}\n\t\t\t\t\tif ($chmod) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tchmod($path, $chmod);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\X::error_log($e->getMessage());\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n    return $dir;\n  }",
             "startLine": 482,
             "endLine": 521,
             "isDeprecated": false,
@@ -584,7 +584,7 @@
         "move": {
             "name": "move",
             "summary": "Moves a file or directory to a new location",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\"\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\"\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -592,14 +592,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\x::dump(\\bbn\\file\\dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\""
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\""
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($orig, $dest, $st = '_v', $length = 0)\n  {\n    if ( file_exists($orig) && self::create_path(\\dirname($dest)) ){\n      if ( file_exists($dest) ){\n        if ( $st === true ){\n          self::delete($dest);\n        }\n        else{\n          $i = 1;\n          while ( $i ){\n            $dir = \\dirname($dest).'\/';\n            $file_name = bbn\\str::file_ext($dest, 1);\n            $file = $file_name[0].$st;\n            if ( $length > 0 ){\n              $len = \\strlen(bbn\\str::cast($i));\n              if ( $len > $length ){\n                return false;\n              }\n              $file .= str_repeat('0', $length - $len);\n            }\n            $file .= bbn\\str::cast($i);\n            if ( !empty($file_name[1]) ){\n              $file .= '.'.$file_name[1];\n            }\n            $i++;\n            if ( !file_exists($dir.$file) ){\n              $dest = $dir.$file;\n              $i = false;\n            }\n          }\n        }\n      }\n      if ( rename($orig, $dest) ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "code": "function($orig, $dest, $st = '_v', $length = 0)\n  {\n    if ( file_exists($orig) && self::createPath(\\dirname($dest)) ){\n      if ( file_exists($dest) ){\n        if ( $st === true ){\n          self::delete($dest);\n        }\n        else{\n          $i = 1;\n          while ( $i ){\n            $dir = \\dirname($dest).'\/';\n            $file_name = bbn\\Str::fileExt($dest, 1);\n            $file = $file_name[0].$st;\n            if ( $length > 0 ){\n              $len = \\strlen(bbn\\Str::cast($i));\n              if ( $len > $length ){\n                return false;\n              }\n              $file .= str_repeat('0', $length - $len);\n            }\n            $file .= bbn\\Str::cast($i);\n            if ( !empty($file_name[1]) ){\n              $file .= '.'.$file_name[1];\n            }\n            $i++;\n            if ( !file_exists($dir.$file) ){\n              $dest = $dir.$file;\n              $i = false;\n            }\n          }\n        }\n      }\n      if ( rename($orig, $dest) ){\n        return true;\n      }\n    }\n    return false;\n  }",
             "startLine": 543,
             "endLine": 580,
             "isDeprecated": false,
@@ -659,7 +659,7 @@
         "copy": {
             "name": "copy",
             "summary": "Will move the content of the given folder to a new destination. Doesn't move the hidden files.",
-            "description": "*\n```php\n\\bbn\\x::dump(\\bbn\\file\\dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1\n```",
+            "description": "*\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -667,14 +667,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "\\bbn\\x::dump(\\bbn\\file\\dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1"
+                    "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1"
                 }
             ],
-            "file": "bbn\\file\\dir",
+            "file": "bbn\\File\\Dir",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($src, $dst)\n  {\n    if ( is_file($src) ){\n      return copy($src, $dst);\n    }\n    if ( is_dir($src) && self::create_path($dst) ){\n      $files = self::get_files($src);\n      $dirs = self::get_dirs($src);\n      foreach ( $files as $f ){\n        copy($f, $dst.'\/'.basename($f));\n      }\n      foreach ( $dirs as $f ){\n        self::copy($f, $dst.'\/'.basename($f));\n      }\n      return true;\n    }\n    else{\n      return false;\n    }\n  }",
+            "code": "function($src, $dst)\n  {\n    if ( is_file($src) ){\n      return copy($src, $dst);\n    }\n    if ( is_dir($src) && self::createPath($dst) ){\n      $files = self::getFiles($src);\n      $dirs = self::getDirs($src);\n      foreach ( $files as $f ){\n        copy($f, $dst.'\/'.basename($f));\n      }\n      foreach ( $dirs as $f ){\n        self::copy($f, $dst.'\/'.basename($f));\n      }\n      return true;\n    }\n    else{\n      return false;\n    }\n  }",
             "startLine": 593,
             "endLine": 612,
             "isDeprecated": false,
@@ -716,7 +716,7 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -737,7 +737,7 @@
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -763,7 +763,7 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -784,7 +784,7 @@
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -810,7 +810,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -831,7 +831,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -857,7 +857,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -878,7 +878,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -904,11 +904,11 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\X::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
             "endLine": 88,
             "isDeprecated": false,
@@ -925,11 +925,11 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\X::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
                 "endLine": 88,
                 "isDeprecated": false,
@@ -951,7 +951,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -972,7 +972,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -1036,7 +1036,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -1057,7 +1057,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -1083,7 +1083,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -1104,7 +1104,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -1161,7 +1161,7 @@
     "isAbstract": false,
     "isFinal": false,
     "modifiers": 0,
-    "parentClass": "bbn\\models\\cls\\basic",
+    "parentClass": "bbn\\Models\\Cls\\Basic",
     "isSubclassOf": false,
     "defaultProperties": {
         "errors": [],
@@ -1171,7 +1171,7 @@
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\file",
+    "namespaceName": "bbn\\File",
     "shortName": "dir",
     "summary": "A class for dealing with directories (folders)"
 }

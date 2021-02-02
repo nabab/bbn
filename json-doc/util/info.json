@@ -9,7 +9,7 @@
             "version": "0.2r89"
         }
     },
-    "name": "bbn\\util\\info",
+    "name": "bbn\\Util\\Info",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -23,7 +23,7 @@
             "summary": "Add information to the $info array",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\util\\info",
+            "file": "bbn\\Util\\Info",
             "static": true,
             "visibility": "public",
             "final": false,
@@ -57,7 +57,7 @@
             "summary": "Add information to the $info array",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\util\\info",
+            "file": "bbn\\Util\\Info",
             "static": true,
             "visibility": "public",
             "final": false,

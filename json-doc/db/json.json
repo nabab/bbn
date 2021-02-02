@@ -9,7 +9,7 @@
             "version": "0.2r89"
         }
     },
-    "name": "bbn\\db\\json",
+    "name": "bbn\\Db\\Json",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -17,7 +17,7 @@
     "startLine": 19,
     "endLine": 65,
     "contentConstructor": {
-        "file": "bbn\\db\\json",
+        "file": "bbn\\Db\\Json",
         "returns": null
     },
     "methods": {
@@ -26,7 +26,7 @@
             "summary": "*",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\db\\json",
+            "file": "bbn\\Db\\Json",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -183,7 +183,7 @@
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\db",
+    "namespaceName": "bbn\\Db",
     "shortName": "json",
     "summary": "Database Class"
 }

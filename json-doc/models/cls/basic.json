@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Basic object Class\n *\n *\nThis class implements basic functions and vars",
+        "description": "Basic object Class\n *\n *\nThis class implements Basic functions and vars",
         "tags": {
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
@@ -9,7 +9,7 @@
             "version": "0.2r89\nTodo: create a new delegation generic function for the double underscores functions"
         }
     },
-    "name": "bbn\\models\\cls\\basic",
+    "name": "bbn\\Models\\Cls\\Basic",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -23,7 +23,7 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -47,7 +47,7 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -71,7 +71,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -95,7 +95,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -119,11 +119,11 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\X::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
             "endLine": 88,
             "isDeprecated": false,
@@ -143,7 +143,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -186,7 +186,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -210,7 +210,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -268,11 +268,11 @@
     "namespaceName": "bbn\\models\\cls",
     "shortName": "basic",
     "summary": "Basic object Class",
-    "description": "*\n *\nThis class implements basic functions and vars",
+    "description": "*\n *\nThis class implements Basic functions and vars",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThis class implements basic functions and vars<\/p>"
+            "content": "<p><em>\n<\/em>\nThis class implements Basic functions and vars<\/p>"
         }
     ]
 }

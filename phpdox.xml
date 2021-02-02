@@ -39,7 +39,7 @@
         <!--  Additional configuration for the collecting process (parsing of php code, generation of xml data) -->
         <collector publiconly="false" backend="parser" encoding="UTF-8">
             <!--  @publiconly - Flag to disable/enable processing of non public methods and members -->
-            <!--  @backend    - The collector backend to use, currently only shipping with 'parser' -->
+            <!--  @backend    - The collector backend to use, Currently only shipping with 'parser' -->
             <!--  @encoding   - Charset encoding of source files (overwrite default 'auto' if detection fails) -->
 
             <!--  <include / exclude filter for filelist generator, mask must follow fnmatch() requirements  -->
@@ -69,7 +69,7 @@
 
                 <!--<source type="...">-->
                 <!-- @type - the handler for the enrichment -->
-                <!--         known types by default are: build, checkstyle, git, phpcs, phploc, phpunit, pmd -->
+                <!--         known types by default are: build, checkstyle, Git, Phpcs, Phploc, Phpunit, pmd -->
 
                 <!-- every enrichment source can have additional configuration nodes, most probably need a logfile -->
                 <!-- <file name="path/to/log.xml" /> -->

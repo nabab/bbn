@@ -1,7 +1,7 @@
 <?php
 namespace bbn\tests\appui;
 
-use bbn\appui\chat;
+use bbn\Appui\Chat;
 use bbn;
 
 class chatTest extends \PHPUnit\Framework\TestCase {
@@ -11,7 +11,7 @@ class chatTest extends \PHPUnit\Framework\TestCase {
   protected function setUp(): void
   {
     try {
-      $db = new bbn\db();
+      $db = new bbn\Db();
     }
     catch (\Exception $e) {
       $db = false;
@@ -19,14 +19,14 @@ class chatTest extends \PHPUnit\Framework\TestCase {
     }
     if ($db) {
       try {
-        $user = new bbn\user($db);
+        $user = new bbn\User($db);
       }
       catch (\Exception $e) {
         $user = false;
         $this->assertTrue(is_string($e->getMessage()));
       }
       if ($db && $user) {
-        $this->obj = new chat($db, $user);
+        $this->obj = new Chat($db, $user);
       }
     }
   }

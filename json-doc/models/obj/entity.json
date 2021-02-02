@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\models\\obj\\entity",
+    "name": "bbn\\Models\\Obj\\Entity",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -11,7 +11,7 @@
     "startLine": 7,
     "endLine": 29,
     "contentConstructor": {
-        "file": "bbn\\models\\obj\\entity",
+        "file": "bbn\\Models\\Obj\\Entity",
         "returns": null
     },
     "methods": {
@@ -20,11 +20,11 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\obj\\entity",
+            "file": "bbn\\Models\\Obj\\Entity",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db, $id)\n  {\n    if ( $this->table_name && $db->count($this->table_name, [$this->id_field => $id]) ){\n      $this->is_checked = true;\n      $this->db = $db;\n    }\n  }",
+            "code": "function(bbn\\Db $db, $id)\n  {\n    if ( $this->table_name && $db->count($this->table_name, [$this->id_field => $id]) ){\n      $this->is_checked = true;\n      $this->db = $db;\n    }\n  }",
             "startLine": 17,
             "endLine": 23,
             "isDeprecated": false,
@@ -41,7 +41,7 @@
                 {
                     "name": "db",
                     "position": 0,
-                    "type": "bbn\\db",
+                    "type": "bbn\\Db",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -63,7 +63,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\obj\\entity",
+            "file": "bbn\\Models\\Obj\\Entity",
             "static": false,
             "visibility": "public",
             "final": false,

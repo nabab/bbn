@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\models\\tts\\references",
+    "name": "bbn\\Models\\Tts\\References",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -17,7 +17,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\tts\\references",
+            "file": "bbn\\Models\\Tts\\References",
             "static": false,
             "visibility": "public",
             "final": false,

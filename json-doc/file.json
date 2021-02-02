@@ -10,7 +10,7 @@
             "version": "0.2r89"
         }
     },
-    "name": "bbn\\file",
+    "name": "bbn\\File",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -18,14 +18,14 @@
     "startLine": 18,
     "endLine": 333,
     "contentConstructor": {
-        "file": "bbn\\file",
+        "file": "bbn\\File",
         "returns": null
     },
     "methods": {
         "__construct": {
             "name": "__construct",
             "summary": "Constructor.",
-            "description": "*\n```php\n$file=new bbn\\file('\/home\/user\/Desktop\/test.txt');\n```",
+            "description": "*\n```php\n$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -33,14 +33,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file=new bbn\\file('\/home\/user\/Desktop\/test.txt');"
+                    "content": "$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file, bbn\\file\\system $fs = NULL)\n  {\n    $this->fs = $fs ?: new file\\system();\n    if ( \\is_array($file) )\n    {\n      if ( isset($file['name'],$file['tmp_name']) )\n      {\n        $this->path = '';\n        $this->name = $file['name'];\n        $this->size = $file['size'];\n        $file = $file['tmp_name'];\n      }\n    }\n    else if ( \\is_string($file) )\n    {\n      $file = trim($file);\n      if ( strrpos($file,'\/') !== false )\n      {\n        \/* The -2 in strrpos means that if there is a final \/, it will be kept in the file name *\/\n        $this->name = substr($file,strrpos($file,'\/',-2)+1);\n        $this->path = substr($file,0,-\\strlen($this->name));\n        if ( substr($this->path,0,2) == '\/\/' ){\n          $this->path = 'http:\/\/'.substr($this->path,2);\n        }\n      }\n      else\n      {\n        $this->name = $file;\n        $this->path = '.\/';\n      }\n    }\n\n    $this->get_extension();\n    if ( \\is_string($file) && is_file($file) ){\n      $this->file = $file;\n    }\n    else{\n      $this->make();\n    }\n  }",
+            "code": "function($file, bbn\\File\\System $fs = NULL)\n  {\n    $this->fs = $fs ?: new file\\system();\n    if ( \\is_array($file) )\n    {\n      if ( isset($file['name'],$file['tmp_name']) )\n      {\n        $this->path = '';\n        $this->name = $file['name'];\n        $this->size = $file['size'];\n        $file = $file['tmp_name'];\n      }\n    }\n    else if ( \\is_string($file) )\n    {\n      $file = trim($file);\n      if ( strrpos($file,'\/') !== false )\n      {\n        \/* The -2 in strrpos means that if there is a final \/, it will be kept in the file name *\/\n        $this->name = substr($file,strrpos($file,'\/',-2)+1);\n        $this->path = substr($file,0,-\\strlen($this->name));\n        if ( substr($this->path,0,2) == '\/\/' ){\n          $this->path = 'http:\/\/'.substr($this->path,2);\n        }\n      }\n      else\n      {\n        $this->name = $file;\n        $this->path = '.\/';\n      }\n    }\n\n    $this->getExtension();\n    if ( \\is_string($file) && is_file($file) ){\n      $this->file = $file;\n    }\n    else{\n      $this->make();\n    }\n  }",
             "startLine": 76,
             "endLine": 115,
             "isDeprecated": false,
@@ -66,7 +66,7 @@
                 {
                     "name": "fs",
                     "position": 1,
-                    "type": "bbn\\file\\system",
+                    "type": "bbn\\File\\System",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -77,7 +77,7 @@
         "get_size": {
             "name": "get_size",
             "summary": "Return the filesize in byte.",
-            "description": "*\n```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nx::dump($file->get_size());\n\/\/ (int) 314\n```",
+            "description": "*\n```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nx::dump($file->getSize());\n\/\/ (int) 314\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -85,10 +85,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file = new bbn\\file('C:\/Test\/file.txt');\nx::dump($file->get_size());\n\/\/ (int) 314"
+                    "content": "$file = new bbn\\File('C:\/Test\/file.txt');\nx::dump($file->getSize());\n\/\/ (int) 314"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -112,7 +112,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -134,7 +134,7 @@
         "get_extension": {
             "name": "get_extension",
             "summary": "Return the extension of the file.",
-            "description": "*\n```php\n$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_extension());\n\/\/(string) 'txt'\n```",
+            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nx::dump($file->getExtension());\n\/\/(string) 'txt'\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -142,14 +142,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_extension());\n\/\/(string) 'txt'"
+                    "content": "$file = new File('C:\/Test\/file.txt');\nx::dump($file->getExtension());\n\/\/(string) 'txt'"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->name ){\n      if ( !isset($this->ext) ){\n        if ( strpos($this->name, '.') !== false ){\n          $p = str::file_ext($this->name, 1);\n          $this->ext = $p[1];\n          $this->title = $p[0];\n        }\n        else{\n          $this->ext = '';\n          $this->title = substr($this->name,-1) === '\/' ? substr($this->name,0,-1) : $this->name;\n        }\n      }\n      return $this->ext;\n    }\n    return false;\n  }",
+            "code": "function()\n  {\n    if ( $this->name ){\n      if ( !isset($this->ext) ){\n        if ( strpos($this->name, '.') !== false ){\n          $p = Str::fileExt($this->name, 1);\n          $this->ext = $p[1];\n          $this->title = $p[0];\n        }\n        else{\n          $this->ext = '';\n          $this->title = substr($this->name,-1) === '\/' ? substr($this->name,0,-1) : $this->name;\n        }\n      }\n      return $this->ext;\n    }\n    return false;\n  }",
             "startLine": 165,
             "endLine": 182,
             "isDeprecated": false,
@@ -167,7 +167,7 @@
         "download": {
             "name": "download",
             "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
-            "description": "*\n```php\n$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();\n```",
+            "description": "*\n```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -175,14 +175,14 @@
                 },
                 {
                     "type": "code",
-                    "content": "$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();"
+                    "content": "$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->get_size();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
+            "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->getSize();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
             "startLine": 228,
             "endLine": 248,
             "isDeprecated": false,
@@ -200,7 +200,7 @@
         "get_hash": {
             "name": "get_hash",
             "summary": "Return the hash of the file.",
-            "description": "*\n```php\n$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nx::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -208,10 +208,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "$file = new file('C:\/Test\/file.txt');\nx::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
+                    "content": "$file = new File('C:\/Test\/file.txt');\nx::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -233,7 +233,7 @@
         "delete": {
             "name": "delete",
             "summary": "Deletes the file.",
-            "description": "*\n```php\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+            "description": "*\n```php\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -241,10 +241,10 @@
                 },
                 {
                     "type": "code",
-                    "content": "x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
+                    "content": "x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nx::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -277,7 +277,7 @@
                     "content": "$file->save('\/home\/user\/desktop\/');"
                 }
             ],
-            "file": "bbn\\file",
+            "file": "bbn\\File",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -311,7 +311,7 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -332,7 +332,7 @@
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -358,7 +358,7 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -379,7 +379,7 @@
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -405,7 +405,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -426,7 +426,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -452,7 +452,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -473,7 +473,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -499,11 +499,11 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\X::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
             "endLine": 88,
             "isDeprecated": false,
@@ -520,11 +520,11 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\X::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
                 "endLine": 88,
                 "isDeprecated": false,
@@ -546,7 +546,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -567,7 +567,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -631,7 +631,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -652,7 +652,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -678,7 +678,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\cls\\basic",
+            "file": "bbn\\Models\\Cls\\Basic",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -699,7 +699,7 @@
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\models\\cls\\basic",
+                "file": "bbn\\Models\\Cls\\Basic",
                 "static": false,
                 "visibility": "public",
                 "final": false,
@@ -817,7 +817,7 @@
     "isAbstract": false,
     "isFinal": false,
     "modifiers": 0,
-    "parentClass": "bbn\\models\\cls\\basic",
+    "parentClass": "bbn\\Models\\Cls\\Basic",
     "isSubclassOf": false,
     "defaultProperties": {
         "size": 0,

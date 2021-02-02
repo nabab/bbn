@@ -10,7 +10,7 @@
             "todo": "Implement Cache for session requests' results?"
         }
     },
-    "name": "bbn\\user\\profile",
+    "name": "bbn\\User\\Profile",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -18,7 +18,7 @@
     "startLine": 22,
     "endLine": 84,
     "contentConstructor": {
-        "file": "bbn\\user\\profile",
+        "file": "bbn\\User\\Profile",
         "returns": null
     },
     "methods": {
@@ -27,11 +27,11 @@
             "summary": "connection constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\user\\profile",
+            "file": "bbn\\User\\Profile",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db, bbn\\user $user, array $cfg = [])\n  {\n    if ($tmp = $user->get_profile()) {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\x::merge_arrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
+            "code": "function(bbn\\Db $db, bbn\\User $user, array $cfg = [])\n  {\n    if ($tmp = $user->get_profile()) {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\X::mergeArrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
             "startLine": 54,
             "endLine": 65,
             "isDeprecated": false,
@@ -48,7 +48,7 @@
                 {
                     "name": "db",
                     "position": 0,
-                    "type": "bbn\\db",
+                    "type": "bbn\\Db",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -57,7 +57,7 @@
                 {
                     "name": "user",
                     "position": 1,
-                    "type": "bbn\\user",
+                    "type": "bbn\\User",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -79,7 +79,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\user\\profile",
+            "file": "bbn\\User\\Profile",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -103,7 +103,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\user\\profile",
+            "file": "bbn\\User\\Profile",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -165,7 +165,7 @@
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\user",
+    "namespaceName": "bbn\\User",
     "shortName": "profile",
     "summary": "A user authentication Class"
 }

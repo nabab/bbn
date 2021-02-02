@@ -1,0 +1,78 @@
+<?php
+/**
+ * @package bbn
+ */
+namespace bbn\Models\Cls;
+use bbn;
+/**
+ * Object Class with Db and cache
+ *
+ *
+ * This class implements Basic functions and vars
+ *
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @copyright BBN Solutions
+ * @since Apr 4, 2011, 23:23:55 +0000
+ * @category  Generic classes
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
+ * @version 0.2r89
+ * Todo: create a new delegation generic function for the double underscores functions
+ */
+abstract class Cache extends bbn\Models\Cls\Basic
+{
+	protected
+    /**
+     * @var bbn\Db
+     */
+    $db,
+		/** @var string */
+		$_cache_prefix,
+		/** @var $cacher cache */
+		$cacher;
+
+  public function __construct(bbn\Db $db){
+    $this->db = $db;
+		$this->cacher = bbn\Cache::getEngine();
+		$this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
+	}
+
+	protected function _cache_name($uid, $method = ''){
+    if ( is_array($uid) ){
+      $uid = md5(serialize($uid));
+    }
+    else if ( is_object($uid) ){
+      $uid = md5(json_encode($uid));
+    }
+		return $this->_cache_prefix.(string)$uid.
+			(empty($method) ? '' : '-'.(string)$method);
+	}
+
+	public function cacheDeleteAll(){
+		$this->cacher->deleteAll($this->_cache_prefix);
+		return $this;
+	}
+
+	public function cacheDelete($uid){
+		$this->cacher->deleteAll($this->_cache_name($uid));
+		return $this;
+	}
+
+	public function cacheGet($uid, $method = '', $ttl = 0){
+		return $this->cacher->get($this->_cache_name($uid, $method), $ttl);
+	}
+
+	public function cacheSet($uid, $method = '', $data = null, $ttl = 0){
+		$this->cacher->set($this->_cache_name($uid, $method), $data, $ttl);
+		return $this;
+	}
+
+	public function cacheGetSet(callable $fn, $uid, $method = '', $ttl = 0){
+		$cn = $this->_cache_name($uid, $method);
+		return $this->cacher->getSet($fn, $cn, $ttl);
+	}
+
+	public function cacheHas($uid, $method = '', $ttl = 0){
+
+    return $this->cacheGet($uid, $method, $ttl) ? true : false;
+  }
+}

@@ -1388,7 +1388,7 @@
                         "text": "modelize",
                         "value": "modelize",
                         "url": "bbn-php\/doc\/method\/appui\/databases\/modelize",
-                        "desc": "Returns a database model as bbn\\db::modelize but with options IDs."
+                        "desc": "Returns a database model as bbn\\Db::modelize but with options IDs."
                     },
                     {
                         "type": "method",
@@ -5047,7 +5047,7 @@
                         "text": "get_events",
                         "value": "get_events",
                         "url": "bbn-php\/doc\/method\/appui\/planning\/get_events",
-                        "desc": "Returns the bbn\\appui\\events instance"
+                        "desc": "Returns the bbn\\Appui\\Events instance"
                     },
                     {
                         "type": "method",
@@ -14605,7 +14605,7 @@
                 "text": "count_field_values",
                 "value": "count_field_values",
                 "url": "bbn-php\/doc\/method\/db\/count_field_values",
-                "desc": "Return a count of identical values in a field as array, reporting a structure type 'num' - 'val'."
+                "desc": "Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'."
             },
             {
                 "type": "method",
@@ -17196,7 +17196,7 @@
                 "text": "get_manager",
                 "value": "get_manager",
                 "url": "bbn-php\/doc\/method\/user\/get_manager",
-                "desc": "Gets a bbn\\user\\manager instance."
+                "desc": "Gets a bbn\\User\\Manager instance."
             },
             {
                 "type": "method",

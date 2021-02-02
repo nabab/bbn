@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\cdn\\common",
+    "name": "bbn\\Cdn\\Common",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -99,7 +99,7 @@
     },
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\cdn",
+    "namespaceName": "bbn\\Cdn",
     "shortName": "common",
     "summary": ""
 }

@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\util\\pparser",
+    "name": "bbn\\Util\\Pparser",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -17,7 +17,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\util\\pparser",
+            "file": "bbn\\Util\\Pparser",
             "static": false,
             "visibility": "public",
             "final": false,

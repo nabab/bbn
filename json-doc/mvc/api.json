@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\mvc\\api",
+    "name": "bbn\\Mvc\\Api",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -17,7 +17,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\mvc\\api",
+            "file": "bbn\\Mvc\\Api",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -69,7 +69,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\mvc\\api",
+            "file": "bbn\\Mvc\\Api",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -109,7 +109,7 @@
     "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
-    "namespaceName": "bbn\\mvc",
+    "namespaceName": "bbn\\Mvc",
     "shortName": "api",
     "summary": ""
 }

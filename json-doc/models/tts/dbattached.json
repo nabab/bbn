@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\models\\tts\\dbattached",
+    "name": "bbn\\Models\\Tts\\Dbattached",
     "namespace": true,
     "traits": [],
     "interfaces": [],
@@ -17,7 +17,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\models\\tts\\dbattached",
+            "file": "bbn\\Models\\Tts\\Dbattached",
             "static": false,
             "visibility": "public",
             "final": false,

@@ -3,7 +3,7 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\models\\tts\\report",
+    "name": "bbn\\Models\\Tts\\Report",
     "namespace": true,
     "traits": [],
     "interfaces": [],
