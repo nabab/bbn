@@ -3130,7 +3130,16 @@ class Option extends bbn\Models\Cls\Db
       $ids     = [];
       $num     = 0;
       $root_id = false;
+      if (!isset($options[0])) {
+        $options = [$options];
+      }
+
       foreach ($options as $i => $o) {
+        if (isset($o['id'])) {
+          unset($o['id']);
+        }
+
+        /*
         if (!$i) {
           $ids[$o['id_parent']] = $id_parent ?: $this->default;
           $o['id_parent'] = $id_parent ?: $this->default;
@@ -3158,6 +3167,19 @@ class Option extends bbn\Models\Cls\Db
 
         if ($id = $this->add($o, true)) {
 
+          $ids[$o['id']] = $id;
+          $num++;
+        }
+        elseif ($i) {
+          $this->removeFull($root_id);
+          throw new \Exception(_("Error while importing: impossible to add"));
+        }
+        */
+        $o['id_parent'] = $id_parent ?: $this->default;
+        if ($o['id_alias']) {
+          $o['id_alias'] = is_array($o['id_alias']) ? $this->fromCode(...$o['id_alias']) : null;
+        }
+        if ($id = $this->add($o, true)) {
           $ids[$o['id']] = $id;
           $num++;
         }
