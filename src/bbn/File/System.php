@@ -875,7 +875,7 @@ class System extends bbn\Models\Cls\Basic
   }
 
 
-  public function getTree( $dir,  string $exclude = '', $only_dir = false,  $filter = null,  $hidden = false)
+  public function getTree(string $dir,  string $exclude = '', $only_dir = false,  $filter = null,  $hidden = false)
   {
     $r    = [];
     $dirs = self::getDirs($dir, $hidden);

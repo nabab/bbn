@@ -515,48 +515,64 @@ class Permissions extends bbn\Models\Cls\Basic
         );
       }
 
-      die(X::dump($id_option, $id_page, $id_plugins));
-
-      $id_access_plugins = $this->opt->fromCode('access', $id_plugins);
+      
 
       /** @todo Add the possibility to do it for another project? */
       $fs = new bbn\File\System();
+      $all = [];
       $fn = function ($a) {
-        return ($a['ext'] === 'php')
-          && (basename($a['name']) !== '_ctrl.php');
-        // Before we allowed directories
-        /*
-        return (($a['type'] === 'dir') || ($a['ext'] === 'php'))
-            && (basename($a['name']) !== '_ctrl.php');
-        */
+        return !empty($a['num'])
+          || ((substr($a['name'], -4) === '.php')
+              && (basename($a['name']) !== '_ctrl.php'));
       };
 
+      $res['total'] = 0;
       if ($id_page
           && ($root = bbn\Mvc::getAppPath().'mvc/public')
-          && ($all = $fs->scan($root, $fn, false, 'te'))
+          && ($all = $fs->getTree($root, '', false, $fn))
       ) {
         $all = $this->_treat($all);
-        /*
-        foreach ($routes as $url => $route){
-          if ($tree = bbn\File\Dir::getTree(
-            $route['path'].'/src/mvc/public', false, function ($a) {
-              return (($a['type'] === 'dir') || ($a['ext'] === 'php')) && (basename($a['name']) !== '_ctrl.php');
-            }
-          )
-          ) {
-            $treated = $this->_treat($tree);
-            $this->_merge($all, $treated, $url);
-          }
-        }
-        */
-
         usort($all, [$this, '_sort']);
         array_walk($all, [$this, '_walk']);
-        $res['total'] = 0;
-        //die(X::dump($all));
-        foreach ($all as $i => $it){
+        foreach ($all as $i => &$it){
           $it['cfg']     = json_encode(['order' => $i + 1]);
           $res['total'] += $this->_add($it, $id_page);
+        }
+        unset($it);
+      }
+
+      if (!empty($routes)) {
+        foreach ($routes as $url => $route) {
+          $root = false;
+          if (strpos($route['name'], 'appui-') === 0) {
+            $root = $this->opt->fromCode('access', 'permissions', substr($route['name'], 6), 'appui');
+          }
+          else {
+            if (!($root = $this->opt->fromCode($route['name'], $id_plugins))) {
+              $root = $this->opt->add(['text' => $route['name'], 'code' => $route['name'], 'id_parent' => $id_plugins]);
+            }
+          }
+          if (!$root) {
+            continue;
+            throw new \Exception(sprintf(_("Impossible to find the appui plugin %s"), substr($route['name'], 6)));
+          }
+
+          if ($all = $fs->getTree(
+            $route['path'].'/src/mvc/public',
+            '',
+            false,
+            $fn
+          )
+          ) {
+            $all = $this->_treat($all);
+            usort($all, [$this, '_sort']);
+            array_walk($all, [$this, '_walk']);
+            foreach ($all as $i => &$it){
+              $it['cfg']     = json_encode(['order' => $i + 1]);
+              $res['total'] += $this->_add($it, $root);
+            }
+            unset($it);
+          }
         }
       }
 
