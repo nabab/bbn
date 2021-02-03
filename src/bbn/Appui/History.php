@@ -921,7 +921,7 @@ MYSQL;
             self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
             self::$structures[$table]['id'] = $dbc->tableId($db->tsn($table), $db->getCurrent());
             self::$structures[$table]['fields'] = array_filter($model['fields'], function($a){
-              return $a['id_option'] !== null;
+              return isset($a['id_option']);
             });
           }
         }
