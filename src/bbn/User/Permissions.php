@@ -97,6 +97,15 @@ class Permissions extends bbn\Models\Cls\Basic
             );
             $path = substr($path, strlen($plugin['url']));
           }
+          elseif ($plugin['name']) {
+            $root = $this->opt->fromCode(
+              $plugin['name'],
+              'plugins',
+              'permissions',
+              BBN_APPUI
+            );
+          }
+          break;
         }
       }
     }
