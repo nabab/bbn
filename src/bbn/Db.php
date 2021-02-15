@@ -363,6 +363,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
                  .dgettext(X::tDom(), "with the following error").$e->getMessage();
           throw new \Exception($err);
         }
+
         $this->language->postCreation();
         $this->current  = $cfg['db'] ?? null;
         $this->engine   = $cfg['engine'];
