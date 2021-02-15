@@ -883,7 +883,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       );
       $models      = [];
 
-      foreach ($args['tables'] as $key => $tab){
+      foreach ($args['tables'] as $key => $tab) {
+        if (empty($tab)) {
+          $this->log(\debug_backtrace());
+          throw new \Exception("$key is not defined");
+        }
+
         $tfn = $this->tfn($tab);
 
         // 2 tables in the same statement can't have the same idx
@@ -2598,7 +2603,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
             if (isset($cfg['available_fields'][$f])) {
               if ($cfg['available_fields'][$f] && ($t = $cfg['models'][$cfg['available_fields'][$f]])
               ) {
-                die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));
+                throw new \Exception("Impossible to create the where in union for the following request: ".PHP_EOL.$cfg['sql']);
+                //die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));
               }
             }
           }
@@ -5160,7 +5166,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
     if (\is_array($cfg)
         && array_key_exists('tables', $cfg)
-        && !empty($cfg['bbn_db_treated'])
+        && array_key_exists('bbn_db_treated', $cfg)
         && ($cfg['bbn_db_treated'] === true)
     ) {
       return $cfg;
@@ -5229,16 +5235,14 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     }
 
     if (!empty($res['tables'])) {
-      foreach ($res['tables'] as &$t){
+      foreach ($res['tables'] as $i => $t){
         if (!is_string($t)) {
           X::log([$cfg, debug_backtrace()], 'db_explained');
           throw new \Exception("Impossible to identify the tables, check the log");
         }
 
-        $t = $this->tfn($t);
+        $res['tables'][$i] = $this->tfn($t);
       }
-
-      unset($t);
     }
     else{
       throw new \Error(dgettext(X::tDom(), 'No table given'));

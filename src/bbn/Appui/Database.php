@@ -84,6 +84,7 @@ class Database extends bbn\Models\Cls\Cache
   {
     if (bbn\Str::isUid($host)) {
       $id_host = $host;
+      $db = $engine;
     }
     elseif (!($id_host = $this->hostId($host, $engine))) {
       throw new \Exception(dgettext(X::tDom(), "Impossible to find the host").' '."$host ($engine)");
