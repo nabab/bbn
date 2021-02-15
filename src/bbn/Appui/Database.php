@@ -84,7 +84,6 @@ class Database extends bbn\Models\Cls\Cache
   {
     if (bbn\Str::isUid($host)) {
       $id_host = $host;
-      $db = $engine;
     }
     elseif (!($id_host = $this->hostId($host, $engine))) {
       throw new \Exception(dgettext(X::tDom(), "Impossible to find the host").' '."$host ($engine)");
@@ -94,72 +93,73 @@ class Database extends bbn\Models\Cls\Cache
       throw new \Exception(dgettext(X::tDom(), "Impossible to find the option corresponding to host").' '."$host ($engine)");
     }
 
-    $parent = $this->o->parent($this->o->getIdParent($id_host));
-    if (!isset($this->connections[$parent['code']])) {
-      throw new \Exception(dgettext(X::tDom(), "Unknown engine")." ".$parent['code']);
-    }
+    if ($id_host && ($parent = $this->o->parent($this->o->getIdParent($id_host)))) {
+      if (!isset($this->connections[$parent['code']])) {
+        throw new \Exception(dgettext(X::tDom(), "Unknown engine")." ".$parent['code']);
+      }
 
-    if (!isset($this->connections[$parent['code']][$cfg['code']])) {
-      switch ($parent['code']) {
-        case 'mysql':
-          if (strpos($cfg['code'], '@')) {
-            $bits = bbn\X::split($cfg['code'], '@');
-            if ((count($bits) === 2) && ($password = $this->getPassword($id_host))) {
-              $db_cfg = [
-                'engine' => 'mysql',
-                'user' => $bits[0],
-                'host' => $bits[1],
-                'db' => $db,
-                'pass' => $password
-              ];
-            }
-            else {
-              $db_cfg = [
-                'engine' => 'mysql',
-                'host' => $cfg['code'],
-                'db' => $db
-              ];
-            }
+      if (!isset($this->connections[$parent['code']][$cfg['code']])) {
+        switch ($parent['code']) {
+          case 'mysql':
+            if (strpos($cfg['code'], '@')) {
+              $bits = bbn\X::split($cfg['code'], '@');
+              if ((count($bits) === 2) && ($password = $this->getPassword($id_host))) {
+                $db_cfg = [
+                  'engine' => 'mysql',
+                  'user' => $bits[0],
+                  'host' => $bits[1],
+                  'db' => $db,
+                  'pass' => $password
+                ];
+              }
+              else {
+                $db_cfg = [
+                  'engine' => 'mysql',
+                  'host' => $cfg['code'],
+                  'db' => $db
+                ];
+              }
 
+              try {
+                $this->connections[$parent['code']][$cfg['code']] = new bbn\Db($db_cfg);
+              }
+              catch (\Exception $e) {
+                throw new \Exception($e->getMessage());
+              }
+            }
+            break;
+
+          case 'postgre':
+            if (empty($db) || empty($cfg['path'])) {
+              throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
+            }
+            break;
+
+          case 'sqlite':
+            if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'/'.$db)) {
+              throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
+            }
+            
+            $db_cfg = [
+              'engine' => 'sqlite',
+              'db' => $cfg['path'].'/'.$db
+            ];
             try {
               $this->connections[$parent['code']][$cfg['code']] = new bbn\Db($db_cfg);
             }
             catch (\Exception $e) {
               throw new \Exception($e->getMessage());
             }
-          }
-          break;
+            break;
 
-        case 'postgre':
-          if (empty($db) || empty($cfg['path'])) {
-            throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
-          }
-          break;
-
-        case 'sqlite':
-          if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'/'.$db)) {
-            throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
-          }
-          
-          $db_cfg = [
-            'engine' => 'sqlite',
-            'db' => $cfg['path'].'/'.$db
-          ];
-          try {
-            $this->connections[$parent['code']][$cfg['code']] = new bbn\Db($db_cfg);
-          }
-          catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-          }
-          break;
-
-        default:
-          throw new \Exception(dgettext(X::tDom(), 'Impossible to find the engine').' '.$cfg['engine']);
+          default:
+            throw new \Exception(dgettext(X::tDom(), 'Impossible to find the engine').' '.$cfg['engine']);
+        }
       }
-    }
 
-    if (isset($this->connections[$parent['code']][$cfg['code']])) {
-      return $this->connections[$parent['code']][$cfg['code']];
+      if (isset($this->connections[$parent['code']][$cfg['code']])) {
+        return $this->connections[$parent['code']][$cfg['code']];
+      }
     }
 
     throw new \Exception(dgettext(X::tDom(), "Impossible to get a connection for").' '.$cfg['code']);
@@ -882,7 +882,7 @@ class Database extends bbn\Models\Cls\Cache
   {
     if (!$host) {
       $conn = $this->db;
-      $host = $this->db->getHost();
+      $host = $this->db->getConnectionCode();
       $old_db = $conn->getCurrent();
       if (Str::isUid($db)) {
         $db = $this->o->getCode($db);
@@ -1032,8 +1032,8 @@ class Database extends bbn\Models\Cls\Cache
   {
     $id_db = null;
     if (Str::isUid($host)
-        && ($parent = $this->o->parent($this->o->getIdParent($host)))
-        && ($id_dbs = self::getOptionId('dbs', $parent['code']))
+        && ($engine = $this->o->parent($this->o->getIdParent($host)))
+        && ($id_dbs = $this->o->fromCode('dbs', $engine['id']))
     ) {
       if (!($id_db = $this->o->fromCode($db, $id_dbs))) {
         if ($id_db = $this->o->add(
@@ -1126,33 +1126,26 @@ class Database extends bbn\Models\Cls\Cache
           );
         }
 
-        if ($host) {
-          $host_id = bbn\Str::isUid($host) ? $host : $this->hostId($host);
-        }
-        else {
-          $host_id = $this->retrieveHost($id_db);
-        }
-
-        if ($host_id && $id_connections && $id_functions && $id_procedures && $id_tables) {
+        if ($id_connections && $id_functions && $id_procedures && $id_tables) {
           if (!$this->db->count(
             'bbn_options', [
             'id_parent' => $id_connections,
-            'id_alias' => $host_id
+            'id_alias' => $host
             ]
           )
           ) {
             $this->o->add(
               [
               'id_parent' => $id_connections,
-              'id_alias' => $host_id
+              'id_alias' => $host
               ]
             );
           }
 
           if ($full) {
-            if (!empty($host_id)) {
+            if (!empty($host)) {
               try {
-                $conn = $this->connection($host_id, $db);
+                $conn = $this->connection($host, $engine['code'], $db);
               }
               catch (\Exception $e) {
                 throw new \Exception(dgettext(X::tDom(), "Impossible to connect"));
@@ -1161,7 +1154,7 @@ class Database extends bbn\Models\Cls\Cache
               $tables = $conn->getTables($db);
               if (!empty($tables)) {
                 foreach ($tables as $t) {
-                  $this->importTable($t, $id_db, $host_id);
+                  $this->importTable($t, $id_db, $host);
                 }
               }
             }
@@ -1219,6 +1212,7 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if ($host_id && ($id_tables = $this->o->fromCode('tables', $id_db))) {
+      $engine = $this->o->parent($this->o->id_parent($host_id));
       if (!($id_table = $this->o->fromCode($table, $id_tables))
           && ($id_table = $this->o->add(
             [
@@ -1276,7 +1270,7 @@ class Database extends bbn\Models\Cls\Cache
           && $id_columns
           && $id_keys
           && $db
-          && ($conn = $this->connection($host_id, $db))
+          && ($conn = $this->connection($host_id, $engine['code'], $db))
           && ($m = $conn->modelize($table))
           && !empty($m['fields'])
       ) {
