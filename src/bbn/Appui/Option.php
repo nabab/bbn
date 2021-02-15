@@ -3206,7 +3206,7 @@ class Option extends bbn\Models\Cls\Db
           }
 
           if (!empty($td['id_root_alias'])) {
-            if ($id_alias = $this->fromCode(...$td['id_root_alias'])) {
+            if ($id_root_alias = $this->fromCode(...$td['id_root_alias'])) {
               $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
             }
           }

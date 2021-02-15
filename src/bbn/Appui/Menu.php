@@ -3,7 +3,7 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\X;
-use bbnStr;
+use bbn\Str;
 
 class Menu extends bbn\Models\Cls\Basic
 {
@@ -403,6 +403,7 @@ class Menu extends bbn\Models\Cls\Basic
     }
 
     if (!($menus = $this->pref->getAll($id_menus))) {
+      return [];
       throw new \Exception("Impossible to get the  menus items");
     }
 
