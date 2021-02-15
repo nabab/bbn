@@ -128,6 +128,7 @@ class View
             $path = $this->_plugin && !$this->_component ? substr($this->_path, \strlen($this->_plugin) + 1) : $this->_path;
             //die(var_dump(count($tmp), 'components/'.$this->path.'/'.$this->path, $tmp));
             $idx = $this->_component ? 'components/' : 'mvc/';
+            //die(var_dump($idx.$path, $tmp));
             //die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));
             if ($translations = ($tmp[$idx.$path] ?? null)) {
               $json           = json_encode($translations);
@@ -175,7 +176,6 @@ JAVASCRIPT;
               else {
                 unset($oldTextDomain);
               }
-
             }
           }
 

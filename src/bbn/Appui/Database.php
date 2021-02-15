@@ -641,7 +641,7 @@ class Database extends bbn\Models\Cls\Cache
     $c = $this->db->csn($column);
     $t = $this->db->tsn($table);
     if (Str::isUid($db)
-        && ($tmp = self::getOptionId($c, 'columns', $t, 'tables', $db))
+        && ($tmp = $this->o->fromCode($c, 'columns', $t, 'tables', $db))
     ) {
       $res = $tmp;
     }
@@ -736,10 +736,10 @@ class Database extends bbn\Models\Cls\Cache
     if (bbn\Str::isUid($key)) {
       $res = $this->o->fromCode($key, $table);
     }
-    elseif (Str::isUid($table) && ($tmp = self::getOptionId($key, 'keys', $table))) {
+    elseif (Str::isUid($table) && ($tmp = $this->o->fromCode($key, 'keys', $table))) {
       $res = $tmp;
     }
-    elseif (Str::isUid($db) && ($tmp = self::getOptionId($key, 'keys', $table, 'tables', $db))) {
+    elseif (Str::isUid($db) && ($tmp = $this->o->fromCode($key, 'keys', $table, 'tables', $db))) {
       $res = $tmp;
     }
 

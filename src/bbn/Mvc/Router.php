@@ -890,7 +890,8 @@ class Router
         if (is_file($root . $path . '.' . $t)) {
           $file = $root . $path . '.' . $t;
           break;
-        } elseif ($alt_root) {
+        }
+        elseif ($alt_root) {
           if (is_file($alt_root . $alt_path . '.' . $t)) {
             $file = $alt_root . $alt_path . '.' . $t;
             break;
@@ -898,7 +899,7 @@ class Router
         }
       }
 
-      if (!empty($file)) {
+      if ($file) {
         return $this->_set_known(
           [
           'file' => $file,
