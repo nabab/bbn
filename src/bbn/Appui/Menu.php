@@ -275,7 +275,7 @@ class Menu extends bbn\Models\Cls\Basic
   public function add($id_menu, array $cfg = null): ?string
   {
     $id     = false;
-    $id_opt = $this->fromPath('menu');
+    $id_opt = $this->fromPath('menus');
     if (\is_array($id_menu)) {
       $cfg = $id_menu;
     }
@@ -283,6 +283,7 @@ class Menu extends bbn\Models\Cls\Basic
     if (Str::isUid($id_menu)) {
       $this->deleteCache($id_menu);
     }
+
     if (!empty($cfg)
         && ($id = Str::isUid($id_menu) ? $this->pref->addBit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg))
     ) {

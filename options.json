@@ -1946,30 +1946,10 @@
                     "icon": "nf nf-oct-file_symlink_file"
                 },
                 {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_icon": 1,
-                        "sortable": 1,
-                        "i18n": "en"
-                    },
                     "num": 3,
                     "text": "Menus",
                     "code": "menus",
-                    "icon": "nf nf-oct-tasklist",
-                    "items": [
-                        {
-                            "num": 1,
-                            "text": "Main menu",
-                            "code": "main",
-                            "icon": "nf nf-fa-bars"
-                        },
-                        {
-                            "num": 2,
-                            "text": "Plugins",
-                            "code": "plugins",
-                            "icon": "nf nf-fa-bars"
-                        }
-                    ]
+                    "icon": "nf nf-oct-tasklist"
                 }
             ]
         },
