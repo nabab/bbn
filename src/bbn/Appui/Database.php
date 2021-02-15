@@ -880,10 +880,10 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function modelize(string $table = '', string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
-    $old_db = $conn->getCurrent();
     if (!$host) {
       $conn = $this->db;
       $host = $this->db->getHost();
+      $old_db = $conn->getCurrent();
       if (Str::isUid($db)) {
         $db = $this->o->getCode($db);
       }
@@ -970,6 +970,9 @@ class Database extends bbn\Models\Cls\Cache
       */
 
       return $model;
+    }
+    if (!empty($old_db) && ($old_db !== $db)) {
+      $conn->change($old_db);
     }
 
     return null;
