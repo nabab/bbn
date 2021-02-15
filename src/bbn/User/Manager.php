@@ -417,7 +417,7 @@ You can click the following link to access directly your account:<br>
    * @param array $cfg A configuration array
 	 * @return array|false
 	 */
-	public function edit(array $cfg, String $id_user = null): ?array
+	public function edit(array $cfg, string $id_user = null): ?array
 	{
 	  $u =& $this->class_cfg['arch']['users'];
     $fields = array_unique(array_values($this->class_cfg['arch']['users']));
@@ -445,7 +445,7 @@ You can click the following link to access directly your account:<br>
 		return null;
   }
 
-  public function copy(string $type, String $id, array $data): ?string
+  public function copy(string $type, string $id, array $data): ?string
   {
     $pref = Preferences::getPreferences();
     $cfg = $pref->getClassCfg();
@@ -540,10 +540,10 @@ You can click the following link to access directly your account:<br>
   }
 
 
-  public function sendMail(string $id_user, String $subject, String $text, array $attachments = []): ?int
+  public function sendMail(string $id_user, string $subject, string $text, array $attachments = []): ?int
   {
     if ( !$this->getMailer() ){
-      throw new \Exception(_("Impossible to make hotlinks without a proper mailer parameter"));
+      throw new \Exception(dgettext(X::tDom(), "Impossible to make hotlinks without a proper mailer parameter"));
     }
     if ( ($usr = $this->getUser($id_user)) && $usr['email']){
       return $this->mailer->send([
@@ -564,7 +564,7 @@ You can click the following link to access directly your account:<br>
    * @param int $exp Timestamp of the expiration date
    * @return manager
    */
-  public function makeHotlink(string $id_user, String $message = 'hotlink', $exp = null): self
+  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null): self
   {
     if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {
       switch ($message)
@@ -620,7 +620,7 @@ You can click the following link to access directly your account:<br>
     }
     else{
       X::log("User $id_user not found");
-      throw new \Exception(_('User not found'));
+      throw new \Exception(dgettext(X::tDom(), 'User not found'));
     }
     return $this;
   }
@@ -632,7 +632,7 @@ You can click the following link to access directly your account:<br>
    * @param int $id_group Group ID
    * @return manager
    */
-  public function setUniqueGroup(string $id_user, String $id_group): bool
+  public function setUniqueGroup(string $id_user, string $id_group): bool
   {
     return (bool)$this->db->update($this->class_cfg['tables']['users'], [
       $this->class_cfg['arch']['users']['id_group'] => $id_group
@@ -641,7 +641,7 @@ You can click the following link to access directly your account:<br>
     ]);
   }
 
-  public function userHasOption(string $id_user, String $id_option, bool $with_group = true): bool
+  public function userHasOption(string $id_user, string $id_option, bool $with_group = true): bool
   {
     if ( $with_group && $user = $this->getUser($id_user) ){
       $id_group = $user[$this->class_cfg['arch']['users']['id_group']];
@@ -660,7 +660,7 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function groupHasOption(string $id_group, String $id_option): bool
+  public function groupHasOption(string $id_group, string $id_option): bool
   {
     if (
       ($pref = Preferences::getPreferences()) &&
@@ -674,7 +674,7 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function getOptions(string $type, String $id): ?array
+  public function getOptions(string $type, string $id): ?array
   {
     if (
       ($pref = Preferences::getPreferences()) &&
@@ -694,7 +694,7 @@ You can click the following link to access directly your account:<br>
     return null;
   }
 
-  public function userInsertOption(string $id_user, String $id_option): bool
+  public function userInsertOption(string $id_user, string $id_option): bool
   {
     if (
       ($pref = Preferences::getPreferences()) &&
@@ -708,7 +708,7 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function groupInsertOption(string $id_group, String $id_option): bool
+  public function groupInsertOption(string $id_group, string $id_option): bool
   {
     if (
       ($pref = Preferences::getPreferences()) &&
@@ -722,7 +722,7 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function userDeleteOption(string $id_user, String $id_option): bool
+  public function userDeleteOption(string $id_user, string $id_option): bool
   {
     if (
       ($pref = Preferences::getPreferences()) &&
@@ -736,7 +736,7 @@ You can click the following link to access directly your account:<br>
     return false;
   }
 
-  public function groupDeleteOption(string $id_group, String $id_option): bool
+  public function groupDeleteOption(string $id_group, string $id_option): bool
   {
     if (
       ($pref = Preferences::getPreferences()) &&
@@ -775,7 +775,7 @@ You can click the following link to access directly your account:<br>
     return null;
   }
 
-  public function groupRename(string $id, String $name): bool
+  public function groupRename(string $id, string $name): bool
   {
     $g = $this->class_cfg['arch']['groups'];
     return (bool)$this->db->update($this->class_cfg['tables']['groups'], [
@@ -800,7 +800,7 @@ You can click the following link to access directly your account:<br>
     $g = $this->class_cfg['arch']['groups'];
     if ( $this->groupNumUsers($id) ){
       /** @todo Error management */
-      throw new \Exception(_("Impossible to delete this group as it has users"));
+      throw new \Exception(dgettext(X::tDom(), "Impossible to delete this group as it has users"));
     }
     return (bool)$this->db->delete($this->class_cfg['tables']['groups'], [
       $g['id'] => $id

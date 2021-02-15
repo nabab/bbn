@@ -73,7 +73,7 @@ class System2 extends bbn\Models\Cls\Basic
         $this->current = '';
         return true;
       }
-      $this->error = _('Impossible to connect to the WebDAV host');
+      $this->error = dgettext(X::tDom(), 'Impossible to connect to the WebDAV host');
     }
     return false;
   }
@@ -99,7 +99,7 @@ class System2 extends bbn\Models\Cls\Basic
         $this->prefix = 'ftp://'.$cfg['user'].':'.$cfg['pass'].'@'.$cfg['host'];
         return true;
       }
-      $this->error = _('Impossible to connect to the FTP host');
+      $this->error = dgettext(X::tDom(), 'Impossible to connect to the FTP host');
     }
     return false;
   }
@@ -114,20 +114,20 @@ class System2 extends bbn\Models\Cls\Basic
     if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
       $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22);
       if ( !$this->cn ){
-        $this->error = _("Could not connect through SSH.");
+        $this->error = dgettext(X::tDom(), "Could not connect through SSH.");
       }
       else if ( @ssh2_auth_password($this->cn, $cfg['user'], $cfg['pass']) ){
-        //die(_("Could not authenticate with username and password."));
+        //die(dgettext(X::tDom(), "Could not authenticate with username and password."));
         $this->obj = @ssh2_sftp($this->cn);
         if ( $this->obj ){
           $this->current = ssh2_sftp_realpath($this->obj, '.');
           $this->prefix = 'ssh2.sftp://'.$this->obj;
           return true;
         }
-        $this->error = _("Could not initialize SFTP subsystem.");
+        $this->error = dgettext(X::tDom(), "Could not initialize SFTP subsystem.");
       }
       else{
-        $this->error = _("Could not authenticate with username and password.");
+        $this->error = dgettext(X::tDom(), "Could not authenticate with username and password.");
       }
     }
     return false;
@@ -152,7 +152,7 @@ class System2 extends bbn\Models\Cls\Basic
     return true;
   }
 
-  private function _propfind_deep($path, $props, String $deep ){
+  private function _propfind_deep($path, $props, string $deep ){
     $collection = $this->obj->propFind($this->getRealPath($path), $props, $deep);
     $res = [];
     if ( !empty($collection) ){
@@ -177,7 +177,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @return array
    */
   //@todo public just to test
-  private function _get_items(string $path, $type = 'both', bool $hidden = false, String $detailed = ''): array
+  private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
     $files = [];
     $dirs = [];
@@ -218,7 +218,7 @@ class System2 extends bbn\Models\Cls\Basic
       }
     }
     if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
-      $fs = ftp_mlsd($this->obj, substr($path, Strlen($this->prefix)));
+      $fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)));
       foreach ( $fs as $f ){
         if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0)) ){
           $ok = 0;
@@ -371,7 +371,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array
    */
-  private function _scand(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): array
+  private function _scand(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
     foreach ( $this->_get_items($path, 'dir', $hidden, $detailed) as $it ){
@@ -393,7 +393,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array
    */
-  private function _scan(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): array
+  private function _scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
     foreach ( $this->_get_items($path, 'both', $hidden, $detailed) as $it ){
@@ -444,10 +444,10 @@ class System2 extends bbn\Models\Cls\Basic
       }
       if ( $full ){
         if ( $this->mode === 'ssh' ){
-          return @ssh2_sftp_rmdir($this->obj, substr($path, Strlen($this->prefix)));
+          return @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
         }
         if ( $this->mode === 'ftp' ){
-          return @ftp_rmdir($this->obj, substr($path, Strlen($this->prefix)));
+          return @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
         }
         else if ( $this->mode === 'nextcloud' ){
           if ( $this->obj->request('DELETE', $path) ){
@@ -463,10 +463,10 @@ class System2 extends bbn\Models\Cls\Basic
     }
     if ( $this->isFile($path) ){
       if ( $this->mode === 'ssh' ){
-        return ssh2_sftp_unlink($this->obj, substr($path, Strlen($this->prefix)));
+        return ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
       }
       if ( $this->mode === 'ftp' ){
-        return ftp_delete($this->obj, substr($path, Strlen($this->prefix)));
+        return ftp_delete($this->obj, substr($path, strlen($this->prefix)));
       }
       else if ( $this->mode === 'nextcloud' ){
         if ( $this->obj->request('DELETE', $path) ){
@@ -483,7 +483,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $dest
    * @return bool
    */
-  private function _copy(string $source, String $dest): bool
+  private function _copy(string $source, string $dest): bool
   {
     if ( $this->isFile($source) ){
       if ( $this->mode === 'nextcloud' ){
@@ -518,8 +518,8 @@ class System2 extends bbn\Models\Cls\Basic
    */
   private function _rename($source, $dest): bool
   {
-    $file1 = substr($source, Strlen($this->prefix));
-    $file2 = substr($dest, Strlen($this->prefix));
+    $file1 = substr($source, strlen($this->prefix));
+    $file2 = substr($dest, strlen($this->prefix));
     
     if ( $this->mode === 'ssh' ){
       return ssh2_sftp_rename($this->obj, $file1, $file2);
@@ -666,7 +666,7 @@ class System2 extends bbn\Models\Cls\Basic
       $path = '';
     }
     while ( $path && (substr($path, -1) === '/') ){
-      $path = substr($path, 0, Strlen($path) - 1);
+      $path = substr($path, 0, strlen($path) - 1);
     }
     return $path;
   }
@@ -721,12 +721,12 @@ class System2 extends bbn\Models\Cls\Basic
     // The full path without the obj prefix, and if it's not absolute we remove the initial slash
     
     if ( $this->mode ===  'nextcloud' ){
-      return $file = substr($file, Strlen($this->prefix) + ($is_absolute ? 0 : 1) -1 );  
+      return $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1) -1 );  
     }
-    $file = substr($file, Strlen($this->prefix) + ($is_absolute ? 0 : 1));
+    $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
     
     if ( !$is_absolute && isset($this->current) ){
-      $file = substr($file, Strlen($this->current));
+      $file = substr($file, strlen($this->current));
     }
     return $file;
   }
@@ -762,7 +762,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array|null
    */
-  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, String $detailed = ''): ?array
+  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->isDir($path) ){
       //die(var_dump($path));
@@ -787,7 +787,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array|null
    */
-  public function getDirs(string $path = '', bool $hidden = false, String $detailed = ''): ?array
+  public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->isDir($path) ){
       $is_absolute = strpos($path, '/') === 0;
@@ -885,7 +885,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param bool $hidden
    * @return array|null
    */
-  public function scand(string $path, bool $hidden = false, String $detailed = ''): ?array
+  public function scand(string $path, bool $hidden = false, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->isDir($path) ){
       clearstatcache();
@@ -909,7 +909,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array|null
    */
-  public function scan(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): ?array
+  public function scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->isDir($path) ){
       clearstatcache();
@@ -968,7 +968,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param bool $append
    * @return bool
    */
-  public function putContents(string $file, String $content, bool $append = false): bool
+  public function putContents(string $file, string $content, bool $append = false): bool
   {
     $path = dirname($file);
     if ( $this->check() && $this->isDir($path) ){
@@ -1025,7 +1025,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param system|null $fs
    * @return bool
    */
-  public function copy(string $source, String $dest, bool $overwrite = false, System $fs = null): bool
+  public function copy(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ( $this->check() ){
       $nfs =& $this;
@@ -1083,7 +1083,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param system|null $fs
    * @return bool
    */
-  public function move(string $source, String $dest, bool $overwrite = false, System $fs = null): bool
+  public function move(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ( $this->check() && $this->exists($source) ){
       $name = basename($source);

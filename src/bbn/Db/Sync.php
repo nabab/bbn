@@ -112,7 +112,7 @@ class Sync
    * @param string  $sync_table
    * @return void
    */
-  public static function init(Db $db, array $sync_cfg = [], array $tables = [], String $sync_table = ''): void
+  public static function init(Db $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void
   {
     if (self::$is_init) {
       throw new \Exception("Impossible to init twice the dbsync class");
@@ -124,7 +124,7 @@ class Sync
       self::$sync_table = $sync_table;
     }
     if (!Str::checkName(self::$sync_table)) {
-      throw new \Exception(_("Table name not allowed"));
+      throw new \Exception(dgettext(X::tDom(), "Table name not allowed"));
     }
     if (empty($sync_cfg)) {
       self::$sync_connection = new Db(self::$default_cfg);
@@ -136,7 +136,7 @@ class Sync
         self::$sync_connection = $sync_cfg['connection'];
       }
       else {
-        throw new \Exception(_("Invalid connection given to the synchronization class"));
+        throw new \Exception(dgettext(X::tDom(), "Invalid connection given to the synchronization class"));
       }
     }
     elseif (isset($sync_cfg['engine'])) {

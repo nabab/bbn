@@ -27,6 +27,7 @@ class X
 
   private static $_cli;
 
+  private static $_textdomain;
 
   /**
   *
@@ -92,6 +93,21 @@ class X
   }
 
 
+  public static function tDom(): string
+  {
+    if (!self::$_textdomain) {
+      $td = 'bbn';
+      $f = dirname(__DIR__).'/version.txt';
+      if (is_file($f)) {
+        $td .= file_get_contents($f);
+      }
+
+      self::$_textdomain = $td;
+    }
+
+    return self::$_textdomain;
+  }
+
   /**
    * Returns a microtime with 4 digit after the coma
    *
@@ -114,7 +130,7 @@ class X
    * @param string $file Filename, default: "misc".
    * @return void
    */
-  public static function log($st, String $file = 'misc'): void
+  public static function log($st, string $file = 'misc'): void
   {
     if (\defined('BBN_DATA_PATH')) {
       $log_file  = BBN_DATA_PATH.'logs/'.$file.'.log';
@@ -223,7 +239,7 @@ class X
    * @param string       $prop
    * @return boolean|null
    */
-  public static function hasProp(iterable $obj, String $prop, bool $check_empty = false): ?bool
+  public static function hasProp(iterable $obj, string $prop, bool $check_empty = false): ?bool
   {
     if (is_array($obj)) {
       return \array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
@@ -522,18 +538,8 @@ class X
    */
   public static function toArray($obj): array
   {
-    if (\is_string($obj)) {
-      $res = json_decode($obj, 1);
-    }
-
-    foreach ($obj as $p => &$v) {
-      if (is_object($v)) {
-        $v = self::toArray($v);
-      }
-    }
-
-    unset($v);
-    return (array)$obj;
+    $obj = \is_string($obj) ? $obj : json_encode($obj);
+    return json_decode($obj, true);
   }
 
 
@@ -1142,7 +1148,7 @@ class X
    * @param string|null $items If null the function will be applied just to the item of the parent array
    * @return array
    */
-  public static function map(callable $fn, array $ar, String $items = null): array
+  public static function map(callable $fn, array $ar, string $items = null): array
   {
     $res = [];
     foreach ($ar as $key => $a) {
@@ -1210,19 +1216,30 @@ class X
    * @param array $where The where condition
    * @return bool|int
    */
-  public static function find(array $ar, array $where, int $from = 0)
+  public static function find(array $ar, $where, int $from = 0)
   {
     //die(var_dump($where));
     if (!empty($where)) {
       foreach ($ar as $i => $v) {
         if (!$from || ($i >= $from)) {
           $ok = 1;
-          $v  = (array)$v;
-          foreach ($where as $k => $w) {
-            if (!array_key_exists($k, $v) || ($v[$k] !== $w)) {
-              $ok = false;
-              break;
+          if (is_callable($where)) {
+            $ok = (bool)$where($v);
+          }
+          elseif (is_array($where)) {
+            $v = (array)$v;
+            foreach ($where as $k => $w) {
+              if (!array_key_exists($k, $v)
+                || (Str::isNumber($v[$k], $w) && ($v[$k] != $w))
+                || (!Str::isNumber($v[$k], $w) && ($v[$k] !== $w))
+              ) {
+                $ok = false;
+                break;
+              }
             }
+          }
+          else {
+            $ok = $v === $filter;
           }
 
           if ($ok) {
@@ -1236,7 +1253,7 @@ class X
   }
 
 
-  public static function filter(array $ar, array $where): array
+  public static function filter(array $ar, $where): array
   {
     $res = [];
     $num = count($ar);
@@ -1256,13 +1273,13 @@ class X
   }
 
 
-  public static function getRows(array $ar, array $where): array
+  public static function getRows(array $ar, $where): array
   {
     return self::filter($ar, $where);
   }
 
 
-  public static function sum(array $ar, String $field, array $where = null): float
+  public static function sum(array $ar, string $field, $where = null): float
   {
     $tot = 0;
     if ($res = $where ? self::filter($ar, $where) : $ar) {
@@ -1305,7 +1322,7 @@ class X
    * @return bool|mixed
    *
    */
-  public static function getRow(array $r, array $where): ?array
+  public static function getRow(array $r, $where): ?array
   {
     if (($res = self::find($r, $where)) !== null) {
       return $r[$res];
@@ -1344,7 +1361,7 @@ class X
    * @param string $field The field where to look for
    * @return bool|mixed
    */
-  public static function getField(array $r, array $where, String $field)
+  public static function getField(array $r, $where, string $field)
   {
     if (($res = self::getRow($r, $where)) && isset($res[$field])) {
       return $res[$field];
@@ -1414,8 +1431,8 @@ class X
       $ar,
       function ($a, $b) use ($backward) {
         if (!Str::isNumber($a, $b)) {
-          $a = str_replace('.', '0', Str_replace('_', '1', Str::changeCase($a, 'lower')));
-          $b = str_replace('.', '0', Str_replace('_', '1', Str::changeCase($b, 'lower')));
+          $a = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a, 'lower')));
+          $b = str_replace('.', '0', str_replace('_', '1', Str::changeCase($b, 'lower')));
           return strcmp($a, $b);
         }
 
@@ -1482,8 +1499,8 @@ class X
           $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
           $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
           if (!Str::isNumber($v1, $v2)) {
-            $a1  = str_replace('.', '0', Str_replace('_', '1', Str::changeCase($a1, 'lower')));
-            $a2  = str_replace('.', '0', Str_replace('_', '1', Str::changeCase($a2, 'lower')));
+            $a1  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a1, 'lower')));
+            $a2  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a2, 'lower')));
             $cmp = strcmp($a1, $a2);
             if (!empty($cmp)) {
               return $cmp;
@@ -1846,7 +1863,7 @@ class X
    * @param bool   $strict
    * @return bool
    */
-  public static function isSame(string $file1, String $file2, $strict = false): bool
+  public static function isSame(string $file1, string $file2, $strict = false): bool
   {
     if (!is_file($file1) || !is_file($file2)) {
       throw Exception("Boo! One of the files given to the X::is_same function doesn't exist");
@@ -1914,7 +1931,7 @@ class X
   * @param bool   $with_titles Set it to false if you don't want the columns titles. Default true
   * @return bool
   */
-  public static function toExcel(array $data, String $file, bool $with_titles = true, array $cfg = []): bool
+  public static function toExcel(array $data, string $file, bool $with_titles = true, array $cfg = []): bool
   {
     $excel    = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet    = $excel->getActiveSheet();
@@ -2095,7 +2112,7 @@ class X
   * @param int    $pr Precision
   * @return boolean
   */
-  public static function compareFloats($v1, $v2, String $op = '===', int $pr = 4): bool
+  public static function compareFloats($v1, $v2, string $op = '===', int $pr = 4): bool
   {
     $v1 = round((float)$v1 * pow(10, $pr));
     $v2 = round((float)$v2 * pow(10, $pr));
@@ -2117,7 +2134,158 @@ class X
     return false;
   }
 
+  public static function fixJson($json) {
+    $newJSON = '';
 
+    $jsonLength = strlen($json);
+    $escaped = false;
+    $opened_b = 0;
+    $opened_cb = 0;
+    $unescaped = false;
+    $squotes = false;
+    $dquotes = false;
+    $current = '';
+    $end_value = false;
+    $end_prop = false;
+    $last_quotes = '';
+    $prop = false;
+    $last_char = '';
+    for ($i = 0; $i < $jsonLength; $i++) {
+      //var_dump($a);
+      $add = '';
+      $a = $json[$i];
+      switch ($a) {
+        case '\\':
+          if ($escaped) {
+            $escaped = false;
+            $unescaped = true;
+          }
+          else {
+            $escaped = true;
+          }
+          break;
+        case '"':
+          if (!$escaped && !$squotes) {
+            $dquotes = !$dquotes;
+            $last_quotes = '"';
+          }
+          break;
+        case "'":
+          if (!$escaped && !$dquotes) {
+            $squotes = !$squotes;
+            $last_quotes = "'";
+          }
+          break;
+        case '{':
+          if (!$dquotes && !$squotes) {
+            $opened_cb++;
+            $last_quotes = "";
+          }
+          break;
+        case '}':
+          if (!$dquotes && !$squotes) {
+            $opened_cb--;
+            $end_value = true;
+            if ($last_char === ',') {
+              $newJSON = substr($newJSON, 0, -1);
+            }
+          }
+          break;
+        case '[':
+          if (!$dquotes && !$squotes) {
+            $opened_b++;
+            $last_quotes = "";
+          }
+          break;
+        case ']':
+          if (!$dquotes && !$squotes) {
+            $opened_b--;
+            $end_value = true;
+            if ($last_char === ',') {
+              $newJSON = substr($newJSON, 0, -1);
+            }
+          }
+          break;
+        case ':':
+          if (!$dquotes && !$squotes) {
+            $end_prop = true;
+          }
+          break;
+        case ',':
+          if (!$dquotes && !$squotes) {
+            $end_value = true;
+          }
+          break;
+        case '/':
+          if ($last_char !== '\\') {
+            //$current .= '\\';
+          }
+          break;
+        default:
+          if ($escaped) {
+            $escaped = false;
+          }
+          if ($unescaped) {
+            $unescaped = false;
+          }
+      }
+      if ($end_prop) {
+        if ($last_quotes === '"') {
+          $add .= $current;
+        }
+        elseif ($last_quotes === "'") {
+          $current = trim($current);
+          $add .= '"'.Str::escapeDquote(Str::unescapeSquote(substr($current, 1, -1))).'":';
+        }
+        else {
+          $add .= '"'.Str::escapeDquote($current).'":';
+        }
+
+        $end_prop = false;
+      }
+      elseif ($end_value) {
+        if ($current) {
+          if ($last_quotes) {
+            $current = trim($current);
+            $add .= '"'.Str::escapeDquote(substr($current, 1, -1)).'"';
+          }
+          else {
+            $add .= Str::escapeDquote($current);
+          }
+
+          if ($a !== ' ') {
+            $add .= $a;
+          }
+        }
+        else {
+          $current .= $a;
+        }
+        $last_quotes = "";
+        $end_value = false;
+      }
+      elseif (!$dquotes && !$squotes && (($a === '[') || ($a === '{'))) {
+        $add .= $a;
+      }
+      elseif ($dquotes || $squotes || ($a !== ' ')) {
+        $current .= $a;
+      }
+
+      if ($add) {
+        $newJSON .= $add;
+        $current = '';
+      }
+
+      if ($a !== ' ') {
+        $last_char = $a;
+      }
+    }
+
+    if ($current) {
+      $newJSON .= $current;
+    }
+
+    return $newJSON;
+  }
   /**
   * Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).
   *
@@ -2198,19 +2366,19 @@ class X
   }
 
 
-  public static function join(array $ar, String $glue = ''): string
+  public static function join(array $ar, string $glue = ''): string
   {
     return implode($glue, $ar);
   }
 
 
-  public static function concat(string $st, String $separator): array
+  public static function concat(string $st, string $separator): array
   {
     return explode($separator, $st);
   }
 
 
-  public static function split(string $st, String $separator): array
+  public static function split(string $st, string $separator): array
   {
     return explode($separator, $st);
   }

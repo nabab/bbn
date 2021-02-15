@@ -36,7 +36,7 @@ class logger
 		}
 		else {
 			//if the file $this->file does not exist it creates the file and put the timestemp as content
-			if ( $system->putContents($this->file, Strtotime(date('Y-m-d H:i:s'))) ){
+			if ( $system->putContents($this->file, strtotime(date('Y-m-d H:i:s'))) ){
 				die(var_dump('fatto', $system->getContents($this->file)));
 			}
 			die(var_dump($this->file));

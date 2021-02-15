@@ -31,7 +31,7 @@ class gitRest extends \bbn\Api\rest
   }
 
 
-  public function createRepositoryRemote(string $token, array $scope, String $api="gitbucket"){
+  public function createRepositoryRemote(string $token, array $scope, string $api="gitbucket"){
     if ( $token &&
         !empty($scope['name']) &&
         $api
@@ -133,7 +133,7 @@ class gitRest extends \bbn\Api\rest
     return $arr;
 	}
 
-  public function pushInRemote(string $repository, String $user, String $passw, String $server="github.com"){
+  public function pushInRemote(string $repository, string $user, string $passw, string $server="github.com"){
     if ($repository && $user && $passw && $server){
       $remote = NULL;
       $params['--repo'] = 'https://'.$user.':'.$passw.'@'.$server.'/'.$user.'/'.$repository.'.git';
@@ -166,7 +166,7 @@ class gitRest extends \bbn\Api\rest
     return false;
   }
 
-  public function removeRemoteBranch( string $repository, String $branch, String $user, String $passw, String $server="github.com" ){
+  public function removeRemoteBranch( string $repository, string $branch, string $user, string $passw, string $server="github.com" ){
     if ( $repository && $branch && $user && $passw && $server ){
        	$remote = 'https://'.$user.':'.$passw.'@'.$server.'/'.$repository.'.git';
         try{
@@ -182,7 +182,7 @@ class gitRest extends \bbn\Api\rest
     return false;
   }
 
-  public function createRemoteRepository(string $repository, String $user, String $passw, String $localPath, String $server="github.com"){
+  public function createRemoteRepository(string $repository, string $user, string $passw, string $localPath, string $server="github.com"){
     if ( $repository && $user && $passw && $server && $localPath ){
 			$rep = self::init($localPath);
       if ( is_object($rep) ){

@@ -359,8 +359,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
           parent::__construct(...($cfg['args'] ?: []));
         }
         catch (\PDOException $e){
-          $err = _("Impossible to create the connection")." $engine/$db "
-                 ._("with the following error").$e->getMessage();
+          $err = dgettext(X::tDom(), "Impossible to create the connection")." $engine/$db "
+                 .dgettext(X::tDom(), "with the following error").$e->getMessage();
           throw new \Exception($err);
         }
         $this->language->postCreation();
@@ -385,8 +385,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     if (!$this->engine) {
       $connection  = $cfg['engine'] ?? 'No engine';
       $connection .= '/'.($cfg['db'] ?? 'No DB');
-      $this->log(_("Impossible to create the connection for").' '.$connection);
-      throw new \Exception(_("Impossible to create the connection for").' '.$connection);
+      $this->log(dgettext(X::tDom(), "Impossible to create the connection for").' '.$connection);
+      throw new \Exception(dgettext(X::tDom(), "Impossible to create the connection for").' '.$connection);
     }
   }
 
@@ -962,7 +962,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
           strpos($col, '->>"$.')  ||
           strpos($col, "->>'$.") ||
           */
-            // String as value
+            // string as value
             || preg_match('/^[\\\'\"]{1}[^\\\'\"]*[\\\'\"]{1}$/', $col)
         ) {
           $res['available_fields'][$col] = false;
@@ -1534,7 +1534,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $db    The database name if different from the current one
    * @return array with tables and fields related to the searched foreign key
    */
-  public function getForeignKeys(string $col, String $table, String $db = null): array
+  public function getForeignKeys(string $col, string $table, string $db = null): array
   {
     if (!$db) {
       $db = $this->current;
@@ -2717,7 +2717,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param array        $order  The "order" condition.
    * @return array
    */
-  public function stat(string $table, String $column, array $where = [], array $order = []): ?array
+  public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
     if ($this->check()) {
       return $this->rselectAll(
@@ -2772,7 +2772,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param array        $order The "order" condition
    * @return array | false
    */
-  public function countFieldValues($table, String $field = null,  array $where = [], array $order = [])
+  public function countFieldValues($table, string $field = null,  array $where = [], array $order = [])
   {
     if (\is_array($table) && \is_array($table['fields']) && count($table['fields'])) {
       $args  = $table;
@@ -2820,7 +2820,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param array        $order The "order" condition
    * @return array
    */
-  public function getColumnValues($table, String $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     $res = null;
     if ($this->check()) {
@@ -2861,7 +2861,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param array        $order The "order" condition
    * @return array
    */
-  public function getValuesCount($table, String $field = null, array $where = [], $order): array
+  public function getValuesCount($table, string $field = null, array $where = [], $order): array
   {
     return $this->countFieldValues($table, $field, $where, $order);
   }
@@ -4249,7 +4249,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $key   The key's name.
    * @return bool
    */
-  public function deleteIndex(string $table, String $key): bool
+  public function deleteIndex(string $table, string $key): bool
   {
     return $this->language->deleteIndex($table, $key);
   }
@@ -4269,7 +4269,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $db
    * @return bool
    */
-  public function createUser(string $user = null, String $pass = null, String $db = null): bool
+  public function createUser(string $user = null, string $pass = null, string $db = null): bool
   {
     return $this->language->createUser($user, $pass, $db);
   }
@@ -4310,7 +4310,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $host. The host
    * @return array
    */
-  public function getUsers(string $user = '', String $host = ''): ?array
+  public function getUsers(string $user = '', string $host = ''): ?array
   {
     return $this->language->getUsers($user, $host);
   }
@@ -4321,7 +4321,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $type
    * @return int
    */
-  public function dbSize(string $database = '', String $type = ''): int
+  public function dbSize(string $database = '', string $type = ''): int
   {
     return $this->language->dbSize($database, $type);
   }
@@ -4332,7 +4332,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $type
    * @return int
    */
-  public function tableSize(string $table, String $type = ''): int
+  public function tableSize(string $table, string $type = ''): int
   {
     return $this->language->tableSize($table, $type);
   }
@@ -4343,7 +4343,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $database
    * @return array|false|mixed
    */
-  public function status(string $table = '', String $database = '')
+  public function status(string $table = '', string $database = '')
   {
     return $this->language->status($table, $database);
   }
@@ -4724,7 +4724,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @return bool|string
    */
-  private function _db_cache_name(string $item, String $mode)
+  private function _db_cache_name(string $item, string $mode)
   {
     $r = false;
     if ($this->engine === 'sqlite') {
@@ -4844,7 +4844,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param int    $placeholders The number of placeholders.
    * @param array  $options      The driver options.
    */
-  private function _add_query(string $hash, String $statement, String $kind, int $placeholders, array $options)
+  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
   {
     $now                  = microtime(true);
     $this->queries[$hash] = [
@@ -4897,7 +4897,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
           X::move($this->list_queries, $idx, $last_index);
         }
         else {
-          throw new \Exception(_("Impossible to find the corresponding hash"));
+          throw new \Exception(dgettext(X::tDom(), "Impossible to find the corresponding hash"));
         }
       }
       else {
@@ -4921,11 +4921,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       if (empty($this->queries)) {
         $debug = debug_backtrace();
         X::log($debug, 'db_explained');
-        throw new \Exception(_("The queries object is empty!"));
+        throw new \Exception(dgettext(X::tDom(), "The queries object is empty!"));
       }
     }
     else {
-      throw new \Exception(_("Impossible to find the query corresponding to this hash"));
+      throw new \Exception(dgettext(X::tDom(), "Impossible to find the query corresponding to this hash"));
     }
 
   }
@@ -5009,7 +5009,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $kind
    * @return array
    */
-  private function _add_kind(array $args, String $kind = 'SELECT'): ?array
+  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
   {
     $kind = strtoupper($kind);
     if (!isset($args[0])) {
@@ -5241,7 +5241,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       unset($t);
     }
     else{
-      throw new \Error(_('No table given'));
+      throw new \Error(dgettext(X::tDom(), 'No table given'));
       return [];
     }
 

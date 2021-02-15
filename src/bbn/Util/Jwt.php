@@ -18,7 +18,7 @@ class Jwt
 
   protected $ttl;
 
-  public function prepare(string $id_user, String $fingerprint, int $ttl = 300)
+  public function prepare(string $id_user, string $fingerprint, int $ttl = 300)
   {
     $this->sub = $fingerprint;
     $this->aud = $id_user;

@@ -2,6 +2,7 @@
 //https://medium.com/@cetteup/how-to-access-nextcloud-using-webdav-and-php-2c00a04e35b9
 namespace bbn\Api;
 use bbn;
+use bbn\X;
 
 class Nextcloud extends bbn\Models\Cls\Basic{
   
@@ -25,14 +26,14 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       ]);
     }
     if ( !$this->obj ){
-      $this->error = _("Missing parameters");
+      $this->error = dgettext(X::tDom(), "Missing parameters");
     }
   }
 
   /**
    * Returns the size of the given dir or file, if no path is given it returns the size of the root folder
    *
-   * @param String $path
+   * @param string $path
    * @return void
    */
   public function getSize($path = '')
@@ -62,7 +63,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   /**
    * Deletes the given file or folder
    *
-   * @param String $file
+   * @param string $file
    * @return Boolean
    */
   public function delete($path)
@@ -78,7 +79,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   /**
    * Returns true if the given $path exists
    *
-   * @param String $path
+   * @param string $path
    * @return Boolean
    */
   public function exists($path)
@@ -105,7 +106,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   /**
    * Creates a dir at the given path
    *
-   * @param String $dir
+   * @param string $dir
    * @return Boolean
    */
   public function mkdir($dir){
@@ -118,11 +119,11 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
   /**
    * Copies the given file or folder to the given destination, if the given destination already exists throws an error.
-   * @param String $source
-   * @param String $dest
+   * @param string $source
+   * @param string $dest
    * @return Boolean
    */
-  public function copy(string $source, String $dest): bool
+  public function copy(string $source, string $dest): bool
   {
     
     if ( $this->exists($source) ){
@@ -134,7 +135,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
           ]);
         }
         else {
-          $this->error = _("The given destination already exists");
+          $this->error = dgettext(X::tDom(), "The given destination already exists");
           return false;
         }
       }
@@ -142,11 +143,11 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   }  
   /**
    * Renames files or folder from the $old name to the $new name-
-   * @param String $old
-   * @param String $new
+   * @param string $old
+   * @param string $new
    * @return Boolean
    */
-  public function rename(string $old, String $new): bool
+  public function rename(string $old, string $new): bool
   {
     if ( $this->exists($old) ){
       if ( !$this->exists($new) ){
@@ -155,19 +156,19 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         ]);
       }
       else {
-        $this->error = _("The new name given already exists");
+        $this->error = dgettext(X::tDom(), "The new name given already exists");
         return false;
       }
     }
     else {
-      $this->error = _("The given path does not correspond to a file or a directory");
+      $this->error = dgettext(X::tDom(), "The given path does not correspond to a file or a directory");
       return false;
     }
   }
   
   /**
    * Returns true if the given $path corresponds to a file.
-   * @param String $path
+   * @param string $path
    * @return Boolean
    */
   public function isFile(string $path)
@@ -182,7 +183,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   
   /**
    * Returns true if the given $path corresponds to a directory.
-   * @param String $path
+   * @param string $path
    * @return Boolean
    */
   public function isDir(string $path)
@@ -197,7 +198,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   
   /**
    * Returns the date of last modification of the given path
-   * @param String $path
+   * @param string $path
    */
   public function filemtime(string $path)
   {
@@ -209,12 +210,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         return $mtime['{DAV:}getlastmodified'];
       }
       else {
-        $this->error = _("The last modification date cannot be retrieved");
+        $this->error = dgettext(X::tDom(), "The last modification date cannot be retrieved");
         return null;
       }  
     }
     else {
-       $this->error = _("The given path doesn't exist");
+       $this->error = dgettext(X::tDom(), "The given path doesn't exist");
     }
   }
   
@@ -227,9 +228,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
   /**
    * Download the given file
-   * @param String $file
+   * @param string $file
    */
-  public function download(String $file):String
+  public function download(string $file):String
   {
     if ( $this->exists($file) && $this->isFile($file) ){
       $dest = '';
@@ -262,7 +263,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $detailed
    * @return array
    */
-  public function getItems(string $path = '', $type = 'both', bool $hidden = false, String $detailed = ''): array
+  public function getItems(string $path = '', $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
     if ( empty($path) || ($path === '.') ){
       $path = self::prefix;
@@ -318,13 +319,13 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       }  
     }
     else {
-      $this->error = _("The path doesn't exists or it's not a directory");
+      $this->error = dgettext(X::tDom(), "The path doesn't exists or it's not a directory");
     }
   }
 
   /**
    * Returns the real path. 
-   * @param String $path
+   * @param string $path
    * @return String
    */
   public function getRealPath(string $path): string
@@ -340,14 +341,14 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
   /**
    * Returns the system path. 
-   * @param String $path
+   * @param string $path
    * @param Boolean $is_absolute
    * @return String
    */
   public function getSystemPath(string $file, bool $is_absolute = true): string
   {
     if ( strpos($file, self::prefix) === 0 ){
-      return substr($file, Strlen(self::prefix) + ($is_absolute ? 0 : 1) -1 );
+      return substr($file, strlen(self::prefix) + ($is_absolute ? 0 : 1) -1 );
     }
     else {
       return $path;
@@ -357,7 +358,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   /**
    * Returns the content of the given file
    *
-   * @param String $file
+   * @param string $file
    * @return String
    */
   public function getContents($file): string
@@ -381,7 +382,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $detailed
    * @return array|null
    */
-  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, String $detailed = ''): ?array
+  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     //exists and is_dir is checked $path in the function get_items
     $is_absolute = strpos($path, '/') === 0;
@@ -390,7 +391,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $this->getItems($path, $filter ?: $type, $hidden, $detailed);
   }
 
-  public function upload(array $files, String $path): bool
+  public function upload(array $files, string $path): bool
   {
     $success = false;
     if ( !empty($files) && !empty($path) ){

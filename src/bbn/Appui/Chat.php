@@ -176,8 +176,8 @@ SQL;
 
       $this->_add_bot_message(
         $id, [
-        $id_user => _('You created this group'),
-        "$username " . _('created this group')
+        $id_user => dgettext(X::tDom(), 'You created this group'),
+        "$username " . dgettext(X::tDom(), 'created this group')
         ]
       );
       foreach ($users as $user) {
@@ -185,9 +185,9 @@ SQL;
           $name = $this->user->getName($user);
           $this->_add_bot_message(
             $id, [
-            $id_user => _('You added') . " $name " .  _('to the group'),
-            $user => $username . ' ' . _('added you to the group'),
-            "$username " . _('added') . " $name " . _('to the group')
+            $id_user => dgettext(X::tDom(), 'You added') . " $name " .  dgettext(X::tDom(), 'to the group'),
+            $user => $username . ' ' . dgettext(X::tDom(), 'added you to the group'),
+            "$username " . dgettext(X::tDom(), 'added') . " $name " . dgettext(X::tDom(), 'to the group')
             ]
           );
           if (\in_array($user, $admins, true)) {
@@ -227,7 +227,7 @@ SQL;
    * @param string $message
    * @return int|null
    */
-  public function talk(string $id_chat, String $message): ?int
+  public function talk(string $id_chat, string $message): ?int
   {
     if ($this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked']) {
       $users = $this->getParticipants($id_chat);
@@ -280,7 +280,7 @@ SQL;
   }
 
 
-  public function setTitle(string $id_chat, String $title = null)
+  public function setTitle(string $id_chat, string $title = null)
   {
     if (\bbn\Str::isUid($id_chat)
         && $this->isAdmin($id_chat)
@@ -289,8 +289,8 @@ SQL;
       $this->_set_state_hash($id_chat);
       return $this->_add_bot_message(
         $id_chat, [
-        $this->user->getId() => _("You have changed the chat title"),
-        $this->user->getName() . ' ' . _('has changed the chat title')
+        $this->user->getId() => dgettext(X::tDom(), "You have changed the chat title"),
+        $this->user->getName() . ' ' . dgettext(X::tDom(), 'has changed the chat title')
         ]
       );
     }
@@ -304,7 +304,7 @@ SQL;
    * @param string $id_user
    * @return bool
    */
-  public function addUser(string $id_chat, String $id_user): bool
+  public function addUser(string $id_chat, string $id_user): bool
   {
     if ($this->isAdmin($id_chat)
         && ($name1 = $this->user->getName())
@@ -322,9 +322,9 @@ SQL;
       $this->_set_state_hash($id_chat);
       return $this->_add_bot_message(
         $id_chat, [
-        $this->user->getId() => _('You added') . " $name2",
-        $id_user => "$name1 " . _('added you'),
-        $name1 . ' ' . _('added') . ' ' . $name2
+        $this->user->getId() => dgettext(X::tDom(), 'You added') . " $name2",
+        $id_user => "$name1 " . dgettext(X::tDom(), 'added you'),
+        $name1 . ' ' . dgettext(X::tDom(), 'added') . ' ' . $name2
         ]
       );
     }
@@ -340,7 +340,7 @@ SQL;
    * @param string $id_user
    * @return bool
    */
-  public function removeUser(string $id_chat, String $id_user): bool
+  public function removeUser(string $id_chat, string $id_user): bool
   {
     if ($this->isAdmin($id_chat)
         && bbn\Str::isUid($id_user)
@@ -356,8 +356,8 @@ SQL;
       $this->_set_state_hash($id_chat);
       return $this->_add_bot_message(
         $id_chat, [
-        $this->user->getId() => _('You remove') . " $name2",
-        $name1 . ' ' . _('removed') . ' ' . $name2
+        $this->user->getId() => dgettext(X::tDom(), 'You remove') . " $name2",
+        $name1 . ' ' . dgettext(X::tDom(), 'removed') . ' ' . $name2
         ]
       );
     }
@@ -366,7 +366,7 @@ SQL;
   }
 
 
-  public function addAdmin(string $id_chat, String $id_user): ?bool
+  public function addAdmin(string $id_chat, string $id_user): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -377,9 +377,9 @@ SQL;
     ) {
       return $this->_set_admin(
         $id_chat, $id_user, true, [
-        $this->user->getId() => _('You set') . " $name2 " . _('as admin'),
-        $id_user => "$name " . _('set you as admin'),
-        "$name " . _('set') . " $name2 " . _('as admin')
+        $this->user->getId() => dgettext(X::tDom(), 'You set') . " $name2 " . dgettext(X::tDom(), 'as admin'),
+        $id_user => "$name " . dgettext(X::tDom(), 'set you as admin'),
+        "$name " . dgettext(X::tDom(), 'set') . " $name2 " . dgettext(X::tDom(), 'as admin')
         ]
       );
     }
@@ -388,7 +388,7 @@ SQL;
   }
 
 
-  public function removeAdmin(string $id_chat, String $id_user): ?bool
+  public function removeAdmin(string $id_chat, string $id_user): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -399,9 +399,9 @@ SQL;
     ) {
       return $this->_set_admin(
         $id_chat, $id_user, false, [
-        $this->user->getId() => _('You removed') . " $name2 " . _('as admin'),
-        $id_user => "$name " . _('removed you as admin'),
-        "$name " . _('removed') . " $name2 " . _('as admin')
+        $this->user->getId() => dgettext(X::tDom(), 'You removed') . " $name2 " . dgettext(X::tDom(), 'as admin'),
+        $id_user => "$name " . dgettext(X::tDom(), 'removed you as admin'),
+        "$name " . dgettext(X::tDom(), 'removed') . " $name2 " . dgettext(X::tDom(), 'as admin')
         ]
       );
     }
@@ -512,7 +512,7 @@ SQL;
    * @param string $id_user
    * @return bool|null
    */
-  public function isParticipant(string $id_chat, String $id_user = null): ?bool
+  public function isParticipant(string $id_chat, string $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -537,7 +537,7 @@ SQL;
    * @param string $id_user
    * @return bool|null
    */
-  public function isAdmin(string $id_chat, String $id_user = null): ?bool
+  public function isAdmin(string $id_chat, string $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -565,7 +565,7 @@ SQL;
    * @param string $id_user
    * @return bool|null
    */
-  public function isCreator(string $id_chat, String $id_user = null): ?bool
+  public function isCreator(string $id_chat, string $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -698,13 +698,13 @@ SQL;
   }
 
 
-  public function getPrevMessages(string $id_chat, float $moment = null, int $num = 50, String $id_user = null): ?array
+  public function getPrevMessages(string $id_chat, float $moment = null, int $num = 50, string $id_user = null): ?array
   {
     return $this->_get_messages($id_chat, $moment ?: X::microtime(), '<', $num, $id_user);
   }
 
 
-  public function getNextMessages(string $id_chat, float $moment = null, int $num = 0, String $id_user = null)
+  public function getNextMessages(string $id_chat, float $moment = null, int $num = 0, string $id_user = null)
   {
     return $this->_get_messages($id_chat, $moment ?: X::microtime(), '>', $num, $id_user);
   }
@@ -732,12 +732,12 @@ SQL;
   }
 
 
-  public function leave(string $id_chat, String $id_user = null): ?bool
+  public function leave(string $id_chat, string $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
         && $this->isParticipant($id_chat)
-        && $this->_add_bot_message($id_chat, $this->user->getName($id_user ?: $this->user->getId()) . ' ' . _('has left the chat'))
+        && $this->_add_bot_message($id_chat, $this->user->getName($id_user ?: $this->user->getId()) . ' ' . dgettext(X::tDom(), 'has left the chat'))
         && $this->db->update(
           'bbn_chats_users', ['active' => 0], [
           'id_chat' => $id_chat,
@@ -760,7 +760,7 @@ SQL;
   }
 
 
-  public function getLastActivity(string $id_chat, String $id_user): float
+  public function getLastActivity(string $id_chat, string $id_user): float
   {
     if (bbn\Str::isUid($id_chat)
         && bbn\Str::isUid($id_user)
@@ -778,7 +778,7 @@ SQL;
   }
 
 
-  public function setLastActivity(string $id_chat, String $id_user): ?bool
+  public function setLastActivity(string $id_chat, string $id_user): ?bool
   {
     if (bbn\Str::isUid($id_chat)
         && bbn\Str::isUid($id_user)
@@ -813,7 +813,7 @@ SQL;
   }
 
 
-  public function setLastNotification(string $id_chat, String $id_user, float $moment = null): bool
+  public function setLastNotification(string $id_chat, string $id_user, float $moment = null): bool
   {
     if (bbn\Str::isUid($id_chat) && bbn\Str::isUid($id_user)) {
       if (\is_null($moment)) {
@@ -980,7 +980,7 @@ SQL;
   }
 
 
-  private function _get_path(string $id_chat, String $id_user = null): ?string
+  private function _get_path(string $id_chat, string $id_user = null): ?string
   {
     if (bbn\Str::isUid($id_chat)
         && (bbn\Str::isUid($id_user) || \is_null($id_user))
@@ -992,7 +992,7 @@ SQL;
   }
 
 
-  private function _scan_files(array $files, String $time, String $comparator, array &$res, int $num = 0)
+  private function _scan_files(array $files, string $time, string $comparator, array &$res, int $num = 0)
   {
     foreach ($files as $file) {
       if ($num && (count($res) >= $num)) {
@@ -1011,7 +1011,7 @@ SQL;
   }
 
 
-  private function _get_messages(string $id_chat, float $moment, String $comparator, int $num = 0, String $id_user = null)
+  private function _get_messages(string $id_chat, float $moment, string $comparator, int $num = 0, string $id_user = null)
   {
     if ($this->check() && bbn\Str::isUid($id_chat)) {
       $res    = [];
@@ -1090,7 +1090,7 @@ SQL;
   }
 
 
-  private function _set_admin(string $id_chat, String $id_user, bool $admin, array $bot): ?bool
+  private function _set_admin(string $id_chat, string $id_user, bool $admin, array $bot): ?bool
   {
     if ($this->isParticipant($id_chat, $id_user)
         && $this->db->update(

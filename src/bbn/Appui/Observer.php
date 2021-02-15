@@ -144,7 +144,7 @@ class Observer extends bbn\Models\Cls\Db
    * @param string $params
    * @return null|string
    */
-  private function _get_id_from_user(string $request, String $params = null): ?string
+  private function _get_id_from_user(string $request, string $params = null): ?string
   {
     $r = null;
     if ($this->id_user && $this->check()) {
@@ -217,7 +217,7 @@ class Observer extends bbn\Models\Cls\Db
    * @param array|null $params
    * @return string
    */
-  private function _get_id_string(string $request, String $params = null): string
+  private function _get_id_string(string $request, string $params = null): string
   {
     return md5($request.($params ?: ''));
   }

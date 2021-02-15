@@ -15,6 +15,9 @@ namespace bbn\Util;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.1
  */
+
+use bbn\X;
+
 class Timer
 {
 
@@ -90,7 +93,7 @@ class Timer
       return $time;
     }
 
-    throw new \Exception(_("Missing a start declaration for timer")." $key");
+    throw new \Exception(dgettext(X::tDom(), "Missing a start declaration for timer")." $key");
   }
 
 

@@ -194,7 +194,7 @@ class Php extends bbn\Models\Cls\Basic
    * @param string $namespace of the class
    * @return array|null
    */
-  public function analyzeLibrary(string $path, String $namespace = ''): ?array
+  public function analyzeLibrary(string $path, string $namespace = ''): ?array
   {
     if ( !empty($path) &&
       !empty($namespace)
@@ -679,7 +679,7 @@ class Php extends bbn\Models\Cls\Basic
    * @param \ReflectionClass $rc
    * @return array|null
    */
-  private function orderElement(array $elements, String $typeEle, \ReflectionClass $rc): ?array
+  private function orderElement(array $elements, string $typeEle, \ReflectionClass $rc): ?array
   {
 
     if ( is_array($elements) && is_string($typeEle) ){

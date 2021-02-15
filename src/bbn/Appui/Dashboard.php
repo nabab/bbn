@@ -153,7 +153,7 @@ class Dashboard
     $this->arch_bits = $ccfg['arch']['user_options_bits'];
     self::optionalInit();
     if (!bbn\Str::isUid($id)) {
-      $id = $this->getOptionId($id);
+      $id = $this->getOptionId($id, 'list');
     }
 
     if (bbn\Str::isUid($id)) {

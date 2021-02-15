@@ -1,0 +1,232 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Util\\Jwt",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Jwt.php",
+    "startLine": 8,
+    "endLine": 84,
+    "contentConstructor": null,
+    "methods": {
+        "prepare": {
+            "name": "prepare",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Util\\Jwt",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $fingerprint, $ttl = 300)\n  {\n    $this->sub = $fingerprint;\n    $this->aud = $id_user;\n    $this->ttl = $ttl;\n    $this->reset();\n  }",
+            "startLine": 21,
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "fingerprint",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 300,
+                    "default_name": ""
+                }
+            ]
+        },
+        "reset": {
+            "name": "reset",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Util\\Jwt",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $this->payload = [\n      \"iss\" => BBN_SERVER_NAME,\n      \"iat\" => time(),\n      \"exp\" => time() + $this->ttl,\n      \"sub\" => $this->sub,\n      \"aud\" => $this->aud,\n      \"data\" => []\n    ];\n    return $this;\n  }",
+            "startLine": 29,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "setKey": {
+            "name": "setKey",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Util\\Jwt",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cert)\n  {\n    $this->key = $cert;\n    return $this;\n  }",
+            "startLine": 42,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cert",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "set": {
+            "name": "set",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Util\\Jwt",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    $this->payload['data'] = $data;\n    try {\n      if ($this->key) {\n        $jwt = \\Firebase\\JWT\\JWT::encode($this->payload, $this->key, 'RS512');\n      }\n      else {\n        $jwt = \\Firebase\\JWT\\JWT::encode($this->payload, $this->payload['sub'], 'HS256');\n      }\n    }\n    catch (\\Firebase\\JWT\\ExpiredException $e) {\n      X::hdump($e->getMessage());\n      throw new \\Exception($e);\n    }\n    catch (\\Exception $e) {\n      X::hdump($e->getMessage());\n      throw new \\Exception($e);\n    }\n    return $jwt;\n  }",
+            "startLine": 48,
+            "endLine": 68,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Util\\Jwt",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($jwt)\n  {\n    try {\n      $payload = \\Firebase\\JWT\\JWT::decode($jwt, $this->key, ['HS256', 'RS512']);\n    }\n    catch (\\Exception $e) {\n      X::hdump($e->getMessage());\n      throw new \\Exception($e);\n    }\n    if (!empty($payload->data)) {\n      return X::toArray($payload->data);\n    }\n    return null;\n  }",
+            "startLine": 70,
+            "endLine": 83,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "jwt",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 5,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "payload": null,
+        "key": null,
+        "sub": null,
+        "aud": null,
+        "ttl": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Util",
+    "shortName": "Jwt",
+    "summary": ""
+}

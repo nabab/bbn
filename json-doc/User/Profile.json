@@ -1,0 +1,171 @@
+{
+    "doc": {
+        "description": "A user authentication Class",
+        "tags": {
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Authentication",
+            "license": "http:\/\/opensource.org\/licenses\/MIT MIT",
+            "version": "0.2r89",
+            "todo": "Implement Cache for session requests' results?"
+        }
+    },
+    "name": "bbn\\User\\Profile",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Profile.php",
+    "startLine": 22,
+    "endLine": 84,
+    "contentConstructor": {
+        "file": "bbn\\User\\Profile",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "connection constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Profile",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\Db $db, bbn\\User $user, array $cfg = [])\n  {\n    if ($tmp = $user->get_profile()) {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\X::mergeArrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
+            "startLine": 54,
+            "endLine": 65,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\Db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "bbn\\User",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "getId": {
+            "name": "getId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Profile",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n  }",
+            "startLine": 70,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Profile",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $this->auth;\n  }",
+            "startLine": 80,
+            "endLine": 83,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": {
+        "default_class_cfg": {
+            "table": "bbn_users_profiles",
+            "cols": {
+                "id": "id",
+                "id_group": "id_group",
+                "id_user": "id_user"
+            }
+        }
+    },
+    "constants": null,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_users_profiles",
+            "cols": {
+                "id": "id",
+                "id_group": "id_group",
+                "id_user": "id_user"
+            }
+        },
+        "db": null,
+        "id": null,
+        "cfg": [],
+        "user": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\User",
+    "shortName": "Profile",
+    "summary": "A user authentication Class"
+}

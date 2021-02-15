@@ -3,7 +3,7 @@
 namespace bbn\Appui;
 
 use bbn;
-
+use bbn\X;
 class Statistic extends bbn\Models\Cls\Db
 {
   use bbn\Models\Tts\Optional;
@@ -101,7 +101,7 @@ class Statistic extends bbn\Models\Cls\Db
    * @param string $code The code of the option
    * @param array  $cfg  The configuration
    */
-  public function __construct(bbn\Db $db, String $code, array $cfg = [])
+  public function __construct(bbn\Db $db, string $code, array $cfg = [])
   {
     // Parent constructors
     parent::__construct($db);
@@ -115,30 +115,30 @@ class Statistic extends bbn\Models\Cls\Db
         // Option retrieved
         && ($this->ocfg = self::getOption($this->id_option))
     ) {
-      if (bbn\X::hasProps($cfg, ['type', 'table'], true)
+      if (X::hasProps($cfg, ['type', 'table'], true)
           // And right types
-          && \bbn\X::is_string($cfg['type'], $cfg['table'])
+          && X::is_string($cfg['type'], $cfg['table'])
           // Correcting case
           && ($cfg['type'] = strtolower($cfg['type']))
           // Type accepted
-          && (\bbn\X::indexOf(self::$types, $cfg['type']) > -1)
+          && (X::indexOf(self::$types, $cfg['type']) > -1)
           // History config retrieved
           && ($this->hcfg = History::getTableCfg($cfg['table']))
       ) {
-        if ((\bbn\X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
-          throw new \Error(_("The field parameter is mandatory for sum and avg types"));
+        if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
+          throw new \Error(dgettext(X::tDom(), "The field parameter is mandatory for sum and avg types"));
         }
 
         $this->code = $code;
         $this->dbo  = new \bbn\Appui\Database($this->db);
         if (isset($cfg['field'])) {
           if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {
-            throw new \Error(_("The field parameter must be a known field of the table"));
+            throw new \Error(dgettext(X::tDom(), "The field parameter must be a known field of the table"));
           }
         }
 
         if (($cfg['type'] === 'update') && empty($this->_id_field)) {
-          throw new \Error(_("The field parameter is mandatory for statistics of type update"));
+          throw new \Error(dgettext(X::tDom(), "The field parameter is mandatory for statistics of type update"));
         }
 
         $this->type = $cfg['type'];
@@ -205,7 +205,7 @@ class Statistic extends bbn\Models\Cls\Db
       }
 
       if (!$start || !is_int($start)) {
-        throw new Error(_('Impossible to read the given start date'));
+        throw new Error(dgettext(X::tDom(), 'Impossible to read the given start date'));
       }
 
       if (!$this->is_total) {
@@ -214,7 +214,7 @@ class Statistic extends bbn\Models\Cls\Db
         }
 
         if (!$end || !is_int($end)) {
-          throw new Error(_('Impossible to read the given end date'));
+          throw new Error(dgettext(X::tDom(), 'Impossible to read the given end date'));
         }
       }
 
@@ -242,7 +242,7 @@ class Statistic extends bbn\Models\Cls\Db
    * @param string|null $start   Start of time
    * @return int
    */
-  public function update(string $variant = null, String $start = null): ?int
+  public function update(string $variant = null, string $start = null): ?int
   {
     if ($this->check()) {
       if (!$variant) {
@@ -285,10 +285,10 @@ class Statistic extends bbn\Models\Cls\Db
         while ($test <= $today) {
           $res = $this->run($real_start);
           if ($num_days) {
-            \bbn\X::hdump($res, $this->db->getLastValues());
+            X::hdump($res, $this->db->getLastValues());
           }
           else {
-            \bbn\X::hdump($res, $this->db->last(), $this->db->getLastValues());
+            X::hdump($res, $this->db->last(), $this->db->getLastValues());
           }
 
           $num_days++;
@@ -355,7 +355,7 @@ class Statistic extends bbn\Models\Cls\Db
   }
 
 
-  public function serie(int $values = 30, String $start = null, String $end = null): ?array
+  public function serie(int $values = 30, string $start = null, string $end = null): ?array
   {
     if ($this->check()) {
       if (!$end) {
@@ -363,7 +363,7 @@ class Statistic extends bbn\Models\Cls\Db
       }
 
       if (!$start) {
-        $start = date('Y-m-d', Strtotime($end.' 12:00:00') - ($values * 24 * 3600));
+        $start = date('Y-m-d', strtotime($end.' 12:00:00') - ($values * 24 * 3600));
       }
 
       if (bbn\Str::isDateSql($start, $end)) {
@@ -476,7 +476,7 @@ class Statistic extends bbn\Models\Cls\Db
   }
 
 
-  public function serieValues(int $values = 30, String $start = null, String $end = null): ?array
+  public function serieValues(int $values = 30, string $start = null, string $end = null): ?array
   {
     if ($res = $this->serie($values, $start, $end)) {
       $res = array_map(
@@ -490,7 +490,7 @@ class Statistic extends bbn\Models\Cls\Db
   }
 
 
-  public function serieByPeriod(int $values = 30, String $unit = 'm', String $end = null, String $pstart = null): ?array
+  public function serieByPeriod(int $values = 30, string $unit = 'm', string $end = null, string $pstart = null): ?array
   {
     if ($this->ocfg && $values) {
       if (!$end) {
@@ -704,7 +704,7 @@ class Statistic extends bbn\Models\Cls\Db
           break;
       }
 
-      if (bbn\X::hasProp($this->cfg, 'filter', true)
+      if (X::hasProp($this->cfg, 'filter', true)
           && ($conditions = $this->db->treatConditions($this->cfg['filter']))
           && !empty($conditions['where']['conditions'])
           && ($tmp2 = $this->_set_filter($conditions['where']))
@@ -900,11 +900,11 @@ class Statistic extends bbn\Models\Cls\Db
   private function _set_update_cfg(array &$cfg)
   {
     if (empty($this->cfg['field'])) {
-      throw new \Error(_("The parameters field and value must be given for update statistics"));
+      throw new \Error(dgettext(X::tDom(), "The parameters field and value must be given for update statistics"));
     }
 
     if (!$this->_id_field) {
-      throw new \Error(_("The parameters field must be a valid column from the given table"));
+      throw new \Error(dgettext(X::tDom(), "The parameters field must be a valid column from the given table"));
     }
 
     $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];
@@ -1053,7 +1053,7 @@ class Statistic extends bbn\Models\Cls\Db
               }
             }
 
-            if (bbn\X::hasDeepProp($tmp, ['filter', 'conditions'], true)) {
+            if (X::hasDeepProp($tmp, ['filter', 'conditions'], true)) {
               $flt['conditions'][] = $tmp['filter'];
             }
           }
@@ -1136,7 +1136,7 @@ class Statistic extends bbn\Models\Cls\Db
             $cd['conditions'][0]['conditions'][0]['exp'] = $c['exp'];
             $cd['conditions'][1]['exp']                  = $c['exp'];
           }
-          elseif (\bbn\X::hasProp($c, 'value')) {
+          elseif (X::hasProp($c, 'value')) {
             $cd['conditions'][0]['conditions'][0]['value'] = $c['value'];
             $cd['conditions'][1]['value']                  = $c['value'];
           }

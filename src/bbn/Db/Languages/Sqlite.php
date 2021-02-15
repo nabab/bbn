@@ -219,7 +219,7 @@ class Sqlite implements bbn\Db\Engines
      */
   public function escape(string $item): string
   {
-    $items = explode('.', Str_replace($this->qte, '', $item));
+    $items = explode('.', str_replace($this->qte, '', $item));
     $r     = [];
     foreach ($items as $m){
       if (!bbn\Str::checkName($m)) {
@@ -242,7 +242,7 @@ class Sqlite implements bbn\Db\Engines
      */
   public function tableFullName(string $table, bool $escaped = false): ?string
   {
-    $bits = explode('.', Str_replace($this->qte, '', $table));
+    $bits = explode('.', str_replace($this->qte, '', $table));
     if (\count($bits) === 2) {
       $db    = trim($bits[0]);
       $table = trim($bits[1]);
@@ -274,7 +274,7 @@ class Sqlite implements bbn\Db\Engines
   public function tableSimpleName(string $table, bool $escaped = false): ?string
   {
     if ($table = trim($table)) {
-      $bits  = explode('.', Str_replace($this->qte, '', $table));
+      $bits  = explode('.', str_replace($this->qte, '', $table));
       $table = end($bits);
       if (bbn\Str::checkName($table)) {
         return $escaped ? $this->qte.$table.$this->qte : $table;
@@ -296,7 +296,7 @@ class Sqlite implements bbn\Db\Engines
   public function colFullName(string $col, $table = null, $escaped = false): ?string
   {
     if ($col = trim($col)) {
-      $bits = explode('.', Str_replace($this->qte, '', $col));
+      $bits = explode('.', str_replace($this->qte, '', $col));
       $ok   = null;
       $col  = array_pop($bits);
       if ($table && ($table = $this->tableSimpleName($table))) {
@@ -326,7 +326,7 @@ class Sqlite implements bbn\Db\Engines
   public function colSimpleName(string $col, bool $escaped=false): ?string
   {
     if ($col = trim($col)) {
-      $bits = explode('.', Str_replace($this->qte, '', $col));
+      $bits = explode('.', str_replace($this->qte, '', $col));
       $col  = end($bits);
       if (bbn\Str::checkName($col)) {
         return $escaped ? $this->qte.$col.$this->qte : $col;
@@ -1395,7 +1395,7 @@ class Sqlite implements bbn\Db\Engines
    * @param string      $key
    * @return bool
    */
-  public function deleteIndex(string $table, String $key): bool
+  public function deleteIndex(string $table, string $key): bool
   {
     if (( $table = $this->tableFullName($table, 1) ) && bbn\Str::checkName($key)) {
       //changed the row above because if the table has no rows query() returns 0
@@ -1463,7 +1463,7 @@ class Sqlite implements bbn\Db\Engines
    * @param string $db
    * @return bool
    */
-  public function createUser(string $user = null, String $pass = null, String $db = null): bool
+  public function createUser(string $user = null, string $pass = null, string $db = null): bool
   {
     return true;
   }
@@ -1486,25 +1486,25 @@ class Sqlite implements bbn\Db\Engines
    * @param string $host
    * @return array|null
    */
-  public function getUsers(string $user = '', String $host = ''): ?array
+  public function getUsers(string $user = '', string $host = ''): ?array
   {
     return [];
   }
 
 
-  public function dbSize(string $database = '', String $type = ''): int
+  public function dbSize(string $database = '', string $type = ''): int
   {
     return @filesize($database) ?: 0;
   }
 
 
-  public function tableSize(string $table, String $type = ''): int
+  public function tableSize(string $table, string $type = ''): int
   {
     return 0;
   }
 
 
-  public function status(string $table = '', String $database = '')
+  public function status(string $table = '', string $database = '')
   {
     $cur = null;
     if ($database && ($this->db->getCurrent() !== $database)) {
@@ -1528,7 +1528,7 @@ class Sqlite implements bbn\Db\Engines
   }
 
 
-  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, String $charset = 'UTF-8')
+  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
   {
     $lines = [];
     $sql   = '';
@@ -1576,7 +1576,7 @@ class Sqlite implements bbn\Db\Engines
   }
 
 
-  public function createTableSqlite($table_name, array $columns, array $keys = null, bool $with_constraints = false, String $charset = 'UTF-8')
+  public function createTableSqlite($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
   {
     $str = $this->createTable($table_name, $columns, $keys, $with_constraints, $charset);
     if ($str !== '') {

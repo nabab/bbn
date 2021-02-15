@@ -266,27 +266,27 @@ class Emails extends bbn\Models\Cls\Basic
   }
 
 
-  public function createFolder(string $id_account, String $name, String $id_parent = null): bool
+  public function createFolder(string $id_account, string $name, string $id_parent = null): bool
   {
 
     $this->createFolderDb($id, $id_parent);
   }
 
 
-  public function createFolderDb(string $id_account, String $name, String $id_parent = null): bool
+  public function createFolderDb(string $id_account, string $name, string $id_parent = null): bool
   {
 
   }
 
 
-  public function renameFolder(string $id, String $name): bool
+  public function renameFolder(string $id, string $name): bool
   {
 
     $this->renameFolderDb($id, $name);
   }
 
 
-  public function renameFolderDb(string $id, String $name): bool
+  public function renameFolderDb(string $id, string $name): bool
   {
 
   }
@@ -466,8 +466,8 @@ class Emails extends bbn\Models\Cls\Basic
                   $res++;
                 }
                 else {
-                  //throw new \Exception(_("Impossible to insert the email with ID").' '.$a['message_id']);
-                  $this->log(_("Impossible to insert the email with ID").' '.$a['message_id']);
+                  //throw new \Exception(dgettext(X::tDom(), "Impossible to insert the email with ID").' '.$a['message_id']);
+                  $this->log(dgettext(X::tDom(), "Impossible to insert the email with ID").' '.$a['message_id']);
                 }
               }
 
@@ -478,10 +478,10 @@ class Emails extends bbn\Models\Cls\Basic
             }
             else {
               throw new \Exception(
-                _("Impossible to get the emails for folder")
+                dgettext(X::tDom(), "Impossible to get the emails for folder")
                 .' '.$folder['uid']
-                .' '._("from").' '.$start
-                .' '._("to").' '.$end
+                .' '.dgettext(X::tDom(), "from").' '.$start
+                .' '.dgettext(X::tDom(), "to").' '.$end
                 .' ('.$real_end.')'
               );
             }
@@ -578,11 +578,11 @@ class Emails extends bbn\Models\Cls\Basic
             if ($id = $this->retrieveEmail($dest['email'])) {
               $sent_opt = X::getField(self::getFolderTypes(), ['code' => 'sent'], 'id');
               if ($sent_opt === $folder['id_option']) {
-                $this->addSentToLink($id, Date('Y-m-d H:i:s', Strtotime($email['date'])));
+                $this->addSentToLink($id, Date('Y-m-d H:i:s', strtotime($email['date'])));
               }
             }
             elseif (!($id = $this->addContactFromMail($dest))) {
-              throw new \Exception(_("Impossible to add the contact").' '.$dest['email']);
+              throw new \Exception(dgettext(X::tDom(), "Impossible to add the contact").' '.$dest['email']);
             }
 
             $dest['id'] = $id;
@@ -626,7 +626,7 @@ class Emails extends bbn\Models\Cls\Basic
           $cfg['id_folder'] => $folder['id'],
           $cfg['msg_uid'] => $email['uid'],
           $cfg['msg_unique_id'] => $email['message_id'],
-          $cfg['date'] => date('Y-m-d H:i:s', Strtotime($email['date'])),
+          $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),
           $cfg['id_sender'] => $id_sender,
           $cfg['subject'] => empty($email['subject']) ? '' : mb_decode_mimeheader($email['subject']),
           $cfg['size'] => $email['Size'],
@@ -663,7 +663,7 @@ class Emails extends bbn\Models\Cls\Basic
       }
     }
     $this->log($email);
-    //throw new \Exception(_("Invalid email"));
+    //throw new \Exception(dgettext(X::tDom(), "Invalid email"));
   }
 
 
@@ -703,7 +703,7 @@ class Emails extends bbn\Models\Cls\Basic
   }
 
 
-  public function addLinkToMail(string $id_email, String $id_link, String $type): bool
+  public function addLinkToMail(string $id_email, string $id_link, string $type): bool
   {
     $cfg   = $this->class_cfg['arch']['users_emails_recipients'];
     $table = $this->class_cfg['tables']['users_emails_recipients'];
@@ -719,7 +719,7 @@ class Emails extends bbn\Models\Cls\Basic
   }
 
 
-  public function addSentToLink(string $id_link, String $date = null): bool
+  public function addSentToLink(string $id_link, string $date = null): bool
   {
     if ($link = $this->getLink($id_link)) {
       $cfg   = $this->class_cfg['arch']['users_contacts_links'];
@@ -778,7 +778,7 @@ class Emails extends bbn\Models\Cls\Basic
   }
 
 
-  public function getContact(string $email, String $name, $force)
+  public function getContact(string $email, string $name, $force)
   {
 
   }

@@ -80,22 +80,22 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db   The database name
    * @return bbn\Db|null
    */
-  public function connection(string $host = null, String $engine = 'mysql', String $db = ''): bbn\Db
+  public function connection(string $host = null, string $engine = 'mysql', string $db = ''): bbn\Db
   {
     if (bbn\Str::isUid($host)) {
       $id_host = $host;
     }
     elseif (!($id_host = $this->hostId($host, $engine))) {
-      throw new \Exception(_("Impossible to find the host").' '."$host ($engine)");
+      throw new \Exception(dgettext(X::tDom(), "Impossible to find the host").' '."$host ($engine)");
     }
 
     if (!($cfg = $this->o->option($id_host))) {
-      throw new \Exception(_("Impossible to find the option corresponding to host").' '."$host ($engine)");
+      throw new \Exception(dgettext(X::tDom(), "Impossible to find the option corresponding to host").' '."$host ($engine)");
     }
 
     $parent = $this->o->parent($this->o->getIdParent($id_host));
     if (!isset($this->connections[$parent['code']])) {
-      throw new \Exception(_("Unknown engine")." ".$parent['code']);
+      throw new \Exception(dgettext(X::tDom(), "Unknown engine")." ".$parent['code']);
     }
 
     if (!isset($this->connections[$parent['code']][$cfg['code']])) {
@@ -131,13 +131,13 @@ class Database extends bbn\Models\Cls\Cache
 
         case 'postgre':
           if (empty($db) || empty($cfg['path'])) {
-            throw new \Exception(_('db or path empty'));
+            throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
           }
           break;
 
         case 'sqlite':
           if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'/'.$db)) {
-            throw new \Exception(_('db or path empty'));
+            throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
           }
           
           $db_cfg = [
@@ -153,7 +153,7 @@ class Database extends bbn\Models\Cls\Cache
           break;
 
         default:
-          throw new \Exception(_('Impossible to find the engine').' '.$cfg['engine']);
+          throw new \Exception(dgettext(X::tDom(), 'Impossible to find the engine').' '.$cfg['engine']);
       }
     }
 
@@ -161,7 +161,7 @@ class Database extends bbn\Models\Cls\Cache
       return $this->connections[$parent['code']][$cfg['code']];
     }
 
-    throw new \Exception(_("Impossible to get a connection for").' '.$cfg['code']);
+    throw new \Exception(dgettext(X::tDom(), "Impossible to get a connection for").' '.$cfg['code']);
   }
 
 
@@ -171,7 +171,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection code (user@host or host)
    * @return null|string
    */
-  public function hostId(string $host, String $engine = 'mysql'): ?string
+  public function hostId(string $host, string $engine = 'mysql'): ?string
   {
     $r = self::getOptionId($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine);
     return $r ?: null;
@@ -235,7 +235,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db The database's name
    * @return null|string
    */
-  public function dbId(string $db = '', String $engine = 'mysql'): ?string
+  public function dbId(string $db = '', string $engine = 'mysql'): ?string
   {
     if (($id_parent = self::getOptionId('dbs', $engine))
         && ($res = $this->o->fromCode($db ?: $this->db->getCurrent(), $id_parent))
@@ -253,7 +253,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code
    * @return int
    */
-  public function countDbs(string $host = '', String $engine = 'mysql'): int
+  public function countDbs(string $host = '', string $engine = 'mysql'): int
   {
     if (!$host) {
       $num = $this->o->count(self::getOptionId('dbs', $engine));
@@ -275,7 +275,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code, all DBs are returned if empty.
    * @return array|null
    */
-  public function dbs(string $host = '', String $engine = 'mysql'): array
+  public function dbs(string $host = '', string $engine = 'mysql'): array
   {
     if (!$host) {
       $arr = $this->o->fullOptions(self::getOptionId('dbs', $engine));
@@ -318,7 +318,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code, all DBs are returned if empty.
    * @return array
    */
-  public function fullDbs(string $host = '', String $engine = 'mysql'): array
+  public function fullDbs(string $host = '', string $engine = 'mysql'): array
   {
     $o =& $this->o;
     if ($dbs = $this->dbs($host, $engine)) {
@@ -369,12 +369,12 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host  The connection's code
    * @return string|null
    */
-  public function tableId(string $table, String $db = '', String $host = '', String $engine = 'mysql'): ?string
+  public function tableId(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?string
   {
     if (!bbn\Str::isUid($db)) {
       if (Str::isUid($host)) {
         if (!($parent = $this->o->parent($this->o->getIdParent($host)))) {
-          throw new \Exception(_("Impossible to find the host engine"));
+          throw new \Exception(dgettext(X::tDom(), "Impossible to find the host engine"));
         }
 
         $engine = $parent['code'];
@@ -403,7 +403,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code
    * @return int|null
    */
-  public function countTables(string $db, String $host = '', String $engine = 'mysql'): ?int
+  public function countTables(string $db, string $host = '', string $engine = 'mysql'): ?int
   {
     if (!bbn\Str::isUid($db)) {
       if (Str::isUid($host)) {
@@ -430,7 +430,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code
    * @return array|null
    */
-  public function tables(string $db = '', String $host = '', String $engine = 'mysql'): ?array
+  public function tables(string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
     if (!bbn\Str::isUid($db)) {
       if (Str::isUid($host)) {
@@ -469,7 +469,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code
    * @return array|null
    */
-  public function fullTables(string $db = '', String $host = '', String $engine = 'mysql'): ?array
+  public function fullTables(string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
     if (!bbn\Str::isUid($db)) {
       if (Str::isUid($host)) {
@@ -630,7 +630,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db     The DB's name
    * @return string|null
    */
-  public function columnId(string $column, String $table, String $db = ''): ?string
+  public function columnId(string $column, string $table, string $db = ''): ?string
   {
     $res = null;
     if (Str::isUid($table)) {
@@ -657,7 +657,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's UID
    * @return int
    */
-  public function countColumns(string $table, String $db = ''): int
+  public function countColumns(string $table, string $db = ''): int
   {
     $num = 0;
     if (!Str::isUid($table) && Str::isUid($db)) {
@@ -681,7 +681,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's UID
    * @return array|false
    */
-  public function columns(string $table, String $db = ''): ?array
+  public function columns(string $table, string $db = ''): ?array
   {
     if (!bbn\Str::isUid($table) && Str::isUid($db)) {
       $table = $this->tableId($this->db->tsn($table), $db);
@@ -705,7 +705,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database UID
    * @return array|false
    */
-  public function fullColumns(string $table, String $db = ''): array
+  public function fullColumns(string $table, string $db = ''): array
   {
     if (!bbn\Str::isUid($table) && Str::isUid($db)) {
       $table = $this->tableId($table, $db);
@@ -730,7 +730,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's name
    * @return null|string
    */
-  public function keyId(string $key, String $table, String $db = ''): ?string
+  public function keyId(string $key, string $table, string $db = ''): ?string
   {
     $res = null;
     if (bbn\Str::isUid($key)) {
@@ -754,7 +754,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's name
    * @return int
    */
-  public function countKeys(string $table, String $db = ''): int
+  public function countKeys(string $table, string $db = ''): int
   {
     $num = 0;
     if (!bbn\Str::isUid($table) && Str::isUid($db)) {
@@ -778,7 +778,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's name
    * @return array
    */
-  public function keys(string $table, String $db = ''): array
+  public function keys(string $table, string $db = ''): array
   {
     $res = [];
     if (!bbn\Str::isUid($table) && bbn\Str::isUid($db)) {
@@ -824,7 +824,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's name
    * @return array
    */
-  public function fullKeys(string $table, String $db = ''): array
+  public function fullKeys(string $table, string $db = ''): array
   {
     return $this->keys($table, $db);
   }
@@ -837,7 +837,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's name
    * @return int
    */
-  public function remove(string $table, String $db = ''): int
+  public function remove(string $table, string $db = ''): int
   {
     $id = $this->tableId($table, $db);
     return $this->o->removeFull($id);
@@ -877,7 +877,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db    The database's name
    * @return array|null
    */
-  public function modelize(string $table = '', String $db = '', String $host = '', String $engine = 'mysql'): ?array
+  public function modelize(string $table = '', string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
     if (!$host) {
       $conn = $this->db;
@@ -891,7 +891,7 @@ class Database extends bbn\Models\Cls\Cache
           $conn->change($db);
         }
         catch (\Exception $e) {
-          throw new \Exception(_("Impossible to use the database")." $db");
+          throw new \Exception(dgettext(X::tDom(), "Impossible to use the database")." $db");
         }
       }
       elseif (!$db) {
@@ -908,7 +908,7 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if (!$conn || !$conn->check()) {
-      throw new \Exception(_("Impossible to connect"));
+      throw new \Exception(dgettext(X::tDom(), "Impossible to connect"));
     }
 
     $table_id = null;
@@ -930,7 +930,7 @@ class Database extends bbn\Models\Cls\Cache
           $a['fields'],
           function (&$w, $k) use ($table_id, $table) {
             if (!$table_id) {
-              throw new \Exception(_("Table undefined")." $table");
+              throw new \Exception(dgettext(X::tDom(), "Table undefined")." $table");
             }
 
             $w['id_option'] = $this->columnId($k, $table_id);
@@ -983,7 +983,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param bool   $full   If true will connect to the database and get its structure
    * @return string|null The ID of the generated (or existing) database entry
    */
-  public function importHost(string $host, String $engine, array $cfg, bool $full = false): ?string
+  public function importHost(string $host, string $engine, array $cfg, bool $full = false): ?string
   {
     if (($id_parent = self::getOptionId('connections', $engine))
         && !($id_host = $this->o->fromCode($host, $id_parent))
@@ -1023,7 +1023,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param bool   $full If true will connect to the database and get its structure
    * @return string|null The ID of the generated (or existing) database entry
    */
-  public function importDb(string $db, String $host = '', $full = false): ?string
+  public function importDb(string $db, string $host = '', $full = false): ?string
   {
     $id_db = null;
     if (Str::isUid($host)
@@ -1048,7 +1048,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_procedures = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => _('Procedures'),
+                'text' => dgettext(X::tDom(), 'Procedures'),
                 'code' => 'procedures',
               ]
             ))
@@ -1067,7 +1067,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_connections = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => _('Connections'),
+                'text' => dgettext(X::tDom(), 'Connections'),
                 'code' => 'connections',
               ]
             ))
@@ -1087,7 +1087,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_functions = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => _('Function'),
+                'text' => dgettext(X::tDom(), 'Function'),
                 'code' => 'functions',
               ]
             ))
@@ -1106,7 +1106,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_tables = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => _('Tables'),
+                'text' => dgettext(X::tDom(), 'Tables'),
                 'code' => 'tables',
               ]
             ))
@@ -1150,7 +1150,7 @@ class Database extends bbn\Models\Cls\Cache
                 $conn = $this->connection($host_id, $db);
               }
               catch (\Exception $e) {
-                throw new \Exception(_("Impossible to connect"));
+                throw new \Exception(dgettext(X::tDom(), "Impossible to connect"));
               }
 
               $tables = $conn->getTables($db);
@@ -1163,7 +1163,7 @@ class Database extends bbn\Models\Cls\Cache
           }
         }
         else{
-          throw new \Exception(_("Impossible to find an host ID for DB")." ".$this->o->code($id_db));
+          throw new \Exception(dgettext(X::tDom(), "Impossible to find an host ID for DB")." ".$this->o->code($id_db));
         }
       }
     }
@@ -1204,7 +1204,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host  The connection's code
    * @return string|null The ID of the generated table entry
    */
-  public function importTable(string $table, String $id_db, String $host = ''): ?array
+  public function importTable(string $table, string $id_db, string $host = ''): ?array
   {
     if (empty($host)) {
       $host_id = $this->retrieveHost($id_db);
@@ -1227,7 +1227,7 @@ class Database extends bbn\Models\Cls\Cache
         if ($id_columns = $this->o->add(
           [
             'id_parent' => $id_table,
-            'text' => _("Columns"),
+            'text' => dgettext(X::tDom(), "Columns"),
             'code' => 'columns'
           ]
         )
@@ -1245,7 +1245,7 @@ class Database extends bbn\Models\Cls\Cache
         if ($id_keys = $this->o->add(
           [
             'id_parent' => $id_table,
-            'text' => _("Keys"),
+            'text' => dgettext(X::tDom(), "Keys"),
             'code' => 'keys',
           ]
         )

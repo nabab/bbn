@@ -538,7 +538,7 @@ class Actions {
                   // Add current file to archive
                   if ( ($file !== $root_dest.$data['name']) &&
                     is_file($file) &&
-                    !$zip->addFile($file, Str_replace($root_dest.$data['name'].'/', '', $file))
+                    !$zip->addFile($file, str_replace($root_dest.$data['name'].'/', '', $file))
                   ){
                     return $this->error("Impossible to add $file");
                   }

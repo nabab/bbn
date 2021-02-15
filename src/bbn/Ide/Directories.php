@@ -704,7 +704,7 @@ class Directories {
     return $res;
   }
 
-  protected function getTab(string $url, String $title, array $cfg){
+  protected function getTab(string $url, string $title, array $cfg){
     return [
       'url' => bbn\Str::parsePath($url),
       'title' => $title,

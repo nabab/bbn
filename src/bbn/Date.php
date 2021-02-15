@@ -145,7 +145,7 @@ class Date
   }
   
   public static function monthName($m){
-    return self::isWindows() ? strftime("%m", Strtotime("2012-$m-01")) : strftime("%B", Strtotime("2012-$m-01"));
+    return self::isWindows() ? strftime("%m", strtotime("2012-$m-01")) : strftime("%B", strtotime("2012-$m-01"));
   }
 
   /**
@@ -154,7 +154,7 @@ class Date
    * @param string $firstweekday
    * @return int
    */
-  public static function getMonthWeek(string $date, String $firstweekday = 'monday'): int
+  public static function getMonthWeek(string $date, string $firstweekday = 'monday'): int
   {
     $cut = substr($date, 0, 8);
     $daylen = 86400;

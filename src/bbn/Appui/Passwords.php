@@ -52,7 +52,7 @@ class Passwords extends bbn\Models\Cls\Db
    *
    * @return bool True if the action went well false otherwise
    */
-  public function store(string $password, String $id_option): bool
+  public function store(string $password, string $id_option): bool
   {
     if ($password && defined('BBN_ENCRYPTION_KEY')) {
       $arch     = &$this->class_cfg['arch']['passwords'];
@@ -72,7 +72,7 @@ class Passwords extends bbn\Models\Cls\Db
       return false;
     }
 
-    throw new \Exception(_("No passwod given or BBN_ENCRYPTION_KEY not defined"));
+    throw new \Exception(dgettext(X::tDom(), "No passwod given or BBN_ENCRYPTION_KEY not defined"));
   }
 
 
@@ -85,7 +85,7 @@ class Passwords extends bbn\Models\Cls\Db
    *
    * @return bool
    */
-  public function userStore(string $password, String $id_pref, bbn\User $user): bool
+  public function userStore(string $password, string $id_pref, bbn\User $user): bool
   {
     if ($password && ($to_store = $user->crypt($password))) {
       $arch =& $this->class_cfg['arch']['passwords'];

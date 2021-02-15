@@ -67,7 +67,7 @@ class Cache
    * @param bool   $parent
    * @return string
    */
-  private static function _dir(string $dir, String $path, $parent = true): string
+  private static function _dir(string $dir, string $path, $parent = true): string
   {
     if ($parent) {
       $dir = dirname($dir);
@@ -99,7 +99,7 @@ class Cache
    * @param string $path
    * @return string
    */
-  private static function _file(string $item, String $path): string
+  private static function _file(string $item, string $path): string
   {
     return self::_dir($item, $path).'/'.self::_sanitize(basename($item)).'.bbn.cache';
   }
@@ -529,7 +529,7 @@ class Cache
    * @param int      $ttl  The cache length
    * @return mixed
    */
-  public function getSet(callable $fn, String $item, int $ttl = 0)
+  public function getSet(callable $fn, string $item, int $ttl = 0)
   {
     switch (self::$type) {
       case 'apc':
@@ -537,26 +537,24 @@ class Cache
       case 'memcache':
         break;
       case 'files':
+        // Getting the data
         $tmp  = $this->getRaw($item, $ttl);
         $data = null;
+        // Can't get the data
         if (!$tmp) {
           $file     = self::_file($item, $this->path);
+          // Temporary file will be created to tell other processes the cache is being created
           $tmp_file = dirname($file).'/_'.basename($file);
+          // Will become true if the cache should be created
           $do       = false;
-          if ($this->fs->isFile($file)) {
-            $this->fs->rename($file, '_'.basename($file));
-            $do = true;
-          }
-          elseif (!$this->fs->isFile($tmp_file)) {
+          // If the temporary file doesn't exist we create one
+          if (!$this->fs->isFile($tmp_file)) {
             $this->fs->createPath(dirname($tmp_file));
             $this->fs->putContents($tmp_file, ' ');
-            $do = true;
-          }
-          else {
-            return $this->get($item);
-          }
-
-          if ($do) {
+            // If the original file exists we delete it
+            if ($this->fs->isFile($file)) {
+              $this->fs->delete($file);
+            }
             $timer = new Util\Timer();
             $timer->start();
             try {
@@ -571,6 +569,12 @@ class Cache
             $this->set($item, $data, $ttl, $exec);
             $this->fs->delete($tmp_file);
           }
+          // Otherwise another process is certainly creating the cache, so wait for it
+          else {
+            return $this->get($item);
+          }
+
+          // Creating the cache
         }
         else {
           $data = $tmp['value'];

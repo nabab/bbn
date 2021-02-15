@@ -835,7 +835,7 @@ class User extends Models\Cls\Basic
    * @param string $key
    * @return null|string
    */
-  public function getIdFromMagicString(string $id, String $key): ?string
+  public function getIdFromMagicString(string $id, string $key): ?string
   {
     if ($val = $this->db->rselect(
       $this->class_cfg['tables']['hotlinks'], [
@@ -933,7 +933,7 @@ class User extends Models\Cls\Basic
    * @param string $new_pass The new password
    * @return bool
    */
-  public function setPassword(string $old_pass, String $new_pass): bool
+  public function setPassword(string $old_pass, string $new_pass): bool
   {
     if ($this->auth) {
       $pwt         = $this->class_cfg['tables']['passwords'];
@@ -1055,7 +1055,7 @@ class User extends Models\Cls\Basic
    * @param bool   $move
    * @return string|null
    */
-  public function addToTmp(string $file, String $name = null, $move = true):? string
+  public function addToTmp(string $file, string $name = null, $move = true):? string
   {
     if ($this->auth) {
       $fs   = new File\System();
@@ -1139,7 +1139,7 @@ class User extends Models\Cls\Basic
    * @param string $hash The corresponding hash
    * @return bool
    */
-  public static function isMagicString(string $key, String $hash): bool
+  public static function isMagicString(string $key, string $hash): bool
   {
     return hash('sha256', $key) === $hash;
   }
@@ -1374,7 +1374,7 @@ class User extends Models\Cls\Basic
     * @param string $pass_stored The stored encrypted password to check against
     * @return bool
     */
-  private function _check_password(string $pass_given, String $pass_stored): bool
+  private function _check_password(string $pass_given, string $pass_stored): bool
   {
     return $this->_crypt($pass_given) === $pass_stored;
   }

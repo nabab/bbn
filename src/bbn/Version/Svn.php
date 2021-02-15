@@ -159,7 +159,7 @@ class Svn
       foreach ( $log->logentry as $l ){
         $r[(int)$l['revision']] = [
           'author' => (string)$l->author,
-          'date' => date('Y-m-d H:i:s', Strtotime($l->date)),
+          'date' => date('Y-m-d H:i:s', strtotime($l->date)),
           'msg' => (string)$l->msg
         ];
       }

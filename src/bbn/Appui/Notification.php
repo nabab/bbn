@@ -63,7 +63,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function create(string $opt_path, String $title, String $content, $perms = true, String $opt_text = '', String $cat_text = '', bool $user_excluded = false): bool
+  public function create(string $opt_path, string $title, string $content, $perms = true, string $opt_text = '', string $cat_text = '', bool $user_excluded = false): bool
   {
     if ($list_opt = self::getOptionId('list')) {
       $ocfg  = $this->opt->getClassCfg();
@@ -144,7 +144,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function insert(string $title, String $content, String $id_option = null, array $users = [], bool $user_excluded = false): bool
+  public function insert(string $title, string $content, string $id_option = null, array $users = [], bool $user_excluded = false): bool
   {
     if (\is_string($id_option) && !bbn\Str::isUid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
@@ -195,7 +195,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function insertByOption(string $title, String $content, String $id_option, bool $user_excluded = false): bool
+  public function insertByOption(string $title, string $content, string $id_option, bool $user_excluded = false): bool
   {
     if (!bbn\Str::isUid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
@@ -258,7 +258,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function read($id, String $id_user = null, $moment = null): bool
+  public function read($id, string $id_user = null, $moment = null): bool
   {
     if (!$id_user) {
       $id_user = $this->user->getId();
@@ -631,7 +631,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function getCfg(string $id_user, String $id_option = null): ?array
+  public function getCfg(string $id_user, string $id_option = null): ?array
   {
     if (bbn\Str::isUid($id_user)
         && ($cfg_opt_id = self::getOptionId('cfg'))
@@ -755,7 +755,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  private function _send_grouped_mail(array $notification, String $mail_cfg)
+  private function _send_grouped_mail(array $notification, string $mail_cfg)
   {
     if (($id_user = $notification[$this->fields['id_user']])
         && bbn\Str::isUid($id_user)
@@ -795,7 +795,7 @@ class Notification extends bbn\Models\Cls\Db
             && !empty($cfg['mail'])
             && ($cfg['mail'] === $mail_cfg)
         ) {
-          $n[$this->class_cfg['arch']['content']['creation']] = date('d/m/Y H:i', Strtotime($n[$this->class_cfg['arch']['content']['creation']]));
+          $n[$this->class_cfg['arch']['content']['creation']] = date('d/m/Y H:i', strtotime($n[$this->class_cfg['arch']['content']['creation']]));
           $notifications[]                                    = $n;
           if ($id_not !== $n[$this->fields['id']]) {
             $n[$this->fields['mail']] = $mail;
@@ -809,7 +809,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function _user_has_permission($notification, String $id_user = null): bool
+  public function _user_has_permission($notification, string $id_user = null): bool
   {
     if (!\is_array($notification)
         && \is_string($notification)

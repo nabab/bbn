@@ -10,6 +10,7 @@
 namespace bbn\Models\Tts;
 
 use bbn;
+use bbn\X;
 
 trait Optional
 {
@@ -42,7 +43,7 @@ trait Optional
     if (!self::$optional_is_init) {
       $opt = bbn\Appui\Option::getInstance();
       if (!$opt) {
-        throw new \Exception(_("There is no options object as needed by").' '.__CLASS__);
+        throw new \Exception(dgettext(X::tDom(), "There is no options object as needed by").' '.__CLASS__);
       }
 
       if (!\defined("BBN_APPUI")) {
@@ -55,7 +56,7 @@ trait Optional
 
       if (!$path) {
         if (!BBN_APPUI || !BBN_APPUI_ROOT) {
-          \bbn\X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
+          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
           return;
         }
 
@@ -99,7 +100,7 @@ trait Optional
 
       if (!$path) {
         if (!BBN_APPUI || !BBN_APPUI_ROOT) {
-          \bbn\X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
+          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
           return;
         }
 
@@ -115,7 +116,7 @@ trait Optional
       self::$option_root_id = $opt->fromCode(...$path);
       //if ( !self::$option_appui_id || !self::$option_root_id ){
       if (!self::$option_root_id) {
-        \bbn\X::log("Impossible to find the option $cls for ".__CLASS__, 'errors');
+        X::log("Impossible to find the option $cls for ".__CLASS__, 'errors');
         return;
       }
 
@@ -134,7 +135,7 @@ trait Optional
   {
     $this->options = bbn\Appui\Option::getInstance();
     if (!$this->options) {
-      throw new \Exception(_("There is no options object as needed by").' '.__CLASS__);
+      throw new \Exception(dgettext(X::tDom(), "There is no options object as needed by").' '.__CLASS__);
     }
 
     self::initOptionalGlobal($this->options, $path);
@@ -159,7 +160,7 @@ trait Optional
   {
     $o = bbn\Appui\Option::getInstance();
     if (!$o) {
-      throw new \Exception(_("Impossible to get the options object from class").' '.__CLASS__);
+      throw new \Exception(dgettext(X::tDom(), "Impossible to get the options object from class").' '.__CLASS__);
     }
 
     return $o;

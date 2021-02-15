@@ -31,7 +31,7 @@ class Git extends \Cz\Git\GitRepository
   }
 
 
-  public function createRepositoryRemote(string $token, array $scope, String $api=""){
+  public function createRepositoryRemote(string $token, array $scope, string $api=""){
     if ( $token &&
         !empty($scope['name']) &&
         (strlen($api) > 0)
@@ -133,7 +133,7 @@ class Git extends \Cz\Git\GitRepository
     return null;
 	}
 
-  public function pushInRemoteT(string $repository, String $user, String $token, String $server="github.com"){
+  public function pushInRemoteT(string $repository, string $user, string $token, string $server="github.com"){
     if ($repository && $user && $passw && $server){
       $remote = NULL;
       //https://[USERNAME]:[NEW TOKEN]@github.com/[USERNAME]/[REPO].git
@@ -154,7 +154,7 @@ class Git extends \Cz\Git\GitRepository
 
   
   
-  public function pushInRemote(string $repository, String $user, String $passw, String $server="github.com"){
+  public function pushInRemote(string $repository, string $user, string $passw, string $server="github.com"){
     if ($repository && $user && $passw && $server){
       $remote = NULL;
       $params['--repo'] = 'https://'.$user.':'.$passw.'@'.$server.'/'.$user.'/'.$repository.'.git';
@@ -187,7 +187,7 @@ class Git extends \Cz\Git\GitRepository
     return false;
   }
 
-  public function removeRemoteBranch( string $repository, String $branch, String $user, String $passw, String $server="github.com" ){
+  public function removeRemoteBranch( string $repository, string $branch, string $user, string $passw, string $server="github.com" ){
     if ( $repository && $branch && $user && $passw && $server ){
        	$remote = 'https://'.$user.':'.$passw.'@'.$server.'/'.$repository.'.git';
         try{
@@ -203,7 +203,7 @@ class Git extends \Cz\Git\GitRepository
     return false;
   }
 
-  public function createRemoteRepository(string $repository, String $user, String $passw, String $localPath, String $server="github.com"){
+  public function createRemoteRepository(string $repository, string $user, string $passw, string $localPath, string $server="github.com"){
     if ( $repository && $user && $passw && $server && $localPath ){
 			$rep = self::init($localPath);
       if ( is_object($rep) ){

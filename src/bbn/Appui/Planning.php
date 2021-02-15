@@ -84,7 +84,7 @@ class Planning {
         $this->fields['id_event'] => $id_event,
         $this->fields['id_staff'] => $id_staff,
         $this->fields['id_alias'] => $id_alias,
-        $this->fields['alias'] => \bbn\Str::isDateSql($alias) ? date('Y-m-d', Strtotime($alias)) : null
+        $this->fields['alias'] => \bbn\Str::isDateSql($alias) ? date('Y-m-d', strtotime($alias)) : null
       ])
     ){
       return $this->db->lastId();
@@ -101,7 +101,7 @@ class Planning {
    * @param string|null $alias
    * @return bool
    */
-  public function update(string $id_planning, String $id_staff, $event, ?string $id_alias = null, ?string $alias = null): bool
+  public function update(string $id_planning, string $id_staff, $event, ?string $id_alias = null, ?string $alias = null): bool
   {
     if ( 
       \bbn\Str::isUid($id_planning) &&
@@ -118,7 +118,7 @@ class Planning {
         $this->fields['id_staff'] => $id_staff,
         $this->fields['id_event'] => $id_event,
         $this->fields['id_alias'] => $id_alias,
-        $this->fields['alias'] => \bbn\Str::isDateSql($alias) ? date('Y-m-d', Strtotime($alias)) : null
+        $this->fields['alias'] => \bbn\Str::isDateSql($alias) ? date('Y-m-d', strtotime($alias)) : null
       ], [
         $this->fields['id'] => $id_planning
       ]);
@@ -185,7 +185,7 @@ class Planning {
             return $this->_delete($id_planning, $id_event);
           case 'future':
             if ( !empty($event[$extf['recurrence']]) ){
-              $until = date('Y-m-d', Strtotime('-1 day', Strtotime($event[$ef['start']])));
+              $until = date('Y-m-d', strtotime('-1 day', strtotime($event[$ef['start']])));
               return $this->events->setUntil($id_event, $until);
             }
             else {
@@ -206,7 +206,7 @@ class Planning {
    * @param string $end
    * @return array
    */
-  public function getAll(string $start, String $end, String $id_staff = null): array
+  public function getAll(string $start, string $end, string $id_staff = null): array
   {
     $et = $this->ecfg['table'];
     $ef = $this->ecfg['arch']['events'];
@@ -429,7 +429,7 @@ class Planning {
    * @param string $end
    * @return array
    */
-  public function analyze(string $start, String $end, array $events): array
+  public function analyze(string $start, string $end, array $events): array
   {
     $ret = [];
     foreach ( $events as $event ){
@@ -485,7 +485,7 @@ class Planning {
    * @param string $end
    * @return bool
    */
-  public function isAvailable(string $id_staff, String $start, String $end): bool
+  public function isAvailable(string $id_staff, string $start, string $end): bool
   {
     $set = $this->class_cfg['tables']['staff_events'];
     $sef = $this->class_cfg['arch']['staff_events'];
@@ -531,11 +531,11 @@ class Planning {
    * @param string $day
    * @return bool
    */
-  public function isReplaced(string $id_planning, String $day): bool
+  public function isReplaced(string $id_planning, string $day): bool
   {
     $t =& $this;
     return !!array_filter($this->getAllByAlias($id_planning), function($a) use($day, $t){
-      return $a[$t->fields['alias']] === date('Y-m-d', Strtotime($day));
+      return $a[$t->fields['alias']] === date('Y-m-d', strtotime($day));
     });
   }
 }

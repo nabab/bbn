@@ -138,7 +138,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string      $id_user
    * @return array|null
    */
-  public function retrieveUserIds(string $id_option = null, String $id_user = null): ?array
+  public function retrieveUserIds(string $id_option = null, string $id_user = null): ?array
   {
     if (!$id_user) {
       $id_user = $this->id_user;
@@ -155,7 +155,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string      $id_group
    * @return array|null
    */
-  public function retrieveGroupIds(string $id_option = null, String $id_group = null): ?array
+  public function retrieveGroupIds(string $id_option = null, string $id_group = null): ?array
   {
     if (!$id_group) {
       $id_group = $this->id_group;
@@ -202,7 +202,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string $id_user
    * @return bool
    */
-  public function userHas(string $id_option, String $id_user = null): bool
+  public function userHas(string $id_option, string $id_user = null): bool
   {
     return (bool)$this->_retrieve_ids($id_option, $id_user);
   }
@@ -215,7 +215,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string $id_group
    * @return bool
    */
-  public function groupHas(string $id_option, String $id_group): bool
+  public function groupHas(string $id_option, string $id_group): bool
   {
     return (bool)$this->_retrieve_ids($id_option, null, $id_group);
   }
@@ -309,7 +309,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param null|array $cfg
    * @return null|array
    */
-  public function getCfgByOption(string $id_option, String $id_user = null): ?array
+  public function getCfgByOption(string $id_option, string $id_user = null): ?array
   {
     if (($cfg = $this->db->selectOne(
       $this->class_cfg['table'],
@@ -878,7 +878,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param null|string $id_user
    * @return null|int
    */
-  public function deleteUserOption(string $id_option, String $id_user = null): ?int
+  public function deleteUserOption(string $id_option, string $id_user = null): ?int
   {
     if ($id_option = $this->_get_id_option($id_option)) {
       return $this->db->delete(
@@ -900,7 +900,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string      $id_group
    * @return int|null
    */
-  public function deleteGroupOption(string $id_option, String $id_group): ?int
+  public function deleteGroupOption(string $id_option, string $id_group): ?int
   {
     if ($id_option = $this->_get_id_option($id_option)) {
       return $this->db->delete(
@@ -949,7 +949,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param null|string $text
    * @return null|int
    */
-  public function setText(string $id, String $text = null): ?int
+  public function setText(string $id, string $text = null): ?int
   {
     return $this->db->update(
       $this->class_cfg['table'], [
@@ -968,7 +968,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string $id_link
    * @return null|int
    */
-  public function setLink(string $id, String $id_link = null): ?int
+  public function setLink(string $id, string $id_link = null): ?int
   {
     return $this->db->update(
       $this->class_cfg['table'], [
@@ -987,7 +987,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string $id_link
    * @return null|string The inserted or updated preference's ID
    */
-  public function addLink(string $id_option, String $id_link): ?string
+  public function addLink(string $id_option, string $id_link): ?string
   {
     $id = $this->db->selectOne(
       $this->class_cfg['table'], $this->fields['id'], [
@@ -1073,7 +1073,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param bool   $cancel
    * @return int|null
    */
-  public function shareWithGroup(string $id, String $id_group, bool $cancel = false): ?int
+  public function shareWithGroup(string $id, string $id_group, bool $cancel = false): ?int
   {
     if ($cfg = $this->get($id)) {
       $id_share = $this->db->selectOne(
@@ -1110,7 +1110,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param bool   $cancel
    * @return int|null
    */
-  public function shareWithUser(string $id, String $id_user, bool $cancel = false): ?int
+  public function shareWithUser(string $id, string $id_user, bool $cancel = false): ?int
   {
     if ($cfg = $this->get($id)) {
       $id_share = $this->db->selectOne(
@@ -1437,7 +1437,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param bool   $with_config    Set it to false if you don't want the preference's cfg field values on the results.
    * @return array
    */
-  public function getFullBits(string $id_user_option, String $id_parent = null, bool $with_config = true): array
+  public function getFullBits(string $id_user_option, string $id_parent = null, bool $with_config = true): array
   {
     if ($this->isAuthorized($id_user_option)) {
       $c = $this->class_cfg['arch']['user_options_bits'];
@@ -1642,7 +1642,7 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  public function fixBitsOrder(string $id_user_option, String $id_parent = null, $deep = false): ?int
+  public function fixBitsOrder(string $id_user_option, string $id_parent = null, $deep = false): ?int
   {
     if (\bbn\Str::isUid($id_user_option)
         && (\bbn\Str::isUid($id_parent) || \is_null($id_parent))
@@ -1673,7 +1673,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string|null The new parent's ID
    * @return bool|null
    */
-  public function moveBit(string $id, String $id_parent = null): ?bool
+  public function moveBit(string $id, string $id_parent = null): ?bool
   {
     if (\bbn\Str::isUid($id)
         && ((\bbn\Str::isUid($id_parent) && $this->getBit($id_parent))
@@ -1701,7 +1701,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param bool        $incr           Set it to true if you want the result increased by 1
    * @return int
    */
-  public function getMaxBitNum(string $id_user_option, String $id_parent = null, bool $incr = false): int
+  public function getMaxBitNum(string $id_user_option, string $id_parent = null, bool $incr = false): int
   {
     if (\bbn\Str::isUid($id_user_option)
         && (\bbn\Str::isUid($id_parent) || is_null($id_parent))
@@ -1895,7 +1895,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param null|string $id_group
    * @return array|null
    */
-  private function _retrieve_ids(string $id_option, String $id_user = null, String $id_group = null): ?array
+  private function _retrieve_ids(string $id_option, string $id_user = null, string $id_group = null): ?array
   {
     if (!$id_user && !$id_group && isset($this->id_user, $this->id_group)) {
       $id_user  = $this->id_user;
@@ -1963,7 +1963,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param string $id_link
    * @return array|null
    */
-  private function _get_links(string $id_link, String $id_user = null, String $id_group = null): ?array
+  private function _get_links(string $id_link, string $id_user = null, string $id_group = null): ?array
   {
     if ($id_link = $this->_get_id_option($id_link)) {
       $where = [

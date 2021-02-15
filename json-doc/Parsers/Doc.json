@@ -1,0 +1,544 @@
+{
+    "doc": {
+        "description": "Documentation block parser",
+        "tags": {
+            "copyright": "BBN Solutions",
+            "category": "Parsers",
+            "version": "1.0"
+        }
+    },
+    "name": "bbn\\Parsers\\Doc",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+    "startLine": 16,
+    "endLine": 748,
+    "contentConstructor": {
+        "file": "bbn\\Parsers\\Doc",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "__construct",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($src = '', $mode = 'vue')\n  {\n    $this->setTags();\n    $this->setSource($src);\n  }",
+            "startLine": 624,
+            "endLine": 628,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "src",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The mode to use"
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "vue",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setSource": {
+            "name": "setSource",
+            "summary": "Sets the source to parse",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($src)\n  {\n    $this->parsed = [];\n    return $this;\n  }",
+            "startLine": 636,
+            "endLine": 640,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "src",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setMode": {
+            "name": "setMode",
+            "summary": "Sets the mode",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($mode)\n  {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(dgettext(X::tDom(), 'Error: mode not allowed.'));\n  }",
+            "startLine": 648,
+            "endLine": 654,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "parse": {
+            "name": "parse",
+            "summary": "Parses the current source",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( isset($matches[0]) ){\n      foreach ( $matches[0] as $match ){\n        preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);\n        $start = $match[1];\n        $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;\n        if ( $db = $this->parseDocblock(substr($this->source, $start, $length)) ){\n          $this->parsed[] = $db;\n        }\n      }\n    }\n    return $this->parsed;\n  }",
+            "startLine": 661,
+            "endLine": 674,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "parseDocblock": {
+            "name": "parseDocblock",
+            "summary": "Parses a given docblock",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($block)\n  {\n    $b = [\n\t\t\t'description' => '',\n\t\t\t'tags' => []\n\t\t];\n    \/\/ Remove start pattern\n    \/\/$block = trim(substr($block, 3));\n\t\t\/\/ Remove end pattern\n\t\t$block = trim(substr($block, 0, strlen($block) - 2));\n\t\t\/\/ Tags\n    $tags = $this->getTags($block);\n    foreach ( $tags as $i => $tag ){\n\t\t\tif (\n\t\t\t\t(\n\t\t\t\t\tisset($tags[$i+1]) &&\n\t\t\t\t\t($t = $this->parseTag(substr($block, $tag[1], $tags[$i+1][1] - $tag[1])))\n        ) ||\n\t\t\t\t($t = $this->parseTag(substr($block, $tag[1])))\n\t\t\t){\n        if ( !empty($t['tag']) && ($t['tag'] === 'ignore') ){\n          return null;\n        }\n\t\t\t\t$b['tags'][] = $t;\n\t\t\t}\n    }\n    \/\/ Get Description\n    $b['description'] = $this->clearText(isset($tags[0]) ? substr($block, 3, $tags[0][1]-1) : substr($block, 3));\n    return $b;\n  }",
+            "startLine": 683,
+            "endLine": 712,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "block",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getJs": {
+            "name": "getJs",
+            "summary": "Gets JavaScript structure",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      'description' => $this->getFile(),\n      'methods' => $this->getMethods(),\n      'events' => $this->getEvents(),\n      \/\/'todo' => $this->getTodo()\n    ];\n  }",
+            "startLine": 719,
+            "endLine": 726,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getVue": {
+            "name": "getVue",
+            "summary": "Gets Vue.js structure",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Doc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($memberof = '')\n  {\n      'description' => $this->getFile($memberof),\n      'methods' => $this->getMethods($memberof),\n      'events' => $this->getEvents($memberof),\n      'mixins' => $this->getMixins($memberof),\n      'props' => $this->getProps($memberof),\n      'data' => $this->getData($memberof),\n      'computed' => $this->getComputed($memberof),\n      'watch' => $this->getWatch($memberof),\n      'components' => $this->getComponents($memberof),\n      \/\/'todo' => $this->getTodo($memberof)\n    ];\n  }",
+            "startLine": 734,
+            "endLine": 747,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "source": "",
+        "mode": "",
+        "modes": [
+            "js",
+            "vue",
+            "php"
+        ],
+        "tags": [],
+        "all_tags": {
+            "common": {
+                "author": [
+                    "text"
+                ],
+                "copyright": [
+                    "text"
+                ],
+                "deprecated": [
+                    "text"
+                ],
+                "example": [
+                    "text"
+                ],
+                "file": [
+                    "text"
+                ],
+                "ignore": [],
+                "license": [
+                    "text"
+                ],
+                "link": [
+                    "text"
+                ],
+                "package": [
+                    "text"
+                ],
+                "return": [
+                    "type",
+                    "description"
+                ],
+                "returns": [
+                    "type",
+                    "description"
+                ],
+                "since": [
+                    "text"
+                ],
+                "throws": [
+                    "type",
+                    "description"
+                ],
+                "todo": [
+                    "text"
+                ],
+                "version": [
+                    "text"
+                ]
+            },
+            "js": {
+                "abstract": [],
+                "access": [
+                    "text"
+                ],
+                "alias": [],
+                "arg": "param",
+                "argument": "param",
+                "async": [],
+                "augments": [],
+                "borrows": [],
+                "callback": [],
+                "class": [],
+                "classdesc": [],
+                "const": "constant",
+                "constant": [],
+                "constructor": "class",
+                "constructs": [],
+                "default": [
+                    "text"
+                ],
+                "defaultValue": "default",
+                "desc": "description",
+                "description": [
+                    "text"
+                ],
+                "emits": "fires",
+                "enum": [],
+                "event": [
+                    "name"
+                ],
+                "exception": "throws",
+                "exports": [],
+                "extends": "augments",
+                "external": [],
+                "file": [
+                    "text"
+                ],
+                "fileoverview": "file",
+                "fires": [
+                    "name"
+                ],
+                "func": "function",
+                "function": [
+                    "name"
+                ],
+                "generator": [],
+                "global": [],
+                "hidecontructor": [],
+                "host": "external",
+                "implements": [],
+                "inner": [],
+                "instance": [],
+                "interface": [],
+                "kind": [],
+                "lends": [],
+                "linkcode": "link",
+                "linkplain": "link",
+                "listens": [],
+                "member": [],
+                "memberof": [
+                    "name"
+                ],
+                "method": "function",
+                "mixes": [],
+                "mixin": [
+                    "name"
+                ],
+                "module": [],
+                "name": [
+                    "name"
+                ],
+                "namespace": [],
+                "override": [],
+                "overview": "file",
+                "param": [
+                    "type",
+                    "default",
+                    "name",
+                    "description"
+                ],
+                "private": [],
+                "prop": "property",
+                "property": [
+                    "type",
+                    "default",
+                    "name"
+                ],
+                "protected": [],
+                "public": [],
+                "readonly": [],
+                "requires": [],
+                "returns": "return",
+                "see": [
+                    "name"
+                ],
+                "static": [],
+                "summary": [
+                    "text"
+                ],
+                "this": [],
+                "tutorial": [],
+                "type": [
+                    "type"
+                ],
+                "typedef": [],
+                "var": "member",
+                "variation": [],
+                "virtual": "abstract",
+                "yield": "yields",
+                "yields": []
+            },
+            "vue": {
+                "component": [
+                    "name"
+                ],
+                "computed": [
+                    "name"
+                ],
+                "data": [
+                    "type",
+                    "default",
+                    "name",
+                    "description"
+                ],
+                "emits": [
+                    "name"
+                ],
+                "method": [
+                    "name"
+                ],
+                "prop": [
+                    "type",
+                    "default",
+                    "name"
+                ],
+                "required": [
+                    "text"
+                ],
+                "watch": [
+                    "name",
+                    "description"
+                ]
+            },
+            "php": {
+                "api": [],
+                "category": [
+                    "text"
+                ],
+                "filesource": [],
+                "global": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "internal": [
+                    "text"
+                ],
+                "method": [
+                    "text"
+                ],
+                "package": [
+                    "text"
+                ],
+                "param": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "property": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "property-read": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "property-write": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "see": [
+                    "text"
+                ],
+                "source": [
+                    "text"
+                ],
+                "subpackage": [
+                    "text"
+                ],
+                "uses": [
+                    "text"
+                ],
+                "var": [
+                    "type",
+                    "name",
+                    "description"
+                ]
+            }
+        },
+        "pattern": {
+            "start": "\/\\\/\\*\\*\/m",
+            "end": "\/\\s\\*\\\/\/m",
+            "tag": "\/(\\n\\s+\\*)*\\n\\s+\\*\\s{1}\\@\/m"
+        },
+        "parsed": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Parsers",
+    "shortName": "Doc",
+    "summary": "Documentation block parser"
+}

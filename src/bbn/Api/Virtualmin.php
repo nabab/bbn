@@ -23,7 +23,7 @@ class Virtualmin {
     $pass,
     /** @var  Virtualmin hostname */
     $hostname,
-    /** @var String mode */
+    /** @var string mode */
     $mode = 'virtualmin',
     /** @var  Check instance existence */
     $checked = false,

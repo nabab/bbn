@@ -102,7 +102,7 @@ class Ide
    * @param $routes
    * @param \bbn\User\Preferences $pref
    */
-  public function __construct(\bbn\Db $db,  \bbn\Appui\Option $options, $routes, \bbn\User\Preferences $pref, String $project = '', String $plugin = 'appui-ide')
+  public function __construct(\bbn\Db $db,  \bbn\Appui\Option $options, $routes, \bbn\User\Preferences $pref, string $project = '', string $plugin = 'appui-ide')
   {
     $this->db      = $db;
     $this->options = $options;
@@ -271,7 +271,7 @@ class Ide
    * @param string $path path project
    * @return bool||array list file with property extension and value the path of the file existing or not
    */
-  public function listTabsWithFile(string $type, String $path, String $repository)
+  public function listTabsWithFile(string $type, string $path, string $repository)
   {
     $list = [];
     $root = $this->getRootPath($repository);
@@ -479,7 +479,7 @@ class Ide
   {
     if ($this->project !== 'apst-app') {
       if ((strlen($plugin) > 0)
-          && empty(array_search(substr($plugin, Strlen('appui-')),array_keys($this->routes)))
+          && empty(array_search(substr($plugin, strlen('appui-')),array_keys($this->routes)))
       ) {
         return false;
       }
@@ -547,7 +547,7 @@ class Ide
 
         $root = $this->getRootPath($real['repository']['name']);
 
-        $file      = substr($real['file'], Strlen($root));
+        $file      = substr($real['file'], strlen($root));
         $file_name = \bbn\Str::fileExt($real['file'],1)[0];
 
         $file_path = substr($url,  strlen($real['repository']['name']) + 1);
@@ -652,12 +652,12 @@ class Ide
 
       if (!empty($file['tab']) && ($file['tab'] === 'php') && !$this->fs->isFile(self::$current_file)) {
         if (!$this->createPermByReal($file['full_path'])) {
-          return $this->error(_("Impossible to create the option"));
+          return $this->error(dgettext(X::tDom(), "Impossible to create the option"));
         }
       }
 
       if (!file_put_contents(self::$current_file, $file['code'])) {
-        return $this->error(_('Error: Save'));
+        return $this->error(dgettext(X::tDom(), 'Error: Save'));
       }
 
       if ($file['extension'] === 'ts') {
@@ -675,7 +675,7 @@ class Ide
       return ['success' => true];
     }
 
-    return $this->error(_('Error: Save'));
+    return $this->error(dgettext(X::tDom(), 'Error: Save'));
   }
 
 
@@ -765,7 +765,7 @@ class Ide
       // New folder
       if (empty($cfg['is_file'])) {
         if ($this->fs->isDir($path.$cfg['name'])) {
-          $this->error(_("Directory exists"));
+          $this->error(dgettext(X::tDom(), "Directory exists"));
           return false;
         }
 
@@ -777,7 +777,7 @@ class Ide
         }
 
         if (empty($this->fs->createPath($path))) {
-          $this->error(_("Impossible to create the directory"));
+          $this->error(dgettext(X::tDom(), "Impossible to create the directory"));
           return false;
         }
 
@@ -788,18 +788,18 @@ class Ide
         $file = $path .'/'. $cfg['name'] . '.' . $cfg['extension'];
         $file = str_replace('//','/', $file);
         if (!$this->fs->isDir($path) && empty($this->fs->createPath($path))) {
-          $this->error(_("Impossible to create the container directory"));
+          $this->error(dgettext(X::tDom(), "Impossible to create the container directory"));
           return false;
         }
 
         if ($this->fs->isDir($path)) {
           if ($this->fs->isFile($file)) {
-            $this->error(_("File exists"));
+            $this->error(dgettext(X::tDom(), "File exists"));
             return false;
           }
 
           if (!file_put_contents($file, $cfg['default_text'])) {
-            $this->error(_("Impossible to create the file"));
+            $this->error(dgettext(X::tDom(), "Impossible to create the file"));
             return false;
           }
         }
@@ -809,7 +809,7 @@ class Ide
             && !empty($cfg['tab']) && ($cfg['tab_url'] === 'php') && !empty($file)
         ) {
           if (!$this->createPermByReal($file)) {
-            return $this->error(_("Impossible to create the option"));
+            return $this->error(dgettext(X::tDom(), "Impossible to create the option"));
           }
         }
 
@@ -926,7 +926,7 @@ class Ide
    * @param string $type The type of real (file/dir)
    * @return bool
    */
-  public function createPermByReal(string $file, String $type = 'file'): bool
+  public function createPermByReal(string $file, string $type = 'file'): bool
   {
     if (!empty($file)
         && $this->fs->isDir($this->getAppPath())
@@ -1029,7 +1029,7 @@ class Ide
    * @param string $type The type (file/dir)
    * @return bool
    */
-  public function changePermByReal(string $old, String $new, String $type = 'file'):  bool
+  public function changePermByReal(string $old, string $new, string $type = 'file'):  bool
   {
     $type = strtolower($type);
     if (!empty($old)
@@ -1059,7 +1059,7 @@ class Ide
    * @param string $type The type (file/dir)
    * @return bool
    */
-  public function movePermByReal(string $old, String $new, String $type = 'file'): bool
+  public function movePermByReal(string $old, string $new, string $type = 'file'): bool
   {
     $type = strtolower($type);
     if (!empty($old)
@@ -1341,7 +1341,7 @@ class Ide
    *
    * @return bool
    */
-  public function tracking(array $file, String $file_code, array $info, bool $setRecent = true): bool
+  public function tracking(array $file, string $file_code, array $info, bool $setRecent = true): bool
   {
     $bit = false;
     if (($id_option_opened = $this->options->fromCode(self::OPENED_FILE,self::IDE_PATH, self::BBN_APPUI))) {
@@ -2177,7 +2177,7 @@ class Ide
                     if ($typeSearch($this->fs->getContents($val), $info['search'], $info['typeSearch']) !== false) {
                       $path      = $base_rep.$part;
                       $path_file = $val;
-                      $link      = explode("/", substr($val, Strlen($path) + 1, Strlen($val)));
+                      $link      = explode("/", substr($val, strlen($path) + 1, strlen($val)));
                       if ((!empty($info['isProject']) && $info['type'] === 'mvc')
                           || !empty($info['mvc'])
                       ) {
@@ -2217,7 +2217,7 @@ class Ide
                         //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
                         if (($typeSearch($lineCurrent, $info['search'], $info['typeSearch']) !== false) && (strpos($lineCurrent, '\n') === false)) {
                           $lineNumber = $file->key() + 1;
-                          $name_path  = $info['repository']['path'].substr(dirname($val), Strlen($base_rep));
+                          $name_path  = $info['repository']['path'].substr(dirname($val), strlen($base_rep));
                           $position   = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);
                           $line       = "<strong>".'line ' . $lineNumber . ' : '."</strong>";
 
@@ -2237,11 +2237,11 @@ class Ide
 
                           $text       .= str_replace($info['search'], "<strong><span class='underlineSeach'>".$info['search']."</span></strong>", $lineCurrent);
                           $file_name   = basename($path_file);
-                          $path        = dirname($base.'/'.substr($path_file, Strlen($base_rep)));
+                          $path        = dirname($base.'/'.substr($path_file, strlen($base_rep)));
                           $occourences = $occourences + substr_count($lineCurrent, $info['search']);
                           // info for code
                           $list[] = [
-                            'text' => strlen($text) > 1000 ? $line."<strong><i>"._('content too long to be shown')."</i></strong>" : $text,
+                            'text' => strlen($text) > 1000 ? $line."<strong><i>".dgettext(X::tDom(), 'content too long to be shown')."</i></strong>" : $text,
                             'line' => $lineNumber - 1,
                             'position' => $position,
                             'link' => $link,
@@ -2269,7 +2269,7 @@ class Ide
                         $tab = explode("/",$path_file)[1];
                       }
 
-                      $link = explode(".",substr($path_file, Strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
+                      $link = explode(".",substr($path_file, strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
                     }
 
                     //info file
@@ -2329,7 +2329,7 @@ class Ide
                       && (strpos($lineCurrent, '\n') === false)
                   ) {
                     $lineNumber  = $file->key() + 1;
-                    $link        = explode(".",substr($path_file, Strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
+                    $link        = explode(".",substr($path_file, strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
                     $name_path   = substr(dirname($v), Strpos($v, $info['repository']['path']));
                     $position    = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);
                     $text        = "<strong>".'line ' . $lineNumber . ' : '."</strong>";
@@ -2346,18 +2346,18 @@ class Ide
                         $tab = explode("/",$path_file)[1];
                       }
 
-                      $link = explode(".",substr($path_file, Strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
+                      $link = explode(".",substr($path_file, strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
                     }
 
                     // info for file
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line."<strong><i>"._('content too long to be shown')."</i></strong>" : $text,
+                      'text' => strlen($text) > 1000 ? $line."<strong><i>".dgettext(X::tDom(), 'content too long to be shown')."</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                       'code' => true,
                       'uid' => $path.'/'.$file_name,
                       'icon' => 'nf nf-fa-code',
-                      'linkPosition' => explode(".",substr($path_file, Strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0],
+                      'linkPosition' => explode(".",substr($path_file, strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0],
                       'tab' => !empty($tab) ? $tab : false
                     ];
                   }
@@ -2437,7 +2437,7 @@ class Ide
                   //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
                   if (!empty($position = strpos($lineCurrent, $seek) !== false) && (strpos($lineCurrent, '\n') === false)) {
                     $lineNumber = $file->key() + 1;
-                    $name_path  = $rep['path'].substr(dirname($val), Strlen($base_rep));
+                    $name_path  = $rep['path'].substr(dirname($val), strlen($base_rep));
                     $line       = "<strong>".'line ' . $lineNumber . ' : '."</strong>";
 
                     $text      = $line;
@@ -2452,7 +2452,7 @@ class Ide
 
                     // info for code
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line."<strong><i>"._('content too long to be shown')."</i></strong>" : $text,
+                      'text' => strlen($text) > 1000 ? $line."<strong><i>".dgettext(X::tDom(), 'content too long to be shown')."</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                      // 'link' => $link,
@@ -2477,22 +2477,22 @@ class Ide
                     $tab = explode("/",$path_file)[1];
                   }
 
-                  $link = explode(".",substr($path_file, Strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
+                  $link = explode(".",substr($path_file, strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1]) + 1))[0];
                 }
 
                 //info file
                 $ext      = \bbn\Str::fileExt($fn,0);
                 $fileData = [
-                  'text' => $rep['name'].'/'.substr($fn, Strlen($rep['root_path']))."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".count($list)."</span>",
+                  'text' => $rep['name'].'/'.substr($fn, strlen($rep['root_path']))."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".count($list)."</span>",
                   'icon' => 'nf nf-fa-file_code_o',
                   'numChildren' => count($list),
                   'repository' => $rep['name'],
-                  'uid' => $rep['name'].'/'.substr($fn, Strlen($rep['root_path'])),
+                  'uid' => $rep['name'].'/'.substr($fn, strlen($rep['root_path'])),
                   'file' => basename($fn),
                   'items' => $list,
                 ];
 
-                $path = explode('/', substr($fn, Strlen($rep['root_path'])));
+                $path = explode('/', substr($fn, strlen($rep['root_path'])));
                 //die(var_dump("sss", $path));
                 if ($path[0] === 'mvc') {
                   if ($path[1] === "public") {
@@ -2635,7 +2635,7 @@ class Ide
    * @param string $id_user if set user id will return the result for that user otherwise the current one will return
    * @return array|null
    */
-  private function _get_bit_by_file(string $file, String $id_user = null): ?array
+  private function _get_bit_by_file(string $file, string $id_user = null): ?array
   {
     if (!empty($file)
         && !empty($this->db)
@@ -2717,7 +2717,7 @@ class Ide
    * @param string $path The file's path from file's URL
    * @return array
    */
-  private function _superior_sctrl(string $tab, String $path = '')
+  private function _superior_sctrl(string $tab, string $path = '')
   {
     if (($pos = strpos($tab, '_ctrl')) > -1) {
       if (($pos === 0)) {
@@ -2750,7 +2750,7 @@ class Ide
   }
 
 
-  private function _check_normal(array $cfg, array $rep, String $path)
+  private function _check_normal(array $cfg, array $rep, string $path)
   {
     if (!empty($cfg) && !empty($path) && !empty($cfg['name'])) {
       $old = $new = $path;
@@ -2791,7 +2791,7 @@ class Ide
   }
 
 
-  private function _check_mvc(array $cfg, array $rep, String $path)
+  private function _check_mvc(array $cfg, array $rep, string $path)
   {
     $todo = [];
     if (!empty($cfg)
@@ -2941,7 +2941,7 @@ class Ide
    * @param string $path
    * @return boolean
    */
-  private function _move_component(array $cfg, array $rep, String $path)
+  private function _move_component(array $cfg, array $rep, string $path)
   {
     $ele = $this->_check_normal($cfg, $rep, $path);
     if (!empty($ele) && is_array($ele) && empty($this->fs->move($ele['old'], Dirname($ele['new'])))) {
@@ -3199,7 +3199,7 @@ class Ide
    * @param string $type
    * @return string|boolean
    */
-  private function _backup_preference_files(array $file, array $state, String $type='')
+  private function _backup_preference_files(array $file, array $state, string $type='')
   {
     $state       = json_encode($state);
     $backup_path = $this->_get_path_backup($file);
@@ -3243,7 +3243,7 @@ class Ide
    * @param string $type
    * @return void
    */
-  private function _backup_history(array $file, String $type='' )
+  private function _backup_history(array $file, string $type='' )
   {
     if (!empty($backup_path = $this->_get_path_backup($file))) {
       $backup = $backup_path['path_history'] . date('Y-m-d_His') . '.' .$file['extension'];
@@ -3265,7 +3265,7 @@ class Ide
    * @param string $ope The operation type (rename, copy)
    * @return bool
    */
-  private function _manager_backup_components(array $cfg, String $case )
+  private function _manager_backup_components(array $cfg, string $case )
   {
     if (!empty($cfg['is_component'])) {
       $component_type       = $this->getType('components');
@@ -3309,7 +3309,7 @@ class Ide
               }
             }
             else {
-              $this->error(_("Error during the component backup copy: old ->"). $old_folder_component);
+              $this->error(dgettext(X::tDom(), "Error during the component backup copy: old ->"). $old_folder_component);
               return false;
             }
             return true;
@@ -3320,7 +3320,7 @@ class Ide
               if ($this->fs->exists($backup_path.$cfg['path'].$cfg['new_name'].'/'.$cfg['name'])
                   && empty($this->fs->rename($backup_path.$cfg['path'].$cfg['new_name'].'/'.$cfg['name'], $cfg['new_name']))
               ) {
-                $this->error(_("Error during the folder backup rename copmonent"));
+                $this->error(dgettext(X::tDom(), "Error during the folder backup rename copmonent"));
                 return false;
               }//rename file preferences
               else{
@@ -3362,7 +3362,7 @@ class Ide
    * @param string $ope  The operation type (rename, copy)
    * @return bool
    */
-  private function _manager_backup(array $path,  array $cfg, String $case )
+  private function _manager_backup(array $path,  array $cfg, string $case )
   {
     //configuration path for backup
     $backup_path = self::$backup_path . $cfg['repository']['path'].'/src';
@@ -3449,7 +3449,7 @@ class Ide
             && !$this->fs->exists($new_backup)
             && empty($this->fs->copy($old_backup, $new_backup))
         ) {
-          $this->error(_("Error during the file backup copy: old ->"). $old_backup);
+          $this->error(dgettext(X::tDom(), "Error during the file backup copy: old ->"). $old_backup);
           return false;
         }
       }//case folder
@@ -3491,7 +3491,7 @@ class Ide
    * @param string $ope The operation type (rename, copy)
    * @return bool
    */
-  private function _operations(array $cfg, String $ope)
+  private function _operations(array $cfg, string $ope)
   {
     //die(var_dump($cfg, $ope));
     if (is_string($ope)
@@ -3592,7 +3592,7 @@ class Ide
                     && (strpos($t['old'], '/mvc/public/') !== false)
                 ) {
                   if (!$this->createPermByReal($t['old'])) {
-                    return $this->error(_("Impossible to create the option for rename"));
+                    return $this->error(dgettext(X::tDom(), "Impossible to create the option for rename"));
                   }
                 }
 
@@ -3615,7 +3615,7 @@ class Ide
                     && !empty($cfg['is_file']) && (strpos($t['old'], '/mvc/public/') !== false)
                 ) {
                   if (!$this->createPermByReal($t['old'])) {
-                    return $this->error(_("Impossible to create the option for move"));
+                    return $this->error(dgettext(X::tDom(), "Impossible to create the option for move"));
                   }
                 }
 

@@ -6,6 +6,7 @@ namespace bbn\Models\Cls;
 
 
 use bbn;
+use bbn\X;
 
 /**
  * Basic object Class
@@ -100,7 +101,7 @@ abstract class Basic
         $ar = \func_get_args();
         $cn = bbn\Str::encodeFilename(str_replace('\\', '_', \get_class($this)));
       foreach ($ar as $a){
-            bbn\X::log($a, $cn);
+            X::log($a, $cn);
       }
     }
   }
@@ -116,7 +117,7 @@ abstract class Basic
     $class = \get_class($this);
     throw new \Exception(
       sprintf(
-        _("Wrong method used for the class %s: %s with the following arguments:"),
+        dgettext(X::tDom(), "Wrong method used for the class %s: %s with the following arguments:"),
         $class,
         $name,
         implode(', ', $arguments)
@@ -178,7 +179,7 @@ abstract class Basic
     }
         /*
      * else if ( $name === 'log' )
-            array_push(bbn\X::log, $value);
+            array_push(X::log, $value);
     }
      */
 }

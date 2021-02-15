@@ -140,7 +140,7 @@ class Cms extends bbn\Models\Cls\Db
 	public function __construct(bbn\Db $db, $notes = null){
 		parent::__construct($db);
 		$this->_init_class_cfg();
-		$this->_events = new bbn\Appui\Events($this->db);
+		$this->_events = new bbn\Appui\Event($this->db);
 		$this->_options = bbn\Appui\Option::getInstance();
 		if (!self::$_id_event) {
 			$id = $this->_options->fromCode('publication', 'event', 'appui');
@@ -156,7 +156,7 @@ class Cms extends bbn\Models\Cls\Db
 
 	/**
 	 * Returns the note with its url, start and end date of publication.
-	 * @param String $url
+	 * @param string $url
 	 * @return Array
 	 */
 	public function get(string $url): array
@@ -232,7 +232,7 @@ class Cms extends bbn\Models\Cls\Db
 
 	/**
 	 * Deletes the given note and unpublish it if published.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @return Boolean
 	 */
 	public function delete(string $id_note): bool
@@ -252,7 +252,7 @@ class Cms extends bbn\Models\Cls\Db
 	
 	/**
 	 * Returns true if the note is linked to an url.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @return Boolean
 	 * 
 	 */
@@ -271,8 +271,8 @@ class Cms extends bbn\Models\Cls\Db
 	}
 	/**
 	 * Returns the url of the note.
-	 * @param String $id_note
-	 * @return String || null
+	 * @param string $id_note
+	 * @return string || null
 	 */
 	public function getUrl(string $id_note) :?string
 	{
@@ -293,8 +293,8 @@ class Cms extends bbn\Models\Cls\Db
 	
 	/**
 	 * Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note.
-	 * @param String $id_note
-	 * @param String $url
+	 * @param string $id_note
+	 * @param string $url
 	 * @return Boolean
 	 */
 	public function setUrl($id_note, $url): ?bool
@@ -332,14 +332,14 @@ class Cms extends bbn\Models\Cls\Db
 			}
 		}
 		elseif ( !empty($idx) ) {
-			throw new \Exception(_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
+			throw new \Exception(dgettext(X::tDom(), 'The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
 		}
 		return $success;
 	}
 
 	/**
 	 * Removes the url corresponding to the given id_note from bbn_notes_url.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @return bool
 	 */
 	public function removeUrl(string $id_note): bool
@@ -366,7 +366,7 @@ class Cms extends bbn\Models\Cls\Db
 	}
 	/**
 	 * Returns the object event of the given note.
-	 * @param String $id_note
+	 * @param string $id_note
 	 */
 	public function getEvent(string $id_note)
 	{
@@ -396,7 +396,7 @@ class Cms extends bbn\Models\Cls\Db
 
 	/**
 	 * Updates the event relative to the given note.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @param Array $cfg
 	 */
 	public function updateEvent(string $id_note, array $cfg = []): ?bool
@@ -417,8 +417,8 @@ class Cms extends bbn\Models\Cls\Db
 	}
 	/**
 	 * If it exists an event linked to the note it returns the start date.
-	 * @param String $id_note
-	 * @return String || null
+	 * @param string $id_note
+	 * @return string || null
 	 */
 	public function getStart($id_note): ?String
 	{
@@ -429,8 +429,8 @@ class Cms extends bbn\Models\Cls\Db
 	}
 	/**
 	 * If it exists an event linked to the note it returns the end date.
-	 * @param String $id_note
-	 * @return String || null
+	 * @param string $id_note
+	 * @return string || null
 	 */
 	public function getEnd($id_note)
 	{
@@ -442,7 +442,7 @@ class Cms extends bbn\Models\Cls\Db
 
 	/**
 	 * Inserts in bbn_events and bbn_notes_events the informations relative to the publication of the given note.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @param Array $cfg
 	 * @return Boolean || null
 	 */
@@ -516,7 +516,7 @@ class Cms extends bbn\Models\Cls\Db
 
 	/**
 	 * If the note has a corresponding event in bbn_events and the date of start is before now, and the date of end if isset is after now and the note has an url it returns true
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @return Boolean
 	 */
 	public function isPublished(string $id_note): ?bool
@@ -536,7 +536,7 @@ class Cms extends bbn\Models\Cls\Db
 
 	/**
 	 * Publish a note.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @param Array  $cfg
 	 * @return Boolean
 	 */
@@ -581,7 +581,7 @@ class Cms extends bbn\Models\Cls\Db
 	
 	/**
 	 * Unpublish a note.
-	 * @param String $id_note
+	 * @param string $id_note
 	 * @return Boolean
 	 */
 	public function unpublish(string $id_note): bool

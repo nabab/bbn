@@ -153,7 +153,7 @@ class Menu extends bbn\Models\Cls\Basic
         $id_menu = $id_menu[$c['arch']['user_options']['id']];
       }
       else {
-        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);
+        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => dgettext(X::tDom(), 'Shortcuts')]);
       }
 
       if (!empty($id_menu)
@@ -323,7 +323,7 @@ class Menu extends bbn\Models\Cls\Basic
    * @param array  $text The new text tp set
    * @return bool
    */
-  public function setText(string $id, String $text): bool
+  public function setText(string $id, string $text): bool
   {
     if (\Str::isUid($id) && $this->pref->setText($id, $text)) {
       $this->deleteCache($id);
@@ -429,7 +429,7 @@ class Menu extends bbn\Models\Cls\Basic
       foreach ($res as $k => &$d) {
         $d['numChildren'] = count($this->pref->getBits($id_menu, $d['id']));
         if (!is_null($d['id_option'])
-            && ($sequence = $this->opt->sequence($d['id_option'], $this->perm->getOptionId('access')))
+            && ($sequence = $this->options->sequence($d['id_option'], $this->perm->getOptionId('access')))
         ) {
           $d['path'][] = $sequence;
         }
@@ -464,7 +464,7 @@ class Menu extends bbn\Models\Cls\Basic
    * @param string $name The new menu's name
    * @return null|string The new ID
    */
-  public function clone(string $id, String $name): ?string
+  public function clone(string $id, string $name): ?string
   {
     if (\Str::isUid($id) && ($id_menu = $this->add(['text' => $name]))) {
       if (($bits = $this->pref->getFullBits($id)) && !$this->_clone($id_menu, $bits)) {
@@ -488,7 +488,7 @@ class Menu extends bbn\Models\Cls\Basic
    */
 
 
-  public function copy(string $id_menu, String $id_menu_to, array $cfg): ?string
+  public function copy(string $id_menu, string $id_menu_to, array $cfg): ?string
   {
     if (\Str::isUid($id_menu)
         && \Str::isUid($id_menu_to)
@@ -513,7 +513,7 @@ class Menu extends bbn\Models\Cls\Basic
    */
 
 
-  public function copyTo(string $id_bit, String $id_menu_to, array $cfg): ?string
+  public function copyTo(string $id_bit, string $id_menu_to, array $cfg): ?string
   {
     if (\Str::isUid($id_bit)
         && \Str::isUid($id_menu_to)
@@ -584,7 +584,7 @@ class Menu extends bbn\Models\Cls\Basic
    * @param string|null $id_parent The parent's ID.
    * @return bool
    */
-  public function move(string $id, String $id_parent = null): bool
+  public function move(string $id, string $id_parent = null): bool
   {
     if ($this->pref->moveBit($id, $id_parent)) {
       $this->deleteCache($this->getIdMenu($id));
@@ -726,7 +726,7 @@ class Menu extends bbn\Models\Cls\Basic
   /**
    *
    */
-  private function _clone(string $id_menu, array $bits, String $id_parent = null)
+  private function _clone(string $id_menu, array $bits, string $id_parent = null)
   {
     $c = $this->pref->getClassCfg();
     if (\Str::isUid($id_menu)) {

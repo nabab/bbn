@@ -15,46 +15,55 @@ class Controller implements Api
    * @var bbn\Mvc
    */
   private $_mvc;
+
   /**
    * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
    * @var array
    */
   private $_reroutes = [];
+
   /**
    * Is set to null while not controled, then 1 if controller was found, and false otherwise.
    * @var null|boolean
    */
   private $_is_controlled;
+
   /**
    * Is set to false while not rerouted
    * @var null|boolean
    */
   private $_is_rerouted = false;
+
   /**
    * The internal path to the controller.
    * @var null|string
    */
   private $_path;
+
   /**
    * The request sent to get to the controller
    * @var null|string
    */
   private $_request;
+
   /**
    * The directory of the controller.
    * @var null|string
    */
   private $_dir;
+
   /**
    * The full path to the controller's file.
    * @var null|string
    */
   private $_file;
+
   /**
    * The full path to the root directory.
    * @var null|string
    */
   private $_root;
+
   /**
    * The checkers files (with full path)
    * If any they will be checked before the controller
@@ -126,46 +135,51 @@ class Controller implements Api
     $this->reset($files, $data);
   }
 
+
   public function reset(array $info, $data = false)
   {
     if (isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
-      $this->_path = $info['path'];
-      $this->_plugin = $info['plugin'];
-      $this->_request = $info['request'];
-      $this->_file = $info['file'];
-      $this->_root = $info['root'];
+      $this->_path     = $info['path'];
+      $this->_plugin   = $info['plugin'];
+      $this->_request  = $info['request'];
+      $this->_file     = $info['file'];
+      $this->_root     = $info['root'];
       $this->arguments = $info['args'];
       $this->_checkers = $info['checkers'];
-      $this->mode = $info['mode'];
-      $this->data = \is_array($data) ? $data : [];
+      $this->mode      = $info['mode'];
+      $this->data      = \is_array($data) ? $data : [];
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
       /** @var bbn\Db db */
-      $this->db = $this->_mvc->getDb();
-      $this->inc = &$this->_mvc->inc;
-      $this->post = $this->_mvc->getPost();
-      $this->get = $this->_mvc->getGet();
-      $this->files = $this->_mvc->getFiles();
+      $this->db     = $this->_mvc->getDb();
+      $this->inc    = &$this->_mvc->inc;
+      $this->post   = $this->_mvc->getPost();
+      $this->get    = $this->_mvc->getGet();
+      $this->files  = $this->_mvc->getFiles();
       $this->params = $this->_mvc->getParams();
-      $this->url = $this->getUrl();
-      $this->obj = new \stdClass();
+      $this->url    = $this->getUrl();
+      $this->obj    = new \stdClass();
     }
   }
+
 
   public function addAuthorizedRoute(): int
   {
     return $this->_mvc->addAuthorizedRoute(...\func_get_args());
   }
 
+
   public function isAuthorizedRoute($url): bool
   {
     return $this->_mvc->isAuthorizedRoute($url);
   }
 
+
   public function getRoot()
   {
     return $this->_mvc->getRoot();
   }
+
 
   public function setRoot($root)
   {
@@ -173,15 +187,18 @@ class Controller implements Api
     return $this;
   }
 
+
   public function getUrl()
   {
     return $this->_mvc->getUrl();
   }
 
+
   public function getPath()
   {
     return $this->_path;
   }
+
 
   /**
    * Returns the current controller's route, i.e as demanded by the client.
@@ -193,10 +210,12 @@ class Controller implements Api
     return $this->_request;
   }
 
+
   public function exists()
   {
     return !empty($this->_path);
   }
+
 
   public function getAll()
   {
@@ -212,6 +231,7 @@ class Controller implements Api
     ];
   }
 
+
   /**
    * Returns the current controller's root drrectory.
    *
@@ -221,6 +241,7 @@ class Controller implements Api
   {
     return $this->_root;
   }
+
 
   /**
    * Returns the current controller's file's name.
@@ -232,6 +253,7 @@ class Controller implements Api
     return $this->_file;
   }
 
+
   /**
    * Returns the current controller's path.
    *
@@ -242,8 +264,10 @@ class Controller implements Api
     if (($pp = $this->getPrepath()) && (strpos($this->_path, $pp) === 0)) {
       return substr($this->_path, \strlen($pp));
     }
+
     return $this->_path;
   }
+
 
   /**
    * Returns the current controller's path.
@@ -255,8 +279,10 @@ class Controller implements Api
     if (($pp = $this->getPrepath()) && (strpos($this->_request, $pp) === 0)) {
       return substr($this->_request, \strlen($pp));
     }
+
     return $this->_request;
   }
+
 
   /**
    * Returns the current controller's file's name.
@@ -270,15 +296,19 @@ class Controller implements Api
       if ($p === '.') {
         return '';
       }
-      if (($prepath = $this->getPrepath()) 
+
+      if (($prepath = $this->getPrepath())
           && (strpos($p, $prepath) === 0)
       ) {
         return substr($p, \strlen($prepath));
       }
+
       return $p;
     }
+
     return null;
   }
+
 
   /**
    * @return mixed
@@ -287,6 +317,7 @@ class Controller implements Api
   {
     return $this->_plugin;
   }
+
 
   /**
    * This directly renders content with arbitrary values using the existing Mustache engine.
@@ -300,11 +331,14 @@ class Controller implements Api
     if (empty($model) && !empty($this->data)) {
       $model = $this->data;
     }
+
     if (\is_string($view)) {
       return \is_array($model) ? bbn\Tpl::render($view, $model) : $view;
     }
-    die(bbn\X::hdump("Problem with the template", $view, $this->_path, $this->mode));
+
+    die(X::hdump("Problem with the template", $view, $this->_path, $this->mode));
   }
+
 
   /**
    * Returns true if called from CLI/Cron, false otherwise
@@ -315,6 +349,7 @@ class Controller implements Api
   {
     return $this->_mvc->isCli();
   }
+
 
   /**
    * This will reroute a controller to another one seemlessly. Chainable
@@ -331,6 +366,7 @@ class Controller implements Api
     }
   }
 
+
   /**
    * This will include a file from within the controller's path. Chainable
    *
@@ -344,15 +380,18 @@ class Controller implements Api
       if (substr($file_name, -4) !== '.php') {
         $file_name .= '.php';
       }
+
       if ((strpos($file_name, '..') === false) && file_exists($d.$file_name)) {
         $bbn_path = $d.$file_name;
-        $ctrl =& $this;
+        $ctrl     =& $this;
         unset($d, $file_name);
         include $bbn_path;
       }
     }
+
     return $this;
   }
+
 
   /**
    * This will add the given string to the script property, and create it if needed. Chainable
@@ -366,19 +405,22 @@ class Controller implements Api
       if (!isset($this->obj->script)) {
         $this->obj->script = '';
       }
+
       $this->obj->script .= $script;
     }
+
     return $this;
   }
+
 
   public function registerPluginClasses($plugin_path): self
   {
     spl_autoload_register(
       function ($class_name) use ($plugin_path) {
-        if ((strpos($class_name,'/') === false) 
+        if ((strpos($class_name,'/') === false)
             && (strpos($class_name,'.') === false)
         ) {
-          $cls = explode('\\', $class_name);
+          $cls  = explode('\\', $class_name);
           $path = implode('/', $cls);
           if (file_exists($plugin_path.'lib/'.$path.'.php')) {
             include_once $plugin_path.'lib/'.$path.'.php';
@@ -388,6 +430,7 @@ class Controller implements Api
     );
     return $this;
   }
+
 
   /**
    * This will enclose the controller's inclusion
@@ -402,6 +445,7 @@ class Controller implements Api
       if ($this->_plugin) {
         $this->registerPluginClasses($this->pluginPath());
       }
+
       ob_start();
       if (defined('BBN_ROOT_CHECKER')) {
         if (!defined('BBN_ROOT_CHECKER_OK')) {
@@ -409,6 +453,7 @@ class Controller implements Api
           array_unshift($this->_checkers, BBN_ROOT_CHECKER);
         }
       }
+
       foreach ($this->_checkers as $appui_checker_file){
         // If a checker file returns false, the controller is not processed
         // The checker file can define data and inc that can be used in the subsequent controller
@@ -417,31 +462,39 @@ class Controller implements Api
           break;
         }
       }
+
       if (($log = ob_get_contents()) && \is_string($log)) {
         $this->obj->content = $log;
       }
+
       ob_end_clean();
       // If rerouted during the checkers
       if ($this->_is_rerouted) {
         $this->_is_rerouted = false;
         return $this->control();
       }
+
       if (!$ok) {
         return false;
       }
+
       $output = bbn\Mvc::includeController($this->_file, $this);
       // If rerouted during the controller
       if ($this->_is_rerouted) {
         $this->_is_rerouted = false;
         return $this->control();
       }
+
       if (\is_object($this->obj) && !isset($this->obj->content) && !empty($output)) {
         $this->obj->content = $output;
       }
+
       $this->_is_controlled = 1;
     }
+
     return $this->_is_controlled ? true : false;
   }
+
 
   /**
    * This will launch the controller in a new function.
@@ -453,22 +506,33 @@ class Controller implements Api
   {
     if (\is_null($this->_is_controlled)) {
       if ($this->_plugin) {
-        $this->applyLocale($this->_plugin);
+        $router = Router::getInstance();
+        if ($textDomain = $router->getLocale($this->_plugin)) {
+          $oldTextDomain = textdomain(null);
+          if ($textDomain !== $oldTextDomain) {
+            textdomain($textDomain);
+          }
+          else {
+            unset($oldTextDomain);
+          }
+        }
       }
+
       $this->control();
+      if (!empty($oldTextDomain)) {
+        textdomain($oldTextDomain);
+      }
     }
+
     return $this;
   }
+
 
   public function hasBeenRerouted()
   {
     return $this->_is_rerouted;
   }
 
-  public function applyLocale($plugin)
-  {
-    return $this->_mvc->applyLocale($plugin);
-  }
 
   /**
    * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
@@ -482,17 +546,20 @@ class Controller implements Api
       $data = $path;
       $path = '';
     }
+
     if ($r = $this->getView($path, 'js', $data)) {
       return '<script>'.
         ( $encapsulated ? '(function(){'.PHP_EOL : '' ).
-        ( empty($data) ? '' : 'let data = '.\bbn\X::jsObject($data).';' ).
+        ( empty($data) ? '' : 'let data = '.X::jsObject($data).';' ).
         $r.
         //( $encapsulated ? '})(jQuery);' : '' ).
         ($encapsulated ? PHP_EOL.'})();' : '').
         '</script>';
     }
+
     return false;
   }
+
 
   /**
    * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
@@ -507,14 +574,16 @@ class Controller implements Api
     if ($js = $this->getViewGroup($files, $data, 'js')) {
       return '<script>'.
       ( $encapsulated ? '(function($){'.PHP_EOL : '' ).
-      ( empty($data) ? '' : 'let data = '.\bbn\X::jsObject($data).';' ).
+      ( empty($data) ? '' : 'let data = '.X::jsObject($data).';' ).
       $js.
       //( $encapsulated ? '})(jQuery);' : '' ).
       ( $encapsulated ? PHP_EOL.'})();' : '' ).
       '</script>';
     }
+
     return false;
   }
+
 
   /**
    * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
@@ -531,8 +600,10 @@ class Controller implements Api
         $this->error("Impossible to get files from directory $files");
         return false;
       }
+
       $files = $tmp;
     }
+
     if (\is_array($files) && \count($files)) {
       $st = '';
       foreach ($files as $f){
@@ -540,10 +611,13 @@ class Controller implements Api
           $st .= $tmp;
         }
       }
+
       return $st;
     }
+
     $this->error('Impossible to get files from get_view_group files argument empty');
   }
+
 
   /**
    * This will get a CSS view encapsulated in a scoped style tag.
@@ -556,8 +630,10 @@ class Controller implements Api
     if ($r = $this->getView($path, 'css')) {
       return \CssMin::minify($r);
     }
+
     return false;
   }
+
 
   /**
    * This will get and compile a LESS view encapsulated in a scoped style tag.
@@ -572,6 +648,7 @@ class Controller implements Api
     }
   }
 
+
   /**
    * This will get a CSS view encapsulated in a scoped style tag.
    *
@@ -584,10 +661,13 @@ class Controller implements Api
       if (!isset($this->obj->css)) {
         $this->obj->css = '';
       }
+
       $this->obj->css .= $css;
     }
+
     return $this;
   }
+
 
   /**
    * This will get and compile a LESS view encapsulated in a scoped style tag.
@@ -601,10 +681,13 @@ class Controller implements Api
       if (!isset($this->obj->css)) {
         $this->obj->css = '';
       }
+
       $this->obj->css .= $css;
     }
+
     return $this;
   }
+
 
   /**
    * This will add a javascript view to $this->obj->script
@@ -616,7 +699,7 @@ class Controller implements Api
    */
   public function addJs()
   {
-    $args = \func_get_args();
+    $args     = \func_get_args();
     $has_path = false;
     foreach ($args as $i => $a){
       if ($new_data = $this->retrieveVar($a)) {
@@ -632,15 +715,19 @@ class Controller implements Api
         $this->jsData($this->data);
       }
     }
+
     if (!$has_path) {
       array_unshift($args, $this->_path);
     }
+
     $args[] = 'js';
     if ($r = $this->getView(...$args)) {
       $this->addScript($r);
     }
+
     return $this;
   }
+
 
   /**
    * This will add a javascript view to $this->obj->script
@@ -655,16 +742,20 @@ class Controller implements Api
     if ($js = $this->getViewGroup($files, $data, 'js')) {
       $this->jsData($data)->addScript($js);
     }
+
     return $this;
   }
+
 
   public function setObj(array $arr)
   {
     foreach ($arr as $k => $a){
       $this->obj->{$k} = $a;
     }
+
     return $this;
   }
+
 
   public function setUrl($url)
   {
@@ -672,11 +763,13 @@ class Controller implements Api
     return $this;
   }
 
+
   public function setTitle($title)
   {
     $this->obj->title = $title;
     return $this;
   }
+
 
   public function setIcon(string $icon)
   {
@@ -684,18 +777,22 @@ class Controller implements Api
     return $this;
   }
 
-  public function setColor(string $bg = null, String $txt = null)
+
+  public function setColor(string $bg = null, string $txt = null)
   {
     if ($bg) {
       $this->obj->bcolor = $bg;
     }
+
     if ($txt) {
       $this->obj->fcolor = $txt;
     }
+
     return $this;
   }
 
-  /** 
+
+  /**
    * Retrieves the plugin's name from the component's name if any
    */
   public function getPluginFromComponent(string $name)
@@ -703,46 +800,54 @@ class Controller implements Api
     return $this->_mvc->getPluginFromComponent($name);
   }
 
+
   public function routeComponent(string $name)
   {
     return $this->_mvc->routeComponent($name);
   }
 
+
   public function getComponent(string $name, array $data = []): ?array
   {
     if ($tmp = $this->routeComponent($name)) {
       if (!empty($tmp['js'])) {
-        $v = new View($tmp['js']);
+        $v   = new View($tmp['js']);
         $res = [
           'name' => $name,
           'script' => $v->get($data)
         ];
         if (!empty($tmp['css'])) {
-          $v = new View($tmp['css']);
+          $v          = new View($tmp['css']);
           $res['css'] = $v->get();
         }
+
         if (!empty($tmp['html'])) {
-          $v = new View($tmp['html']);
+          $v              = new View($tmp['html']);
           $res['content'] = $v->get($data);
         }
+
         return $res;
       }
     }
+
     return null;
   }
 
+
   public function jsData($data)
   {
-    if (bbn\X::isAssoc($data)) {
+    if (X::isAssoc($data)) {
       if (!isset($this->obj->data)) {
         $this->obj->data = $data;
       }
-      elseif (bbn\X::isAssoc($this->obj->data)) {
-        $this->obj->data = bbn\X::mergeArrays($this->obj->data, $data);
+      elseif (X::isAssoc($this->obj->data)) {
+        $this->obj->data = X::mergeArrays($this->obj->data, $data);
       }
     }
+
     return $this;
   }
+
 
   private function getArguments(array $args)
   {
@@ -764,13 +869,15 @@ class Controller implements Api
         $r['die'] = $a;
       }
     }
+
     if (!isset($r['mode']) && isset($r['path']) && Router::isMode($r['path'])) {
       $r['mode'] = $r['path'];
       unset($r['path']);
     }
+
     if (empty($r['path'])) {
       $r['path'] = $this->_path;
-      if (($this->getMode() === 'dom') 
+      if (($this->getMode() === 'dom')
           && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))
       ) {
         $r['path'] .= '/index';
@@ -779,14 +886,18 @@ class Controller implements Api
     elseif (strpos($r['path'], './') === 0) {
       $r['path'] = $this->getCurrentDir().substr($r['path'], 1);
     }
+
     if (!isset($r['data'])) {
       $r['data'] = $this->data;
     }
+
     if (!isset($r['die'])) {
       $r['die'] = true;
     }
+
     return $r;
   }
+
 
   /**
    * This will get a view.
@@ -810,6 +921,7 @@ class Controller implements Api
     if (empty($args['mode'])) {
       $args['mode'] = 'html';
     }
+
     $v = $this->_mvc->getView($args['path'], $args['mode'], $args['data']);
     /*
     if ( !$v && $args['die'] ){
@@ -819,32 +931,38 @@ class Controller implements Api
     return $v;
   }
 
-  public function getExternalView(string $full_path, String $mode = 'html', array $data=null)
+
+  public function getExternalView(string $full_path, string $mode = 'html', array $data=null)
   {
     return $this->_mvc->getExternalView($full_path, $mode, $data);
   }
 
-  public function customPluginView(string $path, String $mode = 'html', array $data = [], String $plugin = null): ?string
+
+  public function customPluginView(string $path, string $mode = 'html', array $data = [], string $plugin = null): ?string
   {
     if (!$plugin) {
       $plugin = $this->getPlugin();
     }
+
     if ($plugin) {
       return $this->_mvc->customPluginView($path, $mode, $data, $plugin);
     }
+
     return null;
   }
 
-  public function getComponentView(string $name, String $type = 'html', array $data = [])
-  {
 
+  public function getComponentView(string $name, string $type = 'html', array $data = [])
+  {
 
   }
 
-  public function getPluginView(string $path, String $type = 'html', array $data = [])
+
+  public function getPluginView(string $path, string $type = 'html', array $data = [])
   {
     return $this->_mvc->getPluginView($path, $type, $data, $this->getPlugin());
   }
+
 
   public function getPluginViews(string $path, array $data = [], array $data2 = null)
   {
@@ -855,20 +973,24 @@ class Controller implements Api
     ];
   }
 
-  public function getPluginModel($path, $data = [], String $plugin = null, int $ttl = 0)
+
+  public function getPluginModel($path, $data = [], string $plugin = null, int $ttl = 0)
   {
     return $this->_mvc->getPluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $ttl);
   }
 
-  public function getSubpluginModel($path, $data = [], String $plugin = null, String $subplugin, int $ttl = 0)
+
+  public function getSubpluginModel($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }
 
-  public function hasSubpluginModel(string $path, String $plugin, String $subplugin)
+
+  public function hasSubpluginModel(string $path, string $plugin, string $subplugin)
   {
     return $this->_mvc->hasSubpluginModel(...\func_get_args());
   }
+
 
   /*
   public function get_php(){
@@ -894,22 +1016,24 @@ class Controller implements Api
     if (\is_string($var) && (strpos($var, '$') === 0) && isset($this->data[substr($var, 1)])) {
       return $this->data[substr($var, 1)];
     }
+
     return false;
   }
+
 
   public function action()
   {
     $this->obj = $this->addData(['res' => ['success' => false]])->addData($this->post)->getObjectModel();
   }
 
+
   public function cachedAction($ttl = 60)
   {
-    $this->obj = \bbn\X::toObject(
-      $this->addData(['res' => ['success' => false]])
-        ->addData($this->post)
-        ->getCachedModel('', $this->data, $ttl)
+    $this->obj = X::toObject(
+      $this->addData(['res' => ['success' => false]])->addData($this->post)->getCachedModel('', $this->data, $ttl)
     );
   }
+
 
   /**
    * Compile and echoes all the views with the given data
@@ -926,13 +1050,15 @@ class Controller implements Api
       $data = null,
       int $ttl = null,
       string $path = ''
-  ): self {
+  ): self
+  {
 
-    $model = $ttl === null ?
-      $this->getModel($path, bbn\X::mergeArrays($this->post, $this->data))
-      : $this->getCachedModel($path, bbn\X::mergeArrays($this->post, $this->data), $ttl);
+    $model = $ttl === null ? $this->getModel($path, X::mergeArrays($this->post, $this->data)) : $this->getCachedModel($path, X::mergeArrays($this->post, $this->data), $ttl);
     if ($model && is_array($model)) {
       $this->addData($model);
+    }
+    else {
+      $model = [];
     }
 
     $this->obj->css = $this->getLess($path, false);
@@ -942,21 +1068,25 @@ class Controller implements Api
     elseif ($title) {
       $this->setTitle($title);
     }
+
     if ($tmp = $this->retrieveVar($data)) {
       $data = $tmp;
     }
     elseif (!\is_array($data)) {
-      $data = $data === true ? $this->data : [];
+      $data = $data === true ? $model : [];
     }
+
     if ($this->mode === 'dom') {
       $this->data['script'] = $this->getJs($path, $data);
     }
     else{
       $this->addJs($path, $data, false);
     }
+
     echo $this->getView($path, false);
     return $this;
   }
+
 
   /**
    * This will get a the content of a file located within the data path
@@ -966,14 +1096,16 @@ class Controller implements Api
    */
   public function getContent($file_name)
   {
-    if ($this->checkPath($file_name) 
-        && \defined('BBN_DATA_PATH') 
+    if ($this->checkPath($file_name)
+        && \defined('BBN_DATA_PATH')
         && is_file(BBN_DATA_PATH.$file_name)
     ) {
       return file_get_contents(BBN_DATA_PATH.$file_name);
     }
+
     return false;
   }
+
 
   /**
    * This will return the path to the directory of the current controller
@@ -985,6 +1117,7 @@ class Controller implements Api
     return $this->_dir;
   }
 
+
   public function getPrepath()
   {
     if ($this->exists()) {
@@ -992,14 +1125,17 @@ class Controller implements Api
     }
   }
 
+
   public function setPrepath($path)
   {
     if ($this->exists() && $this->_mvc->setPrepath($path)) {
       $this->params = $this->_mvc->getParams();
       return $this;
     }
+
     die("Prepath $path is not valid");
   }
+
 
   /**
    * This will get the model. There is no order for the arguments.
@@ -1011,7 +1147,7 @@ class Controller implements Api
   public function getModel()
   {
     $args = \func_get_args();
-    $die = false;
+    $die  = false;
     foreach ($args as $a){
       if (\is_string($a)) {
         $path = $a;
@@ -1033,21 +1169,27 @@ class Controller implements Api
     elseif (strpos($path, './') === 0) {
       $path = $this->getCurrentDir().substr($path, 1);
     }
+
     if (!isset($data)) {
       $data = $this->data;
     }
+
     $m = $this->_mvc->getModel($path, $data, $this);
     if (\is_object($m)) {
-      $m = bbn\X::toArray($m);
+      $m = X::toArray($m);
     }
+
     if (!\is_array($m)) {
       if ($die) {
         die("$path is an invalid model");
       }
+
       return [];
     }
+
     return $m;
   }
+
 
   /**
    * This will get the model. There is no order for the arguments.
@@ -1059,8 +1201,8 @@ class Controller implements Api
   public function getCachedModel()
   {
     $args = \func_get_args();
-    $die = false;
-    $ttl = 0;
+    $die  = false;
+    $ttl  = 0;
     $data = [];
     foreach ($args as $a){
       if (\is_string($a) && \strlen($a)) {
@@ -1076,21 +1218,26 @@ class Controller implements Api
         $die = $a;
       }
     }
+
     if (!isset($path)) {
       $path = $this->_path;
     }
     elseif (strpos($path, './') === 0) {
       $path = $this->getCurrentDir().substr($path, 1);
     }
+
     if (!isset($data)) {
       $data = $this->data;
     }
+
     $m = $this->_mvc->getCachedModel($path, $data, $this, $ttl);
     if (!\is_array($m) && $die) {
       die("$path is an invalid model");
     }
+
     return $m;
   }
+
 
   /**
    * This will delete the cached model. There is no order for the arguments.
@@ -1110,17 +1257,21 @@ class Controller implements Api
         $data = $a;
       }
     }
+
     if (!isset($path)) {
       $path = $this->_path;
     }
     elseif (strpos($path, './') === 0) {
       $path = $this->getCurrentDir().substr($path, 1);
     }
+
     if (!isset($data)) {
       $data = $this->data;
     }
+
     return $this->_mvc->deleteCachedModel($path, $data, $this);
   }
+
 
   /**
    * This will get the model. There is no order for the arguments.
@@ -1132,7 +1283,7 @@ class Controller implements Api
   public function setCachedModel()
   {
     $args = \func_get_args();
-    $die = 1;
+    $die  = 1;
     foreach ($args as $a){
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
@@ -1147,18 +1298,22 @@ class Controller implements Api
         $die = $a;
       }
     }
+
     if (!isset($path)) {
       $path = $this->_path;
     }
     elseif (strpos($path, './') === 0) {
       $path = $this->getCurrentDir().substr($path, 1);
     }
+
     if (!isset($data)) {
       $data = $this->data;
     }
+
     if (!isset($ttl)) {
       $ttl = 10;
     }
+
     $this->_mvc->setCachedModel($path, $data, $this, $ttl);
     return $this;
   }
@@ -1166,7 +1321,7 @@ class Controller implements Api
 
   public function getObjectModel(): ?object
   {
-    $args = \func_get_args();
+    $args      = \func_get_args();
     $has_cache = false;
     foreach ($args as $a) {
       if (\is_int($a)) {
@@ -1183,11 +1338,12 @@ class Controller implements Api
     }
 
     if (\is_array($m)) {
-      $m = bbn\X::toObject($m);
+      $m = X::toObject($m);
     }
 
     return \is_object($m) ? $m : null;
   }
+
 
   /**
    * Adds a property to the MVC object inc if it has not been declared.
@@ -1200,6 +1356,7 @@ class Controller implements Api
     return $this;
   }
 
+
   public function hasArguments(int $num = 1)
   {
     $i = 0;
@@ -1207,10 +1364,13 @@ class Controller implements Api
       if (!array_key_exists($i, $this->arguments)) {
         return false;
       }
+
       $i++;
     }
+
     return true;
   }
+
 
   /**
    * Returns the output object.
@@ -1222,10 +1382,12 @@ class Controller implements Api
     return $this->obj;
   }
 
+
   public function transform(callable $fn): void
   {
     $this->obj = $fn($this->obj);
   }
+
 
   /**
      * Checks if data exists or if a specific index exists in the data
@@ -1237,11 +1399,14 @@ class Controller implements Api
     if (!\is_array($this->data)) {
       return false;
     }
+
     if (\is_null($idx)) {
       return !empty($this->data);
     }
-    return \bbn\X::hasProps($this->data, (array)$idx, $check_empty);
+
+    return X::hasProps($this->data, (array)$idx, $check_empty);
   }
+
 
   /**
    * Checks if there is ny HTML content in the object
@@ -1253,8 +1418,10 @@ class Controller implements Api
     if (!\is_object($this->obj)) {
       return false;
     }
+
     return !empty($this->obj->content);
   }
+
 
   /**
    * Returns the rendered result from the current mvc if successufully processed
@@ -1267,13 +1434,16 @@ class Controller implements Api
     if (isset($this->obj->content)) {
       return $this->obj->content;
     }
+
     return false;
   }
+
 
   public function getMode()
   {
     return $this->mode;
   }
+
 
   public function setMode($mode)
   {
@@ -1281,8 +1451,10 @@ class Controller implements Api
       $this->mode = $mode;
       //die(var_dump($mode));
     }
+
     return $this;
   }
+
 
   /**
    * Returns the rendered result from the current mvc if successufully processed
@@ -1295,8 +1467,10 @@ class Controller implements Api
     if (isset($this->obj->script)) {
       return $this->obj->script;
     }
+
     return '';
   }
+
 
   /**
    * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
@@ -1309,6 +1483,7 @@ class Controller implements Api
     $this->data = $data;
     return $this;
   }
+
 
   /**
    * Merges the existing data if there is with this one. Chainable.
@@ -1323,8 +1498,10 @@ class Controller implements Api
         $this->data = empty($this->data) ? $d : array_merge($this->data, $d);
       }
     }
+
     return $this;
   }
+
 
   /**
    * Merges the existing data if there is with this one. Chainable.
@@ -1333,16 +1510,20 @@ class Controller implements Api
    */
   public function add($path, $data=[], $internal = false)
   {
+    die(X::dump($this->_plugin, array_keys(get_object_vars($this))));
     if (substr($path, 0, 2) === './') {
       $path = $this->getCurrentDir().substr($path, 1);
     }
+
     if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {
       $o = new Controller($this->_mvc, $route, $data);
       $o->process();
       return $o;
     }
+
     return false;
   }
+
 
   /**
    * Merges the existing data if there is with this one. Chainable.
@@ -1354,21 +1535,25 @@ class Controller implements Api
     if (substr($path, 0, 2) === './') {
       $path = $this->getCurrentDir().substr($path, 1);
     }
+
     if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {
       $o = new Controller($this->_mvc, $route, $data);
       $o->process();
-      $this->obj = \bbn\X::mergeObjects($this->obj, $o->obj);
+      $this->obj = X::mergeObjects($this->obj, $o->obj);
     }
     else {
-      throw new \Error(_("Impossible to route the following request").': '.$path);
+      throw new \Error(dgettext(X::tDom(), "Impossible to route the following request").': '.$path);
     }
+
     return $this;
   }
+
 
   public function getResult()
   {
     return $this->obj;
   }
+
 
   /**
    * Checks whether the given view exists or not.
@@ -1377,10 +1562,11 @@ class Controller implements Api
    * @param string $mode
    * @return boolean
    */
-  public function viewExists(string $path, String $mode = 'html'): bool
+  public function viewExists(string $path, string $mode = 'html'): bool
   {
     return $this->_mvc->viewExists($path, $mode);
   }
+
 
   /**
    * Checks whether the given model exists or not.
@@ -1392,4 +1578,6 @@ class Controller implements Api
   {
     return $this->_mvc->modelExists($path);
   }
+
+
 }

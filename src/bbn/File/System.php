@@ -92,7 +92,7 @@ class System extends bbn\Models\Cls\Basic
     }
 
     if (empty($this->mode)) {
-      $this->error = _("Impossible to connect to the SSH server");
+      $this->error = dgettext(X::tDom(), "Impossible to connect to the SSH server");
     }
   }
 
@@ -116,7 +116,7 @@ class System extends bbn\Models\Cls\Basic
     }
 
     while ($path && (substr($path, -1) === '/')){
-      $path = substr($path, 0, Strlen($path) - 1);
+      $path = substr($path, 0, strlen($path) - 1);
     }
 
     return $path;
@@ -158,9 +158,9 @@ class System extends bbn\Models\Cls\Basic
       $file = $this->obj->getSystemPath($file, $is_absolute);
     }
     else {
-      $file = substr($file, Strlen($this->prefix) + ($is_absolute ? 0 : 1));
+      $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
       if (!$is_absolute && $this->current) {
-        $file = substr($file, Strlen($this->current));
+        $file = substr($file, strlen($this->current));
       }
     }
 
@@ -203,7 +203,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string               $detailed
    * @return array|null
    */
-  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, String $detailed = ''): ?array
+  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ($this->check() && $this->isDir($path)) {
       if ($this->mode !== 'nextcloud') {
@@ -237,7 +237,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array|null
    */
-  public function getDirs(string $path = '', bool $hidden = false, String $detailed = ''): ?array
+  public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
     if ($this->check() && $this->isDir($path)) {
       $is_absolute = strpos($path, '/') === 0;
@@ -334,7 +334,7 @@ class System extends bbn\Models\Cls\Basic
    * @param bool   $hidden
    * @return array|null
    */
-  public function scand(string $path, bool $hidden = false, String $detailed = ''): ?array
+  public function scand(string $path, bool $hidden = false, string $detailed = ''): ?array
   {
     if ($this->check() && $this->isDir($path)) {
       clearstatcache();
@@ -363,7 +363,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string               $detailed
    * @return array|null
    */
-  public function scan(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): ?array
+  public function scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): ?array
   {
     if ($this->check() && $this->isDir($path)) {
       clearstatcache();
@@ -392,7 +392,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string               $detailed
    * @return array|null
    */
-  public function rscan(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): ?array
+  public function rscan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): ?array
   {
     if ($this->check() && $this->isDir($path)) {
       clearstatcache();
@@ -469,7 +469,7 @@ class System extends bbn\Models\Cls\Basic
    * @param bool   $append
    * @return bool
    */
-  public function putContents(string $file, String $content, bool $append = false): bool
+  public function putContents(string $file, string $content, bool $append = false): bool
   {
     $path = dirname($file);
     if ($this->check() && $this->isDir($path)) {
@@ -508,6 +508,41 @@ class System extends bbn\Models\Cls\Basic
 
   /**
    * @param string $file
+   * @return null|string
+   */
+  public function decodeContents(string $file, $decoder = null)
+  {
+    if ($c = $this->getContents($file)) {
+      if (is_callable($decoder)) {
+        return $decoder($c);
+      }
+      else {
+        $encoding = false;
+        if (!$decoder) {
+          $encoding = bbn\Str::fileExt($file);
+        }
+        elseif (is_string($decoder)) {
+          $encoding = $decoder;
+        }
+
+        switch ($encoding) {
+          case 'json':
+            return json_decode($c);
+          case 'yml':
+          case 'yaml':
+            return yaml_parse($c);
+          default:
+            return unserialize($c);
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @param string $file
    * @param bool   $full
    * @return bool
    */
@@ -528,7 +563,7 @@ class System extends bbn\Models\Cls\Basic
    * @param system|null $fs
    * @return bool
    */
-  public function copy(string $source, String $dest, bool $overwrite = false, System $fs = null): bool
+  public function copy(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ($this->check()) {
       if ($this->mode !== 'nextcloud') {
@@ -598,7 +633,7 @@ class System extends bbn\Models\Cls\Basic
    * @param system|null $fs
    * @return bool
    */
-  public function move(string $source, String $dest, bool $overwrite = false, System $fs = null): bool
+  public function move(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ($this->check() && $this->exists($source)) {
       $name = basename($source);
@@ -766,7 +801,7 @@ class System extends bbn\Models\Cls\Basic
         foreach ($search as $s) {
           $idx     = 0;
           $res[$s] = [];
-          while (($n = \bbn\X::indexOf($content, $s, $idx)) > -1) {
+          while (($n = X::indexOf($content, $s, $idx)) > -1) {
             $res[$s][] = $n;
             $idx       = $n + strlen($s);
           }
@@ -774,7 +809,7 @@ class System extends bbn\Models\Cls\Basic
       }
       else {
         $idx = 0;
-        while (($n = \bbn\X::indexOf($content, $search, $idx)) > -1) {
+        while (($n = X::indexOf($content, $search, $idx)) > -1) {
           $res[] = $n;
           $idx   = $n + 1;
         }
@@ -804,7 +839,7 @@ class System extends bbn\Models\Cls\Basic
   {
     if (\is_array($replace)) {
       if (!\is_array($search) || (count($replace) !== count($search))) {
-        throw new \Exception(_("If replace is an array, search must be an array of equal length"));
+        throw new \Exception(dgettext(X::tDom(), "If replace is an array, search must be an array of equal length"));
       }
 
       $replace_array = true;
@@ -823,7 +858,7 @@ class System extends bbn\Models\Cls\Basic
       $changed = false;
       if (is_array($search)) {
         foreach ($search as $idx => $s) {
-          if (\bbn\X::indexOf($content, $s) === -1) {
+          if (X::indexOf($content, $s) === -1) {
             continue;
           }
 
@@ -831,7 +866,7 @@ class System extends bbn\Models\Cls\Basic
           $content = str_replace($s, $replace_array ? $replace[$idx] : $replace, $content);
         }
       }
-      elseif (\bbn\X::indexOf($content, $search) > -1) {
+      elseif (X::indexOf($content, $search) > -1) {
         $changed = true;
         $content = str_replace($search, $replace, $content);
       }
@@ -964,7 +999,7 @@ class System extends bbn\Models\Cls\Basic
         return true;
       }
 
-      $this->error = _('Impossible to connect to the WebDAV host');
+      $this->error = dgettext(X::tDom(), 'Impossible to connect to the WebDAV host');
     }
 
     return false;
@@ -984,7 +1019,7 @@ class System extends bbn\Models\Cls\Basic
         $this->obj = ftp_ssl_connect(...$args);
       }
       catch (\Exception $e){
-        $this->error  = _('Impossible to connect to the FTP host through SSL');
+        $this->error  = dgettext(X::tDom(), 'Impossible to connect to the FTP host through SSL');
         $this->error .= PHP_EOL.$e->getMessage();
       }
 
@@ -993,14 +1028,14 @@ class System extends bbn\Models\Cls\Basic
           $this->obj = ftp_connect(...$args);
         }
         catch (\Exception $e){
-          $this->error  = _('Impossible to connect to the FTP host');
+          $this->error  = dgettext(X::tDom(), 'Impossible to connect to the FTP host');
           $this->error .= PHP_EOL.$e->getMessage();
         }
       }
 
       if ($this->obj) {
         if (!@ftp_login($this->obj, $cfg['user'], $this->_get_password($cfg))) {
-          $this->error  = _('Impossible to login to the FTP host');
+          $this->error  = dgettext(X::tDom(), 'Impossible to login to the FTP host');
           $this->error .= PHP_EOL.error_get_last()['message'];
         }
         else{
@@ -1038,15 +1073,15 @@ class System extends bbn\Models\Cls\Basic
       $this->cn = @ssh2_connect(
         $cfg['host'], $cfg['port'] ?? 22, $param/*, [
         'debug' => function($message, $language, $always_display){
-        bbn\X::log([$message, $language, $always_display], 'connect_ssh_debug');
+        X::log([$message, $language, $always_display], 'connect_ssh_debug');
         },
         'disconnect' => function($reason, $message, $language){
-        bbn\X::log([$reason, $message, $language], 'connect_ssh_disconnect');
+        X::log([$reason, $message, $language], 'connect_ssh_disconnect');
         }
         ]*/
       );
       if (!$this->cn) {
-        $this->error = _("Could not connect through SSH.");
+        $this->error = dgettext(X::tDom(), "Could not connect through SSH.");
       }
       elseif (X::hasProps($cfg, ['user', 'public', 'private'], true)) {
         stream_set_blocking($this->cn, true);
@@ -1054,18 +1089,18 @@ class System extends bbn\Models\Cls\Basic
         /*
         $fingerprint = ssh2_fingerprint($this->cn, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
         if ( strcmp($this->ssh_server_fp, $fingerprint) !== 0 ){
-          $this->error = _('Unable to verify server identity!');
+          $this->error = dgettext(X::tDom(), 'Unable to verify server identity!');
         }
         */
         if (!ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $this->_get_password($cfg))) {
-          $this->error = _('Authentication rejected by server');
+          $this->error = dgettext(X::tDom(), 'Authentication rejected by server');
         }
         else {
           try {
             $this->obj = ssh2_sftp($this->cn);
           }
           catch (\Exception $e) {
-            $this->error = _("Could not connect through SFTP.");
+            $this->error = dgettext(X::tDom(), "Could not connect through SFTP.");
           }
 
           if ($this->obj) {
@@ -1079,14 +1114,14 @@ class System extends bbn\Models\Cls\Basic
           ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg));
         }
         catch (\Exception $e) {
-          $this->error = _("Could not authenticate with username and password.");
+          $this->error = dgettext(X::tDom(), "Could not authenticate with username and password.");
         }
         if (!$this->error) {
           try {
             $this->obj = @ssh2_sftp($this->cn);
           }
           catch (\Exception $e) {
-            $this->error = _("Could not initialize SFTP subsystem.");
+            $this->error = dgettext(X::tDom(), "Could not initialize SFTP subsystem.");
           }
 
           if ($this->obj) {
@@ -1132,7 +1167,7 @@ class System extends bbn\Models\Cls\Basic
             }
 
             return strtolower($a);
-          }, \bbn\X::split($filter, '|')
+          }, X::split($filter, '|')
         );
         foreach ($extensions as $ext) {
           if (strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($ext))) === $ext) {
@@ -1159,7 +1194,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string          $detailed
    * @return array
    */
-  private function _get_items(string $path, $type = 'both', bool $hidden = false, String $detailed = ''): array
+  private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
     if ($this->mode !== 'nextcloud') {
       $files        = [];
@@ -1170,7 +1205,7 @@ class System extends bbn\Models\Cls\Basic
       $has_children = stripos((string)$detailed, 'c') !== false;
       $has_ext      = stripos((string)$detailed, 'e') !== false;
       if (($this->mode === 'ftp') && ($detailed || ($type !== 'both'))) {
-        if ($fs = ftp_mlsd($this->obj, substr($path, Strlen($this->prefix)))) {
+        if ($fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)))) {
           foreach ($fs as $f){
             if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0))) {
               if ($this->_check_filter($f['name'], $type)) {
@@ -1221,7 +1256,7 @@ class System extends bbn\Models\Cls\Basic
           }
         }
         else{
-          bbn\X::log(error_get_last(), 'filesystem');
+          X::log(error_get_last(), 'filesystem');
         }
       }
       else {
@@ -1297,7 +1332,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string               $detailed
    * @return array
    */
-  private function _scand(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): array
+  private function _scand(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
     foreach ($this->_get_items($path, 'dir', $hidden, $detailed) as $it){
@@ -1322,7 +1357,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string               $detailed
    * @return array
    */
-  private function _scan(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): array
+  private function _scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
 
@@ -1350,7 +1385,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string               $detailed
    * @return array
    */
-  private function _rscan(string $path = '', $filter = null, bool $hidden = false, String $detailed = ''): array
+  private function _rscan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
 
@@ -1411,18 +1446,18 @@ class System extends bbn\Models\Cls\Basic
         if ($full) {
           if ($this->mode === 'ssh') {
             try {
-              $res = @ssh2_sftp_rmdir($this->obj, substr($path, Strlen($this->prefix)));
+              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
             }
             catch (\Exception $e) {
-              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+              $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
             }
           }
           elseif ($this->mode === 'ftp') {
             try {
-              $res = @ftp_rmdir($this->obj, substr($path, Strlen($this->prefix)));
+              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
             }
             catch (\Exception $e) {
-              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+              $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
             }
           }
           else{
@@ -1430,7 +1465,7 @@ class System extends bbn\Models\Cls\Basic
               $res = rmdir($path);
             }
             catch (\Exception $e) {
-              $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+              $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
             }
           }
         }
@@ -1441,18 +1476,18 @@ class System extends bbn\Models\Cls\Basic
       elseif ($this->_is_file($path)) {
         if ($this->mode === 'ssh') {
           try {
-            $res = ssh2_sftp_unlink($this->obj, substr($path, Strlen($this->prefix)));
+            $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
           }
           catch (\Exception $e) {
-            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
           }
         }
         elseif ($this->mode === 'ftp') {
           try {
-            $res = ftp_delete($this->obj, substr($path, Strlen($this->prefix)));
+            $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
           }
           catch (\Exception $e) {
-            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
           }
         }
         else {
@@ -1460,7 +1495,7 @@ class System extends bbn\Models\Cls\Basic
             $res = unlink($path);
           }
           catch (\Exception $e) {
-            $this->log(_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
           }
         }
       }
@@ -1476,7 +1511,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string $dest
    * @return bool
    */
-  private function _copy(string $source, String $dest): bool
+  private function _copy(string $source, string $dest): bool
   {
     if ($this->mode !== 'nextcloud') {
       if ($this->_is_file($source)) {
@@ -1503,8 +1538,8 @@ class System extends bbn\Models\Cls\Basic
   private function _rename($source, $dest): bool
   {
     if ($this->mode !== 'nextcloud') {
-      $file1 = substr($source, Strlen($this->prefix));
-      $file2 = substr($dest, Strlen($this->prefix));
+      $file1 = substr($source, strlen($this->prefix));
+      $file2 = substr($dest, strlen($this->prefix));
       if ($this->mode === 'ssh') {
         return ssh2_sftp_rename($this->obj, $file1, $file2);
       }
@@ -1639,7 +1674,7 @@ class System extends bbn\Models\Cls\Basic
   }
 
 
-  private function _upload(array $files, String $path): bool
+  private function _upload(array $files, string $path): bool
   {
     $success = false;
     if (!empty($files) && !empty($path)) {

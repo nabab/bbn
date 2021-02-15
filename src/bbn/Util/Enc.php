@@ -31,7 +31,7 @@ class Enc
    * @param string $key
    * @return string
    */
-  public static function crypt(string $s, String $key=''): string
+  public static function crypt(string $s, string $key=''): string
   {
     $key = self::_get_key($key);
     return self::encryptOpenssl($s, $key);
@@ -42,18 +42,18 @@ class Enc
    * @param string $key
    * @return string
    */
-  public static function decrypt(string $s, String $key=''): string
+  public static function decrypt(string $s, string $key=''): string
   {
     $key = self::_get_key($key);
     return self::decryptOpenssl($s, $key);
   }
 
-  public static function crypt64(string $s, String $key=''): string
+  public static function crypt64(string $s, string $key=''): string
   {
     return base64_encode(self::crypt($s, $key));
   }
 
-  public static function decrypt64(string $s, String $key=''): string
+  public static function decrypt64(string $s, string $key=''): string
   {
     return self::decrypt(base64_decode($s), $key);
   }
@@ -127,7 +127,7 @@ class Enc
    *
    * @return bool
    */
-  public static function generateCertFiles(string $path, String $algo = 'sha512', int $key_bits = 4096): bool
+  public static function generateCertFiles(string $path, string $algo = 'sha512', int $key_bits = 4096): bool
   {
     $res = false;
     if (is_dir(dirname($path))

@@ -1,0 +1,303 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Parsers\\Apache",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Apache.php",
+    "startLine": 8,
+    "endLine": 283,
+    "contentConstructor": null,
+    "methods": {
+        "getLastErrors": {
+            "name": "getLastErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$last_errors;\n  }",
+            "startLine": 32,
+            "endLine": 35,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "cutLogFile": {
+            "name": "cutLogFile",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $size)\n  {\n    if (file_exists($file)) {\n      if (filesize($file) > $size) {\n        $handle = fopen($file, \"r\");\n        if ($handle) {\n          $current_error = false;\n          $fsize = 0;\n          $res = [];\n          while (($buffer = fgets($handle)) !== false) {\n            $fsize += strlen($buffer);\n            $res[] = $buffer;\n            while ($fsize > $size) {\n              array_shift($res);\n              $fsize = strlen(implode('', $res));\n            }\n          }\n\n          if (file_put_contents($file, implode('', $res))) {\n            return true;\n          }\n        }\n      }\n\n      return false;\n    }\n\n    return null;\n  }",
+            "startLine": 38,
+            "endLine": 66,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "size",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getParseLimit": {
+            "name": "getParseLimit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$limit;\n  }",
+            "startLine": 69,
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "setParseLimit": {
+            "name": "setParseLimit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($limit)\n  {\n    self::$limit = $limit;\n  }",
+            "startLine": 75,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "limit",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "parseFile": {
+            "name": "parseFile",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, array $res = [])\n  {\n    $num = 0;\n    self::setLastErrors($num);\n    if (file_exists($file)) {\n      $handle = fopen($file, \"r\");\n      if ($handle) {\n        $current_error = false;\n        $min = 0;\n        if ($res) {\n          $min = X::maxWithKey($res, 'last_date');\n        }\n\n        while (($buffer = fgets($handle)) !== false) {\n          if ($parsed = self::parseLine($buffer)) {\n            if (isset($parsed['error'])) {\n              if ($min > $parsed['date']) {\n                continue;\n              }\n\n              $num++;\n              $idx = X::find(\n                $res,\n                [\n                  'error' => $parsed['error'],\n                  'file' => $parsed['file'],\n                  'line' => $parsed['line']\n                ]\n              );\n              if ($idx !== null) {\n                $res[$idx]['count']++;\n                $res[$idx]['last_date'] = $parsed['date'];\n                if (isset($res[$idx]['backtrace'])) {\n                  unset($res[$idx]['backtrace']);\n                }\n\n                $current_error = $idx;\n              }\n              else{\n                $current_error = count($res);\n                $res[]         = [\n                  'first_date' => $parsed['date'],\n                  'last_date' => $parsed['date'],\n                  'count' => 1,\n                  'type' => $parsed['type'],\n                  'error' => $parsed['error'],\n                  'file' => $parsed['file'],\n                  'line' => $parsed['line']\n                ];\n                if (count($res) > self::$file_limit) {\n                  $tmp = $res[$current_error];\n                  X::sortBy($res, 'last_date', 'DESC');\n                  $current_error = X::find($res, $tmp);\n                  array_pop($res);\n                }\n                self::setLastErrors($num);\n              }\n            }\n            elseif (isset($parsed['action'], $res[$current_error])) {\n              if (!isset($res[$current_error]['backtrace'])) {\n                $res[$current_error]['backtrace'] = [];\n              }\n              elseif (count($res[$current_error]['backtrace']) > 10) {\n                continue;\n              }\n\n              array_unshift($res[$current_error]['backtrace'],  $parsed);\n            }\n          }\n        }\n\n        if (!feof($handle)) {\n          throw new \\Exception(dgettext(X::tDom(), \"Error: unexpected fgets() fail\"));\n        }\n\n        fclose($handle);\n        X::sortBy($res, 'last_date', 'DESC');\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 81,
+            "endLine": 162,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "res",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "parseLine": {
+            "name": "parseLine",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    $ln = trim($st);\n    if (empty($ln)) {\n      return null;\n    }\n\n    $m = [];\n    if (preg_match(self::$err1, $ln, $m)) {\n      $in_lib = strpos('\/'.$m[4], BBN_LIB_PATH) === 0;\n      return [\n        'date' => date('Y-m-d H:i:s', strtotime(str_replace('-', ' ', $m[1]))),\n        'type' => $m[2],\n        'error' => $m[3],\n        'file' => str_replace(\n          $in_lib ? BBN_LIB_PATH : BBN_APP_PATH,\n          $in_lib ? 'lib\/' : 'app\/',\n          '\/'.$m[4]\n        ),\n        'line' => $m[5],\n      ];\n    }\n\n    if (preg_match(self::$err2, $ln, $m)) {\n      $in_lib = strpos('\/'.$m[4], BBN_LIB_PATH) === 0;\n      return [\n        'date' => date('Y-m-d H:i:s', strtotime(str_replace('-', ' ', $m[1]))),\n        'type' => $m[2],\n        'error' => $m[3],\n        'file' => str_replace(\n          $in_lib ? BBN_LIB_PATH : BBN_APP_PATH,\n          $in_lib ? 'lib\/' : 'app\/',\n          '\/'.$m[4]\n        ),\n        'line' => $m[5],\n      ];\n    }\n\n    if (preg_match(self::$err_line, $ln, $m)) {\n      $in_lib = strpos('\/'.$m[3], BBN_LIB_PATH) === 0;\n      return [\n        'action' => Str::cut($m[2], 255),\n        'file' => str_replace(\n          $in_lib ? BBN_LIB_PATH : BBN_APP_PATH,\n          $in_lib ? 'lib\/' : 'app\/',\n          '\/'.$m[3]\n        ),\n        'line' => $m[4]\n      ];\n    }\n\n    if (preg_match(self::$err_line2, $ln, $m)) {\n      $in_lib = strpos('\/'.$m[1], BBN_LIB_PATH) === 0;\n      return [\n        'action' => Str::cut($m[3], 255),\n        'file' => str_replace(\n          $in_lib ? BBN_LIB_PATH : BBN_APP_PATH,\n          $in_lib ? 'lib\/' : 'app\/',\n          '\/'.$m[1]\n        ),\n        'line' => $m[2]\n      ];\n    }\n\n    return null;\n  }",
+            "startLine": 165,
+            "endLine": 230,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "parse": {
+            "name": "parse",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Parsers\\Apache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    $num   = 0;\n    $res   = [];\n    $errs  = [];\n    $lines = explode(PHP_EOL, $st, self::$parse_limit);\n    $err   = false;\n    foreach ($lines as $ln) {\n      if ($parsed = self::parseLine($ln)) {\n        if (isset($parsed['error'])) {\n          if ($err) {\n            $res[] = $err;\n          }\n\n          $err = $parsed;\n        }\n        elseif (isset($parsed['action'])) {\n          if (!$err) {\n            continue;\n            \/\/throw new \\Exception(dgettext(X::tDom(), \"A trace is starting so an error should exist\"));\n          }\n\n          if (!isset($err['trace'])) {\n            $err['trace'] = [];\n          }\n\n          $err['trace'][] = $parsed;\n        }\n        else {\n          if ($err) {\n            $res[] = $err;\n            $err   = false;\n          }\n\n          $errs[] = $ln;\n          $num++;\n          \/\/throw new \\Exception(dgettext(X::tDom(), \"Impossible to parse log string\").\" $ln\");\n        }\n      }\n    }\n\n    if ($err) {\n      $res[] = $err;\n    }\n\n    \/\/die(X::dump($errs));\n    return $res;\n  }",
+            "startLine": 233,
+            "endLine": 280,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": {
+        "parse_limit": 50000,
+        "file_limit": 500,
+        "last_errors": 0,
+        "err1": "\/^\\[([^\\]]+)\\]\\s+PHP\\s+([^:]+):\\s+(.+)\\s+called\\s+in\\s+\\\/([^\\s]+)\\s+on\\s+line\\s+(\\d+)(.*)$\/",
+        "err2": "\/^\\[([^\\]]+)\\]\\s+PHP\\s+([^:]+):\\s+(.+)\\s+in\\s+\\\/([^\\s]+)(?:\\s+on\\s+line\\s+|:)(\\d+)$\/",
+        "err_line": "\/^\\[([^\\]]+)\\]\\s+PHP\\s+\\d+\\.\\s+(.+)\\s+\\\/([^:]+):(\\d+)$\/",
+        "err_line2": "\/^\\s*#\\d+\\s+\\\/([^\\(]+)\\((\\d+)\\):\\s+(.+)$\/",
+        "err_trace": "\/^(\\[[^\\]]+\\]\\s+PHP)?\\s*Stack\\s+trace:$\/"
+    },
+    "constants": null,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 8,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "parse_limit": 50000,
+        "file_limit": 500,
+        "last_errors": 0,
+        "err1": "\/^\\[([^\\]]+)\\]\\s+PHP\\s+([^:]+):\\s+(.+)\\s+called\\s+in\\s+\\\/([^\\s]+)\\s+on\\s+line\\s+(\\d+)(.*)$\/",
+        "err2": "\/^\\[([^\\]]+)\\]\\s+PHP\\s+([^:]+):\\s+(.+)\\s+in\\s+\\\/([^\\s]+)(?:\\s+on\\s+line\\s+|:)(\\d+)$\/",
+        "err_line": "\/^\\[([^\\]]+)\\]\\s+PHP\\s+\\d+\\.\\s+(.+)\\s+\\\/([^:]+):(\\d+)$\/",
+        "err_line2": "\/^\\s*#\\d+\\s+\\\/([^\\(]+)\\((\\d+)\\):\\s+(.+)$\/",
+        "err_trace": "\/^(\\[[^\\]]+\\]\\s+PHP)?\\s*Stack\\s+trace:$\/"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Parsers",
+    "shortName": "Apache",
+    "summary": ""
+}

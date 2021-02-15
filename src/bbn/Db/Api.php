@@ -141,7 +141,7 @@ interface Api
    * @param array $order The "order" condition.
    * @return null|array
    */
-  public function stat(string $table, String $column, array $where = [], array $order = []): ?array;
+  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;
 
   /**
    * Inserts/Updates rows in the a given table

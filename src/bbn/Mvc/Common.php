@@ -175,13 +175,13 @@ trait Common
   }
 
 
-  public function userTmpPath(string $id_user = null, String $plugin = null):? string
+  public function userTmpPath(string $id_user = null, string $plugin = null):? string
   {
     return \bbn\Mvc::getUserTmpPath($id_user, $plugin);
   }
 
 
-  public function userDataPath(string $id_user = null, String $plugin = null):? string
+  public function userDataPath(string $id_user = null, string $plugin = null):? string
   {
     return \bbn\Mvc::getUserDataPath($id_user, $plugin);
   }

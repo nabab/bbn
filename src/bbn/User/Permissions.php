@@ -115,7 +115,7 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     if (!$root) {
-      throw new \Exception(_("Impossible to find the permission code"));
+      throw new \Exception(dgettext(X::tDom(), "Impossible to find the permission code"));
     }
 
     $parts  = explode('/', $path);
@@ -186,7 +186,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string      $type
    * @return array|null
    */
-  public function options(string $id_option = null, String $type = 'access'): ?array
+  public function options(string $id_option = null, string $type = 'access'): ?array
   {
     if (($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->options(\func_get_args()))
@@ -212,7 +212,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string      $type
    * @return array|null
    */
-  public function fullOptions(string $id_option = null, String $type = 'access'): ?array
+  public function fullOptions(string $id_option = null, string $type = 'access'): ?array
   {
     if (($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->fullOptions(\func_get_args()))
@@ -220,10 +220,10 @@ class Permissions extends bbn\Models\Cls\Basic
       $res = [];
       foreach ($os as $o){
         /* if ( ($ids = $this->pref->retrieveIds($o['id'])) && ($cfg = $this->pref->get($ids[0])) ){
-          $res[] = bbn\X::mergeArrays($o, $cfg);
+          $res[] = X::mergeArrays($o, $cfg);
         } */
         if ($this->has($o['id'], $type)) {
-          $res[] = bbn\X::mergeArrays($o, $this->pref->getByOption($o['id']) ?: []);
+          $res[] = X::mergeArrays($o, $this->pref->getByOption($o['id']) ?: []);
         }
       }
 
@@ -241,7 +241,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string      $type
    * @return null|array
    */
-  public function getAll(string $id_option = null, String $type = 'access'): ?array
+  public function getAll(string $id_option = null, string $type = 'access'): ?array
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->options($id_option ?: $this->getCurrent());
@@ -258,7 +258,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string      $type
    * @return array|bool|false
    */
-  public function getFull($id_option = null, String $type = 'access'): ?array
+  public function getFull($id_option = null, string $type = 'access'): ?array
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->fullOptions($id_option ?: $this->getCurrent());
@@ -276,7 +276,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param bool   $force
    * @return array|bool
    */
-  public function get(string $id_option = null, String $type = 'access', bool $force = false): ?array
+  public function get(string $id_option = null, string $type = 'access', bool $force = false): ?array
   {
     /*
     if ( $all = $this->getAll($id_option, $type) ){
@@ -307,7 +307,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param bool   $force
    * @return bool
    */
-  public function has(string $id_option = null, String $type = 'access', bool $force = false): bool
+  public function has(string $id_option = null, string $type = 'access', bool $force = false): bool
   {
     if (!$force && $this->user && $this->user->isDev()) {
       return true;
@@ -334,7 +334,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param bool   $force
    * @return bool
    */
-  public function hasDeep(string $id_option = null, String $type = 'access', bool $force = false): bool
+  public function hasDeep(string $id_option = null, string $type = 'access', bool $force = false): bool
   {
     if (!$force && $this->user && $this->user->isDev()) {
       return true;
@@ -365,7 +365,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string $type
    * @return null|string
    */
-  public function is(string $path, String $type = 'access'): ?string
+  public function is(string $path, string $type = 'access'): ?string
   {
     return $this->fromPath($path, $type);
   }
@@ -411,7 +411,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string      $type
    * @return int
    */
-  public function add(string $id_option, String $type = 'access'): ?int
+  public function add(string $id_option, string $type = 'access'): ?int
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->setByOption($id_option, []);
@@ -428,7 +428,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string      $type
    * @return null|int
    */
-  public function remove($id_option, String $type = 'access'): ?int
+  public function remove($id_option, string $type = 'access'): ?int
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->delete($id_option);
@@ -486,7 +486,7 @@ class Permissions extends bbn\Models\Cls\Basic
           [
           'id_parent' => $id_permission,
           'code' => 'options',
-          'text' => _("Options"),
+          'text' => dgettext(X::tDom(), "Options"),
           'cfg' => [
             'icon' => 'nf nf-fa-cogs'
           ]
@@ -501,7 +501,7 @@ class Permissions extends bbn\Models\Cls\Basic
           [
           'id_parent' => $id_permission,
           'code' => 'access',
-          'text' => _("Access"),
+          'text' => dgettext(X::tDom(), "Access"),
           'cfg' => [
             'icon' => 'nf nf-fa-files'
           ]
@@ -516,7 +516,7 @@ class Permissions extends bbn\Models\Cls\Basic
           [
             'id_parent' => $id_permission,
             'code' => 'plugins',
-            'text' => _("Plugins"),
+            'text' => dgettext(X::tDom(), "Plugins"),
             'cfg' => [
               'icon' => 'nf nf-fa-plug'
             ]
@@ -563,7 +563,7 @@ class Permissions extends bbn\Models\Cls\Basic
           }
           if (!$root) {
             continue;
-            throw new \Exception(sprintf(_("Impossible to find the appui plugin %s"), substr($route['name'], 6)));
+            throw new \Exception(sprintf(dgettext(X::tDom(), "Impossible to find the appui plugin %s"), substr($route['name'], 6)));
           }
 
           if ($all = $fs->getTree(

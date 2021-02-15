@@ -18,6 +18,7 @@
 namespace bbn\Mvc;
 
 use bbn;
+use bbn\X;
 
 
 class Environment
@@ -77,7 +78,7 @@ class Environment
       foreach ($tmp as $t) {
         if (!empty($t) || bbn\Str::isNumber($t)) {
           if (\in_array($t, bbn\Mvc::$reserved, true)) {
-            $msg = _('The controller you are asking for contains one of these reserved words')
+            $msg = dgettext(X::tDom(), 'The controller you are asking for contains one of these reserved words')
                 .': '.implode(', ', bbn\Mvc::$reserved);
             throw new \Exception($msg);
           }
@@ -160,7 +161,7 @@ class Environment
 
   public function setPrepath($path)
   {
-    $path = bbn\X::removeEmpty(explode('/', $path));
+    $path = X::removeEmpty(explode('/', $path));
     if (\count($path)) {
       foreach ($path as $p) {
         if ($this->_params[0] === $p) {
@@ -182,7 +183,7 @@ class Environment
   public function isCli()
   {
     if (!isset($this->_cli)) {
-      $this->_cli = bbn\X::isCli();
+      $this->_cli = X::isCli();
       if ($this->_cli) {
         $opt = getopt('', ['cli']);
         if (isset($opt['cli'])) {
@@ -295,7 +296,7 @@ class Environment
         $this->_has_post = true;
         $this->_post = bbn\Str::correctTypes($this->_post);
         foreach ($this->_post as $k => $v) {
-          if (\bbn\X::indexOf($k, '_bbn_') === 0) {
+          if (X::indexOf($k, '_bbn_') === 0) {
             if (!defined(strtoupper(substr($k, 1)))) {
               define(strtoupper(substr($k, 1)), $v);
             }

@@ -150,7 +150,7 @@ class Apache
         }
 
         if (!feof($handle)) {
-          throw new \Exception(_("Error: unexpected fgets() fail"));
+          throw new \Exception(dgettext(X::tDom(), "Error: unexpected fgets() fail"));
         }
 
         fclose($handle);
@@ -173,7 +173,7 @@ class Apache
     if (preg_match(self::$err1, $ln, $m)) {
       $in_lib = strpos('/'.$m[4], BBN_LIB_PATH) === 0;
       return [
-        'date' => date('Y-m-d H:i:s', Strtotime(str_replace('-', ' ', $m[1]))),
+        'date' => date('Y-m-d H:i:s', strtotime(str_replace('-', ' ', $m[1]))),
         'type' => $m[2],
         'error' => $m[3],
         'file' => str_replace(
@@ -188,7 +188,7 @@ class Apache
     if (preg_match(self::$err2, $ln, $m)) {
       $in_lib = strpos('/'.$m[4], BBN_LIB_PATH) === 0;
       return [
-        'date' => date('Y-m-d H:i:s', Strtotime(str_replace('-', ' ', $m[1]))),
+        'date' => date('Y-m-d H:i:s', strtotime(str_replace('-', ' ', $m[1]))),
         'type' => $m[2],
         'error' => $m[3],
         'file' => str_replace(
@@ -249,7 +249,7 @@ class Apache
         elseif (isset($parsed['action'])) {
           if (!$err) {
             continue;
-            //throw new \Exception(_("A trace is starting so an error should exist"));
+            //throw new \Exception(dgettext(X::tDom(), "A trace is starting so an error should exist"));
           }
 
           if (!isset($err['trace'])) {
@@ -266,7 +266,7 @@ class Apache
 
           $errs[] = $ln;
           $num++;
-          //throw new \Exception(_("Impossible to parse log string")." $ln");
+          //throw new \Exception(dgettext(X::tDom(), "Impossible to parse log string")." $ln");
         }
       }
     }

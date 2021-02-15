@@ -1,0 +1,3396 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\X",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/X.php",
+    "startLine": 21,
+    "endLine": 2510,
+    "contentConstructor": null,
+    "methods": {
+        "increment": {
+            "name": "increment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name = 'num', $i = 1)\n  {\n    self::_init_count($name);\n    self::$_counters[$name] += $i;\n  }",
+            "startLine": 51,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "num",
+                    "default_name": ""
+                },
+                {
+                    "name": "i",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                }
+            ]
+        },
+        "decrement": {
+            "name": "decrement",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name = 'num', $i = 1)\n  {\n    self::_init_count($name);\n    self::$_counters[$name] -= $i;\n  }",
+            "startLine": 62,
+            "endLine": 66,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "num",
+                    "default_name": ""
+                },
+                {
+                    "name": "i",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                }
+            ]
+        },
+        "count": {
+            "name": "count",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name = 'num', $delete = false)\n  {\n    self::_init_count($name);\n    $tmp = self::$_counters[$name];\n    if ($delete) {\n      unset(self::$_counters[$name]);\n    }\n\n    return $tmp;\n  }",
+            "startLine": 73,
+            "endLine": 82,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "num",
+                    "default_name": ""
+                },
+                {
+                    "name": "delete",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "countAll": {
+            "name": "countAll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($delete = false)\n  {\n    $tmp = self::$_counters;\n    if ($delete) {\n      self::$_counters = [];\n    }\n\n    return $tmp;\n  }",
+            "startLine": 85,
+            "endLine": 93,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "delete",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "tDom": {
+            "name": "tDom",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (!self::$_textdomain) {\n      $td = 'bbn';\n      $f = dirname(__DIR__).'\/version.txt';\n      if (is_file($f)) {\n        $td .= file_get_contents($f);\n      }\n\n      self::$_textdomain = $td;\n    }\n\n    return self::$_textdomain;\n  }",
+            "startLine": 96,
+            "endLine": 109,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "microtime": {
+            "name": "microtime",
+            "summary": "Returns a microtime with 4 digit after the coma",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return round(\\microtime(true), 4);\n  }",
+            "startLine": 116,
+            "endLine": 119,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "float"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "Saves logs to a file.",
+            "description": "*\n```php\nX::log('My text', 'FileName');\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::log('My text', 'FileName');"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st, $file = 'misc')\n  {\n    if (\\defined('BBN_DATA_PATH')) {\n      $log_file  = BBN_DATA_PATH.'logs\/'.$file.'.log';\n      $backtrace = array_filter(\n        debug_backtrace(), function ($a) {\n          return $a['function'] === 'log';\n        }\n      );\n      $i         = end($backtrace);\n      $r         = \"[\".date('d\/m\/Y H:i:s').\"]\\t\".$i['file'].\" - line \".$i['line'].\n        self::getDump($st).PHP_EOL;\n\n      if (php_sapi_name() === 'cli') {\n        global $argv;\n        if (isset($argv[2]) && ($argv[2] === 'log')) {\n          echo self::getDump($st).PHP_EOL;\n        }\n      }\n\n      $s = (file_exists($log_file)) ? filesize($log_file) : 0;\n      if ($s > BBN_X_MAX_LOG_FILE) {\n        file_put_contents($log_file.'.old', File_get_contents($log_file), FILE_APPEND);\n        file_put_contents($log_file, $r);\n      }\n      else{\n        file_put_contents($log_file, $r, FILE_APPEND);\n      }\n    }\n  }",
+            "startLine": 133,
+            "endLine": 162,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Filename, default: \"misc\"."
+                },
+                {
+                    "name": "file",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "misc",
+                    "default_name": ""
+                }
+            ]
+        },
+        "logError": {
+            "name": "logError",
+            "summary": "Puts the PHP errors into a JSON file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($errno, $errstr, $errfile, $errline)\n  {\n    if (\\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {\n      $file      = BBN_DATA_PATH.'logs\/_php_error.json';\n      $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);\n      foreach ($backtrace as &$b) {\n        if (!empty($b['file'])) {\n          $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);\n        }\n      }\n\n      $r = false;\n      if (is_file($file)) {\n        $r = json_decode(file_get_contents($file), 1);\n      }\n\n      if (!$r) {\n        $r = [];\n      }\n\n      $t = date('Y-m-d H:i:s');\n      if (class_exists('\\\\bbn\\\\Mvc')) {\n        $mvc = Mvc::getInstance();\n      }\n\n      $errfile = str_replace(BBN_APP_PATH, '', $errfile);\n      $idx     = self::find(\n        $r, [\n        'type' => $errno,\n        'error' => $errstr,\n        'file' => $errfile,\n        'line' => $errline,\n        'request' => ''\n        ]\n      );\n      if ($idx !== null) {\n        $r[$idx]['count']++;\n        $r[$idx]['last_date'] = $t;\n        $r[$idx]['backtrace'] = $backtrace;\n      }\n      else{\n        $r[] = [\n          'first_date' => $t,\n          'last_date' => $t,\n          'count' => 1,\n          'type' => $errno,\n          'error' => $errstr,\n          'file' => $errfile,\n          'line' => $errline,\n          'backtrace' => $backtrace,\n          'request' => ''\n          \/\/'context' => $context\n        ];\n      }\n\n      self::sortBy($r, 'last_date', 'DESC');\n      file_put_contents($file, Json_encode($r, JSON_PRETTY_PRINT));\n    }\n  }",
+            "startLine": 174,
+            "endLine": 232,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "errno",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's name, default: \"misc\"."
+                },
+                {
+                    "name": "errstr",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "errfile",
+                    "position": 2,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "errline",
+                    "position": 3,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "hasProp": {
+            "name": "hasProp",
+            "summary": "Check if an array or an object has the given property",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($obj, $prop, $check_empty = false)\n  {\n    if (is_array($obj)) {\n      return \\array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));\n    }\n    elseif (is_object($obj)) {\n      return \\property_exists($obj, $prop) && (!$check_empty || !empty($obj->$prop));\n    }\n\n    return null;\n  }",
+            "startLine": 242,
+            "endLine": 252,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": "iterable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "prop",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "check_empty",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "hasProps": {
+            "name": "hasProps",
+            "summary": "Check if an array or an object has the given properties",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($obj, array $props, $check_empty = false)\n  {\n    foreach ($props as $p) {\n      $test = self::hasProp($obj, $p, $check_empty);\n      if ($test === null) {\n        return null;\n      }\n      elseif (!$test) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
+            "startLine": 262,
+            "endLine": 275,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": "iterable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "props",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "check_empty",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "hasDeepProp": {
+            "name": "hasDeepProp",
+            "summary": "Check if an array or an object has the given property.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($obj, array $prop_path, $check_empty = false)\n  {\n      array $prop_path,\n      bool $check_empty = false\n  ): ?bool\n  {\n    $o =& $obj;\n    foreach ($prop_path as $p) {\n      if (is_array($o)) {\n        if (!\\array_key_exists($p, $o)) {\n          return false;\n        }\n\n        if ($check_empty && !$o[$p]) {\n          return false;\n        }\n\n        $o =& $o[$p];\n      }\n      elseif (\\is_object($o)) {\n        if (!\\property_exists($o, $p)) {\n          return false;\n        }\n\n        if ($check_empty && !$o->$p) {\n          return false;\n        }\n\n        $o =& $o->$p;\n      }\n      else {\n        return false;\n      }\n    }\n\n    return true;\n  }",
+            "startLine": 285,
+            "endLine": 321,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": "iterable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path"
+                },
+                {
+                    "name": "prop_path",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "check_empty",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "makeStoragePath": {
+            "name": "makeStoragePath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $format = 'Y\/m\/d', $max = 100, bbn\\File\\System $fs = NULL)\n  {\n      $format = 'Y\/m\/d',\n      $max = 100,\n      File\\System $fs = null\n  ): ?string\n  {\n    if (empty($format)) {\n      $format = 'Y\/m\/d';\n    }\n\n    if (!$max) {\n      $max = 100;\n    }\n\n    if (!$fs) {\n      $fs = new File\\System();\n    }\n\n    \/\/ One dir per $format\n    $spath = date($format);\n    if ($spath) {\n      $path = $fs->createPath($path.(substr($path, -1) === '\/' ? '' : '\/').$spath);\n      if ($fs->isDir($path)) {\n        $num = count($fs->getDirs($path));\n        if ($num) {\n          $num_files = count($fs->getFiles($path.'\/'.$num));\n          if ($num_files >= $max) {\n            $num++;\n          }\n        }\n        else {\n          $num = 1;\n        }\n\n        if ($fs->createPath($path.'\/'.$num)) {\n          return $path.'\/'.$num.'\/';\n        }\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 324,
+            "endLine": 366,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "format",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "Y\/m\/d",
+                    "default_name": ""
+                },
+                {
+                    "name": "max",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 100,
+                    "default_name": ""
+                },
+                {
+                    "name": "fs",
+                    "position": 3,
+                    "type": "bbn\\File\\System",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cleanStoragePath": {
+            "name": "cleanStoragePath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $format = 'Y\/m\/d', bbn\\File\\System $fs = NULL)\n  {\n      $format = 'Y\/m\/d',\n      File\\System $fs = null\n  ): ?int\n  {\n    if (empty($format)) {\n      $format = 'Y\/m\/d';\n    }\n\n    if (!$fs) {\n      $fs = new File\\System();\n    }\n\n    if (!$fs->isDir($path)) {\n      return null;\n    }\n\n    $limit = count(self::split($format, '\/')) + 1;\n    $res   = 0;\n    while ($limit > 0) {\n      if (!$fs->getNumFiles($path) && $fs->delete($path)) {\n        $limit--;\n        $res++;\n        $path = dirname($path);\n      }\n      else{\n        break;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 369,
+            "endLine": 401,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "format",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "Y\/m\/d",
+                    "default_name": ""
+                },
+                {
+                    "name": "fs",
+                    "position": 2,
+                    "type": "bbn\\File\\System",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "mergeObjects": {
+            "name": "mergeObjects",
+            "summary": "Returns to a merged object from two objects.",
+            "description": "*\n```php\nclass A {\n public $a = 10;\n public $b = 20;\n};\n   *\nclass B {\n public $c = 30;\n public $d = 40;\n};\n   *\n$obj1 = new A;\n$obj2 = new B;\n   *\nX::mergeObjects($obj1, $obj2);\n\/\/ object {'a': 10, 'b': 20, 'c': 30, 'd': 40}\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "class A {\n public $a = 10;\n public $b = 20;\n};\n   *\nclass B {\n public $c = 30;\n public $d = 40;\n};\n   *\n$obj1 = new A;\n$obj2 = new B;\n   *\nX::mergeObjects($obj1, $obj2);\n\/\/ object {'a': 10, 'b': 20, 'c': 30, 'd': 40}"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($o1, $o2)\n  {\n    $args = \\func_get_args();\n    \/* @todo check if it's working with more than 2 object arguments *\/\n    if (\\count($args) > 2) {\n      for ($i = \\count($args) - 1; $i > 1; $i--) {\n        $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);\n      }\n\n      $o2 = $args[1];\n    }\n\n    $a1  = self::toArray($o1);\n    $a2  = self::toArray($o2);\n    $res = self::mergeArrays($a1, $a2);\n    return self::toObject($res);\n  }",
+            "startLine": 429,
+            "endLine": 445,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "stdClass"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "o1",
+                    "position": 0,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The second object to merge."
+                },
+                {
+                    "name": "o2",
+                    "position": 1,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "mergeArrays": {
+            "name": "mergeArrays",
+            "summary": "Returns to a merged array from two or more arrays.",
+            "description": "*\n```php\nX::mergeArrays([1, 'Test'], [2, 'Example']);\n\/\/ array [1, 'Test', 2, 'Example']\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::mergeArrays([1, 'Test'], [2, 'Example']);\n\/\/ array [1, 'Test', 2, 'Example']"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $a1, array $a2)\n  {\n    $args = \\func_get_args();\n    if (\\count($args) > 2) {\n      for ($i = \\count($args) - 1; $i > 1; $i--) {\n        $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);\n      }\n\n      $a2 = $args[1];\n    }\n\n    if ((self::isAssoc($a1) || empty($a1)) && (self::isAssoc($a2) || empty($a2))) {\n      $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));\n      $r    = [];\n      foreach ($keys as $k) {\n        if (!array_key_exists($k, $a1) && !array_key_exists($k, $a2)) {\n          continue;\n        }\n        elseif (!array_key_exists($k, $a2)) {\n          $r[$k] = $a1[$k];\n        }\n        elseif (!array_key_exists($k, $a1) || !\\is_array($a2[$k]) || !\\is_array($a1[$k]) || is_numeric(key($a2[$k]))) {\n          $r[$k] = $a2[$k];\n        }\n        else{\n          $r[$k] = self::mergeArrays($a1[$k], $a2[$k]);\n        }\n      }\n    }\n    else{\n      $r = array_merge($a1, $a2);\n    }\n\n    return $r;\n  }",
+            "startLine": 460,
+            "endLine": 494,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "a1",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The second array to merge."
+                },
+                {
+                    "name": "a2",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "toObject": {
+            "name": "toObject",
+            "summary": "Converts a JSON string or an array into an object.",
+            "description": "*\n```php\nX::toObject([[1, 'Test'], [2, 'Example']]);\n\/\/ object {[1, 'Test'], [2, 'Example']}\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::toObject([[1, 'Test'], [2, 'Example']]);\n\/\/ object {[1, 'Test'], [2, 'Example']}"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($ar)\n  {\n    if (\\is_string($ar)) {\n      return json_decode($ar);\n    }\n\n    if (\\is_array($ar)) {\n      return json_decode(json_encode($ar));\n    }\n\n    return (object)$ar;\n  }",
+            "startLine": 508,
+            "endLine": 519,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "stdClass"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "toArray": {
+            "name": "toArray",
+            "summary": "Converts a JSON string or an object into an array.",
+            "description": "*\n```php\n$file = new stdClass();\n$file->foo = \"bar\";\n$file->bar = \"foo\";\necho X::toArray($file);\n\/* array [\n    'foo' => 'bar',\n    'bar' => 'foo'\n]\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$file = new stdClass();\n$file->foo = \"bar\";\n$file->bar = \"foo\";\necho X::toArray($file);\n\/* array [\n    'foo' => 'bar',\n    'bar' => 'foo'\n]"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($obj)\n  {\n    $obj = \\is_string($obj) ? $obj : json_encode($obj);\n    return json_decode($obj, true);\n  }",
+            "startLine": 539,
+            "endLine": 543,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "jsObject": {
+            "name": "jsObject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($obj)\n  {\n    $value_arr    = [];\n    $replace_keys = [];\n\n    \/\/$obj = X::convertUids($obj);\n    $transform = function ($o, $idx = 0) use (&$transform, &$value_arr, &$replace_keys) {\n      foreach($o as $key => &$value) {\n        $idx++;\n        if (\\is_array($value) || \\is_object($value)) {\n          $value = $transform($value, $idx);\n        }\n        elseif (\\is_string($value)\n            \/\/ Look for values starting with 'function('\n            && (strpos(trim($value), 'function(') === 0)\n        ) {\n          \/\/ Store function string.\n          $value_arr[] = $value;\n          \/\/ Replace function string in $foo with a \u2018unique\u2019 special key.\n          $value = \"%bbn%$key%bbn%$idx%bbn%\";\n          \/\/ Later on, we\u2019ll look for the value, and replace it.\n          $replace_keys[] = '\"'.$value.'\"';\n        }\n      }\n\n      return $o;\n    };\n    \/\/ Now encode the array to json format\n    $json = json_encode($transform($obj), JSON_PRETTY_PRINT);\n    \/* $json looks like:\n    {\n      \u201cnumber\u201d:1,\n      \u201cfloat\u201d:1.5,\n      \u201carray\u201d:[1,2],\n      \u201cstring\u201d:\u201dbar\u201d,\n      \u201cfunction\u201d:\u201d%bbn%function%bbn%5%bbn%\u201d\n    }\n    *\/\n    \/\/ Replace the special keys with the original string.\n    return \\count($replace_keys) ? str_replace($replace_keys, $value_arr, $json) : $json;\n  }",
+            "startLine": 546,
+            "endLine": 586,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": "iterable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "indentJson": {
+            "name": "indentJson",
+            "summary": "Indents a flat JSON string to make it human-readable.",
+            "description": "*\n```php\necho X::indentJson('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}');\n\/*\n{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"isAlive\": true,\n  \"age\": 25\n}\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "echo X::indentJson('{\"firstName\": \"John\", \"lastName\": \"Smith\", \"age\": 25}');\n\/*\n{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"isAlive\": true,\n  \"age\": 25\n}"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($json)\n  {\n    $result      = '';\n    $pos         = 0;\n    $strLen      = \\strlen($json);\n    $indentStr   = '  ';\n    $newLine     = \"\\n\";\n    $prevChar    = '';\n    $outOfQuotes = true;\n\n    for ($i = 0; $i <= $strLen; $i++) {\n      \/\/ Grab the next character in the string.\n      $char = substr($json, $i, 1);\n\n      \/\/ Are we inside a quoted string?\n      if ($char == '\"' && $prevChar != '\\\\') {\n        $outOfQuotes = !$outOfQuotes;\n\n        \/\/ If this character is the end of an element,\n        \/\/ output a new line and indent the next line.\n      } elseif(($char == '}' || $char == ']') && $outOfQuotes) {\n        $result .= $newLine;\n        $pos --;\n        for ($j = 0; $j < $pos; $j++) {\n          $result .= $indentStr;\n        }\n      }\n\n      \/\/ Add the character to the result string.\n      $result .= $char;\n\n      \/\/ If the last character was the beginning of an element,\n      \/\/ output a new line and indent the next line.\n      if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {\n        $result .= $newLine;\n        if ($char == '{' || $char == '[') {\n          $pos ++;\n        }\n\n        for ($j = 0; $j < $pos; $j++) {\n          $result .= $indentStr;\n        }\n      }\n\n      $prevChar = $char;\n    }\n\n    return $result;\n  }",
+            "startLine": 606,
+            "endLine": 654,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "json",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeEmpty": {
+            "name": "removeEmpty",
+            "summary": "Returns an object or an array cleaned of all empty values.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($arr, $remove_space = false)\n  {\n    foreach ($arr as $k => $v) {\n      if (\\is_object($arr)) {\n        if (\\is_array($v) || \\is_object($v)) {\n          $arr->$k = self::removeEmpty($v);\n        }\n\n        if (empty($arr->$k)) {\n          unset($arr->$k);\n        }\n      }\n      else{\n        if (\\is_array($v) || \\is_object($v)) {\n          $arr[$k] = self::removeEmpty($v);\n        }\n        elseif ($remove_space) {\n          $arr[$k] = trim($arr[$k]);\n        }\n\n        if (empty($arr[$k])) {\n          unset($arr[$k]);\n        }\n      }\n    }\n\n    return $arr;\n  }",
+            "startLine": 673,
+            "endLine": 700,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "arr",
+                    "position": 0,
+                    "type": "iterable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "space If \"true\" the spaces are removed, default: \"false\"."
+                },
+                {
+                    "name": "remove_space",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "toGroups": {
+            "name": "toGroups",
+            "summary": "Converts an indexed array into a numeric array where the original index is a property.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $arr, $keyname = 'value', $valname = 'text')\n  {\n    $r = [];\n    foreach ($arr as $k => $v) {\n      $r[] = [$keyname => $k, $valname => $v];\n    }\n\n    return $r;\n  }",
+            "startLine": 720,
+            "endLine": 728,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "arr",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Alias for the index."
+                },
+                {
+                    "name": "keyname",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": "",
+                    "description": "Alias for the value."
+                },
+                {
+                    "name": "valname",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isAssoc": {
+            "name": "isAssoc",
+            "summary": "Checks if the given array is associative.",
+            "description": "```php\n\\bbn\\\\X::isAssoc(['id' => 0, 'name' => 'Allison']);\n   *\n\\bbn\\\\X::isAssoc(['Allison', 'John', 'Bert']);\n   *\n\\bbn\\\\X::isAssoc([0 => \"Allison\", 1 => \"John\", 2 => \"Bert\"]);\n   *\n\\bbn\\\\X::isAssoc([0 => \"Allison\", 1 => \"John\", 3 => \"Bert\"]);\n   *\n\/\/ boolean true\n\/\/ boolean false\n\/\/ boolean false\n\/\/ boolean true\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "\\bbn\\\\X::isAssoc(['id' => 0, 'name' => 'Allison']);\n   *\n\\bbn\\\\X::isAssoc(['Allison', 'John', 'Bert']);\n   *\n\\bbn\\\\X::isAssoc([0 => \"Allison\", 1 => \"John\", 2 => \"Bert\"]);\n   *\n\\bbn\\\\X::isAssoc([0 => \"Allison\", 1 => \"John\", 3 => \"Bert\"]);\n   *\n\/\/ boolean true\n\/\/ boolean false\n\/\/ boolean false\n\/\/ boolean true"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $r)\n  {\n    $keys = array_keys($r);\n    $c    = \\count($keys);\n    for ($i = 0; $i < $c; $i++) {\n      if ($keys[$i] !== $i) {\n        return 1;\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 752,
+            "endLine": 763,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "r",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isCli": {
+            "name": "isCli",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (!isset(self::$_cli)) {\n      self::$_cli = (php_sapi_name() === 'cli');\n    }\n\n    return self::$_cli;\n  }",
+            "startLine": 766,
+            "endLine": 773,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDump": {
+            "name": "getDump",
+            "summary": "Returns a dump of the given variable.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $args = \\func_get_args();\n    $st   = '';\n    foreach ($args as $a) {\n      $r = $a;\n      if (\\is_null($a)) {\n        $r = 'null';\n      }\n      elseif ($a === false) {\n        $r = 'false';\n      }\n      elseif ($a === true) {\n        $r = 'true';\n      }\n      elseif ($a === 0) {\n        $r = '0';\n      }\n      elseif ($a === '') {\n        $r = '\"\"';\n      }\n      elseif ($a === []) {\n        $r = '[]';\n      }\n      elseif (!$a) {\n        $r = '0';\n      }\n      elseif (!\\is_string($a) && \\is_callable($a)) {\n        $r = 'Function';\n      }\n      elseif (\\is_object($a)) {\n        $n = \\get_class($a);\n        if ($n === 'stdClass') {\n          $r = Str::export($a);\n        }\n        else{\n          $r = $n.' Object';\n        }\n      }\n      elseif (\\is_array($a)) {\n        $r = Str::export($a);\n      }\n      elseif (\\is_resource($a)) {\n        $r = 'Resource '.get_resource_type($a);\n      }\n      elseif (Str::isBuid($a)) {\n        $r = '0x'.bin2hex($a);\n      }\n\n      $st .= $r.PHP_EOL;\n    }\n\n    return PHP_EOL.$st;\n  }",
+            "startLine": 782,
+            "endLine": 835,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getHdump": {
+            "name": "getHdump",
+            "summary": "Returns an HTML dump of the given variable.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return nl2br(str_replace(\"  \", \"&nbsp;&nbsp;\", htmlentities(self::getDump(...\\func_get_args()))), false);\n  }",
+            "startLine": 844,
+            "endLine": 847,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "dump": {
+            "name": "dump",
+            "summary": "Dumps the given variable.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    echo self::getDump(...\\func_get_args());\n  }",
+            "startLine": 857,
+            "endLine": 860,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "hdump": {
+            "name": "hdump",
+            "summary": "Dumps the given variable in HTML.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    echo self::getHdump(...\\func_get_args());\n  }",
+            "startLine": 869,
+            "endLine": 872,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "adump": {
+            "name": "adump",
+            "summary": "Adaptative dump, i.e. dunps in text if CLI, HTML otherwise.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    self::isCli() ? self::dump(...\\func_get_args()) : self::hdump(...\\func_get_args());\n  }",
+            "startLine": 881,
+            "endLine": 884,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "buildOptions": {
+            "name": "buildOptions",
+            "summary": "Returns the HTML code for creating the &lt;option&gt; tag(s) based on an array.",
+            "description": "If the array is indexed, the index will be used as value\n   *\n```php\nX::buildOptions(['yes', 'no']);\n\/\/ string \"<option value=\"yes\">yes<\/option>;<option value=\"no\">no<\/option>\"\nX::buildOptions(['yes', 'no'], 'no');\n\/\/ string \"<option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\nX::buildOptions(['yes', 'no'], 'no', 'LabelForEmpty');\n\/\/ string \"<option value=\"\">LabelForEmpty<\/option><option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\nX::dump(X::buildOptions([3 => \"Allison\", 4 => \"Mike\", 5 => \"Andrew\"], 5, 'Who?'));\n\/\/ string \"<option  value=\"\">Who?<\/option><option  value=\"3\">Allison<\/option><option  value=\"4\">Mike<\/option><option  value=\"5\"  selected=\"selected\">Andrew<\/option>\"\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>If the array is indexed, the index will be used as value\n*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::buildOptions(['yes', 'no']);\n\/\/ string \"<option value=\"yes\">yes<\/option>;<option value=\"no\">no<\/option>\"\nX::buildOptions(['yes', 'no'], 'no');\n\/\/ string \"<option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\nX::buildOptions(['yes', 'no'], 'no', 'LabelForEmpty');\n\/\/ string \"<option value=\"\">LabelForEmpty<\/option><option value=\"yes\">yes<\/option><option value=\"no\" selected=\"selected\">no<\/option>\"\nX::dump(X::buildOptions([3 => \"Allison\", 4 => \"Mike\", 5 => \"Andrew\"], 5, 'Who?'));\n\/\/ string \"<option  value=\"\">Who?<\/option><option  value=\"3\">Allison<\/option><option  value=\"4\">Mike<\/option><option  value=\"5\"  selected=\"selected\">Andrew<\/option>\""
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $values, $selected = '', $empty_label = false)\n  {\n    $r = '';\n    if ($empty_label !== false) {\n      $r .= '<option value=\"\">'.$empty_label.'<\/option>';\n    }\n\n    $is_assoc = self::isAssoc($values);\n    foreach ($values as $k => $v)\n    {\n      if (\\is_array($v) && \\count($v) == 2) {\n        $value = $v[0];\n        $title = $v[1];\n      }\n      elseif (!isset($values[0]) && $is_assoc) {\n        $value = $k;\n        $title = $v;\n      }\n      else {\n        $value = $title = $v;\n      }\n\n      if (isset($value,$title)) {\n        $r .= '<option value=\"'.$value.'\"'.\n          ($value == $selected ? ' selected=\"selected\"' : '').\n          '>'.$title.'<\/option>';\n      }\n\n      unset($value,$title);\n    }\n\n    return $r;\n  }",
+            "startLine": 907,
+            "endLine": 939,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "values",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The selected value"
+                },
+                {
+                    "name": "selected",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "label A label for empty value"
+                },
+                {
+                    "name": "empty_label",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "toKeypair": {
+            "name": "toKeypair",
+            "summary": "Converts a numeric array into an associative one, alternating key and value.",
+            "description": "*\n```php\nX::toKeypair(['Test', 'TestFile', 'Example', 'ExampleFile']);\n\/\/ string ['Test' => 'TestFile', 'Example' => 'ExampleFile']\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::toKeypair(['Test', 'TestFile', 'Example', 'ExampleFile']);\n\/\/ string ['Test' => 'TestFile', 'Example' => 'ExampleFile']"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $arr, $protected = true)\n  {\n    $num = \\count($arr);\n    $res = [];\n    if (($num % 2) === 0) {\n      $i = 0;\n      while (isset($arr[$i])) {\n        if (!\\is_string($arr[$i]) || (!$protected && !preg_match('\/[0-9A-z\\-_]+\/8', Str::cast($arr[$i])))) {\n          return false;\n        }\n\n        $res[$arr[$i]] = $arr[$i + 1];\n        $i            += 2;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 954,
+            "endLine": 971,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "arr",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "If false no index protection will be performed"
+                },
+                {
+                    "name": "protected",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "maxWithKey": {
+            "name": "maxWithKey",
+            "summary": "Returns the maximum value of a given property from a 2 dimensions array.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, $key)\n  {\n    if (\\count($ar) == 0) {\n      return null;\n    }\n\n    $max = current($ar)[$key];\n    foreach ($ar as $a) {\n      if (is_float($a[$key]) || is_float($max)) {\n        if (self::compareFloats($a[$key], $max, '>')) {\n          $max = $a[$key];\n        }\n      }\n      elseif ($a[$key] > $max) {\n        $max = $a[$key];\n      }\n    }\n\n    return $max;\n  }",
+            "startLine": 993,
+            "endLine": 1012,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Where to check the property value from"
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "minWithKey": {
+            "name": "minWithKey",
+            "summary": "Returns the minimum value of an index from a multidimensional array.",
+            "description": "*\n```php\nX::minWithKey([\n ['age' => 1, 'name' => 'Michelle'],\n ['age' => 8, 'name' => 'John'],\n ['age' => 45, 'name' => 'Sarah'],\n ['age' => 45, 'name' => 'Camilla'],\n ['age' => 2, 'name' => 'Allison']\n], 'age');\n\/\/ int  1\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::minWithKey([\n ['age' => 1, 'name' => 'Michelle'],\n ['age' => 8, 'name' => 'John'],\n ['age' => 45, 'name' => 'Sarah'],\n ['age' => 45, 'name' => 'Camilla'],\n ['age' => 2, 'name' => 'Allison']\n], 'age');\n\/\/ int  1"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $array, $key)\n  {\n    if (\\count($array) == 0) {\n      return null;\n    }\n\n    $min = $array[0][$key];\n    foreach($array as $a) {\n      if($a[$key] < $min) {\n        $min = $a[$key];\n      }\n    }\n\n    return $min;\n  }",
+            "startLine": 1033,
+            "endLine": 1047,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "array",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The index where to search."
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "debug": {
+            "name": "debug",
+            "summary": "Gets the backtrace and dumps or logs it into a file.",
+            "description": "*\n```php\nX::dump(X::debug());\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump(X::debug());"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file = '')\n  {\n    $debug = array_map(\n      function ($a) {\n        if (isset($a['object'])) {\n          unset($a['object']);\n        }\n\n        return $a;\n      }, debug_backtrace()\n    );\n    if (empty($file)) {\n      self::hdump($debug);\n    }\n    else{\n      self::log($debug, $file);\n    }\n  }",
+            "startLine": 1059,
+            "endLine": 1076,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file to debug"
+                }
+            ]
+        },
+        "map": {
+            "name": "map",
+            "summary": "Applies the given function at all levels of a multidimensional array (if defined param $item).",
+            "description": "*\n```php\n$ar = [\n       ['age' => 45,\n         'name' => 'John',\n         'children' => [\n           ['age' => 8, 'name' => 'Carol'],\n           ['age' => 24, 'name' => 'Jack'],\n         ]\n       ],\n       ['age' => 44, 'name' => 'Benjamin'],\n       ['age' => 60, 'name' => 'Paul', 'children' =>\n         [\n           ['age' => 36, 'name' => 'Mike'],\n           ['age' => 46, 'name' => 'Alan', 'children' =>\n             ['age' => 8, 'name' => 'Allison'],\n           ]\n         ]\n       ]\n     ];\nX::hdump(X::map(function($a) {\n if ($a['age']>20) {\n   $a['name'] = 'Mr. '.$a['name'];\n }\n return $a;\n}, $ar,'children'));\n\/* array [\n           [\n             \"age\"  =>  45,\n             \"name\"  =>  \"Mr.  John\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  8,\n                 \"name\"  =>  \"Carol\",\n               ],\n               [\n                 \"age\"  =>  24,\n                 \"name\"  =>  \"Mr.  Jack\",\n               ],\n             ],\n           ],\n           [\n             \"age\"  =>  44,\n             \"name\"  =>  \"Mr.  Benjamin\",\n           ],\n           [\n             \"age\"  =>  60,\n             \"name\"  =>  \"Mr.  Paul\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  36,\n                 \"name\"  =>  \"Mr.  Mike\",\n               ],\n               [\n                 \"age\"  =>  46,\n                 \"name\"  =>  \"Mr.  Alan\",\n                 \"children\"  =>  [\n                   \"age\"  =>  8,\n                   \"name\"  =>  \"Allison\",\n                 ],\n               ],\n           ],\n         ]\n   *\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$ar = [\n       ['age' => 45,\n         'name' => 'John',\n         'children' => [\n           ['age' => 8, 'name' => 'Carol'],\n           ['age' => 24, 'name' => 'Jack'],\n         ]\n       ],\n       ['age' => 44, 'name' => 'Benjamin'],\n       ['age' => 60, 'name' => 'Paul', 'children' =>\n         [\n           ['age' => 36, 'name' => 'Mike'],\n           ['age' => 46, 'name' => 'Alan', 'children' =>\n             ['age' => 8, 'name' => 'Allison'],\n           ]\n         ]\n       ]\n     ];\nX::hdump(X::map(function($a) {\n if ($a['age']>20) {\n   $a['name'] = 'Mr. '.$a['name'];\n }\n return $a;\n}, $ar,'children'));\n\/* array [\n           [\n             \"age\"  =>  45,\n             \"name\"  =>  \"Mr.  John\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  8,\n                 \"name\"  =>  \"Carol\",\n               ],\n               [\n                 \"age\"  =>  24,\n                 \"name\"  =>  \"Mr.  Jack\",\n               ],\n             ],\n           ],\n           [\n             \"age\"  =>  44,\n             \"name\"  =>  \"Mr.  Benjamin\",\n           ],\n           [\n             \"age\"  =>  60,\n             \"name\"  =>  \"Mr.  Paul\",\n             \"children\"  =>  [\n               [\n                 \"age\"  =>  36,\n                 \"name\"  =>  \"Mr.  Mike\",\n               ],\n               [\n                 \"age\"  =>  46,\n                 \"name\"  =>  \"Mr.  Alan\",\n                 \"children\"  =>  [\n                   \"age\"  =>  8,\n                   \"name\"  =>  \"Allison\",\n                 ],\n               ],\n           ],\n         ]\n   *"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($fn, array $ar, $items = NULL)\n  {\n    $res = [];\n    foreach ($ar as $key => $a) {\n      $is_false = $a === false;\n      $r        = $fn($a, $key);\n      if ($is_false) {\n        $res[] = $r;\n      }\n      elseif ($r !== false) {\n        if (\\is_array($r) && $items && isset($r[$items]) && \\is_array($r[$items])) {\n          $r[$items] = self::map($fn, $r[$items], $items);\n        }\n\n        $res[] = $r;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1151,
+            "endLine": 1170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The function to be applied to the items of the array"
+                },
+                {
+                    "name": "ar",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "items",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "If null the function will be applied just to the item of the parent array"
+                }
+            ]
+        },
+        "find": {
+            "name": "find",
+            "summary": "Returns the array's first index, which satisfies the 'where' condition.",
+            "description": "*\n```php\nX::hdump(X::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['id' => 4]));\n\/\/ int 3\nX::hdump(X::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert', 'fname' => 'Taylor']));\n\/\/ int 1\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::hdump(X::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['id' => 4]));\n\/\/ int 3\nX::hdump(X::find([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert', 'fname' => 'Taylor']));\n\/\/ int 1"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, $where, $from = 0)\n  {\n    \/\/die(var_dump($where));\n    if (!empty($where)) {\n      foreach ($ar as $i => $v) {\n        if (!$from || ($i >= $from)) {\n          $ok = 1;\n          if (is_callable($where)) {\n            $ok = (bool)$where($v);\n          }\n          elseif (is_array($where)) {\n            $v = (array)$v;\n            foreach ($where as $k => $w) {\n              if (!array_key_exists($k, $v)\n                || (Str::isNumber($v[$k], $w) && ($v[$k] != $w))\n                || (!Str::isNumber($v[$k], $w) && ($v[$k] !== $w))\n              ) {\n                $ok = false;\n                break;\n              }\n            }\n          }\n          else {\n            $ok = $v === $filter;\n          }\n\n          if ($ok) {\n            return $i;\n          }\n        }\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 1219,
+            "endLine": 1253,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The where condition"
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "from",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "filter": {
+            "name": "filter",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, $where)\n  {\n    $res = [];\n    $num = count($ar);\n    $i   = 0;\n    while ($i < $num) {\n      $idx = self::find($ar, $where, $i);\n      if ($idx === null) {\n        break;\n      }\n      else{\n        $res[] = $ar[$idx];\n        $i     = $idx + 1;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1256,
+            "endLine": 1273,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getRows": {
+            "name": "getRows",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, $where)\n  {\n    return self::filter($ar, $where);\n  }",
+            "startLine": 1276,
+            "endLine": 1279,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "sum": {
+            "name": "sum",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, $field, $where = NULL)\n  {\n    $tot = 0;\n    if ($res = $where ? self::filter($ar, $where) : $ar) {\n      foreach ($res as $r) {\n        $r    = (array)$r;\n        $tot += (float)($r[$field]);\n      }\n    }\n\n    return $tot;\n  }",
+            "startLine": 1282,
+            "endLine": 1293,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "float"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getRow": {
+            "name": "getRow",
+            "summary": "Returns the first row of an array to satisfy the where parameters ({@link find()).",
+            "description": "*\n```php\nX::dump(X::getRow([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert']));\n\/\/ array [ \"id\" => 2, \"name\" => \"Albert\", \"fname\" => \"Taylor\", ]\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump(X::getRow([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert']));\n\/\/ array [ \"id\" => 2, \"name\" => \"Albert\", \"fname\" => \"Taylor\", ]"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $r, $where)\n  {\n    if (($res = self::find($r, $where)) !== null) {\n      return $r[$res];\n    }\n\n    return null;\n  }",
+            "startLine": 1325,
+            "endLine": 1332,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "r",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The where condition"
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getField": {
+            "name": "getField",
+            "summary": "Returns the first value of a specific field of an array.",
+            "description": "*\n```php\nX::dump(X::getRow([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert'],'id'));\n\/\/ int 2\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump(X::getRow([[\n   'id' => 1,\n   'name' => 'Andrew',\n   'fname' => 'Williams'\n   ], [\n  'id' => 2,\n   'name' => 'Albert',\n   'fname' => 'Taylor'\n   ], [\n   'id' => 3,\n   'name' => 'Mike',\n   'fname' => 'Smith'\n   ], [\n   'id' => 4,\n   'name' => 'John',\n   'fname' => 'White'\n   ]], ['name' => 'Albert'],'id'));\n\/\/ int 2"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $r, $where, $field)\n  {\n    if (($res = self::getRow($r, $where)) && isset($res[$field])) {\n      return $res[$field];\n    }\n\n    return false;\n  }",
+            "startLine": 1364,
+            "endLine": 1371,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "r",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The where condition"
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The field where to look for"
+                },
+                {
+                    "name": "field",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "pick": {
+            "name": "pick",
+            "summary": "Returns a reference to a subarray targeted by an array $keys.",
+            "description": "*\n```php\n$ar = [\n 'session' => [\n   'user' => [\n     'profile' => [\n       'admin' => [\n         'email' => 'test@test.com'\n       ]\n     ]\n   ]\n ]\n];\nX::hdump(X::pick($ar,['session', 'user', 'profile', 'admin', 'email']));\n\/\/ string test@test.com\n   *\nX::hdump(X::pick($ar,['session', 'user', 'profile', 'admin']));\n\/\/ [\"email\"  =>  \"test@test.com\",]\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$ar = [\n 'session' => [\n   'user' => [\n     'profile' => [\n       'admin' => [\n         'email' => 'test@test.com'\n       ]\n     ]\n   ]\n ]\n];\nX::hdump(X::pick($ar,['session', 'user', 'profile', 'admin', 'email']));\n\/\/ string test@test.com\n   *\nX::hdump(X::pick($ar,['session', 'user', 'profile', 'admin']));\n\/\/ [\"email\"  =>  \"test@test.com\",]"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, array $keys)\n  {\n    while (\\count($keys)) {\n      $r = array_shift($keys);\n      if (isset($ar[$r])) {\n        $ar = $ar[$r];\n        if (!count($keys)) {\n          return $ar;\n        }\n      }\n    }\n  }",
+            "startLine": 1399,
+            "endLine": 1410,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The array"
+                },
+                {
+                    "name": "keys",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The array's keys"
+                }
+            ]
+        },
+        "sort": {
+            "name": "sort",
+            "summary": "Sorts the items of an array.",
+            "description": "*\n```php\n$var = [3, 2, 5, 6, 1];\nX::sort($var);\nX::hdump($var);\n\/\/ array [1,2,3,5,6]\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$var = [3, 2, 5, 6, 1];\nX::sort($var);\nX::hdump($var);\n\/\/ array [1,2,3,5,6]"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array &$ar, $backward = false)\n  {\n    usort(\n      $ar,\n      function ($a, $b) use ($backward) {\n        if (!Str::isNumber($a, $b)) {\n          $a = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a, 'lower')));\n          $b = str_replace('.', '0', str_replace('_', '1', Str::changeCase($b, 'lower')));\n          return strcmp($a, $b);\n        }\n\n        if ($a > $b) {\n          return $backward ? -1 : 1;\n        }\n        elseif ($a == $b) {\n          return 0;\n        }\n\n        return $backward ? 1 : -1;\n      }\n    );\n  }",
+            "startLine": 1428,
+            "endLine": 1449,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "backward",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "sortBy": {
+            "name": "sortBy",
+            "summary": "Sorts the items of an indexed array based on a given $key.",
+            "description": "*\n```php\n $v = [\n   ['age'=>10, 'name'=>'thomas'],\n   ['age'=>22, 'name'=>'John'],\n   ['age'=>37, 'name'=>'Michael']\n ];\n X::sortBy($v,'name','desc');\n X::hdump($v);\n X::sortBy($v,'name','asc');\n X::hdump($v);\n X::sortBy($v,'age','asc');\n X::hdump($v);\n X::sortBy($v,'age','desc');\n X::hdump($v);\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$v = [\n   ['age'=>10, 'name'=>'thomas'],\n   ['age'=>22, 'name'=>'John'],\n   ['age'=>37, 'name'=>'Michael']\n ];\n X::sortBy($v,'name','desc');\n X::hdump($v);\n X::sortBy($v,'name','asc');\n X::hdump($v);\n X::sortBy($v,'age','asc');\n X::hdump($v);\n X::sortBy($v,'age','desc');\n X::hdump($v);"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array &$ar, $key, $dir = '')\n  {\n    $args = \\func_get_args();\n    array_shift($args);\n    if (\\is_string($key)) {\n      $args = [[\n        'key' => $key,\n        'dir' => $dir\n      ]];\n    }\n\n    usort(\n      $ar,\n      function ($a, $b) use ($args) {\n        foreach ($args as $arg) {\n          $key = $arg['key'];\n          $dir = $arg['dir'] ?? 'asc';\n          if (!\\is_array($key)) {\n            $key = [$key];\n          }\n\n          $v1 = self::pick($a, $key);\n          $v2 = self::pick($b, $key);\n          $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);\n          $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);\n          if (!Str::isNumber($v1, $v2)) {\n            $a1  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a1, 'lower')));\n            $a2  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a2, 'lower')));\n            $cmp = strcmp($a1, $a2);\n            if (!empty($cmp)) {\n              return $cmp;\n            }\n          }\n\n          if ($a1 > $a2) {\n            return 1;\n          }\n          elseif ($a1 < $a2) {\n            return -1;\n          }\n        }\n\n        return 0;\n      }\n    );\n    return $ar;\n  }",
+            "startLine": 1476,
+            "endLine": 1522,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The key to sort by"
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The direction of the sort ('asc'|'desc')"
+                },
+                {
+                    "name": "dir",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isWindows": {
+            "name": "isWindows",
+            "summary": "Checks if the operating system, from which PHP is executed, is Windows or not.",
+            "description": "```php\nX::dump(X::isWindows());\n\/\/ boolean false\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump(X::isWindows());\n\/\/ boolean false"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';\n  }",
+            "startLine": 1534,
+            "endLine": 1537,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "curl": {
+            "name": "curl",
+            "summary": "Makes a Curl call towards a URL and returns the result as a string.",
+            "description": "*\n```php\n $url = 'https:\/\/www.omdbapi.com\/';\n $param = ['t'=>'la vita \u00e8 bella'];\n X::hdump(X::curl($url,$param, ['POST' => false]));\n   *\n\/\/ object {\n\/\/   \"Title\":\"La  vita  \u00e8  bella\",\n\/\/   \"Year\":\"1943\",\n\/\/   \"Rated\":\"N\/A\",\n\/\/   \"Released\":\"26  May  1943\",\n\/\/   \"Runtime\":\"76  min\",\n\/\/   \"Genre\":\"Comedy\"\n\/\/   \"imdbRating\":\"7.9\",\n\/\/   \"imdbVotes\":\"50\",\n\/\/   \"imdbID\":\"tt0036502\",\n\/\/   \"Type\":\"movie\",\n\/\/   \"Response\":\"True\"\n\/\/ }\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$url = 'https:\/\/www.omdbapi.com\/';\n $param = ['t'=>'la vita \u00e8 bella'];\n X::hdump(X::curl($url,$param, ['POST' => false]));\n   *\n\/\/ object {\n\/\/   \"Title\":\"La  vita  \u00e8  bella\",\n\/\/   \"Year\":\"1943\",\n\/\/   \"Rated\":\"N\/A\",\n\/\/   \"Released\":\"26  May  1943\",\n\/\/   \"Runtime\":\"76  min\",\n\/\/   \"Genre\":\"Comedy\"\n\/\/   \"imdbRating\":\"7.9\",\n\/\/   \"imdbVotes\":\"50\",\n\/\/   \"imdbID\":\"tt0036502\",\n\/\/   \"Type\":\"movie\",\n\/\/   \"Response\":\"True\"\n\/\/ }"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, $param = NULL, array $options = array (\n  'post' => 1,\n))\n  {\n    $ch               = curl_init();\n    self::$_last_curl = $ch;\n    $defined          = array_map('strtolower', array_keys($options));\n   \n    if (!in_array('returntransfer', $defined)) {\n      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n    }\n\n    if (\\is_object($param)) {\n      $param = self::toArray($param);\n    }\n\n    if (\\defined('BBN_IS_SSL') && \\defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV) {\n      if (!in_array('ssl_verifypeer', $defined)) {\n        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);\n      }\n\n      if (!in_array('ssl_verifyhost', $defined)) {\n        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);\n      }\n\n      \/\/curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);\n    }\n\n    $options = array_change_key_case($options, CASE_UPPER);\n    foreach ($options as $opt => $val) {\n      if (\\defined('CURLOPT_'.$opt)) {\n        curl_setopt($ch, constant('CURLOPT_'.$opt), $val);\n      }\n    }\n\n    if ($param) {\n      if (!empty($options['POST'])) {\n        if (!in_array('url', $defined)) {\n          curl_setopt($ch, CURLOPT_URL, $url);\n        }\n\n        if (!in_array('postfields', $defined)) {\n          curl_setopt($ch, CURLOPT_POSTFIELDS, $param);\n        }\n      }\n      elseif (!empty($options['DELETE'])) {\n        \/\/die($url.'?'.http_build_query($param));\n        if (!in_array('url', $defined)) {\n          curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));\n        }\n\n        if (!in_array('customrequest', $defined)) {\n          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');\n        }\n      }\n      elseif (!in_array('url', $defined)) {\n        curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));\n      }\n    }\n    else{\n      if (!in_array('url', $defined)) {\n        curl_setopt($ch, CURLOPT_URL, $url);\n      }\n\n      if (!empty($options['DELETE']) && !in_array('customrequest', $defined)) {\n        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');\n      }\n    }\n\n    $r = curl_exec($ch);\n    \n    if (!$r) {\n      self::log([\"PROBLEME AVEC L'URL $url\", curl_error($ch), curl_getinfo($ch)], 'curl');\n    }\n\n    return $r;\n  }",
+            "startLine": 1568,
+            "endLine": 1642,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "param",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "options",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": {
+                        "post": 1
+                    },
+                    "default_name": ""
+                }
+            ]
+        },
+        "lastCurlError": {
+            "name": "lastCurlError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (self::$_last_curl) {\n      return curl_error(self::$_last_curl);\n    }\n\n    return null;\n  }",
+            "startLine": 1645,
+            "endLine": 1652,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "lastCurlCode": {
+            "name": "lastCurlCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (self::$_last_curl) {\n      $infos = curl_getinfo(self::$_last_curl);\n      if ($infos) {\n        return $infos['http_code'];\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 1655,
+            "endLine": 1665,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "lastCurlInfo": {
+            "name": "lastCurlInfo",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (self::$_last_curl) {\n      return curl_getinfo(self::$_last_curl);\n    }\n\n    return null;\n  }",
+            "startLine": 1668,
+            "endLine": 1675,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getTree": {
+            "name": "getTree",
+            "summary": "Returns the given array or object as a tree structure ready for a JS tree.",
+            "description": "*\n```php\nX::hdump(X::getTree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* array [\n   [ \"text\" => 0, \"items\" => [ [ \"text\" => \"id: 1\", ], [ \"text\" => \"name: Andrew\", ], [ \"text\" => \"fname: Williams\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Emma\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Giorgio\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"id: 2\", ], [ \"text\" => \"name: Albert\", ], [ \"text\" => \"fname: Taylor\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Esther\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Paul\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 2, \"items\" => [ [ \"text\" => \"id: 3\", ], [ \"text\" => \"name: Mike\", ], [ \"text\" => \"fname: Smith\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Sara\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Fred\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], ]\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::hdump(X::getTree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* array [\n   [ \"text\" => 0, \"items\" => [ [ \"text\" => \"id: 1\", ], [ \"text\" => \"name: Andrew\", ], [ \"text\" => \"fname: Williams\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Emma\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Giorgio\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"id: 2\", ], [ \"text\" => \"name: Albert\", ], [ \"text\" => \"fname: Taylor\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Esther\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Paul\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], [ \"text\" => 2, \"items\" => [ [ \"text\" => \"id: 3\", ], [ \"text\" => \"name: Mike\", ], [ \"text\" => \"fname: Smith\", ], [ \"text\" => \"children\", \"items\" => [ [ \"text\" => 0, \"items\" => [ [ \"text\" => \"name: Sara\", ], [ \"text\" => \"age: 6\", ], ], ], [ \"text\" => 1, \"items\" => [ [ \"text\" => \"name: Fred\", ], [ \"text\" => \"age: 9\", ], ], ], ], ], ], ], ]"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($ar)\n  {\n    $res = [];\n    foreach ($ar as $k => $a) {\n      $r = ['text' => $k];\n      if (\\is_object($a)) {\n        $a = self::toArray($a);\n      }\n\n      if (\\is_array($a)) {\n        $r['items'] = self::getTree($a);\n      }\n      elseif (\\is_null($a)) {\n        $r['text'] .= ': null';\n      }\n      elseif ($a === false) {\n        $r['text'] .= ': false';\n      }\n      elseif ($a === true) {\n        $r['text'] .= ': true';\n      }\n      else {\n        $r['text'] .= ': '.(string)$a;\n      }\n\n      array_push($res, $r);\n    }\n\n    return $res;\n  }",
+            "startLine": 1690,
+            "endLine": 1719,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "move": {
+            "name": "move",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array &$ar, $old_index, $new_index)\n  {\n    $out = array_splice($ar, $old_index, 1);\n    array_splice($ar, $new_index, 0, $out);\n  }",
+            "startLine": 1721,
+            "endLine": 1725,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "old_index",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "new_index",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "makeTree": {
+            "name": "makeTree",
+            "summary": "Returns a view of an array or object as a JS tree.",
+            "description": "*\n```php\nX::dump(X::makeTree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* string\n   0\n     id: 1\n     name: Andrew\n     fname: Williams\n     children:\n       0\n         name: Emma\n         age: 6\n       1\n         name: Giorgio\n         age: 9\n   1\n     id: 2\n     name: Albert\n     fname: Taylor\n     children\n       0\n         name: Esther\n         age: 6\n       1\n         name: Paul\n         age: 9\n   2\n     id: 3\n     name: Mike\n     fname: Smith\n     children\n     0\n       name: Sara\n       age: 6\n     1\n       name: Fred\n       age: 9\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump(X::makeTree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));\n\/* string\n   0\n     id: 1\n     name: Andrew\n     fname: Williams\n     children:\n       0\n         name: Emma\n         age: 6\n       1\n         name: Giorgio\n         age: 9\n   1\n     id: 2\n     name: Albert\n     fname: Taylor\n     children\n       0\n         name: Esther\n         age: 6\n       1\n         name: Paul\n         age: 9\n   2\n     id: 3\n     name: Mike\n     fname: Smith\n     children\n     0\n       name: Sara\n       age: 6\n     1\n       name: Fred\n       age: 9"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar)\n  {\n    return \"<bbn-tree :source='\".\\bbn\\Str::escapeSquotes(json_encode(self::getTree($ar))).\"'><\/bbn-tree>\";\n  }",
+            "startLine": 1772,
+            "endLine": 1775,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fromCsv": {
+            "name": "fromCsv",
+            "summary": "Formats a CSV line(s) and returns it as an array.",
+            "description": "Adapted from http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\n   *\n```php\n X::dump(X::fromCsv(\n     '\"141\";\"10\/11\/2002\";\"350.00\";\"1311742251\"\n     \"142\";\"12\/12\/2002\";\"349.00\";\"1311742258\"'\n));\n\/\/ [ [ \"141\", \"10\/11\/2002\", \"350.00\", \"1311742251\", ], [ \"142\", \"12\/12\/2002\", \"349.00\", \"1311742258\", ], ]\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>Adapted from <a href=\"http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\">http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120<\/a>\n*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump(X::fromCsv(\n     '\"141\";\"10\/11\/2002\";\"350.00\";\"1311742251\"\n     \"142\";\"12\/12\/2002\";\"349.00\";\"1311742258\"'\n));\n\/\/ [ [ \"141\", \"10\/11\/2002\", \"350.00\", \"1311742251\", ], [ \"142\", \"12\/12\/2002\", \"349.00\", \"1311742258\", ], ]"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st, $del = ';', $enc = '\"', $sep = '\n')\n  {\n    $r     = [];\n    $lines = explode($sep, $st);\n    foreach ($lines as $line) {\n      $r[] = str_getcsv($line, $del, $enc);\n    }\n\n    return $r;\n  }",
+            "startLine": 1796,
+            "endLine": 1805,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Deimiter"
+                },
+                {
+                    "name": "del",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": ";",
+                    "default_name": "",
+                    "description": "Enclosure"
+                },
+                {
+                    "name": "enc",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "\"",
+                    "default_name": "",
+                    "description": "Separator"
+                },
+                {
+                    "name": "sep",
+                    "position": 3,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "\n",
+                    "default_name": "bbn\\PHP_EOL"
+                }
+            ]
+        },
+        "toCsv": {
+            "name": "toCsv",
+            "summary": "Formats an array as a CSV string.",
+            "description": "Adapted from http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\n   *\n```php\nX::dump(X::toCsv([[\"John\", \"Mike\", \"David\", \"Clara\"],[\"White\", \"Red\", \"Green\", \"Blue\"]]));\n\/\/ John;Mike;David;Clara\n\/\/ White;Red;Green;Blue\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>Adapted from <a href=\"http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120\">http:\/\/us3.php.net\/manual\/en\/function.fputcsv.php#87120<\/a>\n*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump(X::toCsv([[\"John\", \"Mike\", \"David\", \"Clara\"],[\"White\", \"Red\", \"Green\", \"Blue\"]]));\n\/\/ John;Mike;David;Clara\n\/\/ White;Red;Green;Blue"
+                }
+            ],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data, $delimiter = ';', $enclosure = '\"', $separator = '\n', $encloseAll = false, $nullToMysqlNull = false)\n  {\n    $delimiter_esc = preg_quote($delimiter, '\/');\n    $enclosure_esc = preg_quote($enclosure, '\/');\n\n    $lines = [];\n    foreach ($data as $d) {\n      $output = [];\n      foreach ($d as $field) {\n        if ($field === null && $nullToMysqlNull) {\n          $output[] = 'NULL';\n          continue;\n        }\n\n        \/\/ Enclose fields containing $delimiter, $enclosure or whitespace\n        if ($encloseAll || preg_match(\"\/(?:${delimiter_esc}|${enclosure_esc}|\\s)\/\", $field)) {\n          $output[] = $enclosure.str_replace($enclosure, '\\\\'.$enclosure, $field) . $enclosure;\n        }\n        else {\n          $output[] = $field;\n        }\n      }\n\n      $lines[] = implode($delimiter, $output);\n    }\n\n    return self::join($lines, $separator);\n  }",
+            "startLine": 1828,
+            "endLine": 1855,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "delimiter",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": ";",
+                    "default_name": ""
+                },
+                {
+                    "name": "enclosure",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "\"",
+                    "default_name": ""
+                },
+                {
+                    "name": "separator",
+                    "position": 3,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "\n",
+                    "default_name": "bbn\\PHP_EOL",
+                    "description": "ll"
+                },
+                {
+                    "name": "encloseAll",
+                    "position": 4,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "oMysqlNull"
+                },
+                {
+                    "name": "nullToMysqlNull",
+                    "position": 5,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "isSame": {
+            "name": "isSame",
+            "summary": "Checks if two files are the same.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file1, $file2, $strict = false)\n  {\n    if (!is_file($file1) || !is_file($file2)) {\n      throw Exception(\"Boo! One of the files given to the X::is_same function doesn't exist\");\n    }\n    else{\n      $same = filesize($file1) === filesize($file2);\n      if (!$strict || !$same) {\n        return $same;\n      }\n\n      return filemtime($file1) === filemtime($file2);\n    }\n  }",
+            "startLine": 1866,
+            "endLine": 1879,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file1",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "file2",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "strict",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "retrieveArrayVar": {
+            "name": "retrieveArrayVar",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $props, array &$ar)\n  {\n    $cur =& $ar;\n    foreach ($props as $p) {\n      if (\\is_array($cur) && array_key_exists($p, $cur)) {\n        $cur =& $cur[$p];\n      }\n      else{\n        throw new \\Exception(\"Impossible to find the value in the array\");\n      }\n    }\n\n    return $cur;\n  }",
+            "startLine": 1882,
+            "endLine": 1895,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "props",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ar",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "retrieveObjectVar": {
+            "name": "retrieveObjectVar",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $props, &$obj)\n  {\n    $cur =& $obj;\n    foreach ($props as $p) {\n      if (property_exists($cur, $p)) {\n        $cur =& $cur->{$p};\n      }\n      else{\n        throw new \\Exception(\"Impossible to find the value in the object\");\n      }\n    }\n\n    return $cur;\n  }",
+            "startLine": 1898,
+            "endLine": 1911,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "props",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "obj",
+                    "position": 1,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "countProperties": {
+            "name": "countProperties",
+            "summary": "Counts the properties of an object.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($obj)\n  {\n    return \\count(get_object_vars($obj));\n  }",
+            "startLine": 1920,
+            "endLine": 1923,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "toExcel": {
+            "name": "toExcel",
+            "summary": "Creates an Excel file from a given array.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data, $file, $with_titles = true, array $cfg = [])\n  {\n    $excel    = new \\PhpOffice\\PhpSpreadsheet\\Spreadsheet();\n    $sheet    = $excel->getActiveSheet();\n    $ow       = new \\PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx($excel);\n    $can_save = false;\n    if (empty($cfg)) {\n      $todo    = [];\n      $checked = false;\n      foreach ($data as $d) {\n        if (!$checked && self::isAssoc($d)) {\n          if ($with_titles) {\n            $line1 = [];\n            $line2 = [];\n            foreach ($d as $k => $v) {\n              $line1[] = $k;\n              $line2[] = '';\n            }\n\n            $todo[] = $line1;\n            $todo[] = $line2;\n          }\n\n          $checked = true;\n        }\n\n        $todo[] = array_values($d);\n      }\n\n      if (count($todo)) {\n        $sheet->fromArray($todo, null, 'A1');\n        $excel->getDefaultStyle()->getNumberFormat()->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n        $can_save = true;\n      }\n    }\n    else {\n      foreach ($cfg['fields'] as $i => $field) {\n        \/\/ Get cell object\n        $cell = $sheet->getCellByColumnAndRow($i + 1, 1);\n        \/\/ Get colum name\n        $col_idx = $cell->getColumn();\n        \/\/ Set auto width to the column\n        $sheet->getColumnDimension($col_idx)->setAutoSize(true);\n        \/\/ Cell style object\n        $style = $sheet->getStyle(\"$col_idx:$col_idx\");\n        \/\/ Get number format object\n        $format = $style->getNumberFormat();\n        \/\/ Set the vertical alignment to center\n        $style->getAlignment()->setVertical(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::VERTICAL_TOP);\n        \/\/ Set the correct data type\n        switch ($field['type']) {\n          case 'integer':\n            \/\/ Set code's format to number\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_NUMBER);\n            break;\n          case 'decimal':\n            \/\/ Set code's format to decimal\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_NUMBER_00);\n            break;\n          case 'money':\n            \/\/ Set code's format to currency\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_CURRENCY_EUR);\n            break;\n          case 'date':\n            \/\/ Set code's format to date\n            $format->setFormatCode('dd\/mm\/yyyy');\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'datetime':\n            \/\/ Set code's format to datetime\n            $format->setFormatCode('dd\/mm\/yyyy hh:mm');\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'boolean':\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'string':\n          default:\n            \/\/ Set code's format to text\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n            \/\/ Set wrap text\n            $style->getAlignment()->setWrapText(true);\n            break;\n        }\n\n        if ($with_titles) {\n          \/\/$cell = $sheet->getCellByColumnAndRow($i+1, 1);\n          $style = $cell->getStyle();\n          \/\/ Set code's format to text\n          $style->getNumberFormat()->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n          \/\/ Set the horizontal alignment to center\n          $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n          \/\/ Set bold to true\n          $style->getFont()->setBold(true);\n          \/\/ Set the column's title\n          $cell->setValue($field['title'] ?? $field['field']);\n        }\n      }\n\n      if (isset($cfg['map'], $cfg['map']['callable'])\n          && is_callable($cfg['map']['callable'])\n      ) {\n        array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);\n      }\n\n      $sheet->fromArray($data, null, 'A' . ($with_titles ? '2' : '1'));\n      $can_save = true;\n    }\n\n    if ($can_save\n        && \\bbn\\File\\Dir::createPath(dirname($file))\n    ) {\n      $ow->save($file);\n      return \\is_file($file);\n    }\n\n    return false;\n  }",
+            "startLine": 1934,
+            "endLine": 2054,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file path"
+                },
+                {
+                    "name": "file",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "titles Set it to false if you don't want the columns titles. Default true"
+                },
+                {
+                    "name": "with_titles",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "makeUid": {
+            "name": "makeUid",
+            "summary": "Makes a UID.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($binary = false, $hyphens = false)\n  {\n    $tmp = sprintf(\n      $hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',\n      \/\/ 32 bits for \"time_low\"\n      mt_rand(0, 0xffff), mt_rand(0, 0xffff),\n      \/\/ 16 bits for \"time_mid\"\n      mt_rand(0, 0xffff),\n      \/\/ 16 bits for \"time_hi_and_version\",\n      \/\/ four most significant bits holds version number 4\n      mt_rand(0, 0x0fff) | 0x4000,\n      \/\/ 16 bits, 8 bits for \"clk_seq_hi_res\",\n      \/\/ 8 bits for \"clk_seq_low\",\n      \/\/ two most significant bits holds zero and one for variant DCE1.1\n      mt_rand(0, 0x3fff) | 0x8000,\n      \/\/ 48 bits for \"node\"\n      mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)\n    );\n    return $binary ? hex2bin($tmp) : $tmp;\n  }",
+            "startLine": 2064,
+            "endLine": 2083,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "binary",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "Set it to true if you want hypens to seperate the UID"
+                },
+                {
+                    "name": "hyphens",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "convertUids": {
+            "name": "convertUids",
+            "summary": "Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    if (\\is_array($st) || \\is_object($st)) {\n      foreach ($st as &$s) {\n        $s = self::convertUids($s);\n      }\n    }\n    elseif (\\bbn\\Str::isUid($st)) {\n      $st = bin2hex($st);\n    }\n\n    return $st;\n  }",
+            "startLine": 2091,
+            "endLine": 2103,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "compareFloats": {
+            "name": "compareFloats",
+            "summary": "Compares two float numbers with the given operator.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($v1, $v2, $op = '===', $pr = 4)\n  {\n    $v1 = round((float)$v1 * pow(10, $pr));\n    $v2 = round((float)$v2 * pow(10, $pr));\n    switch ($op) {\n      case '===':\n        return $v1 === $v2;\n      case '==':\n        return $v1 == $v2;\n      case '>=':\n        return $v1 >= $v2;\n      case '<=':\n        return $v1 <= $v2;\n      case '>':\n        return $v1 > $v2;\n      case '<':\n        return $v1 < $v2;\n    }\n\n    return false;\n  }",
+            "startLine": 2115,
+            "endLine": 2135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "v1",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Value 2"
+                },
+                {
+                    "name": "v2",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Operator"
+                },
+                {
+                    "name": "op",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "===",
+                    "default_name": "",
+                    "description": "Precision"
+                },
+                {
+                    "name": "pr",
+                    "position": 3,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 4,
+                    "default_name": ""
+                }
+            ]
+        },
+        "fixJson": {
+            "name": "fixJson",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($json)\n  {\n\n    $jsonLength = strlen($json);\n    $escaped = false;\n    $opened_b = 0;\n    $opened_cb = 0;\n    $unescaped = false;\n    $squotes = false;\n    $dquotes = false;\n    $current = '';\n    $end_value = false;\n    $end_prop = false;\n    $last_quotes = '';\n    $prop = false;\n    $last_char = '';\n    for ($i = 0; $i < $jsonLength; $i++) {\n      \/\/var_dump($a);\n      $add = '';\n      $a = $json[$i];\n      switch ($a) {\n        case '\\\\':\n          if ($escaped) {\n            $escaped = false;\n            $unescaped = true;\n          }\n          else {\n            $escaped = true;\n          }\n          break;\n        case '\"':\n          if (!$escaped && !$squotes) {\n            $dquotes = !$dquotes;\n            $last_quotes = '\"';\n          }\n          break;\n        case \"'\":\n          if (!$escaped && !$dquotes) {\n            $squotes = !$squotes;\n            $last_quotes = \"'\";\n          }\n          break;\n        case '{':\n          if (!$dquotes && !$squotes) {\n            $opened_cb++;\n            $last_quotes = \"\";\n          }\n          break;\n        case '}':\n          if (!$dquotes && !$squotes) {\n            $opened_cb--;\n            $end_value = true;\n            if ($last_char === ',') {\n              $newJSON = substr($newJSON, 0, -1);\n            }\n          }\n          break;\n        case '[':\n          if (!$dquotes && !$squotes) {\n            $opened_b++;\n            $last_quotes = \"\";\n          }\n          break;\n        case ']':\n          if (!$dquotes && !$squotes) {\n            $opened_b--;\n            $end_value = true;\n            if ($last_char === ',') {\n              $newJSON = substr($newJSON, 0, -1);\n            }\n          }\n          break;\n        case ':':\n          if (!$dquotes && !$squotes) {\n            $end_prop = true;\n          }\n          break;\n        case ',':\n          if (!$dquotes && !$squotes) {\n            $end_value = true;\n          }\n          break;\n        case '\/':\n          if ($last_char !== '\\\\') {\n            \/\/$current .= '\\\\';\n          }\n          break;\n        default:\n          if ($escaped) {\n            $escaped = false;\n          }\n          if ($unescaped) {\n            $unescaped = false;\n          }\n      }\n      if ($end_prop) {\n        if ($last_quotes === '\"') {\n          $add .= $current;\n        }\n        elseif ($last_quotes === \"'\") {\n          $current = trim($current);\n          $add .= '\"'.Str::escapeDquote(Str::unescapeSquote(substr($current, 1, -1))).'\":';\n        }\n        else {\n          $add .= '\"'.Str::escapeDquote($current).'\":';\n        }\n\n        $end_prop = false;\n      }\n      elseif ($end_value) {\n        if ($current) {\n          if ($last_quotes) {\n            $current = trim($current);\n            $add .= '\"'.Str::escapeDquote(substr($current, 1, -1)).'\"';\n          }\n          else {\n            $add .= Str::escapeDquote($current);\n          }\n\n          if ($a !== ' ') {\n            $add .= $a;\n          }\n        }\n        else {\n          $current .= $a;\n        }\n        $last_quotes = \"\";\n        $end_value = false;\n      }\n      elseif (!$dquotes && !$squotes && (($a === '[') || ($a === '{'))) {\n        $add .= $a;\n      }\n      elseif ($dquotes || $squotes || ($a !== ' ')) {\n        $current .= $a;\n      }\n\n      if ($add) {\n        $newJSON .= $add;\n        $current = '';\n      }\n\n      if ($a !== ' ') {\n        $last_char = $a;\n      }\n    }\n\n    if ($current) {\n      $newJSON .= $current;\n    }\n\n    return $newJSON;\n  }",
+            "startLine": 2137,
+            "endLine": 2288,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "json",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "jsonBase64Encode": {
+            "name": "jsonBase64Encode",
+            "summary": "Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $arr, $json = true)\n  {\n    $res = [];\n    foreach ($arr as $i => $a) {\n      if (is_array($a)) {\n        $res[$i] = self::jsonBase64Encode($a, false);\n      }\n      elseif (is_string($a)) {\n        $res[$i] = base64_encode($a);\n      }\n      else{\n        $res[$i] = $a;\n      }\n    }\n\n    return $json ? json_encode($res) : $res;\n  }",
+            "startLine": 2296,
+            "endLine": 2312,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "arr",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "json",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "jsonBase64Decode": {
+            "name": "jsonBase64Decode",
+            "summary": "Decodes the base64 array's values. You can also give a JSON string of an array.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    $res = \\is_string($st) ? json_decode($st, true) : $st;\n    if (\\is_array($res)) {\n      foreach ($res as $i => $a) {\n        if (\\is_array($a)) {\n          $res[$i] = self::jsonBase64Decode($a);\n        }\n        elseif (\\is_string($a)) {\n          $res[$i] = base64_decode($a);\n        }\n        else{\n          $res[$i] = $a;\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 2321,
+            "endLine": 2341,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "indexByFirstVal": {
+            "name": "indexByFirstVal",
+            "summary": "Creates an associative array based on the first array's value.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar)\n  {\n    if (empty($ar) || !isset($ar[0]) || !\\count($ar[0])) {\n      return $ar;\n    }\n\n    $cols     = array_keys($ar[0]);\n    $idx      = array_shift($cols);\n    $num_cols = \\count($cols);\n    $res      = [];\n    foreach ($ar as $d) {\n      $index = $d[$idx];\n      unset($d[$idx]);\n      $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];\n    }\n\n    return $res;\n  }",
+            "startLine": 2349,
+            "endLine": 2366,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "join": {
+            "name": "join",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $ar, $glue = '')\n  {\n    return implode($glue, $ar);\n  }",
+            "startLine": 2369,
+            "endLine": 2372,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ar",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "glue",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "concat": {
+            "name": "concat",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st, $separator)\n  {\n    return explode($separator, $st);\n  }",
+            "startLine": 2375,
+            "endLine": 2378,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "separator",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "split": {
+            "name": "split",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st, $separator)\n  {\n    return explode($separator, $st);\n  }",
+            "startLine": 2381,
+            "endLine": 2384,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "separator",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "indexOf": {
+            "name": "indexOf",
+            "summary": "Searches from start to end",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($subject, $search, $start = 0)\n  {\n    $res = false;\n    if (is_array($subject)) {\n      $i = 0;\n      foreach ($subject as $s) {\n        if (($i >= $start) && ($s === $search)) {\n          $res = $i;\n          break;\n        }\n        else{\n          $i++;\n        }\n      }\n    }\n    elseif (is_string($subject)) {\n      $res = strpos($subject, $search, $start);\n    }\n\n    return $res === false ? -1 : $res;\n  }",
+            "startLine": 2390,
+            "endLine": 2410,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "subject",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "search",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "lastIndexOf": {
+            "name": "lastIndexOf",
+            "summary": "Searches from end to start",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($subject, $search, $start = NULL)\n  {\n    $res = false;\n    if (is_array($subject)) {\n      $i = count($subject) - 1;\n      if ($i) {\n        if ($start > 0) {\n          if ($start > $i) {\n            return -1;\n          }\n\n          $i = $start;\n        }\n        elseif ($start < 0) {\n          $i -= $start;\n          if ($i < 0) {\n            return -1;\n          }\n        }\n\n        foreach ($subject as $s) {\n          if (($i <= $start) && ($s === $search)) {\n            $res = $i;\n            break;\n          }\n          else{\n            $i--;\n          }\n        }\n      }\n    }\n    elseif (is_string($subject)) {\n      if ($start > 0) {\n        $start = strlen($subject) - (strlen($subject) - $start);\n      }\n\n      $res = strrpos($subject, $search, $start);\n    }\n\n    return $res === false ? -1 : $res;\n  }",
+            "startLine": 2416,
+            "endLine": 2456,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "subject",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "search",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "output": {
+            "name": "output",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $wrote = false;\n    foreach (func_get_args() as $a) {\n      if ($a === null) {\n        $st = 'null';\n      }\n      elseif ($a === true) {\n        $st = 'true';\n      }\n      elseif ($a === false) {\n        $st = 'false';\n      }\n      elseif (\\bbn\\Str::isNumber($a)) {\n        $st = $a;\n      }\n      elseif (!is_string($a)) {\n        $st = self::getDump($a);\n      }\n      else {\n        $st = $a;\n      }\n\n      if ($st) {\n        $wrote = true;\n        echo $st.PHP_EOL;\n      }\n    }\n\n    if ($wrote) {\n      \/\/ob_end_flush();\n    }\n  }",
+            "startLine": 2459,
+            "endLine": 2491,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "__callStatic": {
+            "name": "__callStatic",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\X",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    if ((strpos($name, 'is_') === 0) && function_exists($name)) {\n      $res = null;\n      foreach ($arguments as $a) {\n        $res = $name($a);\n        if (!$res) {\n          return $res;\n        }\n      }\n\n      return $res;\n    }\n  }",
+            "startLine": 2494,
+            "endLine": 2507,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": {
+        "_counters": [],
+        "_last_curl": null,
+        "_cli": false,
+        "_textdomain": null
+    },
+    "constants": null,
+    "numMethods": 72,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 4,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_counters": [],
+        "_last_curl": null,
+        "_cli": null,
+        "_textdomain": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "X",
+    "summary": ""
+}

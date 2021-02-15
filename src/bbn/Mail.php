@@ -192,7 +192,7 @@ TEMPLATE;
       $cfg['from'] = BBN_ADMIN_EMAIL;
     }
     if (!PHPMailer::validateAddress($cfg['from'])) {
-      die(_("A \"From\" eMail address must be provided"));
+      die(dgettext(X::tDom(), "A \"From\" eMail address must be provided"));
     }
     $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);
     $this->mailer = new PHPMailer(true);
@@ -292,7 +292,7 @@ TEMPLATE;
    * @param string $name
    * @return self
    */
-  public function setFrom(string $email, String $name = null): self
+  public function setFrom(string $email, string $name = null): self
   {
     if (!PHPMailer::validateAddress($email)) {
       die("The From eMail address is not valid");

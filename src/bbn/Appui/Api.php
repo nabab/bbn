@@ -67,11 +67,11 @@ class Api extends bbn\Models\Cls\Basic
         return $this->jwt->setKey($key_in)->get($res);
       }
       else {
-        throw new \Exception(_("Impossible to register"));
+        throw new \Exception(dgettext(X::tDom(), "Impossible to register"));
       }
     }
     else {
-      throw new \Exception(_("No JWT"));
+      throw new \Exception(dgettext(X::tDom(), "No JWT"));
     }
   }
 
@@ -96,11 +96,11 @@ class Api extends bbn\Models\Cls\Basic
         return $this->jwt->setKey($key)->get($res);
       }
       else {
-        throw new \Exception(_("Impossible to send the request"));
+        throw new \Exception(dgettext(X::tDom(), "Impossible to send the request"));
       }
     }
     else {
-      throw new \Exception(_("No JWT"));
+      throw new \Exception(dgettext(X::tDom(), "No JWT"));
     }
   }
 

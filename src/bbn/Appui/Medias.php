@@ -55,7 +55,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param boolean $private
    * @return string|null
    */
-  public function insert(string $name, array $content = null, String $title = '', String $type='file', bool $private = false): ?string
+  public function insert(string $name, array $content = null, string $title = '', string $type='file', bool $private = false): ?string
   {
     $cf =& $this->class_cfg;
     if (
@@ -79,7 +79,7 @@ class Medias extends bbn\Models\Cls\Db
               bbn\Mvc::getDataPath('appui-note').'media/');
             if ( $root ){
               $path = bbn\X::makeStoragePath($root, '', 0, $fs);
-              $dpath = substr($path, Strlen($root) + 1);
+              $dpath = substr($path, strlen($root) + 1);
               $file = basename($name);
               $content = [
                 'path' => $dpath,
@@ -354,7 +354,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param array $content
    * @return void
    */
-  public function updateDb(string $id_media, String $name, String $title, array $content = []){
+  public function updateDb(string $id_media, string $name, string $title, array $content = []){
     $fields = [
       $this->class_cfg['arch']['medias']['name'] => $name,
 			$this->class_cfg['arch']['medias']['title'] => $title
@@ -384,7 +384,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $title
    * @return void
    */
-  public function updateContent(string $id_media,int $ref, String $oldName, String $newName, String $title){
+  public function updateContent(string $id_media,int $ref, string $oldName, string $newName, string $title){
     $tmp_path = \bbn\Mvc::getUserTmpPath().$ref.'/'.$oldName;
     $fs = new \bbn\File\System();
     $new_media = [];
@@ -423,7 +423,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $name
    * @return void
    */
-  public function getMediaPath(string $id_media, String $name = null){
+  public function getMediaPath(string $id_media, string $name = null){
     if ( $media = $this->getMedia($id_media, true) ){
       $content = json_decode($media['content'], true);
       $path = bbn\Mvc::getDataPath('appui-note').'media/'.$content['path'].$id_media.'/'.($name ? $name : $media['name']);

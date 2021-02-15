@@ -1,0 +1,2291 @@
+{
+    "doc": {
+        "description": "Database Class",
+        "tags": {
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Database",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.4"
+        }
+    },
+    "name": "bbn\\Db\\Languages\\Sqlite",
+    "namespace": true,
+    "traits": [],
+    "interfaces": {
+        "bbn\\Db\\Engines": {
+            "name": "bbn\\Db\\Engines"
+        }
+    },
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Sqlite.php",
+    "startLine": 22,
+    "endLine": 1637,
+    "contentConstructor": {
+        "file": "bbn\\Db\\Languages\\Sqlite",
+        "returns": null
+    },
+    "methods": {
+        "isAggregateFunction": {
+            "name": "isAggregateFunction",
+            "summary": "Returns true if the column name is an aggregate function",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($f)\n  {\n    foreach (self::$aggr_functions as $a) {\n      if (preg_match('\/^'.$a.'\\\\s*\\\\(\/i', $f)) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 97,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "f",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\Db $db = NULL)\n  {\n    if (!\\extension_loaded('pdo_sqlite')) {\n      die('The SQLite driver for PDO is not installed...');\n    }\n\n    $this->db = $db;\n  }",
+            "startLine": 113,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\Db",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getConnection": {
+            "name": "getConnection",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg = [])\n  {\n    $cfg['engine'] = 'sqlite';\n    if (!isset($cfg['db']) && \\defined('BBN_DATABASE')) {\n      $cfg['db'] = BBN_DATABASE;\n    }\n\n    if (!empty($cfg['db']) && \\is_string($cfg['db'])) {\n      if (is_file($cfg['db'])) {\n        $info        = pathinfo($cfg['db']);\n        $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;\n        $cfg['db']   = $info['basename'];\n      }\n      elseif (\\defined('BBN_DATA_PATH')\n          && is_dir(BBN_DATA_PATH.'db')\n          && (strpos($cfg['db'], '\/') === false)\n      ) {\n        $cfg['host'] = BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR;\n        if (!is_file(BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR.$cfg['db'])\n            && (strpos($cfg['db'], '.') === false)\n        ) {\n          $cfg['db'] .= '.sqlite';\n        }\n      }\n      else{\n        $info = pathinfo($cfg['db']);\n        if (is_writable($info['dirname'])) {\n          $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;\n          $cfg['db']   = isset($info['extension']) ? $info['basename'] : $info['basename'].'.sqlite';\n        }\n      }\n\n      if (isset($cfg['host'])) {\n        $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];\n        $cfg['code_db'] = $cfg['db'];\n        $cfg['code_host'] = $cfg['host'];\n        $cfg['db']   = 'main';\n        return $cfg;\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 136,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The user's options"
+                }
+            ]
+        },
+        "postCreation": {
+            "name": "postCreation",
+            "summary": "Actions to do once the PDO object has been created",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    \/\/ Obliged to do that  if we want to use foreign keys with SQLite\n    $this->enableKeys();\n    return;\n  }",
+            "startLine": 186,
+            "endLine": 191,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "change": {
+            "name": "change",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db)\n  {\n    if (strpos($db, '.') === false) {\n      $db .= '.sqlite';\n    }\n\n    $info = pathinfo($db);\n    if (( $info['filename'] !== $this->db->getCurrent() ) && file_exists($this->db->host.$db) && strpos($db, $this->qte) === false) {\n      $this->db->rawQuery(\"ATTACH '\".$this->db->host.$db.\"' AS \".$info['filename']);\n      return true;\n    }\n\n      return false;\n  }",
+            "startLine": 198,
+            "endLine": 211,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database name or file"
+                }
+            ]
+        },
+        "escape": {
+            "name": "escape",
+            "summary": "Returns a database item expression escaped like database, table, column, key names",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($item)\n  {\n    $items = explode('.', str_replace($this->qte, '', $item));\n    $r     = [];\n    foreach ($items as $m){\n      if (!bbn\\Str::checkName($m)) {\n        return false;\n      }\n\n      $r[] = $this->qte.$m.$this->qte;\n    }\n\n    return implode('.', $r);\n  }",
+            "startLine": 220,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "tableFullName": {
+            "name": "tableFullName",
+            "summary": "Returns a table's full name i.e. database.table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $escaped = false)\n  {\n    $bits = explode('.', str_replace($this->qte, '', $table));\n    if (\\count($bits) === 2) {\n      $db    = trim($bits[0]);\n      $table = trim($bits[1]);\n    }\n    else{\n      $db    = $this->db->getCurrent();\n      $table = trim($bits[0]);\n    }\n\n    if (bbn\\Str::checkName($db, $table)) {\n      if ($db === 'main') {\n        return $escaped ? $this->qte.$table.$this->qte : $table;\n      }\n\n      return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;\n    }\n\n      return null;\n  }",
+            "startLine": 243,
+            "endLine": 264,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
+                },
+                {
+                    "name": "escaped",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "tableSimpleName": {
+            "name": "tableSimpleName",
+            "summary": "Returns a table's simple name i.e. table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $escaped = false)\n  {\n    if ($table = trim($table)) {\n      $bits  = explode('.', str_replace($this->qte, '', $table));\n      $table = end($bits);\n      if (bbn\\Str::checkName($table)) {\n        return $escaped ? $this->qte.$table.$this->qte : $table;\n      }\n    }\n\n        return false;\n  }",
+            "startLine": 274,
+            "endLine": 285,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
+                },
+                {
+                    "name": "escaped",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "colFullName": {
+            "name": "colFullName",
+            "summary": "Returns a column's full name i.e. table.column",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($col, $table = NULL, $escaped = false)\n  {\n    if ($col = trim($col)) {\n      $bits = explode('.', str_replace($this->qte, '', $col));\n      $ok   = null;\n      $col  = array_pop($bits);\n      if ($table && ($table = $this->tableSimpleName($table))) {\n        $ok = 1;\n      }\n      elseif (\\count($bits)) {\n        $table = array_pop($bits);\n        $ok    = 1;\n      }\n\n      if ((null !== $ok) && bbn\\Str::checkName($table, $col)) {\n        return $escaped ? '\"'.$table.'\".\"'.$col.'\"' : $table.'.'.$col;\n      }\n    }\n\n        return null;\n  }",
+            "startLine": 296,
+            "endLine": 316,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name (escaped or not)"
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
+                },
+                {
+                    "name": "escaped",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "colSimpleName": {
+            "name": "colSimpleName",
+            "summary": "Returns a column's simple name i.e. column",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($col, $escaped = false)\n  {\n    if ($col = trim($col)) {\n      $bits = explode('.', str_replace($this->qte, '', $col));\n      $col  = end($bits);\n      if (bbn\\Str::checkName($col)) {\n        return $escaped ? $this->qte.$col.$this->qte : $col;\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 326,
+            "endLine": 337,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
+                },
+                {
+                    "name": "escaped",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "isTableFullName": {
+            "name": "isTableFullName",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table)\n  {\n    \/\/return true;\n    return strpos($table, '.') ? true : false;\n  }",
+            "startLine": 344,
+            "endLine": 348,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isColFullName": {
+            "name": "isColFullName",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($col)\n  {\n    return (bool)strpos($col, '.');\n  }",
+            "startLine": 355,
+            "endLine": 358,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "col",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "disableKeys": {
+            "name": "disableKeys",
+            "summary": "Disable foreign keys check",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $this->db->rawQuery('PRAGMA foreign_keys = OFF;');\n    return $this->db;\n  }",
+            "startLine": 366,
+            "endLine": 370,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bbn\\Db"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "enableKeys": {
+            "name": "enableKeys",
+            "summary": "Enable foreign keys check",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $this->db->rawQuery('PRAGMA foreign_keys = ON;');\n    return $this->db;\n  }",
+            "startLine": 378,
+            "endLine": 382,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bbn\\Db"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDatabases": {
+            "name": "getDatabases",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (!$this->db->check()) {\n      return null;\n    }\n\n    $x  = [];\n    $fs = bbn\\File\\Dir::scan($this->db->host);\n    foreach ($fs as $f){\n      if (is_file($f)) {\n        $x[] = pathinfo($f, PATHINFO_FILENAME);\n      }\n    }\n\n    sort($x);\n    return $x;\n  }",
+            "startLine": 388,
+            "endLine": 404,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getTables": {
+            "name": "getTables",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($database = '')\n  {\n    if (!$this->db->check()) {\n      return null;\n    }\n\n    if (empty($database) || !bbn\\Str::checkName($database)) {\n        $database = $this->db->getCurrent() === 'main' ? '' : '\"'.$this->db->getCurrent().'\".';\n    }\n    elseif ($database === 'main') {\n      $database = '';\n    }\n\n      $t2 = [];\n    if (( $r = $this->db->rawQuery(\n      '\n      SELECT \"tbl_name\"\n      FROM '.$database.'\"sqlite_master\"\n        WHERE type = \\'table\\''\n    ) )\n        && $t1 = $r->fetchAll(\\PDO::FETCH_NUM)\n    ) {\n      foreach ($t1 as $t){\n        if (strpos($t[0], 'sqlite') !== 0) {\n          array_push($t2, $t[0]);\n        }\n      }\n    }\n\n      return $t2;\n  }",
+            "startLine": 411,
+            "endLine": 441,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Database name"
+                }
+            ]
+        },
+        "getColumns": {
+            "name": "getColumns",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table)\n  {\n    if (!$this->db->check()) {\n      return null;\n    }\n\n    $r = [];\n    if ($table = $this->tableFullName($table)) {\n      $p = 1;\n      if ($rows = $this->db->getRows(\"PRAGMA table_info($table)\")) {\n        foreach ($rows as $row){\n          $f     = $row['name'];\n          $r[$f] = [\n            'position' => $p++,\n            'null' => $row['notnull'] == 0 ? 1 : 0,\n            'key' => $row['pk'] == 1 ? 'PRI' : null,\n            'default' => $row['dflt_value'],\n            'extra' => null,\n            'maxlength' => null,\n            'signed' => 1\n          ];\n          $type  = strtolower($row['type']);\n          if (strpos($type, 'blob') !== false) {\n            $r[$f]['type'] = 'BLOB';\n          }\n          elseif (( strpos($type, 'int') !== false ) || ( strpos($type, 'bool') !== false ) || ( strpos($type, 'timestamp') !== false )) {\n            $r[$f]['type'] = 'INTEGER';\n          }\n          elseif (( strpos($type, 'floa') !== false ) || ( strpos($type, 'doub') !== false ) || ( strpos($type, 'real') !== false )) {\n            $r[$f]['type'] = 'REAL';\n          }\n          elseif (( strpos($type, 'char') !== false ) || ( strpos($type, 'text') !== false )) {\n            $r[$f]['type'] = 'TEXT';\n          }\n\n          if (preg_match_all('\/\\((.*?)\\)\/', $row['type'], $matches)) {\n            $r[$f]['maxlength'] = (int)$matches[1][0];\n          }\n\n          if (!isset($r[$f]['type'])) {\n            $r[$f]['type'] = 'TEXT';\n          }\n        }\n      }\n    }\n\n      return $r;\n  }",
+            "startLine": 448,
+            "endLine": 495,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ]
+        },
+        "getKeys": {
+            "name": "getKeys",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table)\n  {\n    if (!$this->db->check()) {\n      return null;\n    }\n\n    $r = [];\n    if ($full = $this->tableFullName($table)) {\n      $r        = [];\n      $keys     = [];\n      $cols     = [];\n      $database = $this->db->getCurrent() === 'main' ? '' : '\"'.$this->db->getCurrent().'\".';\n      if ($indexes = $this->db->getRows('PRAGMA index_list('.$table.')')) {\n        foreach ($indexes as $d){\n          if ($fields = $this->db->getRows('PRAGMA index_info('.$database.'\"'.$d['name'].'\")')) {\n            \/** @todo Redo, $a is false! *\/\n            foreach ($fields as $d2){\n              $a = false;\n              if (!isset($keys[$d['name']])) {\n                $keys[$d['name']] = [\n                  'columns' => [$d2['name']],\n                  'ref_db' => $a ? $a['ref_db'] : null,\n                  'ref_table' => $a ? $a['ref_table'] : null,\n                  'ref_column' => $a ? $a['ref_column'] : null,\n                  'unique' => $d['unique'] == 1 ? 1 : 0\n                ];\n              }\n              else{\n                $keys[$d['name']]['columns'][] = $d2['name'];\n              }\n\n              if (!isset($cols[$d2['name']])) {\n                $cols[$d2['name']] = [$d['name']];\n              }\n              else{\n                $cols[$d2['name']][] = $d['name'];\n              }\n            }\n          }\n        }\n      }\n\n      $r['keys'] = $keys;\n      $r['cols'] = $cols;\n    }\n\n      return $r;\n  }",
+            "startLine": 502,
+            "endLine": 549,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ]
+        },
+        "getConditions": {
+            "name": "getConditions",
+            "summary": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $conditions, array $cfg = [], $is_having = false, $indent = 0)\n  {\n    $res = '';\n    if (isset($conditions['conditions'], $conditions['logic'])) {\n      $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';\n      foreach ($conditions['conditions'] as $key => $f){\n        if (\\is_array($f) && isset($f['logic']) && isset($f['conditions'])) {\n          if ($tmp = $this->getConditions($f, $cfg, $is_having, $indent + 2)) {\n            $res .= (empty($res) ? '(' : PHP_EOL.str_repeat(' ', $indent).\"$logic (\").\n                    $tmp.PHP_EOL.str_repeat(' ', $indent).\")\";\n          }\n        }\n        elseif (isset($f['operator'], $f['field'])) {\n          $field = $f['field'];\n          if (!array_key_exists('value', $f)) {\n            $f['value'] = false;\n          }\n\n          $is_number = false;\n          $is_null   = true;\n          $is_uid    = false;\n          $is_date   = false;\n          $model     = null;\n          if ($is_having) {\n            $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : \"$logic \").$field.' ';\n          }\n          elseif (isset($cfg['available_fields'][$field])) {\n            $table  = $cfg['available_fields'][$field];\n            $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);\n            if ($table && $column && isset($cfg['models'][$table]['fields'][$column])) {\n              $model = $cfg['models'][$table]['fields'][$column];\n              $res  .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : \"$logic \").\n                      (!empty($cfg['available_fields'][$field]) ? $this->colFullName($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true) : $this->colSimpleName($column, true)\n                      ).' ';\n            }\n            else{\n              \/\/ Remove the alias from where and join but not in having execpt if it's a count\n              if (!$is_having && ($table === false) && isset($cfg['fields'][$field])) {\n                $field = $cfg['fields'][$field];\n                \/\/ Same for exp in case it's an alias\n                if (!empty($f['exp']) && isset($cfg['fields'][$f['exp']])) {\n                  $f['exp'] = $cfg['fields'][$f['exp']];\n                }\n              }\n\n              $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';\n            }\n\n            if (!empty($model)) {\n              $is_null = (bool)$model['null'];\n              if ($model['type'] === 'binary') {\n                $is_number = true;\n                if (($model['maxlength'] === 16) && $model['key']) {\n                  $is_uid = true;\n                }\n              }\n              elseif (\\in_array($model['type'], self::$numeric_types, true)) {\n                $is_number = true;\n              }\n              elseif (\\in_array($model['type'], self::$date_types, true)) {\n                $is_date = true;\n              }\n            }\n            elseif ($f['value'] && \\bbn\\Str::isUid($f['value'])) {\n              $is_uid = true;\n            }\n            elseif (is_int($f['value']) || is_float($f['value'])) {\n              $is_number = true;\n            }\n          }\n          else{\n            $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';\n          }\n\n          switch (strtolower($f['operator'])){\n            case '=':\n              if (isset($f['exp'])) {\n                $res .= '= '.$f['exp'];\n              }\n              else {\n                $res .= '= ?';\n              }\n              break;\n            case '!=':\n              if (isset($f['exp'])) {\n                $res .= '!= '.$f['exp'];\n              }\n              else {\n                $res .= '!= ?';\n              }\n              break;\n            case 'like':\n              if (isset($f['exp'])) {\n                $res .= 'LIKE '.$f['exp'];\n              }\n              else {\n                $res .= 'LIKE ?';\n              }\n              break;\n            case 'not like':\n              if (isset($f['exp'])) {\n                $res .= 'NOT LIKE '.$f['exp'];\n              }\n              else {\n                $res .= 'NOT LIKE ?';\n              }\n              break;\n            case 'eq':\n            case 'is':\n              if (isset($f['exp'])) {\n                $res .= '= '.$f['exp'];\n              }\n              elseif ($is_uid || $is_number) {\n                $res .= '= ?';\n              }\n              else{\n                $res .= 'LIKE ?';\n              }\n              break;\n            case 'neq':\n            case 'isnot':\n              if (isset($f['exp'])) {\n                $res .= '!= '.$f['exp'];\n              }\n              elseif ($is_uid || $is_number) {\n                $res .= '!= ?';\n              }\n              else{\n                $res .= 'NOT LIKE ?';\n              }\n              break;\n\n            case 'doesnotcontains':\n            case 'doesnotcontain':\n              $res .= 'NOT LIKE '.($f['exp'] ?? '?');\n              break;\n\n            case 'endswith':\n            case 'startswith':\n            case 'contains':\n              $res .= 'LIKE '.($f['exp'] ?? '?');\n              break;\n\n            case 'gte':\n            case '>=':\n              if (isset($f['exp'])) {\n                $res .= '>= '.$f['exp'];\n              }\n              else{\n                $res .= '>= ?';\n              }\n              break;\n\n            case 'gt':\n            case '>':\n              if (isset($f['exp'])) {\n                $res .= '> '.$f['exp'];\n              }\n              else{\n                $res .= '> ?';\n              }\n              break;\n\n            case 'lte':\n            case '<=':\n              if (isset($f['exp'])) {\n                $res .= '<= '.$f['exp'];\n              }\n              else{\n                $res .= '<= ?';\n              }\n              break;\n\n            case 'lt':\n            case '<':\n              if (isset($f['exp'])) {\n                $res .= '< '.$f['exp'];\n              }\n              else{\n                $res .= '< ?';\n              }\n              break;\n\n            \/** @todo Check if it is working with an array *\/\n            case 'isnull':\n              $res .= 'IS NULL';\n              break;\n\n            case 'isnotnull':\n              $res .= 'IS NOT NULL';\n              break;\n\n            case 'isempty':\n              $res .= $is_number ? '= 0' : \"LIKE ''\";\n              break;\n\n            case 'isnotempty':\n              $res .= $is_number ? '!= 0' : \"NOT LIKE ''\";\n              break;\n\n            case 'doesnotcontain':\n              $res .= $is_number ? '!= ?' : 'NOT LIKE ?';\n              break;\n\n            case 'contains':\n              $res .= 'LIKE ?';\n              break;\n\n            default:\n              $res .= '= ?';\n              break;\n          }\n        }\n      }\n    }\n\n    if (!empty($res)) {\n      return str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $res.PHP_EOL);\n    }\n\n    return $res;\n  }",
+            "startLine": 560,
+            "endLine": 781,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "conditions",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "having"
+                },
+                {
+                    "name": "is_having",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "indent",
+                    "position": 3,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getSelect": {
+            "name": "getSelect",
+            "summary": "Generates a string starting with SELECT ... FROM with corresponding parameters",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    \/\/ 22\/06\/2020 imported from mysql.php by Mirko\n    $res = '';\n    if (\\is_array($cfg['tables']) && !empty($cfg['tables'])) {\n      $res = 'SELECT ';\n      if (!empty($cfg['count'])) {\n        if ($cfg['group_by']) {\n          $indexes = [];\n          $idxs    = [];\n          foreach ($cfg['group_by'] as $g){\n            \/\/ Alias\n            if (isset($cfg['fields'][$g])) {\n              $g = $cfg['fields'][$g];\n            }\n\n            if (($t = $cfg['available_fields'][$g])\n                && ($cfn = $this->colFullName($g, $t))\n            ) {\n              $indexes[] = $cfn;\n              \/\/$idxs[] = $this->colSimpleName($g, true);\n              \/\/ Changed by Mirko\n              $idxs[] = $this->colSimpleName($cfg['aliases'][$g] ?? $g, true);\n            }\n            else {\n              $indexes[] = $g;\n              $idxs[]    = $g;\n            }\n          }\n\n          if (!empty($cfg['having'])) {\n            if (count($indexes) === count($cfg['group_by'])) {\n              $res .= 'COUNT(*) FROM ( SELECT ';\n              $tmp  = [];\n              if ($extracted_fields = $this->db->extractFields($cfg, $cfg['having']['conditions'])) {\n                \/\/die(var_dump($extracted_fields));\n                foreach ($extracted_fields as $ef) {\n                  if (!in_array($ef, $indexes)) {\n                    if (!empty($cfg['fields'][$ef])) {\n                      $tmp[$ef] = $cfg['fields'][$ef];\n                    }\n                    else {\n                      $tmp[] = $ef;\n                    }\n                  }\n                }\n              }\n\n              $cfg['fields'] = $indexes;\n              foreach ($tmp as $k => $v) {\n                if (is_string($k)) {\n                  $cfg['fields'][$k] = $v;\n                }\n                else {\n                  $cfg['fields'][] = $v;\n                }\n              }\n            }\n            else{\n              $res .= 'COUNT(*) FROM ( SELECT ';\n            }\n          }\n          else{\n            if (count($indexes) === count($cfg['group_by'])) {\n              $res .= 'COUNT(*) FROM ( SELECT ';\n              \/\/$cfg['fields'] = $indexes;\n              \/\/ Changed by Mirko\n              $cfg['fields'] = array_combine($idxs, $indexes);\n            }\n            else{\n              $res .= 'COUNT(*) FROM ( SELECT ';\n            }\n          }\n        }\n        else{\n          $res          .= 'COUNT(*)';\n          $cfg['fields'] = [];\n        }\n      }\n\n      if (!empty($cfg['fields'])) {\n        $fields_to_put = [];\n        \/\/ Checking the selected fields\n        foreach ($cfg['fields'] as $alias => $f){\n          $is_distinct = false;\n          $f           = trim($f);\n          $bits        = explode(' ', $f);\n          if ((count($bits) > 1) && (strtolower($bits[0]) === 'distinct')) {\n            $is_distinct = true;\n            array_shift($bits);\n            $f = implode(' ', $bits);\n          }\n\n          \/\/ Adding the alias in $fields\n          if (strpos($f, '(')) {\n            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\\is_string($alias) ? ' AS '.$this->escape($alias) : '');\n          }\n          elseif (array_key_exists($f, $cfg['available_fields'])) {\n            $idx    = $cfg['available_fields'][$f];\n            $csn    = $this->colSimpleName($f);\n            $is_uid = false;\n            \/\/die(var_dump($idx, $f, $tables[$idx]));\n            if (($idx !== false) && isset($cfg['models'][$idx]['fields'][$csn])) {\n              $column = $cfg['models'][$idx]['fields'][$csn];\n              if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {\n                $is_uid = true;\n                if (!\\is_string($alias)) {\n                  $alias = $csn;\n                }\n              }\n            }\n\n            \/\/$res['fields'][$alias] = $this->cfn($f, $fields[$f]);\n            if ($is_uid) {\n              $st = 'LOWER(HEX('.$this->colFullName($csn, $cfg['available_fields'][$f], true).'))';\n            }\n            \/\/ For JSON fields\n            elseif ($cfg['available_fields'][$f] === false) {\n              $st = $f;\n            }\n            else{\n              $st = $this->colFullName($csn, $cfg['available_fields'][$f], true);\n            }\n\n            if (\\is_string($alias)) {\n              $st .= ' AS '.$this->escape($alias);\n            }\n\n            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$st;\n          }\n          elseif (isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false)) {\n            $this->db->error(\"Error! The column '$f' exists on several tables in '\".implode(', ', $cfg['tables']));\n          }\n          else{\n            $this->db->error(\"Error! The column '$f' doesn't exist in '\".implode(', ', $cfg['tables']));\n          }\n        }\n\n        $res .= implode(', ', $fields_to_put);\n      }\n\n      $res          .= PHP_EOL;\n      $tables_to_put = [];\n      foreach ($cfg['tables'] as $alias => $tfn){\n        $st = $this->tableFullName($tfn, true);\n        if ($alias !== $tfn) {\n          $st .= ' AS '.$this->escape($alias);\n        }\n\n        $tables_to_put[] = $st;\n      }\n\n      $res .= 'FROM '.implode(', ', $tables_to_put).PHP_EOL;\n      return $res;\n    }\n\n    return $res;\n  }",
+            "startLine": 790,
+            "endLine": 947,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getInsert": {
+            "name": "getInsert",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $fields_to_put = [\n      'values' => [],\n      'fields' => []\n    ];\n    $i             = 0;\n    foreach ($cfg['fields'] as $alias => $f){\n      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {\n        $model  = $cfg['models'][$cfg['available_fields'][$f]];\n        $csn    = $this->colSimpleName($f);\n        $is_uid = false;\n        if (isset($model['fields'][$csn])) {\n          $column = $model['fields'][$csn];\n          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {\n            $is_uid = true;\n          }\n\n          $fields_to_put['fields'][] = $this->colSimpleName($f, true);\n          $fields_to_put['values'][] = $is_uid && (!$column['null'] || (null !== $cfg['values'][$i])) ? 'UNHEX(?)' : '?';\n        }\n      }\n      else{\n        $this->db->error(\"Error! The column '$f' doesn't exist in '\".implode(', ', $cfg['tables']));\n      }\n\n      $i++;\n    }\n\n    if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {\n      return 'INSERT '.($cfg['ignore'] ? 'IGNORE ' : '').'INTO '.$this->tableSimpleName(current($cfg['tables']), true).PHP_EOL.\n        '('.implode(', ', $fields_to_put['fields']).')'.PHP_EOL.' VALUES ('.\n        implode(', ', $fields_to_put['values']).')'.PHP_EOL;\n    }\n\n    return '';\n  }",
+            "startLine": 954,
+            "endLine": 990,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The configuration array"
+                }
+            ]
+        },
+        "getUpdate": {
+            "name": "getUpdate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res           = '';\n    $fields_to_put = [\n      'values' => [],\n      'fields' => []\n    ];\n    foreach ($cfg['fields'] as $alias => $f){\n      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {\n        $model  = $cfg['models'][$cfg['available_fields'][$f]];\n        $csn    = $this->colSimpleName($f);\n        $is_uid = false;\n        if (isset($model['fields'][$csn])) {\n          $column = $model['fields'][$csn];\n          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {\n            $is_uid = true;\n          }\n\n          $fields_to_put['fields'][] = $this->colSimpleName($f, true);\n          $fields_to_put['values'][] = $is_uid ? 'UNHEX(?)' : '?';\n        }\n      }\n      else{\n        $this->db->error(\"Error! The column '$f' doesn't exist in '\".implode(', ', $cfg['tables']));\n      }\n    }\n\n    if (count($fields_to_put['fields'])) {\n      $res .= 'UPDATE '.($cfg['ignore'] ? 'IGNORE ' : '').$this->tableSimpleName(current($cfg['tables']), true).' SET ';\n      $last = count($fields_to_put['fields']) - 1;\n      foreach ($fields_to_put['fields'] as $i => $f){\n        $res .= $f.' = '.$fields_to_put['values'][$i];\n        if ($i < $last) {\n          $res .= ',';\n        }\n\n        $res .= PHP_EOL;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 997,
+            "endLine": 1038,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The configuration array"
+                }
+            ]
+        },
+        "getDelete": {
+            "name": "getDelete",
+            "summary": "Return SQL code for row(s) DELETE.",
+            "description": "*\n```php\nX::dump($db->getDelete('table_users',['id'=>1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>\n<pre><code class=\"language-php\">X::dump($db-&gt;getDelete('table_users',['id'=&gt;1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?<\/code><\/pre>"
+                }
+            ],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res = '';\n    if (count($cfg['tables']) === 1) {\n      $res = 'DELETE '.( $cfg['ignore'] ? 'IGNORE ' : '' ).\n        'FROM '.$this->tableFullName(current($cfg['tables']), true).PHP_EOL;\n    }\n\n    return $res;\n  }",
+            "startLine": 1052,
+            "endLine": 1061,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getJoin": {
+            "name": "getJoin",
+            "summary": "Returns a string with the JOIN part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res = '';\n    if (!empty($cfg['join'])) {\n      foreach ($cfg['join'] as $join){\n        if (isset($join['table'], $join['on']) && ($cond = $this->db->getConditions($join['on'], $cfg, false, 4))) {\n          $res .= '  '.\n            (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '').\n            'JOIN '.$this->tableFullName($join['table'],true).\n            (!empty($join['alias']) ? ' AS '.$this->escape($join['alias']) : '').PHP_EOL.'ON '.$cond;\n        }\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1070,
+            "endLine": 1085,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getWhere": {
+            "name": "getWhere",
+            "summary": "Returns a string with the JOIN part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res = $this->getConditions($cfg['filters'] ?? [], $cfg);\n    if (!empty($res)) {\n      $res = 'WHERE '.$res;\n    }\n\n    return $res;\n  }",
+            "startLine": 1094,
+            "endLine": 1102,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getGroupBy": {
+            "name": "getGroupBy",
+            "summary": "Returns a string with the GROUP BY part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res          = '';\n    $group_to_put = [];\n    if (!empty($cfg['group_by'])) {\n      foreach ($cfg['group_by'] as $g){\n        if (isset($cfg['available_fields'][$g])) {\n          $group_to_put[] = $this->escape($g);\n          \/*\n          if ( isset($cfg['available_fields'][$this->isColFullName($g) ? $this->colFullName($g) : $this->colSimpleName($g)]) ){\n          $group_to_put[] = $this->escape($g);\n          \/\/$group_to_put[] = $this->colFullName($g, $cfg['available_fields'][$g], true);\n          *\/\n        }\n        else{\n          $this->db->error(\"Error! The column '$g' doesn't exist for group by \".print_r($cfg, true));\n        }\n      }\n\n      if (count($group_to_put)) {\n        $res .= 'GROUP BY '.implode(', ', $group_to_put).PHP_EOL;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1111,
+            "endLine": 1136,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getHaving": {
+            "name": "getHaving",
+            "summary": "Returns a string with the HAVING part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res = '';\n    if (!empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->getConditions($cfg['having'], $cfg, !$cfg['count'], 2))) {\n      $res .= '  HAVING '.$cond.PHP_EOL;\n    }\n\n    return $res;\n  }",
+            "startLine": 1145,
+            "endLine": 1153,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOrder": {
+            "name": "getOrder",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res = '';\n    if (!empty($cfg['order'])) {\n      foreach ($cfg['order'] as $col => $dir){\n        if (\\is_array($dir) && isset($dir['field'], $cfg['available_fields'][$dir['field']])) {\n          $res .= $this->escape($dir['field']).' COLLATE NOCASE '.\n            (!empty($dir['dir']) && strtolower($dir['dir']) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;\n        }\n        elseif (isset($cfg['available_fields'][$col])) {\n          $res .= $this->escape($col).' COLLATE NOCASE '.\n            (strtolower($dir) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;\n        }\n      }\n\n      if (!empty($res)) {\n        return 'ORDER BY '.substr($res,0, Strrpos($res,',')).PHP_EOL;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 1160,
+            "endLine": 1181,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getLimit": {
+            "name": "getLimit",
+            "summary": "Get a string starting with LIMIT with corresponding parameters to $where",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $res = '';\n    if (!empty($cfg['limit']) && bbn\\Str::isInteger($cfg['limit'])) {\n      $res .= 'LIMIT '.(!empty($cfg['start']) && bbn\\Str::isInteger($cfg['start']) ? (string)$cfg['start'] : '0').', '.$cfg['limit'];\n    }\n\n    return $res;\n  }",
+            "startLine": 1190,
+            "endLine": 1198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getRawCreate": {
+            "name": "getRawCreate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table)\n  {\n    if (($table = $this->tableFullName($table, true))\n        && ($r = $this->db->rawQuery(\"SHOW CREATE TABLE $table\"))\n    ) {\n      return $r->fetch(\\PDO::FETCH_ASSOC)['Create Table'];\n    }\n\n    return '';\n  }",
+            "startLine": 1205,
+            "endLine": 1214,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table for which to create the statement"
+                }
+            ]
+        },
+        "getCreateTable": {
+            "name": "getCreateTable",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n    if (!$model) {\n      $model = $this->db->modelize($table);\n    }\n\n    $st   = 'CREATE TABLE ' . $this->db->escape($table) . ' (' . PHP_EOL;\n    $done = false;\n    foreach ($model['fields'] as $name => $col) {\n      if (!$done) {\n        $done = true;\n      }\n      else {\n        $st .= ',' . PHP_EOL;\n      }\n\n      $st .= '  ' . $this->db->escape($name) . ' ';\n      if (!in_array($col['type'], self::$types)) {\n        if (isset(self::$interoperability[$col['type']])) {\n          $st .= self::$interoperability[$col['type']];\n        }\n        \/\/ No error: no type is fine\n      }\n      else {\n        $st .= $col['type'];\n      }\n\n      if (empty($col['null'])) {\n        $st .= ' NOT NULL';\n      }\n\n      if (array_key_exists('default', $col)) {\n        $st .= ' DEFAULT ';\n        if (($col['default'] === 'NULL')\n            || bbn\\Str::isNumber($col['default'])\n            || strpos($col['default'], '(')\n            || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])\n        ) {\n          $st .= (string)$col['default'];\n        }\n        else {\n          $st .= \"'\" . bbn\\Str::escapeSquotes($col['default']) . \"'\";\n        }\n      }\n    }\n\n    if (isset($model['keys']['PRIMARY'])) {\n      $db  = &$this->db;\n      $st .= ','.PHP_EOL.'  PRIMARY KEY ('.X::join(\n        array_map(\n          function ($a) use ($db) {\n            return $db->escape($a);\n          },\n          $model['keys']['PRIMARY']['columns']\n        ),\n        ', '\n      ).')';\n    }\n\n    $st .= PHP_EOL . ')';\n    return $st;\n  }",
+            "startLine": 1217,
+            "endLine": 1278,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreateKeys": {
+            "name": "getCreateKeys",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n    $st = '';\n    if (!$model) {\n      $model = $this->db->modelize($table);\n    }\n\n    if ($model && !empty($model['keys'])) {\n      $last  = count($model['keys']) - 1;\n      $dbcls = &$this->db;\n      foreach ($model['keys'] as $name => $key) {\n        if ($name === 'PRIMARY') {\n          continue;\n        }\n\n        $st .= 'CREATE ';\n        if (!empty($key['unique'])) {\n          $st .= 'UNIQUE ';\n        }\n\n        $st .= 'INDEX \\''.Str::escapeSquotes($name).'\\' ON ' . $this->db->escape($table);\n        $db  = &$this->db;\n        $st .= ' ('.X::join(\n          array_map(\n            function ($a) use ($db) {\n              return $db->escape($a);\n            },\n            $key['columns']\n          ),\n          ', '\n        ).')';\n        $st .= ';' . PHP_EOL;\n      }\n    }\n\n    return $st;\n  }",
+            "startLine": 1281,
+            "endLine": 1317,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreate": {
+            "name": "getCreate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n    $st = '';\n    if (!$model) {\n      $model = $this->db->modelize($table);\n    }\n\n    if ($st = $this->getCreateTable($table, $model)) {\n      $st .= ';'.PHP_EOL . $this->getCreateKeys($table, $model);\n    }\n\n    return $st;\n  }",
+            "startLine": 1324,
+            "endLine": 1336,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table for which to create the statement"
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "createIndex": {
+            "name": "createIndex",
+            "summary": "Creates an index",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $column, $unique = false, $length = NULL, $order = NULL)\n  {\n    if (!\\is_array($column)) {\n      $column = [$column];\n    }\n\n    if (!\\is_null($length)) {\n      if (!\\is_array($length)) {\n        $length = [$length];\n      }\n    }\n\n    $name = bbn\\Str::encodeFilename($table);\n    foreach ($column as $i => $c){\n      if (!bbn\\Str::checkName($c)) {\n        $this->db->error(\"Illegal column $c\");\n      }\n\n      $name      .= '_'.$c;\n      $column[$i] = '`'.$column[$i].'`';\n      if (\\is_int($length[$i]) && $length[$i] > 0) {\n        $column[$i] .= '('.$length[$i].')';\n      }\n    }\n\n    $name = bbn\\Str::cut($name, 50);\n    if ($table = $this->tableFullName($table, 1)) {\n      $query = 'CREATE '.( $unique ? 'UNIQUE ' : '' ).\"INDEX `$name` ON $table ( \".implode(', ', $column);\n      if (($order === \"ASC\") || ($order === \"DESC\")) {\n        $query .= ' '. $order .' );';\n      }\n      else{\n        $query .= ' );';\n      }\n\n      X::log(['index', $query],'vito');\n      return (bool)$this->db->rawQuery($query);\n    }\n\n        return false;\n  }",
+            "startLine": 1348,
+            "endLine": 1388,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "unique",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "length",
+                    "position": 3,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 4,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "deleteIndex": {
+            "name": "deleteIndex",
+            "summary": "Deletes an index",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $key)\n  {\n    if (( $table = $this->tableFullName($table, 1) ) && bbn\\Str::checkName($key)) {\n      \/\/changed the row above because if the table has no rows query() returns 0\n      \/\/return (bool)$this->db->query(\"ALTER TABLE $table DROP INDEX `$key`\");\n      return $this->db->query('DROP INDEX IF EXISTS '.$key) !== false;\n    }\n\n        return false;\n  }",
+            "startLine": 1398,
+            "endLine": 1407,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createDatabase": {
+            "name": "createDatabase",
+            "summary": "Creates a database",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($database)\n  {\n    if (bbn\\Str::checkFilename($database)) {\n      if(empty(strpos($database, '.sqlite'))) {\n        $database = $database.'.sqlite';\n      }\n\n      if(empty(file_exists($this->db->host.$database))) {\n        fopen($this->db->host.$database, 'w');\n        return file_exists($this->db->host.$database);\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 1418,
+            "endLine": 1432,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dropDatabase": {
+            "name": "dropDatabase",
+            "summary": "Drops the given database",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($database)\n  {\n    if (bbn\\Str::checkFilename($database)) {\n      if(empty(strpos($database, '.sqlite'))) {\n        $database = $database.'.sqlite';\n      }\n\n      if(file_exists($this->db->host.$database)) {\n        unlink($this->db->host.$database);\n        return file_exists($this->db->host.$database);\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 1441,
+            "endLine": 1455,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createUser": {
+            "name": "createUser",
+            "summary": "Creates a database user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($user = NULL, $pass = NULL, $db = NULL)\n  {\n    return true;\n  }",
+            "startLine": 1466,
+            "endLine": 1469,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "pass",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "deleteUser": {
+            "name": "deleteUser",
+            "summary": "Deletes a database user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($user = NULL)\n  {\n    return true;\n  }",
+            "startLine": 1478,
+            "endLine": 1481,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUsers": {
+            "name": "getUsers",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($user = '', $host = '')\n  {\n    return [];\n  }",
+            "startLine": 1489,
+            "endLine": 1492,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "host",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbSize": {
+            "name": "dbSize",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($database = '', $type = '')\n  {\n    return @filesize($database) ?: 0;\n  }",
+            "startLine": 1495,
+            "endLine": 1498,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "database",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "tableSize": {
+            "name": "tableSize",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $type = '')\n  {\n    return 0;\n  }",
+            "startLine": 1501,
+            "endLine": 1504,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "status": {
+            "name": "status",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table = '', $database = '')\n  {\n    $cur = null;\n    if ($database && ($this->db->getCurrent() !== $database)) {\n      $cur = $this->db->getCurrent();\n      $this->db->change($database);\n    }\n\n    \/\/$r = $this->db->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);\n    $r = $this->db->getRow('SELECT * FROM dbstat WHERE Name LIKE ?', $table);\n    if (null !== $cur) {\n      $this->db->change($cur);\n    }\n\n    return $r;\n  }",
+            "startLine": 1507,
+            "endLine": 1522,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUid": {
+            "name": "getUid",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return bbn\\X::makeUid();\n  }",
+            "startLine": 1525,
+            "endLine": 1528,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "createTable": {
+            "name": "createTable",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table_name, array $columns, array $keys = NULL, $with_constraints = false, $charset = 'UTF-8')\n  {\n    $lines = [];\n    $sql   = '';\n    foreach ($columns as $n => $c){\n      $name = $c['name'] ?? $n;\n      if (isset($c['type']) && bbn\\Str::checkName($name)) {\n        $st = $this->colSimpleName($name, true).' '.$c['type'];\n        if (!empty($c['maxlength'])) {\n          $st .= '('.$c['maxlength'].')';\n        }\n        elseif (!empty($c['values']) && \\is_array($c['values'])) {\n          $st .= '(';\n          foreach ($c['values'] as $i => $v){\n            $st .= \"'\".bbn\\Str::escapeSquotes($v).\"'\";\n            if ($i < count($c['values']) - 1) {\n              $st .= ',';\n            }\n          }\n\n          $st .= ')';\n        }\n\n        if ((strpos($c['type'], 'int') !== false) && empty($c['signed'])) {\n          $st .= ' UNSIGNED';\n        }\n\n        if (empty($c['null'])) {\n          $st .= ' NOT NULL';\n        }\n\n        if (isset($c['default'])) {\n          $st .= ' DEFAULT '.($c['default'] === 'NULL' ? 'NULL' : \"'\".bbn\\Str::escapeSquotes($c['default']).\"'\");\n        }\n\n        $lines[] = $st;\n      }\n    }\n\n    if (count($lines)) {\n      $sql = 'CREATE TABLE '.$this->tableSimpleName($table_name, false).' ('.PHP_EOL.implode(','.PHP_EOL, $lines).\n        PHP_EOL.'); PRAGMA encoding='.$this->qte.$charset.$this->qte.';';\n    }\n\n    return $sql;\n  }",
+            "startLine": 1531,
+            "endLine": 1576,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table_name",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "columns",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "keys",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "with_constraints",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "charset",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "UTF-8",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createTableSqlite": {
+            "name": "createTableSqlite",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table_name, array $columns, array $keys = NULL, $with_constraints = false, $charset = 'UTF-8')\n  {\n    $str = $this->createTable($table_name, $columns, $keys, $with_constraints, $charset);\n    if ($str !== '') {\n      return (bool)$this->db->rawQuery($str);\n    }\n\n    return false;\n  }",
+            "startLine": 1579,
+            "endLine": 1587,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table_name",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "columns",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "keys",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "with_constraints",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "charset",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "UTF-8",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreateConstraints": {
+            "name": "getCreateConstraints",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n    $st = '';\n    if (!empty($model)) {\n      if ($last = count($model)) {\n        $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;\n        $i   = 0;\n\n        if (!is_array($model[0])) {\n          $constraints[] = $model;\n        }\n        else{\n          $constraints = $model;\n        }\n\n        foreach ($constraints as $name => $key) {\n          X::log($key, 'vito');\n          $i++;\n          $st .= '  ADD '.\n            'CONSTRAINT '.$this->db->escape($key['constraint']).\n            ($key['foreign_key'] ? ' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') ' : '').\n            ($key['unique'] ? ' UNIQUE ('.$this->db->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').\n            ($key['primary_key'] ? ' PRIMARY KEY ('.$this->db->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').\n            ' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') '.\n            'REFERENCES '.$this->db->escape($table).'('.$this->db->escape($key['columns'][0]).') '.\n            ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').\n            ($key['update'] ? ' ON UPDATE '.$key['update'] : '').\n            ($i === $last ? ';' : ','.PHP_EOL);\n        }\n      }\n    }\n\n    return $st;\n  }",
+            "startLine": 1590,
+            "endLine": 1623,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "createConstraintsSqlite": {
+            "name": "createConstraintsSqlite",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Languages\\Sqlite",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n    $str = $this->getCreateConstraints($table,  $model);\n    if ($str !== '') {\n      return (bool)$this->db->rawQuery($str);\n    }\n\n    return false;\n  }",
+            "startLine": 1626,
+            "endLine": 1634,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "operators": {
+            "static": true,
+            "visibility": "public",
+            "doc": {
+                "description": "@var array Allowed operators",
+                "tags": []
+            },
+            "value": [
+                "!=",
+                "=",
+                "<>",
+                "<",
+                "<=",
+                ">",
+                ">=",
+                "like",
+                "clike",
+                "slike",
+                "not",
+                "is",
+                "is not",
+                "in",
+                "between",
+                "not like"
+            ]
+        },
+        "numeric_types": {
+            "static": true,
+            "visibility": "public",
+            "doc": {
+                "description": "@var array Numeric column types",
+                "tags": []
+            },
+            "value": [
+                "integer",
+                "real"
+            ]
+        },
+        "date_types": {
+            "static": true,
+            "visibility": "public",
+            "doc": {
+                "description": "@var array Time and date column types don't exist in SQLite",
+                "tags": []
+            }
+        },
+        "types": {
+            "static": true,
+            "visibility": "public",
+            "value": [
+                "integer",
+                "real",
+                "text",
+                "blob"
+            ]
+        },
+        "interoperability": {
+            "static": true,
+            "visibility": "public",
+            "value": {
+                "tinyint": "integer",
+                "smallint": "integer",
+                "mediumint": "integer",
+                "int": "integer",
+                "bigint": "integer",
+                "decimal": "real",
+                "float": "real",
+                "double": "real",
+                "bit": "",
+                "char": "",
+                "varchar": "text",
+                "binary": "blob",
+                "varbinary": "blob",
+                "tinyblob": "blob",
+                "blob": "blob",
+                "mediumblob": "blob",
+                "longblob": "blob",
+                "tinytext": "text",
+                "text": "text",
+                "mediumtext": "text",
+                "longtext": "text",
+                "enum": "text",
+                "set": "text",
+                "date": "text",
+                "time": "text",
+                "datetime": "text",
+                "timestamp": "integer",
+                "year": "integer",
+                "json": "text"
+            }
+        },
+        "aggr_functions": {
+            "static": true,
+            "visibility": "public",
+            "value": [
+                "AVG",
+                "COUNT",
+                "GROUP_CONCAT",
+                "MAX",
+                "MIN",
+                "SUM"
+            ]
+        },
+        "qte": {
+            "visibility": "public",
+            "doc": {
+                "description": "@var string The quote character",
+                "tags": []
+            },
+            "value": "\""
+        }
+    },
+    "staticProperties": {
+        "operators": [
+            "!=",
+            "=",
+            "<>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "like",
+            "clike",
+            "slike",
+            "not",
+            "is",
+            "is not",
+            "in",
+            "between",
+            "not like"
+        ],
+        "numeric_types": [
+            "integer",
+            "real"
+        ],
+        "date_types": [],
+        "types": [
+            "integer",
+            "real",
+            "text",
+            "blob"
+        ],
+        "interoperability": {
+            "tinyint": "integer",
+            "smallint": "integer",
+            "mediumint": "integer",
+            "int": "integer",
+            "bigint": "integer",
+            "decimal": "real",
+            "float": "real",
+            "double": "real",
+            "bit": "",
+            "char": "",
+            "varchar": "text",
+            "binary": "blob",
+            "varbinary": "blob",
+            "tinyblob": "blob",
+            "blob": "blob",
+            "mediumblob": "blob",
+            "longblob": "blob",
+            "tinytext": "text",
+            "text": "text",
+            "mediumtext": "text",
+            "longtext": "text",
+            "enum": "text",
+            "set": "text",
+            "date": "text",
+            "time": "text",
+            "datetime": "text",
+            "timestamp": "integer",
+            "year": "integer",
+            "json": "text"
+        },
+        "aggr_functions": [
+            "AVG",
+            "COUNT",
+            "GROUP_CONCAT",
+            "MAX",
+            "MIN",
+            "SUM"
+        ]
+    },
+    "constants": null,
+    "numMethods": 48,
+    "numProperties": 7,
+    "numConstants": 0,
+    "numStaticProperties": 6,
+    "interfaceNames": [
+        "bbn\\Db\\Engines"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "operators": [
+            "!=",
+            "=",
+            "<>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "like",
+            "clike",
+            "slike",
+            "not",
+            "is",
+            "is not",
+            "in",
+            "between",
+            "not like"
+        ],
+        "numeric_types": [
+            "integer",
+            "real"
+        ],
+        "date_types": [],
+        "types": [
+            "integer",
+            "real",
+            "text",
+            "blob"
+        ],
+        "interoperability": {
+            "tinyint": "integer",
+            "smallint": "integer",
+            "mediumint": "integer",
+            "int": "integer",
+            "bigint": "integer",
+            "decimal": "real",
+            "float": "real",
+            "double": "real",
+            "bit": "",
+            "char": "",
+            "varchar": "text",
+            "binary": "blob",
+            "varbinary": "blob",
+            "tinyblob": "blob",
+            "blob": "blob",
+            "mediumblob": "blob",
+            "longblob": "blob",
+            "tinytext": "text",
+            "text": "text",
+            "mediumtext": "text",
+            "longtext": "text",
+            "enum": "text",
+            "set": "text",
+            "date": "text",
+            "time": "text",
+            "datetime": "text",
+            "timestamp": "integer",
+            "year": "integer",
+            "json": "text"
+        },
+        "aggr_functions": [
+            "AVG",
+            "COUNT",
+            "GROUP_CONCAT",
+            "MAX",
+            "MIN",
+            "SUM"
+        ],
+        "sqlite_keys_enabled": false,
+        "db": null,
+        "qte": "\""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Languages",
+    "shortName": "Sqlite",
+    "summary": "Database Class"
+}

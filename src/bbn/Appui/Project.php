@@ -43,7 +43,7 @@ class Project extends bbn\Models\Cls\Db
    * @param bbn\Db $db
    * @param string $id
    */
-  public function __construct(bbn\Db $db, String $id = null)
+  public function __construct(bbn\Db $db, string $id = null)
   {
     parent::__construct($db);
     $this->options = bbn\Appui\Option::getInstance();
@@ -74,12 +74,20 @@ class Project extends bbn\Models\Cls\Db
   {
     $file_environment = \bbn\Mvc::getAppPath().'cfg/environment';
     if ($this->fs->isFile($file_environment.'.json')) {
-      $envs = \json_decode($this->fs->getContents($file_environment.'.json'), true)[0];
+      $envs = \json_decode($this->fs->getContents($file_environment.'.json'), true);
     }
     elseif ($this->fs->isFile($file_environment.'.yml')) {
-      $envs = \yaml_parse($this->fs->getContents($file_environment.'.yml'), true)[0];
+      try {
+        $envs = \yaml_parse($this->fs->getContents($file_environment.'.yml'), true);
+      }
+      catch (\Exception $e) {
+        throw new \Exception(
+          "Impossible to parse the file $file_environment"
+          .PHP_EOL.$e->getMessage()
+        );
+      }
     }
-    return $envs ?? null;
+    return $envs ? $envs[0] : null;
   }
 
 
@@ -261,12 +269,11 @@ class Project extends bbn\Models\Cls\Db
     //if only name else get info repository
     $path       = '';
     $repository = \is_string($rep) ? $this->repositories[$rep] : $rep;
-    if ((!empty($repository) && is_array($repository))
-        && !empty($repository['path'])
-        && !empty($repository['root'])
-        && !empty($repository['code'])
+    if ((!empty($repository)
+        && is_array($repository))
+        && X::hasProps($repository, ['path', 'root', 'code'], true)
     ) {
-      switch($repository['root']){
+      switch ($repository['root']) {
         case 'app':
           $path = $this->getAppPath();
           break;
@@ -565,17 +572,17 @@ class Project extends bbn\Models\Cls\Db
     if ($o = $this->options->option($id ?: $this->id)) {
       $cfg                = $this->options->getCfg($id ?: $this->id);
       $this->name         = $o['text'];
-      $this->lang         = $cfg['i18n'] ?: '';
+      $this->lang         = $cfg['i18n'] ?? '';
       $this->code         = $o['code'];
       $this->option       = $o;
       $this->repositories = $this->getRepositories($o['text']);
       //the id of the child option 'lang' (children of this option are all languages for which the project is configured)
-      if (!$this->id_langs = $this->options->fromCode('lang', $o['code'], 'project', 'appui')) {
+      if (!$this->id_langs = $this->options->fromCode('lang', $o['code'], 'list', 'project', 'appui')) {
         $this->setIdLangs();
       }
 
       //the id of the child option 'path'
-      $this->id_path = $this->options->fromCode('path', $o['code'], 'project', 'appui') ?: null;
+      $this->id_path = $this->options->fromCode('path', $o['code'], 'list', 'project', 'appui') ?: null;
       return true;
     }
 

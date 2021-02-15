@@ -101,7 +101,7 @@ class Event extends bbn\Models\Cls\Db
     // Events table fields
     $ef =& $this->class_cfg['arch']['events'];
     return array_filter($recurrences, function($o) use($ef, $rf, $t, $monthweek){
-      $tstart = strtotime(date('Y-m-d', Strtotime($o[$ef['start']])));
+      $tstart = strtotime(date('Y-m-d', strtotime($o[$ef['start']])));
       // Get the last day of the month
       $lastday = strtotime('last day of this month', $tstart);
       // Get the first day of the month
@@ -117,7 +117,7 @@ class Event extends bbn\Models\Cls\Db
           $lastwd = strtotime('-1 week', $lastwd);
         }
         // Get the corrected week number
-        $lwd = \bbn\Date::getMonthWeek(date('Y-m-d', Strtotime('-' . abs($monthweek + 1) .' week', $lastwd)));
+        $lwd = \bbn\Date::getMonthWeek(date('Y-m-d', strtotime('-' . abs($monthweek + 1) .' week', $lastwd)));
         return $lwd === $week;
       }
       // From the start
@@ -129,7 +129,7 @@ class Event extends bbn\Models\Cls\Db
           $firstwd = strtotime('+1 week', $firstwd);
         }
         // Get the corrected week number
-        $fwd = \bbn\Date::getMonthWeek(date('Y-m-d', Strtotime('+' . ($monthweek - 1) .' week', $firstwd)));
+        $fwd = \bbn\Date::getMonthWeek(date('Y-m-d', strtotime('+' . ($monthweek - 1) .' week', $firstwd)));
         return $fwd === $week;
       }
     });
@@ -348,7 +348,7 @@ class Event extends bbn\Models\Cls\Db
    * @param array $event
    * @return array
    */
-  public function getRecurrences(string $start, String $end, array &$event): array
+  public function getRecurrences(string $start, string $end, array &$event): array
   {
     // Recurring table fields
     $rf =& $this->class_cfg['arch']['recurring'];
@@ -541,7 +541,7 @@ class Event extends bbn\Models\Cls\Db
       ($ex = $this->getExceptions($recurrences[0][$rf['id_event']])) 
     ){
       return array_filter($recurrences, function($r) use($ex, $ef, $exf){
-        return \bbn\X::find($ex, [$exf['day'] => date('Y-m-d', Strtotime($r[$ef['start']]))]) === null;
+        return \bbn\X::find($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === null;
       });    
     }
     return $recurrences;
@@ -553,7 +553,7 @@ class Event extends bbn\Models\Cls\Db
    * @param string $until
    * @return bool
    */
-  public function setUntil(string $id, String $until = null): bool
+  public function setUntil(string $id, string $until = null): bool
   {
     if ( 
       \bbn\Str::isUid($id) &&
@@ -604,9 +604,9 @@ class Event extends bbn\Models\Cls\Db
       if ( empty($exc[$exf['id_event']]) ){
         $exc[$exf['id_event']] = $id_event;
       }
-      $exc[$exf['day']] = date('Y-m-d', Strtotime($exc[$exf['day']]));
-      $exc[$exf['start']] = date('H:i:s', Strtotime($exc[$exf['start']]));
-      $exc[$exf['end']] = date('H:i:s', Strtotime($exc[$exf['end']]));
+      $exc[$exf['day']] = date('Y-m-d', strtotime($exc[$exf['day']]));
+      $exc[$exf['start']] = date('H:i:s', strtotime($exc[$exf['start']]));
+      $exc[$exf['end']] = date('H:i:s', strtotime($exc[$exf['end']]));
       $exc[$exf['id_user']] = !empty($exc[$exf['id_user']]) ? $exc[$exf['id_user']] : \bbn\User::getInstance()->getId();
       $exc[$exf['creation']] = \bbn\Str::isDateSql($exc[$exf['creation']]) ?
         $exc[$exf['creation']] : date('Y-m-d H:i:s');
@@ -621,7 +621,7 @@ class Event extends bbn\Models\Cls\Db
    * @param string $to_event
    * @param bool
    */
-  public function copyExceptions(string $from_event, String $to_event): bool
+  public function copyExceptions(string $from_event, string $to_event): bool
   {
     if (
       \bbn\Str::isUid($from_event) &&

@@ -161,7 +161,7 @@ class Ftp extends bbn\Models\Cls\Basic
    * 
 	 * @return array
 	 */
-	public function scan(string $dir, String $type = null, &$res = [], int $timeout = 0): array
+	public function scan(string $dir, string $type = null, &$res = [], int $timeout = 0): array
   {
     $res = [];
     if ( $dirs = $this->listFiles($dir) ){
@@ -370,7 +370,7 @@ class Ftp extends bbn\Models\Cls\Basic
    * @param string $new The new file full path
    * @return bool
    */
-  public function move(string $old, String $new){
+  public function move(string $old, string $new){
     if (
       !empty($old) &&
       !empty($new) &&

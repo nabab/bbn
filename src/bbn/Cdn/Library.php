@@ -12,6 +12,7 @@
 namespace bbn\Cdn;
 
 use bbn;
+use bbn\X;
 
 /**
  * Library retriever tool.
@@ -368,7 +369,7 @@ class Library
       $info['prepend'] = [];
       if ($info['git']) {
         if (strpos($info['git'], 'https://github.com/') === 0) {
-          $info['git'] = substr($info['git'], Strlen('https://github.com/'));
+          $info['git'] = substr($info['git'], strlen('https://github.com/'));
           if (substr($info['git'], -4) === '.git') {
             $info['git'] = substr($info['git'], 0, -4);
           }
@@ -394,7 +395,7 @@ class Library
                 foreach ($info['content']->files as $f) {
                   /** @todo Remove!!! */
                   if (substr($f, -4) === 'less') {
-                    if (bbn\X::indexOf($tf, '%s') > -1) {
+                    if (X::indexOf($tf, '%s') > -1) {
                       $info['prepend'][$f][] = sprintf(str_replace('%s', '%1$s', $tf), $th);
                     } else {
                       $info['prepend'][$f][] = $tf;
@@ -404,7 +405,7 @@ class Library
               }
             } else {
               foreach ($info['content']->theme_files as $tf) {
-                if (bbn\X::indexOf($tf, '%s') > -1) {
+                if (X::indexOf($tf, '%s') > -1) {
                   $info['content']->files[] = sprintf(str_replace('%s', '%1$s', $tf), $th);
                 } else {
                   $info['content']->files[] = $tf;
@@ -445,7 +446,7 @@ class Library
    * ```php
    * $info = $lib->info('bbn-vue');
    * $deps = $lib->getDependencies($info['version']);
-   * bbn\X::dump($deps);
+   * X::dump($deps);
    * // [
    * //   "vuejs|v2.6.10",
    * //   "axios|v0.19.2",
@@ -502,7 +503,7 @@ SQL,
    * // @var bbn\Cdn\Library $lib
    * $lib->add('jquery-ui') // jQuery will be added too
    *     ->add('axios', false); // no dependency will be added here
-   * bbn\X::dump($lib->getConfig());
+   * X::dump($lib->getConfig());
    * // {
    * //     "libraries": {
    * //         "jquery": "3.3.1",
@@ -534,11 +535,11 @@ SQL,
         if ($has_dep) {
           // Adding dependencies
           if (!$info['id']) {
-            throw new \Exception(_("Problem adding library").' '.$library);
+            throw new \Exception(dgettext(X::tDom(), "Problem adding library").' '.$library);
           }
 
           $dependencies = $this->getDependencies($info['id']);
-          //bbn\X::dump($dependencies, $info);
+          //X::dump($dependencies, $info);
           if (!empty($dependencies)) {
             foreach ($dependencies as $dep) {
               $this->add($dep);
@@ -625,7 +626,7 @@ SQL,
    * // @var bbn\Cdn\Library $lib
    * $lib->add('jquery-ui|latest|black');
    * $cfg = $lib->getConfig()
-   * bbn\X::dump($cfg);
+   * X::dump($cfg);
    * // {
    * //     "libraries": {
    * //         "jquery": "3.3.1",
@@ -676,7 +677,7 @@ SQL,
 
             if (!in_array($f, $res[$type])) {
               $res[$type][] = $f;
-              $inc[$type][] = substr($f, Strlen($inc['path']));
+              $inc[$type][] = substr($f, strlen($inc['path']));
             }
           }
         }

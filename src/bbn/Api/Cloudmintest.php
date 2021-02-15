@@ -21,7 +21,7 @@ class Cloudmintest {
     $pass,
     /** @var  Cloudmin hostname */
     $hostname,
-    /** @var String mode */
+    /** @var string mode */
     $mode = 'cloudmin',
     /** @var  Check instance existence */
     $checked = false,

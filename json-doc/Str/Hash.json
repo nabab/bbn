@@ -1,0 +1,261 @@
+{
+    "doc": {
+        "description": "A Class for hashes",
+        "tags": {
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Strings",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\Str\\Hash",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
+    "startLine": 18,
+    "endLine": 151,
+    "contentConstructor": {
+        "file": "bbn\\Str\\Hash",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Str\\Hash",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($hash = '')\n  {\n\t\tif ( !empty($hash) )\n\t\t{\n\t\t\tif ( preg_match('#[A-z0-9_\/]+#',$hash,$m) === 1 && $m[0] === $hash )\n\t\t\t{\n\t\t\t\t$this->hash = $hash;\n\t\t\t\twhile ( strpos($this->hash,'\/\/') )\n\t\t\t\t\t$this->hash = str_replace('\/\/','\/',$this->hash);\n\t\t\t\tif ( strpos($this->hash,'\/') === 0 )\n\t\t\t\t\t$this->hash = substr($this->hash,1);\n\t\t\t\tif ( substr($this->hash,-1) === '\/' )\n\t\t\t\t\t$this->hash = substr($this->hash,0,-1);\n\t\t\t}\n\t\t}\n\t\tif ( !isset($this->hash) )\n\t\t\t$this->hash = '';\n\t\t$h = explode(self::$separator,$this->hash);\n\t\t$j = 0;\n\t\tfor ( $i = 0; $i < ( \\count($h) - 1 ); $i += 2 )\n\t\t{\n\t\t\t$this->keys[$j] = $h[$i];\n\t\t\t$this->values[$j] = $h[$i+1];\n\t\t\t$j++;\n\t\t}\n  }",
+            "startLine": 44,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "hash",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add": {
+            "name": "add",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Str\\Hash",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($pair, $replace = 1)\n  {\n\t\tif ( \\is_array($pair) )\n\t\t{\n\t\t\tif ( isset($pair[0]) && isset($pair[1]) )\n\t\t\t{\n\t\t\t\t$k = $pair[0];\n\t\t\t\t$v = $pair[1];\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\t$k = array_keys($pair);\n\t\t\t\t$k = $k[0];\n\t\t\t\t$v = $pair[$k];\n\t\t\t}\n\t\t\t\n\t\t\tif (\n\t\t\t\tpreg_match('#[A-z0-9_]+#',$k,$m) === 1 &&\n\t\t\t\t$m[0] === $k &&\n\t\t\t\tpreg_match('#[A-z0-9_]+#',$v,$m) === 1 &&\n\t\t\t\t$m[0] === $v\n\t\t\t)\n\t\t\t{\n\t\t\t\tif ( is_numeric($v) )\n\t\t\t\t\t$v = $v + 0;\n\t\t\t\t$i = array_search($k,$this->keys);\n\t\t\t\tif ( $i === false )\n\t\t\t\t{\n\t\t\t\t\tarray_push($this->keys,$k);\n\t\t\t\t\tarray_push($this->values,$v);\n\t\t\t\t}\n\t\t\t\telse if ( $replace )\n\t\t\t\t{\n\t\t\t\t\t$this->keys[$i] = $k;\n\t\t\t\t\t$this->values[$i] = $v;\n\t\t\t\t}\n\t\t\t\treturn $this;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
+            "startLine": 74,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "pair",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "replace",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                }
+            ]
+        },
+        "remove": {
+            "name": "remove",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Str\\Hash",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key)\n  {\n\t\tif ( isset($this->values[$key]) )\n\t\t\tunset($this->values[$key]);\n\t\treturn $this;\n  }",
+            "startLine": 119,
+            "endLine": 124,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Str\\Hash",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key = '')\n  {\n\t\tif ( empty($key) )\n\t\t\treturn $this->values;\n\t\treturn isset($this->values[$key]) ? $this->values[$key] : false;\n  }",
+            "startLine": 129,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "output": {
+            "name": "output",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Str\\Hash",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t$h = '';\n\t\tif ( \\count($this->values) > 0 )\n\t\t{\n\t\t\tforeach ( $this->values as $k => $v )\n\t\t\t\t$h.= $this->keys[$k].'\/'.$v.'\/';\n\t\t\t$h = substr($h,0,-1);\n\t\t}\n\t\treturn $h;\n  }",
+            "startLine": 139,
+            "endLine": 149,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": {
+        "keys": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "values": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            }
+        },
+        "hash": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            }
+        }
+    },
+    "staticProperties": {
+        "separator": "\/"
+    },
+    "constants": null,
+    "numMethods": 5,
+    "numProperties": 3,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "separator": "\/",
+        "keys": [],
+        "values": [],
+        "hash": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Str",
+    "shortName": "Hash",
+    "summary": "A Class for hashes"
+}

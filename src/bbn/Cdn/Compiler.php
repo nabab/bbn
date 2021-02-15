@@ -60,7 +60,7 @@ class Compiler extends bbn\Models\Cls\Basic
    * @param string $lang The language used by the string
    * @return void
    */
-  public function minify(string $st, String $lang): string
+  public function minify(string $st, string $lang): string
   {
     $tmp = false;
     $st = trim($st);
@@ -123,7 +123,7 @@ class Compiler extends bbn\Models\Cls\Basic
       $ext = bbn\Str::fileExt($file);
       $minified = false;
       if (!is_file($this->fpath.$file)) {
-        throw new \Exception(_("Impoossible to find the file").' '.$this->fpath.$file);
+        throw new \Exception(dgettext(X::tDom(), "Impoossible to find the file").' '.$this->fpath.$file);
         return false;
       }
       foreach (self::$_min_suffixes as $s){
@@ -485,7 +485,7 @@ JAVASCRIPT;
    */
   public function cssContent(string $css): string
   {
-    $css = str_replace('`', '\\``', Str_replace('\\', '\\\\', $css));
+    $css = str_replace('`', '\\``', str_replace('\\', '\\\\', $css));
     //$css = bbn\Str::escapeSquotes($css);
     $code = bbn\Str::genpwd(25, 20);
     $head = $code.'2';

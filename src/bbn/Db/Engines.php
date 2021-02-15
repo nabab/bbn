@@ -291,7 +291,7 @@ interface Engines
    * @param string $key
    * @return bool
    */
-  public function deleteIndex(string $table, String $key): bool;
+  public function deleteIndex(string $table, string $key): bool;
 
 
   /**
@@ -302,7 +302,7 @@ interface Engines
    * @param string $db
    * @return bool
    */
-  public function createUser(string $user, String $pass, String $db = null): bool;
+  public function createUser(string $user, string $pass, string $db = null): bool;
 
 
   /**
@@ -339,7 +339,7 @@ interface Engines
    * @param string $host
    * @return array
    */
-  public function getUsers(string $user = '', String $host = ''): ?array;
+  public function getUsers(string $user = '', string $host = ''): ?array;
 
 
   /**
@@ -349,7 +349,7 @@ interface Engines
    * @param string $type
    * @return int Size in bytes
    */
-  public function dbSize(string $database = '', String $type = ''): int;
+  public function dbSize(string $database = '', string $type = ''): int;
 
 
   /**
@@ -359,7 +359,7 @@ interface Engines
    * @param string $type
    * @return int Size in bytes
    */
-  public function tableSize(string $table, String $type = ''): int;
+  public function tableSize(string $table, string $type = ''): int;
 
 
   /**
@@ -369,7 +369,7 @@ interface Engines
    * @param string $database
    * @return mixed
    */
-  public function status(string $table = '', String $database = '');
+  public function status(string $table = '', string $database = '');
 
 
   /**

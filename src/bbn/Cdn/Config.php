@@ -12,6 +12,7 @@
 namespace bbn\Cdn;
 
 use bbn;
+use bbn\X;
 
 /**
  * Makes a usable configuration array out of a request string.
@@ -59,7 +60,7 @@ class Config extends bbn\Models\Cls\Basic
       $db = bbn\Db::getInstance();
     }
     if (!$db) {
-      die(_('Impossible to initialize the CDN without a DB connection'));
+      die(dgettext(X::tDom(), 'Impossible to initialize the CDN without a DB connection'));
     }
     $this->db = $db;
     if ($request) {
@@ -94,7 +95,7 @@ class Config extends bbn\Models\Cls\Basic
    * @example
    * ```php
    * // @var bbn\Cdn\Config $cfg
-   * \bbn\X::hdump($cfg->get());
+   * X::hdump($cfg->get());
    * // {
    * //     "url": "lib",
    * //     "params": {
@@ -219,11 +220,11 @@ class Config extends bbn\Models\Cls\Basic
   protected function setFiles(): self
   {
     // Shortcuts for files and dir
-    if (bbn\X::hasProp($this->cfg['params'], 'f', true)) {
+    if (X::hasProp($this->cfg['params'], 'f', true)) {
       $this->cfg['params']['files'] = $this->cfg['params']['f'];
       unset($this->cfg['params']['f']);
     }
-    if (bbn\X::hasProp($this->cfg['params'], 'd', true)) {
+    if (X::hasProp($this->cfg['params'], 'd', true)) {
       $this->cfg['params']['dir'] = $this->cfg['params']['d'];
       unset($this->cfg['params']['d']);
     }
@@ -232,11 +233,11 @@ class Config extends bbn\Models\Cls\Basic
       $res = $this->getFile();
     }
     // Preconfigured
-    elseif (bbn\X::hasProp($this->cfg['params'], 'id', true)) {
+    elseif (X::hasProp($this->cfg['params'], 'id', true)) {
       $res = $this->getPreconfig();
     }
     // List of files
-    elseif (bbn\X::hasProp($this->cfg['params'], 'files', true) && is_dir($this->fpath.$this->cfg['url'])) {
+    elseif (X::hasProp($this->cfg['params'], 'files', true) && is_dir($this->fpath.$this->cfg['url'])) {
       $res = $this->getFiles();
     }
     // Directory content
@@ -277,7 +278,7 @@ class Config extends bbn\Models\Cls\Basic
       }
     }
     // Last but not least, libraries!
-    elseif (bbn\X::hasProp($this->cfg['params'], 'lib', true)) {
+    elseif (X::hasProp($this->cfg['params'], 'lib', true)) {
       $res = $this->getLibraries();
       // Adding dirs to config
       if (!empty($this->cfg['params']['dirs'])) {
@@ -452,7 +453,7 @@ class Config extends bbn\Models\Cls\Basic
       if (!empty($p['components'])) {
         $components = explode(',', $p['components']);
       }
-      $this->cfg = bbn\X::mergeArrays(
+      $this->cfg = X::mergeArrays(
         $this->cfg, [
         'test' => !empty($p['test']),
         'lang' => empty($p['lang']) ? self::$default_language : $p['lang'],

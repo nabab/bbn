@@ -54,8 +54,8 @@ class Appui
     $ok = true;
     foreach (self::$vars as $v) {
       if (!defined('BBN_'.strtoupper($v))) {
-        X::log(_("$v is not defined"));
-        throw new \Exception(_("$v is not defined"));
+        X::log(dgettext(X::tDom(), "$v is not defined"));
+        throw new \Exception(dgettext(X::tDom(), "$v is not defined"));
         $ok = false;
       }
     }
@@ -112,7 +112,7 @@ class Appui
    *
    * @return string|null
    */
-  public function getEnvironmentIndex(string $hostname = null, String $servname = null): ?string
+  public function getEnvironmentIndex(string $hostname = null, string $servname = null): ?string
   {
     if ($this->check()) {
       if (empty($hostname) && empty($servname)) {
@@ -136,7 +136,7 @@ class Appui
    *
    * @return array
    */
-  public function getEnvironment($hostname = null, String $servname = null): ?array
+  public function getEnvironment($hostname = null, string $servname = null): ?array
   {
     if ($this->check()) {
       if ($hostname !== true) {
@@ -304,14 +304,14 @@ class Appui
       }
     }
     else {
-      throw new \Exception(_("Impossible to get the settings"));
+      throw new \Exception(dgettext(X::tDom(), "Impossible to get the settings"));
     }
 
     return false;
   }
 
 
-  public function replaceEnvironment(array $update, String $hostname = null, String $servname = null): bool
+  public function replaceEnvironment(array $update, string $hostname = null, string $servname = null): bool
   {
     return $this->setEnvironment($update, $hostname, $servname, true);
   }
@@ -320,6 +320,57 @@ class Appui
   public function replaceSettings(array $update): bool
   {
     return $this->setSettings($update, true);
+  }
+
+
+  public function addPlugin(string $name, string $title = null)
+  {
+    if (!$title) {
+      $title = $name;
+    }
+
+    /** @var \bbn\Appui\Option */
+    $o       = bbn\Appui\Option::getInstance();
+    $isAppui = substr($name, 0, 6) === 'appui-';
+    $name    = $isAppui ? substr($name, 6) : $name;
+    $params  = $isAppui ? ['appui'] : ['plugins'];
+    if ($id_parent = $o->fromCode(...$params)) {
+      array_unshift($params, $name);
+      if ($id = $o->fromCode(...$params)) {
+        return $id;
+      }
+      $id_plugin = $o->add([
+        'code' => $name,
+        'text' => $title,
+        'id_parent' => $id_parent
+      ]);
+      if (!$id_plugin) {
+        throw new \Exception(dgettext(X::tDom(), "Impossible to add the plugin")." $name");
+      }
+
+      $perm_id = $o->add([
+        'id_parent' => $id_plugin,
+        'code' => 'permissions',
+        'text' => 'Permissions'
+      ]);
+      if (!$perm_id) {
+        throw new \Exception(dgettext(X::tDom(), "Impossible to add the permission for the plugin")." $name");
+      }
+
+      // Other options under permissions
+      $o->add([
+        'id_parent' => $perm_id,
+        'code' => 'options',
+        'text' => 'Options'
+      ]);
+      $o->add([
+        'id_parent' => $perm_id,
+        'code' => 'plugins',
+        'text' => 'Plugins'
+      ]);
+    }
+
+    return null;
   }
 
 }

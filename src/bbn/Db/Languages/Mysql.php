@@ -229,7 +229,7 @@ class Mysql implements bbn\Db\Engines
    */
   public function escape(string $item): string
   {
-    $items = explode('.', Str_replace($this->qte, '', $item));
+    $items = explode('.', str_replace($this->qte, '', $item));
     $r     = [];
     foreach ($items as $m) {
       if (!bbn\Str::checkName($m)) {
@@ -1339,7 +1339,7 @@ MYSQL
           $st .= self::$interoperability[$col['type']];
         }
         else {
-          throw new \Exception(_("Impossible to recognize the column type")." $col[type]");
+          throw new \Exception(dgettext(X::tDom(), "Impossible to recognize the column type")." $col[type]");
         }
       }
       else {
@@ -1562,7 +1562,7 @@ MYSQL
    * @param string      $key
    * @return bool
    */
-  public function deleteIndex(string $table, String $key): bool
+  public function deleteIndex(string $table, string $key): bool
   {
     if (($table = $this->tableFullName($table, true))
         && bbn\Str::checkName($key)
@@ -1587,7 +1587,7 @@ MYSQL
    * @param string $collation
    * @return bool
    */
-  public function createMysqlDatabase(string $database, String $enc = 'utf8', String $collation = 'utf8_general_ci'): bool
+  public function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
     if (bbn\Str::checkName($database, $enc, $collation)) {
       return (bool)$this->db->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
@@ -1621,7 +1621,7 @@ MYSQL
   {
     if ($this->db->check()) {
       if (!Str::checkName($database)) {
-        throw new \Exception(_("Wrong database name")." $database");
+        throw new \Exception(dgettext(X::tDom(), "Wrong database name")." $database");
       }
 
       try {
@@ -1644,7 +1644,7 @@ MYSQL
    * @param string $db
    * @return bool
    */
-  public function createUser(string $user, String $pass, String $db = null): bool
+  public function createUser(string $user, string $pass, string $db = null): bool
   {
     if (null === $db) {
       $db = $this->db->getCurrent();
@@ -1696,7 +1696,7 @@ MYSQL
    * @param string $host
    * @return array|null
    */
-  public function getUsers(string $user = '', String $host = ''): ?array
+  public function getUsers(string $user = '', string $host = ''): ?array
   {
     if ($this->db->check()) {
       $cond = '';
@@ -1731,7 +1731,7 @@ MYSQL
   }
 
 
-  public function dbSize(string $database = '', String $type = ''): int
+  public function dbSize(string $database = '', string $type = ''): int
   {
     $cur = null;
     if ($database && ($this->db->getCurrent() !== $database)) {
@@ -1759,7 +1759,7 @@ MYSQL
   }
 
 
-  public function tableSize(string $table, String $type = ''): int
+  public function tableSize(string $table, string $type = ''): int
   {
     $size = 0;
     if (bbn\Str::checkName($table)) {
@@ -1777,7 +1777,7 @@ MYSQL
   }
 
 
-  public function status(string $table = '', String $database = '')
+  public function status(string $table = '', string $database = '')
   {
     $cur = null;
     if ($database && ($this->db->getCurrent() !== $database)) {
@@ -1806,7 +1806,7 @@ MYSQL
   }
 
 
-  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, String $charset = 'utf8', $engine = 'InnoDB')
+  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', $engine = 'InnoDB')
   {
     $lines = [];
     $sql   = '';

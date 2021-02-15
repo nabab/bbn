@@ -165,7 +165,7 @@ class Imessages extends \bbn\Models\Cls\Db
    * @param bool   $simple
    * @return array
    */
-  public function get(string $id_option, String $id_user, $simple = true)
+  public function get(string $id_option, string $id_user, $simple = true)
   {
     $cfg =& $this->class_cfg;
     // Current datetime
@@ -277,7 +277,7 @@ class Imessages extends \bbn\Models\Cls\Db
    * @param string $id_user
    * @return bool
    */
-  public function setHidden(string $id_imess, String $id_user)
+  public function setHidden(string $id_imess, string $id_user)
   {
     $cfg =& $this->class_cfg;
     if (!empty($id_imess) && !empty($id_user)) {
@@ -303,7 +303,7 @@ class Imessages extends \bbn\Models\Cls\Db
    * @param string $id_user
    * @return bool
    */
-  public function unsetHidden(string $id_imess, String $id_user)
+  public function unsetHidden(string $id_imess, string $id_user)
   {
     $cfg =& $this->class_cfg;
     if (!empty($id_imess) && !empty($id_user)) {

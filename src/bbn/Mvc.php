@@ -335,7 +335,7 @@ class Mvc implements Mvc\Api
    *
    * @return string|null
    */
-  public static function getUserTmpPath(string $id_user = null, String $plugin = null):? string
+  public static function getUserTmpPath(string $id_user = null, string $plugin = null):? string
   {
     if (!self::$_app_name) {
       return null;
@@ -357,7 +357,7 @@ class Mvc implements Mvc\Api
   }
 
 
-  public static function getUserDataPath(string $id_user = null, String $plugin = null):? string
+  public static function getUserDataPath(string $id_user = null, string $plugin = null):? string
   {
     if (!self::$_app_name) {
       return null;
@@ -484,12 +484,6 @@ class Mvc implements Mvc\Api
   public function fetchDir($dir, $mode)
   {
     return $this->router->fetchDir($dir, $mode);
-  }
-
-
-  public function applyLocale($plugin)
-  {
-    return $this->router->applyLocale($plugin);
   }
 
 
@@ -845,7 +839,7 @@ class Mvc implements Mvc\Api
    * @param string $mode
    * @return bool
    */
-  public function hasView(string $path = '', String $mode = 'html'): bool
+  public function hasView(string $path = '', string $mode = 'html'): bool
   {
     return array_key_exists($mode, self::$_loaded_views[$mode]) && isset(self::$_loaded_views[$mode][$path]);
   }
@@ -857,7 +851,7 @@ class Mvc implements Mvc\Api
    * @param Mvc\View $view
    * @return void
    */
-  public function addToViews(string $path, String $mode, Mvc\View $view): void
+  public function addToViews(string $path, string $mode, Mvc\View $view): void
   {
     if (!array_key_exists($mode, self::$_loaded_views[$mode])) {
       self::$_loaded_views[$mode] = [];
@@ -875,7 +869,7 @@ class Mvc implements Mvc\Api
    * @param array  $data
    * @return string|false
    */
-  public function getView(string $path, String $mode = 'html', array $data=null)
+  public function getView(string $path, string $mode = 'html', array $data=null)
   {
     if (!router::isMode($mode) || !($path = Router::parse($path))) {
       die("Incorrect mode $path $mode");
@@ -905,7 +899,7 @@ class Mvc implements Mvc\Api
    * @param string $mode
    * @return boolean
    */
-  public function viewExists(string $path, String $mode = 'html'): bool
+  public function viewExists(string $path, string $mode = 'html'): bool
   {
     if (!router::isMode($mode) || !($path = Router::parse($path))) {
       return false;
@@ -947,7 +941,7 @@ class Mvc implements Mvc\Api
    * @param array  $data
    * @return string|false
    */
-  public function getExternalView(string $full_path, String $mode = 'html', array $data=null)
+  public function getExternalView(string $full_path, string $mode = 'html', array $data=null)
   {
     if (!router::isMode($mode) && ($full_path = Str::parsePath($full_path))) {
       die("Incorrect mode $full_path $mode");
@@ -1010,7 +1004,7 @@ class Mvc implements Mvc\Api
    *
    * @return string|null
    */
-  public function customPluginView(string $path, String $mode, array $data, String $plugin): ?string
+  public function customPluginView(string $path, string $mode, array $data, string $plugin): ?string
   {
     if ($plugin && ($route = $this->router->routeCustomPlugin(router::parse($path), $mode, $plugin))) {
       $view = new Mvc\View($route);
@@ -1036,7 +1030,7 @@ class Mvc implements Mvc\Api
    *
    * @return array|null
    */
-  public function customPluginModel(string $path, array $data, Mvc\Controller $ctrl, String $plugin, int $ttl = null): ?array
+  public function customPluginModel(string $path, array $data, Mvc\Controller $ctrl, string $plugin, int $ttl = null): ?array
   {
     if ($plugin && ($route = $this->router->routeCustomPlugin(router::parse($path), 'model', $plugin))) {
       $model = new Mvc\Model($this->db, $route, $ctrl, $this);
@@ -1060,7 +1054,7 @@ class Mvc implements Mvc\Api
    *
    * @return bool
    */
-  public function hasSubpluginModel(string $path, String $plugin, String $subplugin): bool
+  public function hasSubpluginModel(string $path, string $plugin, string $subplugin): bool
   {
     return !!$this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin);
   }
@@ -1078,7 +1072,7 @@ class Mvc implements Mvc\Api
    *
    * @return array|null
    */
-  public function subpluginModel(string $path, array $data, Mvc\Controller $ctrl, String $plugin, String $subplugin, int $ttl = null): ?array
+  public function subpluginModel(string $path, array $data, Mvc\Controller $ctrl, string $plugin, string $subplugin, int $ttl = null): ?array
   {
     if ($plugin
         && $subplugin
@@ -1103,7 +1097,7 @@ class Mvc implements Mvc\Api
    *
    * @return string|false
    */
-  public function getPluginView(string $path, String $mode, array $data, String $plugin)
+  public function getPluginView(string $path, string $mode, array $data, string $plugin)
   {
     return $this->customPluginView(router::parse($path), $mode, $data, $this->pluginName($plugin));
   }
@@ -1128,13 +1122,13 @@ class Mvc implements Mvc\Api
   }
 
 
-  public function getPluginModel(string $path, array $data, Mvc\Controller $ctrl, String $plugin, int $ttl = null)
+  public function getPluginModel(string $path, array $data, Mvc\Controller $ctrl, string $plugin, int $ttl = null)
   {
     return $this->customPluginModel(router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);
   }
 
 
-  public function getSubpluginModel(string $path, array $data, Mvc\Controller $ctrl, String $plugin, String $subplugin, int $ttl = null)
+  public function getSubpluginModel(string $path, array $data, Mvc\Controller $ctrl, string $plugin, string $subplugin, int $ttl = null)
   {
     return $this->subpluginModel($path, $data, $ctrl, $plugin, $subplugin, $ttl);
   }

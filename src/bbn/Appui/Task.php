@@ -8,6 +8,7 @@
 
 namespace bbn\Appui;
 use bbn;
+use bbn\X;
 
 class Task extends bbn\Models\Cls\Db
 {
@@ -80,7 +81,7 @@ class Task extends bbn\Models\Cls\Db
         }
         return $a;
       }, $cats, 1);
-      \bbn\X::sortBy($res, 'text', 'ASC');
+      X::sortBy($res, 'text', 'ASC');
       return $res;
     }
     return false;
@@ -106,7 +107,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTitle($id_task, $simple=false){
     if ( $title = $this->db->selectOne('bbn_tasks', 'title', ['id' => $id_task]) ){
-      return (!empty($simple) ? (_("Task")." ") : '').$title;
+      return (!empty($simple) ? (dgettext(X::tDom(), "Task")." ") : '').$title;
     }
     return '';
   }
@@ -353,7 +354,7 @@ class Task extends bbn\Models\Cls\Db
       $res[$i]['details'] = $this->info($r['id']);
     }
     */
-    bbn\X::sortBy($res, $order, $dir);
+    X::sortBy($res, $order, $dir);
     return $res;
   }
 
@@ -413,7 +414,7 @@ class Task extends bbn\Models\Cls\Db
       $res[$i]['details'] = $this->info($r['id']);
     }
     */
-    bbn\X::sortBy($res, $order, $dir);
+    X::sortBy($res, $order, $dir);
     return [
       'data' => $res,
       'total' => \count($res)
@@ -684,7 +685,7 @@ class Task extends bbn\Models\Cls\Db
       HAVING 1
       $having
       $order";
-    //die(bbn\X::dump($sql));
+    //die(X::dump($sql));
     if ( !isset($args) ){
       $args = array_merge($args0, $args1, $args2);
     }
@@ -728,7 +729,7 @@ class Task extends bbn\Models\Cls\Db
         ['role' => 'ASC']);
       $n = false;
       foreach ( $all as $a ){
-        $code = bbn\X::getField($roles, ['id' => $a['role']], 'code');
+        $code = X::getField($roles, ['id' => $a['role']], 'code');
         if ( $n !== $code ){
           $n = $code;
           $r[$n] = [];
@@ -1122,7 +1123,7 @@ class Task extends bbn\Models\Cls\Db
       if (
         !empty($message) &&
         !($id_note = $this->comment($id_task, [
-          'title' => _('Report tracker').' '.date('d M Y H:i', Strtotime($active_track['start'])).' - '.date('d M Y H:i', $now),
+          'title' => dgettext(X::tDom(), 'Report tracker').' '.date('d M Y H:i', strtotime($active_track['start'])).' - '.date('d M Y H:i', $now),
           'text' => $message
         ]))
       ){

@@ -9,6 +9,7 @@
 namespace bbn\Appui;
 
 use bbn;
+use bbn\X;
 
 class Masks extends bbn\Models\Cls\Db
 {
@@ -91,9 +92,9 @@ class Masks extends bbn\Models\Cls\Db
           ];
           if ($fulltext) {
             $tmp['fulltext'] = $a['title'].
-              ($a['default'] ? ' ('._('default').')' : '').
+              ($a['default'] ? ' ('.dgettext(X::tDom(), 'default').')' : '').
               ' - v'.$a['version'].' '.
-              \bbn\Date::format($a['creation']).' '._('by').' '.
+              \bbn\Date::format($a['creation']).' '.dgettext(X::tDom(), 'by').' '.
               $admin->getName($a['id_user']);
           }
           $res[] = $tmp;

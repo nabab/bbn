@@ -10,6 +10,9 @@ namespace bbn\Parsers;
  * @category Parsers
  * @version 1.0
  */
+use bbn;
+use bbn\X;
+
 class Doc {
   private
     /**
@@ -181,12 +184,12 @@ class Doc {
   private function setTags(){
     if ( $this->mode ){
       if ( $this->mode === 'vue' ){
-        $tags = \bbn\X::mergeArrays($this->all_tags['js'], $this->all_tags['vue']);
+        $tags = X::mergeArrays($this->all_tags['js'], $this->all_tags['vue']);
       }
       else {
         $tags = $this->all_tags[$this->mode];
       }
-      $this->tags = \bbn\X::mergeArrays($this->all_tags['common'], $tags);
+      $this->tags = X::mergeArrays($this->all_tags['common'], $tags);
       return $this->tags;
     }
   }
@@ -199,9 +202,9 @@ class Doc {
 	 * @return string
 	 */
 	private function clearText(string $text){
-    //return trim(str_replace('   ', ' ', Str_replace('  ', ' ', preg_replace('/\n\s+\*\s{0,1}/', PHP_EOL, $text))));
+    //return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('/\n\s+\*\s{0,1}/', PHP_EOL, $text))));
     $st = trim(preg_replace('/\n\s*\*{1}? /', PHP_EOL, $text));
-    \bbn\X::log($st, 'clear_text');
+    X::log($st, 'clear_text');
 
     return $st;
 	}
@@ -461,7 +464,7 @@ class Doc {
    * @param string $memberof The parent tag name
    * @return array|false
    */
-  private function get(string $tag, String $memberof = '', bool $grouped = true){
+  private function get(string $tag, string $memberof = '', bool $grouped = true){
     if ( empty($this->parsed) ){
       $this->parse();
     }
@@ -470,15 +473,15 @@ class Doc {
       foreach ( $this->parsed as $p ){
         if (
           !empty($p['tags']) &&
-          (($i = \bbn\X::find($p['tags'], ['tag' => $tag])) !== null) &&
+          (($i = X::find($p['tags'], ['tag' => $tag])) !== null) &&
           (
             (
               empty($memberof) &&
-              (\bbn\X::find($p['tags'], ['tag' => 'memberof']) === null)
+              (X::find($p['tags'], ['tag' => 'memberof']) === null)
             ) ||
             (
               !empty($memberof) &&
-              (($k = \bbn\X::find($p['tags'], ['tag' => 'memberof'])) !== null) &&
+              (($k = X::find($p['tags'], ['tag' => 'memberof'])) !== null) &&
               ($p['tags'][$k]['name'] === $memberof)
             )
           )
@@ -618,7 +621,7 @@ class Doc {
    * @param string $src The source code or an absolute file path
    * @param string $mode The mode to use
    */
-  public function __construct(string $src = '', String $mode = 'vue'){
+  public function __construct(string $src = '', string $mode = 'vue'){
     $this->setMode($mode);
     $this->setTags();
     $this->setSource($src);
@@ -647,7 +650,7 @@ class Doc {
       $this->mode = $mode;
       return $this;
     }
-    die(_('Error: mode not allowed.'));
+    die(dgettext(X::tDom(), 'Error: mode not allowed.'));
   }
 
   /**
@@ -686,7 +689,7 @@ class Doc {
     // Remove start pattern
     //$block = trim(substr($block, 3));
 		// Remove end pattern
-		$block = trim(substr($block, 0, Strlen($block) - 2));
+		$block = trim(substr($block, 0, strlen($block) - 2));
 		// Tags
     $tags = $this->getTags($block);
     foreach ( $tags as $i => $tag ){

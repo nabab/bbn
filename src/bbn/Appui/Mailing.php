@@ -9,6 +9,7 @@
 namespace bbn\Appui;
 
 use bbn;
+use bbn\X;
 use Error;
 
 class Mailing extends bbn\Models\Cls\Db
@@ -200,7 +201,7 @@ class Mailing extends bbn\Models\Cls\Db
    * @param string $new_state
    * @return boolean
    */
-  public function changeState(string $id, String $new_state): bool
+  public function changeState(string $id, string $new_state): bool
   {
     if ($this->check()) {
       $cur = $this->db->selectOne("bbn_emailings", 'state', ['id' => $id]);
@@ -382,11 +383,11 @@ class Mailing extends bbn\Models\Cls\Db
       }
       return $successes;
     }
-    $this->setError(_("No mailer defined"));
+    $this->setError(dgettext(X::tDom(), "No mailer defined"));
     return null;
   }
 
-  public function send(array $cfg, String $sender = null): bool
+  public function send(array $cfg, string $sender = null): bool
   {
     if (!empty($cfg['to']) && ($mailer = $this->_get_mailer($sender))) {
       return $mailer->send($cfg);
@@ -447,7 +448,7 @@ class Mailing extends bbn\Models\Cls\Db
     return null;
   }
 
-  public function insertEmails(string $id_mailing, String $date, array $emails, int $priority = 5): ?array
+  public function insertEmails(string $id_mailing, string $date, array $emails, int $priority = 5): ?array
   {
     if (!empty($date) && \bbn\Date::validateSQL($date)) {
       $res = [];
@@ -485,7 +486,7 @@ class Mailing extends bbn\Models\Cls\Db
     ) {
       $cfg['id'] = $id;
       if ($this->countSent($id)) {
-        throw new Error(_("Impossible to edit a message already sent or partially sent, you need to duplicate it."));
+        throw new Error(dgettext(X::tDom(), "Impossible to edit a message already sent or partially sent, you need to duplicate it."));
       }
       $version = $mailing['version'];
       if (($cfg['title'] !== $mailing['title']) || ($cfg['content'] !== $mailing['content'])) {
@@ -654,7 +655,7 @@ class Mailing extends bbn\Models\Cls\Db
    * @param string $state
    * @return bool
    */
-  public function changeEmailStatus(string $id_email, String $state): bool
+  public function changeEmailStatus(string $id_email, string $state): bool
   {
     return $this->db->update(
       'bbn_emails', ['status' => $state], [
@@ -705,7 +706,7 @@ class Mailing extends bbn\Models\Cls\Db
    * @param string $status
    * @return boolean
    */
-  public function changeEmailsStatus(string $id_mailing, String $status): bool
+  public function changeEmailsStatus(string $id_mailing, string $status): bool
   { 
     $count = 0;
     if (($emails = $this->getEmails($id_mailing))) {

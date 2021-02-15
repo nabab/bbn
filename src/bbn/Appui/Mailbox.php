@@ -522,8 +522,8 @@ class Mailbox extends bbn\Models\Cls\Basic
           throw new \Exception("Wrong number? $start");
         }
 
-        $tmp['date_sent'] = date('Y-m-d H:i:s', Strtotime($tmp['Date']));
-        $tmp['date_server'] = date('Y-m-d H:i:s', Strtotime($tmp['MailDate']));
+        $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
+        $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
         $tmp['uid'] = $this->getMsgUid($start);
         unset(
           $tmp['Date'],

@@ -1,0 +1,842 @@
+{
+    "doc": {
+        "description": "Perform a single file objectification and manage its manipulation.",
+        "tags": {
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Files ressources",
+            "package": "bbn",
+            "license": "\\sa elem http:\/\/www.opensource.org\/licenses\/lgpl-license.php LGPL",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\File",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File.php",
+    "startLine": 18,
+    "endLine": 333,
+    "contentConstructor": {
+        "file": "bbn\\File",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor.",
+            "description": "*\n```php\n$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, bbn\\File\\System $fs = NULL)\n  {\n    $this->fs = $fs ?: new File\\System();\n    if ( \\is_array($file) )\n    {\n      if ( isset($file['name'],$file['tmp_name']) )\n      {\n        $this->path = '';\n        $this->name = $file['name'];\n        $this->size = $file['size'];\n        $file = $file['tmp_name'];\n      }\n    }\n    else if ( \\is_string($file) )\n    {\n      $file = trim($file);\n      if ( strrpos($file,'\/') !== false )\n      {\n        \/* The -2 in strrpos means that if there is a final \/, it will be kept in the file name *\/\n        $this->name = substr($file,strrpos($file,'\/',-2)+1);\n        $this->path = substr($file,0,-\\strlen($this->name));\n        if ( substr($this->path,0,2) == '\/\/' ){\n          $this->path = 'http:\/\/'.substr($this->path,2);\n        }\n      }\n      else\n      {\n        $this->name = $file;\n        $this->path = '.\/';\n      }\n    }\n\n    $this->getExtension();\n    if ( \\is_string($file) && is_file($file) ){\n      $this->file = $file;\n    }\n    else{\n      $this->make();\n    }\n  }",
+            "startLine": 76,
+            "endLine": 115,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "fs",
+                    "position": 1,
+                    "type": "bbn\\File\\System",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getSize": {
+            "name": "getSize",
+            "summary": "Return the filesize in byte.",
+            "description": "*\n```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file && $this->size === 0 ){\n      $this->size = filesize($this->file);\n    }\n    return $this->size;\n  }",
+            "startLine": 128,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "iterateLines": {
+            "name": "iterateLines",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      $f = fopen($this->file, 'r');\n      try {\n        while ($line = fgets($f)) {\n          yield $line;\n        }\n      }\n      finally {\n        fclose($f);\n      }\n    }\n  }",
+            "startLine": 139,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": true,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getExtension": {
+            "name": "getExtension",
+            "summary": "Return the extension of the file.",
+            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->name ){\n      if ( !isset($this->ext) ){\n        if ( strpos($this->name, '.') !== false ){\n          $p = Str::fileExt($this->name, 1);\n          $this->ext = $p[1];\n          $this->title = $p[0];\n        }\n        else{\n          $this->ext = '';\n          $this->title = substr($this->name,-1) === '\/' ? substr($this->name,0,-1) : $this->name;\n        }\n      }\n      return $this->ext;\n    }\n    return false;\n  }",
+            "startLine": 165,
+            "endLine": 182,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "download": {
+            "name": "download",
+            "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
+            "description": "*\n```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->getSize();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
+            "startLine": 228,
+            "endLine": 248,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getHash": {
+            "name": "getHash",
+            "summary": "Return the hash of the file.",
+            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      return md5_file($this->file);\n    }\n    return '';\n  }",
+            "startLine": 261,
+            "endLine": 267,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes the file.",
+            "description": "*\n```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      unlink($this->file);\n    }\n    $this->file = false;\n    return $this;\n  }",
+            "startLine": 283,
+            "endLine": 290,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "save": {
+            "name": "save",
+            "summary": "That feature saves the file as a parameter, and accepts a string that contains the path where to save.",
+            "description": "*\n```php\n $file->save('\/home\/user\/desktop\/');\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$file->save('\/home\/user\/desktop\/');"
+                }
+            ],
+            "file": "bbn\\File",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dest = '.\/')\n  {\n    $new_name = false;\n    if ( substr($dest,-1) === '\/' ){\n      if ( is_dir($dest) ){\n        $new_name = 0;\n      }\n    }\n    else if ( is_dir($dest) ){\n      $dest .= '\/';\n      $new_name = 0;\n    }\n    else if ( is_dir(substr($dest,0,strrpos($dest,'\/'))) ){\n      $new_name = 1;\n    }\n    if ( $new_name !== false ){\n      if ( $new_name === 0 ){\n        $dest .= $this->name;\n      }\n      if ( null !== $_FILES ){\n        move_uploaded_file($this->file,$dest);\n        $this->file = $dest;\n        $this->uploaded = 1;\n      }\n      else{\n        copy($this->file, $dest);\n      }\n    }\n    return $this;\n  }",
+            "startLine": 302,
+            "endLine": 331,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dest",
+                    "position": 0,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": ".\/",
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+            "startLine": 51,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "startLine": 51,
+                "endLine": 58,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+            "startLine": 65,
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "startLine": 65,
+                "endLine": 72,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "getError": {
+            "name": "getError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->error;\n  }",
+            "startLine": 86,
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    return $this->error;\n  }",
+                "startLine": 86,
+                "endLine": 89,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\n  }",
+            "startLine": 92,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\n  }",
+                "startLine": 92,
+                "endLine": 95,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "startLine": 98,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "startLine": 98,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        dgettext(X::tDom(), \"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
+            "startLine": 115,
+            "endLine": 126,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        dgettext(X::tDom(), \"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
+                "startLine": 115,
+                "endLine": 126,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": null,
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": null,
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+            "startLine": 132,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "isDebug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "startLine": 132,
+                "endLine": 135,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Cls\\Basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n    $this->debug = $debug;\n  }",
+            "startLine": 142,
+            "endLine": 145,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "setDebug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\Models\\Cls\\Basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n    $this->debug = $debug;\n  }",
+                "startLine": 142,
+                "endLine": 145,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "path": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "name": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "file": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            }
+        },
+        "title": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            }
+        },
+        "uploaded": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "int"
+                    }
+                ]
+            }
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 16,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "size": 0,
+        "ext": null,
+        "fs": null,
+        "hash": null,
+        "path": null,
+        "name": null,
+        "file": null,
+        "title": null,
+        "uploaded": 0,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "File",
+    "summary": "Perform a single file objectification and manage its manipulation."
+}

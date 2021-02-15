@@ -155,7 +155,7 @@ class History
    * @param $table string
    * @return null|string
    */
-  public static function getIdColumn(string $column, String $table): ?string
+  public static function getIdColumn(string $column, string $table): ?string
   {
     if (
       ($db = self::_get_db()) &&
@@ -386,7 +386,7 @@ class History
    * @param string|null $dir
    * @return array
    */
-  public static function getAllHistory(string $table, int $start = 0, int $limit = 20, String $dir = null): array
+  public static function getAllHistory(string $table, int $start = 0, int $limit = 20, string $dir = null): array
   {
     if (
       ($db = self::_get_db()) &&
@@ -457,7 +457,7 @@ MYSQL;
    * @param null $column
    * @return null|array
    */
-  public static function getNextUpdate(string $table, String $id, $from_when, $column = null)
+  public static function getNextUpdate(string $table, string $id, $from_when, $column = null)
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
@@ -524,7 +524,7 @@ MYSQL;
    * @param null $column
    * @return null|array
    */
-  public static function getPrevUpdate(string $table, String $id, $from_when, $column = null): ?array
+  public static function getPrevUpdate(string $table, string $id, $from_when, $column = null): ?array
   {
     if (
       bbn\Str::checkName($table) &&
@@ -567,7 +567,7 @@ MYSQL;
    * @param $column
    * @return bool|mixed
    */
-  public static function getNextValue(string $table, String $id, $from_when, $column){
+  public static function getNextValue(string $table, string $id, $from_when, $column){
     if ( $r = self::getNextUpdate($table, $id, $from_when, $column) ){
       return $r['ref'] ?: $r['val'];
     }
@@ -581,7 +581,7 @@ MYSQL;
    * @param $column
    * @return bool|mixed
    */
-  public static function getPrevValue(string $table, String $id, $from_when, $column){
+  public static function getPrevValue(string $table, string $id, $from_when, $column){
     if ( $r = self::getPrevUpdate($table, $id, $from_when, $column) ){
       return $r['ref'] ?: $r['val'];
     }
@@ -595,7 +595,7 @@ MYSQL;
    * @param array $columns
    * @return array|null
    */
-  public static function getRowBack(string $table, String $id, $when, array $columns = []): ?array
+  public static function getRowBack(string $table, string $id, $when, array $columns = []): ?array
   {
     if ( !($when = self::validDate($when)) ){
       self::_report_error("The date $when is incorrect", __CLASS__, __LINE__);
@@ -656,7 +656,7 @@ MYSQL;
    * @param $column
    * @return bool|mixed
    */
-  public static function getValBack(string $table, String $id, $when, $column)
+  public static function getValBack(string $table, string $id, $when, $column)
   {
     if ( $row = self::getRowBack($table, $id, $when, [$column]) ){
       return $row[$column];
@@ -664,7 +664,7 @@ MYSQL;
     return false;
   }
 
-  public static function getCreationDate(string $table, String $id): ?float
+  public static function getCreationDate(string $table, string $id): ?float
   {
     if ( $res = self::getCreation($table, $id) ){
       return $res['date'];
@@ -677,7 +677,7 @@ MYSQL;
    * @param $id
    * @return array|null
    */
-  public static function getCreation(string $table, String $id): ?array
+  public static function getCreation(string $table, string $id): ?array
   {
     if (
       ($db = self::_get_db()) &&
@@ -706,7 +706,7 @@ MYSQL;
    * @param null $column
    * @return float|null
    */
-  public static function getLastDate(string $table, String $id, $column = null): float
+  public static function getLastDate(string $table, string $id, $column = null): float
   {
     if ( $db = self::_get_db() ){
       if (
@@ -743,7 +743,7 @@ MYSQL;
    * @param string $col
    * @return array
    */
-  public static function getHistory(string $table, String $id, String $col = ''){
+  public static function getHistory(string $table, string $id, string $col = ''){
     if ( 
       self::check($table) && 
       ($modelize = self::getTableCfg($table))
@@ -806,7 +806,7 @@ MYSQL;
    * @param string $id
    * @return array
    */
-  public static function getFullHistory(string $table, String $id): array
+  public static function getFullHistory(string $table, string $id): array
   {
     $r = [];
     if (
@@ -828,7 +828,7 @@ MYSQL;
     return $r;
   }
 
-  public static function getColumnHistory(string $table, String $id, String $column)
+  public static function getColumnHistory(string $table, string $id, string $column)
   {
     if ( 
       self::check($table) && 

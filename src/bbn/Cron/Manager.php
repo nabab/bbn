@@ -7,6 +7,7 @@
 namespace bbn\Cron;
 
 use bbn;
+use bbn\X;
 
 /**
  * Class cron
@@ -69,7 +70,7 @@ class Manager extends bbn\Models\Cls\Basic
         && ($path = $this->getLogPath($cron))
         && is_file($path)
     ) {
-      [$pid, $time] = bbn\X::split(file_get_contents($path), '|');
+      [$pid, $time] = X::split(file_get_contents($path), '|');
       return (($time + $cron['cfg']['timeout']) < time());
     }
 
@@ -130,7 +131,7 @@ class Manager extends bbn\Models\Cls\Basic
       if (!empty($cron['cfg']['frequency'])) {
         $time  = time();
         $start = date('Y-m-d H:i:s', $time);
-        $next  = $this->getNextDate($cron['cfg']['frequency'], Strtotime($cron['next'] ?: $start));
+        $next  = $this->getNextDate($cron['cfg']['frequency'], strtotime($cron['next'] ?: $start));
       }
 
       $enable   = false;
@@ -200,7 +201,7 @@ class Manager extends bbn\Models\Cls\Basic
         $r    = 0;
         $step = 0;
         if (!is_numeric($number)) {
-          \bbn\X::log($number, 'next_date');
+          X::log($number, 'next_date');
         }
 
         $test   = mktime(
@@ -305,7 +306,7 @@ class Manager extends bbn\Models\Cls\Basic
         function ($a) {
           $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
           unset($a['cfg']);
-          return \bbn\X::mergeArrays($a, $cfg);
+          return X::mergeArrays($a, $cfg);
         }, $this->db->rselectAll(
           [
           'table' => $this->table,
@@ -343,7 +344,7 @@ class Manager extends bbn\Models\Cls\Basic
         function ($a) {
           $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
           unset($a['cfg']);
-          return \bbn\X::mergeArrays($a, $cfg);
+          return X::mergeArrays($a, $cfg);
         }, $this->db->rselectAll(
           [
           'table' => $this->table,
@@ -388,7 +389,7 @@ class Manager extends bbn\Models\Cls\Basic
         function ($a) {
           $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
           unset($a['cfg']);
-          return \bbn\X::mergeArrays($a, $cfg);
+          return X::mergeArrays($a, $cfg);
         }, $this->db->rselectAll(
           [
           'table' => $this->table,
@@ -430,11 +431,11 @@ class Manager extends bbn\Models\Cls\Basic
     $notifications = new \bbn\Appui\Notification($this->db);
     if ($failed = $this->getFailed()) {
       foreach ($failed as $f) {
-        $content = _('The task')." $f[file] "._('failed.');
+        $content = dgettext(X::tDom(), 'The task')." $f[file] ".dgettext(X::tDom(), 'failed.');
         if (empty($f['notification'])
-            && $notifications->insertByOption(_('CRON task failed'), $content, 'cron/task_failed', true)
+            && $notifications->insertByOption(dgettext(X::tDom(), 'CRON task failed'), $content, 'cron/task_failed', true)
         ) {
-          $this->db->update($this->table, ['notification' => \bbn\X::microtime()], ['id' => $f['id']]);
+          $this->db->update($this->table, ['notification' => X::microtime()], ['id' => $f['id']]);
         }
       }
     }
@@ -508,7 +509,7 @@ class Manager extends bbn\Models\Cls\Basic
   public function add($cfg): ?array
   {
     if ($this->check()
-        && bbn\X::hasProps($cfg, ['file', 'priority', 'frequency', 'timeout'], true)
+        && X::hasProps($cfg, ['file', 'priority', 'frequency', 'timeout'], true)
     ) {
       $d = [
         'file' => $cfg['file'],
@@ -533,12 +534,12 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
-  public function addSingle(string $file, String $variant, int $priority = 5, int $timeout = 360)
+  public function addSingle(string $file, string $variant, int $priority = 5, int $timeout = 360)
   {
     if ($this->check()) {
       $d = [
         'file' => $file,
-        'description' => _('One shot action'),
+        'description' => dgettext(X::tDom(), 'One shot action'),
         'next' => date('Y-m-d H:i:s'),
         'priority' => $priority,
         'cfg' => json_encode(

@@ -1,0 +1,1191 @@
+{
+    "doc": {
+        "description": "DB API\n *\n *\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+        "tags": {
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Database",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.3"
+        }
+    },
+    "name": "bbn\\Db\\Api",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Api.php",
+    "startLine": 20,
+    "endLine": 210,
+    "contentConstructor": null,
+    "methods": {
+        "select": {
+            "name": "select",
+            "summary": "Returns the first row resulting from the query as an object.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n\t *\/\n\tpublic function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n\n  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n\t * @return false|array\n\t *\/\n\tpublic function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/\n\tpublic function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n\t * @param string $table The table name.\n\t * @param string $field The fields name.\n\t * @param array $where  The \"where\" condition.\n\t * @param string|array $order The \"order\" condition, default: false.\n\t * @param int $start The \"start\" condition, default: 0.\n\t * @return mixed\n\t *\/\n\tpublic function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 33,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "stdClass",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectAll": {
+            "name": "selectAll",
+            "summary": "Fetches a given table and returns an array of a single row text-indexed",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n  \/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n\n  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n\t * @return false|array\n\t *\/\n\tpublic function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/\n\tpublic function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n\t * @param string $table The table name.\n\t * @param string $field The fields name.\n\t * @param array $where  The \"where\" condition.\n\t * @param string|array $order The \"order\" condition, default: false.\n\t * @param int $start The \"start\" condition, default: 0.\n\t * @return mixed\n\t *\/\n\tpublic function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 46,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "iselect": {
+            "name": "iselect",
+            "summary": "Return the first row resulting from the query as a numeric array.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n\t * @return false|array\n\t *\/\n\tpublic function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/\n\tpublic function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n\t * @param string $table The table name.\n\t * @param string $field The fields name.\n\t * @param array $where  The \"where\" condition.\n\t * @param string|array $order The \"order\" condition, default: false.\n\t * @param int $start The \"start\" condition, default: 0.\n\t * @return mixed\n\t *\/\n\tpublic function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 59,
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "iselectAll": {
+            "name": "iselectAll",
+            "summary": "Return the searched rows as an array of numeric arrays.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n  \/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n\t * @return false|array\n\t *\/\n\tpublic function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/\n\tpublic function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n\t * @param string $table The table name.\n\t * @param string $field The fields name.\n\t * @param array $where  The \"where\" condition.\n\t * @param string|array $order The \"order\" condition, default: false.\n\t * @param int $start The \"start\" condition, default: 0.\n\t * @return mixed\n\t *\/\n\tpublic function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 72,
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields's name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "| boolean The \"order\" condition, default: false"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "rselect": {
+            "name": "rselect",
+            "summary": "Fetches a given table and returns an array of a single row text-indexed",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/\n\tpublic function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n\t * @param string $table The table name.\n\t * @param string $field The fields name.\n\t * @param array $where  The \"where\" condition.\n\t * @param string|array $order The \"order\" condition, default: false.\n\t * @param int $start The \"start\" condition, default: 0.\n\t * @return mixed\n\t *\/\n\tpublic function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 84,
+            "endLine": 84,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "rselectAll": {
+            "name": "rselectAll",
+            "summary": "Fetches a given table and returns an array of a single row text-indexed",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t *\n\t * @param string $table The table name.\n\t * @param string $field The fields name.\n\t * @param array $where  The \"where\" condition.\n\t * @param string|array $order The \"order\" condition, default: false.\n\t * @param int $start The \"start\" condition, default: 0.\n\t * @return mixed\n\t *\/\n\tpublic function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 97,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields' name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectOne": {
+            "name": "selectOne",
+            "summary": "Fetches a given table and returns an array of a single row text-indexed",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $field, array $where = [], array $order = [], $start = 0)\n  {\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 109,
+            "endLine": 109,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields name."
+                },
+                {
+                    "name": "field",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition, default: false."
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0."
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "count": {
+            "name": "count",
+            "summary": "Return the number of records in the table corresponding to the $where condition (non mandatory).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $where = [])\n  {\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 118,
+            "endLine": 118,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectAllByKeys": {
+            "name": "selectAllByKeys",
+            "summary": "Return an array indexed on the first field of the request.",
+            "description": "The value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>The value will be an array if the request has more than two fields.\nReturn the same value as &quot;get_key_val&quot;.<\/p>"
+                }
+            ],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 133,
+            "endLine": 133,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The fields's name"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The $limit condition, default: 0"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The $limit condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "stat": {
+            "name": "stat",
+            "summary": "Return an array with the count of values corresponding to the where conditions.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $column, array $where = [], array $order = [])\n  {\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array $values\n   * @param $ignore\n   * @return int\n   *\/\n\tpublic function insert($table, array $values = null, $ignore): ?int;\n\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 144,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The field's name."
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The \"where\" condition."
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"order\" condition."
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "insert": {
+            "name": "insert",
+            "summary": "Inserts\/Updates rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $values, $ignore)\n  {\n\t\/**\n\t * Inserts\/Updates rows in the a given table\n\t *\n\t * @return int\n\t *\/\n\tpublic function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 154,
+            "endLine": 154,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ignore",
+                    "position": 2,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "insertUpdate": {
+            "name": "insertUpdate",
+            "summary": "Inserts\/Updates rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $values = NULL)\n  {\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 161,
+            "endLine": 161,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "update": {
+            "name": "update",
+            "summary": "Updates rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $values = NULL, array $where = NULL, $ignore = false)\n  {\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array $where\n   * @return int\n   *\/\n  public function updateIgnore($table, array $values = null, array $where = null): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 172,
+            "endLine": 172,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ignore",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "updateIgnore": {
+            "name": "updateIgnore",
+            "summary": "Updates rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $values = NULL, array $where = NULL)\n  {\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function delete($table, array $where, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 182,
+            "endLine": 182,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $where, $ignore = false)\n  {\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  public function deleteIgnore($table, array $where): ?int;\n\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 189,
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ignore",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "deleteIgnore": {
+            "name": "deleteIgnore",
+            "summary": "Deletes rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $where)\n  {\n\t\/**\n\t * Inserts ignore rows in the a given table\n\t\t*\n\t * @return int\n\t *\/\n\tpublic function insertIgnore($table, array $values): ?int;\n\t\/**\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 196,
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "insertIgnore": {
+            "name": "insertIgnore",
+            "summary": "Inserts ignore rows in the a given table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\Api",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $values)\n  {\n\t * Fetches a given table and returns an array of a single row text-indexed\n\t\t*\n\t * @params \n\t * @return false|array\n\t *\/\n  }",
+            "startLine": 203,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "values",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 17,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": true,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": true,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db",
+    "shortName": "Api",
+    "summary": "DB API",
+    "description": "*\n *\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p><em>\n<\/em>\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
+        }
+    ]
+}
