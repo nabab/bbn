@@ -4,7 +4,7 @@ namespace bbn\tests\appui;
 use bbn\Appui\Chat;
 use bbn;
 
-class chatTest extends \PHPUnit\Framework\TestCase {
+class permissionsTest extends \PHPUnit\Framework\TestCase {
 
   private $obj;
 
@@ -17,6 +17,7 @@ class chatTest extends \PHPUnit\Framework\TestCase {
       $db = false;
       $this->assertTrue(is_string($e->getMessage()));
     }
+
     if ($db) {
       try {
         $user = new bbn\User($db);
