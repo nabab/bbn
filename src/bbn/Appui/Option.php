@@ -3148,7 +3148,7 @@ class Option extends bbn\Models\Cls\Db
       $is_root = false;
       if ($todo === null) {
         $is_root = true;
-        $todo = true;
+        $todo = [];
       }
 
       if (!isset($options[0])) {
