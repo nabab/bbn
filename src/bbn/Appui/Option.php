@@ -1546,7 +1546,7 @@ class Option extends bbn\Models\Cls\Db
 
   /**
    * Returns the raw content of the cfg column for the given option.
-   * 
+   *
    * ```php
    * X::dump($opt->getCfg(25));
    * /*
@@ -1563,7 +1563,7 @@ class Option extends bbn\Models\Cls\Db
   public function getRawCfg($code = null): ?string
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $c   =& $this->class_cfg;
+      $c =& $this->class_cfg;
       return $this->db->selectOne($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
     }
 
@@ -2301,7 +2301,7 @@ class Option extends bbn\Models\Cls\Db
       }
 
       if ($cfg) {
-        $ocfg = $this->getRawCfg($id);
+        $ocfg        = $this->getRawCfg($id);
         $data['cfg'] = json_encode(array_merge($ocfg ? json_decode($ocfg, true) : [], $cfg));
       }
 
@@ -2773,7 +2773,8 @@ class Option extends bbn\Models\Cls\Db
       if ($merge && ($old_cfg = $this->getCfg($id))) {
         $cfg = array_merge($old_cfg, $cfg);
       }
-      $c       =& $this->class_cfg;
+
+      $c =& $this->class_cfg;
       if ($res = $this->db->update(
         $c['table'], [
         $c['arch']['options']['cfg'] => $cfg ? json_encode($cfg) : null
@@ -3148,7 +3149,7 @@ class Option extends bbn\Models\Cls\Db
       $is_root = false;
       if ($todo === null) {
         $is_root = true;
-        $todo = [];
+        $todo    = [];
       }
 
       if (!isset($options[0])) {
@@ -3185,7 +3186,7 @@ class Option extends bbn\Models\Cls\Db
 
           $num++;
           if (!empty($items)) {
-            $this->import($items, $id, $todo);
+            $num += $this->import($items, $id, $todo);
           }
         }
         else {
@@ -3203,6 +3204,7 @@ class Option extends bbn\Models\Cls\Db
               throw new \Exception("Error while importing: impossible to set the alias");
             }
           }
+
           if (!empty($td['id_root_alias'])) {
             if ($id_alias = $this->fromCode(...$td['id_root_alias'])) {
               $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
@@ -3673,6 +3675,8 @@ class Option extends bbn\Models\Cls\Db
       ]
     );
   }
+
+
   private function _set_local_cache($name, $val): void
   {
     $this->_local_cache[$name] = $val;
@@ -3731,6 +3735,7 @@ class Option extends bbn\Models\Cls\Db
       if (!is_array($it[$c['cfg']])) {
         $it[$c['cfg']] = json_decode($it[$c['cfg']], true);
       }
+
       $cfg =& $it[$c['cfg']];
       if (!empty($cfg['id_root_alias'])) {
         if (is_array($cfg['id_root_alias'])) {
@@ -3858,5 +3863,6 @@ class Option extends bbn\Models\Cls\Db
 
     return $opt;
   }
+
 
 }

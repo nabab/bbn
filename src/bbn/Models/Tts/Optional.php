@@ -61,7 +61,7 @@ trait Optional
         }
 
         $tmp                   = explode('\\', __CLASS__);
-        $cls                   = end($tmp);
+        $cls                   = strtolower(end($tmp));
         $path                  = [$cls, BBN_APPUI];
         self::$option_appui_id = $opt->fromCode($cls, BBN_APPUI_ROOT);
       }
