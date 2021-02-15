@@ -1923,11 +1923,8 @@
         {
             "cfg": {
                 "show_code": 1,
-                "show_value": 1,
                 "show_alias": 1,
                 "allow_children": 1,
-                "inheritance": "cascade",
-                "sortable": 1,
                 "i18n": "en",
                 "show_icon": 1
             },
@@ -1937,29 +1934,40 @@
             "items": [
                 {
                     "num": 1,
-                    "text": "Menu principal",
+                    "text": "Default menu",
                     "code": "default",
-                    "icon": "list"
+                    "id_alias": ["main", "menus", "menu", "appui"],
+                    "icon": "nf nf-fa-bars"
                 },
                 {
                     "num": 2,
-                    "text": "Raccourcis",
-                    "code": "shortcuts"
+                    "text": "Shortcuts",
+                    "code": "shortcuts",
+                    "icon": "nf nf-oct-file_symlink_file"
                 },
                 {
+                    "cfg": {
+                        "show_code": 1,
+                        "show_icon": 1,
+                        "sortable": 1,
+                        "i18n": "en"
+                    },
                     "num": 3,
                     "text": "Menus",
                     "code": "menus",
+                    "icon": "nf nf-oct-tasklist",
                     "items": [
                         {
                             "num": 1,
                             "text": "Main menu",
-                            "code": "default",
-                            "icon": "list"
+                            "code": "main",
+                            "icon": "nf nf-fa-bars"
                         },
                         {
                             "num": 2,
-                            "text": "Plugins"
+                            "text": "Plugins",
+                            "code": "plugins",
+                            "icon": "nf nf-fa-bars"
                         }
                     ]
                 }

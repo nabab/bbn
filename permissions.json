@@ -4,7 +4,8 @@
     "show_icon": 1,
     "sortable": 1,
     "allow_children": 1,
-    "inheritance": "cascade"
+    "inheritance": "cascade",
+    "i18n": "en"
   },
   "text": "Permissions",
   "code": "permissions",
