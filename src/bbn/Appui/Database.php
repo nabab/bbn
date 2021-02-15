@@ -1212,7 +1212,7 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if ($host_id && ($id_tables = $this->o->fromCode('tables', $id_db))) {
-      $engine = $this->o->parent($this->o->id_parent($host_id));
+      $engine = $this->o->parent($this->o->getIdParent($host_id));
       if (!($id_table = $this->o->fromCode($table, $id_tables))
           && ($id_table = $this->o->add(
             [
