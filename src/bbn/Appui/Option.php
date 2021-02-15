@@ -3195,19 +3195,18 @@ class Option extends bbn\Models\Cls\Db
 
       if ($is_root && !empty($todo)) {
         foreach ($todo as $id => $td) {
-          if (!empty($td['id_alias'])
-              && ($id_alias = $this->fromCode(...$td['id_alias']))
-          ) {
-            $this->setAlias($id, $id_alias);
+          if (!empty($td['id_alias'])) {
+            if ($id_alias = $this->fromCode(...$td['id_alias'])) {
+              $this->setAlias($id, $id_alias);
+            }
+            else {
+              throw new \Exception("Error while importing: impossible to set the alias");
+            }
           }
-          else {
-            throw new \Exception("Error while importing: impossible to set the alias");
-          }
-
-          if (!empty($td['id_root_alias'])
-              && ($id_alias = $this->fromCode(...$td['id_root_alias']))
-          ) {
-            $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
+          if (!empty($td['id_root_alias'])) {
+            if ($id_alias = $this->fromCode(...$td['id_root_alias'])) {
+              $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
+            }
           }
         }
       }

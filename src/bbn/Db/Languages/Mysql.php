@@ -180,7 +180,7 @@ class Mysql implements bbn\Db\Engines
       $cfg['port'] = 3306;
     }
 
-    $cfg['code_db']   = $cfg['db'];
+    $cfg['code_db']   = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
     $cfg['args']      = ['mysql:host='
         .(in_array($cfg['host'], ['localhost', '127.0.0.1']) ? gethostname() : $cfg['host'])
