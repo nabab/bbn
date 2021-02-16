@@ -3138,14 +3138,13 @@ class Option extends bbn\Models\Cls\Db
     if (is_array($id_parent)) {
       $id_parent = $this->fromCode(...$id_parent);
     }
-    elseif (!$id_parent) {
+    elseif (null === $id_parent) {
       $id_parent = $this->default;
     }
 
     if (!empty($options) && $this->check() && $this->exists($id_parent)) {
       $c       =& $this->class_cfg['arch']['options'];
       $num     = 0;
-      $ids     = [];
       $is_root = false;
       if ($todo === null) {
         $is_root = true;
@@ -3206,10 +3205,10 @@ class Option extends bbn\Models\Cls\Db
             }
           }
 
-          if (!empty($td['id_root_alias'])) {
-            if ($id_root_alias = $this->fromCode(...$td['id_root_alias'])) {
-              $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
-            }
+          if (!empty($td['id_root_alias'])
+              && ($id_root_alias = $this->fromCode(...$td['id_root_alias']))
+          ) {
+            $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
           }
         }
       }
