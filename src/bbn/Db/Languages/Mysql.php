@@ -1339,7 +1339,7 @@ MYSQL
           $st .= self::$interoperability[$col['type']];
         }
         else {
-          throw new \Exception(dgettext(X::tDom(), "Impossible to recognize the column type")." $col[type]");
+          throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
         }
       }
       else {
@@ -1621,7 +1621,7 @@ MYSQL
   {
     if ($this->db->check()) {
       if (!Str::checkName($database)) {
-        throw new \Exception(dgettext(X::tDom(), "Wrong database name")." $database");
+        throw new \Exception(X::_("Wrong database name")." $database");
       }
 
       try {

@@ -123,7 +123,7 @@ class Compiler extends bbn\Models\Cls\Basic
       $ext = bbn\Str::fileExt($file);
       $minified = false;
       if (!is_file($this->fpath.$file)) {
-        throw new \Exception(dgettext(X::tDom(), "Impoossible to find the file").' '.$this->fpath.$file);
+        throw new \Exception(X::_("Impoossible to find the file").' '.$this->fpath.$file);
         return false;
       }
       foreach (self::$_min_suffixes as $s){

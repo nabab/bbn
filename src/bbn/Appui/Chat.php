@@ -176,8 +176,8 @@ SQL;
 
       $this->_add_bot_message(
         $id, [
-        $id_user => dgettext(X::tDom(), 'You created this group'),
-        "$username " . dgettext(X::tDom(), 'created this group')
+        $id_user => X::_('You created this group'),
+        "$username " . X::_('created this group')
         ]
       );
       foreach ($users as $user) {
@@ -185,9 +185,9 @@ SQL;
           $name = $this->user->getName($user);
           $this->_add_bot_message(
             $id, [
-            $id_user => dgettext(X::tDom(), 'You added') . " $name " .  dgettext(X::tDom(), 'to the group'),
-            $user => $username . ' ' . dgettext(X::tDom(), 'added you to the group'),
-            "$username " . dgettext(X::tDom(), 'added') . " $name " . dgettext(X::tDom(), 'to the group')
+            $id_user => X::_('You added') . " $name " .  X::_('to the group'),
+            $user => $username . ' ' . X::_('added you to the group'),
+            "$username " . X::_('added') . " $name " . X::_('to the group')
             ]
           );
           if (\in_array($user, $admins, true)) {
@@ -289,8 +289,8 @@ SQL;
       $this->_set_state_hash($id_chat);
       return $this->_add_bot_message(
         $id_chat, [
-        $this->user->getId() => dgettext(X::tDom(), "You have changed the chat title"),
-        $this->user->getName() . ' ' . dgettext(X::tDom(), 'has changed the chat title')
+        $this->user->getId() => X::_("You have changed the chat title"),
+        $this->user->getName() . ' ' . X::_('has changed the chat title')
         ]
       );
     }
@@ -322,9 +322,9 @@ SQL;
       $this->_set_state_hash($id_chat);
       return $this->_add_bot_message(
         $id_chat, [
-        $this->user->getId() => dgettext(X::tDom(), 'You added') . " $name2",
-        $id_user => "$name1 " . dgettext(X::tDom(), 'added you'),
-        $name1 . ' ' . dgettext(X::tDom(), 'added') . ' ' . $name2
+        $this->user->getId() => X::_('You added') . " $name2",
+        $id_user => "$name1 " . X::_('added you'),
+        $name1 . ' ' . X::_('added') . ' ' . $name2
         ]
       );
     }
@@ -356,8 +356,8 @@ SQL;
       $this->_set_state_hash($id_chat);
       return $this->_add_bot_message(
         $id_chat, [
-        $this->user->getId() => dgettext(X::tDom(), 'You remove') . " $name2",
-        $name1 . ' ' . dgettext(X::tDom(), 'removed') . ' ' . $name2
+        $this->user->getId() => X::_('You remove') . " $name2",
+        $name1 . ' ' . X::_('removed') . ' ' . $name2
         ]
       );
     }
@@ -377,9 +377,9 @@ SQL;
     ) {
       return $this->_set_admin(
         $id_chat, $id_user, true, [
-        $this->user->getId() => dgettext(X::tDom(), 'You set') . " $name2 " . dgettext(X::tDom(), 'as admin'),
-        $id_user => "$name " . dgettext(X::tDom(), 'set you as admin'),
-        "$name " . dgettext(X::tDom(), 'set') . " $name2 " . dgettext(X::tDom(), 'as admin')
+        $this->user->getId() => X::_('You set') . " $name2 " . X::_('as admin'),
+        $id_user => "$name " . X::_('set you as admin'),
+        "$name " . X::_('set') . " $name2 " . X::_('as admin')
         ]
       );
     }
@@ -399,9 +399,9 @@ SQL;
     ) {
       return $this->_set_admin(
         $id_chat, $id_user, false, [
-        $this->user->getId() => dgettext(X::tDom(), 'You removed') . " $name2 " . dgettext(X::tDom(), 'as admin'),
-        $id_user => "$name " . dgettext(X::tDom(), 'removed you as admin'),
-        "$name " . dgettext(X::tDom(), 'removed') . " $name2 " . dgettext(X::tDom(), 'as admin')
+        $this->user->getId() => X::_('You removed') . " $name2 " . X::_('as admin'),
+        $id_user => "$name " . X::_('removed you as admin'),
+        "$name " . X::_('removed') . " $name2 " . X::_('as admin')
         ]
       );
     }
@@ -737,7 +737,7 @@ SQL;
     if ($this->check()
         && bbn\Str::isUid($id_chat)
         && $this->isParticipant($id_chat)
-        && $this->_add_bot_message($id_chat, $this->user->getName($id_user ?: $this->user->getId()) . ' ' . dgettext(X::tDom(), 'has left the chat'))
+        && $this->_add_bot_message($id_chat, $this->user->getName($id_user ?: $this->user->getId()) . ' ' . X::_('has left the chat'))
         && $this->db->update(
           'bbn_chats_users', ['active' => 0], [
           'id_chat' => $id_chat,

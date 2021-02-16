@@ -466,8 +466,8 @@ class Emails extends bbn\Models\Cls\Basic
                   $res++;
                 }
                 else {
-                  //throw new \Exception(dgettext(X::tDom(), "Impossible to insert the email with ID").' '.$a['message_id']);
-                  $this->log(dgettext(X::tDom(), "Impossible to insert the email with ID").' '.$a['message_id']);
+                  //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
+                  $this->log(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
                 }
               }
 
@@ -478,10 +478,10 @@ class Emails extends bbn\Models\Cls\Basic
             }
             else {
               throw new \Exception(
-                dgettext(X::tDom(), "Impossible to get the emails for folder")
+                X::_("Impossible to get the emails for folder")
                 .' '.$folder['uid']
-                .' '.dgettext(X::tDom(), "from").' '.$start
-                .' '.dgettext(X::tDom(), "to").' '.$end
+                .' '.X::_("from").' '.$start
+                .' '.X::_("to").' '.$end
                 .' ('.$real_end.')'
               );
             }
@@ -582,7 +582,7 @@ class Emails extends bbn\Models\Cls\Basic
               }
             }
             elseif (!($id = $this->addContactFromMail($dest))) {
-              throw new \Exception(dgettext(X::tDom(), "Impossible to add the contact").' '.$dest['email']);
+              throw new \Exception(X::_("Impossible to add the contact").' '.$dest['email']);
             }
 
             $dest['id'] = $id;
@@ -663,7 +663,7 @@ class Emails extends bbn\Models\Cls\Basic
       }
     }
     $this->log($email);
-    //throw new \Exception(dgettext(X::tDom(), "Invalid email"));
+    //throw new \Exception(X::_("Invalid email"));
   }
 
 

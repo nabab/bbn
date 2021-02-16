@@ -124,7 +124,7 @@ class Sync
       self::$sync_table = $sync_table;
     }
     if (!Str::checkName(self::$sync_table)) {
-      throw new \Exception(dgettext(X::tDom(), "Table name not allowed"));
+      throw new \Exception(X::_("Table name not allowed"));
     }
     if (empty($sync_cfg)) {
       self::$sync_connection = new Db(self::$default_cfg);
@@ -136,7 +136,7 @@ class Sync
         self::$sync_connection = $sync_cfg['connection'];
       }
       else {
-        throw new \Exception(dgettext(X::tDom(), "Invalid connection given to the synchronization class"));
+        throw new \Exception(X::_("Invalid connection given to the synchronization class"));
       }
     }
     elseif (isset($sync_cfg['engine'])) {

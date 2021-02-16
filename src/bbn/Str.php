@@ -1559,17 +1559,17 @@ class Str
 
     switch ($error) {
       case JSON_ERROR_DEPTH:
-        return dgettext(X::tDom(), 'Maximum stack depth exceeded');
+        return X::_('Maximum stack depth exceeded');
       case JSON_ERROR_STATE_MISMATCH:
-        return dgettext(X::tDom(), 'State mismatch (invalid or malformed JSON)');
+        return X::_('State mismatch (invalid or malformed JSON)');
       case JSON_ERROR_CTRL_CHAR:
-        return dgettext(X::tDom(), 'Unexpected control character found');
+        return X::_('Unexpected control character found');
       case JSON_ERROR_SYNTAX:
-        return dgettext(X::tDom(), 'Syntax error, malformed JSON');
+        return X::_('Syntax error, malformed JSON');
       case JSON_ERROR_UTF8:
-        return dgettext(X::tDom(), 'Malformed UTF-8 characters, possibly incorrectly encoded');
+        return X::_('Malformed UTF-8 characters, possibly incorrectly encoded');
       default:
-        return dgettext(X::tDom(), 'Unknown error');
+        return X::_('Unknown error');
     }
   }
 

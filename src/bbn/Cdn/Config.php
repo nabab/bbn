@@ -60,7 +60,7 @@ class Config extends bbn\Models\Cls\Basic
       $db = bbn\Db::getInstance();
     }
     if (!$db) {
-      die(dgettext(X::tDom(), 'Impossible to initialize the CDN without a DB connection'));
+      die(X::_('Impossible to initialize the CDN without a DB connection'));
     }
     $this->db = $db;
     if ($request) {

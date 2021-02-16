@@ -650,7 +650,7 @@ class Doc {
       $this->mode = $mode;
       return $this;
     }
-    die(dgettext(X::tDom(), 'Error: mode not allowed.'));
+    die(X::_('Error: mode not allowed.'));
   }
 
   /**

@@ -431,9 +431,9 @@ class Manager extends bbn\Models\Cls\Basic
     $notifications = new \bbn\Appui\Notification($this->db);
     if ($failed = $this->getFailed()) {
       foreach ($failed as $f) {
-        $content = dgettext(X::tDom(), 'The task')." $f[file] ".dgettext(X::tDom(), 'failed.');
+        $content = X::_('The task')." $f[file] ".X::_('failed.');
         if (empty($f['notification'])
-            && $notifications->insertByOption(dgettext(X::tDom(), 'CRON task failed'), $content, 'cron/task_failed', true)
+            && $notifications->insertByOption(X::_('CRON task failed'), $content, 'cron/task_failed', true)
         ) {
           $this->db->update($this->table, ['notification' => X::microtime()], ['id' => $f['id']]);
         }
@@ -539,7 +539,7 @@ class Manager extends bbn\Models\Cls\Basic
     if ($this->check()) {
       $d = [
         'file' => $file,
-        'description' => dgettext(X::tDom(), 'One shot action'),
+        'description' => X::_('One shot action'),
         'next' => date('Y-m-d H:i:s'),
         'priority' => $priority,
         'cfg' => json_encode(

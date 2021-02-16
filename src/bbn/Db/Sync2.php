@@ -123,7 +123,7 @@ class Sync2 extends bbn\Models\Cls\Db
       $this->sync_table = $sync_table;
     }
     if (!Str::checkName($this->sync_table)) {
-      throw new \Exception(dgettext(X::tDom(), "Table name not allowed"));
+      throw new \Exception(X::_("Table name not allowed"));
     }
     if (empty($sync_cfg)) {
       $this->sync_connection = new Db(self::$default_cfg);
@@ -135,7 +135,7 @@ class Sync2 extends bbn\Models\Cls\Db
         $this->sync_connection = $sync_cfg['connection'];
       }
       else {
-        throw new \Exception(dgettext(X::tDom(), "Invalid connection given to the synchronization class"));
+        throw new \Exception(X::_("Invalid connection given to the synchronization class"));
       }
     }
     elseif (isset($sync_cfg['engine'])) {

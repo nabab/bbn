@@ -359,8 +359,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
           parent::__construct(...($cfg['args'] ?: []));
         }
         catch (\PDOException $e){
-          $err = dgettext(X::tDom(), "Impossible to create the connection")." $engine/$db "
-                 .dgettext(X::tDom(), "with the following error").$e->getMessage();
+          $err = X::_("Impossible to create the connection")." $engine/$db "
+                 .X::_("with the following error").$e->getMessage();
           throw new \Exception($err);
         }
 
@@ -386,8 +386,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     if (!$this->engine) {
       $connection  = $cfg['engine'] ?? 'No engine';
       $connection .= '/'.($cfg['db'] ?? 'No DB');
-      $this->log(dgettext(X::tDom(), "Impossible to create the connection for").' '.$connection);
-      throw new \Exception(dgettext(X::tDom(), "Impossible to create the connection for").' '.$connection);
+      $this->log(X::_("Impossible to create the connection for").' '.$connection);
+      throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
     }
   }
 
@@ -4904,7 +4904,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
           X::move($this->list_queries, $idx, $last_index);
         }
         else {
-          throw new \Exception(dgettext(X::tDom(), "Impossible to find the corresponding hash"));
+          throw new \Exception(X::_("Impossible to find the corresponding hash"));
         }
       }
       else {
@@ -4928,11 +4928,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       if (empty($this->queries)) {
         $debug = debug_backtrace();
         X::log($debug, 'db_explained');
-        throw new \Exception(dgettext(X::tDom(), "The queries object is empty!"));
+        throw new \Exception(X::_("The queries object is empty!"));
       }
     }
     else {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to find the query corresponding to this hash"));
+      throw new \Exception(X::_("Impossible to find the query corresponding to this hash"));
     }
 
   }
@@ -5246,7 +5246,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       }
     }
     else{
-      throw new \Error(dgettext(X::tDom(), 'No table given'));
+      throw new \Error(X::_('No table given'));
       return [];
     }
 

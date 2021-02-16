@@ -86,16 +86,16 @@ class Database extends bbn\Models\Cls\Cache
       $id_host = $host;
     }
     elseif (!($id_host = $this->hostId($host, $engine))) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to find the host").' '."$host ($engine)");
+      throw new \Exception(X::_("Impossible to find the host").' '."$host ($engine)");
     }
 
     if (!($cfg = $this->o->option($id_host))) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to find the option corresponding to host").' '."$host ($engine)");
+      throw new \Exception(X::_("Impossible to find the option corresponding to host").' '."$host ($engine)");
     }
 
     if ($id_host && ($parent = $this->o->parent($this->o->getIdParent($id_host)))) {
       if (!isset($this->connections[$parent['code']])) {
-        throw new \Exception(dgettext(X::tDom(), "Unknown engine")." ".$parent['code']);
+        throw new \Exception(X::_("Unknown engine")." ".$parent['code']);
       }
 
       if (!isset($this->connections[$parent['code']][$cfg['code']])) {
@@ -131,13 +131,13 @@ class Database extends bbn\Models\Cls\Cache
 
           case 'postgre':
             if (empty($db) || empty($cfg['path'])) {
-              throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
+              throw new \Exception(X::_('db or path empty'));
             }
             break;
 
           case 'sqlite':
             if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'/'.$db)) {
-              throw new \Exception(dgettext(X::tDom(), 'db or path empty'));
+              throw new \Exception(X::_('db or path empty'));
             }
             
             $db_cfg = [
@@ -153,7 +153,7 @@ class Database extends bbn\Models\Cls\Cache
             break;
 
           default:
-            throw new \Exception(dgettext(X::tDom(), 'Impossible to find the engine').' '.$cfg['engine']);
+            throw new \Exception(X::_('Impossible to find the engine').' '.$cfg['engine']);
         }
       }
 
@@ -162,7 +162,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
 
-    throw new \Exception(dgettext(X::tDom(), "Impossible to get a connection for").' '.$cfg['code']);
+    throw new \Exception(X::_("Impossible to get a connection for").' '.$cfg['code']);
   }
 
 
@@ -375,7 +375,7 @@ class Database extends bbn\Models\Cls\Cache
     if (!bbn\Str::isUid($db)) {
       if (Str::isUid($host)) {
         if (!($parent = $this->o->parent($this->o->getIdParent($host)))) {
-          throw new \Exception(dgettext(X::tDom(), "Impossible to find the host engine"));
+          throw new \Exception(X::_("Impossible to find the host engine"));
         }
 
         $engine = $parent['code'];
@@ -893,7 +893,7 @@ class Database extends bbn\Models\Cls\Cache
           $conn->change($db);
         }
         catch (\Exception $e) {
-          throw new \Exception(dgettext(X::tDom(), "Impossible to use the database")." $db");
+          throw new \Exception(X::_("Impossible to use the database")." $db");
         }
       }
       elseif (!$db) {
@@ -910,7 +910,7 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if (!$conn || !$conn->check()) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to connect"));
+      throw new \Exception(X::_("Impossible to connect"));
     }
 
     $table_id = null;
@@ -932,7 +932,7 @@ class Database extends bbn\Models\Cls\Cache
           $a['fields'],
           function (&$w, $k) use ($table_id, $table) {
             if (!$table_id) {
-              throw new \Exception(dgettext(X::tDom(), "Table undefined")." $table");
+              throw new \Exception(X::_("Table undefined")." $table");
             }
 
             $w['id_option'] = $this->columnId($k, $table_id);
@@ -1053,7 +1053,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_procedures = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => dgettext(X::tDom(), 'Procedures'),
+                'text' => X::_('Procedures'),
                 'code' => 'procedures',
               ]
             ))
@@ -1072,7 +1072,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_connections = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => dgettext(X::tDom(), 'Connections'),
+                'text' => X::_('Connections'),
                 'code' => 'connections',
               ]
             ))
@@ -1092,7 +1092,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_functions = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => dgettext(X::tDom(), 'Function'),
+                'text' => X::_('Function'),
                 'code' => 'functions',
               ]
             ))
@@ -1111,7 +1111,7 @@ class Database extends bbn\Models\Cls\Cache
             && ($id_tables = $this->o->add(
               [
                 'id_parent' => $id_db,
-                'text' => dgettext(X::tDom(), 'Tables'),
+                'text' => X::_('Tables'),
                 'code' => 'tables',
               ]
             ))
@@ -1148,7 +1148,7 @@ class Database extends bbn\Models\Cls\Cache
                 $conn = $this->connection($host, $engine['code'], $db);
               }
               catch (\Exception $e) {
-                throw new \Exception(dgettext(X::tDom(), "Impossible to connect"));
+                throw new \Exception(X::_("Impossible to connect"));
               }
 
               $tables = $conn->getTables($db);
@@ -1161,7 +1161,7 @@ class Database extends bbn\Models\Cls\Cache
           }
         }
         else{
-          throw new \Exception(dgettext(X::tDom(), "Impossible to find an host ID for DB")." ".$this->o->code($id_db));
+          throw new \Exception(X::_("Impossible to find an host ID for DB")." ".$this->o->code($id_db));
         }
       }
     }
@@ -1226,7 +1226,7 @@ class Database extends bbn\Models\Cls\Cache
         if ($id_columns = $this->o->add(
           [
             'id_parent' => $id_table,
-            'text' => dgettext(X::tDom(), "Columns"),
+            'text' => X::_("Columns"),
             'code' => 'columns'
           ]
         )
@@ -1244,7 +1244,7 @@ class Database extends bbn\Models\Cls\Cache
         if ($id_keys = $this->o->add(
           [
             'id_parent' => $id_table,
-            'text' => dgettext(X::tDom(), "Keys"),
+            'text' => X::_("Keys"),
             'code' => 'keys',
           ]
         )

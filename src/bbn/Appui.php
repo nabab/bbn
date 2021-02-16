@@ -54,8 +54,8 @@ class Appui
     $ok = true;
     foreach (self::$vars as $v) {
       if (!defined('BBN_'.strtoupper($v))) {
-        X::log(dgettext(X::tDom(), "$v is not defined"));
-        throw new \Exception(dgettext(X::tDom(), "$v is not defined"));
+        X::log(X::_("$v is not defined"));
+        throw new \Exception(X::_("$v is not defined"));
         $ok = false;
       }
     }
@@ -304,7 +304,7 @@ class Appui
       }
     }
     else {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to get the settings"));
+      throw new \Exception(X::_("Impossible to get the settings"));
     }
 
     return false;
@@ -345,7 +345,7 @@ class Appui
         'id_parent' => $id_parent
       ]);
       if (!$id_plugin) {
-        throw new \Exception(dgettext(X::tDom(), "Impossible to add the plugin")." $name");
+        throw new \Exception(X::_("Impossible to add the plugin")." $name");
       }
 
       $perm_id = $o->add([
@@ -354,7 +354,7 @@ class Appui
         'text' => 'Permissions'
       ]);
       if (!$perm_id) {
-        throw new \Exception(dgettext(X::tDom(), "Impossible to add the permission for the plugin")." $name");
+        throw new \Exception(X::_("Impossible to add the permission for the plugin")." $name");
       }
 
       // Other options under permissions

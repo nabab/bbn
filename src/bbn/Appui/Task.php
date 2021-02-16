@@ -107,7 +107,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTitle($id_task, $simple=false){
     if ( $title = $this->db->selectOne('bbn_tasks', 'title', ['id' => $id_task]) ){
-      return (!empty($simple) ? (dgettext(X::tDom(), "Task")." ") : '').$title;
+      return (!empty($simple) ? (X::_("Task")." ") : '').$title;
     }
     return '';
   }
@@ -1123,7 +1123,7 @@ class Task extends bbn\Models\Cls\Db
       if (
         !empty($message) &&
         !($id_note = $this->comment($id_task, [
-          'title' => dgettext(X::tDom(), 'Report tracker').' '.date('d M Y H:i', strtotime($active_track['start'])).' - '.date('d M Y H:i', $now),
+          'title' => X::_('Report tracker').' '.date('d M Y H:i', strtotime($active_track['start'])).' - '.date('d M Y H:i', $now),
           'text' => $message
         ]))
       ){

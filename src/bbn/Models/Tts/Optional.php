@@ -43,7 +43,7 @@ trait Optional
     if (!self::$optional_is_init) {
       $opt = bbn\Appui\Option::getInstance();
       if (!$opt) {
-        throw new \Exception(dgettext(X::tDom(), "There is no options object as needed by").' '.__CLASS__);
+        throw new \Exception(X::_("There is no options object as needed by").' '.__CLASS__);
       }
 
       if (!\defined("BBN_APPUI")) {
@@ -135,7 +135,7 @@ trait Optional
   {
     $this->options = bbn\Appui\Option::getInstance();
     if (!$this->options) {
-      throw new \Exception(dgettext(X::tDom(), "There is no options object as needed by").' '.__CLASS__);
+      throw new \Exception(X::_("There is no options object as needed by").' '.__CLASS__);
     }
 
     self::initOptionalGlobal($this->options, $path);
@@ -160,7 +160,7 @@ trait Optional
   {
     $o = bbn\Appui\Option::getInstance();
     if (!$o) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to get the options object from class").' '.__CLASS__);
+      throw new \Exception(X::_("Impossible to get the options object from class").' '.__CLASS__);
     }
 
     return $o;

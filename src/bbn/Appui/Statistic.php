@@ -126,19 +126,19 @@ class Statistic extends bbn\Models\Cls\Db
           && ($this->hcfg = History::getTableCfg($cfg['table']))
       ) {
         if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
-          throw new \Error(dgettext(X::tDom(), "The field parameter is mandatory for sum and avg types"));
+          throw new \Error(X::_("The field parameter is mandatory for sum and avg types"));
         }
 
         $this->code = $code;
         $this->dbo  = new \bbn\Appui\Database($this->db);
         if (isset($cfg['field'])) {
           if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {
-            throw new \Error(dgettext(X::tDom(), "The field parameter must be a known field of the table"));
+            throw new \Error(X::_("The field parameter must be a known field of the table"));
           }
         }
 
         if (($cfg['type'] === 'update') && empty($this->_id_field)) {
-          throw new \Error(dgettext(X::tDom(), "The field parameter is mandatory for statistics of type update"));
+          throw new \Error(X::_("The field parameter is mandatory for statistics of type update"));
         }
 
         $this->type = $cfg['type'];
@@ -205,7 +205,7 @@ class Statistic extends bbn\Models\Cls\Db
       }
 
       if (!$start || !is_int($start)) {
-        throw new Error(dgettext(X::tDom(), 'Impossible to read the given start date'));
+        throw new Error(X::_('Impossible to read the given start date'));
       }
 
       if (!$this->is_total) {
@@ -214,7 +214,7 @@ class Statistic extends bbn\Models\Cls\Db
         }
 
         if (!$end || !is_int($end)) {
-          throw new Error(dgettext(X::tDom(), 'Impossible to read the given end date'));
+          throw new Error(X::_('Impossible to read the given end date'));
         }
       }
 
@@ -900,11 +900,11 @@ class Statistic extends bbn\Models\Cls\Db
   private function _set_update_cfg(array &$cfg)
   {
     if (empty($this->cfg['field'])) {
-      throw new \Error(dgettext(X::tDom(), "The parameters field and value must be given for update statistics"));
+      throw new \Error(X::_("The parameters field and value must be given for update statistics"));
     }
 
     if (!$this->_id_field) {
-      throw new \Error(dgettext(X::tDom(), "The parameters field must be a valid column from the given table"));
+      throw new \Error(X::_("The parameters field must be a valid column from the given table"));
     }
 
     $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];

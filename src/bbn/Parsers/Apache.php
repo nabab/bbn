@@ -150,7 +150,7 @@ class Apache
         }
 
         if (!feof($handle)) {
-          throw new \Exception(dgettext(X::tDom(), "Error: unexpected fgets() fail"));
+          throw new \Exception(X::_("Error: unexpected fgets() fail"));
         }
 
         fclose($handle);
@@ -249,7 +249,7 @@ class Apache
         elseif (isset($parsed['action'])) {
           if (!$err) {
             continue;
-            //throw new \Exception(dgettext(X::tDom(), "A trace is starting so an error should exist"));
+            //throw new \Exception(X::_("A trace is starting so an error should exist"));
           }
 
           if (!isset($err['trace'])) {
@@ -266,7 +266,7 @@ class Apache
 
           $errs[] = $ln;
           $num++;
-          //throw new \Exception(dgettext(X::tDom(), "Impossible to parse log string")." $ln");
+          //throw new \Exception(X::_("Impossible to parse log string")." $ln");
         }
       }
     }

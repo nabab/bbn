@@ -431,7 +431,7 @@ class Grid extends bbn\Models\Cls\Cache
     if ( \X::toExcel($data, $path, true, $cfg) ){
       return ['file' => $path];
     }
-    return ['error' => dgettext(X::tDom(), 'Error')];
+    return ['error' => X::_('Error')];
   }
 
   /**

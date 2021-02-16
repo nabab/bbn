@@ -92,9 +92,9 @@ class Masks extends bbn\Models\Cls\Db
           ];
           if ($fulltext) {
             $tmp['fulltext'] = $a['title'].
-              ($a['default'] ? ' ('.dgettext(X::tDom(), 'default').')' : '').
+              ($a['default'] ? ' ('.X::_('default').')' : '').
               ' - v'.$a['version'].' '.
-              \bbn\Date::format($a['creation']).' '.dgettext(X::tDom(), 'by').' '.
+              \bbn\Date::format($a['creation']).' '.X::_('by').' '.
               $admin->getName($a['id_user']);
           }
           $res[] = $tmp;

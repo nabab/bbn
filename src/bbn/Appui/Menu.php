@@ -153,7 +153,7 @@ class Menu extends bbn\Models\Cls\Basic
         $id_menu = $id_menu[$c['arch']['user_options']['id']];
       }
       else {
-        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => dgettext(X::tDom(), 'Shortcuts')]);
+        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => X::_('Shortcuts')]);
       }
 
       if (!empty($id_menu)
@@ -274,8 +274,8 @@ class Menu extends bbn\Models\Cls\Basic
    */
   public function add($id_menu, array $cfg = null): ?string
   {
-    $id     = false;
     $id_opt = $this->fromPath('menus');
+    X::log([$id_opt, $id_menu, $cfg], 'menu');
     if (\is_array($id_menu)) {
       $cfg = $id_menu;
     }
@@ -283,14 +283,12 @@ class Menu extends bbn\Models\Cls\Basic
     if (!empty($cfg)) {
       if (Str::isUid($id_menu)) {
         $this->deleteCache($id_menu);
-      }
-
-      if (Str::isUid($id_menu)) {
         $id = $this->pref->addBit($id_menu, $cfg);
       }
       else {
-        $id = $this->pref->add($id_opt, $cfg);
+        $id = $this->pref->addToGroup($id_opt, $cfg);
       }
+
       $this->options->deleteCache($id_opt);
       return $id;
     }
@@ -427,21 +425,29 @@ class Menu extends bbn\Models\Cls\Basic
   }
 
 
-  public function get(string $id_menu): ?array
+  public function get(string $id_menu, $submenu = null): ?array
   {
-    $res = $this->pref->getBits($id_menu);
+    $res = $this->pref->getBits($id_menu, $submenu);
     if (\is_array($res) && !empty($res)) {
       foreach ($res as $k => &$d) {
         $d['numChildren'] = count($this->pref->getBits($id_menu, $d['id']));
-        if (!is_null($d['id_option'])
-            && ($sequence = $this->options->sequence($d['id_option'], $this->perm->getOptionId('access')))
-        ) {
-          $d['path'][] = $sequence;
-        }
-        else{
-          $d['path'] = [];
+        $path = $tmp = [];
+        if (!is_null($d['id_option'])) {
+          $id_option = $d['id_option'];
+          while ($id_option) {
+            array_unshift($tmp, $id_option);
+            $o = $this->options->parent($id_option);
+            if ($o['code'] === 'access') {
+              $path = $tmp;
+              break;
+            }
+            else {
+              $id_option = $o['id'];
+            }
+          }
         }
 
+        $d['path'] = $path;
         if (!empty($d['path'][0])) {
           array_shift($d['path'][0]);
         }

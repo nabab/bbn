@@ -115,7 +115,7 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     if (!$root) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to find the permission code"));
+      throw new \Exception(X::_("Impossible to find the permission code"));
     }
 
     $parts  = explode('/', $path);
@@ -141,6 +141,7 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     $p    = [];
     $bits = $this->opt->getCodePath($id_option);
+    // Minimum: appui, plugin, permissions, path
     if (empty($bits) || (count($bits) < 4)) {
       return null;
     }
@@ -486,7 +487,7 @@ class Permissions extends bbn\Models\Cls\Basic
           [
           'id_parent' => $id_permission,
           'code' => 'options',
-          'text' => dgettext(X::tDom(), "Options"),
+          'text' => X::_("Options"),
           'cfg' => [
             'icon' => 'nf nf-fa-cogs'
           ]
@@ -501,7 +502,7 @@ class Permissions extends bbn\Models\Cls\Basic
           [
           'id_parent' => $id_permission,
           'code' => 'access',
-          'text' => dgettext(X::tDom(), "Access"),
+          'text' => X::_("Access"),
           'cfg' => [
             'icon' => 'nf nf-fa-files'
           ]
@@ -516,7 +517,7 @@ class Permissions extends bbn\Models\Cls\Basic
           [
             'id_parent' => $id_permission,
             'code' => 'plugins',
-            'text' => dgettext(X::tDom(), "Plugins"),
+            'text' => X::_("Plugins"),
             'cfg' => [
               'icon' => 'nf nf-fa-plug'
             ]
@@ -563,7 +564,7 @@ class Permissions extends bbn\Models\Cls\Basic
           }
           if (!$root) {
             continue;
-            throw new \Exception(sprintf(dgettext(X::tDom(), "Impossible to find the appui plugin %s"), substr($route['name'], 6)));
+            throw new \Exception(sprintf(X::_("Impossible to find the appui plugin %s"), substr($route['name'], 6)));
           }
 
           if ($all = $fs->getTree(

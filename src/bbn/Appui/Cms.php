@@ -332,7 +332,7 @@ class Cms extends bbn\Models\Cls\Db
 			}
 		}
 		elseif ( !empty($idx) ) {
-			throw new \Exception(dgettext(X::tDom(), 'The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
+			throw new \Exception(X::_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
 		}
 		return $success;
 	}

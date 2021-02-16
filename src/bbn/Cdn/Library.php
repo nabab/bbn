@@ -535,7 +535,7 @@ SQL,
         if ($has_dep) {
           // Adding dependencies
           if (!$info['id']) {
-            throw new \Exception(dgettext(X::tDom(), "Problem adding library").' '.$library);
+            throw new \Exception(X::_("Problem adding library").' '.$library);
           }
 
           $dependencies = $this->getDependencies($info['id']);

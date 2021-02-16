@@ -66,13 +66,13 @@ class Runner extends bbn\Models\Cls\Basic
         if (file_exists('/proc/' . $pid)) {
           $this->log("There is already a process running with PID " . $pid);
           // If it's currently running we exit
-          //$this->output(dgettext(X::tDom(), 'Existing process'), $pid);
+          //$this->output(X::_('Existing process'), $pid);
           exit();
         }
         else {
           // Otherwise we delete the PID file
           $this->log("DELETING FILEPID AS THE PROCESS IS DEAD " . $pid);
-          $this->output(dgettext(X::tDom(), 'Dead process'), $pid);
+          $this->output(X::_('Dead process'), $pid);
           @unlink($pid_file);
         }
       }
@@ -89,7 +89,7 @@ class Runner extends bbn\Models\Cls\Basic
         else if ($type === 'cron') {
           // Real task
           if (array_key_exists('id', $this->data)) {
-            //$this->output(dgettext(X::tDom(), 'Launching'), $this->data['file']);
+            //$this->output(X::_('Launching'), $this->data['file']);
             $this->runTask($this->data);
           }
           // Or task system
@@ -161,20 +161,20 @@ class Runner extends bbn\Models\Cls\Basic
     $file_content = @file_get_contents($pid);
     // Write the error log if an error is present
     if ($error = error_get_last()) {
-      //$this->output(dgettext(X::tDom(), 'Error'), $error);
+      //$this->output(X::_('Error'), $error);
       $this->log([$data, $error]);
     }
     $ok = true;
     if (ob_get_length()) {
       $content = ob_end_flush();
-      $this->output(dgettext(X::tDom(), 'Content'), $content);
+      $this->output(X::_('Content'), $content);
     }
     // We check if there is a problem with the PID file (it's only debug it shouldn't be necessary)
     if ($file_content) {
       $pid_content = explode('|', $file_content);
       if ($pid_content[1] && ($pid_content[0] != BBN_PID)) {
-        $this->output(dgettext(X::tDom(), 'Different processes'), $pid_content[0] . '/' . BBN_PID);
-        $this->log(dgettext(X::tDom(), 'Different processes') . ': ' . $pid_content[0] . '/' . BBN_PID);
+        $this->output(X::_('Different processes'), $pid_content[0] . '/' . BBN_PID);
+        $this->log(X::_('Different processes') . ': ' . $pid_content[0] . '/' . BBN_PID);
         $ok = false;
       }
     }
@@ -199,7 +199,7 @@ class Runner extends bbn\Models\Cls\Basic
       }
       //X::dump("FROM SHUTDOWN", $data);
       // We output the ending time (as all output will be logged in the output file
-      //$this->output(dgettext(X::tDom(), 'Shutdown'), Date('H:i:s'));
+      //$this->output(X::_('Shutdown'), Date('H:i:s'));
     }
   }
 
@@ -234,7 +234,7 @@ class Runner extends bbn\Models\Cls\Basic
       $this->timer->start('users');
       $this->timer->start('cron_check');
       $obs = new bbn\Appui\Observer($this->db);
-      //$this->output(dgettext(X::tDom(), 'Starting poll'), Date('Y-m-d H:i:s'));
+      //$this->output(X::_('Starting poll'), Date('Y-m-d H:i:s'));
       /*
       foreach ( $admin->get_old_tokens() as $t ){
         $id_user = $admin->get_user_from_token($t['id']);
@@ -275,7 +275,7 @@ class Runner extends bbn\Models\Cls\Basic
           $this->timer->start('users');
         }
         if ($this->timer->measure('timeout') > self::$poll_timeout) {
-          //$this->output(dgettext(X::tDom(), 'Timeout'), Date('Y-m-d H:i:s'));
+          //$this->output(X::_('Timeout'), Date('Y-m-d H:i:s'));
           echo '.';
         }
         if ($this->timer->measure('cron_check') > self::$cron_check_timeout) {
@@ -284,29 +284,29 @@ class Runner extends bbn\Models\Cls\Basic
           $this->timer->start('cron_check');
         }
       }
-      $this->output(dgettext(X::tDom(), 'Ending poll process'), Date('Y-m-d H:i:s'));
+      $this->output(X::_('Ending poll process'), Date('Y-m-d H:i:s'));
     }
   }
 
   public function runTaskSystem()
   {
     if ($this->check()) {
-      //$this->output(dgettext(X::tDom(), 'Start task system'), Date('Y-m-d H:i:s'));
+      //$this->output(X::_('Start task system'), Date('Y-m-d H:i:s'));
       $this->timer->start('timeout');
       $ok = true;
       while ($ok) {
         if (!$this->isActive() || !$this->isCronActive()) {
-          //$this->output(dgettext(X::tDom(), 'End'), Date('Y-m-d H:i:s'));
+          //$this->output(X::_('End'), Date('Y-m-d H:i:s'));
           if ($rows = $this->cron->getManager()->getRunningRows()) {
             foreach ($rows as $r) {
               if (file_exists('/proc/' . $r['pid'])) {
                 exec('kill -9 ' . $r['pid']);
-                //$this->output(dgettext(X::tDom(), 'Killing task'), $r['pid']);
+                //$this->output(X::_('Killing task'), $r['pid']);
               }
               $fpid = $this->getPidPath(['type' => 'cron', 'id' => $r['id']]);
               if (is_file($fpid)) {
                 unlink($fpid);
-                //$this->output(dgettext(X::tDom(), 'Deleting PID file'), $fpid);
+                //$this->output(X::_('Deleting PID file'), $fpid);
               }
               $this->cron->getManager()->unsetPid($r['id']);
             }
@@ -320,8 +320,8 @@ class Runner extends bbn\Models\Cls\Basic
               'id' => $r['id'],
               'file' => $r['file']
             ];
-            //$this->output(dgettext(X::tDom(), 'Launch'), Date('Y-m-d H:i:s'));
-            //$this->output(dgettext(X::tDom(), 'Execution'), $param['file']);
+            //$this->output(X::_('Launch'), Date('Y-m-d H:i:s'));
+            //$this->output(X::_('Execution'), $param['file']);
             $this->cron->getLauncher()->launch($param);
           }
         }

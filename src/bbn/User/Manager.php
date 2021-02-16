@@ -543,7 +543,7 @@ You can click the following link to access directly your account:<br>
   public function sendMail(string $id_user, string $subject, string $text, array $attachments = []): ?int
   {
     if ( !$this->getMailer() ){
-      throw new \Exception(dgettext(X::tDom(), "Impossible to make hotlinks without a proper mailer parameter"));
+      throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
     }
     if ( ($usr = $this->getUser($id_user)) && $usr['email']){
       return $this->mailer->send([
@@ -620,7 +620,7 @@ You can click the following link to access directly your account:<br>
     }
     else{
       X::log("User $id_user not found");
-      throw new \Exception(dgettext(X::tDom(), 'User not found'));
+      throw new \Exception(X::_('User not found'));
     }
     return $this;
   }
@@ -800,7 +800,7 @@ You can click the following link to access directly your account:<br>
     $g = $this->class_cfg['arch']['groups'];
     if ( $this->groupNumUsers($id) ){
       /** @todo Error management */
-      throw new \Exception(dgettext(X::tDom(), "Impossible to delete this group as it has users"));
+      throw new \Exception(X::_("Impossible to delete this group as it has users"));
     }
     return (bool)$this->db->delete($this->class_cfg['tables']['groups'], [
       $g['id'] => $id

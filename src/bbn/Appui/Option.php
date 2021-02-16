@@ -322,9 +322,9 @@ class Option extends bbn\Models\Cls\Db
       $true_code = array_pop($args);
       $enc_code  = base64_encode($true_code);
       // This is the cache name
-      // get_codedgettext(X::tDom(), base64(first_code))
+      // get_codeX::_(base64(first_code))
       $cache_name = 'get_code_'.$enc_code;
-      // UID-get_codedgettext(X::tDom(), base64(first_code))
+      // UID-get_codeX::_(base64(first_code))
       if (($tmp = $this->cacheGet($id_parent, $cache_name))) {
         if (!count($args)) {
           return $tmp;
@@ -792,7 +792,7 @@ class Option extends bbn\Models\Cls\Db
       $c =& $this->class_cfg['arch']['options'];
       if (bbn\Str::isUid($opt[$c['id_alias']]) && ($opt['alias'] = $this->nativeOption($opt[$c['id_alias']]))) {
         if ($opt[$c['id_alias']] === $id) {
-          throw new \Exception(dgettext(X::tDom(), "Impossible to have the same ID as ALIAS, check out ID").' '.$id);
+          throw new \Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
         }
         else {
           $this->_set_value($opt['alias']);
@@ -988,7 +988,7 @@ class Option extends bbn\Models\Cls\Db
             $res[] = $tmp;
           }
           else {
-            throw new \Exception(dgettext(X::tDom(), "Impossible to find the ID").' '.$i);
+            throw new \Exception(X::_("Impossible to find the ID").' '.$i);
           }
         }
 
@@ -1870,7 +1870,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * ```php
    * X::dump($opt->itext(12));
-   * // Result of dgettext(X::tDom(), "BBN's own IDE") with fr as locale
+   * // Result of X::_("BBN's own IDE") with fr as locale
    * // (string) L'IDE de BBN
    * X::dump($opt->itext('bbn_ide'));
    * // (string) L'IDE de BBN
@@ -1888,7 +1888,7 @@ class Option extends bbn\Models\Cls\Db
         ]
       );
       if ($val) {
-        return dgettext(X::tDom(), $val);
+        return X::_($val);
       }
     }
 
@@ -3133,7 +3133,7 @@ class Option extends bbn\Models\Cls\Db
    * @param int|null $id_parent The option target, if not specified {@link default}
    * @return int The number of affected rows
    */
-  public function import(array $options, $id_parent = null, array $todo = null)
+  public function import(array $options, $id_parent = null, array &$todo = null)
   {
     if (is_array($id_parent)) {
       $id_parent = $this->fromCode(...$id_parent);
@@ -3190,7 +3190,7 @@ class Option extends bbn\Models\Cls\Db
           }
         }
         else {
-          throw new \Exception(dgettext(X::tDom(), "Error while importing: impossible to add"));
+          throw new \Exception(X::_("Error while importing: impossible to add"));
         }
       }
 
@@ -3708,11 +3708,11 @@ class Option extends bbn\Models\Cls\Db
         $it[$c['id_parent']] = $id_parent;
       }
       else {
-        throw new \Exception(dgettext(X::tDom(), "Impossible to find the parent"));
+        throw new \Exception(X::_("Impossible to find the parent"));
       }
     }
     elseif (!$this->exists($it[$c['id_parent']])) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to find the parent"));
+      throw new \Exception(X::_("Impossible to find the parent"));
     }
 
     if (empty($it[$c['id_alias']])) {
@@ -3723,11 +3723,11 @@ class Option extends bbn\Models\Cls\Db
         $it[$c['id_alias']] = $id_alias;
       }
       else {
-        throw new \Exception(dgettext(X::tDom(), "Impossible to find the alias"));
+        throw new \Exception(X::_("Impossible to find the alias"));
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to find the alias"));
+      throw new \Exception(X::_("Impossible to find the alias"));
     }
 
     $cfg = null;
@@ -3743,11 +3743,11 @@ class Option extends bbn\Models\Cls\Db
             $cfg['id_root_alias'] = $id_root_alias;
           }
           else {
-            throw new \Exception(dgettext(X::tDom(), "Impossible to find the root alias"));
+            throw new \Exception(X::_("Impossible to find the root alias"));
           }
         }
         elseif (!$this->exists($cfg['id_root_alias'])) {
-          throw new \Exception(dgettext(X::tDom(), "Impossible to find the root alias"));
+          throw new \Exception(X::_("Impossible to find the root alias"));
         }
       }
     }

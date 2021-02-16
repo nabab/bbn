@@ -93,7 +93,7 @@ class Timer
       return $time;
     }
 
-    throw new \Exception(dgettext(X::tDom(), "Missing a start declaration for timer")." $key");
+    throw new \Exception(X::_("Missing a start declaration for timer")." $key");
   }
 
 

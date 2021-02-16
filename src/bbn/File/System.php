@@ -92,7 +92,7 @@ class System extends bbn\Models\Cls\Basic
     }
 
     if (empty($this->mode)) {
-      $this->error = dgettext(X::tDom(), "Impossible to connect to the SSH server");
+      $this->error = X::_("Impossible to connect to the SSH server");
     }
   }
 
@@ -839,7 +839,7 @@ class System extends bbn\Models\Cls\Basic
   {
     if (\is_array($replace)) {
       if (!\is_array($search) || (count($replace) !== count($search))) {
-        throw new \Exception(dgettext(X::tDom(), "If replace is an array, search must be an array of equal length"));
+        throw new \Exception(X::_("If replace is an array, search must be an array of equal length"));
       }
 
       $replace_array = true;
@@ -999,7 +999,7 @@ class System extends bbn\Models\Cls\Basic
         return true;
       }
 
-      $this->error = dgettext(X::tDom(), 'Impossible to connect to the WebDAV host');
+      $this->error = X::_('Impossible to connect to the WebDAV host');
     }
 
     return false;
@@ -1019,7 +1019,7 @@ class System extends bbn\Models\Cls\Basic
         $this->obj = ftp_ssl_connect(...$args);
       }
       catch (\Exception $e){
-        $this->error  = dgettext(X::tDom(), 'Impossible to connect to the FTP host through SSL');
+        $this->error  = X::_('Impossible to connect to the FTP host through SSL');
         $this->error .= PHP_EOL.$e->getMessage();
       }
 
@@ -1028,14 +1028,14 @@ class System extends bbn\Models\Cls\Basic
           $this->obj = ftp_connect(...$args);
         }
         catch (\Exception $e){
-          $this->error  = dgettext(X::tDom(), 'Impossible to connect to the FTP host');
+          $this->error  = X::_('Impossible to connect to the FTP host');
           $this->error .= PHP_EOL.$e->getMessage();
         }
       }
 
       if ($this->obj) {
         if (!@ftp_login($this->obj, $cfg['user'], $this->_get_password($cfg))) {
-          $this->error  = dgettext(X::tDom(), 'Impossible to login to the FTP host');
+          $this->error  = X::_('Impossible to login to the FTP host');
           $this->error .= PHP_EOL.error_get_last()['message'];
         }
         else{
@@ -1081,7 +1081,7 @@ class System extends bbn\Models\Cls\Basic
         ]*/
       );
       if (!$this->cn) {
-        $this->error = dgettext(X::tDom(), "Could not connect through SSH.");
+        $this->error = X::_("Could not connect through SSH.");
       }
       elseif (X::hasProps($cfg, ['user', 'public', 'private'], true)) {
         stream_set_blocking($this->cn, true);
@@ -1089,18 +1089,18 @@ class System extends bbn\Models\Cls\Basic
         /*
         $fingerprint = ssh2_fingerprint($this->cn, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
         if ( strcmp($this->ssh_server_fp, $fingerprint) !== 0 ){
-          $this->error = dgettext(X::tDom(), 'Unable to verify server identity!');
+          $this->error = X::_('Unable to verify server identity!');
         }
         */
         if (!ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $this->_get_password($cfg))) {
-          $this->error = dgettext(X::tDom(), 'Authentication rejected by server');
+          $this->error = X::_('Authentication rejected by server');
         }
         else {
           try {
             $this->obj = ssh2_sftp($this->cn);
           }
           catch (\Exception $e) {
-            $this->error = dgettext(X::tDom(), "Could not connect through SFTP.");
+            $this->error = X::_("Could not connect through SFTP.");
           }
 
           if ($this->obj) {
@@ -1114,14 +1114,14 @@ class System extends bbn\Models\Cls\Basic
           ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg));
         }
         catch (\Exception $e) {
-          $this->error = dgettext(X::tDom(), "Could not authenticate with username and password.");
+          $this->error = X::_("Could not authenticate with username and password.");
         }
         if (!$this->error) {
           try {
             $this->obj = @ssh2_sftp($this->cn);
           }
           catch (\Exception $e) {
-            $this->error = dgettext(X::tDom(), "Could not initialize SFTP subsystem.");
+            $this->error = X::_("Could not initialize SFTP subsystem.");
           }
 
           if ($this->obj) {
@@ -1449,7 +1449,7 @@ class System extends bbn\Models\Cls\Basic
               $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
             }
             catch (\Exception $e) {
-              $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+              $this->log(X::_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
             }
           }
           elseif ($this->mode === 'ftp') {
@@ -1457,7 +1457,7 @@ class System extends bbn\Models\Cls\Basic
               $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
             }
             catch (\Exception $e) {
-              $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+              $this->log(X::_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
             }
           }
           else{
@@ -1465,7 +1465,7 @@ class System extends bbn\Models\Cls\Basic
               $res = rmdir($path);
             }
             catch (\Exception $e) {
-              $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+              $this->log(X::_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
             }
           }
         }
@@ -1479,7 +1479,7 @@ class System extends bbn\Models\Cls\Basic
             $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
           }
           catch (\Exception $e) {
-            $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            $this->log(X::_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
           }
         }
         elseif ($this->mode === 'ftp') {
@@ -1487,7 +1487,7 @@ class System extends bbn\Models\Cls\Basic
             $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
           }
           catch (\Exception $e) {
-            $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            $this->log(X::_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
           }
         }
         else {
@@ -1495,7 +1495,7 @@ class System extends bbn\Models\Cls\Basic
             $res = unlink($path);
           }
           catch (\Exception $e) {
-            $this->log(dgettext(X::tDom(), 'Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
+            $this->log(X::_('Error in _delete').': '.$e->getMessage().' ('.$e->getLine().')');
           }
         }
       }

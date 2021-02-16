@@ -117,7 +117,7 @@ abstract class Basic
     $class = \get_class($this);
     throw new \Exception(
       sprintf(
-        dgettext(X::tDom(), "Wrong method used for the class %s: %s with the following arguments:"),
+        X::_("Wrong method used for the class %s: %s with the following arguments:"),
         $class,
         $name,
         implode(', ', $arguments)

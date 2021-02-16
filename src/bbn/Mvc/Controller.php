@@ -1052,13 +1052,17 @@ class Controller implements Api
       string $path = ''
   ): self
   {
-
-    $model = $ttl === null ? $this->getModel($path, X::mergeArrays($this->post, $this->data)) : $this->getCachedModel($path, X::mergeArrays($this->post, $this->data), $ttl);
-    if ($model && is_array($model)) {
-      $this->addData($model);
+    if ($this->getRoute($path ?: $this->_path, 'model')) {
+      $model = $ttl === null ? $this->getModel($path, X::mergeArrays($this->post, $this->data)) : $this->getCachedModel($path, X::mergeArrays($this->post, $this->data), $ttl);
+      if ($model && is_array($model)) {
+        $this->addData($model);
+      }
+      else {
+        $model = [];
+      }
     }
-    else {
-      $model = [];
+    elseif ($data === true) {
+      $model = $this->data;
     }
 
     $this->obj->css = $this->getLess($path, false);
@@ -1542,7 +1546,7 @@ class Controller implements Api
       $this->obj = X::mergeObjects($this->obj, $o->obj);
     }
     else {
-      throw new \Error(dgettext(X::tDom(), "Impossible to route the following request").': '.$path);
+      throw new \Error(X::_("Impossible to route the following request").': '.$path);
     }
 
     return $this;

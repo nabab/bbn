@@ -26,7 +26,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       ]);
     }
     if ( !$this->obj ){
-      $this->error = dgettext(X::tDom(), "Missing parameters");
+      $this->error = X::_("Missing parameters");
     }
   }
 
@@ -135,7 +135,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
           ]);
         }
         else {
-          $this->error = dgettext(X::tDom(), "The given destination already exists");
+          $this->error = X::_("The given destination already exists");
           return false;
         }
       }
@@ -156,12 +156,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         ]);
       }
       else {
-        $this->error = dgettext(X::tDom(), "The new name given already exists");
+        $this->error = X::_("The new name given already exists");
         return false;
       }
     }
     else {
-      $this->error = dgettext(X::tDom(), "The given path does not correspond to a file or a directory");
+      $this->error = X::_("The given path does not correspond to a file or a directory");
       return false;
     }
   }
@@ -210,12 +210,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         return $mtime['{DAV:}getlastmodified'];
       }
       else {
-        $this->error = dgettext(X::tDom(), "The last modification date cannot be retrieved");
+        $this->error = X::_("The last modification date cannot be retrieved");
         return null;
       }  
     }
     else {
-       $this->error = dgettext(X::tDom(), "The given path doesn't exist");
+       $this->error = X::_("The given path doesn't exist");
     }
   }
   
@@ -319,7 +319,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       }  
     }
     else {
-      $this->error = dgettext(X::tDom(), "The path doesn't exists or it's not a directory");
+      $this->error = X::_("The path doesn't exists or it's not a directory");
     }
   }
 

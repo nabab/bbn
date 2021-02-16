@@ -35,7 +35,7 @@ trait Singleton
   protected static function singletonInit(self $instance)
   {
     if (self::singletonExists()) {
-      throw new \Exception(dgettext(X::tDom(), "Impossible to create a new instance of").' '.\get_class($instance));
+      throw new \Exception(X::_("Impossible to create a new instance of").' '.\get_class($instance));
     }
     self::$singleton_exists = 1;
     self::$singleton_instance = $instance;

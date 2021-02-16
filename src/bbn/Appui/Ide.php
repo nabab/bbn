@@ -652,12 +652,12 @@ class Ide
 
       if (!empty($file['tab']) && ($file['tab'] === 'php') && !$this->fs->isFile(self::$current_file)) {
         if (!$this->createPermByReal($file['full_path'])) {
-          return $this->error(dgettext(X::tDom(), "Impossible to create the option"));
+          return $this->error(X::_("Impossible to create the option"));
         }
       }
 
       if (!file_put_contents(self::$current_file, $file['code'])) {
-        return $this->error(dgettext(X::tDom(), 'Error: Save'));
+        return $this->error(X::_('Error: Save'));
       }
 
       if ($file['extension'] === 'ts') {
@@ -675,7 +675,7 @@ class Ide
       return ['success' => true];
     }
 
-    return $this->error(dgettext(X::tDom(), 'Error: Save'));
+    return $this->error(X::_('Error: Save'));
   }
 
 
@@ -765,7 +765,7 @@ class Ide
       // New folder
       if (empty($cfg['is_file'])) {
         if ($this->fs->isDir($path.$cfg['name'])) {
-          $this->error(dgettext(X::tDom(), "Directory exists"));
+          $this->error(X::_("Directory exists"));
           return false;
         }
 
@@ -777,7 +777,7 @@ class Ide
         }
 
         if (empty($this->fs->createPath($path))) {
-          $this->error(dgettext(X::tDom(), "Impossible to create the directory"));
+          $this->error(X::_("Impossible to create the directory"));
           return false;
         }
 
@@ -788,18 +788,18 @@ class Ide
         $file = $path .'/'. $cfg['name'] . '.' . $cfg['extension'];
         $file = str_replace('//','/', $file);
         if (!$this->fs->isDir($path) && empty($this->fs->createPath($path))) {
-          $this->error(dgettext(X::tDom(), "Impossible to create the container directory"));
+          $this->error(X::_("Impossible to create the container directory"));
           return false;
         }
 
         if ($this->fs->isDir($path)) {
           if ($this->fs->isFile($file)) {
-            $this->error(dgettext(X::tDom(), "File exists"));
+            $this->error(X::_("File exists"));
             return false;
           }
 
           if (!file_put_contents($file, $cfg['default_text'])) {
-            $this->error(dgettext(X::tDom(), "Impossible to create the file"));
+            $this->error(X::_("Impossible to create the file"));
             return false;
           }
         }
@@ -809,7 +809,7 @@ class Ide
             && !empty($cfg['tab']) && ($cfg['tab_url'] === 'php') && !empty($file)
         ) {
           if (!$this->createPermByReal($file)) {
-            return $this->error(dgettext(X::tDom(), "Impossible to create the option"));
+            return $this->error(X::_("Impossible to create the option"));
           }
         }
 
@@ -2241,7 +2241,7 @@ class Ide
                           $occourences = $occourences + substr_count($lineCurrent, $info['search']);
                           // info for code
                           $list[] = [
-                            'text' => strlen($text) > 1000 ? $line."<strong><i>".dgettext(X::tDom(), 'content too long to be shown')."</i></strong>" : $text,
+                            'text' => strlen($text) > 1000 ? $line."<strong><i>".X::_('content too long to be shown')."</i></strong>" : $text,
                             'line' => $lineNumber - 1,
                             'position' => $position,
                             'link' => $link,
@@ -2351,7 +2351,7 @@ class Ide
 
                     // info for file
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line."<strong><i>".dgettext(X::tDom(), 'content too long to be shown')."</i></strong>" : $text,
+                      'text' => strlen($text) > 1000 ? $line."<strong><i>".X::_('content too long to be shown')."</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                       'code' => true,
@@ -2452,7 +2452,7 @@ class Ide
 
                     // info for code
                     $list[] = [
-                      'text' => strlen($text) > 1000 ? $line."<strong><i>".dgettext(X::tDom(), 'content too long to be shown')."</i></strong>" : $text,
+                      'text' => strlen($text) > 1000 ? $line."<strong><i>".X::_('content too long to be shown')."</i></strong>" : $text,
                       'line' => $lineNumber - 1,
                       'position' => $position,
                      // 'link' => $link,
@@ -3309,7 +3309,7 @@ class Ide
               }
             }
             else {
-              $this->error(dgettext(X::tDom(), "Error during the component backup copy: old ->"). $old_folder_component);
+              $this->error(X::_("Error during the component backup copy: old ->"). $old_folder_component);
               return false;
             }
             return true;
@@ -3320,7 +3320,7 @@ class Ide
               if ($this->fs->exists($backup_path.$cfg['path'].$cfg['new_name'].'/'.$cfg['name'])
                   && empty($this->fs->rename($backup_path.$cfg['path'].$cfg['new_name'].'/'.$cfg['name'], $cfg['new_name']))
               ) {
-                $this->error(dgettext(X::tDom(), "Error during the folder backup rename copmonent"));
+                $this->error(X::_("Error during the folder backup rename copmonent"));
                 return false;
               }//rename file preferences
               else{
@@ -3449,7 +3449,7 @@ class Ide
             && !$this->fs->exists($new_backup)
             && empty($this->fs->copy($old_backup, $new_backup))
         ) {
-          $this->error(dgettext(X::tDom(), "Error during the file backup copy: old ->"). $old_backup);
+          $this->error(X::_("Error during the file backup copy: old ->"). $old_backup);
           return false;
         }
       }//case folder
@@ -3592,7 +3592,7 @@ class Ide
                     && (strpos($t['old'], '/mvc/public/') !== false)
                 ) {
                   if (!$this->createPermByReal($t['old'])) {
-                    return $this->error(dgettext(X::tDom(), "Impossible to create the option for rename"));
+                    return $this->error(X::_("Impossible to create the option for rename"));
                   }
                 }
 
@@ -3615,7 +3615,7 @@ class Ide
                     && !empty($cfg['is_file']) && (strpos($t['old'], '/mvc/public/') !== false)
                 ) {
                   if (!$this->createPermByReal($t['old'])) {
-                    return $this->error(dgettext(X::tDom(), "Impossible to create the option for move"));
+                    return $this->error(X::_("Impossible to create the option for move"));
                   }
                 }
 

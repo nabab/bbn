@@ -108,6 +108,19 @@ class X
     return self::$_textdomain;
   }
 
+
+  public static function _(string $string): string
+  {
+    $res = dgettext(X::tDom(), $string);
+    $args = func_get_args();
+    if (count($args) > 1) {
+      array_shift($args);
+      return sprintf($res, ...$args);
+    }
+
+    return $res;
+  }
+
   /**
    * Returns a microtime with 4 digit after the coma
    *

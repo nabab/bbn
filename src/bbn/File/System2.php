@@ -73,7 +73,7 @@ class System2 extends bbn\Models\Cls\Basic
         $this->current = '';
         return true;
       }
-      $this->error = dgettext(X::tDom(), 'Impossible to connect to the WebDAV host');
+      $this->error = X::_('Impossible to connect to the WebDAV host');
     }
     return false;
   }
@@ -99,7 +99,7 @@ class System2 extends bbn\Models\Cls\Basic
         $this->prefix = 'ftp://'.$cfg['user'].':'.$cfg['pass'].'@'.$cfg['host'];
         return true;
       }
-      $this->error = dgettext(X::tDom(), 'Impossible to connect to the FTP host');
+      $this->error = X::_('Impossible to connect to the FTP host');
     }
     return false;
   }
@@ -114,20 +114,20 @@ class System2 extends bbn\Models\Cls\Basic
     if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
       $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22);
       if ( !$this->cn ){
-        $this->error = dgettext(X::tDom(), "Could not connect through SSH.");
+        $this->error = X::_("Could not connect through SSH.");
       }
       else if ( @ssh2_auth_password($this->cn, $cfg['user'], $cfg['pass']) ){
-        //die(dgettext(X::tDom(), "Could not authenticate with username and password."));
+        //die(X::_("Could not authenticate with username and password."));
         $this->obj = @ssh2_sftp($this->cn);
         if ( $this->obj ){
           $this->current = ssh2_sftp_realpath($this->obj, '.');
           $this->prefix = 'ssh2.sftp://'.$this->obj;
           return true;
         }
-        $this->error = dgettext(X::tDom(), "Could not initialize SFTP subsystem.");
+        $this->error = X::_("Could not initialize SFTP subsystem.");
       }
       else{
-        $this->error = dgettext(X::tDom(), "Could not authenticate with username and password.");
+        $this->error = X::_("Could not authenticate with username and password.");
       }
     }
     return false;

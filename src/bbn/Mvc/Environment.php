@@ -78,7 +78,7 @@ class Environment
       foreach ($tmp as $t) {
         if (!empty($t) || bbn\Str::isNumber($t)) {
           if (\in_array($t, bbn\Mvc::$reserved, true)) {
-            $msg = dgettext(X::tDom(), 'The controller you are asking for contains one of these reserved words')
+            $msg = X::_('The controller you are asking for contains one of these reserved words')
                 .': '.implode(', ', bbn\Mvc::$reserved);
             throw new \Exception($msg);
           }

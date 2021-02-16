@@ -72,7 +72,7 @@ class Passwords extends bbn\Models\Cls\Db
       return false;
     }
 
-    throw new \Exception(dgettext(X::tDom(), "No passwod given or BBN_ENCRYPTION_KEY not defined"));
+    throw new \Exception(X::_("No passwod given or BBN_ENCRYPTION_KEY not defined"));
   }
 
 

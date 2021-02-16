@@ -383,7 +383,7 @@ class Mailing extends bbn\Models\Cls\Db
       }
       return $successes;
     }
-    $this->setError(dgettext(X::tDom(), "No mailer defined"));
+    $this->setError(X::_("No mailer defined"));
     return null;
   }
 
@@ -486,7 +486,7 @@ class Mailing extends bbn\Models\Cls\Db
     ) {
       $cfg['id'] = $id;
       if ($this->countSent($id)) {
-        throw new Error(dgettext(X::tDom(), "Impossible to edit a message already sent or partially sent, you need to duplicate it."));
+        throw new Error(X::_("Impossible to edit a message already sent or partially sent, you need to duplicate it."));
       }
       $version = $mailing['version'];
       if (($cfg['title'] !== $mailing['title']) || ($cfg['content'] !== $mailing['content'])) {
