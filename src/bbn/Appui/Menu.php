@@ -275,7 +275,6 @@ class Menu extends bbn\Models\Cls\Basic
   public function add($id_menu, array $cfg = null): ?string
   {
     $id_opt = $this->fromPath('menus');
-    X::log([$id_opt, $id_menu, $cfg], 'menu');
     if (\is_array($id_menu)) {
       $cfg = $id_menu;
     }

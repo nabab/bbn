@@ -130,6 +130,7 @@ class View
             $idx = $this->_component ? 'components/' : 'mvc/';
             //die(var_dump($idx.$path, $tmp));
             //die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));
+            //die(var_dump($idx.$path, $tmp));
             if ($translations = ($tmp[$idx.$path] ?? null)) {
               $json           = json_encode($translations);
               $tmp            = <<<JAVASCRIPT

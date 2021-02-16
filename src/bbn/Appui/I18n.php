@@ -9,6 +9,7 @@
 namespace bbn\Appui;
 
 use bbn;
+use bbn\X;
 
 class I18n extends bbn\Models\Cls\Cache
 {
@@ -773,13 +774,17 @@ class I18n extends bbn\Models\Cls\Cache
 
       if (!empty($to_explore_dirs)) {
         foreach ($to_explore_dirs as $c){
-                    $res[] = $this->analyzeFolder($c, true);
+          if ($ana = $this->analyzeFolder($c, true)) {
+            foreach ($ana as $exp => $an) {
+              if (!isset($res[$exp])) {
+                $res[$exp] = $an;
+              }
+              else {
+                $res[$exp] = array_merge($res[$exp], $an);
+              }
+            }
+          }
         }
-      }
-
-      //all strings found in the different dirs $to_explore_dirs, merge all index of $res
-      if (!empty($res)) {
-         $res = array_merge(...$res);
       }
 
       $news = [];
@@ -1138,7 +1143,8 @@ class I18n extends bbn\Models\Cls\Cache
   public function getPathToExplore(string $id_option) :? String
   {
     if ($this->id_project) {
-      $project = new \bbn\Appui\Project($this->db, $this->id_project);
+      /** @var bbn\Appui\Project */
+      $project = new Project($this->db, $this->id_project);
       //the repository
       $rep = $project->repositoryById($id_option);
 
@@ -1159,8 +1165,14 @@ class I18n extends bbn\Models\Cls\Cache
    */
   public function getLocaleDirPath(string $id_option) : String
   {
-    $path = $this->getPathToExplore($id_option).'locale';
-    return $path;
+    if ($path = $this->getPathToExplore($id_option)) {
+      if (substr($path, -1) !== '/') {
+        $path .= '/';
+      }
+
+    }
+
+    return $path.'locale';
   }
 
 

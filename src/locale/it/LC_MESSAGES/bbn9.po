@@ -1,0 +1,619 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 1\n"
+"Report-Msgid-Bugs-To: info@bbn.so\n"
+"last-Translator: BBN Solutions <support@bbn.solutions>\n"
+"Language-Team: IT <IT@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-02-16 17:30+0100\n"
+"POT-Revision-Date: 2021-02-16 17:30+0100\n"
+"Language: it\n"
+"X-Domain: bbn\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui.php
+msgid "Impossible to get the settings"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui.php
+msgid "Impossible to add the plugin"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui.php
+msgid "Impossible to add the permission for the plugin"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "Impossible to create the connection"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "with the following error"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "Impossible to create the connection for"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "Impossible to find the corresponding hash"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "The queries object is empty!"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "Impossible to find the query corresponding to this hash"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db.php
+msgid "No table given"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Mail.php
+msgid "A \"From\" eMail address must be provided"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Str.php
+msgid "Maximum stack depth exceeded"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Str.php
+msgid "State mismatch (invalid or malformed JSON)"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Str.php
+msgid "Unexpected control character found"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Str.php
+msgid "Syntax error, malformed JSON"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Str.php
+msgid "Malformed UTF-8 characters, possibly incorrectly encoded"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Str.php
+msgid "Unknown error"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "Missing parameters"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "The given destination already exists"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "The new name given already exists"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "The given path does not correspond to a file or a directory"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "The last modification date cannot be retrieved"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "The given path doesn't exist"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Api/Nextcloud.php
+msgid "The path doesn't exists or it's not a directory"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Api.php
+msgid "Impossible to register"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Api.php
+msgid "No JWT"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Api.php
+msgid "Impossible to send the request"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "You created this group"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "created this group"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "You added"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "to the group"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "added you to the group"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "added"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "You have changed the chat title"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "has changed the chat title"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "added you"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "You remove"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "removed"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "You set"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "as admin"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "set you as admin"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "set"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "You removed"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "removed you as admin"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Chat.php
+msgid "has left the chat"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Cms.php
+msgid ""
+"The url you are trying to insert already belongs to a published note. Unpublish "
+"the note or change the url!"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to find the host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to find the option corresponding to host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Unknown engine"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "db or path empty"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to find the engine"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to get a connection for"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to find the host engine"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to use the database"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to connect"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Table undefined"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Procedures"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Connections"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Function"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Tables"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Impossible to find an host ID for DB"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Columns"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Database.php
+msgid "Keys"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Grid.php
+msgid "Error"
+msgstr "Errore"
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Impossible to create the option"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Error: Save"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Directory exists"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Impossible to create the directory"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Impossible to create the container directory"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "File exists"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Impossible to create the file"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "content too long to be shown"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Error during the component backup copy: old ->"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Error during the folder backup rename copmonent"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Error during the file backup copy: old ->"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Impossible to create the option for rename"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Ide.php
+msgid "Impossible to create the option for move"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Mailing.php
+msgid "No mailer defined"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Mailing.php
+msgid ""
+"Impossible to edit a message already sent or partially sent, you need to "
+"duplicate it."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Masks.php
+msgid "default"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Masks.php
+msgid "by"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Menu.php
+msgid "Shortcuts"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Option.php
+msgid "Impossible to have the same ID as ALIAS, check out ID"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Option.php
+msgid "Impossible to find the ID"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Option.php
+msgid "Error while importing: impossible to add"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Option.php
+msgid "Impossible to find the parent"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Option.php
+msgid "Impossible to find the alias"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Option.php
+msgid "Impossible to find the root alias"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Passwords.php
+msgid "No passwod given or BBN_ENCRYPTION_KEY not defined"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "The field parameter is mandatory for sum and avg types"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "The field parameter must be a known field of the table"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "The field parameter is mandatory for statistics of type update"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "Impossible to read the given start date"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "Impossible to read the given end date"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "The parameters field and value must be given for update statistics"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Statistic.php
+msgid "The parameters field must be a valid column from the given table"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Task.php
+msgid "Task"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Appui/Task.php
+msgid "Report tracker"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cdn/Compiler.php
+msgid "Impoossible to find the file"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cdn/Config.php
+msgid "Impossible to initialize the CDN without a DB connection"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cdn/Library.php
+msgid "Problem adding library"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Manager.php
+msgid "The task"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Manager.php
+msgid "failed."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Manager.php
+msgid "CRON task failed"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Manager.php
+msgid "One shot action"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Runner.php
+msgid "Dead process"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Runner.php
+msgid "Content"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Runner.php
+msgid "Different processes"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Cron/Runner.php
+msgid "Ending poll process"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Sync.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Sync2.php
+msgid "Table name not allowed"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Sync.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Sync2.php
+msgid "Invalid connection given to the synchronization class"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Languages/Mysql.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Languages/Pgsql.php
+msgid "Impossible to recognize the column type"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Languages/Mysql.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Db/Languages/Pgsql.php
+msgid "Wrong database name"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "Impossible to connect to the SSH server"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "If replace is an array, search must be an array of equal length"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System2.php
+msgid "Impossible to connect to the WebDAV host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "Impossible to connect to the FTP host through SSL"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System2.php
+msgid "Impossible to connect to the FTP host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "Impossible to login to the FTP host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System2.php
+msgid "Could not connect through SSH."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "Authentication rejected by server"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "Could not connect through SFTP."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System2.php
+msgid "Could not authenticate with username and password."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System2.php
+msgid "Could not initialize SFTP subsystem."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/File/System.php
+msgid "Error in _delete"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Models/Cls/Basic.php
+msgid "Wrong method used for the class %s: %s with the following arguments:"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Models/Tts/Optional.php
+msgid "There is no options object as needed by"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Models/Tts/Optional.php
+msgid "Impossible to get the options object from class"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Models/Tts/Singleton.php
+msgid "Impossible to create a new instance of"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Mvc/Controller.php
+msgid "Impossible to route the following request"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Mvc/Environment.php
+msgid "The controller you are asking for contains one of these reserved words"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Mvc/Router.php
+msgid "Impossible to find a route"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Parsers/Apache.php
+msgid "Error: unexpected fgets() fail"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Parsers/Doc.php
+msgid "Error: mode not allowed."
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Emails.php
+msgid "Impossible to insert the email with ID"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Emails.php
+msgid "Impossible to get the emails for folder"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Emails.php
+msgid "from"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Emails.php
+msgid "to"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Emails.php
+msgid "Impossible to add the contact"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Manager.php
+msgid "Impossible to make hotlinks without a proper mailer parameter"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Manager.php
+msgid "User not found"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Manager.php
+msgid "Impossible to delete this group as it has users"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Permissions.php
+msgid "Impossible to find the permission code"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Permissions.php
+msgid "Options"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Permissions.php
+msgid "Access"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Permissions.php
+msgid "Plugins"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/User/Permissions.php
+msgid "Impossible to find the appui plugin %s"
+msgstr ""
+
+#: /home/thomas/domains/apstapp.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/Util/Timer.php
+msgid "Missing a start declaration for timer"
+msgstr ""

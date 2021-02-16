@@ -145,21 +145,24 @@ You can click the following link to access directly your account:<br>
     $t =& $this->class_cfg['tables'];
     $id = $this->db->cfn($a['groups']['id'], $t['groups']);
     $users_id = $this->db->cfn($a['users']['id'], $t['users'], 1);
+    $db =& $this->db;
+    $fields = \array_map(function($g) use($db, $t){
+      return $db->cfn($g, $t['groups']);
+    }, \array_values($a['groups']));
+    $fields['num'] = "COUNT($users_id)";
     return $this->db->rselectAll([
-      'tables' => [$t['groups']],
-      'fields' => array_merge($a['groups'], ['num' => "COUNT($users_id)"]),
-      'join' => [
-        [
-          'table' => $t['users'],
-          'type' => 'left',
-          'on' => [
-            [
-              'field' => 'id_group',
-              'exp' => $id
-            ]
-          ]
+      'table' => $t['groups'],
+      'fields' => $fields,
+      'join' => [[
+        'table' => $t['users'],
+        'type' => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($a['users']['id_group'], $t['users']),
+            'exp' => $id
+          ]]
         ]
-      ],
+      ]],
       'group_by' => [$id]
     ]);
   }
