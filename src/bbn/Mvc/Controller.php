@@ -1052,6 +1052,16 @@ class Controller implements Api
       string $path = ''
   ): self
   {
+    if (empty($path)) {
+      $basename = basename($this->_file, '.php');
+      if (X::indexOf(['index', 'home'], $basename) > -1) {
+        $bits = X::split($this->_path, '/');
+        if (end($bits) !== $basename) {
+          $bits[] = $basename;
+          $path = X::join($bits, '/');
+        }
+      }
+    }
     if ($this->getRoute($path ?: $this->_path, 'model')) {
       $model = $ttl === null ? $this->getModel($path, X::mergeArrays($this->post, $this->data)) : $this->getCachedModel($path, X::mergeArrays($this->post, $this->data), $ttl);
       if ($model && is_array($model)) {
@@ -1087,7 +1097,7 @@ class Controller implements Api
       $this->addJs($path, $data, false);
     }
 
-    echo $this->getView($path, false);
+    echo $this->getView($path);
     return $this;
   }
 
@@ -1514,7 +1524,6 @@ class Controller implements Api
    */
   public function add($path, $data=[], $internal = false)
   {
-    die(X::dump($this->_plugin, array_keys(get_object_vars($this))));
     if (substr($path, 0, 2) === './') {
       $path = $this->getCurrentDir().substr($path, 1);
     }

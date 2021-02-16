@@ -3201,6 +3201,7 @@ class Option extends bbn\Models\Cls\Db
               $this->setAlias($id, $id_alias);
             }
             else {
+              X::log($td['id_alias']);
               throw new \Exception("Error while importing: impossible to set the alias");
             }
           }
