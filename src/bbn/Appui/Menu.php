@@ -280,14 +280,17 @@ class Menu extends bbn\Models\Cls\Basic
       $cfg = $id_menu;
     }
 
-    if (Str::isUid($id_menu)) {
-      $this->deleteCache($id_menu);
-    }
+    if (!empty($cfg)) {
+      if (Str::isUid($id_menu)) {
+        $this->deleteCache($id_menu);
+      }
 
-    if (!empty($cfg)
-        && ($id = Str::isUid($id_menu) ? $this->pref->addBit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg))
-    ) {
-
+      if (Str::isUid($id_menu)) {
+        $id = $this->pref->addBit($id_menu, $cfg);
+      }
+      else {
+        $id = $this->pref->add($id_opt, $cfg);
+      }
       $this->options->deleteCache($id_opt);
       return $id;
     }
