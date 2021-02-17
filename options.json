@@ -1,4 +1,4 @@
-{
+[{
     "cfg": {
         "categories": 1,
         "show_code": 1,
@@ -7,7 +7,7 @@
     },
     "text": "Appui",
     "code": "appui",
-    "icon": "data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAZCAYAAABQDyyRAAAABmJLR0QA\/wD\/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH5AQWEw8z59s9RwAAAvVJREFUSMe9lt1LU3EYxz\/PWetl02axO4fitXCsSOwuTXqBHSGs8No7\/4AIAqUiMrzy1r8gerko5gtUdBeCIoSJ9AoliLaxmVp6jkZ7uvmt3Jrb2ci+lzu\/8\/t8n+\/z7Px+sIdSVVS1X1VvqarwP2XgA\/pHg6q69+BAIJCD31TVrObr7p4nYeA3dHcNljURCAQYHR1lbGysGvgtLa+hXDuswk2Gh4dJJBIHLcuaEJEuPyaampowG94GBnx4vQYMqarkRTExMQEQUtUE0AlsA1dUNeE4TsnKDby\/wo5dLUwgpKqjBg6wH3gkIhd3S8LA71QB\/wDcl4LKx4COIou3gR7gSTweB8C2bWZnZ8XAr1cI\/wicBpbEwMMG3l7ipR9Aj6o+dhwnV\/lgFfD3psglEcEy8PEycIAg8EBELi0uLgIMVQF\/B7Rvbm4uiRk\/S1Ufmjj8KAjci0QiD80kVwrvmJubWw6Hw79\/tIC7wDe\/f3Xbtt2amprLFcLfmoSXbdvOe2ABL4ELwPdy8JaWlrVYLBYBxPO8zZWVlXUf8DdAu4h8Efn7A2jF43FSqdQkcL5EEmrb9lp9fX0dgOd5G5OTk4GpqamaTCazWgbeASR3W2AB9Pb24rpuzkTRqlzXFUANfJ\/neQdU1Zqenq5Np9Nfi7wyb2JPFqs8p7wn4+PjAKeAp8DhwsWNjY2ryWTykOd5B\/I2Ecm2trauRaPRIzvgZ0QkVa4\/f1nr6+ujq6urzZiI+J0yY2I9Go0umi9pqlTleS3YqZGREba2tqaAc8AaQCQS2YjFYutlTkJrZmbms+u6HX7hRQ0AdHd3o6rTwNm6urrltra2fbZthxsaGkqZmMtms2dDoVDaL7xoC\/IOgO1tgsHgSeAZcAT4OT8\/v7GwsFA4H69N7OncWfFPDOw47U4Az4GjRUzMqmqniGQqhfsysMPEceBFQRKfVLXTcZxMtVc4y+eEA7wyMWeAQHNz88fa2tozqlo1vNoL5zFVfa6qR\/\/FNfsXYh\/EsKizzrMAAAAASUVORK5CYII=",
+    "icon": "data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAADTAAAA0wB\/Z14fgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKXSURBVFiF5ZcxT+pQFIC\/FgUWTTSuJLA41sGFhQSMkKjAr1CCJsbJTU0b2N35HWjiRFzVSHRwMBEqMJG2JjoRE+rgow+wLQUxJu+dsb33fF\/PPbe9FW5ubkx+McTfhP8fAoZhcHl5+TsChmGwu7vL4eEh5+fntmNmfhKez+ep1WoAyLIMwObm5sC4H6nAMByg2+0iy\/KXSkxdwA7uJuEoMD8\/z8zMeCvkBh+WODs7Axx6YGFhgUgkQqfT4fHxkff396nA+yUURQFsKtCDC4JAMBhkeXmZ2dlZ14SappHL5TzB+yWur68HBfrhvRglYRgGe3t7qKrqGQ6QSqU4Pj7+K2AHHyUxTtmH4YVCAZ\/P9yngBneSmAYcQPQCH5Z4fX2dGF4sFi04gKDrurm4uOg5SavVIh6P8\/T0NBFcFAf7XlRVlZeXF09JGo0GsVjMgvv9fk\/z0um0LRxANE2Ter2OYRiuSZrNJmtra1a37+zscHV1xdLSkuu8TCbDycmJLRz+vAdM02RUJfL5vPXkuVyOUqnEysoKFxcXOC1hJpP53GoOcACh\/0gmCALhcNg2oa7rJBIJotEopVJp4N7d3R3r6+tommZdy2azHB0ducK\/CIySeHt7Y25uzjbR7e0tqVQKXdc9w20FnCQ6nQ6BQMA1WbVa5fT0lP39fU9wcPga9nqi15iKorC6ukq73XZNFgqFODg48AwHhwpYNwWBarXK9vY2AJIkUalUbJdH0zSen589g3vhqmqaJpIkWceo+\/t7YrHYl0pMCh8pACCKIrIsWxIPDw8kEglL4jtwTwL9EhsbG5ZEMpmkXq9\/C+5ZoCehKApbW1sAhMPhgX0\/abg2oV10u13K5TLpdHqsbp+awLTj3\/83HBUfhqFVwjxEB4YAAAAASUVORK5CYII=",
     "items": [
         {
             "cfg": {
@@ -17,7 +17,8 @@
                 "i18n": "en"
             },
             "text": "API",
-            "code": "api"
+            "code": "api",
+            "icon": "nf nf-mdi-lan_connect"
         },
         {
             "cfg": {
@@ -27,7 +28,8 @@
                 "i18n": "en"
             },
             "text": "Billing",
-            "code": "billing"
+            "code": "billing",
+            "icon": "nf nf-fa-credit_card"
         },
         {
             "cfg": {
@@ -37,7 +39,8 @@
                 "i18n": "en"
             },
             "text": "CDN",
-            "code": "cdn"
+            "code": "cdn",
+            "icon": "nf nf-fa-cube"
         },
         {
             "cfg": {
@@ -47,7 +50,8 @@
                 "i18n": "en"
             },
             "text": "Chat",
-            "code": "chat"
+            "code": "chat",
+            "icon": "nf nf-oct-comment_discussion"
         },
         {
             "cfg": {
@@ -57,7 +61,8 @@
                 "i18n": "en"
             },
             "text": "Clipboard",
-            "code": "clipboard"
+            "code": "clipboard",
+            "icon": "nf nf-mdi-clipboard_outline"
         },
         {
             "cfg": {
@@ -67,7 +72,8 @@
                 "i18n": "en"
             },
             "text": "Components",
-            "code": "component"
+            "code": "component",
+            "icon": "nf nf-fae-molecule"
         },
         {
             "cfg": {
@@ -88,7 +94,8 @@
                 "i18n": "en"
             },
             "text": "Core",
-            "code": "core"
+            "code": "core",
+            "icon": "nf nf-custom-electron"
         },
         {
             "cfg": {
@@ -98,7 +105,8 @@
                 "i18n": "en"
             },
             "text": "CRM",
-            "code": "crm"
+            "code": "crm",
+            "icon": "nf nf-oct-organization"
         },
         {
             "cfg": {
@@ -304,6 +312,7 @@
             },
             "text": "eMails",
             "code": "email",
+            "icon": "nf nf-fa-at",
             "items": [
                 {
                     "text": "Accounts",
@@ -416,7 +425,8 @@
                 "i18n": "en"
             },
             "text": "Entity",
-            "code": "entity"
+            "code": "entity",
+            "icon": "nf nf-dev-codepen"
         },
         {
             "cfg": {
@@ -427,6 +437,7 @@
             },
             "text": "Events",
             "code": "event",
+            "icon": "nf nf-oct-calendar",
             "items": [
                 {
                     "text": "Publication",
@@ -446,7 +457,8 @@
                 "i18n": "en"
             },
             "text": "Explorer",
-            "code": "explorer"
+            "code": "explorer",
+            "icon": "nf nf-mdi-magnify"
         },
         {
             "cfg": {
@@ -477,7 +489,8 @@
                 "i18n": "en"
             },
             "text": "GDPR",
-            "code": "gdpr"
+            "code": "gdpr",
+            "icon": "nf nf-mdi-playlist_check"
         },
         {
             "cfg": {
@@ -487,7 +500,8 @@
                 "i18n": "en"
             },
             "text": "History",
-            "code": "history"
+            "code": "history",
+            "icon": "nf nf-mdi-history"
         },
         {
             "cfg": {
@@ -1918,7 +1932,8 @@
                 "i18n": "en"
             },
             "text": "Meeting",
-            "code": "meeting"
+            "code": "meeting",
+            "icon": "nf nf-mdi-webcam"
         },
         {
             "cfg": {
@@ -1958,7 +1973,8 @@
                 "i18n": "en"
             },
             "text": "Monitor",
-            "code": "monitor"
+            "code": "monitor",
+            "icon": "nf nf-mdi-heart_pulse"
         },
         {
             "cfg": {
@@ -2093,7 +2109,8 @@
                 "i18n": "en"
             },
             "text": "Observers",
-            "code": "observers"
+            "code": "observers",
+            "icon": "nf nf-fa-binoculars"
         },
         {
             "cfg": {
@@ -2103,7 +2120,8 @@
                 "i18n": "en"
             },
             "text": "Options",
-            "code": "option"
+            "code": "option",
+            "icon": "nf nf-mdi-format_list_checks"
         },
         {
             "cfg": {
@@ -2168,7 +2186,8 @@
                 "i18n": "en"
             },
             "text": "Social",
-            "code": "social"
+            "code": "social",
+            "icon": "nf nf-mdi-google_circles_extended"
         },
         {
             "cfg": {
@@ -2178,7 +2197,8 @@
                 "i18n": "en"
             },
             "text": "Spreadsheet",
-            "code": "spreadsheet"
+            "code": "spreadsheet",
+            "icon": "nf nf-mdi-grid"
         },
         {
             "cfg": {
@@ -2239,7 +2259,8 @@
                 "i18n": "en"
             },
             "text": "Styles",
-            "code": "style"
+            "code": "style",
+            "icon": "nf nf-dev-css3"
         },
         {
             "cfg": {
@@ -2258,17 +2279,8 @@
                         "allow_children": 1,
                         "i18n": "en",
                         "scfg": {
-                            "allow_children": null,
                             "alias_name": "Permission",
-                            "categories": null,
-                            "controller": null,
-                            "default": "",
-                            "default_value": null,
-                            "desc": "",
-                            "form": null,
                             "i18n": "en",
-                            "id": "",
-                            "inheritance": "",
                             "schema": [
                                 {
                                     "title": "Closable",
@@ -2371,14 +2383,23 @@
                             "show_icon": 1,
                             "show_value": null,
                             "sortable": 1,
-                            "help": "",
                             "notext": 0,
                             "view": 0
                         },
                         "show_icon": 1
                     },
                     "text": "Dashboards",
-                    "code": "list"
+                    "code": "list",
+                    "items": [
+                        {
+                            "text": "Default dashboard",
+                            "code": "default"
+                        },
+                        {
+                            "text": "Plugins dashboard",
+                            "code": "plugins"
+                        }
+                    ]
                 }
             ]
         },
@@ -2598,7 +2619,8 @@
                 "i18n": "en"
             },
             "text": "User and Group",
-            "code": "usergroup"
+            "code": "usergroup",
+            "icon": "nf nf-fa-user_circle"
         },
         {
             "cfg": {
@@ -2608,7 +2630,18 @@
                 "i18n": "en"
             },
             "text": "Write",
-            "code": "write"
+            "code": "write",
+            "icon": "nf nf-fa-pencil_square_o"
         }
     ]
-}
+}, {
+    "cfg": {
+        "categories": 1,
+        "show_code": 1,
+        "show_icon": 1,
+        "i18n": "en"
+    },
+    "text": "Plugins",
+    "code": "_plugins_",
+    "icon": "nf nf-mdi-puzzle"
+}]
