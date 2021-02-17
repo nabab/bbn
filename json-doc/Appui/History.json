@@ -2044,7 +2044,6 @@
                     "bbn_users_tokens",
                     "bbn_users_usergroups",
                     "bbn_vcs",
-                    "my_new_table",
                     "test"
                 ],
                 "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents": {
@@ -10669,7 +10668,7 @@
                         "variant": {
                             "position": 5,
                             "type": "varchar",
-                            "null": 1,
+                            "null": 0,
                             "key": null,
                             "extra": "",
                             "signed": true,
@@ -13032,18 +13031,6 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
-                        },
-                        "excerpt": {
-                            "columns": [
-                                "excerpt"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 0
                         }
                     },
                     "cols": {
@@ -13061,9 +13048,6 @@
                         ],
                         "id_alias": [
                             "id_alias"
-                        ],
-                        "excerpt": [
-                            "excerpt"
                         ]
                     },
                     "fields": {
@@ -13118,7 +13102,7 @@
                             "position": 5,
                             "type": "text",
                             "null": 0,
-                            "key": "MUL",
+                            "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -15950,7 +15934,7 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL",
-                            "maxlength": 255
+                            "maxlength": 100
                         },
                         "blacklist": {
                             "position": 4,
@@ -15991,19 +15975,6 @@
                             "delete": null,
                             "unique": 1
                         },
-                        "type": {
-                            "columns": [
-                                "type",
-                                "value"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 1
-                        },
                         "id_contact": {
                             "columns": [
                                 "id_contact"
@@ -16015,30 +15986,11 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
-                        },
-                        "value": {
-                            "columns": [
-                                "value"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 0
                         }
                     },
                     "cols": {
                         "id": [
                             "PRIMARY"
-                        ],
-                        "type": [
-                            "type"
-                        ],
-                        "value": [
-                            "type",
-                            "value"
                         ],
                         "id_contact": [
                             "id_contact"
@@ -16071,7 +16023,7 @@
                             "position": 3,
                             "type": "varchar",
                             "null": 0,
-                            "key": "MUL",
+                            "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -16082,7 +16034,7 @@
                             "position": 4,
                             "type": "varchar",
                             "null": 0,
-                            "key": "MUL",
+                            "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -17648,201 +17600,6 @@
                         }
                     }
                 },
-                "mysql\/bbn@mysql.lan\/apst_app\/my_new_table": {
-                    "keys": {
-                        "PRIMARY": {
-                            "columns": [
-                                "id"
-                            ],
-                            "ref_db": "apst_app",
-                            "ref_table": "bbn_history_uids",
-                            "ref_column": "bbn_uid",
-                            "constraint": "y40wncx1",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 1
-                        },
-                        "file": {
-                            "columns": [
-                                "file",
-                                "variant"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 1
-                        },
-                        "project": {
-                            "columns": [
-                                "project"
-                            ],
-                            "ref_db": "apst_app",
-                            "ref_table": "bbn_projects",
-                            "ref_column": "id",
-                            "constraint": "y40wncx2",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 0
-                        }
-                    },
-                    "cols": {
-                        "id": [
-                            "PRIMARY"
-                        ],
-                        "file": [
-                            "file"
-                        ],
-                        "variant": [
-                            "file"
-                        ],
-                        "project": [
-                            "project"
-                        ]
-                    },
-                    "fields": {
-                        "id": {
-                            "position": 1,
-                            "type": "binary",
-                            "null": 0,
-                            "key": "PRI",
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "maxlength": 16
-                        },
-                        "project": {
-                            "position": 2,
-                            "type": "binary",
-                            "null": 1,
-                            "key": "MUL",
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 16
-                        },
-                        "priority": {
-                            "position": 3,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 5,
-                            "maxlength": 1
-                        },
-                        "file": {
-                            "position": 4,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": "MUL",
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "maxlength": 100
-                        },
-                        "variant": {
-                            "position": 5,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 255
-                        },
-                        "prev": {
-                            "position": 6,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "next": {
-                            "position": 7,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "description": {
-                            "position": 8,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "pid": {
-                            "position": 9,
-                            "type": "int",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 6
-                        },
-                        "notification": {
-                            "position": 10,
-                            "type": "decimal",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 14,
-                            "decimals": 4
-                        },
-                        "cfg": {
-                            "position": 11,
-                            "type": "json",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": ""
-                        },
-                        "active": {
-                            "position": 12,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 0,
-                            "maxlength": 1
-                        }
-                    }
-                },
                 "mysql\/bbn@mysql.lan\/apst_app\/test": {
                     "keys": [],
                     "cols": [],
@@ -17991,9 +17748,6 @@
                 "id"
             ],
             "apst_app.bbn_people": [
-                "id"
-            ],
-            "apst_app.my_new_table": [
                 "id"
             ]
         },
@@ -18445,7 +18199,6 @@
                     "bbn_users_tokens",
                     "bbn_users_usergroups",
                     "bbn_vcs",
-                    "my_new_table",
                     "test"
                 ],
                 "mysql\/bbn@mysql.lan\/apst_app\/apst_adherents": {
@@ -27070,7 +26823,7 @@
                         "variant": {
                             "position": 5,
                             "type": "varchar",
-                            "null": 1,
+                            "null": 0,
                             "key": null,
                             "extra": "",
                             "signed": true,
@@ -29433,18 +29186,6 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
-                        },
-                        "excerpt": {
-                            "columns": [
-                                "excerpt"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 0
                         }
                     },
                     "cols": {
@@ -29462,9 +29203,6 @@
                         ],
                         "id_alias": [
                             "id_alias"
-                        ],
-                        "excerpt": [
-                            "excerpt"
                         ]
                     },
                     "fields": {
@@ -29519,7 +29257,7 @@
                             "position": 5,
                             "type": "text",
                             "null": 0,
-                            "key": "MUL",
+                            "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -32351,7 +32089,7 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL",
-                            "maxlength": 255
+                            "maxlength": 100
                         },
                         "blacklist": {
                             "position": 4,
@@ -32392,19 +32130,6 @@
                             "delete": null,
                             "unique": 1
                         },
-                        "type": {
-                            "columns": [
-                                "type",
-                                "value"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 1
-                        },
                         "id_contact": {
                             "columns": [
                                 "id_contact"
@@ -32416,30 +32141,11 @@
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
-                        },
-                        "value": {
-                            "columns": [
-                                "value"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 0
                         }
                     },
                     "cols": {
                         "id": [
                             "PRIMARY"
-                        ],
-                        "type": [
-                            "type"
-                        ],
-                        "value": [
-                            "type",
-                            "value"
                         ],
                         "id_contact": [
                             "id_contact"
@@ -32472,7 +32178,7 @@
                             "position": 3,
                             "type": "varchar",
                             "null": 0,
-                            "key": "MUL",
+                            "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -32483,7 +32189,7 @@
                             "position": 4,
                             "type": "varchar",
                             "null": 0,
-                            "key": "MUL",
+                            "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
@@ -34049,201 +33755,6 @@
                         }
                     }
                 },
-                "mysql\/bbn@mysql.lan\/apst_app\/my_new_table": {
-                    "keys": {
-                        "PRIMARY": {
-                            "columns": [
-                                "id"
-                            ],
-                            "ref_db": "apst_app",
-                            "ref_table": "bbn_history_uids",
-                            "ref_column": "bbn_uid",
-                            "constraint": "y40wncx1",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 1
-                        },
-                        "file": {
-                            "columns": [
-                                "file",
-                                "variant"
-                            ],
-                            "ref_db": null,
-                            "ref_table": null,
-                            "ref_column": null,
-                            "constraint": null,
-                            "update": null,
-                            "delete": null,
-                            "unique": 1
-                        },
-                        "project": {
-                            "columns": [
-                                "project"
-                            ],
-                            "ref_db": "apst_app",
-                            "ref_table": "bbn_projects",
-                            "ref_column": "id",
-                            "constraint": "y40wncx2",
-                            "update": "CASCADE",
-                            "delete": "CASCADE",
-                            "unique": 0
-                        }
-                    },
-                    "cols": {
-                        "id": [
-                            "PRIMARY"
-                        ],
-                        "file": [
-                            "file"
-                        ],
-                        "variant": [
-                            "file"
-                        ],
-                        "project": [
-                            "project"
-                        ]
-                    },
-                    "fields": {
-                        "id": {
-                            "position": 1,
-                            "type": "binary",
-                            "null": 0,
-                            "key": "PRI",
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "maxlength": 16
-                        },
-                        "project": {
-                            "position": 2,
-                            "type": "binary",
-                            "null": 1,
-                            "key": "MUL",
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 16
-                        },
-                        "priority": {
-                            "position": 3,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 5,
-                            "maxlength": 1
-                        },
-                        "file": {
-                            "position": 4,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": "MUL",
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "maxlength": 100
-                        },
-                        "variant": {
-                            "position": 5,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 255
-                        },
-                        "prev": {
-                            "position": 6,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "next": {
-                            "position": 7,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "description": {
-                            "position": 8,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "pid": {
-                            "position": 9,
-                            "type": "int",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 6
-                        },
-                        "notification": {
-                            "position": 10,
-                            "type": "decimal",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 14,
-                            "decimals": 4
-                        },
-                        "cfg": {
-                            "position": 11,
-                            "type": "json",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": ""
-                        },
-                        "active": {
-                            "position": 12,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 0,
-                            "maxlength": 1
-                        }
-                    }
-                },
                 "mysql\/bbn@mysql.lan\/apst_app\/test": {
                     "keys": [],
                     "cols": [],
@@ -34392,9 +33903,6 @@
                 "id"
             ],
             "apst_app.bbn_people": [
-                "id"
-            ],
-            "apst_app.my_new_table": [
                 "id"
             ]
         },

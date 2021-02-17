@@ -69,7 +69,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $o = bbn\\Appui\\Option::getInstance();\n    if (!$o) {\n      throw new \\Exception(dgettext(X::tDom(), \"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "code": "function()\n  {\n    $o = bbn\\Appui\\Option::getInstance();\n    if (!$o) {\n      throw new \\Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
             "startLine": 159,
             "endLine": 167,
             "isDeprecated": false,

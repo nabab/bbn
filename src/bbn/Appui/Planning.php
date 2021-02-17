@@ -51,7 +51,7 @@ class Planning {
   {
     $this->db = $db;
     $this->_init_class_cfg();
-    $this->events = new \bbn\Appui\Events($this->db);
+    $this->events = new \bbn\Appui\Event($this->db);
     $this->ecfg = $this->events->getClassCfg();
     $this->options = new \bbn\Appui\Option($this->db);
     $this->ocfg = $this->options->getClassCfg();
@@ -59,7 +59,7 @@ class Planning {
 
   /**
    * Returns the bbn\Appui\Events instance
-   * @return \bbn\Appui\Events
+   * @return \bbn\Appui\Event
    */
   public function getEvents(){
     return $this->events;

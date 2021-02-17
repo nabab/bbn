@@ -165,7 +165,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      $this->_measures[$key]['num']++;\n      $time                          = $this->measure($key);\n      $this->_measures[$key]['sum'] += $time;\n      unset($this->_measures[$key]['start']);\n      return $time;\n    }\n\n    throw new \\Exception(dgettext(X::tDom(), \"Missing a start declaration for timer\").\" $key\");\n  }",
+            "code": "function($key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      $this->_measures[$key]['num']++;\n      $time                          = $this->measure($key);\n      $this->_measures[$key]['sum'] += $time;\n      unset($this->_measures[$key]['start']);\n      return $time;\n    }\n\n    throw new \\Exception(X::_(\"Missing a start declaration for timer\").\" $key\");\n  }",
             "startLine": 86,
             "endLine": 97,
             "isDeprecated": false,

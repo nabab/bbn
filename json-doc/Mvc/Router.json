@@ -18,7 +18,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
     "startLine": 28,
-    "endLine": 953,
+    "endLine": 954,
     "contentConstructor": {
         "file": "bbn\\Mvc\\Router",
         "returns": null

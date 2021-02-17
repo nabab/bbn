@@ -892,7 +892,7 @@ class Option extends bbn\Models\Cls\Db
    * Returns an option's children array of id and text in a user-defined indexed array
    *
    * ```php
-   * X::dump($opt->text_value_option(12, 'title'));
+   * X::dump($opt->textValueOptions(12, 'title'));
    * /* value comes from the default argument
    * array [
    *   ['title' => "My option 21", 'value' =>  21],

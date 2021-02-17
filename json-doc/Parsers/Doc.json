@@ -106,7 +106,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($mode)\n  {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(dgettext(X::tDom(), 'Error: mode not allowed.'));\n  }",
+            "code": "function($mode)\n  {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(X::_('Error: mode not allowed.'));\n  }",
             "startLine": 648,
             "endLine": 654,
             "isDeprecated": false,

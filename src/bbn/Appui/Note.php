@@ -703,7 +703,7 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($cf['arch']['notes']['active'], $cf['table']),
           'first_version.'.$cf['arch']['versions']['creation'],
           'last_version.'.$cf['arch']['versions']['title'],
-          'last_version.'.$cf['arch']['versions']['content'],
+          //'last_version.'.$cf['arch']['versions']['content'],
           'last_version.'.$cf['arch']['versions']['id_user'],
           'last_edit' => 'last_version.'.$cf['arch']['versions']['creation']
         ],
