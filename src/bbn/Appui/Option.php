@@ -1071,6 +1071,39 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns each individual option plus the children of options having this as alias.
+   *
+   * ```php
+   * X::dump($opt->fullOptions(12));
+   * /*
+   * array [
+   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
+   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
+   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
+   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false A list of parent if option not found
+   */
+  public function itemsRef($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      $all = $this->items($id);
+      $aliases = $this->getAliases($id);
+      foreach ($aliases as $a) {
+        $all[] = $a['id'];
+      }
+
+      return $all;
+    }
+
+    return null;
+  }
+
+
+  /**
    * Returns an array of full options arrays for a given parent
    *
    * ```php
@@ -3119,6 +3152,126 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  public function export(string $id, string $mode = 'single'): ?array
+  {
+    $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];
+    if (!in_array($mode, $modes)) {
+      throw new \Exception(X::_("The given mode is forbidden"));
+    }
+
+    $simple = false;
+    switch ($mode) {
+      case 'single':
+        $o = $this->rawOption($id);
+        break;
+      case 'simple':
+        $o = $this->option($id);
+        $simple = true;
+        break;
+      case 'schildren':
+        $o = $this->fullOptions($id);
+        $simple = true;
+        break;
+      case 'children':
+        $o = $this->exportDb($id, false, true);
+        break;
+      case 'full':
+        $o = $this->exportDb($id, true, true);
+        break;
+      case 'sfull':
+        $o = $this->fullTree($id);
+        $simple = true;
+        break;
+    }
+
+    if ($o) {
+      if ($simple) {
+        $opt =& $this;
+        $fn  = function ($o) use (&$opt) {
+
+          $cfg = $opt->getCfg($o['id']);
+          if (!is_array($cfg) || !empty($cfg['inherit_from'])) {
+            $cfg = [];
+          }
+          elseif (!empty($cfg['schema']) && is_string($cfg['schema'])) {
+            $cfg['schema'] = json_decode($cfg['schema'], true);
+          }
+
+          if (isset($cfg['scfg'])
+              && !empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])
+          ) {
+            $cfg['scfg']['schema'] = json_decode($cfg['scfg']['schema'], true);
+          }
+
+          if (!empty($cfg['id_root_alias'])) {
+            if ($codes = $opt->getCodePath($o['id_root_alias'])) {
+              $cfg['id_root_alias'] = $codes;
+            }
+            else {
+              unset($cfg['id_root_alias']);
+            }
+          }
+
+          foreach ($cfg as $n => $v) {
+            if (!$v) {
+              unset($cfg[$n]);
+            }
+          }
+
+          if (!empty($cfg)) {
+            $o['cfg'] = $cfg;
+          }
+
+          unset($o['id_parent']);
+          unset($o['id']);
+          if (isset($o['num_children'])) {
+            unset($o['num_children']);
+          }
+
+          if (isset($o['alias'])) {
+            unset($o['alias']);
+          }
+
+          foreach ($o as $n => $v) {
+            if (!$v) {
+              unset($o[$n]);
+            }
+          }
+
+          if (!empty($o['id_alias'])
+              && ($codes = $opt->getCodePath($o['id_alias']))
+          ) {
+            $o['id_alias'] = $codes;
+          }
+          else {
+            unset($o['id_alias']);
+          }
+
+          return $o;
+        };
+
+        switch ($mode) {
+          case 'simple':
+            $o = $fn($o);
+            break;
+          case 'schildren':
+            $o = X::map($fn, $o, 'items');
+            $simple = true;
+            break;
+          case 'sfull':
+            $o = $fn($o);
+            $o['items'] = $o['items'] ? X::map($fn, $o['items'], 'items') : [];
+            break;
+        }
+      }
+
+      return $o;
+    }
+
+    return null;
+  }
+
+
   /**
    * Converts an option or a hierarchy to a multi-level array with JSON values
    * If $return is false the resulting array will be printed
@@ -3132,7 +3285,7 @@ class Option extends bbn\Models\Cls\Db
    * @param boolean $return If set to true the resulting array will be returned
    * @return array|false
    */
-  public function export($id, bool $deep = false, bool $return = false, bool $aliases = false)
+  public function exportDb($id, bool $deep = false, bool $return = false, bool $aliases = false)
   {
     if (($ret = $deep ? $this->rawTree($id) : $this->rawOptions($id))) {
       $ret  = $this->analyzeOut($ret);
@@ -3581,6 +3734,75 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  public function updatePlugins(): ?int
+  {
+    if (defined('BBN_APPUI')
+        && ($ids = $this->items('plugins', 'templates', 'option', 'appui'))
+    ) {
+      $res = 0;
+      $all = $this->items('plugins');
+      foreach ($this->fullOptions('appui') as $a) {
+        if (!empty($a['plugin'])) {
+          $all[] = $a['id'];
+        }
+      }
+
+      foreach ($ids as $id) {
+        if ($export = $this->export($id, 'sfull')) {
+          $export['id_alias'] = $this->getCodePath($id);
+          foreach ($all as $plugin) {
+            $res += (int)$this->import($export, $plugin);
+          }
+        }
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  public function updateTemplate(string $id = null): ?int
+  {
+
+    if (defined('BBN_APPUI') && $this->exists($id)) {
+      $res = 0;
+      $all = $this->optionsRef($id);
+      foreach ($all as $id => $o) {
+        if (($export = $this->export($id, 'sfull'))
+            && !empty($export['items'])
+        ) {
+          foreach ($this->getAliases($id) as $id_alias) {
+            $res += (int)$this->import($export['items'], $id_alias);
+          }
+        }
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  public function updateAllTemplates(): ?int
+  {
+    if (defined('BBN_APPUI')
+        && ($id = $this->fromCode('list', 'templates', 'option', 'appui'))
+    ) {
+      $res = 0;
+      foreach ($this->itemsRef($id) as $a) {
+        $res += (int)$this->updateTemplate($a);
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
   /**
    * returns an array containing all options that have the property i18n set
    */
@@ -3606,7 +3828,6 @@ class Option extends bbn\Models\Cls\Db
           ]
         ]
       );
-      die(var_dump($opts));
 
       foreach ($opts as $opt){
         if (!empty($items)) {

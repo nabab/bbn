@@ -19,7 +19,8 @@
         },
         "text": "API",
         "code": "api",
-        "icon": "nf nf-mdi-lan_connect"
+        "icon": "nf nf-mdi-lan_connect",
+        "plugin": true
       },
       {
         "cfg": {
@@ -30,7 +31,8 @@
         },
         "text": "Billing",
         "code": "billing",
-        "icon": "nf nf-fa-credit_card"
+        "icon": "nf nf-fa-credit_card",
+        "plugin": true
       },
       {
         "cfg": {
@@ -41,7 +43,8 @@
         },
         "text": "CDN",
         "code": "cdn",
-        "icon": "nf nf-fa-cube"
+        "icon": "nf nf-fa-cube",
+        "plugin": true
       },
       {
         "cfg": {
@@ -52,7 +55,8 @@
         },
         "text": "Chat",
         "code": "chat",
-        "icon": "nf nf-oct-comment_discussion"
+        "icon": "nf nf-oct-comment_discussion",
+        "plugin": true
       },
       {
         "cfg": {
@@ -63,7 +67,8 @@
         },
         "text": "Clipboard",
         "code": "clipboard",
-        "icon": "nf nf-mdi-clipboard_outline"
+        "icon": "nf nf-mdi-clipboard_outline",
+        "plugin": true
       },
       {
         "cfg": {
@@ -74,7 +79,8 @@
         },
         "text": "Components",
         "code": "component",
-        "icon": "nf nf-fae-molecule"
+        "icon": "nf nf-fae-molecule",
+        "plugin": true
       },
       {
         "cfg": {
@@ -85,7 +91,8 @@
         },
         "text": "Configuration",
         "code": "config",
-        "icon": "nf nf-fa-cog"
+        "icon": "nf nf-fa-cog",
+        "plugin": true
       },
       {
         "cfg": {
@@ -96,7 +103,8 @@
         },
         "text": "Core",
         "code": "core",
-        "icon": "nf nf-custom-electron"
+        "icon": "nf nf-custom-electron",
+        "plugin": true
       },
       {
         "cfg": {
@@ -107,7 +115,8 @@
         },
         "text": "CRM",
         "code": "crm",
-        "icon": "nf nf-oct-organization"
+        "icon": "nf nf-oct-organization",
+        "plugin": true
       },
       {
         "cfg": {
@@ -118,7 +127,8 @@
         },
         "text": "CRON",
         "code": "cron",
-        "icon": "nf nf-mdi-clock_start"
+        "icon": "nf nf-mdi-clock_start",
+        "plugin": true
       },
       {
         "cfg": {
@@ -130,6 +140,7 @@
         "text": "Databases",
         "code": "database",
         "icon": "nf nf-fa-database",
+        "plugin": true,
         "items": [
           {
             "cfg": {
@@ -314,6 +325,7 @@
         "text": "eMails",
         "code": "email",
         "icon": "nf nf-fa-at",
+        "plugin": true,
         "items": [
           {
             "text": "Accounts",
@@ -427,7 +439,8 @@
         },
         "text": "Entity",
         "code": "entity",
-        "icon": "nf nf-dev-codepen"
+        "icon": "nf nf-dev-codepen",
+        "plugin": true
       },
       {
         "cfg": {
@@ -439,6 +452,7 @@
         "text": "Events",
         "code": "event",
         "icon": "nf nf-oct-calendar",
+        "plugin": true,
         "items": [
           {
             "text": "Publication",
@@ -461,7 +475,8 @@
         },
         "text": "Explorer",
         "code": "explorer",
-        "icon": "nf nf-mdi-magnify"
+        "icon": "nf nf-mdi-magnify",
+        "plugin": true
       },
       {
         "cfg": {
@@ -473,6 +488,7 @@
         "text": "Finder",
         "code": "finder",
         "icon": "nf nf-mdi-apple_finder",
+        "plugin": true,
         "items": [
           {
             "text": "Favourites",
@@ -493,7 +509,8 @@
         },
         "text": "GDPR",
         "code": "gdpr",
-        "icon": "nf nf-mdi-playlist_check"
+        "icon": "nf nf-mdi-playlist_check",
+        "plugin": true
       },
       {
         "cfg": {
@@ -504,7 +521,8 @@
         },
         "text": "History",
         "code": "history",
-        "icon": "nf nf-mdi-history"
+        "icon": "nf nf-mdi-history",
+        "plugin": true
       },
       {
         "cfg": {
@@ -516,6 +534,7 @@
         "text": "HR",
         "code": "hr",
         "icon": "nf nf-fa-users",
+        "plugin": true,
         "items": [
           {
             "text": "Types of absences",
@@ -551,6 +570,7 @@
         "text": "I.D.E.",
         "code": "ide",
         "icon": "nf nf-fa-code",
+        "plugin": true,
         "items": [
           {
             "cfg": {
@@ -953,6 +973,110 @@
                 ]
               },
               {
+                "text": "Sandbox",
+                "code": "sandbox",
+                "icon": "nf nf-dev-netbeans",
+                "tabs": [
+                  {
+                    "pos": 1,
+                    "url": "private",
+                    "icon": "icon-php-alt",
+                    "path": "private\/",
+                    "title": "Private",
+                    "bcolor": "#cccccc",
+                    "fcolor": "#fdfdfd",
+                    "default": false,
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<?php\n\/**\n * What is my purpose?\n *\n **\/\n\n\/** @var $ctrl \\bbn\\Mvc\\Controller *\/\n\n"
+                      }
+                    ],
+                    "alternative": true
+                  },
+                  {
+                    "pos": 2,
+                    "url": "model",
+                    "icon": "icon-database",
+                    "path": "model\/",
+                    "title": "Model",
+                    "bcolor": "#ee05cf",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<?php\n\/**\n * What is my purpose?\n *\n **\/\n\n\/** @var $model \\bbn\\Mvc\\Model*\/\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 3,
+                    "url": "html",
+                    "icon": "icon-html",
+                    "path": "html\/",
+                    "title": "View",
+                    "bcolor": "#58be1d",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<!-- HTML Document -->\n\n"
+                      },
+                      {
+                        "ext": "html",
+                        "mode": "html",
+                        "default": "<!-- HTML Document -->\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 4,
+                    "url": "js",
+                    "icon": "icon-javascript-alt",
+                    "path": "js\/",
+                    "title": "JavaScript",
+                    "bcolor": "#f40505",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "js",
+                        "mode": "js",
+                        "default": "\/\/ Javascript Document\n\n"
+                      },
+                      {
+                        "ext": "ts",
+                        "mode": "typescript",
+                        "default": "\/\/ Typescript Document\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 5,
+                    "url": "css",
+                    "icon": "icon-css",
+                    "path": "css\/",
+                    "title": "CSS",
+                    "bcolor": "#ff9900",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "less",
+                        "mode": "less",
+                        "default": "\/* LESS Document *\/\n\n"
+                      },
+                      {
+                        "ext": "css",
+                        "mode": "css",
+                        "default": "\/* CSS Document *\/\n\n"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
                 "text": "PHP",
                 "code": "php",
                 "icon": "nf nf-mdi-language_php",
@@ -1019,6 +1143,7 @@
         "text": "Internationalization",
         "code": "i18n",
         "icon": "nf nf-mdi-translate",
+        "plugin": true,
         "items": [
           {
             "text": "Languages",
@@ -1775,6 +1900,7 @@
         "text": "Mailings",
         "code": "mailing",
         "icon": "nf nf-oct-mail",
+        "plugin": true,
         "items": [
           {
             "cfg": {
@@ -1805,6 +1931,7 @@
         "text": "Masks",
         "code": "masks",
         "icon": "nf nf-mdi-guy_fawkes_mask",
+        "plugin": true,
         "tekname": "ltypes"
       },
       {
@@ -1816,7 +1943,8 @@
         },
         "text": "Meeting",
         "code": "meeting",
-        "icon": "nf nf-mdi-webcam"
+        "icon": "nf nf-mdi-webcam",
+        "plugin": true
       },
       {
         "cfg": {
@@ -1827,6 +1955,7 @@
         "text": "Menus",
         "code": "menu",
         "icon": "nf nf-mdi-menu",
+        "plugin": true,
         "items": [
           {
             "num": 1,
@@ -1857,7 +1986,8 @@
         },
         "text": "Monitor",
         "code": "monitor",
-        "icon": "nf nf-mdi-heart_pulse"
+        "icon": "nf nf-mdi-heart_pulse",
+        "plugin": true
       },
       {
         "cfg": {
@@ -1870,6 +2000,7 @@
         "text": "Notes",
         "code": "note",
         "icon": "nf nf-fa-pencil_square_o",
+        "plugin": true,
         "items": [
           {
             "cfg": {
@@ -1969,6 +2100,7 @@
         "text": "Notifications",
         "code": "notification",
         "icon": "nf nf-fa-exclamation",
+        "plugin": true,
         "items": [
           {
             "text": "Configuration",
@@ -2005,6 +2137,7 @@
         "text": "Options",
         "code": "option",
         "icon": "nf nf-mdi-format_list_checks",
+        "plugin": true,
         "items": [
           {
             "cfg": {
@@ -2018,129 +2151,60 @@
             "icon": "nf nf-mdi-file_tree",
             "items": [
               {
-                "cfg": {
-                  "show_code": 1,
-                  "show_icon": 1,
-                  "sortable": 1,
-                  "allow_children": 1,
-                  "inheritance": "cascade",
-                  "i18n": "en"
-                },
-                "text": "Permissions",
-                "code": "permissions",
-                "icon": "nf nf-fa-key",
+                "text": "Plugins",
+                "code": "plugins",
+                "icon": "nf nf-mdi-puzzle",
                 "items": [
                   {
-                    "num": 1,
-                    "text": "Access",
-                    "code": "access",
-                    "icon": "nf nf-mdi-door"
-                  },
-                  {
-                    "num": 2,
+                    "cfg": {
+                      "show_code": 1,
+                      "show_icon": 1,
+                      "sortable": 1,
+                      "allow_children": 1,
+                      "inheritance": "cascade",
+                      "i18n": "en"
+                    },
+                    "text": "Permissions",
+                    "code": "permissions",
+                    "icon": "nf nf-fa-key",
+                    "items": [
+                      {
+                        "num": 1,
+                        "text": "Access",
+                        "code": "access",
+                        "icon": "nf nf-mdi-door"
+                      },
+                      {
+                        "num": 2,
+                        "text": "Plugins",
+                        "code": "plugins",
+                        "icon": "nf nf-mdi-puzzle"
+                      },
+                      {
+                        "num": 3,
+                        "text": "Options",
+                        "code": "options",
+                        "icon": "nf nf-fa-cogs"
+                      }
+                    ]
+                  }, {
+                    "cfg": {
+                      "show_code": 1,
+                      "show_icon": 1,
+                      "allow_children": 1,
+                      "show_alias": 1,
+                      "id_root_alias": ["appui"]
+                    },
                     "text": "Plugins",
                     "code": "plugins",
                     "icon": "nf nf-mdi-puzzle"
-                  },
-                  {
-                    "num": 3,
-                    "text": "Options",
-                    "code": "options",
-                    "icon": "nf nf-fa-cogs"
                   }
                 ]
               },
               {
-                "cfg": {
-                  "show_code": 1,
-                  "show_alias": 1,
-                  "show_value": 1,
-                  "i18n": "fr"
-                },
-                "text": "Project",
-                "code": "project",
-                "icon": "nf nf-fa-server",
-                "items": [
-                  {
-                    "cfg": {
-                      "show_code": 1,
-                      "show_alias": 1
-                    },
-                    "text": "Languages",
-                    "code": "lang",
-                    "items": [
-                      {
-                        "id_alias": [
-                          "en",
-                          "languages",
-                          "i18n",
-                          "appui"
-                        ],
-                        "text": "English",
-                        "code": "en"
-                      }
-                    ]
-                  },
-                  {
-                    "cfg": {
-                      "show_code": 1,
-                      "show_alias": 1,
-                      "show_value": 1
-                    },
-                    "text": "path",
-                    "code": "path",
-                    "icon": "nf nf-fa-code_fork",
-                    "items": [
-                      {
-                        "cfg": {
-                          "show_code": 1,
-                          "show_alias": 1,
-                          "show_value": 1
-                        },
-                        "text": "app",
-                        "code": "app",
-                        "icon": "nf nf-mdi-server_minus",
-                        "items": [
-                          {
-                            "id_alias": [
-                              "bbn-project",
-                              "types",
-                              "ide",
-                              "appui"
-                            ],
-                            "text": "main",
-                            "code": "main",
-                            "path": "\/",
-                            "bcolor": "#0c1b71",
-                            "fcolor": "#fdfdfd",
-                            "default": true,
-                            "language": "en"
-                          }
-                        ]
-                      },
-                      {
-                        "cfg": {
-                          "show_code": 1,
-                          "show_alias": 1,
-                          "show_value": 1
-                        },
-                        "text": "cdn",
-                        "code": "cdn",
-                        "icon": "nf nf-mdi-server_minus"
-                      },
-                      {
-                        "cfg": {
-                          "show_code": 1,
-                          "show_alias": 1,
-                          "show_value": 1
-                        },
-                        "text": "lib",
-                        "code": "lib",
-                        "icon": "nf nf-mdi-server_minus"
-                      }
-                    ]
-                  }
-                ]
+                "text": "List",
+                "code": "list",
+                "icon": "nf nf-fa-list"
               }
             ]
           }
@@ -2167,13 +2231,154 @@
         "text": "Projects",
         "code": "project",
         "icon": "nf nf-fa-sitemap",
+        "plugin": true,
         "items": [
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "allow_children": 1
             },
             "text": "List",
             "code": "list"
+          },
+          {
+            "cfg": {
+              "show_code": 1,
+              "allow_children": 1
+            },
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "id_alias": ["option", "appui"],
+                "code": "appui-option",
+                "text": "appui-option",
+                "items": [
+                  {
+                    "code": "templates",
+                    "id_alias": ["list", "templates", "option", "appui"],
+                    "text": "Templates",
+                    "items": [
+                      {
+                        "cfg": {
+                          "show_code": 1,
+                          "show_alias": 1,
+                          "show_value": 1,
+                          "i18n": "fr"
+                        },
+                        "text": "Project",
+                        "code": "project",
+                        "icon": "nf nf-fa-server",
+                        "items": [
+                          {
+                            "cfg": {
+                              "show_code": 1,
+                              "show_alias": 1
+                            },
+                            "text": "Languages",
+                            "code": "lang",
+                            "items": [
+                              {
+                                "id_alias": [
+                                  "en",
+                                  "languages",
+                                  "i18n",
+                                  "appui"
+                                ],
+                                "text": "English",
+                                "code": "en"
+                              }
+                            ]
+                          },
+                          {
+                            "cfg": {
+                              "show_code": 1,
+                              "show_alias": 1,
+                              "show_value": 1
+                            },
+                            "text": "path",
+                            "code": "path",
+                            "icon": "nf nf-fa-code_fork",
+                            "items": [
+                              {
+                                "cfg": {
+                                  "show_code": 1,
+                                  "show_alias": 1,
+                                  "show_value": 1
+                                },
+                                "text": "Main application",
+                                "code": "app",
+                                "icon": "nf nf-mdi-folder_star",
+                                "items": [
+                                  {
+                                    "id_alias": [
+                                      "bbn-project",
+                                      "types",
+                                      "ide",
+                                      "appui"
+                                    ],
+                                    "text": "main",
+                                    "code": "main",
+                                    "path": "\/",
+                                    "bcolor": "#0c1b71",
+                                    "fcolor": "#fdfdfd",
+                                    "default": true,
+                                    "language": "en"
+                                  }
+                                ]
+                              },
+                              {
+                                "cfg": {
+                                  "show_code": 1,
+                                  "show_alias": 1,
+                                  "show_value": 1
+                                },
+                                "text": "Static directory",
+                                "code": "cdn",
+                                "icon": "nf nf-custom-folder_npm"
+                              },
+                              {
+                                "cfg": {
+                                  "show_code": 1,
+                                  "show_alias": 1,
+                                  "show_value": 1
+                                },
+                                "text": "Libraries (vendor)",
+                                "code": "lib",
+                                "icon": "nf nf-custom-folder_config"
+                              },
+                              {
+                                "cfg": {
+                                  "show_code": 1,
+                                  "show_alias": 1,
+                                  "show_value": 1
+                                },
+                                "text": "Data directory",
+                                "code": "data",
+                                "icon": "nf nf-mdi-folder_account",
+                                "items": [
+                                  {
+                                    "text": "Sandbox",
+                                    "code": "sandbox",
+                                    "id_alias": [
+                                      "sandbox",
+                                      "types",
+                                      "ide",
+                                      "appui"
+                                    ],
+                                    "path": "plugins\/appui-ide\/sandbox\/"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
