@@ -2264,7 +2264,7 @@
                           "show_code": 1,
                           "show_alias": 1,
                           "show_value": 1,
-                          "i18n": "fr"
+                          "i18n": "en"
                         },
                         "text": "Project",
                         "code": "project",
@@ -2371,6 +2371,62 @@
                                 ]
                               }
                             ]
+                          },
+                          {
+                            "text": "Environments",
+                            "code": "env",
+                            "icon": "nf nf-fa-envira",
+                            "cfg": {
+                              "show_code": 1,
+                              "show_alias": 1,
+                              "show_icon": 1,
+                              "allow_children": 1,
+                              "alias_name": "Host",
+                              "id_root_alias": ["servers","server","appui"],
+                              "schema": [
+                                {
+                                  "title": "Path",
+                                  "field": "text",
+                                  "type": "string",
+                                  "required": true,
+                                  "editable": true,
+                                  "showable": true
+                                },
+                                {
+                                  "title": "URL",
+                                  "field": "code",
+                                  "type": "string",
+                                  "options": {},
+                                  "required": true,
+                                  "hidden": false,
+                                  "editable": true,
+                                  "showable": true
+                                },
+                                {
+                                  "title": "Environment type",
+                                  "field": "type",
+                                  "showable": true,
+                                  "editable": true,
+                                  "required": true,
+                                  "type": "",
+                                  "hidden": false,
+                                  "source": [
+                                    {
+                                      "text": "Development",
+                                      "value":"dev"
+                                    },
+                                    {
+                                      "text": "Test",
+                                      "value": "test"
+                                    },
+                                    {
+                                      "text": "Production",
+                                      "value": "prod"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
                           }
                         ]
                       }
