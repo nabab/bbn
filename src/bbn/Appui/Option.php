@@ -1093,7 +1093,9 @@ class Option extends bbn\Models\Cls\Db
       $all = $this->items($id);
       $aliases = $this->getAliases($id);
       foreach ($aliases as $a) {
-        $all[] = $a['id'];
+        if ($items = $this->items($a)) {
+          array_push($all, ...$items);
+        }
       }
 
       return $all;
@@ -3204,7 +3206,7 @@ class Option extends bbn\Models\Cls\Db
           }
 
           if (!empty($cfg['id_root_alias'])) {
-            if ($codes = $opt->getCodePath($o['id_root_alias'])) {
+            if ($codes = $opt->getCodePath($cfg['id_root_alias'])) {
               $cfg['id_root_alias'] = $codes;
             }
             else {
@@ -3260,7 +3262,7 @@ class Option extends bbn\Models\Cls\Db
             break;
           case 'sfull':
             $o = $fn($o);
-            $o['items'] = $o['items'] ? X::map($fn, $o['items'], 'items') : [];
+            $o['items'] = empty($o['items']) ? [] : X::map($fn, $o['items'], 'items');
             break;
         }
       }
@@ -3424,7 +3426,12 @@ class Option extends bbn\Models\Cls\Db
             }
             else {
               X::log($td['id_alias']);
-              throw new \Exception("Error while importing: impossible to set the alias");
+              throw new \Exception(
+                X::_(
+                  "Error while importing: impossible to set the alias %s",
+                  json_encode($td['id_alias'], JSON_PRETTY_PRINT)
+                )
+              );
             }
           }
 
@@ -3768,14 +3775,14 @@ class Option extends bbn\Models\Cls\Db
 
     if (defined('BBN_APPUI') && $this->exists($id)) {
       $res = 0;
-      $all = $this->optionsRef($id);
-      foreach ($all as $id => $o) {
-        if (($export = $this->export($id, 'sfull'))
-            && !empty($export['items'])
-        ) {
-          foreach ($this->getAliases($id) as $id_alias) {
-            $res += (int)$this->import($export['items'], $id_alias);
-          }
+      // All the options refering to this template
+      $all = $this->getAliases($id);
+      if (!empty($all)
+          && ($export = $this->export($id, 'sfull'))
+          && !empty($export['items'])
+      ) {
+        foreach ($all as $a) {
+          $res += (int)$this->import($export['items'], $a['id']);
         }
       }
 
