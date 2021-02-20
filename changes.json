@@ -1,0 +1,26 @@
+[
+  [
+    [
+      "PTYPES",
+      "ide",
+      "appui"
+    ],
+    "types"
+  ],
+  [
+    [
+      "PATHS",
+      "ide",
+      "appui"
+    ],
+    "pathss"
+  ],
+  [
+    [
+      "pathss",
+      "ide",
+      "appui"
+    ],
+    "paths"
+  ]
+]

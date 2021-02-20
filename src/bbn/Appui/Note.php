@@ -682,7 +682,7 @@ class Note extends bbn\Models\Cls\Db
     return null;
   }
 
-  public function browse($cfg)
+  public function browse($cfg): ?array
   {
     if (isset($cfg['limit']) && ($user = bbn\User::getInstance())) {
       /** @var bbn\Db $db */
@@ -876,7 +876,7 @@ class Note extends bbn\Models\Cls\Db
       foreach ($all as $i => $a) {
         if (bbn\Str::isJson($a['content']) && ($media_obj = $this->getMediaInstance())) {
           $content = json_decode($a['content'], true);
-          $path = $root.$content['path'].'/';  
+          $path = $root.$content['path'].'/';
           $full_path =  $path.$a['id'].'/'.$a['name'];  
           if (file_exists($full_path)) {
             $all[$i]['notes'] = $this->getMediaNotes($a['id']);
@@ -884,8 +884,8 @@ class Note extends bbn\Models\Cls\Db
             if ($media_obj->isImage($full_path) && ($thumb = $media_obj->getThumbs($full_path))) {
               $all[$i]['is_image'] = true;
             }
+
             $res[] = $all[$i];
-            
           }
         }
       }

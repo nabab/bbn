@@ -1,2647 +1,2683 @@
-[{
+[
+  {
     "cfg": {
-        "categories": 1,
-        "show_code": 1,
-        "show_icon": 1,
-        "i18n": "en"
+      "categories": 1,
+      "show_code": 1,
+      "show_icon": 1,
+      "i18n": "en"
     },
     "text": "Appui",
     "code": "appui",
     "icon": "data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAADTAAAA0wB\/Z14fgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKXSURBVFiF5ZcxT+pQFIC\/FgUWTTSuJLA41sGFhQSMkKjAr1CCJsbJTU0b2N35HWjiRFzVSHRwMBEqMJG2JjoRE+rgow+wLQUxJu+dsb33fF\/PPbe9FW5ubkx+McTfhP8fAoZhcHl5+TsChmGwu7vL4eEh5+fntmNmfhKez+ep1WoAyLIMwObm5sC4H6nAMByg2+0iy\/KXSkxdwA7uJuEoMD8\/z8zMeCvkBh+WODs7Axx6YGFhgUgkQqfT4fHxkff396nA+yUURQFsKtCDC4JAMBhkeXmZ2dlZ14SappHL5TzB+yWur68HBfrhvRglYRgGe3t7qKrqGQ6QSqU4Pj7+K2AHHyUxTtmH4YVCAZ\/P9yngBneSmAYcQPQCH5Z4fX2dGF4sFi04gKDrurm4uOg5SavVIh6P8\/T0NBFcFAf7XlRVlZeXF09JGo0GsVjMgvv9fk\/z0um0LRxANE2Ter2OYRiuSZrNJmtra1a37+zscHV1xdLSkuu8TCbDycmJLRz+vAdM02RUJfL5vPXkuVyOUqnEysoKFxcXOC1hJpP53GoOcACh\/0gmCALhcNg2oa7rJBIJotEopVJp4N7d3R3r6+tommZdy2azHB0ducK\/CIySeHt7Y25uzjbR7e0tqVQKXdc9w20FnCQ6nQ6BQMA1WbVa5fT0lP39fU9wcPga9nqi15iKorC6ukq73XZNFgqFODg48AwHhwpYNwWBarXK9vY2AJIkUalUbJdH0zSen589g3vhqmqaJpIkWceo+\/t7YrHYl0pMCh8pACCKIrIsWxIPDw8kEglL4jtwTwL9EhsbG5ZEMpmkXq9\/C+5ZoCehKApbW1sAhMPhgX0\/abg2oV10u13K5TLpdHqsbp+awLTj3\/83HBUfhqFVwjxEB4YAAAAASUVORK5CYII=",
     "items": [
-        {
-            "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "show_icon": 1,
-                "i18n": "en"
-            },
-            "text": "API",
-            "code": "api",
-            "icon": "nf nf-mdi-lan_connect"
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "show_icon": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Billing",
-            "code": "billing",
-            "icon": "nf nf-fa-credit_card"
+        "text": "API",
+        "code": "api",
+        "icon": "nf nf-mdi-lan_connect"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "CDN",
-            "code": "cdn",
-            "icon": "nf nf-fa-cube"
+        "text": "Billing",
+        "code": "billing",
+        "icon": "nf nf-fa-credit_card"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Chat",
-            "code": "chat",
-            "icon": "nf nf-oct-comment_discussion"
+        "text": "CDN",
+        "code": "cdn",
+        "icon": "nf nf-fa-cube"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Clipboard",
-            "code": "clipboard",
-            "icon": "nf nf-mdi-clipboard_outline"
+        "text": "Chat",
+        "code": "chat",
+        "icon": "nf nf-oct-comment_discussion"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Components",
-            "code": "component",
-            "icon": "nf nf-fae-molecule"
+        "text": "Clipboard",
+        "code": "clipboard",
+        "icon": "nf nf-mdi-clipboard_outline"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Configuration",
-            "code": "config",
-            "icon": "nf nf-fa-cog"
+        "text": "Components",
+        "code": "component",
+        "icon": "nf nf-fae-molecule"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "allow_children": 1,
-                "show_code": 1,
-                "show_icon": 1,
-                "i18n": "en"
-            },
-            "text": "Core",
-            "code": "core",
-            "icon": "nf nf-custom-electron"
+        "text": "Configuration",
+        "code": "config",
+        "icon": "nf nf-fa-cog"
+      },
+      {
+        "cfg": {
+          "allow_children": 1,
+          "show_code": 1,
+          "show_icon": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "CRM",
-            "code": "crm",
-            "icon": "nf nf-oct-organization"
+        "text": "Core",
+        "code": "core",
+        "icon": "nf nf-custom-electron"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "CRON",
-            "code": "cron",
-            "icon": "nf nf-mdi-clock_start"
+        "text": "CRM",
+        "code": "crm",
+        "icon": "nf nf-oct-organization"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
+        "text": "CRON",
+        "code": "cron",
+        "icon": "nf nf-mdi-clock_start"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "show_icon": 1,
+          "i18n": "en"
+        },
+        "text": "Databases",
+        "code": "database",
+        "icon": "nf nf-fa-database",
+        "items": [
+          {
             "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "show_icon": 1,
-                "i18n": "en"
+              "show_code": 1
             },
-            "text": "Databases",
-            "code": "database",
-            "icon": "nf nf-fa-database",
+            "text": "MySQL",
+            "code": "mysql",
+            "icon": "nf nf-dev-mysql",
             "items": [
-                {
-                    "cfg": {
-                        "show_code": 1
+              {
+                "cfg": {
+                  "show_code": 1,
+                  "show_alias": 1,
+                  "schema": [
+                    {
+                      "title": "Connection's name",
+                      "field": "text",
+                      "type": "string",
+                      "options": [],
+                      "required": true,
+                      "hidden": false,
+                      "editable": true,
+                      "showable": true
                     },
-                    "text": "MySQL",
-                    "code": "mysql",
-                    "icon": "nf nf-dev-mysql",
-                    "items": [
+                    {
+                      "title": "user@host",
+                      "field": "code",
+                      "type": "string",
+                      "options": [],
+                      "required": true,
+                      "hidden": false,
+                      "editable": true,
+                      "showable": true
+                    },
+                    {
+                      "title": "password",
+                      "field": "pass",
+                      "type": "string",
+                      "options": [],
+                      "required": true,
+                      "hidden": false,
+                      "editable": true,
+                      "showable": true
+                    },
+                    {
+                      "title": "Environment",
+                      "options": [],
+                      "field": "environment",
+                      "showable": true,
+                      "editable": true,
+                      "type": "",
+                      "hidden": false,
+                      "source": [
                         {
-                            "cfg": {
-                                "show_code": 1,
-                                "show_alias": 1,
-                                "schema": [
-                                    {
-                                        "title": "Connection's name",
-                                        "field": "text",
-                                        "type": "string",
-                                        "options": [],
-                                        "required": true,
-                                        "hidden": false,
-                                        "editable": true,
-                                        "showable": true
-                                    },
-                                    {
-                                        "title": "user@host",
-                                        "field": "code",
-                                        "type": "string",
-                                        "options": [],
-                                        "required": true,
-                                        "hidden": false,
-                                        "editable": true,
-                                        "showable": true
-                                    },
-                                    {
-                                        "title": "password",
-                                        "field": "pass",
-                                        "type": "string",
-                                        "options": [],
-                                        "required": true,
-                                        "hidden": false,
-                                        "editable": true,
-                                        "showable": true
-                                    },
-                                    {
-                                        "title": "Environment",
-                                        "options": [],
-                                        "field": "environment",
-                                        "showable": true,
-                                        "editable": true,
-                                        "type": "",
-                                        "hidden": false,
-                                        "source": [
-                                            {
-                                                "text": "Development",
-                                                "value": "dev"
-                                            },
-                                            {
-                                                "text": "Test",
-                                                "value": "test"
-                                            },
-                                            {
-                                                "text": "Production",
-                                                "value": "prod"
-                                            }
-                                        ]
-                                    }
-                                ],
-                                "alias_name": "Server"
-                            },
-                            "text": "Connections",
-                            "code": "connections"
+                          "text": "Development",
+                          "value": "dev"
                         },
                         {
-                            "cfg": {
-                                "allow_children": 1
-                            },
-                            "text": "Databases",
-                            "code": "dbs"
-                        }
-                    ]
-                },
-                {
-                    "cfg": {
-                        "show_code": 1
-                    },
-                    "text": "PostgreSQL",
-                    "code": "pgsql",
-                    "icon": "nf nf-dev-postgresql",
-                    "items": [
-                        {
-                            "text": "Connections",
-                            "code": "connections"
+                          "text": "Test",
+                          "value": "test"
                         },
                         {
-                            "text": "Databases",
-                            "code": "dbs"
+                          "text": "Production",
+                          "value": "prod"
                         }
-                    ]
+                      ]
+                    }
+                  ],
+                  "alias_name": "Server"
                 },
-                {
-                    "text": "SQLite",
-                    "code": "sqlite",
-                    "icon": "nf nf-dev-sqllite",
-                    "items": [
-                        {
-                            "cfg": {
-                                "show_code": 1
-                            },
-                            "text": "Databases",
-                            "code": "dbs"
-                        },
-                        {
-                            "cfg": {
-                                "show_code": 1,
-                                "show_value": 1,
-                                "schema": [
-                                    {
-                                        "title": "Path",
-                                        "field": "path",
-                                        "type": "string",
-                                        "showable": true,
-                                        "editable": true,
-                                        "hidden": false,
-                                        "options": []
-                                    },
-                                    {
-                                        "title": "Root",
-                                        "field": "root",
-                                        "type": "",
-                                        "showable": true,
-                                        "nullable": true,
-                                        "editable": true,
-                                        "source": [
-                                            "data",
-                                            "app",
-                                            "lib",
-                                            "cdn"
-                                        ],
-                                        "hidden": false,
-                                        "options": []
-                                    },
-                                    {
-                                        "title": "Environment",
-                                        "field": "environment",
-                                        "type": "",
-                                        "showable": true,
-                                        "editable": true,
-                                        "nullable": true,
-                                        "hidden": false,
-                                        "source": [
-                                            "dev",
-                                            "test",
-                                            "prod"
-                                        ],
-                                        "options": []
-                                    }
-                                ]
-                            },
-                            "text": "Paths",
-                            "code": "paths"
-                        }
-                    ]
+                "text": "Connections",
+                "code": "connections"
+              },
+              {
+                "cfg": {
+                  "allow_children": 1
                 },
-                {
-                    "cfg": {
-                        "show_alias": 1,
-                        "notext": 1
-                    },
-                    "text": "Synchronization",
-                    "code": "sync"
-                }
+                "text": "Databases",
+                "code": "dbs"
+              }
             ]
-        },
-        {
+          },
+          {
             "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "show_icon": 1,
-                "i18n": "en"
+              "show_code": 1
             },
-            "text": "eMails",
-            "code": "email",
-            "icon": "nf nf-fa-at",
+            "text": "PostgreSQL",
+            "code": "pgsql",
+            "icon": "nf nf-dev-postgresql",
             "items": [
-                {
-                    "text": "Accounts",
-                    "code": "accounts"
-                },
-                {
-                    "text": "Domains",
-                    "code": "domains"
-                },
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_value": 1,
-                        "show_icon": 1
-                    },
-                    "text": "Folders",
-                    "code": "folders",
-                    "items": [
-                        {
-                            "text": "Drafts",
-                            "code": "drafts",
-                            "icon": "nf nf-mdi-file_document",
-                            "names": [
-                                "drafts",
-                                "Drafts",
-                                "Brouillons"
-                            ]
-                        },
-                        {
-                            "text": "Inbox",
-                            "code": "inbox",
-                            "icon": "nf nf-fa-inbox",
-                            "names": [
-                                "INBOX"
-                            ]
-                        },
-                        {
-                            "text": "Other folders",
-                            "code": "folders",
-                            "icon": "nf nf-fa-folder_o"
-                        },
-                        {
-                            "text": "Sent",
-                            "code": "sent",
-                            "icon": "nf nf-mdi-inbox_arrow_up",
-                            "names": [
-                                "sent",
-                                "Sent",
-                                "&AMk-l&AOk-ments envoy&AOk-s",
-                                "\u00c9l\u00e9ments envoy\u00e9s"
-                            ]
-                        },
-                        {
-                            "text": "Spam",
-                            "code": "spam",
-                            "icon": "nf nf-mdi-fire",
-                            "names": [
-                                "spam",
-                                "Spam",
-                                "Junk",
-                                "junk",
-                                "Ind\u00e9sirables"
-                            ]
-                        },
-                        {
-                            "text": "Trash",
-                            "code": "trash",
-                            "icon": "nf nf-fa-trash",
-                            "names": [
-                                "trash",
-                                "Trash",
-                                "Corbeille"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_value": 1
-                    },
-                    "text": "Types",
-                    "code": "types",
-                    "items": [
-                        {
-                            "text": "GMail",
-                            "code": "gmail"
-                        },
-                        {
-                            "text": "IMAP",
-                            "code": "imap"
-                        },
-                        {
-                            "text": "Microsoft Mail (Hotmail, Live...)",
-                            "code": "hotmail"
-                        },
-                        {
-                            "text": "POP3",
-                            "code": "pop3"
-                        }
-                    ]
-                }
+              {
+                "text": "Connections",
+                "code": "connections"
+              },
+              {
+                "text": "Databases",
+                "code": "dbs"
+              }
             ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Entity",
-            "code": "entity",
-            "icon": "nf nf-dev-codepen"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Events",
-            "code": "event",
-            "icon": "nf nf-oct-calendar",
+          },
+          {
+            "text": "SQLite",
+            "code": "sqlite",
+            "icon": "nf nf-dev-sqllite",
             "items": [
-                {
-                    "text": "Publication",
-                    "code": "publication"
+              {
+                "cfg": {
+                  "show_code": 1
                 },
-                {
-                    "text": "Working plane",
-                    "code": "wp"
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Explorer",
-            "code": "explorer",
-            "icon": "nf nf-mdi-magnify"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Finder",
-            "code": "finder",
-            "icon": "nf nf-mdi-apple_finder",
-            "items": [
-                {
-                    "text": "Favourites",
-                    "code": "favourites"
+                "text": "Databases",
+                "code": "dbs"
+              },
+              {
+                "cfg": {
+                  "show_code": 1,
+                  "show_value": 1,
+                  "schema": [
+                    {
+                      "title": "Path",
+                      "field": "path",
+                      "type": "string",
+                      "showable": true,
+                      "editable": true,
+                      "hidden": false,
+                      "options": []
+                    },
+                    {
+                      "title": "Root",
+                      "field": "root",
+                      "type": "",
+                      "showable": true,
+                      "nullable": true,
+                      "editable": true,
+                      "source": [
+                        "data",
+                        "app",
+                        "lib",
+                        "cdn"
+                      ],
+                      "hidden": false,
+                      "options": []
+                    },
+                    {
+                      "title": "Environment",
+                      "field": "environment",
+                      "type": "",
+                      "showable": true,
+                      "editable": true,
+                      "nullable": true,
+                      "hidden": false,
+                      "source": [
+                        "dev",
+                        "test",
+                        "prod"
+                      ],
+                      "options": []
+                    }
+                  ]
                 },
-                {
-                    "text": "Sources",
-                    "code": "sources"
-                }
+                "text": "Paths",
+                "code": "paths"
+              }
             ]
-        },
-        {
+          },
+          {
             "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
+              "show_alias": 1,
+              "notext": 1
             },
-            "text": "GDPR",
-            "code": "gdpr",
-            "icon": "nf nf-mdi-playlist_check"
+            "text": "Synchronization",
+            "code": "sync"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "show_icon": 1,
+          "i18n": "en"
         },
-        {
+        "text": "eMails",
+        "code": "email",
+        "icon": "nf nf-fa-at",
+        "items": [
+          {
+            "text": "Accounts",
+            "code": "accounts"
+          },
+          {
+            "text": "Domains",
+            "code": "domains"
+          },
+          {
             "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
+              "show_code": 1,
+              "show_value": 1,
+              "show_icon": 1
             },
-            "text": "History",
-            "code": "history",
-            "icon": "nf nf-mdi-history"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "HR",
-            "code": "hr",
-            "icon": "nf nf-fa-users",
+            "text": "Folders",
+            "code": "folders",
             "items": [
-                {
-                    "text": "Types of absences",
-                    "code": "absences",
-                    "items": [
-                        {
-                            "text": "Holidays",
-                            "code": "holidays",
-                            "color": "skyblue"
-                        },
-                        {
-                            "text": "Permission",
-                            "code": "permission",
-                            "color": "sandybrown"
-                        },
-                        {
-                            "text": "Sick holidays",
-                            "code": "sick",
-                            "color": "tomato"
-                        }
+              {
+                "text": "Drafts",
+                "code": "drafts",
+                "icon": "nf nf-mdi-file_document",
+                "names": [
+                  "drafts",
+                  "Drafts",
+                  "Brouillons"
+                ]
+              },
+              {
+                "text": "Inbox",
+                "code": "inbox",
+                "icon": "nf nf-fa-inbox",
+                "names": [
+                  "INBOX"
+                ]
+              },
+              {
+                "text": "Other folders",
+                "code": "folders",
+                "icon": "nf nf-fa-folder_o"
+              },
+              {
+                "text": "Sent",
+                "code": "sent",
+                "icon": "nf nf-mdi-inbox_arrow_up",
+                "names": [
+                  "sent",
+                  "Sent",
+                  "&AMk-l&AOk-ments envoy&AOk-s",
+                  "\u00c9l\u00e9ments envoy\u00e9s"
+                ]
+              },
+              {
+                "text": "Spam",
+                "code": "spam",
+                "icon": "nf nf-mdi-fire",
+                "names": [
+                  "spam",
+                  "Spam",
+                  "Junk",
+                  "junk",
+                  "Ind\u00e9sirables"
+                ]
+              },
+              {
+                "text": "Trash",
+                "code": "trash",
+                "icon": "nf nf-fa-trash",
+                "names": [
+                  "trash",
+                  "Trash",
+                  "Corbeille"
+                ]
+              }
+            ]
+          },
+          {
+            "cfg": {
+              "show_code": 1,
+              "show_value": 1
+            },
+            "text": "Types",
+            "code": "types",
+            "items": [
+              {
+                "text": "GMail",
+                "code": "gmail"
+              },
+              {
+                "text": "IMAP",
+                "code": "imap"
+              },
+              {
+                "text": "Microsoft Mail (Hotmail, Live...)",
+                "code": "hotmail"
+              },
+              {
+                "text": "POP3",
+                "code": "pop3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Entity",
+        "code": "entity",
+        "icon": "nf nf-dev-codepen"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Events",
+        "code": "event",
+        "icon": "nf nf-oct-calendar",
+        "items": [
+          {
+            "text": "Publication",
+            "code": "publication",
+            "icon": "nf nf-fa-leanpub"
+          },
+          {
+            "text": "Work schedule",
+            "code": "wp",
+            "icon": "nf nf-mdi-calendar_multiple_check"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Explorer",
+        "code": "explorer",
+        "icon": "nf nf-mdi-magnify"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Finder",
+        "code": "finder",
+        "icon": "nf nf-mdi-apple_finder",
+        "items": [
+          {
+            "text": "Favourites",
+            "code": "favourites"
+          },
+          {
+            "text": "Sources",
+            "code": "sources"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "GDPR",
+        "code": "gdpr",
+        "icon": "nf nf-mdi-playlist_check"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "History",
+        "code": "history",
+        "icon": "nf nf-mdi-history"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "HR",
+        "code": "hr",
+        "icon": "nf nf-fa-users",
+        "items": [
+          {
+            "text": "Types of absences",
+            "code": "absences",
+            "items": [
+              {
+                "text": "Holidays",
+                "code": "holidays",
+                "color": "skyblue"
+              },
+              {
+                "text": "Permission",
+                "code": "permission",
+                "color": "sandybrown"
+              },
+              {
+                "text": "Sick holidays",
+                "code": "sick",
+                "color": "tomato"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_value": 1,
+          "allow_children": 1,
+          "show_icon": 1,
+          "i18n": "en"
+        },
+        "text": "I.D.E.",
+        "code": "ide",
+        "icon": "nf nf-fa-code",
+        "items": [
+          {
+            "cfg": {
+              "show_code": 1,
+              "show_value": 1,
+              "show_alias": 1,
+              "allow_children": 1,
+              "inheritance": "cascade"
+            },
+            "text": "Development paths",
+            "code": "paths",
+            "icon": "nf nf-custom-folder_git_branch",
+            "items": [
+              {
+                "text": "Main application",
+                "code": "BBN_APP_PATH",
+                "icon": "nf nf-mdi-folder_star"
+              },
+              {
+                "text": "Static directory",
+                "code": "BBN_CDN_PATH",
+                "icon": "nf nf-custom-folder_npm"
+              },
+              {
+                "text": "Library (vendor)",
+                "code": "BBN_LIB_PATH",
+                "icon": "nf nf-custom-folder_config"
+              },
+              {
+                "text": "Data directory",
+                "code": "BBN_DATA_PATH",
+                "icon": "nf nf-mdi-folder_account"
+              }
+            ]
+          },
+          {
+            "cfg": {
+              "show_code": 1,
+              "show_value": 1
+            },
+            "text": "Paths' types",
+            "code": "types",
+            "icon": "nf nf-mdi-shape_outline",
+            "items": [
+              {
+                "text": "Projects BBN",
+                "code": "bbn-project",
+                "icon": "nf nf-fa-cubes",
+                "types": [
+                  {
+                    "url": "mvc",
+                    "icon": "nf nf-fa-code\n",
+                    "path": "mvc\/",
+                    "type": "mvc",
+                    "bcolor": "#302c2b",
+                    "fcolor": "#86cdea",
+                    "bbn_path": "BBN_APP_PATH",
+                    "language": "en"
+                  },
+                  {
+                    "url": "components",
+                    "icon": "nf nf-mdi-vuejs\n",
+                    "path": "components\/",
+                    "type": "components",
+                    "bcolor": "#302c2b",
+                    "fcolor": "#44b782",
+                    "bbn_path": "BBN_APP_PATH",
+                    "language": "en"
+                  },
+                  {
+                    "url": "lib",
+                    "icon": "nf nf-mdi-library",
+                    "path": "lib\/",
+                    "type": "classes",
+                    "bcolor": "#302c2b",
+                    "fcolor": "#ecebeb",
+                    "bbn_path": "BBN_APP_PATH",
+                    "language": "en"
+                  },
+                  {
+                    "url": "cli",
+                    "icon": "nf nf-fa-cogs",
+                    "path": "cli\/",
+                    "type": "cli",
+                    "bcolor": "#ced62b",
+                    "fcolor": "#000000",
+                    "bbn_path": "BBN_APP_PATH",
+                    "language": "en"
+                  }
+                ]
+              },
+              {
+                "text": "PHP Classes",
+                "code": "cls",
+                "icon": "nf nf-fa-object_group",
+                "extensions": [
+                  {
+                    "ext": "php",
+                    "mode": "php",
+                    "default": "<?php\n\/*\n * Describe this class or punish yourself!\n *\n **\/"
+                  }
+                ]
+              },
+              {
+                "cfg": {
+                  "show_code": 1
+                },
+                "text": "Cli",
+                "code": "cli",
+                "icon": "nf nf-oct-terminal",
+                "extensions": [
+                  {
+                    "ext": "php",
+                    "mode": "php",
+                    "default": "<?php\n\/*\n *  Describe what it does or you're a pussy\n *\n **\/"
+                  }
+                ]
+              },
+              {
+                "text": "Components",
+                "code": "components",
+                "icon": "nf nf-mdi-vuejs",
+                "tabs": [
+                  {
+                    "pos": 1,
+                    "url": "js",
+                    "icon": "icon-javascript-alt",
+                    "path": "js\/",
+                    "title": "JavaScript",
+                    "bcolor": "#f40505",
+                    "fcolor": "#fdfdfd",
+                    "default": true,
+                    "extensions": [
+                      {
+                        "ext": "js",
+                        "mode": "js",
+                        "default": "\/\/ Javascript Document\n\n(() => {\n  return {\n    \n  }\n})();"
+                      }
                     ]
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_value": 1,
-                "allow_children": 1,
-                "show_icon": 1,
-                "i18n": "en"
-            },
-            "text": "I.D.E.",
-            "code": "ide",
-            "icon": "nf nf-fa-code",
-            "items": [
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_value": 1,
-                        "show_alias": 1,
-                        "allow_children": 1,
-                        "inheritance": "cascade"
-                    },
-                    "text": "Development paths",
-                    "code": "PATHS",
-                    "items": [
-                        {
-                            "text": "App",
-                            "code": "BBN_APP_PATH"
-                        },
-                        {
-                            "text": "CDN",
-                            "code": "BBN_CDN_PATH"
-                        },
-                        {
-                            "text": "Lib",
-                            "code": "BBN_LIB_PATH"
-                        }
+                  },
+                  {
+                    "pos": 2,
+                    "url": "html",
+                    "icon": "icon-html",
+                    "path": "html\/",
+                    "title": "View",
+                    "bcolor": "#58be1d",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<!-- HTML Document -->\n\n"
+                      },
+                      {
+                        "ext": "html",
+                        "mode": "html",
+                        "default": "<!-- HTML Document -->\n\n"
+                      }
                     ]
-                },
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_value": 1
-                    },
-                    "text": "Paths' types",
-                    "code": "PTYPES",
-                    "items": [
-                        {
-                            "text": "Bbn-project",
-                            "code": "bbn-project",
-                            "types": [
-                                {
-                                    "url": "mvc",
-                                    "icon": "nf nf-fa-code\n",
-                                    "path": "mvc\/",
-                                    "type": "mvc",
-                                    "bcolor": "#302c2b",
-                                    "fcolor": "#86cdea",
-                                    "bbn_path": "BBN_APP_PATH",
-                                    "language": "en"
-                                },
-                                {
-                                    "url": "components",
-                                    "icon": "nf nf-mdi-vuejs\n",
-                                    "path": "components\/",
-                                    "type": "components",
-                                    "bcolor": "#302c2b",
-                                    "fcolor": "#44b782",
-                                    "bbn_path": "BBN_APP_PATH",
-                                    "language": "en"
-                                },
-                                {
-                                    "url": "lib",
-                                    "icon": "nf nf-mdi-library",
-                                    "path": "lib\/",
-                                    "type": "classes",
-                                    "bcolor": "#302c2b",
-                                    "fcolor": "#ecebeb",
-                                    "bbn_path": "BBN_APP_PATH",
-                                    "language": "en"
-                                },
-                                {
-                                    "url": "cli",
-                                    "icon": "nf nf-fa-cogs",
-                                    "path": "cli\/",
-                                    "type": "cli",
-                                    "bcolor": "#ced62b",
-                                    "fcolor": "#000000",
-                                    "bbn_path": "BBN_APP_PATH",
-                                    "language": "en"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "Classes",
-                            "code": "cls",
-                            "extensions": [
-                                {
-                                    "ext": "php",
-                                    "mode": "php",
-                                    "default": "<?php\n\/*\n * Describe this class or punish yourself!\n *\n **\/"
-                                }
-                            ]
-                        },
-                        {
-                            "cfg": {
-                                "show_code": 1
-                            },
-                            "text": "Cli",
-                            "code": "cli",
-                            "extensions": [
-                                {
-                                    "ext": "php",
-                                    "mode": "php",
-                                    "default": "<?php\n\/*\n *  Describe what it does or you're a pussy\n *\n **\/"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "Components",
-                            "code": "components",
-                            "tabs": [
-                                {
-                                    "pos": 1,
-                                    "url": "js",
-                                    "icon": "icon-javascript-alt",
-                                    "path": "js\/",
-                                    "title": "JavaScript",
-                                    "bcolor": "#f40505",
-                                    "fcolor": "#fdfdfd",
-                                    "default": true,
-                                    "extensions": [
-                                        {
-                                            "ext": "js",
-                                            "mode": "js",
-                                            "default": "\/\/ Javascript Document\n(()=>{\n  return{}\n})();"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 2,
-                                    "url": "html",
-                                    "icon": "icon-html",
-                                    "path": "html\/",
-                                    "title": "View",
-                                    "bcolor": "#58be1d",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<!-- HTML Document -->"
-                                        },
-                                        {
-                                            "ext": "html",
-                                            "mode": "html",
-                                            "default": "<!-- HTML Document -->"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 3,
-                                    "url": "css",
-                                    "icon": "icon-css",
-                                    "path": "css\/",
-                                    "title": "CSS",
-                                    "bcolor": "#ff9900",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "less",
-                                            "mode": "less",
-                                            "default": "\/* LESS Document *\/"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "text": "CSS",
-                            "code": "css",
-                            "extensions": [
-                                {
-                                    "ext": "less",
-                                    "mode": "less",
-                                    "default": "\/* LESS Document *\/\n\n"
-                                },
-                                {
-                                    "ext": "css",
-                                    "mode": "css",
-                                    "default": "\/* CSS Document *\/\n\n"
-                                },
-                                {
-                                    "ext": "scss",
-                                    "mode": "scss",
-                                    "default": "\/* SCSS Document *\/\n\n"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "HTML",
-                            "code": "html",
-                            "extensions": [
-                                {
-                                    "ext": "html",
-                                    "mode": "html",
-                                    "default": "<!-- HTML Document -->\n\n"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "JavaScript",
-                            "code": "js",
-                            "extensions": [
-                                {
-                                    "ext": "js",
-                                    "mode": "js",
-                                    "default": "\/\/ Javascript Document\n"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "Librairies",
-                            "code": "lib",
-                            "extensions": [
-                                {
-                                    "ext": "js",
-                                    "mode": "js",
-                                    "default": "\/\/ Javascript Document\n"
-                                },
-                                {
-                                    "ext": "less",
-                                    "mode": "less",
-                                    "default": "\/* LESS Document *\/\n\n"
-                                },
-                                {
-                                    "ext": "css",
-                                    "mode": "css",
-                                    "default": "\/* CSS Document *\/\n\n"
-                                },
-                                {
-                                    "ext": "scss",
-                                    "mode": "scss",
-                                    "default": "\/* SCSS Document *\/\n\n"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "MVC",
-                            "code": "mvc",
-                            "tabs": [
-                                {
-                                    "ext": "php",
-                                    "pos": 1,
-                                    "url": "_ctrl",
-                                    "path": "public\/",
-                                    "fixed": "_ctrl.php",
-                                    "title": "CTRL",
-                                    "bcolor": "#24288f",
-                                    "fcolor": "#fdfdfd",
-                                    "recursive": 1,
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $ctrl \\bbn\\mvc\\controller *\/"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 2,
-                                    "url": "php",
-                                    "icon": "icon-php",
-                                    "path": "public\/",
-                                    "title": "Controller",
-                                    "bcolor": "#5c9fd6",
-                                    "fcolor": "#fdfdfd",
-                                    "default": true,
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n * @var $ctrl \\bbn\\mvc\\controller \n *\n *\/\n"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 3,
-                                    "url": "private",
-                                    "icon": "icon-php-alt",
-                                    "path": "private\/",
-                                    "title": "Private",
-                                    "bcolor": "#cccccc",
-                                    "fcolor": "#fdfdfd",
-                                    "default": false,
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $ctrl \\bbn\\mvc\\controller *\/"
-                                        }
-                                    ],
-                                    "alternative": true
-                                },
-                                {
-                                    "pos": 4,
-                                    "url": "model",
-                                    "icon": "icon-database",
-                                    "path": "model\/",
-                                    "title": "Model",
-                                    "bcolor": "#ee05cf",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $model \\bbn\\mvc\\model*\/"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 5,
-                                    "url": "html",
-                                    "icon": "icon-html",
-                                    "path": "html\/",
-                                    "title": "View",
-                                    "bcolor": "#58be1d",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<!-- HTML Document -->"
-                                        },
-                                        {
-                                            "ext": "html",
-                                            "mode": "html",
-                                            "default": "<!-- HTML Document -->"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 6,
-                                    "url": "js",
-                                    "icon": "icon-javascript-alt",
-                                    "path": "js\/",
-                                    "title": "JavaScript",
-                                    "bcolor": "#f40505",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "js",
-                                            "mode": "js",
-                                            "default": "\/\/ Javascript Document"
-                                        },
-                                        {
-                                            "ext": "coffee",
-                                            "mode": "coffee",
-                                            "default": "\/\/ Coffeescript Document"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 7,
-                                    "url": "css",
-                                    "icon": "icon-css",
-                                    "path": "css\/",
-                                    "title": "CSS",
-                                    "bcolor": "#ff9900",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "less",
-                                            "mode": "less",
-                                            "default": "\/* LESS Document *\/"
-                                        },
-                                        {
-                                            "ext": "css",
-                                            "mode": "css",
-                                            "default": "\/* CSS Document *\/"
-                                        },
-                                        {
-                                            "ext": "scss",
-                                            "mode": "scss",
-                                            "default": "\/* SCSS Document *\/"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "text": "mvc2",
-                            "code": "mvc2",
-                            "tabs": [
-                                {
-                                    "ext": "php",
-                                    "pos": 1,
-                                    "url": "_ctrl",
-                                    "path": "public\/",
-                                    "fixed": "_ctrl.php",
-                                    "title": "CTRL",
-                                    "bcolor": "#24288f",
-                                    "fcolor": "#fdfdfd",
-                                    "recursive": 1,
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $this \\bbn\\mvc\\controller *\/"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 2,
-                                    "url": "php",
-                                    "icon": "icon-php",
-                                    "path": "public\/",
-                                    "title": "Controller",
-                                    "bcolor": "#5c9fd6",
-                                    "fcolor": "#fdfdfd",
-                                    "default": true,
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $this \\bbn\\mvc\\controller *\/"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 3,
-                                    "url": "private",
-                                    "icon": "icon-php-alt",
-                                    "path": "private\/",
-                                    "title": "Private",
-                                    "bcolor": "#cccccc",
-                                    "fcolor": "#fdfdfd",
-                                    "default": false,
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $this \\bbn\\mvc\\controller *\/"
-                                        }
-                                    ],
-                                    "alternative": true
-                                },
-                                {
-                                    "pos": 4,
-                                    "url": "model",
-                                    "icon": "icon-database",
-                                    "menu": [
-                                        {
-                                            "icon": "nf nf-fa-code",
-                                            "text": "add",
-                                            "items": []
-                                        }
-                                    ],
-                                    "path": "model\/",
-                                    "title": "Model",
-                                    "bcolor": "#ee05cf",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<?php\n\/*\n * Describe what it does!\n *\n **\/\n\n\/** @var $this \\bbn\\mvc\\model*\/"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 5,
-                                    "url": "html",
-                                    "icon": "icon-html",
-                                    "path": "html\/",
-                                    "title": "View",
-                                    "bcolor": "#58be1d",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "php",
-                                            "mode": "php",
-                                            "default": "<!-- HTML Document -->"
-                                        },
-                                        {
-                                            "ext": "html",
-                                            "mode": "html",
-                                            "default": "<!-- HTML Document -->"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 6,
-                                    "url": "js",
-                                    "icon": "icon-javascript-alt",
-                                    "path": "js\/",
-                                    "title": "JavaScript",
-                                    "bcolor": "#f40505",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "js",
-                                            "mode": "js",
-                                            "default": "\/\/ Javascript Document"
-                                        },
-                                        {
-                                            "ext": "coffee",
-                                            "mode": "coffee",
-                                            "default": "\/\/ Coffeescript Document"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "pos": 7,
-                                    "url": "css",
-                                    "icon": "icon-css",
-                                    "path": "css\/",
-                                    "title": "CSS",
-                                    "bcolor": "#ff9900",
-                                    "fcolor": "#fdfdfd",
-                                    "extensions": [
-                                        {
-                                            "ext": "less",
-                                            "mode": "less",
-                                            "default": "\/* LESS Document *\/"
-                                        },
-                                        {
-                                            "ext": "css",
-                                            "mode": "css",
-                                            "default": "\/* CSS Document *\/"
-                                        },
-                                        {
-                                            "ext": "scss",
-                                            "mode": "scss",
-                                            "default": "\/* SCSS Document *\/"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "text": "PHP",
-                            "code": "php",
-                            "extensions": [
-                                {
-                                    "ext": "php",
-                                    "mode": "php",
-                                    "default": "<?php\n\/*\n * Describe what it does or you're a pussy\n *\n **\/\n\n\/** @var $this \\bbn\\mvc\\controller *\/\n"
-                                }
-                            ]
-                        },
-                        {
-                            "text": "Scripts",
-                            "code": "scripts",
-                            "extensions": [
-                                {
-                                    "ext": "php",
-                                    "mode": "php",
-                                    "default": "<?php\n\/*\n * Describe what it does or you're as gay as Jaysus\n *\n **\/\n\n\/** @var $this \\bbn\\mvc\\controller *\/\n"
-                                },
-                                {
-                                    "ext": "js",
-                                    "mode": "js",
-                                    "default": "\/\/ Javascript Document\n"
-                                }
-                            ]
-                        }
+                  },
+                  {
+                    "pos": 3,
+                    "url": "css",
+                    "icon": "icon-css",
+                    "path": "css\/",
+                    "title": "CSS",
+                    "bcolor": "#ff9900",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "css",
+                        "mode": "css",
+                        "default": "\/* CSS Document *\/\n\n"
+                      },
+                      {
+                        "ext": "less",
+                        "mode": "less",
+                        "default": "\/* LESS Document *\/\n\n"
+                      }
                     ]
-                },
-                {
-                    "text": "Recent files",
-                    "code": "recent"
-                },
-                {
-                    "text": "File preferences",
-                    "code": "files"
-                },
-                {
-                    "text": "Opened files",
-                    "code": "opened"
-                },
-                {
-                    "cfg": {
-                        "show_code": 1
-                    },
-                    "text": "Theme",
-                    "code": "theme",
-                    "theme": "default"
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Internationalization",
-            "code": "i18n",
-            "icon": "nf nf-mdi-translate",
-            "items": [
-                {
-                    "text": "Languages",
-                    "code": "languages",
-                    "items": [
-                        {
-                            "text": "Abkhaz",
-                            "code": "ab"
-                        },
-                        {
-                            "text": "Afar",
-                            "code": "aa"
-                        },
-                        {
-                            "text": "Afrikaans",
-                            "code": "af"
-                        },
-                        {
-                            "text": "Akan",
-                            "code": "ak"
-                        },
-                        {
-                            "text": "Albanian",
-                            "code": "sq"
-                        },
-                        {
-                            "text": "Amharic",
-                            "code": "am"
-                        },
-                        {
-                            "text": "Arabic",
-                            "code": "ar"
-                        },
-                        {
-                            "text": "Aragonese",
-                            "code": "an"
-                        },
-                        {
-                            "text": "Armenian",
-                            "code": "hy"
-                        },
-                        {
-                            "text": "Assamese",
-                            "code": "as"
-                        },
-                        {
-                            "text": "Avaric",
-                            "code": "av"
-                        },
-                        {
-                            "text": "Avestan",
-                            "code": "ae"
-                        },
-                        {
-                            "text": "Aymara",
-                            "code": "ay"
-                        },
-                        {
-                            "text": "Azerbaijani",
-                            "code": "az"
-                        },
-                        {
-                            "text": "Bambara",
-                            "code": "bm"
-                        },
-                        {
-                            "text": "Bashkir",
-                            "code": "ba"
-                        },
-                        {
-                            "text": "Basque",
-                            "code": "eu"
-                        },
-                        {
-                            "text": "Belarusian",
-                            "code": "be"
-                        },
-                        {
-                            "text": "Bengali",
-                            "code": "bn"
-                        },
-                        {
-                            "text": "Bihari",
-                            "code": "bh"
-                        },
-                        {
-                            "text": "Bislama",
-                            "code": "bi"
-                        },
-                        {
-                            "text": "Bosnian",
-                            "code": "bs"
-                        },
-                        {
-                            "text": "Breton",
-                            "code": "br"
-                        },
-                        {
-                            "text": "Bulgarian",
-                            "code": "bg"
-                        },
-                        {
-                            "text": "Burmese",
-                            "code": "my"
-                        },
-                        {
-                            "text": "Catalan; Valencian",
-                            "code": "ca"
-                        },
-                        {
-                            "text": "Chamorro",
-                            "code": "ch"
-                        },
-                        {
-                            "text": "Chechen",
-                            "code": "ce"
-                        },
-                        {
-                            "text": "Chichewa; Chewa; Nyanja",
-                            "code": "ny"
-                        },
-                        {
-                            "text": "Chinese",
-                            "code": "zh"
-                        },
-                        {
-                            "text": "Chuvash",
-                            "code": "cv"
-                        },
-                        {
-                            "text": "Cornish",
-                            "code": "kw"
-                        },
-                        {
-                            "text": "Corsican",
-                            "code": "co"
-                        },
-                        {
-                            "text": "Cree",
-                            "code": "cr"
-                        },
-                        {
-                            "text": "Croatian",
-                            "code": "hr"
-                        },
-                        {
-                            "text": "Czech",
-                            "code": "cs"
-                        },
-                        {
-                            "text": "Danish",
-                            "code": "da"
-                        },
-                        {
-                            "text": "Divehi; Dhivehi; Maldivian;",
-                            "code": "dv"
-                        },
-                        {
-                            "text": "Dutch",
-                            "code": "nl"
-                        },
-                        {
-                            "text": "English",
-                            "code": "en",
-                            "primary": true
-                        },
-                        {
-                            "text": "Esperanto",
-                            "code": "eo"
-                        },
-                        {
-                            "text": "Estonian",
-                            "code": "et"
-                        },
-                        {
-                            "text": "Ewe",
-                            "code": "ee"
-                        },
-                        {
-                            "text": "Faroese",
-                            "code": "fo"
-                        },
-                        {
-                            "text": "Fijian",
-                            "code": "fj"
-                        },
-                        {
-                            "text": "Finnish",
-                            "code": "fi"
-                        },
-                        {
-                            "text": "French",
-                            "code": "fr",
-                            "primary": true
-                        },
-                        {
-                            "text": "Fula; Fulah; Pulaar; Pular",
-                            "code": "ff"
-                        },
-                        {
-                            "text": "Galician",
-                            "code": "gl"
-                        },
-                        {
-                            "text": "Georgian",
-                            "code": "ka"
-                        },
-                        {
-                            "text": "German",
-                            "code": "de",
-                            "primary": true
-                        },
-                        {
-                            "text": "Greek, Modern",
-                            "code": "el"
-                        },
-                        {
-                            "text": "Guaran\u00ed",
-                            "code": "gn"
-                        },
-                        {
-                            "text": "Gujarati",
-                            "code": "gu"
-                        },
-                        {
-                            "text": "Haitian; Haitian Creole",
-                            "code": "ht"
-                        },
-                        {
-                            "text": "Hausa",
-                            "code": "ha"
-                        },
-                        {
-                            "text": "Hebrew (modern)",
-                            "code": "he"
-                        },
-                        {
-                            "text": "Herero",
-                            "code": "hz"
-                        },
-                        {
-                            "text": "Hindi",
-                            "code": "hi"
-                        },
-                        {
-                            "text": "Hiri Motu",
-                            "code": "ho"
-                        },
-                        {
-                            "text": "Hungarian",
-                            "code": "hu"
-                        },
-                        {
-                            "text": "Icelandic",
-                            "code": "is"
-                        },
-                        {
-                            "text": "Ido",
-                            "code": "io"
-                        },
-                        {
-                            "text": "Igbo",
-                            "code": "ig"
-                        },
-                        {
-                            "text": "Indonesian",
-                            "code": "id"
-                        },
-                        {
-                            "text": "Interlingua",
-                            "code": "ia"
-                        },
-                        {
-                            "text": "Interlingue",
-                            "code": "ie"
-                        },
-                        {
-                            "text": "Inuktitut",
-                            "code": "iu"
-                        },
-                        {
-                            "text": "Inupiaq",
-                            "code": "ik"
-                        },
-                        {
-                            "text": "Irish",
-                            "code": "ga"
-                        },
-                        {
-                            "text": "Italian",
-                            "code": "it",
-                            "primary": true
-                        },
-                        {
-                            "text": "Japanese",
-                            "code": "ja"
-                        },
-                        {
-                            "text": "Javanese",
-                            "code": "jv"
-                        },
-                        {
-                            "text": "Kalaallisut, Greenlandic",
-                            "code": "kl"
-                        },
-                        {
-                            "text": "Kannada",
-                            "code": "kn"
-                        },
-                        {
-                            "text": "Kanuri",
-                            "code": "kr"
-                        },
-                        {
-                            "text": "Kashmiri",
-                            "code": "ks"
-                        },
-                        {
-                            "text": "Kazakh",
-                            "code": "kk"
-                        },
-                        {
-                            "text": "Khmer",
-                            "code": "km"
-                        },
-                        {
-                            "text": "Kikuyu, Gikuyu",
-                            "code": "ki"
-                        },
-                        {
-                            "text": "Kinyarwanda",
-                            "code": "rw"
-                        },
-                        {
-                            "text": "Kirghiz, Kyrgyz",
-                            "code": "ky"
-                        },
-                        {
-                            "text": "Kirundi",
-                            "code": "rn"
-                        },
-                        {
-                            "text": "Komi",
-                            "code": "kv"
-                        },
-                        {
-                            "text": "Kongo",
-                            "code": "kg"
-                        },
-                        {
-                            "text": "Korean",
-                            "code": "ko"
-                        },
-                        {
-                            "text": "Kurdish",
-                            "code": "ku"
-                        },
-                        {
-                            "text": "Kwanyama, Kuanyama",
-                            "code": "kj"
-                        },
-                        {
-                            "text": "Lao",
-                            "code": "lo"
-                        },
-                        {
-                            "text": "Latin",
-                            "code": "la"
-                        },
-                        {
-                            "text": "Latvian",
-                            "code": "lv"
-                        },
-                        {
-                            "text": "Limburgish, Limburgan, Limburger",
-                            "code": "li"
-                        },
-                        {
-                            "text": "Lingala",
-                            "code": "ln"
-                        },
-                        {
-                            "text": "Lithuanian",
-                            "code": "lt"
-                        },
-                        {
-                            "text": "Luba-Katanga",
-                            "code": "lu"
-                        },
-                        {
-                            "text": "Luganda",
-                            "code": "lg"
-                        },
-                        {
-                            "text": "Luxembourgish, Letzeburgesch",
-                            "code": "lb"
-                        },
-                        {
-                            "text": "Macedonian",
-                            "code": "mk"
-                        },
-                        {
-                            "text": "Malagasy",
-                            "code": "mg"
-                        },
-                        {
-                            "text": "Malay",
-                            "code": "ms"
-                        },
-                        {
-                            "text": "Malayalam",
-                            "code": "ml"
-                        },
-                        {
-                            "text": "Maltese",
-                            "code": "mt"
-                        },
-                        {
-                            "text": "Manx",
-                            "code": "gv"
-                        },
-                        {
-                            "text": "M\u0101ori",
-                            "code": "mi"
-                        },
-                        {
-                            "text": "Marathi (Mar\u0101\u1e6dh\u012b)",
-                            "code": "mr"
-                        },
-                        {
-                            "text": "Marshallese",
-                            "code": "mh"
-                        },
-                        {
-                            "text": "Mongolian",
-                            "code": "mn"
-                        },
-                        {
-                            "text": "Nauru",
-                            "code": "na"
-                        },
-                        {
-                            "text": "Navajo, Navaho",
-                            "code": "nv"
-                        },
-                        {
-                            "text": "Ndonga",
-                            "code": "ng"
-                        },
-                        {
-                            "text": "Nepali",
-                            "code": "ne"
-                        },
-                        {
-                            "text": "North Ndebele",
-                            "code": "nd"
-                        },
-                        {
-                            "text": "Northern Sami",
-                            "code": "se"
-                        },
-                        {
-                            "text": "Norwegian",
-                            "code": "no"
-                        },
-                        {
-                            "text": "Norwegian Bokm\u00e5l",
-                            "code": "nb"
-                        },
-                        {
-                            "text": "Norwegian Nynorsk",
-                            "code": "nn"
-                        },
-                        {
-                            "text": "Nuosu",
-                            "code": "ii"
-                        },
-                        {
-                            "text": "Occitan",
-                            "code": "oc"
-                        },
-                        {
-                            "text": "Ojibwe, Ojibwa",
-                            "code": "oj"
-                        },
-                        {
-                            "text": "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic",
-                            "code": "cu"
-                        },
-                        {
-                            "text": "Oriya",
-                            "code": "or"
-                        },
-                        {
-                            "text": "Oromo",
-                            "code": "om"
-                        },
-                        {
-                            "text": "Ossetian, Ossetic",
-                            "code": "os"
-                        },
-                        {
-                            "text": "P\u0101li",
-                            "code": "pi"
-                        },
-                        {
-                            "text": "Panjabi, Punjabi",
-                            "code": "pa"
-                        },
-                        {
-                            "text": "Pashto, Pushto",
-                            "code": "ps"
-                        },
-                        {
-                            "text": "Persian",
-                            "code": "fa"
-                        },
-                        {
-                            "text": "Polish",
-                            "code": "pl"
-                        },
-                        {
-                            "text": "Portuguese",
-                            "code": "pt"
-                        },
-                        {
-                            "text": "Quechua",
-                            "code": "qu"
-                        },
-                        {
-                            "text": "Romanian, Moldavian, Moldovan",
-                            "code": "ro"
-                        },
-                        {
-                            "text": "Romansh",
-                            "code": "rm"
-                        },
-                        {
-                            "text": "Russian",
-                            "code": "ru"
-                        },
-                        {
-                            "text": "Samoan",
-                            "code": "sm"
-                        },
-                        {
-                            "text": "Sango",
-                            "code": "sg"
-                        },
-                        {
-                            "text": "Sanskrit (Sa\u1e41sk\u1e5bta)",
-                            "code": "sa"
-                        },
-                        {
-                            "text": "Sardinian",
-                            "code": "sc"
-                        },
-                        {
-                            "text": "Scottish Gaelic; Gaelic",
-                            "code": "gd"
-                        },
-                        {
-                            "text": "Serbian",
-                            "code": "sr"
-                        },
-                        {
-                            "text": "Shona",
-                            "code": "sn"
-                        },
-                        {
-                            "text": "Sindhi",
-                            "code": "sd"
-                        },
-                        {
-                            "text": "Sinhala, Sinhalese",
-                            "code": "si"
-                        },
-                        {
-                            "text": "Slovak",
-                            "code": "sk"
-                        },
-                        {
-                            "text": "Slovene",
-                            "code": "sl"
-                        },
-                        {
-                            "text": "Somali",
-                            "code": "so"
-                        },
-                        {
-                            "text": "South Ndebele",
-                            "code": "nr"
-                        },
-                        {
-                            "text": "Southern Sotho",
-                            "code": "st"
-                        },
-                        {
-                            "text": "Spanish; Castilian",
-                            "code": "es",
-                            "primary": true
-                        },
-                        {
-                            "text": "Sundanese",
-                            "code": "su"
-                        },
-                        {
-                            "text": "Swahili",
-                            "code": "sw"
-                        },
-                        {
-                            "text": "Swati",
-                            "code": "ss"
-                        },
-                        {
-                            "text": "Swedish",
-                            "code": "sv"
-                        },
-                        {
-                            "text": "Tagalog",
-                            "code": "tl"
-                        },
-                        {
-                            "text": "Tahitian",
-                            "code": "ty"
-                        },
-                        {
-                            "text": "Tajik",
-                            "code": "tg"
-                        },
-                        {
-                            "text": "Tamil",
-                            "code": "ta"
-                        },
-                        {
-                            "text": "Tatar",
-                            "code": "tt"
-                        },
-                        {
-                            "text": "Telugu",
-                            "code": "te"
-                        },
-                        {
-                            "text": "Thai",
-                            "code": "th"
-                        },
-                        {
-                            "text": "Tibetan Standard, Tibetan, Central",
-                            "code": "bo"
-                        },
-                        {
-                            "text": "Tigrinya",
-                            "code": "ti"
-                        },
-                        {
-                            "text": "Tonga (Tonga Islands)",
-                            "code": "to"
-                        },
-                        {
-                            "text": "Tsonga",
-                            "code": "ts"
-                        },
-                        {
-                            "text": "Tswana",
-                            "code": "tn"
-                        },
-                        {
-                            "text": "Turkish",
-                            "code": "tr"
-                        },
-                        {
-                            "text": "Turkmen",
-                            "code": "tk"
-                        },
-                        {
-                            "text": "Twi",
-                            "code": "tw"
-                        },
-                        {
-                            "text": "Uighur, Uyghur",
-                            "code": "ug"
-                        },
-                        {
-                            "text": "Ukrainian",
-                            "code": "uk"
-                        },
-                        {
-                            "text": "Urdu",
-                            "code": "ur"
-                        },
-                        {
-                            "text": "Uzbek",
-                            "code": "uz"
-                        },
-                        {
-                            "text": "Venda",
-                            "code": "ve"
-                        },
-                        {
-                            "text": "Vietnamese",
-                            "code": "vi"
-                        },
-                        {
-                            "text": "Volap\u00fck",
-                            "code": "vo"
-                        },
-                        {
-                            "text": "Walloon",
-                            "code": "wa"
-                        },
-                        {
-                            "text": "Welsh",
-                            "code": "cy"
-                        },
-                        {
-                            "text": "Western Frisian",
-                            "code": "fy"
-                        },
-                        {
-                            "text": "Wolof",
-                            "code": "wo"
-                        },
-                        {
-                            "text": "Xhosa",
-                            "code": "xh"
-                        },
-                        {
-                            "text": "Yiddish",
-                            "code": "yi"
-                        },
-                        {
-                            "text": "Yoruba",
-                            "code": "yo"
-                        },
-                        {
-                            "text": "Zhuang, Chuang",
-                            "code": "za"
-                        }
+                  }
+                ]
+              },
+              {
+                "text": "CSS",
+                "code": "css",
+                "icon": "nf nf-fa-css3",
+                "extensions": [
+                  {
+                    "ext": "less",
+                    "mode": "less",
+                    "default": "\/* LESS Document *\/\n\n"
+                  },
+                  {
+                    "ext": "css",
+                    "mode": "css",
+                    "default": "\/* CSS Document *\/\n\n"
+                  },
+                  {
+                    "ext": "scss",
+                    "mode": "scss",
+                    "default": "\/* SCSS Document *\/\n\n"
+                  }
+                ]
+              },
+              {
+                "text": "HTML",
+                "code": "html",
+                "icon": "nf nf-fa-html5",
+                "extensions": [
+                  {
+                    "ext": "html",
+                    "mode": "html",
+                    "default": "<!-- HTML Document -->\n\n"
+                  }
+                ]
+              },
+              {
+                "text": "JavaScript",
+                "code": "js",
+                "icon": "nf nf-mdi-language_javascript",
+                "extensions": [
+                  {
+                    "ext": "js",
+                    "mode": "js",
+                    "default": "\/\/ Javascript Document\n\n"
+                  }
+                ]
+              },
+              {
+                "text": "Librairies",
+                "code": "lib",
+                "icon": "nf nf-fa-book",
+                "extensions": [
+                  {
+                    "ext": "js",
+                    "mode": "js",
+                    "default": "\/\/ Javascript Document\n\n"
+                  },
+                  {
+                    "ext": "less",
+                    "mode": "less",
+                    "default": "\/* LESS Document *\/\n\n"
+                  },
+                  {
+                    "ext": "css",
+                    "mode": "css",
+                    "default": "\/* CSS Document *\/\n\n"
+                  },
+                  {
+                    "ext": "scss",
+                    "mode": "scss",
+                    "default": "\/* SCSS Document *\/\n\n"
+                  }
+                ]
+              },
+              {
+                "text": "MVC",
+                "code": "mvc",
+                "icon": "nf nf-dev-netbeans",
+                "tabs": [
+                  {
+                    "ext": "php",
+                    "pos": 1,
+                    "url": "_ctrl",
+                    "path": "public\/",
+                    "fixed": "_ctrl.php",
+                    "title": "CTRL",
+                    "bcolor": "#24288f",
+                    "fcolor": "#fdfdfd",
+                    "recursive": 1,
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<?php\n\n\/** @var $ctrl \\bbn\\Mvc\\Controller *\/\n\n"
+                      }
                     ]
-                },
-                {
-                    "text": "Translatable languages",
-                    "code": "langs"
-                }
+                  },
+                  {
+                    "pos": 2,
+                    "url": "php",
+                    "icon": "icon-php",
+                    "path": "public\/",
+                    "title": "Controller",
+                    "bcolor": "#5c9fd6",
+                    "fcolor": "#fdfdfd",
+                    "default": true,
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<?php\n\n\/** @var $ctrl \\bbn\\Mvc\\Controller *\/\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 3,
+                    "url": "private",
+                    "icon": "icon-php-alt",
+                    "path": "private\/",
+                    "title": "Private",
+                    "bcolor": "#cccccc",
+                    "fcolor": "#fdfdfd",
+                    "default": false,
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<?php\n\/**\n * What is my purpose?\n *\n **\/\n\n\/** @var $ctrl \\bbn\\Mvc\\Controller *\/\n\n"
+                      }
+                    ],
+                    "alternative": true
+                  },
+                  {
+                    "pos": 4,
+                    "url": "model",
+                    "icon": "icon-database",
+                    "path": "model\/",
+                    "title": "Model",
+                    "bcolor": "#ee05cf",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<?php\n\/**\n * What is my purpose?\n *\n **\/\n\n\/** @var $model \\bbn\\Mvc\\Model*\/\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 5,
+                    "url": "html",
+                    "icon": "icon-html",
+                    "path": "html\/",
+                    "title": "View",
+                    "bcolor": "#58be1d",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "php",
+                        "mode": "php",
+                        "default": "<!-- HTML Document -->\n\n"
+                      },
+                      {
+                        "ext": "html",
+                        "mode": "html",
+                        "default": "<!-- HTML Document -->\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 6,
+                    "url": "js",
+                    "icon": "icon-javascript-alt",
+                    "path": "js\/",
+                    "title": "JavaScript",
+                    "bcolor": "#f40505",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "js",
+                        "mode": "js",
+                        "default": "\/\/ Javascript Document\n\n"
+                      },
+                      {
+                        "ext": "ts",
+                        "mode": "typescript",
+                        "default": "\/\/ Typescript Document\n\n"
+                      }
+                    ]
+                  },
+                  {
+                    "pos": 7,
+                    "url": "css",
+                    "icon": "icon-css",
+                    "path": "css\/",
+                    "title": "CSS",
+                    "bcolor": "#ff9900",
+                    "fcolor": "#fdfdfd",
+                    "extensions": [
+                      {
+                        "ext": "less",
+                        "mode": "less",
+                        "default": "\/* LESS Document *\/\n\n"
+                      },
+                      {
+                        "ext": "css",
+                        "mode": "css",
+                        "default": "\/* CSS Document *\/\n\n"
+                      },
+                      {
+                        "ext": "scss",
+                        "mode": "scss",
+                        "default": "\/* SCSS Document *\/\n\n"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "PHP",
+                "code": "php",
+                "icon": "nf nf-mdi-language_php",
+                "extensions": [
+                  {
+                    "ext": "php",
+                    "mode": "php",
+                    "default": "<?php\n\/**\n * What is my purpose?\n *\n **\/\n\n\/** @var $ctrl \\bbn\\Mvc\\Controller *\/\n\n"
+                  }
+                ]
+              },
+              {
+                "text": "Scripts",
+                "code": "scripts",
+                "icon": "nf nf-mdi-language_javascript",
+                "extensions": [
+                  {
+                    "ext": "php",
+                    "mode": "php",
+                    "default": "<?php\n\/**\n * What is my purpose?\n *\n **\/\n\n\/** @var $ctrl \\bbn\\Mvc\\Controller *\/\n\n"
+                  },
+                  {
+                    "ext": "js",
+                    "mode": "js",
+                    "default": "\/\/ Javascript Document\n\n"
+                  }
+                ]
+              }
             ]
-        },
-        {
+          },
+          {
+            "text": "Recent files",
+            "code": "recent",
+            "icon": "nf nf-fa-file_code_o"
+          },
+          {
+            "text": "File preferences",
+            "code": "files",
+            "icon": "nf nf-mdi-folder_account"
+          },
+          {
+            "text": "Opened files",
+            "code": "opened",
+            "icon": "nf nf-fa-folder_open_o"
+          },
+          {
             "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "show_icon": 1,
-                "i18n": "en"
+              "show_code": 1
             },
-            "text": "Mailings",
-            "code": "mailing",
-            "icon": "nf nf-oct-mail",
+            "text": "Theme",
+            "code": "theme",
+            "icon": "nf nf-fae-palette_color",
+            "theme": "default"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Internationalization",
+        "code": "i18n",
+        "icon": "nf nf-mdi-translate",
+        "items": [
+          {
+            "text": "Languages",
+            "code": "languages",
             "items": [
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_value": 1,
-                        "sortable": 1
-                    },
-                    "text": "eMails de test",
-                    "code": "test",
-                    "icon": "nf nf-fa-at"
-                },
-                {
-                    "cfg": {
-                        "show_value": 1
-                    },
-                    "text": "Exp\u00e9diteur",
-                    "code": "sender"
-                }
+              {
+                "text": "Abkhaz",
+                "code": "ab"
+              },
+              {
+                "text": "Afar",
+                "code": "aa"
+              },
+              {
+                "text": "Afrikaans",
+                "code": "af"
+              },
+              {
+                "text": "Akan",
+                "code": "ak"
+              },
+              {
+                "text": "Albanian",
+                "code": "sq"
+              },
+              {
+                "text": "Amharic",
+                "code": "am"
+              },
+              {
+                "text": "Arabic",
+                "code": "ar"
+              },
+              {
+                "text": "Aragonese",
+                "code": "an"
+              },
+              {
+                "text": "Armenian",
+                "code": "hy"
+              },
+              {
+                "text": "Assamese",
+                "code": "as"
+              },
+              {
+                "text": "Avaric",
+                "code": "av"
+              },
+              {
+                "text": "Avestan",
+                "code": "ae"
+              },
+              {
+                "text": "Aymara",
+                "code": "ay"
+              },
+              {
+                "text": "Azerbaijani",
+                "code": "az"
+              },
+              {
+                "text": "Bambara",
+                "code": "bm"
+              },
+              {
+                "text": "Bashkir",
+                "code": "ba"
+              },
+              {
+                "text": "Basque",
+                "code": "eu"
+              },
+              {
+                "text": "Belarusian",
+                "code": "be"
+              },
+              {
+                "text": "Bengali",
+                "code": "bn"
+              },
+              {
+                "text": "Bihari",
+                "code": "bh"
+              },
+              {
+                "text": "Bislama",
+                "code": "bi"
+              },
+              {
+                "text": "Bosnian",
+                "code": "bs"
+              },
+              {
+                "text": "Breton",
+                "code": "br"
+              },
+              {
+                "text": "Bulgarian",
+                "code": "bg"
+              },
+              {
+                "text": "Burmese",
+                "code": "my"
+              },
+              {
+                "text": "Catalan; Valencian",
+                "code": "ca"
+              },
+              {
+                "text": "Chamorro",
+                "code": "ch"
+              },
+              {
+                "text": "Chechen",
+                "code": "ce"
+              },
+              {
+                "text": "Chichewa; Chewa; Nyanja",
+                "code": "ny"
+              },
+              {
+                "text": "Chinese",
+                "code": "zh"
+              },
+              {
+                "text": "Chuvash",
+                "code": "cv"
+              },
+              {
+                "text": "Cornish",
+                "code": "kw"
+              },
+              {
+                "text": "Corsican",
+                "code": "co"
+              },
+              {
+                "text": "Cree",
+                "code": "cr"
+              },
+              {
+                "text": "Croatian",
+                "code": "hr"
+              },
+              {
+                "text": "Czech",
+                "code": "cs"
+              },
+              {
+                "text": "Danish",
+                "code": "da"
+              },
+              {
+                "text": "Divehi; Dhivehi; Maldivian;",
+                "code": "dv"
+              },
+              {
+                "text": "Dutch",
+                "code": "nl"
+              },
+              {
+                "text": "English",
+                "code": "en",
+                "primary": true
+              },
+              {
+                "text": "Esperanto",
+                "code": "eo"
+              },
+              {
+                "text": "Estonian",
+                "code": "et"
+              },
+              {
+                "text": "Ewe",
+                "code": "ee"
+              },
+              {
+                "text": "Faroese",
+                "code": "fo"
+              },
+              {
+                "text": "Fijian",
+                "code": "fj"
+              },
+              {
+                "text": "Finnish",
+                "code": "fi"
+              },
+              {
+                "text": "French",
+                "code": "fr",
+                "primary": true
+              },
+              {
+                "text": "Fula; Fulah; Pulaar; Pular",
+                "code": "ff"
+              },
+              {
+                "text": "Galician",
+                "code": "gl"
+              },
+              {
+                "text": "Georgian",
+                "code": "ka"
+              },
+              {
+                "text": "German",
+                "code": "de",
+                "primary": true
+              },
+              {
+                "text": "Greek, Modern",
+                "code": "el"
+              },
+              {
+                "text": "Guaran\u00ed",
+                "code": "gn"
+              },
+              {
+                "text": "Gujarati",
+                "code": "gu"
+              },
+              {
+                "text": "Haitian; Haitian Creole",
+                "code": "ht"
+              },
+              {
+                "text": "Hausa",
+                "code": "ha"
+              },
+              {
+                "text": "Hebrew (modern)",
+                "code": "he"
+              },
+              {
+                "text": "Herero",
+                "code": "hz"
+              },
+              {
+                "text": "Hindi",
+                "code": "hi"
+              },
+              {
+                "text": "Hiri Motu",
+                "code": "ho"
+              },
+              {
+                "text": "Hungarian",
+                "code": "hu"
+              },
+              {
+                "text": "Icelandic",
+                "code": "is"
+              },
+              {
+                "text": "Ido",
+                "code": "io"
+              },
+              {
+                "text": "Igbo",
+                "code": "ig"
+              },
+              {
+                "text": "Indonesian",
+                "code": "id"
+              },
+              {
+                "text": "Interlingua",
+                "code": "ia"
+              },
+              {
+                "text": "Interlingue",
+                "code": "ie"
+              },
+              {
+                "text": "Inuktitut",
+                "code": "iu"
+              },
+              {
+                "text": "Inupiaq",
+                "code": "ik"
+              },
+              {
+                "text": "Irish",
+                "code": "ga"
+              },
+              {
+                "text": "Italian",
+                "code": "it",
+                "primary": true
+              },
+              {
+                "text": "Japanese",
+                "code": "ja"
+              },
+              {
+                "text": "Javanese",
+                "code": "jv"
+              },
+              {
+                "text": "Kalaallisut, Greenlandic",
+                "code": "kl"
+              },
+              {
+                "text": "Kannada",
+                "code": "kn"
+              },
+              {
+                "text": "Kanuri",
+                "code": "kr"
+              },
+              {
+                "text": "Kashmiri",
+                "code": "ks"
+              },
+              {
+                "text": "Kazakh",
+                "code": "kk"
+              },
+              {
+                "text": "Khmer",
+                "code": "km"
+              },
+              {
+                "text": "Kikuyu, Gikuyu",
+                "code": "ki"
+              },
+              {
+                "text": "Kinyarwanda",
+                "code": "rw"
+              },
+              {
+                "text": "Kirghiz, Kyrgyz",
+                "code": "ky"
+              },
+              {
+                "text": "Kirundi",
+                "code": "rn"
+              },
+              {
+                "text": "Komi",
+                "code": "kv"
+              },
+              {
+                "text": "Kongo",
+                "code": "kg"
+              },
+              {
+                "text": "Korean",
+                "code": "ko"
+              },
+              {
+                "text": "Kurdish",
+                "code": "ku"
+              },
+              {
+                "text": "Kwanyama, Kuanyama",
+                "code": "kj"
+              },
+              {
+                "text": "Lao",
+                "code": "lo"
+              },
+              {
+                "text": "Latin",
+                "code": "la"
+              },
+              {
+                "text": "Latvian",
+                "code": "lv"
+              },
+              {
+                "text": "Limburgish, Limburgan, Limburger",
+                "code": "li"
+              },
+              {
+                "text": "Lingala",
+                "code": "ln"
+              },
+              {
+                "text": "Lithuanian",
+                "code": "lt"
+              },
+              {
+                "text": "Luba-Katanga",
+                "code": "lu"
+              },
+              {
+                "text": "Luganda",
+                "code": "lg"
+              },
+              {
+                "text": "Luxembourgish, Letzeburgesch",
+                "code": "lb"
+              },
+              {
+                "text": "Macedonian",
+                "code": "mk"
+              },
+              {
+                "text": "Malagasy",
+                "code": "mg"
+              },
+              {
+                "text": "Malay",
+                "code": "ms"
+              },
+              {
+                "text": "Malayalam",
+                "code": "ml"
+              },
+              {
+                "text": "Maltese",
+                "code": "mt"
+              },
+              {
+                "text": "Manx",
+                "code": "gv"
+              },
+              {
+                "text": "M\u0101ori",
+                "code": "mi"
+              },
+              {
+                "text": "Marathi (Mar\u0101\u1e6dh\u012b)",
+                "code": "mr"
+              },
+              {
+                "text": "Marshallese",
+                "code": "mh"
+              },
+              {
+                "text": "Mongolian",
+                "code": "mn"
+              },
+              {
+                "text": "Nauru",
+                "code": "na"
+              },
+              {
+                "text": "Navajo, Navaho",
+                "code": "nv"
+              },
+              {
+                "text": "Ndonga",
+                "code": "ng"
+              },
+              {
+                "text": "Nepali",
+                "code": "ne"
+              },
+              {
+                "text": "North Ndebele",
+                "code": "nd"
+              },
+              {
+                "text": "Northern Sami",
+                "code": "se"
+              },
+              {
+                "text": "Norwegian",
+                "code": "no"
+              },
+              {
+                "text": "Norwegian Bokm\u00e5l",
+                "code": "nb"
+              },
+              {
+                "text": "Norwegian Nynorsk",
+                "code": "nn"
+              },
+              {
+                "text": "Nuosu",
+                "code": "ii"
+              },
+              {
+                "text": "Occitan",
+                "code": "oc"
+              },
+              {
+                "text": "Ojibwe, Ojibwa",
+                "code": "oj"
+              },
+              {
+                "text": "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic",
+                "code": "cu"
+              },
+              {
+                "text": "Oriya",
+                "code": "or"
+              },
+              {
+                "text": "Oromo",
+                "code": "om"
+              },
+              {
+                "text": "Ossetian, Ossetic",
+                "code": "os"
+              },
+              {
+                "text": "P\u0101li",
+                "code": "pi"
+              },
+              {
+                "text": "Panjabi, Punjabi",
+                "code": "pa"
+              },
+              {
+                "text": "Pashto, Pushto",
+                "code": "ps"
+              },
+              {
+                "text": "Persian",
+                "code": "fa"
+              },
+              {
+                "text": "Polish",
+                "code": "pl"
+              },
+              {
+                "text": "Portuguese",
+                "code": "pt"
+              },
+              {
+                "text": "Quechua",
+                "code": "qu"
+              },
+              {
+                "text": "Romanian, Moldavian, Moldovan",
+                "code": "ro"
+              },
+              {
+                "text": "Romansh",
+                "code": "rm"
+              },
+              {
+                "text": "Russian",
+                "code": "ru"
+              },
+              {
+                "text": "Samoan",
+                "code": "sm"
+              },
+              {
+                "text": "Sango",
+                "code": "sg"
+              },
+              {
+                "text": "Sanskrit (Sa\u1e41sk\u1e5bta)",
+                "code": "sa"
+              },
+              {
+                "text": "Sardinian",
+                "code": "sc"
+              },
+              {
+                "text": "Scottish Gaelic; Gaelic",
+                "code": "gd"
+              },
+              {
+                "text": "Serbian",
+                "code": "sr"
+              },
+              {
+                "text": "Shona",
+                "code": "sn"
+              },
+              {
+                "text": "Sindhi",
+                "code": "sd"
+              },
+              {
+                "text": "Sinhala, Sinhalese",
+                "code": "si"
+              },
+              {
+                "text": "Slovak",
+                "code": "sk"
+              },
+              {
+                "text": "Slovene",
+                "code": "sl"
+              },
+              {
+                "text": "Somali",
+                "code": "so"
+              },
+              {
+                "text": "South Ndebele",
+                "code": "nr"
+              },
+              {
+                "text": "Southern Sotho",
+                "code": "st"
+              },
+              {
+                "text": "Spanish; Castilian",
+                "code": "es",
+                "primary": true
+              },
+              {
+                "text": "Sundanese",
+                "code": "su"
+              },
+              {
+                "text": "Swahili",
+                "code": "sw"
+              },
+              {
+                "text": "Swati",
+                "code": "ss"
+              },
+              {
+                "text": "Swedish",
+                "code": "sv"
+              },
+              {
+                "text": "Tagalog",
+                "code": "tl"
+              },
+              {
+                "text": "Tahitian",
+                "code": "ty"
+              },
+              {
+                "text": "Tajik",
+                "code": "tg"
+              },
+              {
+                "text": "Tamil",
+                "code": "ta"
+              },
+              {
+                "text": "Tatar",
+                "code": "tt"
+              },
+              {
+                "text": "Telugu",
+                "code": "te"
+              },
+              {
+                "text": "Thai",
+                "code": "th"
+              },
+              {
+                "text": "Tibetan Standard, Tibetan, Central",
+                "code": "bo"
+              },
+              {
+                "text": "Tigrinya",
+                "code": "ti"
+              },
+              {
+                "text": "Tonga (Tonga Islands)",
+                "code": "to"
+              },
+              {
+                "text": "Tsonga",
+                "code": "ts"
+              },
+              {
+                "text": "Tswana",
+                "code": "tn"
+              },
+              {
+                "text": "Turkish",
+                "code": "tr"
+              },
+              {
+                "text": "Turkmen",
+                "code": "tk"
+              },
+              {
+                "text": "Twi",
+                "code": "tw"
+              },
+              {
+                "text": "Uighur, Uyghur",
+                "code": "ug"
+              },
+              {
+                "text": "Ukrainian",
+                "code": "uk"
+              },
+              {
+                "text": "Urdu",
+                "code": "ur"
+              },
+              {
+                "text": "Uzbek",
+                "code": "uz"
+              },
+              {
+                "text": "Venda",
+                "code": "ve"
+              },
+              {
+                "text": "Vietnamese",
+                "code": "vi"
+              },
+              {
+                "text": "Volap\u00fck",
+                "code": "vo"
+              },
+              {
+                "text": "Walloon",
+                "code": "wa"
+              },
+              {
+                "text": "Welsh",
+                "code": "cy"
+              },
+              {
+                "text": "Western Frisian",
+                "code": "fy"
+              },
+              {
+                "text": "Wolof",
+                "code": "wo"
+              },
+              {
+                "text": "Xhosa",
+                "code": "xh"
+              },
+              {
+                "text": "Yiddish",
+                "code": "yi"
+              },
+              {
+                "text": "Yoruba",
+                "code": "yo"
+              },
+              {
+                "text": "Zhuang, Chuang",
+                "code": "za"
+              }
             ]
+          },
+          {
+            "text": "Translatable languages",
+            "code": "langs"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "show_icon": 1,
+          "i18n": "en"
         },
-        {
+        "text": "Mailings",
+        "code": "mailing",
+        "icon": "nf nf-oct-mail",
+        "items": [
+          {
             "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
+              "show_code": 1,
+              "show_value": 1,
+              "sortable": 1
             },
-            "text": "Masks",
-            "code": "masks",
-            "icon": "nf nf-mdi-guy_fawkes_mask",
-            "tekname": "ltypes"
+            "text": "eMails de test",
+            "code": "test",
+            "icon": "nf nf-fa-at"
+          },
+          {
+            "cfg": {
+              "show_value": 1
+            },
+            "text": "Exp\u00e9diteur",
+            "code": "sender"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Meeting",
-            "code": "meeting",
-            "icon": "nf nf-mdi-webcam"
+        "text": "Masks",
+        "code": "masks",
+        "icon": "nf nf-mdi-guy_fawkes_mask",
+        "tekname": "ltypes"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "i18n": "en",
-                "show_icon": 1
-            },
+        "text": "Meeting",
+        "code": "meeting",
+        "icon": "nf nf-mdi-webcam"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "i18n": "en",
+          "show_icon": 1
+        },
+        "text": "Menus",
+        "code": "menu",
+        "icon": "nf nf-mdi-menu",
+        "items": [
+          {
+            "num": 1,
+            "text": "Default menu",
+            "code": "default",
+            "icon": "nf nf-fa-bars"
+          },
+          {
+            "num": 2,
+            "text": "Shortcuts",
+            "code": "shortcuts",
+            "icon": "nf nf-oct-file_symlink_file"
+          },
+          {
+            "num": 3,
             "text": "Menus",
-            "code": "menu",
-            "icon": "nf nf-mdi-menu",
+            "code": "menus",
+            "icon": "nf nf-oct-tasklist"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Monitor",
+        "code": "monitor",
+        "icon": "nf nf-mdi-heart_pulse"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "write": true,
+          "show_icon": 1,
+          "i18n": "en"
+        },
+        "text": "Notes",
+        "code": "note",
+        "icon": "nf nf-fa-pencil_square_o",
+        "items": [
+          {
+            "cfg": {
+              "show_code": 1
+            },
+            "text": "Media types",
+            "code": "media",
             "items": [
-                {
-                    "num": 1,
-                    "text": "Default menu",
-                    "code": "default",
-                    "icon": "nf nf-fa-bars"
-                },
-                {
-                    "num": 2,
-                    "text": "Shortcuts",
-                    "code": "shortcuts",
-                    "icon": "nf nf-oct-file_symlink_file"
-                },
-                {
-                    "num": 3,
-                    "text": "Menus",
-                    "code": "menus",
-                    "icon": "nf nf-oct-tasklist"
-                }
+              {
+                "text": "File",
+                "code": "file"
+              },
+              {
+                "text": "HTML code",
+                "code": "html"
+              },
+              {
+                "text": "JavaScript code",
+                "code": "js"
+              },
+              {
+                "text": "Link (hypertext)",
+                "code": "link"
+              },
+              {
+                "text": "PHP code",
+                "code": "php"
+              },
+              {
+                "text": "Rich text",
+                "code": "rich"
+              },
+              {
+                "text": "Simple text",
+                "code": "text"
+              }
             ]
-        },
-        {
+          },
+          {
             "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
+              "show_code": 1,
+              "write": true
             },
-            "text": "Monitor",
-            "code": "monitor",
-            "icon": "nf nf-mdi-heart_pulse"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "write": true,
-                "show_icon": 1,
-                "i18n": "en"
-            },
-            "text": "Notes",
-            "code": "note",
-            "icon": "nf nf-fa-pencil_square_o",
+            "text": "Notes types",
+            "code": "types",
             "items": [
-                {
-                    "cfg": {
-                        "show_code": 1
-                    },
-                    "text": "Media types",
-                    "code": "media",
-                    "items": [
-                        {
-                            "text": "File",
-                            "code": "file"
-                        },
-                        {
-                            "text": "HTML code",
-                            "code": "html"
-                        },
-                        {
-                            "text": "JavaScript code",
-                            "code": "js"
-                        },
-                        {
-                            "text": "Link (hypertext)",
-                            "code": "link"
-                        },
-                        {
-                            "text": "PHP code",
-                            "code": "php"
-                        },
-                        {
-                            "text": "Rich text",
-                            "code": "rich"
-                        },
-                        {
-                            "text": "Simple text",
-                            "code": "text"
-                        }
-                    ]
-                },
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "write": true
-                    },
-                    "text": "Notes types",
-                    "code": "types",
-                    "items": [
-                        {
-                            "text": "Events",
-                            "code": "events"
-                        },
-                        {
-                            "text": "Helps",
-                            "code": "helps"
-                        },
-                        {
-                            "text": "Internal messages",
-                            "code": "imessages"
-                        },
-                        {
-                            "text": "Mailings",
-                            "code": "mailings"
-                        },
-                        {
-                            "text": "Masks",
-                            "code": "masks"
-                        },
-                        {
-                            "text": "News",
-                            "code": "news"
-                        },
-                        {
-                            "text": "Pages",
-                            "code": "pages"
-                        },
-                        {
-                            "text": "Personal",
-                            "code": "personal"
-                        },
-                        {
-                            "text": "Tasks",
-                            "code": "tasks"
-                        }
-                    ]
-                }
+              {
+                "text": "Events",
+                "code": "events"
+              },
+              {
+                "text": "Helps",
+                "code": "helps"
+              },
+              {
+                "text": "Internal messages",
+                "code": "imessages"
+              },
+              {
+                "text": "Mailings",
+                "code": "mailings"
+              },
+              {
+                "text": "Masks",
+                "code": "masks"
+              },
+              {
+                "text": "News",
+                "code": "news"
+              },
+              {
+                "text": "Pages",
+                "code": "pages"
+              },
+              {
+                "text": "Personal",
+                "code": "personal"
+              },
+              {
+                "text": "Tasks",
+                "code": "tasks"
+              }
             ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_value": 1,
+          "allow_children": 1,
+          "inheritance": "cascade",
+          "permissions": 1,
+          "show_icon": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_value": 1,
-                "allow_children": 1,
-                "inheritance": "cascade",
-                "permissions": 1,
-                "show_icon": 1,
-                "i18n": "en"
-            },
+        "text": "Notifications",
+        "code": "notification",
+        "icon": "nf nf-fa-exclamation",
+        "items": [
+          {
+            "text": "Configuration",
+            "code": "cfg",
+            "web": true,
+            "mail": "default",
+            "mobile": true,
+            "browser": true
+          },
+          {
             "text": "Notifications",
-            "code": "notification",
-            "icon": "nf nf-fa-exclamation",
+            "code": "list"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Observers",
+        "code": "observers",
+        "icon": "nf nf-fa-binoculars"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Options",
+        "code": "option",
+        "icon": "nf nf-mdi-format_list_checks",
+        "items": [
+          {
+            "cfg": {
+              "show_code": 1,
+              "show_icon": 1,
+              "allow_children": 1,
+              "i18n": "en"
+            },
+            "text": "Templates",
+            "code": "templates",
+            "icon": "nf nf-mdi-file_tree",
             "items": [
-                {
-                    "text": "Configuration",
-                    "code": "cfg",
-                    "web": true,
-                    "mail": "default",
-                    "mobile": true,
-                    "browser": true
+              {
+                "cfg": {
+                  "show_code": 1,
+                  "show_icon": 1,
+                  "sortable": 1,
+                  "allow_children": 1,
+                  "inheritance": "cascade",
+                  "i18n": "en"
                 },
-                {
-                    "text": "Notifications",
-                    "code": "list"
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Observers",
-            "code": "observers",
-            "icon": "nf nf-fa-binoculars"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Options",
-            "code": "option",
-            "icon": "nf nf-mdi-format_list_checks"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Users preferences",
-            "code": "prefs",
-            "icon": "nf nf-fa-users"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "show_icon": 1,
-                "i18n": "en"
-            },
-            "text": "Projects",
-            "code": "project",
-            "icon": "nf nf-fa-sitemap",
-            "items": [
-                {
-                    "cfg": {
-                        "show_code": 1
-                    },
-                    "text": "List",
-                    "code": "list"
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_value": 1,
-                "sortable": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Server",
-            "code": "server",
-            "icon": "nf nf-fa-server",
-            "items": [
-                {
-                    "cfg": {
-                        "show_code": 1,
-                        "show_value": 1,
-                        "sortable": 1
-                    },
-                    "text": "Servers",
-                    "code": "servers"
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Social",
-            "code": "social",
-            "icon": "nf nf-mdi-google_circles_extended"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Spreadsheet",
-            "code": "spreadsheet",
-            "icon": "nf nf-mdi-grid"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Statistic",
-            "code": "statistic",
-            "icon": "nf nf-fa-bar_chart",
-            "tekname": "stats",
-            "items": [
-                {
-                    "cfg": {
-                        "show_code": 1
-                    },
-                    "text": "Active",
-                    "code": "active"
+                "text": "Permissions",
+                "code": "permissions",
+                "icon": "nf nf-fa-key",
+                "items": [
+                  {
+                    "num": 1,
+                    "text": "Access",
+                    "code": "access",
+                    "icon": "nf nf-mdi-door"
+                  },
+                  {
+                    "num": 2,
+                    "text": "Plugins",
+                    "code": "plugins",
+                    "icon": "nf nf-mdi-puzzle"
+                  },
+                  {
+                    "num": 3,
+                    "text": "Options",
+                    "code": "options",
+                    "icon": "nf nf-fa-cogs"
+                  }
+                ]
+              },
+              {
+                "cfg": {
+                  "show_code": 1,
+                  "show_alias": 1,
+                  "show_value": 1,
+                  "i18n": "fr"
                 },
-                {
+                "text": "Project",
+                "code": "project",
+                "icon": "nf nf-fa-server",
+                "items": [
+                  {
                     "cfg": {
-                        "show_code": 1
+                      "show_code": 1,
+                      "show_alias": 1
                     },
-                    "text": "Disabled",
-                    "code": "disabled"
-                },
-                {
-                    "cfg": {
-                        "show_code": 1
-                    },
-                    "text": "Types",
-                    "code": "types",
+                    "text": "Languages",
+                    "code": "lang",
                     "items": [
-                        {
-                            "cfg": {
-                                "show_code": 1
-                            },
-                            "text": "Totals",
-                            "code": "totals"
-                        },
-                        {
-                            "cfg": {
-                                "show_code": 1
-                            },
-                            "text": "Variations",
-                            "code": "variations"
-                        }
+                      {
+                        "id_alias": [
+                          "en",
+                          "languages",
+                          "i18n",
+                          "appui"
+                        ],
+                        "text": "English",
+                        "code": "en"
+                      }
                     ]
-                }
-            ]
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Styles",
-            "code": "style",
-            "icon": "nf nf-dev-css3"
-        },
-        {
-            "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "i18n": "en",
-                "show_icon": 1
-            },
-            "text": "Tableau de bord",
-            "code": "dashboard",
-            "icon": "nf nf-fa-dashboard",
-            "items": [
-                {
+                  },
+                  {
                     "cfg": {
-                        "show_code": 1,
-                        "allow_children": 1,
-                        "i18n": "en",
-                        "scfg": {
-                            "alias_name": "Permission",
-                            "i18n": "en",
-                            "schema": [
-                                {
-                                    "title": "Closable",
-                                    "field": "closable",
-                                    "type": "boolean",
-                                    "showable": true,
-                                    "editable": true,
-                                    "hidden": false,
-                                    "width": 70,
-                                    "options": {
-                                        "value": true,
-                                        "novalue": false
-                                    },
-                                    "cls": "bbn-c",
-                                    "default": false
-                                },
-                                {
-                                    "title": "Observe",
-                                    "field": "observe",
-                                    "type": "boolean",
-                                    "showable": true,
-                                    "editable": true,
-                                    "hidden": false,
-                                    "options": {
-                                        "value": true,
-                                        "novalue": false
-                                    },
-                                    "width": 70,
-                                    "cls": "bbn-c",
-                                    "default": false
-                                },
-                                {
-                                    "title": "Component",
-                                    "field": "component",
-                                    "type": "string",
-                                    "showable": true,
-                                    "editable": true,
-                                    "hidden": false,
-                                    "options": []
-                                },
-                                {
-                                    "title": "itemComponent",
-                                    "field": "itemComponent",
-                                    "type": "string",
-                                    "showable": true,
-                                    "editable": true,
-                                    "hidden": false,
-                                    "options": []
-                                },
-                                {
-                                    "title": "Limit",
-                                    "field": "limit",
-                                    "type": "number",
-                                    "showable": true,
-                                    "editable": true,
-                                    "hidden": true,
-                                    "options": [],
-                                    "default": 5
-                                },
-                                {
-                                    "title": "Right buttons",
-                                    "field": "buttonsRight",
-                                    "type": "json",
-                                    "showable": false,
-                                    "editable": true,
-                                    "hidden": true,
-                                    "options": {
-                                        "style": "height: 200px !important"
-                                    },
-                                    "default": "[]"
-                                },
-                                {
-                                    "title": "Left buttons",
-                                    "field": "buttonsLeft",
-                                    "type": "json",
-                                    "showable": false,
-                                    "editable": true,
-                                    "hidden": true,
-                                    "options": {
-                                        "style": "height: 200px !important"
-                                    },
-                                    "default": "[]"
-                                },
-                                {
-                                    "field": "options",
-                                    "title": "Component's options",
-                                    "hidden": true,
-                                    "editable": true,
-                                    "filterable": false,
-                                    "type": "json",
-                                    "options": {
-                                        "style": "height:200px !important"
-                                    },
-                                    "showable": false,
-                                    "default": "{}"
-                                }
+                      "show_code": 1,
+                      "show_alias": 1,
+                      "show_value": 1
+                    },
+                    "text": "path",
+                    "code": "path",
+                    "icon": "nf nf-fa-code_fork",
+                    "items": [
+                      {
+                        "cfg": {
+                          "show_code": 1,
+                          "show_alias": 1,
+                          "show_value": 1
+                        },
+                        "text": "app",
+                        "code": "app",
+                        "icon": "nf nf-mdi-server_minus",
+                        "items": [
+                          {
+                            "id_alias": [
+                              "bbn-project",
+                              "types",
+                              "ide",
+                              "appui"
                             ],
-                            "show_alias": 1,
-                            "show_code": 1,
-                            "show_icon": 1,
-                            "show_value": null,
-                            "sortable": 1,
-                            "notext": 0,
-                            "view": 0
+                            "text": "main",
+                            "code": "main",
+                            "path": "\/",
+                            "bcolor": "#0c1b71",
+                            "fcolor": "#fdfdfd",
+                            "default": true,
+                            "language": "en"
+                          }
+                        ]
+                      },
+                      {
+                        "cfg": {
+                          "show_code": 1,
+                          "show_alias": 1,
+                          "show_value": 1
                         },
-                        "show_icon": 1
-                    },
-                    "text": "Dashboards",
-                    "code": "list",
-                    "items": [
-                        {
-                            "text": "Default dashboard",
-                            "code": "default"
+                        "text": "cdn",
+                        "code": "cdn",
+                        "icon": "nf nf-mdi-server_minus"
+                      },
+                      {
+                        "cfg": {
+                          "show_code": 1,
+                          "show_alias": 1,
+                          "show_value": 1
                         },
-                        {
-                            "text": "Plugins dashboard",
-                            "code": "plugins"
-                        }
+                        "text": "lib",
+                        "code": "lib",
+                        "icon": "nf nf-mdi-server_minus"
+                      }
                     ]
-                }
+                  }
+                ]
+              }
             ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
-            "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
-            },
-            "text": "Tables",
-            "code": "tables",
-            "icon": "nf nf-fa-table"
+        "text": "Users preferences",
+        "code": "prefs",
+        "icon": "nf nf-fa-users"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "show_icon": 1,
+          "i18n": "en"
         },
-        {
+        "text": "Projects",
+        "code": "project",
+        "icon": "nf nf-fa-sitemap",
+        "items": [
+          {
             "cfg": {
-                "show_code": 1,
-                "allow_children": 1,
-                "inheritance": "cascade",
-                "show_icon": 1,
-                "i18n": "en"
+              "show_code": 1
             },
-            "text": "Tasks (project management)",
-            "code": "task",
-            "icon": "nf nf-oct-tasklist",
-            "tekname": "tasks",
+            "text": "List",
+            "code": "list"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_value": 1,
+          "sortable": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Server",
+        "code": "server",
+        "icon": "nf nf-fa-server",
+        "items": [
+          {
+            "cfg": {
+              "show_code": 1,
+              "show_value": 1,
+              "sortable": 1
+            },
+            "text": "Servers",
+            "code": "servers"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Social",
+        "code": "social",
+        "icon": "nf nf-mdi-google_circles_extended"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Spreadsheet",
+        "code": "spreadsheet",
+        "icon": "nf nf-mdi-grid"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Statistic",
+        "code": "statistic",
+        "icon": "nf nf-fa-bar_chart",
+        "tekname": "stats",
+        "items": [
+          {
+            "cfg": {
+              "show_code": 1
+            },
+            "text": "Active",
+            "code": "active"
+          },
+          {
+            "cfg": {
+              "show_code": 1
+            },
+            "text": "Disabled",
+            "code": "disabled"
+          },
+          {
+            "cfg": {
+              "show_code": 1
+            },
+            "text": "Types",
+            "code": "types",
             "items": [
-                {
-                    "text": "Actions",
-                    "code": "actions",
-                    "items": [
-                        {
-                            "text": "Added %s as %s",
-                            "code": "role_insert"
-                        },
-                        {
-                            "text": "Added a comment",
-                            "code": "comment_insert"
-                        },
-                        {
-                            "text": "Added a deadline for %s",
-                            "code": "deadline_insert"
-                        },
-                        {
-                            "text": "Added the file %s",
-                            "code": "file_insert"
-                        },
-                        {
-                            "text": "Added the link %s",
-                            "code": "link_insert"
-                        },
-                        {
-                            "text": "Added the price %s \u20ac",
-                            "code": "price_insert"
-                        },
-                        {
-                            "text": "Approved the price %s \u20ac",
-                            "code": "price_approved"
-                        },
-                        {
-                            "text": "Auto-added as %s",
-                            "code": "role_sinsert"
-                        },
-                        {
-                            "text": "Auto-removed as %s",
-                            "code": "role_sdelete"
-                        },
-                        {
-                            "text": "Changed the deadline from %s to %s",
-                            "code": "deadline_update"
-                        },
-                        {
-                            "text": "Changed the price from %s \u20ac to %s \u20ac",
-                            "code": "price_update"
-                        },
-                        {
-                            "text": "Changed the priority from %s to %s",
-                            "code": "priority_update"
-                        },
-                        {
-                            "text": "Changed the status from %s to %s",
-                            "code": "status_update"
-                        },
-                        {
-                            "text": "Changed the title from %s to %s",
-                            "code": "title_update"
-                        },
-                        {
-                            "text": "Changed the type from %s to %s",
-                            "code": "type_update"
-                        },
-                        {
-                            "text": "Closed the task",
-                            "code": "task_close"
-                        },
-                        {
-                            "text": "Created the task",
-                            "code": "insert"
-                        },
-                        {
-                            "text": "Deleted the file %s",
-                            "code": "file_delele"
-                        },
-                        {
-                            "text": "Deleted the link %s",
-                            "code": "link_delete"
-                        },
-                        {
-                            "text": "Deleted the task",
-                            "code": "delete"
-                        },
-                        {
-                            "text": "Deleted the task's price (%s \u20ac)",
-                            "code": "price_delete"
-                        },
-                        {
-                            "text": "Put the task on hold",
-                            "code": "task_hold"
-                        },
-                        {
-                            "text": "Removed %s as %s",
-                            "code": "role_delete"
-                        },
-                        {
-                            "text": "Removed the comment %s",
-                            "code": "comment_delete"
-                        },
-                        {
-                            "text": "Removed the deadline for %s",
-                            "code": "deadline_delete"
-                        },
-                        {
-                            "text": "Reopened the task",
-                            "code": "task_reopen"
-                        },
-                        {
-                            "text": "Set the task as waiting for approval",
-                            "code": "task_unapproved"
-                        },
-                        {
-                            "text": "Started the task",
-                            "code": "task_start"
-                        },
-                        {
-                            "text": "Task ping",
-                            "code": "task_ping"
-                        }
-                    ]
+              {
+                "cfg": {
+                  "show_code": 1
                 },
-                {
-                    "text": "Roles",
-                    "code": "roles",
-                    "items": [
-                        {
-                            "text": "Deciders",
-                            "code": "deciders"
-                        },
-                        {
-                            "text": "Managers",
-                            "code": "managers"
-                        },
-                        {
-                            "text": "Viewers",
-                            "code": "viewers"
-                        },
-                        {
-                            "text": "Workers",
-                            "code": "workers"
-                        }
-                    ]
+                "text": "Totals",
+                "code": "totals"
+              },
+              {
+                "cfg": {
+                  "show_code": 1
                 },
-                {
-                    "text": "States",
-                    "code": "states",
-                    "items": [
-                        {
-                            "text": "Approved",
-                            "code": "approved"
-                        },
-                        {
-                            "text": "Closed",
-                            "code": "closed"
-                        },
-                        {
-                            "text": "On hold",
-                            "code": "holding"
-                        },
-                        {
-                            "text": "Ongoing",
-                            "code": "ongoing"
-                        },
-                        {
-                            "text": "Opened",
-                            "code": "opened"
-                        },
-                        {
-                            "text": "Postponed",
-                            "code": "postponed"
-                        },
-                        {
-                            "text": "Unapproved",
-                            "code": "unapproved"
-                        }
-                    ]
-                },
-                {
-                    "text": "Task categories",
-                    "code": "cats"
-                }
+                "text": "Variations",
+                "code": "variations"
+              }
             ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
+        "text": "Styles",
+        "code": "style",
+        "icon": "nf nf-dev-css3"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "i18n": "en",
+          "show_icon": 1
+        },
+        "text": "Tableau de bord",
+        "code": "dashboard",
+        "icon": "nf nf-fa-dashboard",
+        "items": [
+          {
             "cfg": {
+              "show_code": 1,
+              "allow_children": 1,
+              "i18n": "en",
+              "scfg": {
+                "alias_name": "Permission",
+                "i18n": "en",
+                "schema": [
+                  {
+                    "title": "Closable",
+                    "field": "closable",
+                    "type": "boolean",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "width": 70,
+                    "options": {
+                      "value": true,
+                      "novalue": false
+                    },
+                    "cls": "bbn-c",
+                    "default": false
+                  },
+                  {
+                    "title": "Observe",
+                    "field": "observe",
+                    "type": "boolean",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "options": {
+                      "value": true,
+                      "novalue": false
+                    },
+                    "width": 70,
+                    "cls": "bbn-c",
+                    "default": false
+                  },
+                  {
+                    "title": "Component",
+                    "field": "component",
+                    "type": "string",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "options": []
+                  },
+                  {
+                    "title": "itemComponent",
+                    "field": "itemComponent",
+                    "type": "string",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "options": []
+                  },
+                  {
+                    "title": "Limit",
+                    "field": "limit",
+                    "type": "number",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": true,
+                    "options": [],
+                    "default": 5
+                  },
+                  {
+                    "title": "Right buttons",
+                    "field": "buttonsRight",
+                    "type": "json",
+                    "showable": false,
+                    "editable": true,
+                    "hidden": true,
+                    "options": {
+                      "style": "height: 200px !important"
+                    },
+                    "default": "[]"
+                  },
+                  {
+                    "title": "Left buttons",
+                    "field": "buttonsLeft",
+                    "type": "json",
+                    "showable": false,
+                    "editable": true,
+                    "hidden": true,
+                    "options": {
+                      "style": "height: 200px !important"
+                    },
+                    "default": "[]"
+                  },
+                  {
+                    "field": "options",
+                    "title": "Component's options",
+                    "hidden": true,
+                    "editable": true,
+                    "filterable": false,
+                    "type": "json",
+                    "options": {
+                      "style": "height:200px !important"
+                    },
+                    "showable": false,
+                    "default": "{}"
+                  }
+                ],
+                "show_alias": 1,
                 "show_code": 1,
                 "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
+                "show_value": null,
+                "sortable": 1,
+                "notext": 0,
+                "view": 0
+              },
+              "show_icon": 1
             },
-            "text": "User and Group",
-            "code": "usergroup",
-            "icon": "nf nf-fa-user_circle"
+            "text": "Dashboards",
+            "code": "list",
+            "items": [
+              {
+                "text": "Default dashboard",
+                "code": "default"
+              },
+              {
+                "text": "Plugins dashboard",
+                "code": "plugins"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
         },
-        {
+        "text": "Tables",
+        "code": "tables",
+        "icon": "nf nf-fa-table"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "inheritance": "cascade",
+          "show_icon": 1,
+          "i18n": "en"
+        },
+        "text": "Tasks (project management)",
+        "code": "task",
+        "icon": "nf nf-oct-tasklist",
+        "tekname": "tasks",
+        "items": [
+          {
+            "text": "Actions",
+            "code": "actions",
+            "items": [
+              {
+                "text": "Added %s as %s",
+                "code": "role_insert"
+              },
+              {
+                "text": "Added a comment",
+                "code": "comment_insert"
+              },
+              {
+                "text": "Added a deadline for %s",
+                "code": "deadline_insert"
+              },
+              {
+                "text": "Added the file %s",
+                "code": "file_insert"
+              },
+              {
+                "text": "Added the link %s",
+                "code": "link_insert"
+              },
+              {
+                "text": "Added the price %s \u20ac",
+                "code": "price_insert"
+              },
+              {
+                "text": "Approved the price %s \u20ac",
+                "code": "price_approved"
+              },
+              {
+                "text": "Auto-added as %s",
+                "code": "role_sinsert"
+              },
+              {
+                "text": "Auto-removed as %s",
+                "code": "role_sdelete"
+              },
+              {
+                "text": "Changed the deadline from %s to %s",
+                "code": "deadline_update"
+              },
+              {
+                "text": "Changed the price from %s \u20ac to %s \u20ac",
+                "code": "price_update"
+              },
+              {
+                "text": "Changed the priority from %s to %s",
+                "code": "priority_update"
+              },
+              {
+                "text": "Changed the status from %s to %s",
+                "code": "status_update"
+              },
+              {
+                "text": "Changed the title from %s to %s",
+                "code": "title_update"
+              },
+              {
+                "text": "Changed the type from %s to %s",
+                "code": "type_update"
+              },
+              {
+                "text": "Closed the task",
+                "code": "task_close"
+              },
+              {
+                "text": "Created the task",
+                "code": "insert"
+              },
+              {
+                "text": "Deleted the file %s",
+                "code": "file_delele"
+              },
+              {
+                "text": "Deleted the link %s",
+                "code": "link_delete"
+              },
+              {
+                "text": "Deleted the task",
+                "code": "delete"
+              },
+              {
+                "text": "Deleted the task's price (%s \u20ac)",
+                "code": "price_delete"
+              },
+              {
+                "text": "Put the task on hold",
+                "code": "task_hold"
+              },
+              {
+                "text": "Removed %s as %s",
+                "code": "role_delete"
+              },
+              {
+                "text": "Removed the comment %s",
+                "code": "comment_delete"
+              },
+              {
+                "text": "Removed the deadline for %s",
+                "code": "deadline_delete"
+              },
+              {
+                "text": "Reopened the task",
+                "code": "task_reopen"
+              },
+              {
+                "text": "Set the task as waiting for approval",
+                "code": "task_unapproved"
+              },
+              {
+                "text": "Started the task",
+                "code": "task_start"
+              },
+              {
+                "text": "Task ping",
+                "code": "task_ping"
+              }
+            ]
+          },
+          {
+            "text": "Roles",
+            "code": "roles",
+            "items": [
+              {
+                "text": "Deciders",
+                "code": "deciders"
+              },
+              {
+                "text": "Managers",
+                "code": "managers"
+              },
+              {
+                "text": "Viewers",
+                "code": "viewers"
+              },
+              {
+                "text": "Workers",
+                "code": "workers"
+              }
+            ]
+          },
+          {
+            "text": "States",
+            "code": "states",
+            "items": [
+              {
+                "text": "Approved",
+                "code": "approved"
+              },
+              {
+                "text": "Closed",
+                "code": "closed"
+              },
+              {
+                "text": "On hold",
+                "code": "holding"
+              },
+              {
+                "text": "Ongoing",
+                "code": "ongoing"
+              },
+              {
+                "text": "Opened",
+                "code": "opened"
+              },
+              {
+                "text": "Postponed",
+                "code": "postponed"
+              },
+              {
+                "text": "Unapproved",
+                "code": "unapproved"
+              }
+            ]
+          },
+          {
+            "text": "Task categories",
+            "code": "cats"
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "User and Group",
+        "code": "usergroup",
+        "icon": "nf nf-fa-user_circle"
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "show_icon": 1,
+          "allow_children": 1,
+          "i18n": "en"
+        },
+        "text": "Write",
+        "code": "write",
+        "icon": "nf nf-fa-pencil_square_o",
+        "items": [
+          {
             "cfg": {
-                "show_code": 1,
-                "show_icon": 1,
-                "allow_children": 1,
-                "i18n": "en"
+              "show_code": 1,
+              "show_icon": 1,
+              "allow_children": 1
             },
-            "text": "Write",
-            "code": "write",
-            "icon": "nf nf-fa-pencil_square_o"
-        }
+            "text": "List",
+            "code": "list"
+          }
+        ]
+      }
     ]
-}, {
+  },
+  {
     "cfg": {
-        "categories": 1,
-        "show_code": 1,
-        "show_icon": 1,
-        "i18n": "en"
+      "categories": 1,
+      "show_code": 1,
+      "show_icon": 1,
+      "i18n": "en"
     },
     "text": "Plugins",
     "code": "_plugins_",
     "icon": "nf nf-mdi-puzzle"
-}]
+  }
+]

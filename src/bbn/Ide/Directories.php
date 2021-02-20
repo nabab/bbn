@@ -8,8 +8,8 @@ class Directories {
   use bbn\Models\Tts\Optional;
 
   const IDE_PATH = 'ide',
-        DEV_PATH = 'PATHS',
-        PATH_TYPE = 'PTYPES',
+        DEV_PATH = 'paths',
+        PATH_TYPE = 'types',
         FILES_PREF = 'files';
 
   private static

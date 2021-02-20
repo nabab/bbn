@@ -18,11 +18,11 @@ class Ide
 
   const BBN_APPUI       = 'appui';
   const BBN_PERMISSIONS = 'permissions';
-  const BBN_PAGE        = 'page';
+  const BBN_ACCESS      = 'access';
   const IDE_PROJECTS    = 'project';
   const IDE_PATH        = 'ide';
-  const DEV_PATH        = 'PATHS';
-  const PATH_TYPE       = 'PTYPES';
+  const DEV_PATH        = 'paths';
+  const PATH_TYPE       = 'types';
   const OPENED_FILE     = 'opened';
   const RECENT_FILE     = 'recent';
   const THEME           = 'theme';
@@ -929,72 +929,31 @@ class Ide
   public function createPermByReal(string $file, string $type = 'file'): bool
   {
     if (!empty($file)
-        && $this->fs->isDir($this->getAppPath())
         // It must be a controller
-        && (strpos($file, '/mvc/public/') !== false)
+        && (strpos($file, '/src/mvc/public/') !== false)
+        && ($perm = bbn\User\Permissions::getInstance())
     ) {
       $is_file = $type === 'file';
       // Check if it's an external route
-      foreach ($this->routes as $r){
-        if (strpos($file, $r['path']) === 0) {
-          // Remove route
-          $f = substr($file, \strpos($file, 'src/mvc/public'));
-          // Remove /mvc/public
-          $f = substr($f, \strlen('src/mvc/public'));
-          // Add the route's name to path
-          $f = $r['url'] . '/' . $f;
-          break;
-        }
+      if (($root_path = $this->getAppPath().'mvc/public/')
+          && (strpos($file, $root_path) === 0)
+      ) {
+        // Remove root path
+        $f = substr($file, \strlen($root_path), \strlen($file) -4);
       }
-
-      // Internal route
-      if (empty($f)) {
-        $root_path = $this->getAppPath().'mvc/public/';
-        if (strpos($file, $root_path) === 0) {
-          // Remove root path
-          $f = substr($file, \strlen($root_path), \strlen($file));
-        }
-      }
-
-      if (!empty($f)) {
-        $bits = \bbn\X::removeEmpty(explode('/', $f));
-
-        $code      = $is_file ? \bbn\Str::fileExt(array_pop($bits), 1)[0] : array_pop($bits).'/';
-        $id_parent = $this->options->fromCode(self::BBN_PAGE, self::BBN_PERMISSIONS, self::BBN_APPUI);
-
-        foreach ($bits as $b){
-          if (!$this->options->fromCode($b.'/', $id_parent)) {
-            $this->options->add(
-              [
-              'id_parent' => $id_parent,
-              'code' => $b.'/',
-              'text' => $b
-              ]
-            );
+      else {
+        foreach ($this->routes as $r){
+          if (strpos($file, $r['path']) === 0) {
+            // Remove route
+            $f = substr($file, strlen($r['path']) + strlen('src/mvc/public'), -4);
+            // Add the route's name to path
+            $f = $r['url'] . '/' . $f;
+            break;
           }
-
-          $id_parent = $this->options->fromCode($b.'/', $id_parent);
-        }
-
-        if (!$this->options->fromCode($code, $id_parent)) {
-          $this->options->add(
-            [
-            'id_parent' => $id_parent,
-            'code' => $code,
-            'text' => $code
-            ]
-          );
-        }
-
-        if(!empty($code) && !empty($opt = $this->options->fromCode($code, $id_parent))) {
-          return $opt;
         }
       }
-      elseif (!$is_file) {
-        return $this->options->fromCode(self::BBN_PAGE, self::BBN_PERMISSIONS, self::BBN_APPUI);
-      }
 
-      return true;
+      return !!$perm->fromPath($f, 'access', true);
     }
 
     return false;
@@ -2608,7 +2567,7 @@ class Ide
   private function _permissions()
   {
     if (!self::$permissions) {
-      if ($id = $this->options->fromCode(self::BBN_PAGE, self::BBN_PERMISSIONS, self::BBN_APPUI)) {
+      if ($id = $this->options->fromCode(self::BBN_ACCESS, self::BBN_PERMISSIONS, self::BBN_APPUI)) {
         self::_set_permissions($id);
       }
     }

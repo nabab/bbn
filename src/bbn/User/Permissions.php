@@ -81,7 +81,7 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string $type
    * @return null|string
    */
-  public function fromPath(string $path, $type = 'access'): ?string
+  public function fromPath(string $path, $type = 'access', $create = false): ?string
   {
     $parent = null;
     $root   = false;
@@ -99,10 +99,10 @@ class Permissions extends bbn\Models\Cls\Basic
           }
           elseif ($plugin['name']) {
             $root = $this->opt->fromCode(
+              'access',
+              'permissions',
               $plugin['name'],
               'plugins',
-              'permissions',
-              BBN_APPUI
             );
           }
           break;
@@ -121,14 +121,26 @@ class Permissions extends bbn\Models\Cls\Basic
     $parts  = explode('/', $path);
     $parent = $root;
     foreach ($parts as $i => $p){
-      $is_not_last = $i < (\count($parts) - 1);
+      $is_last = $i === (\count($parts) - 1);
       if (!empty($p)) {
         $prev_parent = $parent;
         // Adds a slash for each bit of the path except the last one
-        $parent = $this->opt->fromCode($p.($is_not_last ? '/' : ''), $prev_parent);
+        $parent = $this->opt->fromCode($p.($is_last ? '' : '/'), $prev_parent);
         // If not found looking for a subpermission
-        if (!$parent && $is_not_last) {
+        if (!$parent && !$is_last) {
           $parent = $this->opt->fromCode($p, $prev_parent);
+        }
+        elseif ($is_last && $prev_parent && !$parent && $create) {
+          if ($this->_add(
+            [
+              'code' => $p,
+              'text' => $p
+            ],
+            $prev_parent
+          )
+          ) {
+            $parent = $this->db->lastId();
+          }
         }
       }
     }

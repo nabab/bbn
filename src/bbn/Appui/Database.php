@@ -236,8 +236,11 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db The database's name
    * @return null|string
    */
-  public function dbId(string $db = '', string $engine = 'mysql'): ?string
+  public function dbId(string $db = '', string $host = '', string $engine = 'mysql'): ?string
   {
+    if (!\bbn\Str::isUid($host)) {
+      $host = $this->hostId($host, $engine);
+    }
     if (($id_parent = self::getOptionId('dbs', $engine))
         && ($res = $this->o->fromCode($db ?: $this->db->getCurrent(), $id_parent))
     ) {
@@ -379,10 +382,10 @@ class Database extends bbn\Models\Cls\Cache
         }
 
         $engine = $parent['code'];
-        $db     = $this->dbId($db, $engine);
+        $db     = $this->dbId($db, $host, $engine);
       }
       else {
-        $db = $this->dbId($db, $engine);
+        $db = $this->dbId($db, $host, $engine);
       }
     }
 
@@ -880,6 +883,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function modelize(string $table = '', string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
+    $model = null;
     if (!$host) {
       $conn = $this->db;
       $host = $this->db->getConnectionCode();
@@ -968,14 +972,13 @@ class Database extends bbn\Models\Cls\Cache
         $fields($model);
       }
       */
-
-      return $model;
     }
+
     if (!empty($old_db) && ($old_db !== $db)) {
       $conn->change($old_db);
     }
 
-    return null;
+    return $model;
   }
 
 
@@ -1129,19 +1132,15 @@ class Database extends bbn\Models\Cls\Cache
         if ($id_connections && $id_functions && $id_procedures && $id_tables) {
           if (!$this->db->count(
             'bbn_options', [
-            'id_parent' => $id_connections,
-            'id_alias' => $host
-            ]
-          )
-          ) {
-            $this->o->add(
-              [
               'id_parent' => $id_connections,
               'id_alias' => $host
-              ]
-            );
+            ]
+          )) {
+            $this->o->add([
+              'id_parent' => $id_connections,
+              'id_alias' => $host
+            ]);
           }
-
           if ($full) {
             if (!empty($host)) {
               try {
@@ -1150,7 +1149,6 @@ class Database extends bbn\Models\Cls\Cache
               catch (\Exception $e) {
                 throw new \Exception(X::_("Impossible to connect"));
               }
-
               $tables = $conn->getTables($db);
               if (!empty($tables)) {
                 foreach ($tables as $t) {

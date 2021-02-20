@@ -1001,6 +1001,76 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns each individual full option plus the children of options having this as alias.
+   *
+   * ```php
+   * X::dump($opt->optionsRef('type', 'media', 'note', 'appui'));
+   * /*
+   * array [
+   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
+   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
+   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
+   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false A list of parent if option not found
+   */
+  public function fullOptionsRef($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      $all = $this->fullOptions($id);
+      $aliases = $this->getAliases($id);
+      foreach ($aliases as $a) {
+        if ($tmp = $this->fullOptions($a['id'])) {
+          array_push($all, ...$tmp);
+        }
+      }
+
+      return $all;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns each individual option plus the children of options having this as alias.
+   *
+   * ```php
+   * X::dump($opt->fullOptions(12));
+   * /*
+   * array [
+   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
+   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
+   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
+   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false A list of parent if option not found
+   */
+  public function optionsRef($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      $all = $this->options($id);
+      $aliases = $this->getAliases($id);
+      foreach ($aliases as $a) {
+        if ($tmp = $this->options($a['id'])) {
+          $all = array_merge($all, $tmp);
+        }
+      }
+
+      return $all;
+    }
+
+    return null;
+  }
+
+
+  /**
    * Returns an array of full options arrays for a given parent
    *
    * ```php
@@ -3833,7 +3903,10 @@ class Option extends bbn\Models\Cls\Db
       return true;
     }
 
-    return false;
+    throw new \Exception(
+      X::_("Impossible to make an option out of it...")
+      .PHP_EOL.json_encode($it, JSON_PRETTY_PRINT)
+    );
   }
 
 

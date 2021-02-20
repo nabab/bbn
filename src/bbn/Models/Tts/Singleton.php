@@ -37,6 +37,7 @@ trait Singleton
     if (self::singletonExists()) {
       throw new \Exception(X::_("Impossible to create a new instance of").' '.\get_class($instance));
     }
+
     self::$singleton_exists = 1;
     self::$singleton_instance = $instance;
   }

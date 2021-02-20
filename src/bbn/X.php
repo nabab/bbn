@@ -360,7 +360,8 @@ class X
       if ($fs->isDir($path)) {
         $num = count($fs->getDirs($path));
         if ($num) {
-          $num_files = count($fs->getFiles($path.'/'.$num));
+          // Dir or files
+          $num_files = count($fs->getFiles($path.'/'.$num, true));
           if ($num_files >= $max) {
             $num++;
           }

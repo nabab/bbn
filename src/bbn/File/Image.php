@@ -25,6 +25,7 @@ use bbn;
 class Image extends bbn\File
 {
 
+  protected static $defaultThumbSizes = [[false, 500], [false, 250], [false, 125], [false, 96], [false, 48]];
     /**
      * @var bool
      */
@@ -1037,20 +1038,23 @@ class Image extends bbn\File
    *
      * @return image|false
    */
-  public function thumbs($dest = '.', $sizes = [[false, 960], [false, 480], [false, 192], [false, 96], [false, 48]], $mask = '_%s', $crop = false, $bigger = false)
+  public function thumbs($dest = '.', $sizes = null, $mask = '_%s', $crop = false, $bigger = false)
   {
     if ($this->test() && is_dir($dest)) {
-      $this->getExtension();
-        $w = $this->getWidth();
-        $h = $this->getHeight();
-        $d = $w >= $h ? 'w' : 'h';
-      $res = [];
       if (bbn\Str::isInteger($sizes)) {
         $sizes = [[$sizes, false]];
       }
+      elseif (!is_array($sizes)) {
+        $sizes = self::$defaultThumbSizes;
+      }
 
+      $this->getExtension();
+      $w = $this->getWidth();
+      $h = $this->getHeight();
+      $d = $w >= $h ? 'w' : 'h';
+      $res = [];
       if ($$d / ($d === 'w' ? $h : $w) < 5) {
-        $mask = ($dest === '.' ? '' : $dest.'/').$this->title.$mask.'.'.$this->ext;
+        $file = ($dest === '.' ? '' : $dest.'/').$this->title;
         //die(var_dump($mask));
         foreach ($sizes as $s){
           if (bbn\Str::isInteger($s)) {
@@ -1062,7 +1066,7 @@ class Image extends bbn\File
               || $bigger
           ) {
             $smask = (empty($s[0]) ? '' : 'w'.$s[0]).(empty($s[1]) ? '' : 'h'.$s[1]);
-            $fn    = sprintf($mask, $smask);
+            $fn    = $file.sprintf($mask, $smask).'.'.$this->ext;
             if ($s[0] && $s[1]) {
               if ($crop) {
                 $this->resize($s[0], $s[1], true);

@@ -31,7 +31,9 @@ trait Retriever
   protected static function retrieverInit(self $instance): void
   {
     self::$retriever_exists = true;
-    self::$retriever_instance = $instance;
+    if (!self::$retriever_instance) {
+      self::$retriever_instance = $instance;
+    }
   }
 
   /**
