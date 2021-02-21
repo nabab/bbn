@@ -3997,6 +3997,22 @@
                     {
                         "type": "method",
                         "class": "Appui\/Medias",
+                        "text": "browse",
+                        "value": "browse",
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/browse",
+                        "desc": "Gets an array of medias."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "count",
+                        "value": "count",
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/count",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
                         "text": "delete",
                         "value": "delete",
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/delete",
@@ -4017,6 +4033,14 @@
                         "value": "getMediaPath",
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMediaPath",
                         "desc": "Returns the path of the given id_media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getPath",
+                        "value": "getPath",
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getPath",
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -4065,6 +4089,14 @@
                         "value": "removeThumbs",
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/removeThumbs",
                         "desc": "Remove the thums files"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "setUrl",
+                        "value": "setUrl",
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/setUrl",
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -4378,6 +4410,14 @@
                         "text": "getByType",
                         "value": "getByType",
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getByType",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getExcerpt",
+                        "value": "getExcerpt",
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getExcerpt",
                         "desc": ""
                     },
                     {
@@ -4853,6 +4893,14 @@
                         "text": "export",
                         "value": "export",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/export",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "exportDb",
+                        "value": "exportDb",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/exportDb",
                         "desc": "Converts an option or a hierarchy to a multi-level array with JSON values"
                     },
                     {
@@ -4950,6 +4998,14 @@
                         "value": "fullOptionsCfg",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsCfg",
                         "desc": "Returns an id-indexed array of full options with the config in arrays for a given parent"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "fullOptionsRef",
+                        "value": "fullOptionsRef",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsRef",
+                        "desc": "Returns each individual full option plus the children of options having this as alias."
                     },
                     {
                         "type": "method",
@@ -5138,6 +5194,14 @@
                     {
                         "type": "method",
                         "class": "Appui\/Option",
+                        "text": "itemsRef",
+                        "value": "itemsRef",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/itemsRef",
+                        "desc": "Returns each individual option plus the children of options having this as alias."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
                         "text": "itext",
                         "value": "itext",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/itext",
@@ -5246,6 +5310,14 @@
                         "value": "optionsByCode",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/optionsByCode",
                         "desc": "Returns an array of children options in the form code => text"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "optionsRef",
+                        "value": "optionsRef",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/optionsRef",
+                        "desc": "Returns each individual option plus the children of options having this as alias."
                     },
                     {
                         "type": "method",
@@ -5462,6 +5534,30 @@
                         "value": "unsetProp",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/unsetProp",
                         "desc": "Unset option's properties taken from the value column"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "updateAllTemplates",
+                        "value": "updateAllTemplates",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/updateAllTemplates",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "updatePlugins",
+                        "value": "updatePlugins",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/updatePlugins",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "updateTemplate",
+                        "value": "updateTemplate",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/updateTemplate",
+                        "desc": ""
                     }
                 ]
             },
@@ -9914,6 +10010,14 @@
                     {
                         "type": "method",
                         "class": "File\/System",
+                        "text": "decodeContents",
+                        "value": "decodeContents",
+                        "url": "bbn-php\/doc\/method\/File\/System\/decodeContents",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "File\/System",
                         "text": "delete",
                         "value": "delete",
                         "url": "bbn-php\/doc\/method\/File\/System\/delete",
@@ -11945,14 +12049,6 @@
                     {
                         "type": "method",
                         "class": "Mvc\/Controller",
-                        "text": "applyLocale",
-                        "value": "applyLocale",
-                        "url": "bbn-php\/doc\/method\/Mvc\/Controller\/applyLocale",
-                        "desc": ""
-                    },
-                    {
-                        "type": "method",
-                        "class": "Mvc\/Controller",
                         "text": "cachedAction",
                         "value": "cachedAction",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/cachedAction",
@@ -12893,17 +12989,17 @@
                     {
                         "type": "method",
                         "class": "Mvc\/Router",
-                        "text": "applyLocale",
-                        "value": "applyLocale",
-                        "url": "bbn-php\/doc\/method\/Mvc\/Router\/applyLocale",
+                        "text": "fetchDir",
+                        "value": "fetchDir",
+                        "url": "bbn-php\/doc\/method\/Mvc\/Router\/fetchDir",
                         "desc": ""
                     },
                     {
                         "type": "method",
                         "class": "Mvc\/Router",
-                        "text": "fetchDir",
-                        "value": "fetchDir",
-                        "url": "bbn-php\/doc\/method\/Mvc\/Router\/fetchDir",
+                        "text": "getLocale",
+                        "value": "getLocale",
+                        "url": "bbn-php\/doc\/method\/Mvc\/Router\/getLocale",
                         "desc": ""
                     },
                     {
@@ -15490,6 +15586,14 @@
             {
                 "type": "method",
                 "class": "Appui",
+                "text": "addPlugin",
+                "value": "addPlugin",
+                "url": "bbn-php\/doc\/method\/Appui\/addPlugin",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Appui",
                 "text": "check",
                 "value": "check",
                 "url": "bbn-php\/doc\/method\/Appui\/check",
@@ -17442,14 +17546,6 @@
             {
                 "type": "method",
                 "class": "Mvc",
-                "text": "applyLocale",
-                "value": "applyLocale",
-                "url": "bbn-php\/doc\/method\/Mvc\/applyLocale",
-                "desc": ""
-            },
-            {
-                "type": "method",
-                "class": "Mvc",
                 "text": "check",
                 "value": "check",
                 "url": "bbn-php\/doc\/method\/Mvc\/check",
@@ -18235,6 +18331,14 @@
             {
                 "type": "method",
                 "class": "Str",
+                "text": "html2text",
+                "value": "html2text",
+                "url": "bbn-php\/doc\/method\/Str\/html2text",
+                "desc": "Converts HTML to text replacing paragraphs and brs with new lines."
+            },
+            {
+                "type": "method",
+                "class": "Str",
                 "text": "isBuid",
                 "value": "isBuid",
                 "url": "bbn-php\/doc\/method\/Str\/isBuid",
@@ -18399,6 +18503,14 @@
                 "value": "saySize",
                 "url": "bbn-php\/doc\/method\/Str\/saySize",
                 "desc": "Converts the bytes to another unit form."
+            },
+            {
+                "type": "method",
+                "class": "Str",
+                "text": "text2html",
+                "value": "text2html",
+                "url": "bbn-php\/doc\/method\/Str\/text2html",
+                "desc": "Converts text to HTML replacing new lines with brs."
             },
             {
                 "type": "method",
@@ -18983,6 +19095,14 @@
             {
                 "type": "method",
                 "class": "X",
+                "text": "_",
+                "value": "_",
+                "url": "bbn-php\/doc\/method\/X\/_",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "X",
                 "text": "__callStatic",
                 "value": "__callStatic",
                 "url": "bbn-php\/doc\/method\/X\/__callStatic",
@@ -19498,6 +19618,14 @@
                 "text": "sum",
                 "value": "sum",
                 "url": "bbn-php\/doc\/method\/X\/sum",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "X",
+                "text": "tDom",
+                "value": "tDom",
+                "url": "bbn-php\/doc\/method\/X\/tDom",
                 "desc": ""
             },
             {

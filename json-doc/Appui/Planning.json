@@ -26,7 +26,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db)\n  {\n    $this->db = $db;\n    $this->_init_class_cfg();\n    $this->events = new \\bbn\\Appui\\Events($this->db);\n    $this->ecfg = $this->events->getClassCfg();\n    $this->options = new \\bbn\\Appui\\Option($this->db);\n    $this->ocfg = $this->options->getClassCfg();\n  }",
+            "code": "function(bbn\\Db $db)\n  {\n    $this->db = $db;\n    $this->_init_class_cfg();\n    $this->events = new \\bbn\\Appui\\Event($this->db);\n    $this->ecfg = $this->events->getClassCfg();\n    $this->options = new \\bbn\\Appui\\Option($this->db);\n    $this->ocfg = $this->options->getClassCfg();\n  }",
             "startLine": 50,
             "endLine": 58,
             "isDeprecated": false,

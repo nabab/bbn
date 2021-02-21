@@ -11,8 +11,8 @@
     ],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Medias.php",
-    "startLine": 5,
-    "endLine": 434,
+    "startLine": 8,
+    "endLine": 656,
     "contentConstructor": {
         "file": "bbn\\Appui\\Medias",
         "returns": null
@@ -27,9 +27,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db)\n  {\n    $this->_init_class_cfg();\n    $this->opt = bbn\\Appui\\Option::getInstance();\n    $this->usr = bbn\\User::getInstance();\n    $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');\n  }",
-            "startLine": 40,
-            "endLine": 46,
+            "code": "function(bbn\\Db $db)\n  {\n    parent::__construct($db);\n    $this->_init_class_cfg();\n    $this->opt    = bbn\\Appui\\Option::getInstance();\n    $this->usr    = bbn\\User::getInstance();\n    $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');\n  }",
+            "startLine": 67,
+            "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -85,6 +85,134 @@
                 }
             ]
         },
+        "getPath": {
+            "name": "getPath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $media = NULL)\n  {\n    if (!isset($this->path)) {\n      $this->path = bbn\\Mvc::getDataPath('appui-note').'\/media';\n    }\n\n    $path = $this->path;\n    if ($media && $media['content'] && $media['content']['path']) {\n      $path .= '\/'.$media['content']['path'].$media['id']\n              .'\/'.$media['name'];\n    }\n\n    return $path;\n  }",
+            "startLine": 77,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "media",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "browse": {
+            "name": "browse",
+            "summary": "Gets an array of medias.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cfg, $limit = 20, $start = 0)\n  {\n    if ($user = bbn\\User::getInstance()) {\n      $cf    = $this->getClassCfg();\n      $ct    = $cf['arch']['medias'];\n      $where = [];\n      if (!isset($filter[$ct['private']])) {\n        $where[$ct['private']] = 0;\n      }\n      else {\n        if ($filter[$ct['private']]) {\n          $where[$ct['id_user']] = $user->getId();\n        }\n\n        $where[$ct['private']] = $filter[$ct['private']];\n        unset($filter[$ct['private']]);\n      }\n      \n      $limit = $cfg['limit'] ?? $limit;\n      $start = $cfg['start'] ?? $start;\n\n      $grid = new Grid(\n        $this->db, $cfg,\n        [\n          'table' => $cf['table'],\n          'fields' => $ct,\n          'limit' => $limit,\n          'start' => $start,\n          'where' => $where\n        ]\n      );\n\n      if ($data = $grid->getDatatable()) {\n        $url = bbn\\Mvc::getPluginUrl('appui-note').'\/media\/image\/';\n        foreach ($data['data'] as &$d) {\n          $d['is_image'] = false;\n          if ($d['content']) {\n            $d['content'] = json_decode($d['content'], true);\n            $full_path = $this->getPath($d);\n            $d['path'] = $url.$d['id'];\n            if ($this->isImage($full_path) && ($thumb = $this->getThumbs($full_path))) {\n              $d['thumbs'] = $thumb;\n              $d['is_image'] = true;\n            }\n          }\n        }\n\n        unset($d);\n        \/*\n        if (!empty($data['data'])) {\n          $tmp = array_filter(\n            $data['data'],\n            function ($a) {\n              return $a['is_image'] ?? false;\n            }\n          );\n          if (empty($tmp)) {\n            $cfg['start'] = $start + $limit;\n            return $this->browse($cfg);\n          }\n\n          $data['data'] = $tmp;\n        }\n        *\/\n\n        return $data;\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 100,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 20,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "count": {
+            "name": "count",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $filter = [])\n  {\n    if ($user = bbn\\User::getInstance()) {\n      $cf = $this->getClassCfg();\n      $ct = $cf['arch']['medias'];\n      if (!isset($filter[$ct['private']])) {\n        $filter[$ct['private']] = 0;\n      }\n      elseif ($filter[$ct['private']]) {\n        $filter[$ct['id_user']] = $user->getId();\n      }\n\n      return $this->db->count($cf['table'], $filter);\n    }\n\n    return null;\n  }",
+            "startLine": 173,
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
         "insert": {
             "name": "insert",
             "summary": "Adds a new media",
@@ -94,16 +222,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, array $content = NULL, $title = '', $type = 'file', $private = false)\n  {\n    $cf =& $this->class_cfg;\n    if (\n      !empty($name) &&\n      ($id_type = $this->opt->fromCode($type, $this->opt_id))\n    ){\n      $content = null;\n      $ok = false;\n      switch ( $type ){\n        case 'link':\n          if ( empty($title) ){\n            $title = basename($name);\n          }\n          $ok = 1;\n        break;\n        default:\n          $fs = new bbn\\File\\System();\n          if ( $fs->isFile($name) ){\n            $root = $fs->createPath($private && $this->usr->check() ? \n              bbn\\Mvc::getUserDataPath($this->usr->getId(), 'appui-note').'media\/' : \n              bbn\\Mvc::getDataPath('appui-note').'media\/');\n            if ( $root ){\n              $path = bbn\\X::makeStoragePath($root, '', 0, $fs);\n              $dpath = substr($path, strlen($root) + 1);\n              $file = basename($name);\n              $content = [\n                'path' => $dpath,\n                'size' => $fs->filesize($name),\n                'extension' => bbn\\Str::fileExt($file)\n              ];\n              if ( empty($title) ){\n                $title = basename($file);\n              }\n              $ok = 1;\n            }\n          }\n          break;\n      }\n      if ( $ok ){\n        $this->db->insert($cf['table'], [\n          $cf['arch']['medias']['id_user'] => $this->usr->getId(),\n          $cf['arch']['medias']['type'] => $id_type,\n          $cf['arch']['medias']['title'] => $title,\n          $cf['arch']['medias']['name'] => $file ?? null,\n          $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,\n          $cf['arch']['medias']['private'] => $private ? 1 : 0\n        ]);\n        $id = $this->db->lastId();\n        if ( isset($file) && $fs->createPath($path.$id) ){\n           $fs->move(\n            $name,\n            $path.$id\n          );\n          }\n        if ( $this->isImage($path.$id.'\/'.basename($name)) ){\n          $image = new \\bbn\\File\\Image($path.$id.'\/'.basename($name), $fs);\n          $image->thumbs($path.$id, $this->thumbs_sizes);\n        }\n        return $id;\n      }\n    }\n    return null;\n  }",
-            "startLine": 58,
-            "endLine": 121,
+            "code": "function($name, array $content = NULL, $title = '', $type = 'file', $private = false, $excerpt = NULL)\n  {\n      array $content = null,\n      string $title = '',\n      string $type='file',\n      bool $private = false,\n      string $excerpt = null\n  ): ?string\n  {\n    $cf =& $this->class_cfg;\n    if (!empty($name)\n        && ($id_type = $this->opt->fromCode($type, $this->opt_id))\n        && ($ext = Str::fileExt($name))\n    ) {\n      $content = null;\n      $fs = new bbn\\File\\System();\n      if (!$fs->isFile($name)) {\n        throw new \\Exception(X::_(\"Impossible to find the file %s\", $name));\n      }\n\n      if ($private) {\n        if (!$this->usr->check()) {\n          return null;\n        }\n\n        $root = bbn\\Mvc::getUserDataPath($this->usr->getId(), 'appui-note');\n      }\n      else {\n        $root = bbn\\Mvc::getDataPath('appui-note');\n      }\n\n      $root   .= 'media\/';\n      $path    = bbn\\X::makeStoragePath($root, '', 0, $fs);\n      $dpath   = substr($path, strlen($root));\n      $file    = basename($name);\n      $mime    = mime_content_type($name) ?: null;\n      $content = [\n        'path' => $dpath,\n        'size' => $fs->filesize($name),\n        'extension' => $ext\n      ];\n      if (empty($title)) {\n        $title = Str::clean(str_replace('-', ' ', str_replace('_', ' ', basename($file, \".$ext\"))));\n      }\n\n      if (!$this->db->insert(\n        $cf['table'],\n        [\n          $cf['arch']['medias']['id_user'] => $this->usr->getId() ?: BBN_EXTERNAL_USER_ID,\n          $cf['arch']['medias']['type'] => $id_type,\n          $cf['arch']['medias']['mimetype'] => $mime,\n          $cf['arch']['medias']['title'] => $title,\n          $cf['arch']['medias']['excerpt'] => $excerpt,\n          $cf['arch']['medias']['name'] => $file ?? null,\n          $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,\n          $cf['arch']['medias']['private'] => $private ? 1 : 0,\n          $cf['arch']['medias']['created'] => date('Y-m-d H:i:s')\n        ]\n      )) {\n        throw new \\Exception(X::_(\"Impossible to insert the media in the database\"));\n      }\n\n      $id = $this->db->lastId();\n      if ($fs->createPath($path.$id)) {\n        $fs->move(\n          $name,\n          $path.$id\n        );\n        $new_file = $path.$id.'\/'.basename($name);\n        if (strpos($mime, 'image\/') === 0) {\n          $image = new \\bbn\\File\\Image($new_file, $fs);\n          $image->thumbs($path.$id, $this->thumbs_sizes);\n        }\n      }\n\n\n      return $id;\n    }\n\n    return null;\n  }",
+            "startLine": 202,
+            "endLine": 282,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 5,
+            "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
                 "string",
@@ -155,6 +283,67 @@
                     "has_default": true,
                     "default": false,
                     "default_name": ""
+                },
+                {
+                    "name": "excerpt",
+                    "position": 5,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "setUrl": {
+            "name": "setUrl",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_media, $url, $shared = 0)\n  {\n    if ($this->exists($id_media)) {\n      $cf =& $this->class_cfg;\n      return $this->db->insertIgnore(\n        $cf['tables']['medias_url'],\n        [\n          $cf['arch']['medias_url']['id_media'] => $id_media,\n          $cf['arch']['medias_url']['url'] => $url,\n          $cf['arch']['medias_url']['shared'] => $shared\n        ]\n      );\n    }\n\n  }",
+            "startLine": 285,
+            "endLine": 299,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_media",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "url",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "shared",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
                 }
             ]
         },
@@ -167,16 +356,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path, array $size = array (\n  0 => 60,\n  1 => 60,\n))\n  {\n    $st = '';\n    $ext = '.'.pathinfo($path, PATHINFO_EXTENSION);\n    $name = str_replace($ext, '',basename($path));\n    $_path = str_replace($name.$ext, '', $path);\n    $st .= $_path.$name.'_w'.$size[0].'h'.$size[1].$ext;\n    if ( file_exists($st) ){\n      return $st;\n    }\n    return null;\n  }",
-            "startLine": 128,
-            "endLine": 139,
+            "code": "function($path, array $size = array (\n  0 => 60,\n  1 => 60,\n), $if_exists = true)\n  {\n    if (isset($size[0], $size[1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {\n      $ext = '.'.Str::fileExt($path);\n      $file = substr($path, 0, - strlen($ext));\n      if ($size[0]) {\n        $file .= '_w'.$size[0];\n      }\n\n      if ($size[1]) {\n        $file .= '_h'.$size[1];\n      }\n\n      $file .= $ext;\n\n      if (!$if_exists || file_exists($file)) {\n        return $file;\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 307,
+            "endLine": 328,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": null,
             "parent": false,
@@ -202,6 +391,15 @@
                         60
                     ],
                     "default_name": ""
+                },
+                {
+                    "name": "if_exists",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
                 }
             ]
         },
@@ -214,9 +412,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    $res = [];\n    $size = [];\n    if ( file_exists($path) && $this->isImage($path) ){\n      foreach($this->thumbs_sizes as $size ){\n        $res[] = $this->getThumbs($path, $size);\n      }\n    }\n    return $res;\n  }",
-            "startLine": 147,
-            "endLine": 157,
+            "code": "function($path)\n  {\n    $res  = [];\n    $size = [];\n    if (file_exists($path) && $this->isImage($path)) {\n      foreach($this->thumbs_sizes as $size){\n        $res[] = $this->getThumbs($path, $size);\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 337,
+            "endLine": 348,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -248,9 +446,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    if ( $thumbs = $this->getThumbsPath($path) ){\n      foreach($thumbs as $th ){\n        if(file_exists($th)){\n          unlink($th);\n        }\n      }\n    }\n  }",
-            "startLine": 165,
-            "endLine": 174,
+            "code": "function($path)\n  {\n    if ($thumbs = $this->getThumbsPath($path)) {\n      foreach($thumbs as $th){\n        if(file_exists($th)) {\n          unlink($th);\n        }\n      }\n    }\n  }",
+            "startLine": 357,
+            "endLine": 366,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -282,9 +480,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, array $size = array (\n  0 => 60,\n  1 => 60,\n))\n  {\n    $tmp = explode('.', $name);\n    if ( $ext = '.'.$tmp[1]){\n      return $tmp[0].'_w'.$size[0].'h'.$size[1].$ext;\n    }\n    return null;\n  }",
-            "startLine": 181,
-            "endLine": 188,
+            "code": "function($name, array $size = array (\n  0 => 60,\n  1 => 60,\n))\n  {\n    $tmp = explode('.', $name);\n    if ($ext = '.'.$tmp[1]) {\n      return $tmp[0].'_w'.$size[0].'h'.$size[1].$ext;\n    }\n\n    return null;\n  }",
+            "startLine": 374,
+            "endLine": 382,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -329,9 +527,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ( \\bbn\\Str::isUid($id) ){\n      $cf =& $this->class_cfg;\n      $media = $this->getMedia($id, true);\n      $fs = new bbn\\File\\System();\n      \n      if ($media \n          && ($path = dirname($media['file']))\n          && is_file($media['file'])\n          && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])\n      ) {\n        if ($fs->delete($path, false)) {\n          bbn\\X::cleanStoragePath($path);\n        }\n        return true;\n      }\n    }\n    return false;\n  }",
-            "startLine": 197,
-            "endLine": 216,
+            "code": "function($id)\n  {\n    if (\\bbn\\Str::isUid($id)) {\n      $cf    =& $this->class_cfg;\n      $media = $this->getMedia($id, true);\n      $fs    = new bbn\\File\\System();\n\n      if ($media\n          && ($path = dirname($media['file']))\n          && is_file($media['file'])\n          && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])\n      ) {\n        if ($fs->delete($path, false)) {\n          bbn\\X::cleanStoragePath($path);\n        }\n\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 391,
+            "endLine": 412,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -363,9 +561,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    if ( is_string($path) ){\n      $content_type = mime_content_type($path);\n      if ( strpos($content_type, 'image\/' ) === 0 ){\n        return true;\n      }\n    }\n    return false;\n  }",
-            "startLine": 224,
-            "endLine": 233,
+            "code": "function($path)\n  {\n    if (is_string($path)) {\n      $content_type = mime_content_type($path);\n      if (strpos($content_type, 'image\/') === 0) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 421,
+            "endLine": 431,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -397,9 +595,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $details = false)\n  {\n    $cf =& $this->class_cfg;\n    $fs = new \\bbn\\File\\System();\n    if (\n      \\bbn\\Str::isUid($id) &&\n      ($link_type = $this->opt->fromCode('link', $this->opt_id)) &&\n      ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id])) &&\n      ($link_type !== $media[$cf['arch']['medias']['type']]) \n    ){\n      $path = '';\n      if ( $media['content'] ){\n        $tmp = json_decode($media[$cf['arch']['medias']['content']], true);\n        $media = array_merge($tmp, $media);\n      }\n      $media['file'] = (\n        $media['private'] ?\n          bbn\\Mvc::getUserDataPath('appui-note') :\n          bbn\\Mvc::getDataPath('appui-note')\n      ).'media\/'.($media['path'] ?? '').$id.'\/'.$media[$cf['arch']['medias']['name']];\n      if ($fs->isFile($media['file']) && $this->isImage($media['file']) ){\n        $media['is_image'] = true;\n      }\n      return empty($details) ? $media['file'] : $media;\n    }\n    return false;\n  }",
-            "startLine": 242,
-            "endLine": 268,
+            "code": "function($id, $details = false)\n  {\n    $cf =& $this->class_cfg;\n    $fs = new \\bbn\\File\\System();\n    if (\\bbn\\Str::isUid($id)\n        && ($link_type = $this->opt->fromCode('link', $this->opt_id))\n        && ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id]))\n        && ($link_type !== $media[$cf['arch']['medias']['type']])\n    ) {\n      $path = '';\n      if ($media['content']) {\n        $tmp   = json_decode($media[$cf['arch']['medias']['content']], true);\n        $media = array_merge($tmp, $media);\n      }\n\n      $media['file'] = (\n        $media['private'] ? bbn\\Mvc::getUserDataPath('appui-note') : bbn\\Mvc::getDataPath('appui-note')\n      ).'media\/'.($media['path'] ?? '').$id.'\/'.$media[$cf['arch']['medias']['name']];\n      if ($fs->isFile($media['file']) && $this->isImage($media['file'])) {\n        $media['is_image'] = true;\n      }\n\n      return empty($details) ? $media['file'] : $media;\n    }\n\n    return false;\n  }",
+            "startLine": 441,
+            "endLine": 467,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -440,9 +638,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($medias, $dest)\n  {\n    if ( is_string($medias) ){\n      $medias = [$medias];\n    }\n    if ( \n      is_array($medias) &&\n      \\bbn\\File\\Dir::createPath(dirname($dest)) &&\n      ($zip = new \\ZipArchive()) &&\n      (\n        (\n          is_file($dest) &&\n          ($zip->open($dest, \\ZipArchive::OVERWRITE) === true)\n        ) ||\n        ($zip->open($dest, \\ZipArchive::CREATE) === true)\n      )\n    ){\n      foreach ( $medias as $media ){\n        if ( $file = $this->getMedia($media) ){\n          $zip->addFile($file, basename($file));\n        }\n      }\n      return $zip->close();\n    }\n    return false;\n  }",
-            "startLine": 270,
-            "endLine": 295,
+            "code": "function($medias, $dest)\n  {\n    if (is_string($medias)) {\n      $medias = [$medias];\n    }\n\n    if (is_array($medias)\n        && \\bbn\\File\\Dir::createPath(dirname($dest))\n        && ($zip = new \\ZipArchive())\n        && ((        is_file($dest)\n        && ($zip->open($dest, \\ZipArchive::OVERWRITE) === true))\n        || ($zip->open($dest, \\ZipArchive::CREATE) === true)        )\n    ) {\n      foreach ($medias as $media){\n        if ($file = $this->getMedia($media)) {\n          $zip->addFile($file, basename($file));\n        }\n      }\n\n      return $zip->close();\n    }\n\n    return false;\n  }",
+            "startLine": 470,
+            "endLine": 493,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -483,9 +681,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_media, $name, $title)\n  {\n    $new = [];\n    \/\/the old media\n    $fs = new bbn\\File\\System();\n    $old = $this->getMedia($id_media, true);\n    $root = bbn\\Mvc::getDataPath('appui-note').'media\/';\n    if ( $old && \n        (($old['name'] !== $name) || ($old['title'] !== $title)) \n       ){\n    \t$content = json_decode($old['content'], true);  \n      $path = $root.$content['path'].'\/';\n  \n      if ( $fs->exists($path.$id_media.'\/'.$old['name']) ){\n        if ( $old['name'] !== $name ){\n          \/\/if the media is an image has to update also the thumbs names\n          if ( $this->isImage($path.$id_media.'\/'.$old['name'])){\n            $thumbs_names = [\n              [\n                'old' => $this->getThumbsName($old['name'], [60,60]),\n                'new' =>  $this->getThumbsName($name, [60,60])\n              ],[\n                'old' => $this->getThumbsName($old['name'], [100,100]),\n                'new' =>  $this->getThumbsName($name, [100,100])\n              ],[\n                'old' => $this->getThumbsName($old['name'], [125,125]),\n                'new' =>  $this->getThumbsName($name, [125,125])\n              ]\n            ];\n            foreach ( $thumbs_names as $t ){\n              $fs->rename($path.$id_media.'\/'.$t['old'], $t['new'], true);\n            }\n          }\n          $fs->rename($path.$id_media.'\/'.$old['name'], $name, true);\n        }\n        if ( $this->updateDb($id_media, $name, $title)){\n          $new = $this->getMedia($id_media, true);\n        }      \n      }\n      return $new;\n    }\n    return $new;\n  }",
-            "startLine": 305,
-            "endLine": 347,
+            "code": "function($id_media, $name, $title)\n  {\n    $new = [];\n    \/\/the old media\n    $fs   = new bbn\\File\\System();\n    $old  = $this->getMedia($id_media, true);\n    $root = bbn\\Mvc::getDataPath('appui-note').'media\/';\n    if ($old\n        && (($old['name'] !== $name) || ($old['title'] !== $title))\n    ) {\n        $content = json_decode($old['content'], true);\n      $path      = $root.$content['path'].'\/';\n\n      if ($fs->exists($path.$id_media.'\/'.$old['name'])) {\n        if ($old['name'] !== $name) {\n          \/\/if the media is an image has to update also the thumbs names\n          if ($this->isImage($path.$id_media.'\/'.$old['name'])) {\n            $thumbs_names = [\n              [\n                'old' => $this->getThumbsName($old['name'], [60,60]),\n                'new' => $this->getThumbsName($name, [60,60])\n              ],[\n                'old' => $this->getThumbsName($old['name'], [100,100]),\n                'new' => $this->getThumbsName($name, [100,100])\n              ],[\n                'old' => $this->getThumbsName($old['name'], [125,125]),\n                'new' => $this->getThumbsName($name, [125,125])\n              ]\n            ];\n            foreach ($thumbs_names as $t){\n              $fs->rename($path.$id_media.'\/'.$t['old'], $t['new'], true);\n            }\n          }\n\n          $fs->rename($path.$id_media.'\/'.$old['name'], $name, true);\n        }\n\n        if ($this->updateDb($id_media, $name, $title)) {\n          $new = $this->getMedia($id_media, true);\n        }\n      }\n\n      return $new;\n    }\n\n    return $new;\n  }",
+            "startLine": 506,
+            "endLine": 552,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -535,9 +733,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_media, $name, $title, array $content = [])\n  {\n      $this->class_cfg['arch']['medias']['name'] => $name,\n\t\t\t$this->class_cfg['arch']['medias']['title'] => $title\n    ];\n    if(!empty($content)){\n      $fields[$this->class_cfg['arch']['medias']['content']] = json_encode($content);\n    }\n    return $this->db->update([\n      'table'=> $this->class_cfg['table'],\n      'fields' => $fields,\n\t\t\t'where'=> [\n        'conditions' => [[\n          'field'=> $this->class_cfg['arch']['medias']['id'],\n          'value' => $id_media\n        ]]\n      ]]\n    );\n  }",
-            "startLine": 357,
-            "endLine": 375,
+            "code": "function($id_media, $name, $title, array $content = [])\n  {\n    $fields = [\n      $this->class_cfg['arch']['medias']['name'] => $name,\n            $this->class_cfg['arch']['medias']['title'] => $title\n    ];\n    if(!empty($content)) {\n      $fields[$this->class_cfg['arch']['medias']['content']] = json_encode($content);\n    }\n\n    return $this->db->update(\n      [\n      'table' => $this->class_cfg['table'],\n      'fields' => $fields,\n            'where' => [\n        'conditions' => [[\n          'field' => $this->class_cfg['arch']['medias']['id'],\n          'value' => $id_media\n        ]]\n            ]]\n    );\n  }",
+            "startLine": 564,
+            "endLine": 585,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -596,9 +794,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_media, $ref, $oldName, $newName, $title)\n  {\n    $fs = new \\bbn\\File\\System();\n    $new_media = [];\n    if ( $fs->isFile($tmp_path) ){\n      $file_content = file_get_contents($tmp_path);\n      $root = \\bbn\\Mvc::getDataPath('appui-note').'media\/';\n      \n      if ( ($media = $this->getMedia($id_media, true)) ){\n        $old_path = $this->getMediaPath($id_media, $oldName);\n        $full_path = $this->getMediaPath($id_media, $newName);\n        if ( $fs->putContents($full_path, $file_content)){\n          if ( $this->isImage($full_path)){\n            $image = new \\bbn\\File\\Image($full_path);\n            $this->removeThumbs($old_path);\n            $image->thumbs(dirname($full_path), $this->thumbs_sizes);\n            $media['is_image'] = true;\n\t\t\t\t\t}\n        }\n      }\n      if( $this->updateDb($id_media, $newName, $title, [\n        'path' => $media['path'],\n        'size' => $fs->filesize($full_path),\n        'extension' => pathinfo($newName, PATHINFO_EXTENSION)\n      ])){\n        $new_media = $this->getMedia($id_media, true);\n      }\n    }\n    return $new_media;\n    \n  }",
-            "startLine": 387,
-            "endLine": 417,
+            "code": "function($id_media, $ref, $oldName, $newName, $title)\n  {\n    $tmp_path  = \\bbn\\Mvc::getUserTmpPath().$ref.'\/'.$oldName;\n    $fs        = new \\bbn\\File\\System();\n    $new_media = [];\n    if ($fs->isFile($tmp_path)) {\n      $file_content = file_get_contents($tmp_path);\n      $root         = \\bbn\\Mvc::getDataPath('appui-note').'media\/';\n\n      if (($media = $this->getMedia($id_media, true))) {\n        $old_path  = $this->getMediaPath($id_media, $oldName);\n        $full_path = $this->getMediaPath($id_media, $newName);\n        if ($fs->putContents($full_path, $file_content)) {\n          if ($this->isImage($full_path)) {\n            $image = new \\bbn\\File\\Image($full_path);\n            $this->removeThumbs($old_path);\n            $image->thumbs(dirname($full_path), $this->thumbs_sizes);\n            $media['is_image'] = true;\n          }\n        }\n      }\n\n      if($this->updateDb(\n        $id_media, $newName, $title, [\n        'path' => $media['path'],\n        'size' => $fs->filesize($full_path),\n        'extension' => pathinfo($newName, PATHINFO_EXTENSION)\n        ]\n      )\n      ) {\n        $new_media = $this->getMedia($id_media, true);\n      }\n    }\n\n    return $new_media;\n\n  }",
+            "startLine": 598,
+            "endLine": 634,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -668,9 +866,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_media, $name = NULL)\n  {\n      $content = json_decode($media['content'], true);\n      $path = bbn\\Mvc::getDataPath('appui-note').'media\/'.$content['path'].$id_media.'\/'.($name ? $name : $media['name']);\n      return $path;\n    }\n    return null;\n  }",
-            "startLine": 426,
-            "endLine": 433,
+            "code": "function($id_media, $name = NULL)\n  {\n    if ($media = $this->getMedia($id_media, true)) {\n      $content = json_decode($media['content'], true);\n      $path    = bbn\\Mvc::getDataPath('appui-note').'media\/'.$content['path'].$id_media.'\/'.($name ? $name : $media['name']);\n      return $path;\n    }\n\n    return null;\n  }",
+            "startLine": 644,
+            "endLine": 653,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1259,16 +1457,24 @@
             "visibility": "public",
             "value": [
                 [
-                    60,
-                    60
+                    500,
+                    false
                 ],
                 [
-                    100,
-                    100
+                    250,
+                    false
                 ],
                 [
                     125,
-                    125
+                    false
+                ],
+                [
+                    96,
+                    false
+                ],
+                [
+                    48,
+                    false
                 ]
             ]
         }
@@ -1277,23 +1483,39 @@
         "default_class_cfg": {
             "table": "bbn_medias",
             "tables": {
-                "medias": "bbn_medias"
+                "medias": "bbn_medias",
+                "medias_tags": "bbn_medias_tags",
+                "medias_url": "bbn_medias_url"
             },
             "arch": {
                 "medias": {
                     "id": "id",
                     "id_user": "id_user",
                     "type": "type",
+                    "mimetype": "mimetype",
                     "name": "name",
                     "title": "title",
+                    "excerpt": "excerpt",
                     "content": "content",
-                    "private": "private"
+                    "private": "private",
+                    "created": "created",
+                    "edited": "edited",
+                    "editor": "editor"
+                },
+                "medias_url": {
+                    "id_media": "id_media",
+                    "url": "url",
+                    "shared": "shared"
+                },
+                "medias_tags": {
+                    "id_media": "id_media",
+                    "id_tag": "id_tag"
                 }
             }
         }
     },
     "constants": null,
-    "numMethods": 26,
+    "numMethods": 30,
     "numProperties": 2,
     "numConstants": 0,
     "numStaticProperties": 1,
@@ -1314,23 +1536,40 @@
         "default_class_cfg": {
             "table": "bbn_medias",
             "tables": {
-                "medias": "bbn_medias"
+                "medias": "bbn_medias",
+                "medias_tags": "bbn_medias_tags",
+                "medias_url": "bbn_medias_url"
             },
             "arch": {
                 "medias": {
                     "id": "id",
                     "id_user": "id_user",
                     "type": "type",
+                    "mimetype": "mimetype",
                     "name": "name",
                     "title": "title",
+                    "excerpt": "excerpt",
                     "content": "content",
-                    "private": "private"
+                    "private": "private",
+                    "created": "created",
+                    "edited": "edited",
+                    "editor": "editor"
+                },
+                "medias_url": {
+                    "id_media": "id_media",
+                    "url": "url",
+                    "shared": "shared"
+                },
+                "medias_tags": {
+                    "id_media": "id_media",
+                    "id_tag": "id_tag"
                 }
             }
         },
         "opt": null,
         "usr": null,
         "opt_id": null,
+        "path": null,
         "img_extensions": [
             "jpeg",
             "jpg",
@@ -1339,16 +1578,24 @@
         ],
         "thumbs_sizes": [
             [
-                60,
-                60
+                500,
+                false
             ],
             [
-                100,
-                100
+                250,
+                false
             ],
             [
                 125,
-                125
+                false
+            ],
+            [
+                96,
+                false
+            ],
+            [
+                48,
+                false
             ]
         ],
         "db": null,
