@@ -271,26 +271,37 @@ class Project extends bbn\Models\Cls\Db
     $repository = \is_string($rep) ? $this->repositories[$rep] : $rep;
     if ((!empty($repository)
         && is_array($repository))
+        && !empty($repository['root'])
         && X::hasProps($repository, ['path', 'root', 'code'], true)
     ) {
-      switch ($repository['root']) {
-        case 'app':
-          $path = $this->getAppPath();
-          break;
-        /* case 'cdn':
-          die(var_dump('cdn'));
-        break;*/
-        case 'lib':
-          $path  = $this->getLibPath();
-          $path .= $repository['path'];
-          if ($repository['alias_code'] === 'bbn-project') {
-            $path .= '/src/';
-          }
-          break;
-        case 'cdn':
-          $path = $this->getCdnPath();
-          break;
+      if (strpos($repository['root'], '/') === 0) {
+        $path = $repository['root'];
       }
+      else {
+        switch ($repository['root']) {
+          case 'app':
+            $path = $this->getAppPath();
+            break;
+          case 'lib':
+            $path  = $this->getLibPath();
+            $path .= $repository['path'];
+            if ($repository['alias_code'] === 'bbn-project') {
+              $path .= '/src/';
+            }
+            break;
+          case 'cdn':
+            $path = $this->getCdnPath();
+            break;
+          case 'data':
+            $path = $this->getDataPath();
+            $path .= $repository['path'];
+            break;
+        }
+      }
+    }
+
+    if ($path && substr($path, -1) !== '/') {
+      $path .= '/';
     }
 
     return $path;
