@@ -23,7 +23,7 @@ class Api extends bbn\Models\Cls\Basic
   public const RSA_PUBLIC = 'src/cfg/cert_rsa.pub';
 
   /** The address of the appui server */
-  public const REMOTE = 'https://server.thomas.lan/api/home';
+  public const REMOTE = 'https://central.app-ui.com/api/home';
 
   public $jwt;
 
