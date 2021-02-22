@@ -4,6 +4,7 @@
       "categories": 1,
       "show_code": 1,
       "show_icon": 1,
+      "permissions": 1,
       "i18n": "en"
     },
     "text": "Appui",
@@ -128,7 +129,43 @@
         "text": "CRON",
         "code": "cron",
         "icon": "nf nf-mdi-clock_start",
-        "plugin": true
+        "plugin": true,
+        "items": [
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "CRON",
+                            "code": "cron",
+                            "observe":false,
+                            "closable":true,
+                            "component":"appui-cron-widget-cron"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       {
         "cfg": {
@@ -312,6 +349,41 @@
             },
             "text": "Synchronization",
             "code": "sync"
+          },
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "Databases",
+                            "code": "databases",
+                            "limit":5,
+                            "observe":false,
+                            "closable":true,
+                            "itemComponent": "appui-database-widget-database"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -522,7 +594,43 @@
         "text": "History",
         "code": "history",
         "icon": "nf nf-mdi-history",
-        "plugin": true
+        "plugin": true,
+        "items": [
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "History",
+                            "code": "last_changes",
+                            "observe":false,
+                            "closable":true,
+                            "component": "appui-history-widget-changes-last"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       {
         "cfg": {
@@ -554,6 +662,50 @@
                 "text": "Sick holidays",
                 "code": "sick",
                 "color": "tomato"
+              }
+            ]
+          },
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "Working schedule",
+                            "code": "wp"
+                          }, {
+                            "text": "Staff absents",
+                            "code": "staff_absent",
+                            "limit":5,
+                            "observe":false,
+                            "closable":true,
+                            "itemComponent":"appui-hr-widget-staff-absent"
+                          }, {
+                            "text": "Staff absents (à venir)",
+                            "code": "staff_absent_soon",
+                            "limit":5,
+                            "closable":true,
+                            "itemComponent": "appui-hr-widget-staff-absent"
+                          }
+                                  ]
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -1130,6 +1282,40 @@
             "code": "theme",
             "icon": "nf nf-fae-palette_color",
             "theme": "default"
+          },
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "IDE recent files",
+                            "code": "ide_recent_files",
+                            "limit":5,
+                            "closable":true,
+                            "itemComponent": "appui-ide-widget-files-recent"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -2433,6 +2619,34 @@
                     ]
                   }
                 ]
+              },
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "Projects",
+                            "code": "projects",
+                            "limit":5,
+                            "closable":true,
+                            "itemComponent": "appui-project-widget-projects"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -2449,6 +2663,7 @@
         },
         "text": "Server",
         "code": "server",
+        "plugin": true,
         "icon": "nf nf-fa-server",
         "items": [
           {
@@ -2459,6 +2674,44 @@
             },
             "text": "Servers",
             "code": "servers"
+          },
+          {
+            "cfg": {
+              "show_code": 1,
+              "allow_children": 1
+            },
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "Servers",
+                            "code": "servers",
+                            "limit":5,
+                            "closable":true,
+                            "itemComponent": "appui-server-widget-servers"
+                          }
+                                  ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -2481,6 +2734,7 @@
           "i18n": "en"
         },
         "text": "Spreadsheet",
+        "plugin": true,
         "code": "spreadsheet",
         "icon": "nf nf-mdi-grid"
       },
@@ -2492,6 +2746,7 @@
           "i18n": "en"
         },
         "text": "Statistic",
+        "plugin": true,
         "code": "statistic",
         "icon": "nf nf-fa-bar_chart",
         "tekname": "stats",
@@ -2674,6 +2929,7 @@
             },
             "text": "Dashboards",
             "code": "list",
+            "plugin": true,
             "items": [
               {
                 "text": "Default dashboard",
@@ -2708,6 +2964,7 @@
         },
         "text": "Tasks (project management)",
         "code": "task",
+        "plugin": true,
         "icon": "nf nf-oct-tasklist",
         "tekname": "tasks",
         "items": [
@@ -2892,6 +3149,47 @@
           {
             "text": "Task categories",
             "code": "cats"
+          },
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "My current bugs",
+                            "code": "tasks",
+                            "itemComponent": "appui-task-widget-task",
+                            "limit":5
+                          },
+                          {
+                            "text": "Derniers Bugs",
+                            "code": "all_tasks",
+                            "limit":5,
+                            "observe":false,
+                            "closable":true,
+                            "itemComponent": "appui-task-widget-task"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -2904,7 +3202,53 @@
         },
         "text": "User and Group",
         "code": "usergroup",
-        "icon": "nf nf-fa-user_circle"
+        "plugin": true,
+        "icon": "nf nf-fa-user_circle",
+        "items": [
+          {
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Dashboards",
+                    "code": "list",
+                    "id_alias": ["list", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Plugins dashboard",
+                        "code": "plugins",
+                        "id_alias": ["plugins", "list", "dashboard", "appui"],
+                        "items": [
+                          {
+                            "text": "Application's users",
+                            "code": "users",
+                            "limit":5,
+                            "observe":false,
+                            "closable":true,
+                            "itemComponent":"appui-usergroup-widget-users"
+                          },
+                          {
+                            "text": "My last sessions",
+                            "code": "sessions",
+                            "observe":false,
+                            "closable":true,
+                            "component":"appui-hr-widget-staff-absent"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+
+        ]
       },
       {
         "cfg": {
@@ -2915,6 +3259,7 @@
         },
         "text": "Write",
         "code": "write",
+        "plugin": true,
         "icon": "nf nf-fa-pencil_square_o",
         "items": [
           {
@@ -2935,7 +3280,8 @@
       "categories": 1,
       "show_code": 1,
       "show_icon": 1,
-      "i18n": "en"
+      "i18n": "en",
+      "permissions": 1
     },
     "text": "Plugins",
     "code": "_plugins_",

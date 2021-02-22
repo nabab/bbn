@@ -601,24 +601,30 @@ class Permissions extends bbn\Models\Cls\Basic
       // $id_option must be set to generate the option's permissions
       if ($id_option && ($permissions = $this->opt->findPermissions($this->opt->getRoot(), true))) {
         foreach ($permissions as $p){
-          $p['code']      = 'opt'.$p['id'];
-          $p['id_alias']  = $p['id'];
-          $p['id_parent'] = $id_option;
-          $p['type']      = 'option';
+          $p['code']     = null;
+          $p['id_alias'] = $p['id'];
+          $p['type']     = 'option';
           unset($p['id']);
           if (!empty($p['items'])) {
             $p['items'] = $this->_treat_options($p['items']);
           }
 
-          $res['total'] += $this->opt->add($p, true, true);
-          if (!empty($p['items'])) {
-            unset($p['items']);
+          if (($p['code'] === 'appui') || ($p['code'] === 'plugins')) {
+            foreach ($p['items'] as $plugin) {
+              if (!empty($plugin['items'])) {
+                $id_perm = $this->fromCode('options', 'permissions', $it['id']);
+                foreach ($plugin['items'] as $it) {
+                  $it['id_parent'] = $id_perm;
+                  $res['total']   += $this->opt->add($it, true, true);
+                }
+              }
+            }
           }
-
-          $p['id_parent'] = $this->opt->fromCode($p['code'], $id_option);
-          $p['code']      = 'write';
-          $p['text']      = 'Écriture';
-          $res['total']  += $this->opt->add($p, true, true);
+          else {
+            $p['id_parent'] = $id_option;
+            // Read
+            $res['total'] += $this->opt->add($p, true, true);
+          }
         }
       }
 

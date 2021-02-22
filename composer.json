@@ -51,9 +51,7 @@
     "sebastian/phpcpd": "6.0.*",
     "bartlett/umlwriter": "2.0.*",
     "friendsofphp/php-cs-fixer": "2.17.*",
-    "phpunitgen/core": "1.1.*",
-    "apigen/apigen": "dev-master",
-    "roave/better-reflection": "dev-master#c87d856"
+    "phpunitgen/core": "1.1.*"
   },
   "autoload": {
     "psr-0": {"": "src/"}

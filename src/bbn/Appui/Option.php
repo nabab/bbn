@@ -3199,6 +3199,10 @@ class Option extends bbn\Models\Cls\Db
             $cfg['schema'] = json_decode($cfg['schema'], true);
           }
 
+          if (isset($cfg['id'])) {
+            unset($cfg['id']);
+          }
+
           if (isset($cfg['scfg'])
               && !empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])
           ) {
