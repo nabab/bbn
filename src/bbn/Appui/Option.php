@@ -4056,7 +4056,7 @@ class Option extends bbn\Models\Cls\Db
 
     // Text is required and parent exists
     if (!empty($it[$c['id_parent']])
-        && (!empty($it[$c['text']]) || !empty($it[$c['id_alias']]))
+        && (!empty($it[$c['text']]) || !empty($it[$c['id_alias']]) || !empty($it[$c['code']]))
         && ($parent = $this->option($it[$c['id_parent']]))
     ) {
       // If the id_parent property is a code or a sequence of codes have to set it as uid

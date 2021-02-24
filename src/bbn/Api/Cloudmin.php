@@ -346,7 +346,7 @@ class Cloudmin
    * @param array $param the raw parameters
    * @return array the processed parameters
    */
-  private function processParameters($param)
+  private function processParameters(array $param)
   {
     foreach ($param as $key => $val){
       //$val is an array
@@ -449,7 +449,7 @@ class Cloudmin
   /**
    * Returns a string of PHP code for executing a given command with all its possible parameters pre-populated
    * @param $command
-   * @return bool|string
+   * @return string|false
    */
   public function generate($command)
   {

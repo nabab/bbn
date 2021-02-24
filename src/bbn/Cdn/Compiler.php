@@ -18,7 +18,7 @@ use CssMin;
 
 /**
  * Compile files into single files, using javascript to call CSS when needed.
- * 
+ *
  *
  * @category CDN
  * @package  BBN
@@ -32,7 +32,7 @@ class Compiler extends bbn\Models\Cls\Basic
 
   /**
    * The suffixes used by minified packaged content
-   * 
+   *
    * @var array
    */
   private static $_min_suffixes = ['.min', '-min', '.pack'];
@@ -41,6 +41,7 @@ class Compiler extends bbn\Models\Cls\Basic
    * @var array
    */
   protected $cfg;
+
 
   /**
    * Constructor.
@@ -53,6 +54,7 @@ class Compiler extends bbn\Models\Cls\Basic
     $this->cfg = $cfg;
   }
 
+
   /**
    * Minify the given string in the given lang (js or css).
    *
@@ -63,7 +65,7 @@ class Compiler extends bbn\Models\Cls\Basic
   public function minify(string $st, string $lang): string
   {
     $tmp = false;
-    $st = trim($st);
+    $st  = trim($st);
     if ($st) {
       try {
         if ($lang === 'js') {
@@ -78,11 +80,13 @@ class Compiler extends bbn\Models\Cls\Basic
         //die('Error during $lang minification with string - '.$e->getMessage());
       }
     }
+
     return $tmp ?: $st;
   }
 
+
   /**
-   * Returns the content of a file or a group of files, 
+   * Returns the content of a file or a group of files,
    * after having compiled it if needed, and minified if test is false.
    *
    * @param string|array $file The file or list of files
@@ -92,59 +96,68 @@ class Compiler extends bbn\Models\Cls\Basic
   public function getContent($file, $test = false)
   {
     if (is_array($file)) {
-      $ext = bbn\Str::fileExt($file[0]);
+      $ext      = bbn\Str::fileExt($file[0]);
       $minified = false;
-      $c = '';
+      $c        = '';
       foreach ($file as $f) {
         $has_content = false;
         if (!is_file($this->fpath.$f)) {
           return false;
         }
+
         foreach (self::$_min_suffixes as $s){
           if (strpos($f, $s.'.')) {
             $minified = true;
             if ($test && file_exists($this->fpath.str_replace($s.'.', '.', $f))) {
-              $c .= PHP_EOL.file_get_contents($this->fpath.str_replace($s.'.', '.', $f));
+              $c          .= PHP_EOL.file_get_contents($this->fpath.str_replace($s.'.', '.', $f));
               $has_content = true;
             }
+
             break;
           }
         }
+
         if (!$has_content) {
           $c .= PHP_EOL.file_get_contents($this->fpath.$f);
         }
+
         if (!empty($c)) {
           $c = trim($c);
         }
       }
+
       $file = $file[0];
     }
     else{
-      $ext = bbn\Str::fileExt($file);
+      $ext      = bbn\Str::fileExt($file);
       $minified = false;
       if (!is_file($this->fpath.$file)) {
         throw new \Exception(X::_("Impoossible to find the file").' '.$this->fpath.$file);
         return false;
       }
+
       foreach (self::$_min_suffixes as $s){
         if (strpos($file, $s.'.')) {
           $minified = true;
           if ($test && file_exists($this->fpath.str_replace($s.'.', '.', $file))) {
             $c = file_get_contents($this->fpath.str_replace($s.'.', '.', $file));
           }
+
           break;
         }
       }
+
       if (!isset($c)) {
         $c = file_get_contents($this->fpath.$file);
       }
+
       if (\is_string($c)) {
         $c = trim($c);
       }
     }
+
     if ($c) {
       switch ($ext){
-
         case 'js':
           if (!$test && !$minified) {
             $c = $this->minify($c, 'js');
@@ -168,6 +181,7 @@ class Compiler extends bbn\Models\Cls\Basic
             $this->setError("Error during LESS compilation with file $file :".$e->getMessage());
             throw $e;
           }
+
           if ($c && !$test) {
             try {
               $c = $this->minify($c, 'css');
@@ -186,6 +200,7 @@ class Compiler extends bbn\Models\Cls\Basic
             if (is_file(\dirname($this->fpath.$file).'/_def.scss')) {
               $c = file_get_contents((\dirname($this->fpath.$file).'/_def.scss')).$c;
             }
+
             $c = $scss->compile($c);
             if ($c && !$test) {
               $c = $this->minify($c, 'css');
@@ -216,14 +231,18 @@ class Compiler extends bbn\Models\Cls\Basic
           }
           break;
       }
+
       if (!$this->check()) {
         die("File $file \n{$this->getError()}");
       }
+
       return $c;
     }
+
     return false;
   }
-  
+
+
   /**
    * Returns a javascript string invoking other javascript files.
    *
@@ -233,21 +252,23 @@ class Compiler extends bbn\Models\Cls\Basic
    */
   public function jsLinks(array $files, $test = false): string
   {
-    $code = '';
+    $code      = '';
     $num_files = \count($files);
     if ($num_files) {
-      $url = $this->furl.'?files=%s&';
+      $url    = $this->furl.'?files=%s&';
       $params = [];
       // The v parameter is passed between requests (to refresh)
       if (!empty($this->cfg['params']['v'])) {
         $params['v'] = $this->cfg['params']['v'];
       }
+
       // The test parameter also (for minification)
       if ($test) {
         $params['test'] = 1;
       }
-      $url .= http_build_query($params);
-      $files_json = json_encode($files);
+
+      $url        .= http_build_query($params);
+      $files_json  = json_encode($files);
             $code .= <<<JAVASCRIPT
   .then(function(){
     return new Promise(function(bbn_resolve, bbn_reject){
@@ -276,8 +297,10 @@ class Compiler extends bbn\Models\Cls\Basic
   })
 JAVASCRIPT;
     }
+
     return $code;
   }
+
 
   /**
    * Returns true if the given css code contains url parameters.
@@ -290,6 +313,7 @@ JAVASCRIPT;
     return strpos($css, 'url(') || (strpos($css, '@import') !== false);
   }
 
+
   /**
    * Returns a javascript string including css files.
    *
@@ -299,13 +323,13 @@ JAVASCRIPT;
    */
   public function cssLinks(array $files, $test = false, $prepend_files = [], $root = '')
   {
-    $code = '';
+    $code      = '';
     $num_files = \count($files);
     if ($num_files) {
-      $dirs = [];
-      $prepended = [];
+      $dirs        = [];
+      $prepended   = [];
       $unprepended = [];
-      $dir = null;
+      $dir         = null;
       foreach ($files as $f) {
         if (is_file($this->fpath.$f)) {
           $tmp = dirname($f);
@@ -320,8 +344,9 @@ JAVASCRIPT;
                 break;
               }
             }
+
             if ($tmp !== $dir) {
-              $bits = \bbn\X::split(dirname($f), '/');
+              $bits    = \bbn\X::split(dirname($f), '/');
               $new_dir = '';
               foreach ($bits as $b) {
                 if (!empty($b)) {
@@ -336,6 +361,7 @@ JAVASCRIPT;
               }
             }
           }
+
           if (isset($prepend_files[$f])) {
             foreach ($prepend_files[$f] as $p){
               if (!in_array($p, $prepended)) {
@@ -345,26 +371,31 @@ JAVASCRIPT;
           }
         }
       }
+
       if (count($prepended)) {
         foreach (array_reverse($prepended) as $p) {
           array_unshift($files, $p);
         }
       }
+
       foreach ($files as $ar){
         $files_json[] = str_replace($dir, '', $ar);
       }
+
       $files_json = json_encode($files_json);
-      $url = $this->furl.'~~~BBN~~~';
-      $params = [];
+      $url        = $this->furl.'~~~BBN~~~';
+      $params     = [];
       // The v parameter is passed between requests (to refresh)
       if (!empty($this->cfg['params']['v'])) {
         $params['v'] = $this->cfg['params']['v'];
       }
+
       // The test parameter also (for minification)
       if ($test) {
         $params['test'] = 1;
       }
-      $url .= http_build_query($params);
+
+      $url  .= http_build_query($params);
       $jsdir = $dir;
       $code .= <<<JAVASCRIPT
 .then(function(){
@@ -402,12 +433,14 @@ JAVASCRIPT;
             if (!isset($dirs[$root])) {
               $dirs[$root] = [];
             }
+
             $dirs[$root][] = substr($file, strlen($root));
           }
           else {
             if (!isset($dirs[\dirname($file)])) {
               $dirs[\dirname($file)] = [];
             }
+
             $dirs[\dirname($file)][] = basename($file);
           }
         }
@@ -415,9 +448,11 @@ JAVASCRIPT;
           if (!isset($dirs['.'])) {
             $dirs['.'] = [];
           }
+
           $dirs['.'][] = $file;
         }
       }
+
       if (\count($dirs)) {
         foreach ($dirs as $dir => $dfiles){
           if (\count($dfiles)) {
@@ -430,11 +465,13 @@ JAVASCRIPT;
             if (!empty($this->cfg['params']['v'])) {
               $params['v'] = $this->cfg['params']['v'];
             }
+
             // The test parameter also (for minification)
             if ($test) {
               $params['test'] = 1;
             }
-            $url .= http_build_query($params);
+
+            $url  .= http_build_query($params);
             $jsdir = $dir === '.' ? '' : $dir.'/';
             $code .= <<<JAVASCRIPT
             
@@ -468,14 +505,17 @@ JAVASCRIPT;
 JAVASCRIPT;
           }
         }
+
         //$code .= ";\nreturn promise;\n})()";
         if (!$test) {
           $code = $this->minify($code, 'js');
         }
       }
     }
+
     return $code;
   }
+
 
   /**
    * Returns a string with javascript including the given CSS content in the head of the document.
@@ -487,8 +527,8 @@ JAVASCRIPT;
   {
     $css = str_replace('`', '\\``', str_replace('\\', '\\\\', $css));
     //$css = bbn\Str::escapeSquotes($css);
-    $code = bbn\Str::genpwd(25, 20);
-    $head = $code.'2';
+    $code  = bbn\Str::genpwd(25, 20);
+    $head  = $code.'2';
     $style = $code.'3';
     return <<<JAVASCRIPT
   let $code = `$css`;
@@ -505,6 +545,7 @@ JAVASCRIPT;
 JAVASCRIPT;
 
   }
+
 
   /**
    * Returns an array of compiled codes based on a list of files.
@@ -530,6 +571,7 @@ JAVASCRIPT;
               }
             }
           }
+
           $codes[$mode ?? $e][] = [
             'code' => $c,
             'file' => \basename($f),
@@ -541,8 +583,10 @@ JAVASCRIPT;
         }
       }
     }
+
     return $codes;
   }
+
 
   /**
    * Compiles together a group of files and returns the result as an array.
@@ -567,6 +611,7 @@ JAVASCRIPT;
             }
           }
         }
+
         $codes[$mode ?? $e][] = [
           'code' => $c,
           'file' => basename(end($files)),
@@ -577,6 +622,9 @@ JAVASCRIPT;
         throw new \Exception("Impossible to get content from $f");
       }
     }
+
     return $codes;
   }
+
+
 }

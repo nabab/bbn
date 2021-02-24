@@ -11,7 +11,8 @@ class Medias extends bbn\Models\Cls\Db
     bbn\Models\Tts\References,
     bbn\Models\Tts\Dbconfig;
 
-  protected static /** @var array */
+  protected static
+    /** @var array */
     $default_class_cfg = [
       'table' => 'bbn_medias',
       'tables' => [
@@ -63,7 +64,6 @@ class Medias extends bbn\Models\Cls\Db
       [48, false]
     ];
 
-
   public function __construct(bbn\Db $db)
   {
     parent::__construct($db);
@@ -72,7 +72,6 @@ class Medias extends bbn\Models\Cls\Db
     $this->usr    = bbn\User::getInstance();
     $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
   }
-
 
   public function getPath(array $media = null): string
   {
@@ -92,43 +91,57 @@ class Medias extends bbn\Models\Cls\Db
 
   /**
    * Gets an array of medias.
-   *
    * @param [type] $cfg a configuration to merge with the database request to the table
-   *
    * @return array|null
    */
-  public function browse($cfg, $limit = 20, $start = 0): ?array
+  public function browse(array $cfg, int $limit = 20, int $start = 0): ?array
   {
     if ($user = bbn\User::getInstance()) {
-      $cf    = $this->getClassCfg();
-      $ct    = $cf['arch']['medias'];
-      $where = [];
-      if (!isset($filter[$ct['private']])) {
-        $where[$ct['private']] = 0;
+      $cf = $this->getClassCfg();
+      $ct = $cf['arch']['medias'];
+      $filters = [];
+      if (isset($cfg['filters'], $cfg['filters']['conditions'])) {
+        $filters = $cfg['filters']['conditions'];
+      }
+      if (($pvtIdx = \bbn\X::find($filters, ['field' => $ct['private']])) === null) {
+        $filters[] = [
+          'field' => $ct['private'],
+          'value' => 0
+        ];
       }
       else {
-        if ($filter[$ct['private']]) {
-          $where[$ct['id_user']] = $user->getId();
+        $userIdx = \bbn\X::find($filters, ['field' => $ct['id_user']]);
+        $id_user = $user->getId();
+        if (!empty($filters[$pvtIdx]['value'])) {
+          if ($userIdx === null) {
+            $filters[] = [
+              'field' => $ct['id_user'],
+              'value' => $id_user
+            ];
+          }
+          else {
+            $filters[$userIdx]['value'] = $id_user;
+          }
         }
-
-        $where[$ct['private']] = $filter[$ct['private']];
-        unset($filter[$ct['private']]);
+        else if ($userIdx !== null) {
+          unset($filters[$userIdx]);
+        }
       }
-      
-      $limit = $cfg['limit'] ?? $limit;
-      $start = $cfg['start'] ?? $start;
-
-      $grid = new Grid(
-        $this->db, $cfg,
-        [
-          'table' => $cf['table'],
-          'fields' => $ct,
-          'limit' => $limit,
-          'start' => $start,
-          'where' => $where
-        ]
-      );
-
+      if (isset($cfg['filters'], $cfg['filters']['conditions'])) {
+        $cfg['filters']['conditions'] = $filters;
+      }
+      else {
+        $cfg['filters'] = [
+          'logic' => 'AND',
+          'conditions' => $filters
+        ];
+      }
+      $grid = new Grid($this->db, $cfg, [
+        'table' => $cf['table'],
+        'fields' => [],
+        'limit' => $cfg['limit'] ?? $limit,
+        'start' => $cfg['start'] ?? $start
+      ]);
       if ($data = $grid->getDatatable()) {
         $url = bbn\Mvc::getPluginUrl('appui-note').'/media/image/';
         foreach ($data['data'] as &$d) {
@@ -136,39 +149,19 @@ class Medias extends bbn\Models\Cls\Db
           if ($d['content']) {
             $d['content'] = json_decode($d['content'], true);
             $full_path = $this->getPath($d);
+            $d['full_pat'] = $this->getThumbs($full_path);
             $d['path'] = $url.$d['id'];
-            if ($this->isImage($full_path) && ($thumb = $this->getThumbs($full_path))) {
-              $d['thumbs'] = $thumb;
-              $d['is_image'] = true;
+            $d['is_image'] = $this->isImage($full_path);
+            if ($d['is_image']) {
+              $d['thumbs'] = $this->getThumbsSizes($d[$ct['id']]);
             }
           }
         }
-
-        unset($d);
-        /*
-        if (!empty($data['data'])) {
-          $tmp = array_filter(
-            $data['data'],
-            function ($a) {
-              return $a['is_image'] ?? false;
-            }
-          );
-          if (empty($tmp)) {
-            $cfg['start'] = $start + $limit;
-            return $this->browse($cfg);
-          }
-
-          $data['data'] = $tmp;
-        }
-        */
-
         return $data;
       }
     }
-
     return null;
   }
-
 
   public function count(array $filter = []): ?int
   {
@@ -184,10 +177,8 @@ class Medias extends bbn\Models\Cls\Db
 
       return $this->db->count($cf['table'], $filter);
     }
-
     return null;
   }
-
 
   /**
    * Adds a new media
@@ -298,6 +289,25 @@ class Medias extends bbn\Models\Cls\Db
 
   }
 
+  public function getThumbsSizes(string $id): array
+  {
+    if (\bbn\Str::isUid($id)
+      && ($path = $this->getMediaPath($id))
+      && ($list = \bbn\File\Dir::getFiles(dirname($path)))
+      && (count($list) > 1)
+    ) {
+      $sizes = [];
+      foreach ($list as $l) {
+        preg_match('/.*\_w([0-9]*)\.[a-zA-Z]*$/', $l, $m);
+        if (!empty($m) && !empty($m[1])) {
+          $sizes[] = $m[1];
+        }
+      }
+      sort($sizes);
+      return $sizes;
+    }
+    return [];
+  }
 
   /**
    * Returns the path to the img for the given $path and size
@@ -436,9 +446,10 @@ class Medias extends bbn\Models\Cls\Db
    *
    * @param string  $id
    * @param boolean $details
+   * @param int $width
    * @return void
    */
-  public function getMedia(string $id, $details = false)
+  public function getMedia(string $id, bool $details = false, int $width = null)
   {
     $cf =& $this->class_cfg;
     $fs = new \bbn\File\System();
@@ -447,15 +458,23 @@ class Medias extends bbn\Models\Cls\Db
         && ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id]))
         && ($link_type !== $media[$cf['arch']['medias']['type']])
     ) {
-      $path = '';
       if ($media['content']) {
         $tmp   = json_decode($media[$cf['arch']['medias']['content']], true);
         $media = array_merge($tmp, $media);
       }
-
       $media['file'] = (
         $media['private'] ? bbn\Mvc::getUserDataPath('appui-note') : bbn\Mvc::getDataPath('appui-note')
       ).'media/'.($media['path'] ?? '').$id.'/'.$media[$cf['arch']['medias']['name']];
+      if ($width && ($sizes = $this->getThumbsSizes($id))) {
+        $current = $width;
+        foreach ($sizes as $size) {
+          if ($size >= $current) {
+            $dot = strrpos($media['file'], '.');
+            $media['file'] = substr($media['file'], 0, $dot) . '_w' . $size . substr($media['file'], $dot);
+            break;
+          }
+        }
+      }
       if ($fs->isFile($media['file']) && $this->isImage($media['file'])) {
         $media['is_image'] = true;
       }

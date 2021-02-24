@@ -1228,7 +1228,7 @@ class X
    *
    * @param array $ar    The search within the array
    * @param array $where The where condition
-   * @return bool|int
+   * @return null|int
    */
   public static function find(array $ar, $where, int $from = 0)
   {

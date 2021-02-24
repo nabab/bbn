@@ -1731,52 +1731,53 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       return null;
     }
 
-    $table  = $bits[1];
-    $refs   = [];
-    $schema = $this->modelize();
-    $test   = function ($key) use ($bits) {
-      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-    };
-    foreach ($schema as $tf => $cfg){
-      $t = $this->tsn($tf);
-      if ($t !== $table) {
-        foreach ($cfg['keys'] as $k){
-          if ($test($k)) {
-            foreach ($cfg['keys'] as $k2){
-              // Is not the same table
-              if (!$test($k2)
-                  // Has a reference
-                  && !empty($k2['ref_column'])
-                  // and refers to a single column
-                  && (\count($k['columns']) === 1)
-                  // A unique reference
-                  && (\count($k2['columns']) === 1)
-                  // To a table with a primary
-                  && isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']])
-                  // which is a sole column
-                  && (\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1)
-                  // We retrieve the key name
-                  && ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0])
-                  // which is unique
-                  && !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])
-              ) {
-                if (!isset($refs[$t])) {
-                  $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
-                }
+    $table = $bits[1];
+    if ($schema = $this->modelize()) {
+      $refs = [];
+      $test = function ($key) use ($bits) {
+        return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+      };
+      foreach ($schema as $tf => $cfg) {
+        $t = $this->tsn($tf);
+        if ($t !== $table) {
+          foreach ($cfg['keys'] as $k) {
+            if ($test($k)) {
+              foreach ($cfg['keys'] as $k2) {
+                // Is not the same table
+                if (!$test($k2)
+                    // Has a reference
+                    && !empty($k2['ref_column'])
+                    // and refers to a single column
+                    && (\count($k['columns']) === 1)
+                    // A unique reference
+                    && (\count($k2['columns']) === 1)
+                    // To a table with a primary
+                    && isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']])
+                    // which is a sole column
+                    && (\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1)
+                    // We retrieve the key name
+                    && ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0])
+                    // which is unique
+                    && !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])
+                ) {
+                  if (!isset($refs[$t])) {
+                    $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
+                  }
 
-                $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
+                  $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
+                }
               }
             }
           }
         }
       }
-    }
 
-    if ($changed) {
-      $this->change($changed);
-    }
+      if ($changed) {
+        $this->change($changed);
+      }
 
-    return $refs;
+      return $refs;
+    }
   }
 
 
@@ -4259,6 +4260,36 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   public function deleteIndex(string $table, string $key): bool
   {
     return $this->language->deleteIndex($table, $key);
+  }
+
+
+  public function getAlter(string $table, array $cfg): string
+  {
+    return $this->language->getAlter($table, $cfg);
+  }
+
+
+  public function getAlterTable(string $table, array $cfg): string
+  {
+    return $this->language->getAlterTable($table, $cfg);
+  }
+
+
+  public function getAlterColumn(string $table, array $cfg): string
+  {
+    return $this->language->getAlterColumn($table, $cfg);
+  }
+
+
+  public function getAlterKey(string $table, array $cfg): string
+  {
+    return $this->language->getAlterKey($table, $cfg);
+  }
+
+
+  public function alter($table, $cfg): int
+  {
+    return $this->language->alter($table, $cfg);
   }
 
 

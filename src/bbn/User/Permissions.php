@@ -109,7 +109,6 @@ class Permissions extends bbn\Models\Cls\Basic
         }
       }
     }
-
     if (!$root) {
       $root = $this->opt->fromCode($type, self::$option_root_id);
     }

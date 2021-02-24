@@ -151,17 +151,171 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "CRON",
                             "code": "cron",
-                            "observe":false,
-                            "closable":true,
-                            "component":"appui-cron-widget-cron"
+                            "id_alias": ["cron", "widgets", "appui-dashboard", "plugins", "cron", "appui"]
                           }
                         ]
                       }
                     ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "CRON",
+                        "code": "cron",
+                        "observe":false,
+                        "closable":true,
+                        "component":"appui-cron-widget-cron"
+                      }
+                    ]
                   }
                 ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cfg": {
+          "show_code": 1,
+          "allow_children": 1,
+          "i18n": "en",
+          "show_icon": 1
+        },
+        "text": "Dashboard",
+        "code": "dashboard",
+        "icon": "nf nf-fa-dashboard",
+        "plugin": true,
+        "items": [
+          {
+            "cfg": {
+              "show_code": 1,
+              "allow_children": 1,
+              "i18n": "en",
+              "scfg": {
+                "alias_name": "Permission",
+                "i18n": "en",
+                "schema": [
+                  {
+                    "title": "Closable",
+                    "field": "closable",
+                    "type": "boolean",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "width": 70,
+                    "options": {
+                      "value": true,
+                      "novalue": false
+                    },
+                    "cls": "bbn-c",
+                    "default": false
+                  },
+                  {
+                    "title": "Observe",
+                    "field": "observe",
+                    "type": "boolean",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "options": {
+                      "value": true,
+                      "novalue": false
+                    },
+                    "width": 70,
+                    "cls": "bbn-c",
+                    "default": false
+                  },
+                  {
+                    "title": "Component",
+                    "field": "component",
+                    "type": "string",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "options": []
+                  },
+                  {
+                    "title": "itemComponent",
+                    "field": "itemComponent",
+                    "type": "string",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": false,
+                    "options": []
+                  },
+                  {
+                    "title": "Limit",
+                    "field": "limit",
+                    "type": "number",
+                    "showable": true,
+                    "editable": true,
+                    "hidden": true,
+                    "options": [],
+                    "default": 5
+                  },
+                  {
+                    "title": "Right buttons",
+                    "field": "buttonsRight",
+                    "type": "json",
+                    "showable": false,
+                    "editable": true,
+                    "hidden": true,
+                    "options": {
+                      "style": "height: 200px !important"
+                    },
+                    "default": "[]"
+                  },
+                  {
+                    "title": "Left buttons",
+                    "field": "buttonsLeft",
+                    "type": "json",
+                    "showable": false,
+                    "editable": true,
+                    "hidden": true,
+                    "options": {
+                      "style": "height: 200px !important"
+                    },
+                    "default": "[]"
+                  },
+                  {
+                    "field": "options",
+                    "title": "Component's options",
+                    "hidden": true,
+                    "editable": true,
+                    "filterable": false,
+                    "type": "json",
+                    "options": {
+                      "style": "height:200px !important"
+                    },
+                    "showable": false,
+                    "default": "{}"
+                  }
+                ],
+                "show_alias": 1,
+                "show_code": 1,
+                "show_icon": 1,
+                "show_value": null,
+                "sortable": 1,
+                "notext": 0,
+                "view": 0
+              },
+              "show_icon": 1
+            },
+            "text": "Dashboards",
+            "code": "list",
+            "plugin": true,
+            "items": [
+              {
+                "text": "Default dashboard",
+                "code": "default"
+              },
+              {
+                "text": "Plugins dashboard",
+                "code": "plugins"
               }
             ]
           }
@@ -370,14 +524,25 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "Databases",
                             "code": "databases",
-                            "limit":5,
-                            "observe":false,
-                            "closable":true,
-                            "itemComponent": "appui-database-widget-database"
+                            "id_alias": ["databases", "widgets", "appui-dashboard", "plugins", "database", "appui"]
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Databases",
+                        "code": "databases",
+                        "limit":5,
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent": "appui-database-widget-database"
                       }
                     ]
                   }
@@ -616,13 +781,24 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "History",
                             "code": "last_changes",
-                            "observe":false,
-                            "closable":true,
-                            "component": "appui-history-widget-changes-last"
+                            "id_alias": ["last_changes", "widgets", "appui-dashboard", "plugins", "history", "appui"]
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "History",
+                        "code": "last_changes",
+                        "observe":false,
+                        "closable":true,
+                        "component": "appui-history-widget-changes-last"
                       }
                     ]
                   }
@@ -663,7 +839,21 @@
                 "code": "sick",
                 "color": "tomato"
               }
-            ]
+            ],
+            "cfg": {
+              "schema": [
+                {
+                  "field": "color",
+                  "title": "Color",
+                  "options": [],
+                  "hidden": false,
+                  "editable": true,
+                  "showable": true,
+                  "type": "string"
+                }
+              ],
+              "show_code": 1
+            }
           },
           {
             "text": "Plugins",
@@ -685,23 +875,42 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "Working schedule",
-                            "code": "wp"
-                          }, {
-                            "text": "Staff absents",
+                            "code": "wp",
+                            "id_alias": ["wp", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
+                          },
+                          {
                             "code": "staff_absent",
-                            "limit":5,
-                            "observe":false,
-                            "closable":true,
-                            "itemComponent":"appui-hr-widget-staff-absent"
-                          }, {
-                            "text": "Staff absents (à venir)",
+                            "id_alias": ["staff_absent", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
+                          },
+                          {
                             "code": "staff_absent_soon",
-                            "limit":5,
-                            "closable":true,
-                            "itemComponent": "appui-hr-widget-staff-absent"
+                            "id_alias": ["staff_absent_soon", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
                           }
-                                  ]
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Working schedule",
+                        "code": "wp"
+                      }, {
+                        "text": "Staff absents",
+                        "code": "staff_absent",
+                        "limit":5,
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent":"appui-hr-widget-staff-absent"
+                      }, {
+                        "text": "Staff absents (à venir)",
+                        "code": "staff_absent_soon",
+                        "limit":5,
+                        "closable":true,
+                        "itemComponent": "appui-hr-widget-staff-absent"
                       }
                     ]
                   }
@@ -1303,13 +1512,24 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "IDE recent files",
                             "code": "ide_recent_files",
-                            "limit":5,
-                            "closable":true,
-                            "itemComponent": "appui-ide-widget-files-recent"
+                            "id_alias": ["ide_recent_files", "widgets", "appui-dashboard", "plugins", "ide", "appui"]
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "IDE recent files",
+                        "code": "ide_recent_files",
+                        "limit":5,
+                        "closable":true,
+                        "itemComponent": "appui-ide-widget-files-recent"
                       }
                     ]
                   }
@@ -2636,13 +2856,24 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "Projects",
-                            "code": "projects",
-                            "limit":5,
-                            "closable":true,
-                            "itemComponent": "appui-project-widget-projects"
+                            "code": "sessions",
+                            "id_alias": ["projects", "widgets", "appui-dashboard", "plugins", "project", "appui"]
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Projects",
+                        "code": "projects",
+                        "limit":5,
+                        "closable":true,
+                        "itemComponent": "appui-project-widget-projects"
                       }
                     ]
                   }
@@ -2699,13 +2930,24 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "Servers",
                             "code": "servers",
-                            "limit":5,
-                            "closable":true,
-                            "itemComponent": "appui-server-widget-servers"
+                            "id_alias": ["servers", "widgets", "appui-dashboard", "plugins", "server", "appui"]
                           }
-                                  ]
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Servers",
+                        "code": "servers",
+                        "limit":5,
+                        "closable":true,
+                        "itemComponent": "appui-server-widget-servers"
                       }
                     ]
                   }
@@ -2800,148 +3042,6 @@
         "text": "Styles",
         "code": "style",
         "icon": "nf nf-dev-css3"
-      },
-      {
-        "cfg": {
-          "show_code": 1,
-          "allow_children": 1,
-          "i18n": "en",
-          "show_icon": 1
-        },
-        "text": "Tableau de bord",
-        "code": "dashboard",
-        "icon": "nf nf-fa-dashboard",
-        "items": [
-          {
-            "cfg": {
-              "show_code": 1,
-              "allow_children": 1,
-              "i18n": "en",
-              "scfg": {
-                "alias_name": "Permission",
-                "i18n": "en",
-                "schema": [
-                  {
-                    "title": "Closable",
-                    "field": "closable",
-                    "type": "boolean",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "width": 70,
-                    "options": {
-                      "value": true,
-                      "novalue": false
-                    },
-                    "cls": "bbn-c",
-                    "default": false
-                  },
-                  {
-                    "title": "Observe",
-                    "field": "observe",
-                    "type": "boolean",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "options": {
-                      "value": true,
-                      "novalue": false
-                    },
-                    "width": 70,
-                    "cls": "bbn-c",
-                    "default": false
-                  },
-                  {
-                    "title": "Component",
-                    "field": "component",
-                    "type": "string",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "options": []
-                  },
-                  {
-                    "title": "itemComponent",
-                    "field": "itemComponent",
-                    "type": "string",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "options": []
-                  },
-                  {
-                    "title": "Limit",
-                    "field": "limit",
-                    "type": "number",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": true,
-                    "options": [],
-                    "default": 5
-                  },
-                  {
-                    "title": "Right buttons",
-                    "field": "buttonsRight",
-                    "type": "json",
-                    "showable": false,
-                    "editable": true,
-                    "hidden": true,
-                    "options": {
-                      "style": "height: 200px !important"
-                    },
-                    "default": "[]"
-                  },
-                  {
-                    "title": "Left buttons",
-                    "field": "buttonsLeft",
-                    "type": "json",
-                    "showable": false,
-                    "editable": true,
-                    "hidden": true,
-                    "options": {
-                      "style": "height: 200px !important"
-                    },
-                    "default": "[]"
-                  },
-                  {
-                    "field": "options",
-                    "title": "Component's options",
-                    "hidden": true,
-                    "editable": true,
-                    "filterable": false,
-                    "type": "json",
-                    "options": {
-                      "style": "height:200px !important"
-                    },
-                    "showable": false,
-                    "default": "{}"
-                  }
-                ],
-                "show_alias": 1,
-                "show_code": 1,
-                "show_icon": 1,
-                "show_value": null,
-                "sortable": 1,
-                "notext": 0,
-                "view": 0
-              },
-              "show_icon": 1
-            },
-            "text": "Dashboards",
-            "code": "list",
-            "plugin": true,
-            "items": [
-              {
-                "text": "Default dashboard",
-                "code": "default"
-              },
-              {
-                "text": "Plugins dashboard",
-                "code": "plugins"
-              }
-            ]
-          }
-        ]
       },
       {
         "cfg": {
@@ -3170,20 +3270,35 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "My current bugs",
                             "code": "tasks",
-                            "itemComponent": "appui-task-widget-task",
-                            "limit":5
+                            "id_alias": ["tasks", "widgets", "appui-dashboard", "plugins", "task", "appui"]
                           },
                           {
-                            "text": "Derniers Bugs",
                             "code": "all_tasks",
-                            "limit":5,
-                            "observe":false,
-                            "closable":true,
-                            "itemComponent": "appui-task-widget-task"
+                            "id_alias": ["all_tasks", "widgets", "appui-dashboard", "plugins", "task", "appui"]
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "My current bugs",
+                        "code": "tasks",
+                        "itemComponent": "appui-task-widget-task",
+                        "limit":5
+                      },
+                      {
+                        "text": "Derniers Bugs",
+                        "code": "all_tasks",
+                        "limit":5,
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent": "appui-task-widget-task"
                       }
                     ]
                   }
@@ -3225,21 +3340,36 @@
                         "id_alias": ["plugins", "list", "dashboard", "appui"],
                         "items": [
                           {
-                            "text": "Application's users",
                             "code": "users",
-                            "limit":5,
-                            "observe":false,
-                            "closable":true,
-                            "itemComponent":"appui-usergroup-widget-users"
+                            "id_alias": ["users", "widgets", "appui-dashboard", "plugins", "usergroup", "appui"]
                           },
                           {
-                            "text": "My last sessions",
                             "code": "sessions",
-                            "observe":false,
-                            "closable":true,
-                            "component":"appui-hr-widget-staff-absent"
+                            "id_alias": ["users", "widgets", "appui-dashboard", "plugins", "usergroup", "appui"]
                           }
                         ]
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "items": [
+                      {
+                        "text": "Application's users",
+                        "code": "users",
+                        "limit":5,
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent":"appui-usergroup-widget-users"
+                      },
+                      {
+                        "text": "My last sessions",
+                        "code": "sessions",
+                        "observe":false,
+                        "closable":true,
+                        "component":"appui-hr-widget-staff-absent"
                       }
                     ]
                   }
