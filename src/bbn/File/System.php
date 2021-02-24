@@ -510,7 +510,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string $file
    * @return null|string
    */
-  public function decodeContents(string $file, $decoder = null)
+  public function decodeContents(string $file, $decoder = null, $as_array = false)
   {
     if ($c = $this->getContents($file)) {
       if (is_callable($decoder)) {
@@ -527,7 +527,7 @@ class System extends bbn\Models\Cls\Basic
 
         switch ($encoding) {
           case 'json':
-            return json_decode($c);
+            return json_decode($c, $as_array);
           case 'yml':
           case 'yaml':
             return yaml_parse($c);
