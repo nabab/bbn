@@ -2,269 +2,322 @@
     {
         "name": "Str",
         "type": "class",
-        "statics": [
+        "items": [
             {
                 "name": "cast",
+                "type": "fn",
                 "desc": "Converts any type of variable to a string.",
                 "args": []
             },
             {
                 "name": "changeCase",
+                "type": "fn",
                 "desc": "Converts the case of a string.",
                 "args": []
             },
             {
                 "name": "escapeAllQuotes",
+                "type": "fn",
                 "desc": "Escapes all quotes (single and double) from a given string.",
                 "args": []
             },
             {
                 "name": "escapeDquotes",
+                "type": "fn",
                 "desc": "Escapes the string in double quotes.",
                 "args": []
             },
             {
                 "name": "escapeDquote",
+                "type": "fn",
                 "desc": "Synonym of \"escape_dquotes\".",
                 "args": []
             },
             {
                 "name": "escapeQuote",
+                "type": "fn",
                 "desc": "Synonym of \"escape_dquotes\".",
                 "args": []
             },
             {
                 "name": "escapeQuotes",
+                "type": "fn",
                 "desc": "Synonym of \"escape_dquotes\".",
                 "args": []
             },
             {
                 "name": "escapeSquotes",
+                "type": "fn",
                 "desc": "Escapes the string in quotes.",
                 "args": []
             },
             {
                 "name": "unescapeSquotes",
+                "type": "fn",
                 "desc": "Unescapes the string in quotes.",
                 "args": []
             },
             {
                 "name": "unescapeSquote",
+                "type": "fn",
                 "desc": "Unescapes the string in quotes.",
                 "args": []
             },
             {
                 "name": "escape",
+                "type": "fn",
                 "desc": "Synonym of \"escape_squotes\".",
                 "args": []
             },
             {
                 "name": "escapeApo",
+                "type": "fn",
                 "desc": "Synonym of \"escape_squotes\".",
                 "args": []
             },
             {
                 "name": "escapeSquote",
+                "type": "fn",
                 "desc": "Synonym of \"escape_squotes\".",
                 "args": []
             },
             {
                 "name": "clean",
+                "type": "fn",
                 "desc": "Returns an expunged string of several types of character(s) depending on the configuration.",
                 "args": []
             },
             {
                 "name": "cut",
+                "type": "fn",
                 "desc": "Cuts a string (HTML and PHP tags stripped) to maximum length inserted.",
                 "args": []
             },
             {
                 "name": "sanitize",
+                "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
                 "name": "encodeFilename",
+                "type": "fn",
                 "desc": "Returns a cross-platform filename for the file.",
                 "args": []
             },
             {
                 "name": "encodeDbname",
+                "type": "fn",
                 "desc": "Returns a corrected string for database naming.",
                 "args": []
             },
             {
                 "name": "fileExt",
+                "type": "fn",
                 "desc": "Returns the file extension.",
                 "args": []
             },
             {
                 "name": "genpwd",
+                "type": "fn",
                 "desc": "Returns a random password.",
                 "args": []
             },
             {
                 "name": "isJson",
+                "type": "fn",
                 "desc": "Checks if the string is a json string.",
                 "args": []
             },
             {
                 "name": "isNumber",
+                "type": "fn",
                 "desc": "Checks if the item is a number.",
                 "args": []
             },
             {
                 "name": "isInteger",
+                "type": "fn",
                 "desc": "Checks if the item is a integer.",
                 "args": []
             },
             {
                 "name": "isCleanPath",
+                "type": "fn",
                 "desc": "Checks if \".. \\\\\" or \"..\/\" is contained in the parameter and it will return false if true.",
                 "args": []
             },
             {
                 "name": "isDecimal",
+                "type": "fn",
                 "desc": "Checks if the item is a decimal.",
                 "args": []
             },
             {
                 "name": "isUid",
+                "type": "fn",
                 "desc": "Checks if the string is a valid UID string.",
                 "args": []
             },
             {
                 "name": "isBuid",
+                "type": "fn",
                 "desc": "Checks if the string is a valid binary UID string.",
                 "args": []
             },
             {
                 "name": "isEmail",
+                "type": "fn",
                 "desc": "Checks if the string is the correct type of e-mail address.",
                 "args": []
             },
             {
                 "name": "isUrl",
+                "type": "fn",
                 "desc": "Checks if the argument is a valid URL string.",
                 "args": []
             },
             {
                 "name": "isDomain",
+                "type": "fn",
                 "desc": "Checks if the argument is a valid domain name.",
                 "args": []
             },
             {
                 "name": "isIp",
+                "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
                 "name": "isDateSql",
+                "type": "fn",
                 "desc": "Checks if the argument is in a valid SQL date format.",
                 "args": []
             },
             {
                 "name": "correctTypes",
+                "type": "fn",
                 "desc": "If it looks like an int or float type, the string variable is converted into the correct type.",
                 "args": []
             },
             {
                 "name": "parseUrl",
+                "type": "fn",
                 "desc": "Returns an array containing any of the various components of the URL that are present.",
                 "args": []
             },
             {
                 "name": "parsePath",
+                "type": "fn",
                 "desc": "Replaces backslash with slash in a path string. Forbids the use of ..\/",
                 "args": []
             },
             {
                 "name": "removeAccents",
+                "type": "fn",
                 "desc": "Replaces accented characters with their character without the accent.",
                 "args": []
             },
             {
                 "name": "checkName",
+                "type": "fn",
                 "desc": "Checks if a string complies with SQL naming convention.",
                 "args": []
             },
             {
                 "name": "checkFilename",
+                "type": "fn",
                 "desc": "Checks if a string doesn't contain a filesystem path.",
                 "args": []
             },
             {
                 "name": "checkPath",
+                "type": "fn",
                 "desc": "Checks if a string doesn't contain a filesystem path.",
                 "args": []
             },
             {
                 "name": "hasSlash",
+                "type": "fn",
                 "desc": "Checks if a string complies with SQL naming convention.",
                 "args": []
             },
             {
                 "name": "getNumbers",
+                "type": "fn",
                 "desc": "Extracts all digits from a string.",
                 "args": []
             },
             {
                 "name": "makeReadable",
+                "type": "fn",
                 "desc": "Returns the argumented value, replacing not standard objects (not stdClass) by their class name.",
                 "args": []
             },
             {
                 "name": "export",
+                "type": "fn",
                 "desc": "Returns a variable in a mode that is directly usable by PHP.",
                 "args": []
             },
             {
                 "name": "replaceOnce",
+                "type": "fn",
                 "desc": "Replaces part of a string. If the part is not found, the method returns the string without change.",
                 "args": []
             },
             {
                 "name": "removeComments",
+                "type": "fn",
                 "desc": "Removes the comments.",
                 "args": []
             },
             {
                 "name": "saySize",
+                "type": "fn",
                 "desc": "Converts the bytes to another unit form.",
                 "args": []
             },
             {
                 "name": "convertSize",
+                "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
                 "name": "checkJson",
+                "type": "fn",
                 "desc": "Checks whether a JSON string is valid or not. If $return_error is set to true, the error will be returned.",
                 "args": []
             },
             {
                 "name": "asVar",
+                "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
                 "name": "markdown2html",
+                "type": "fn",
                 "desc": "Transforms a markdown string into HTML.",
                 "args": []
             },
             {
                 "name": "toCamel",
+                "type": "fn",
                 "desc": "Converts the given string to camel case.",
                 "args": []
             },
             {
                 "name": "html2text",
+                "type": "fn",
                 "desc": "Converts HTML to text replacing paragraphs and brs with new lines.",
                 "args": []
             },
             {
                 "name": "text2html",
+                "type": "fn",
                 "desc": "Converts text to HTML replacing new lines with brs.",
                 "args": []
             }
