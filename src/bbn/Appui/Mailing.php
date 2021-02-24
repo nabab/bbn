@@ -30,9 +30,9 @@ class Mailing extends bbn\Models\Cls\Db
   /**
    * Gets a notes instance by constructing one if needed.
    *
-   * @return notes
+   * @return Note
    */
-  private function _note(): notes
+  private function _note(): Note
   {
     if (!$this->notes) {
       $this->notes = new Note($this->db);
@@ -43,9 +43,9 @@ class Mailing extends bbn\Models\Cls\Db
   /**
    * Gets a medias instance by constructing one if needed.
    *
-   * @return notes
+   * @return Medias
    */
-  private function _medias(): medias
+  private function _medias(): Medias
   {
     if (!$this->medias) {
       $this->medias = new Medias($this->db);
@@ -407,7 +407,7 @@ class Mailing extends bbn\Models\Cls\Db
     if ($this->check()
         && $notes
         && bbn\X::hasProps($cfg, ['title', 'content', 'sender'], true)
-        && ($id_type = Notes::getOptionId('mailing','types'))
+        && ($id_type = Note::getOptionId('mailings','types'))
         && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
         // Cannot give a date if no recipients selected
         && (!empty($cfg['recipients']) || empty($cfg['sent']))

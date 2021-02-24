@@ -881,10 +881,10 @@ class User extends Models\Cls\Basic
   /**
    * Gets a bbn\User\Manager instance.
    *
-   * @param mail $mail
+   * @param Mail $mail
    * @return User\Manager
    */
-  public function getManager(mail $mail = null)
+  public function getManager(Mail $mail = null)
   {
     $mgr = new User\Manager($this, $mail);
     return $mgr;

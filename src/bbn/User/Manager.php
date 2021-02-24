@@ -545,11 +545,11 @@ You can click the following link to access directly your account:<br>
 
   public function sendMail(string $id_user, string $subject, string $text, array $attachments = []): ?int
   {
-    if (!$this->getMailer()) {
-      mail($usr['email'], $subject, $message);
-      //throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
-    }
     if ( ($usr = $this->getUser($id_user)) && $usr['email']){
+      if (!$this->getMailer()) {
+        return mail($usr['email'], $subject, $text);
+        //throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
+      }
       return $this->mailer->send([
         'to' => $usr['email'],
         'subject' => $subject,
