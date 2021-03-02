@@ -1351,7 +1351,11 @@ class Controller implements Api
       $m = $this->getModel(...$args);
     }
 
-    if (\is_array($m)) {
+    if (empty($m)) {
+      return (new \stdClass());
+    }
+
+    if (X::isAssoc($m)) {
       $m = X::toObject($m);
     }
 

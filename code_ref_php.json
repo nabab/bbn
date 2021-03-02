@@ -19,6 +19,14 @@
                     {
                         "name": "options",
                         "ref": "Option"
+                    },
+                    {
+                        "name": "pref",
+                        "ref": "Preferences"
+                    },
+                    {
+                        "name": "perm",
+                        "ref": "Permissions"
                     }
                 ]
             }
@@ -44,6 +52,14 @@
                     {
                         "name": "options",
                         "ref": "Option"
+                    },
+                    {
+                        "name": "pref",
+                        "ref": "Preferences"
+                    },
+                    {
+                        "name": "perm",
+                        "ref": "Permissions"
                     }
                 ]
             }
@@ -4805,6 +4821,45 @@
                 ]
             },
             {
+                "name": "getAliasFullOptions",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "code",
+                        "optional": true,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "getAliasItems",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "code",
+                        "optional": true,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "getAliasOptions",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "code",
+                        "optional": true,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
                 "name": "getCfg",
                 "type": "fn",
                 "desc": "Returns a formatted content of the cfg column as an array",
@@ -6114,7 +6169,7 @@
                         "name": "mail",
                         "optional": true,
                         "default": null,
-                        "type": "bbn\\mail"
+                        "type": "bbn\\Mail"
                     }
                 ]
             },
@@ -6448,6 +6503,1829 @@
         ]
     },
     {
+        "name": "Permissions",
+        "type": "class",
+        "items": [
+            {
+                "name": "__call",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "name",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "arguments",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "__construct",
+                "type": "fn",
+                "desc": "permissions constructor.",
+                "args": [
+                    {
+                        "name": "routes",
+                        "optional": true,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "add",
+                "type": "fn",
+                "desc": "Grants a new permission to a user or a group",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "check",
+                "type": "fn",
+                "desc": "Checks whether the error property has been set (so an error happened).",
+                "args": []
+            },
+            {
+                "name": "customize",
+                "type": "fn",
+                "desc": "Adapts a given array of options' to user's permissions",
+                "args": [
+                    {
+                        "name": "arr",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "fromPath",
+                "type": "fn",
+                "desc": "Returns the option's ID corresponds to the given path.",
+                "args": [
+                    {
+                        "name": "path",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": null
+                    },
+                    {
+                        "name": "create",
+                        "optional": true,
+                        "default": false,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "fullOptions",
+                "type": "fn",
+                "desc": "Returns the result of Appui\\Option::full_options filtered with only the ones authorized to the current user.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "get",
+                "type": "fn",
+                "desc": "Returns an option combined with its sole\/first permission",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    },
+                    {
+                        "name": "force",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getAll",
+                "type": "fn",
+                "desc": "Returns the full list of permissions existing in the given option",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getAppuiOption",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionId",
+                "type": "fn",
+                "desc": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptions",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionsIds",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionsTextValue",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionsTree",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiRoot",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getCurrent",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getError",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getErrors",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getFull",
+                "type": "fn",
+                "desc": "Returns the full list of permissions existing in the given option with all the current user's preferences",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getInstance",
+                "type": "fn",
+                "desc": "Returns the instance of the singleton or null.",
+                "args": []
+            },
+            {
+                "name": "getOption",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionId",
+                "type": "fn",
+                "desc": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "args": []
+            },
+            {
+                "name": "getOptionRoot",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptions",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsIds",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsObject",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsTextValue",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsTree",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "has",
+                "type": "fn",
+                "desc": "Checks if a user and\/or a group has a permission.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    },
+                    {
+                        "name": "force",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "hasDeep",
+                "type": "fn",
+                "desc": "Checks if a user and\/or a group has a permission for the given option or for its childern.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    },
+                    {
+                        "name": "force",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "is",
+                "type": "fn",
+                "desc": "Checks if an option corresponds to the given path.",
+                "args": [
+                    {
+                        "name": "path",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "isDebug",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "log",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "options",
+                "type": "fn",
+                "desc": "Returns the result of Appui\\Option::options filtered with only the ones authorized to the current user.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "readOption",
+                "type": "fn",
+                "desc": "Checks if the category represented by the given option ID is readable by the current user",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "remove",
+                "type": "fn",
+                "desc": "Deletes a preference for a path or an ID.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "type",
+                        "optional": true,
+                        "default": "access",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "retrieverExists",
+                "type": "fn",
+                "desc": "Returns true if an instance as been initiated.",
+                "args": []
+            },
+            {
+                "name": "setCurrent",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "setDebug",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "debug",
+                        "optional": false,
+                        "default": null,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "test",
+                "type": "fn",
+                "desc": "Checks whether the error property has been set (so an error happened).",
+                "args": []
+            },
+            {
+                "name": "toPath",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "updateAll",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "routes",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "writeOption",
+                "type": "fn",
+                "desc": "Checks if the category represented by the given option ID is writable by the current user",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Preferences",
+        "type": "class",
+        "items": [
+            {
+                "name": "__call",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "name",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "arguments",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "__construct",
+                "type": "fn",
+                "desc": "preferences constructor.",
+                "args": [
+                    {
+                        "name": "db",
+                        "optional": false,
+                        "default": null,
+                        "type": "bbn\\Db"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": true,
+                        "default": [],
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "add",
+                "type": "fn",
+                "desc": "Adds a new preference for the given option for the current user.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "addBit",
+                "type": "fn",
+                "desc": "Adds a bit to a preference",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "addLink",
+                "type": "fn",
+                "desc": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_link",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "addToGroup",
+                "type": "fn",
+                "desc": "Adds a new preference for the given option for the current user.",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "check",
+                "type": "fn",
+                "desc": "Checks whether the error property has been set (so an error happened).",
+                "args": []
+            },
+            {
+                "name": "delete",
+                "type": "fn",
+                "desc": "Deletes the given preference",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "deleteBit",
+                "type": "fn",
+                "desc": "Deletes a preference's bit",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "deleteBits",
+                "type": "fn",
+                "desc": "Deletes all bits from a preference",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "deleteGroupOption",
+                "type": "fn",
+                "desc": "Deletes all the given group's permissions for the given option",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_group",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "deleteUserOption",
+                "type": "fn",
+                "desc": "Deletes all the given or current user's permissions for the given option",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_user",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "exists",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "explodeBitCfg",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "bit",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "fixBitsOrder",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_parent",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "deep",
+                        "optional": true,
+                        "default": false,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "fullOptions",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "code",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "get",
+                "type": "fn",
+                "desc": "Returns the current user's preference based on the given id, his own profile and his group",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getAll",
+                "type": "fn",
+                "desc": "Returns an array of the current user's preferences based on the given id_option, his own profile and his group's",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getAllNotMine",
+                "type": "fn",
+                "desc": "Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getAppuiOption",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionId",
+                "type": "fn",
+                "desc": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptions",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionsIds",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionsTextValue",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiOptionsTree",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getAppuiRoot",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getBit",
+                "type": "fn",
+                "desc": "Returns a single preference's bit",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getBitCfg",
+                "type": "fn",
+                "desc": "Gets the bit's cfg array, normalized either from the DB or from the $cfg argument",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": true,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "getBits",
+                "type": "fn",
+                "desc": "Returns the bits list of a preference",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_parent",
+                        "optional": true,
+                        "default": false,
+                        "type": null
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getBitsByIdOption",
+                "type": "fn",
+                "desc": "Returns the bits list of an option's id",
+                "args": [
+                    {
+                        "name": "id_opt",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_parent",
+                        "optional": true,
+                        "default": false,
+                        "type": null
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getBitsOrder",
+                "type": "fn",
+                "desc": "*",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getByBit",
+                "type": "fn",
+                "desc": "Gets a preference row from a bit ID",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getByOption",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getCfg",
+                "type": "fn",
+                "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": true,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "getCfgByOption",
+                "type": "fn",
+                "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_user",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getClassCfg",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getCurrent",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getError",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getErrors",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getFields",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getFullBits",
+                "type": "fn",
+                "desc": "Returns the hierarchical bits list of a preference",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_parent",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getGroup",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getIdByBit",
+                "type": "fn",
+                "desc": "Gets the preference's ID from a bit ID",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getInstance",
+                "type": "fn",
+                "desc": "Returns the instance of the singleton or null.",
+                "args": []
+            },
+            {
+                "name": "getLinks",
+                "type": "fn",
+                "desc": "Gets the preferences which have the option's $id as id_link",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getMaxBitNum",
+                "type": "fn",
+                "desc": "Gets the maximum num value of the user option's bits.",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_parent",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "incr",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getOption",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionId",
+                "type": "fn",
+                "desc": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "args": []
+            },
+            {
+                "name": "getOptionRoot",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptions",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsIds",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsObject",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsTextValue",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getOptionsTree",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getPreferences",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "getShared",
+                "type": "fn",
+                "desc": "Returns an array",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "getTree",
+                "type": "fn",
+                "desc": "Returns a preference and its hierarchical bits list",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "with_config",
+                        "optional": true,
+                        "default": true,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "getUser",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "groupHas",
+                "type": "fn",
+                "desc": "Checks if a group has the given preference",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_group",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "has",
+                "type": "fn",
+                "desc": "Returns true if the current user can access a preference, false otherwise",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "force",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "isAuthorized",
+                "type": "fn",
+                "desc": "Checks if the given user or the current user is authorized to access a user_option.",
+                "args": [
+                    {
+                        "name": "id_user_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "isDebug",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "items",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "code",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "log",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "makePublic",
+                "type": "fn",
+                "desc": "Makes (or unmakes) the given preference public.",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cancel",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "moveBit",
+                "type": "fn",
+                "desc": "Moves a bit.",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_parent",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "nextBitNum",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "option",
+                "type": "fn",
+                "desc": "",
+                "args": []
+            },
+            {
+                "name": "options",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "code",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "order",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "index",
+                        "optional": false,
+                        "default": null,
+                        "type": "int"
+                    },
+                    {
+                        "name": "upd",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "orderBit",
+                "type": "fn",
+                "desc": "Orders a bit.",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "pos",
+                        "optional": false,
+                        "default": null,
+                        "type": "int"
+                    }
+                ]
+            },
+            {
+                "name": "retrieveGroupIds",
+                "type": "fn",
+                "desc": "Returns preferences' IDs from the option's ID and the given group ID",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_group",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "retrieveIds",
+                "type": "fn",
+                "desc": "Returns preferences' IDs from the option's ID",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "retrieverExists",
+                "type": "fn",
+                "desc": "Returns true if an instance as been initiated.",
+                "args": []
+            },
+            {
+                "name": "retrieveUserIds",
+                "type": "fn",
+                "desc": "Returns preferences' IDs from the option's ID and the given user ID",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_user",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "set",
+                "type": "fn",
+                "desc": "Sets the permission config for the current user by the preference's ID",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": true,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "setByOption",
+                "type": "fn",
+                "desc": "Sets the permission row for the current user by the option's ID",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "setCfg",
+                "type": "fn",
+                "desc": "Sets (or unsets) the cfg field of a given preference based on its ID",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": true,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "setCurrent",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "setDebug",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "debug",
+                        "optional": false,
+                        "default": null,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "setGroup",
+                "type": "fn",
+                "desc": "Sets the given group.",
+                "args": [
+                    {
+                        "name": "id_group",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "setLink",
+                "type": "fn",
+                "desc": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_link",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "setText",
+                "type": "fn",
+                "desc": "Sets (or unsets) the text field of the given preference and returns the result of the executed query",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "text",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "setUser",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "user",
+                        "optional": false,
+                        "default": null,
+                        "type": "bbn\\User"
+                    }
+                ]
+            },
+            {
+                "name": "shareWithGroup",
+                "type": "fn",
+                "desc": "Shares (or unshares) the given preference to the given group.",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_group",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cancel",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "shareWithUser",
+                "type": "fn",
+                "desc": "Shares (or unshares) the given preference to the given user",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_user",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cancel",
+                        "optional": true,
+                        "default": false,
+                        "type": "bool"
+                    }
+                ]
+            },
+            {
+                "name": "test",
+                "type": "fn",
+                "desc": "Checks whether the error property has been set (so an error happened).",
+                "args": []
+            },
+            {
+                "name": "text",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "textValue",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_user",
+                        "optional": true,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "id_group",
+                        "optional": true,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "update",
+                "type": "fn",
+                "desc": "Sets the permission row for the current user by the preference's ID",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "updateBit",
+                "type": "fn",
+                "desc": "Updates a preference's bit",
+                "args": [
+                    {
+                        "name": "id",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    },
+                    {
+                        "name": "merge_config",
+                        "optional": true,
+                        "default": false,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "updateByOption",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "userHas",
+                "type": "fn",
+                "desc": "Checks if a user has the given preference",
+                "args": [
+                    {
+                        "name": "id_option",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id_user",
+                        "optional": true,
+                        "default": null,
+                        "type": "string"
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "name": "Cache",
         "type": "class",
         "items": [
@@ -6775,6 +8653,25 @@
                     },
                     {
                         "name": "params",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    }
+                ]
+            },
+            {
+                "name": "alter",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "table",
+                        "optional": false,
+                        "default": null,
+                        "type": null
+                    },
+                    {
+                        "name": "cfg",
                         "optional": false,
                         "default": null,
                         "type": null
@@ -7501,6 +9398,82 @@
                         "optional": true,
                         "default": false,
                         "type": null
+                    }
+                ]
+            },
+            {
+                "name": "getAlter",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "table",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "getAlterColumn",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "table",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "getAlterKey",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "table",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
+                    }
+                ]
+            },
+            {
+                "name": "getAlterTable",
+                "type": "fn",
+                "desc": "",
+                "args": [
+                    {
+                        "name": "table",
+                        "optional": false,
+                        "default": null,
+                        "type": "string"
+                    },
+                    {
+                        "name": "cfg",
+                        "optional": false,
+                        "default": null,
+                        "type": "array"
                     }
                 ]
             },

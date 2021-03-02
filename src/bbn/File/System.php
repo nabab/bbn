@@ -924,14 +924,12 @@ class System extends bbn\Models\Cls\Basic
             'items' => self::getTree($d, $exclude, $only_dir, $filter, $hidden)
           ];
           $x['num'] = \count($x['items']);
-        }
-
-        if ($filter) {
-          if ($filter($x)) {
-            $r[] = $x;
+          if (empty($x['items'])) {
+            unset($x['items']);
           }
         }
-        else{
+
+        if (!empty($x['items']) || $this->_check_filter($x, $filter)) {
           $r[] = $x;
         }
       }
@@ -945,12 +943,7 @@ class System extends bbn\Models\Cls\Basic
             'type' => 'file',
             'ext' => bbn\Str::fileExt($f)
           ];
-          if ($filter) {
-            if ($filter($x)) {
-              $r[] = $x;
-            }
-          }
-          else{
+          if ($this->_check_filter($x, $filter)) {
             $r[] = $x;
           }
         }
@@ -1146,14 +1139,20 @@ class System extends bbn\Models\Cls\Basic
    */
   private function _check_filter($item, $filter): bool
   {
-    if ($filter) {
+    if ($filter && $item) {
+      $name = \is_array($item) ? ($item['name'] ?? null) : $item;
+
+      if (empty($name)) {
+        throw new \Exception(X::_("There is no item to chek the filter against"));
+      }
+
       if (is_string($filter)) {
         if ($filter === 'file') {
-          return $this->_is_file($item);
+          return $this->_is_file($name);
         }
 
         if ($filter === 'dir') {
-          return $this->_is_dir($item);
+          return $this->_is_dir($name);
         }
 
         if ($filter === 'both') {
@@ -1170,7 +1169,7 @@ class System extends bbn\Models\Cls\Basic
           }, X::split($filter, '|')
         );
         foreach ($extensions as $ext) {
-          if (strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($ext))) === $ext) {
+          if (strtolower(substr($name, - strlen($ext))) === $ext) {
             return true;
           }
         }

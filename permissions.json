@@ -19,12 +19,6 @@
     },
     {
       "num": 2,
-      "text": "Plugins",
-      "code": "plugins",
-      "icon": "nf nf-mdi-puzzle"
-    },
-    {
-      "num": 3,
       "text": "Options",
       "code": "options",
       "icon": "nf nf-fa-cogs"

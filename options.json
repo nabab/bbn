@@ -162,6 +162,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "CRON",
@@ -195,115 +196,11 @@
               "show_code": 1,
               "allow_children": 1,
               "i18n": "en",
+              "show_icon": 1,
               "scfg": {
-                "alias_name": "Permission",
-                "i18n": "en",
-                "schema": [
-                  {
-                    "title": "Closable",
-                    "field": "closable",
-                    "type": "boolean",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "width": 70,
-                    "options": {
-                      "value": true,
-                      "novalue": false
-                    },
-                    "cls": "bbn-c",
-                    "default": false
-                  },
-                  {
-                    "title": "Observe",
-                    "field": "observe",
-                    "type": "boolean",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "options": {
-                      "value": true,
-                      "novalue": false
-                    },
-                    "width": 70,
-                    "cls": "bbn-c",
-                    "default": false
-                  },
-                  {
-                    "title": "Component",
-                    "field": "component",
-                    "type": "string",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "options": []
-                  },
-                  {
-                    "title": "itemComponent",
-                    "field": "itemComponent",
-                    "type": "string",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": false,
-                    "options": []
-                  },
-                  {
-                    "title": "Limit",
-                    "field": "limit",
-                    "type": "number",
-                    "showable": true,
-                    "editable": true,
-                    "hidden": true,
-                    "options": [],
-                    "default": 5
-                  },
-                  {
-                    "title": "Right buttons",
-                    "field": "buttonsRight",
-                    "type": "json",
-                    "showable": false,
-                    "editable": true,
-                    "hidden": true,
-                    "options": {
-                      "style": "height: 200px !important"
-                    },
-                    "default": "[]"
-                  },
-                  {
-                    "title": "Left buttons",
-                    "field": "buttonsLeft",
-                    "type": "json",
-                    "showable": false,
-                    "editable": true,
-                    "hidden": true,
-                    "options": {
-                      "style": "height: 200px !important"
-                    },
-                    "default": "[]"
-                  },
-                  {
-                    "field": "options",
-                    "title": "Component's options",
-                    "hidden": true,
-                    "editable": true,
-                    "filterable": false,
-                    "type": "json",
-                    "options": {
-                      "style": "height:200px !important"
-                    },
-                    "showable": false,
-                    "default": "{}"
-                  }
-                ],
-                "show_alias": 1,
-                "show_code": 1,
-                "show_icon": 1,
-                "show_value": null,
-                "sortable": 1,
-                "notext": 0,
-                "view": 0
-              },
-              "show_icon": 1
+                "alias_name": "Widget",
+                "show_alias": 1
+              }
             },
             "text": "Dashboards",
             "code": "list",
@@ -318,6 +215,115 @@
                 "code": "plugins"
               }
             ]
+          },
+          {
+            "cfg": {
+              "i18n": "en",
+              "schema": [
+                {
+                  "title": "Closable",
+                  "field": "closable",
+                  "type": "boolean",
+                  "showable": true,
+                  "editable": true,
+                  "hidden": false,
+                  "width": 70,
+                  "options": {
+                    "value": true,
+                    "novalue": false
+                  },
+                  "cls": "bbn-c",
+                  "default": false
+                },
+                {
+                  "title": "Observe",
+                  "field": "observe",
+                  "type": "boolean",
+                  "showable": true,
+                  "editable": true,
+                  "hidden": false,
+                  "options": {
+                    "value": true,
+                    "novalue": false
+                  },
+                  "width": 70,
+                  "cls": "bbn-c",
+                  "default": false
+                },
+                {
+                  "title": "Component",
+                  "field": "component",
+                  "type": "string",
+                  "showable": true,
+                  "editable": true,
+                  "hidden": false,
+                  "options": []
+                },
+                {
+                  "title": "itemComponent",
+                  "field": "itemComponent",
+                  "type": "string",
+                  "showable": true,
+                  "editable": true,
+                  "hidden": false,
+                  "options": []
+                },
+                {
+                  "title": "Limit",
+                  "field": "limit",
+                  "type": "number",
+                  "showable": true,
+                  "editable": true,
+                  "hidden": true,
+                  "options": [],
+                  "default": 5
+                },
+                {
+                  "title": "Right buttons",
+                  "field": "buttonsRight",
+                  "type": "json",
+                  "showable": false,
+                  "editable": true,
+                  "hidden": true,
+                  "options": {
+                    "style": "height: 200px !important"
+                  },
+                  "default": "[]"
+                },
+                {
+                  "title": "Left buttons",
+                  "field": "buttonsLeft",
+                  "type": "json",
+                  "showable": false,
+                  "editable": true,
+                  "hidden": true,
+                  "options": {
+                    "style": "height: 200px !important"
+                  },
+                  "default": "[]"
+                },
+                {
+                  "field": "options",
+                  "title": "Component's options",
+                  "hidden": true,
+                  "editable": true,
+                  "filterable": false,
+                  "type": "json",
+                  "options": {
+                    "style": "height:200px !important"
+                  },
+                  "showable": false,
+                  "default": "{}"
+                }
+              ],
+              "show_code": 1,
+              "show_icon": 1,
+              "show_value": null,
+              "sortable": 1
+            },
+            "text": "Widgets",
+            "code": "widgets",
+            "icon": "nf nf-mdi-widgets"
           }
         ]
       },
@@ -535,6 +541,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "Databases",
@@ -792,6 +799,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "History",
@@ -894,6 +902,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "Working schedule",
@@ -1523,6 +1532,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "IDE recent files",
@@ -2498,8 +2508,6 @@
           "show_code": 1,
           "show_value": 1,
           "allow_children": 1,
-          "inheritance": "cascade",
-          "permissions": 1,
           "show_icon": 1,
           "i18n": "en"
         },
@@ -2517,6 +2525,15 @@
             "browser": true
           },
           {
+            "cfg": {
+              "show_code": 1,
+              "show_value": 1,
+              "allow_children": 1,
+              "inheritance": "cascade",
+              "permissions": 1,
+              "show_icon": 1,
+              "i18n": "en"
+            },
             "text": "Notifications",
             "code": "list"
           }
@@ -2867,6 +2884,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "Projects",
@@ -2941,6 +2959,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "Servers",
@@ -3285,6 +3304,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "My current bugs",
@@ -3355,6 +3375,7 @@
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
                         "text": "Application's users",

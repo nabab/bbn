@@ -5,6 +5,8 @@
 namespace bbn\Appui;
 
 use bbn;
+use bbn\X;
+use bbn\Str;
 use Exception;
 
 class Dashboard
@@ -24,17 +26,26 @@ class Dashboard
   /** @var \bbn\User\Preferences */
   protected $pref;
 
-  /** @var array */
-  protected $arch_opt;
+  /** @var \bbn\Db */
+  protected $db;
 
   /** @var array */
-  protected $arch_pref;
+  protected $archOpt;
 
   /** @var array */
-  protected $arch_bits;
+  protected $archPref;
+
+  /** @var array */
+  protected $cfgPref;
+
+  /** @var array */
+  protected $archBits;
 
   /** @var string */
   protected $dashboard;
+
+  /** @var string */
+  protected $idList;
 
 
   /**
@@ -42,24 +53,24 @@ class Dashboard
    */
   public function __construct(string $id)
   {
-    $oid             = $id;
-    $this->opt       = bbn\Appui\Option::getInstance();
-    $this->user      = bbn\User::getInstance();
-    $this->perm      = bbn\User\Permissions::getInstance();
-    $this->pref      = bbn\User\Preferences::getInstance();
-    $ccfg            = $this->pref->getClassCfg();
-    $this->arch_opt  = $this->opt->getClassCfg()['arch']['options'];
-    $this->arch_pref = $ccfg['arch']['user_options'];
-    $this->arch_bits = $ccfg['arch']['user_options_bits'];
+    $oid            = $id;
+    $this->opt      = bbn\Appui\Option::getInstance();
+    $this->user     = bbn\User::getInstance();
+    $this->perm     = bbn\User\Permissions::getInstance();
+    $this->pref     = bbn\User\Preferences::getInstance();
+    $this->db       = bbn\Db::getInstance();
+    $this->cfgPref  = $this->pref->getClassCfg();
+    $this->archOpt  = $this->opt->getClassCfg()['arch']['options'];
+    $this->archPref = $this->cfgPref['arch']['user_options'];
+    $this->archBits = $this->cfgPref['arch']['user_options_bits'];
     self::optionalInit();
-    if (!bbn\Str::isUid($id)) {
-      $id = $this->getOptionId($id, 'list');
+    $this->idList = $this->getOptionId('list');
+    if (!Str::isUid($this->idList)) {
+      throw new \Exception("Unable to load the option 'list'");
     }
 
-    if (bbn\Str::isUid($id)) {
-      $this->dashboard = $id;
-    }
-    else {
+    $this->dashboard = $this->_getDashboard($id);
+    if (!Str::isUid($this->dashboard)) {
       throw new \Exception("Unable to load the dashboard using identifier: $oid");
     }
   }
@@ -67,18 +78,18 @@ class Dashboard
 
   public function add(array $widget): ?string
   {
-    if (!empty($widget[$this->arch_opt['text']])
-        && !empty($widget[$this->arch_opt['code']])
+    if (!empty($widget[$this->archOpt['text']])
+        && !empty($widget[$this->archOpt['code']])
         && (!empty($widget['component']) || !empty($widget['itemComponent']))
     ) {
-      $widget[$this->arch_opt['id_parent']] = $this->dashboard;
-      $widget[$this->arch_opt['id_alias']]  = $widget[$this->arch_opt['id_alias']] ?? null;
-      $widget['closable']                   = $widget['closable'] ?? false;
-      $widget['observe']                    = $widget['observe'] ?? false;
-      $widget['limit']                      = $widget['limit'] ?? 5;
-      $widget['buttonsRight']               = $widget['buttonsRight'] ?? [];
-      $widget['buttonsLeft']                = $widget['buttonsLeft'] ?? [];
-      $widget['options']                    = $widget['options'] ?? new \stdClass();
+      $widget[$this->archOpt['id_parent']] = $this->dashboard;
+      $widget[$this->archOpt['id_alias']]  = $widget[$this->archOpt['id_alias']] ?? null;
+      $widget['closable']                  = $widget['closable'] ?? false;
+      $widget['observe']                   = $widget['observe'] ?? false;
+      $widget['limit']                     = $widget['limit'] ?? 5;
+      $widget['buttonsRight']              = $widget['buttonsRight'] ?? [];
+      $widget['buttonsLeft']               = $widget['buttonsLeft'] ?? [];
+      $widget['options']                   = $widget['options'] ?? new \stdClass();
       return $this->opt->add($widget);
     }
 
@@ -89,28 +100,43 @@ class Dashboard
   /**
    * Saves the widget configuration
    * @param array $data
-   * @return string|int
+   * @return string|bool
    */
   public function save(array $data)
   {
-    if (!empty($data[$this->arch_pref['id']])) {
-      // Current option's id or preference's id
-      $id = $data[$this->arch_pref['id']];
-      // Normal widget
-      if ($cfg = $this->pref->getByOption($id)) {
-        return $this->pref->setByOption($id, \bbn\X::mergeArrays($cfg, $data[$this->arch_pref['cfg']]));
-      }
-      // User's personal widget
-      elseif ($old = $this->pref->get($id, false)) {
-        if (($cfg = json_decode($old[$this->arch_pref['cfg']], true)) && !empty($cfg['widget'])) {
-          $cfg['widget'] = \bbn\X::mergeArrays($cfg['widget'], $data[$this->arch_pref['cfg']]);
-          return $this->pref->setCfg($id, $cfg);
+    if (!empty($data[$this->archBits['id']])
+        && !empty($data[$this->archBits['cfg']])
+    ) {
+      $idWidget = $data[$this->archBits['id']];
+      $cfg      = Str::isJson($data[$this->archBits['cfg']]) ? json_decode(Str::isJson($data[$this->archBits['cfg']]), true) : (is_array($data[$this->archBits['cfg']]) ? $data[$this->archBits['cfg']] : []);
+      if ($dash = $this->getDashboardByWidget($idWidget)) {
+        $idDash = $dash[$this->archPref['id']];
+        if ($uDash = $this->getUserDashboard($idDash)) {
+          $uCfg = Str::isJson($uDash[$this->archPref['cfg']]) ? json_decode($uDash[$this->archPref['cfg']], true) : [];
+          if (!isset($uCfg['widgets'])) {
+            $uCfg['widgets'] = [];
+          }
+
+          $uCfg['widgets'][$idWidget] = X::mergeArrays($uCfg['widgets'][$idWidget] ?? [], $cfg);
+          return (bool)$this->pref->setCfg($uDash[$this->archPref['id']], $uCfg);
+        }
+        elseif ($this->pref->shareWithUser($idDash, $this->user->getId())) {
+          $idUsrDash = $this->db->lastId();
+          if ($this->pref->setCfg(
+            $idUsrDash, [
+            'widgets' => [
+              $idWidget => $cfg
+            ]
+            ]
+          )
+          ) {
+            return $idUsrDash;
+          }
         }
       }
-      else {
-        return $this->pref->add($id, $data[$this->arch_pref['cfg']]);
-      }
     }
+
+    return false;
   }
 
 
@@ -123,30 +149,42 @@ class Dashboard
   {
     if (!empty($order)) {
       $changed = 0;
-      foreach ($order as $i => $k){
-        // Normal widget
-        if ($opt = $this->opt->option($k)) {
-          // Existing preference
-          if ($pref = $this->pref->getByOption($k)) {
-            if ($pref[$this->arch_pref['num']] !== ($i + 1)) {
-              $pref[$this->arch_pref['num']] = $i + 1;
-              $this->pref->update($pref[$this->arch_pref['id']], $pref);
-              $changed++;
-            }
+      if ($uDash = $this->getUserDashboard($this->dashboard)) {
+        $uCfg = Str::isJson($uDash[$this->archPref['cfg']]) ? json_decode($uDash[$this->archPref['cfg']], true) : [];
+        if (!isset($uCfg['widgets'])) {
+          $uCfg['widgets'] = [];
+        }
+
+        foreach ($order as $i => $k){
+          if (!isset($uCfg['widgets'][$k])) {
+            $uCfg['widgets'][$k] = [];
           }
-          // Add new preference
-          elseif ($opt[$this->arch_opt['num']] !== ($i + 1)) {
-            $this->pref->add($k, [$this->arch_pref['num'] => $i + 1]);
+
+          if (!isset($uCfg['widgets'][$k][$this->archBits['num']])) {
+            $uCfg['widgets'][$k][$this->archBits['num']] = 0;
+          }
+
+          if ($uCfg['widgets'][$k][$this->archBits['num']] !== $i + 1) {
+            $uCfg['widgets'][$k][$this->archBits['num']] = $i + 1;
             $changed++;
           }
         }
-        // User's personal widget
-        elseif (($pref = $this->pref->get($k))
-            && ($pref[$this->arch_pref['num']] !== ($i + 1))
-        ) {
-          $pref[$this->arch_pref['num']] = $i + 1;
-          $this->pref->update($pref[$this->arch_pref['id']], $pref);
-          $changed++;
+
+        if ($changed && $this->pref->setCfg($uDash[$this->archPref['id']], $uCfg)) {
+          return $changed;
+        }
+      }
+      else {
+        $cfg = ['widgets' => []];
+        foreach ($order as $i => $k){
+          $cfg['widgets'][$k] = [$this->archBits['num'] => $i + 1];
+        }
+
+        if ($this->pref->shareWithUser($this->dashboard, $this->user->getId())) {
+          $idUsrDash = $this->db->lastId();
+          if ($this->pref->setCfg($idUsrDash, $cfg)) {
+            return count($cfg['widgets']);
+          }
         }
       }
 
@@ -164,7 +202,7 @@ class Dashboard
    */
   public function getWidgets(string $url = ''): array
   {
-    $widgets = $this->_get_widgets($url);
+    $widgets = $this->_getWidgets($url);
     return [
       'widgets' => $widgets,
       'order' => $this->getOrder($widgets)
@@ -186,10 +224,10 @@ class Dashboard
     }
 
     foreach ($widgets as $widget){
-      if (bbn\Str::isInteger($widget[$this->arch_opt['num']])
-          && !\array_key_exists($widget[$this->arch_opt['num']], $ret)
+      if (Str::isInteger($widget[$this->archOpt['num']])
+          && !\array_key_exists($widget[$this->archOpt['num']], $ret)
       ) {
-        $ret[$widget[$this->arch_opt['num']]] = $widget['key'];
+        $ret[$widget[$this->archOpt['num']]] = $widget['key'];
       }
       else {
         $toend[] = $widget['key'];
@@ -208,14 +246,96 @@ class Dashboard
    */
   public function getWidgetsCode(string $url = ''): array
   {
-    $widgets = $this->_get_widgets($url, true);
+    $widgets = $this->_getWidgets($url, true);
     $ret     = [];
     foreach ($widgets as $w){
-      $ret[$w[$this->arch_opt['code']]] = $w;
+      $ret[$w[$this->archOpt['code']]] = $w;
     }
 
     \ksort($ret);
     return $ret;
+  }
+
+
+  /**
+   * Gets the dashboard by a widget ID (bit)
+   * @param string $id The widget ID (bit)
+   * @return array|null
+   */
+  public function getDashboardByWidget(string $id): ?array
+  {
+    if (Str::isUid($id)) {
+      return $this->pref->getByBit($id);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Gets the widget option
+   * @param string                                    $id The widget ID (bit)
+   * @param bool false if you want only the option ID
+   * @return array|null|string
+   */
+  public function getWidgetOption(string $id, bool $full = false)
+  {
+    if (Str::isUid($id)
+        && ($bit = $this->pref->getBit($id))
+        && !empty($bit[$this->archBits['id_option']])
+    ) {
+      return $full ? $this->opt->option($bit[$this->archBits['id_option']]) : $bit[$this->archBits['id_option']];
+    }
+
+    return null;
+  }
+
+
+  public function getUserDashboard(string $id)
+  {
+    return $this->db->rselect(
+      $this->cfgPref['tables']['user_options'], [], [
+      $this->archPref['id_alias'] => $id,
+      $this->archPref['id_user'] => $this->user->getId(),
+      $this->archPref['public'] => 0
+      ]
+    );
+  }
+
+
+  private function _getDashboard(string $code): string
+  {
+    if (!Str::isUid($code)) {
+      return $this->db->selectOne(
+        [
+        'table' => $this->cfgPref['tables']['user_options'],
+        'fields' => [$this->archPref['id']],
+        'where' => [
+          'conditions' => [[
+            'field' => $this->archPref['id_option'],
+            'value' => $this->idList
+          ], [
+            'field' => $this->archPref['cfg'] . '->>"$.code"',
+            'value' => $code
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $this->archPref['id_user'],
+              'value' => $this->user->getId()
+            ], [
+              'field' => $this->archPref['id_group'],
+              'value' => $this->user->getGroup()
+            ], [
+              'field' => $this->archPref['public'],
+              'value' => 1
+            ]]
+          ]]
+        ]
+        ]
+      );
+    }
+
+    return $code;
   }
 
 
@@ -226,73 +346,90 @@ class Dashboard
    * @param bool   $with_code If true the code property is also returned.
    * @return array
    */
-  private function _get_widgets(string $url = '', bool $with_code = false): array
+  private function _getWidgets(string $url = '', bool $with_code = false): array
   {
-    $t = $this;
-    // Get all widgets options
-    if ($widgets = $this->opt->fullOptionsRef($this->dashboard)) {
-      // Filter the widgets by user's permissions
-      $widgets = $this->filterByPermissions($widgets);
-      // Get the personal user's widgets
-      $prefs = $this->getWidgetPref();
-      if (\is_array($prefs)) {
-        // Merge the personal widgets with the globals;
-        $widgets = \array_merge($widgets, $prefs);
-        foreach ($widgets as $i => $w){
-          // Get the preferences of the single widget
-          if ((\bbn\X::find($prefs, [$this->arch_pref['id'] => $w[$this->arch_pref['id']]]) === null)
-              && ($p = $this->pref->getByOption($w[$this->arch_pref['id']], false))
-          ) {
-            if (!empty($p[$this->arch_pref['cfg']])) {
-              $widgets[$i] = \array_merge($widgets[$i], json_decode($p[$this->arch_pref['cfg']], true));
+    /** @var array The final result */
+    $res = [];
+    /** @var array The user's own preferences */
+    $widgetPrefs = [];
+    // Looking for some preferences if he has some
+    if (($uDash = $this->getUserDashboard($this->dashboard))
+        && !empty($uDash[$this->archPref['cfg']])
+        && Str::isJson($uDash[$this->archPref['cfg']])
+        && ($uDashCfg = json_decode($uDash[$this->archPref['cfg']], true))
+        && !empty($uDashCfg['widgets'])
+    ) {
+      $widgetPrefs = $uDashCfg['widgets'];
+    }
+
+    // Looking for the widgets
+    if ($widgets = $this->pref->getBits($this->dashboard, false)) {
+      foreach ($widgets as $w) {
+        // Getting the option
+        if (!empty($w[$this->archBits['id_option']])
+            && ($o = $this->opt->option($w[$this->archBits['id_option']]))
+        ) {
+          // Checking the permission
+          if ($this->perm->has($o[$this->archOpt['id']])) {
+            if ($cfg = $this->pref->getBitCfg($w[$this->archBits['id']])) {
+              $o = X::mergeArrays($o, $cfg);
             }
 
-            if (!is_null($p[$this->arch_pref['num']])) {
-              $widgets[$i][$this->arch_opt['num']] = $p[$this->arch_pref['num']];
+            // Set the widget's key
+            $o['key'] = $w[$this->archBits['id']];
+            // Set the widget's url
+            if (!empty($o[$this->archOpt['code']])) {
+              $o['url'] = $url.$o[$this->archOpt['code']];
             }
-          }
 
-          // Set the widget's url
-          if (!empty($w[$this->arch_opt['code']])) {
-            $widgets[$i]['url'] = $url.$w[$this->arch_opt['code']];
-          }
+            // Get the preferences of the single widget
+            if (!empty($widgetPrefs[$o['key']])) {
+              $o = X::mergeArrays($o, $widgetPrefs[$o['key']]);
+            }
 
-          // Set the hidden property
-          $widgets[$i]['hidden'] = $widgets[$i]['hidden'] ?? false;
-          // Set the widget's key
-          $widgets[$i]['key'] = $w[$this->arch_opt['id']];
-          unset(
-            $widgets[$i][$this->arch_opt['id_alias']],
-            $widgets[$i]['num_children'],
-            $widgets[$i][$this->arch_opt['id']],
-            $widgets[$i][$this->arch_opt['id_parent']]
-          );
-          if (!$with_code) {
-            unset($widgets[$i][$this->arch_opt['code']]);
+            if (!isset($o['hidden'])) {
+              $o['hidden'] = false;
+            }
+
+            unset(
+              $o[$this->archOpt['id_alias']],
+              $o['num_children'],
+              $o[$this->archOpt['id']],
+              $o[$this->archOpt['id_parent']]
+            );
+            if (!$with_code) {
+              unset($o[$this->archOpt['code']]);
+            }
+
+            $res[] = $o;
           }
         }
-
-        return $widgets;
       }
     }
 
-    return [];
+    return $res;
   }
 
 
   /**
-   * Filters the widgets by the user's permissions
+   * Filters the widgets by the user's permissions.
+   * The widget should come as a dashboard's item linked to a widget option.
+   *
    * @param array $widgets The list of widgets
    * @return array
    */
-  private function filterByPermissions(array $widgets): array
+  private function _filterByPermissions(array $widgets): array
   {
-    $t = $this;
+    $oa   =& $this->archOpt;
+    $perm =& $this->perm;
     // Filter the widgets by user's permissions
     return \array_values(
       \array_filter(
-        $widgets, function ($w) use ($t) {
-          return !empty($w[$t->arch_opt['id_alias']]) && $t->perm->has($w[$t->arch_opt['id_alias']]);
+        $widgets,
+        function ($w) use (&$oa, &$perm) {
+          // The alias is the widget itself on which the permission should be set
+          return !empty($w[$oa['id_alias']]) &&
+              $perm->has($w[$oa['id_alias']]);
         }
       )
     );
@@ -300,11 +437,11 @@ class Dashboard
 
 
   /**
-   * Get the personal user's widgets from the preferences
-   * @param string The dashboard id
+   * Get the personal user's widgets from the preferences.
+   *
    * @return array
    */
-  private function getWidgetPref(): array
+  private function _getWidgetPref(): array
   {
     $t = $this;
     // Get the personal user's widgets
@@ -317,10 +454,10 @@ class Dashboard
       function ($p) use ($t) {
         return \array_merge(
           [
-          $t->arch_pref['id'] => $p[$t->arch_pref['id']],
-          $t->arch_pref['id_option'] => $p[$t->arch_pref['id_option']],
-          $t->arch_pref['text'] => $p[$t->arch_pref['text']],
-          $t->arch_pref['num'] => $p[$t->arch_pref['num']],
+          $t->archPref['id'] => $p[$t->archPref['id']],
+          $t->archPref['id_option'] => $p[$t->archPref['id_option']],
+          $t->archPref['text'] => $p[$t->archPref['text']],
+          $t->archPref['num'] => $p[$t->archPref['num']],
           'hidden' => isset($p['hidden']) ? !!$p['hidden'] : false
           ], $p['widget']
         );
@@ -333,5 +470,6 @@ class Dashboard
       )
     );
   }
+
 
 }

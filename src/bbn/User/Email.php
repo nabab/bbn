@@ -6,7 +6,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\User;
 
-class Emails extends bbn\Models\Cls\Basic
+class Email extends bbn\Models\Cls\Basic
 {
   use bbn\Models\Tts\Dbconfig;
   use bbn\Models\Tts\Optional;
@@ -226,31 +226,42 @@ class Emails extends bbn\Models\Cls\Basic
   }
 
 
-  public function addAccount(array $cfg): ?string
+  public function addAccount(array $cfg): string
   {
-    if (X::hasProps($cfg, ['login', 'pass', 'type'], true)
-        && ($id_accounts = self::getOptionId('accounts'))
-        && ($id_pref = $this->pref->addToGroup(
-          $id_accounts,
-          [
-            'id_user' => $this->user->getId(),
-            'login' => $cfg['login'],
-            'type' => $cfg['type'],
-            'host' => $cfg['host'] ?? null,
-            'port' => $cfg['port'] ?? null,
-            'ssl' => $cfg['ssl'] ?? true
-          ]
-        ))
-        && $this->_get_password()->userStore($cfg['pass'], $id_pref, $this->user)
-    ) {
-      $this->getAccount($id_pref, true);
-      if (!empty($cfg['folders'])) {
-        $this->syncFolders($id_pref, $cfg['folders']);
-      }
-      return $id_pref;
+    if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
+      throw new \Exception("Missing arguments");
     }
 
-    return null;
+    if (!($id_accounts = self::getOptionId('accounts'))) {
+      throw new \Exception("Impossible to find the account option");
+    }
+
+    // toGroup as this option will use different user options
+    if (!($id_pref = $this->pref->addToGroup(
+      $id_accounts,
+      [
+        'id_user' => $this->user->getId(),
+        'login' => $cfg['login'],
+        'type' => $cfg['type'],
+        'host' => $cfg['host'] ?? null,
+        'port' => $cfg['port'] ?? null,
+        'ssl' => $cfg['ssl'] ?? true
+      ]
+    ))
+    ) {
+      throw new \Exception("Impossible to add the preference");
+    }
+
+    if (!$this->_get_password()->userStore($cfg['pass'], $id_pref, $this->user)) {
+      throw new \Exception("Impossible to set the password");
+    }
+
+    $this->getAccount($id_pref, true);
+    if (!empty($cfg['folders'])) {
+      $this->syncFolders($id_pref, $cfg['folders']);
+    }
+
+    return $id_pref;
   }
 
 
@@ -531,7 +542,8 @@ class Emails extends bbn\Models\Cls\Basic
         'table' => $table,
         'fields' => $cfg
       ]);
-      if ( $grid->check() ){
+
+      if ($grid->check()) {
         return $grid->getDatatable();
       }
     }

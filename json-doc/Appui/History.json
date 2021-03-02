@@ -6472,6 +6472,17 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL"
+                        },
+                        "infos_comp": {
+                            "position": 235,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
                         }
                     }
                 },
@@ -22620,6 +22631,17 @@
                         "succursales_lieu_ville": {
                             "position": 234,
                             "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "infos_comp": {
+                            "position": 235,
+                            "type": "json",
                             "null": 1,
                             "key": null,
                             "extra": "",

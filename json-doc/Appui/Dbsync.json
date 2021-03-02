@@ -5385,6 +5385,17 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL"
+                        },
+                        "infos_comp": {
+                            "position": 235,
+                            "type": "json",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
                         }
                     }
                 },

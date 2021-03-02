@@ -1184,7 +1184,7 @@ class Preferences extends bbn\Models\Cls\Db
         $c['id_option'] => $cfg[$c['id_option']] ?? null,
         $c['num'] => $cfg[$c['num']] ?? null,
         $c['text'] => $cfg[$c['text']] ?? '',
-        $c['cfg'] => $cfg[$c['cfg']] ?? '',
+        $c['cfg'] => $cfg[$c['cfg']] ?? null,
         ]
       )
       ) {
@@ -1748,7 +1748,7 @@ class Preferences extends bbn\Models\Cls\Db
         'table' => $this->class_cfg['table'],
         'fields' => array_map(
           function ($v) use ($t) {
-            return $t->class_cfg['table'].'.'.$v;
+            return $t->db->cfn($v, $t->class_cfg['table']);
           }, array_values($this->class_cfg['arch']['user_options'])
         ),
         'join' => [[

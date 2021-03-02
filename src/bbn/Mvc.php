@@ -328,6 +328,23 @@ class Mvc implements Mvc\Api
 
 
   /**
+   * Returns the URL part of the given plugin.
+   * 
+   * @param string $plugin_name the plugin
+   * 
+   * @return null|string
+   */
+  public static function getPluginPath(string $plugin_name): ?string
+  {
+    if ($mvc = self::getInstance()) {
+      return $mvc->pluginPath($plugin_name);
+    }
+
+    return null;
+  }
+
+
+  /**
    * Returns 
    *
    * @param string $id_user

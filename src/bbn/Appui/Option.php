@@ -196,6 +196,10 @@ class Option extends bbn\Models\Cls\Db
           }
         }
 
+        if ($id_alias = $this->alias($id)) {
+          $this->deleteCache($id_alias);
+        }
+
         $this->cacheDelete($id);
         if (!$subs) {
           $this->cacheDelete($this->getIdParent($id));
@@ -762,7 +766,7 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an option's full content as an array
+   * Returns an option's full content as an array.
    *
    * ```php
    * X::dump($opt->option(25));
@@ -796,6 +800,59 @@ class Option extends bbn\Models\Cls\Db
         }
         else {
           $this->_set_value($opt['alias']);
+        }
+      }
+
+      return $opt;
+    }
+
+    return null;
+  }
+
+
+
+
+  /**
+   * Returns the merge between an option and its alias as an array.
+   *
+   * ```php
+   * X::dump($opt->option(25));
+   * X::dump($opt->option('bbn_ide'));
+   * X::dump($opt->option('TEST', 58));
+   * X::dump($opt->option('test', 'users', 'bbn_ide'));
+   * /* Each would return an array of this form
+   * array [
+   *   'id' => 25,
+   *   'code' => "bbn_ide",
+   *   'text' => "This is BBN's IDE",
+   *   'myIntProperty' => 56854,
+   *   'myTextProperty' => "<h1>Hello\nWorld</h1>",
+   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false The option array or false if the option cannot be found
+   */
+  public function opAlias($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+        && ($opt = $this->nativeOption($id))
+    ) {
+      $this->_set_value($opt);
+      $c =& $this->class_cfg['arch']['options'];
+      if (bbn\Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
+        if ($opt[$c['id_alias']] === $id) {
+          throw new \Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
+        }
+        else {
+          $this->_set_value($alias);
+          foreach ($alias as $n => $a) {
+            if (!empty($a)) {
+              $opt[$n] = $a;
+            }
+          }
+
         }
       }
 
@@ -1168,12 +1225,78 @@ class Option extends bbn\Models\Cls\Db
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
-      foreach ($this->db->rselectAll('bbn_options', [], ['id_alias' => $id]) as $d){
+      $cf = $this->getClassCfg();
+      foreach ($this->db->rselectAll($cf['table'], [], ['id_alias' => $id]) as $d) {
         $this->_set_value($d);
         $r[] = $d;
       }
 
       return $r;
+    }
+
+    return null;
+  }
+
+
+  public function getAliasItems($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      if ($res = $this->cacheGet($id, __FUNCTION__)) {
+        return $res;
+      }
+
+      $cf = $this->getClassCfg();
+      $res = $this->db->getColumnValues(
+        $cf['table'],
+        $cf['arch']['options']['id'],
+        [$cf['arch']['options']['id_alias'] => $id]
+      );
+
+      $this->cacheSet($id, __FUNCTION__, $res);
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  public function getAliasOptions($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      if ($r = $this->cacheGet($id, __FUNCTION__)) {
+        return $r;
+      }
+
+      $res = [];
+      if ($items = $this->getAliasItems($id)) {
+        $cf = $this->getClassCfg();
+        foreach ($items as $it) {
+          $res[$it] = $this->text($it);
+        }
+      }
+
+      $this->cacheSet($id, __FUNCTION__, $res);
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  public function getAliasFullOptions($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      if ($r = $this->cacheGet($id, __FUNCTION__)) {
+        return $r;
+      }
+
+      $res = [];
+      if ($items = $this->getAliasItems($id)) {
+        $res[] = $this->option($it);
+      }
+
+      $this->cacheSet($id, __FUNCTION__, $res);
+      return $res;
     }
 
     return null;
@@ -2094,7 +2217,7 @@ class Option extends bbn\Models\Cls\Db
    * @param int $root The start/origin of the path, {@link get_default()} if is null
    * @return array|bool
    */
-  public function getPathArray($id, $root = null): ?array
+  public function getPathArray(string $id, $root = null): ?array
   {
     if (!isset($root)) {
       $root = $this->getDefault();
@@ -2171,7 +2294,7 @@ class Option extends bbn\Models\Cls\Db
    * @param int    $parent The start/origin of the path
    * @return string|false The path concatenated with the separator or false if no path
    */
-  public function toPath($id, $sep = '|', $parent = null): ?string
+  public function toPath(string $id, string $sep = '|', string $parent = null): ?string
   {
     if ($this->check() && ($parts = $this->getPathArray($id, $parent))) {
       return implode($sep, $parts);
@@ -2873,6 +2996,9 @@ class Option extends bbn\Models\Cls\Db
     if ($this->check() && $this->exists($id)) {
       if (isset($cfg['inherited_from'])) {
         unset($cfg['inherited_from']);
+      }
+      if (isset($cfg['id'])) {
+        unset($cfg['id']);
       }
 
       if ($merge && ($old_cfg = $this->getCfg($id))) {

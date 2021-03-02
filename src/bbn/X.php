@@ -459,6 +459,33 @@ class X
   }
 
 
+  public static function flatten(array $arr, string $children)
+  {
+    $toAdd = [];
+    $res = self::rmap(
+      function ($a) use (&$toAdd, $children) {
+        if (isset($a[$children]) && is_array($a[$children])) {
+          foreach ($a[$children] as &$c) {
+            $toAdd[] = $c;
+          }
+
+          unset($c);
+          unset($a[$children]);
+        }
+
+        return $a;
+      },
+      $arr,
+      $children
+    );
+    if (count($toAdd)) {
+      array_push($res, ...$toAdd);
+    }
+
+    return $res;
+  }
+
+
   /**
    * Returns to a merged array from two or more arrays.
    *
@@ -1176,6 +1203,101 @@ class X
           $r[$items] = self::map($fn, $r[$items], $items);
         }
 
+        $res[] = $r;
+      }
+    }
+
+    return $res;
+  }
+
+
+
+
+  /**
+   * Applies the given function at all levels of a multidimensional array after picking the items (if defined param $item).
+   *
+   * ```php
+   * $ar = [
+   *        ['age' => 45,
+   *          'name' => 'John',
+   *          'children' => [
+   *            ['age' => 8, 'name' => 'Carol'],
+   *            ['age' => 24, 'name' => 'Jack'],
+   *          ]
+   *        ],
+   *        ['age' => 44, 'name' => 'Benjamin'],
+   *        ['age' => 60, 'name' => 'Paul', 'children' =>
+   *          [
+   *            ['age' => 36, 'name' => 'Mike'],
+   *            ['age' => 46, 'name' => 'Alan', 'children' =>
+   *              ['age' => 8, 'name' => 'Allison'],
+   *            ]
+   *          ]
+   *        ]
+   *      ];
+   * X::hdump(X::map(function($a) {
+   *  if ($a['age']>20) {
+   *    $a['name'] = 'Mr. '.$a['name'];
+   *  }
+   *  return $a;
+   * }, $ar,'children'));
+   * /* array [
+   *            [
+   *              "age"  =>  45,
+   *              "name"  =>  "Mr.  John",
+   *              "children"  =>  [
+   *                [
+   *                  "age"  =>  8,
+   *                  "name"  =>  "Carol",
+   *                ],
+   *                [
+   *                  "age"  =>  24,
+   *                  "name"  =>  "Mr.  Jack",
+   *                ],
+   *              ],
+   *            ],
+   *            [
+   *              "age"  =>  44,
+   *              "name"  =>  "Mr.  Benjamin",
+   *            ],
+   *            [
+   *              "age"  =>  60,
+   *              "name"  =>  "Mr.  Paul",
+   *              "children"  =>  [
+   *                [
+   *                  "age"  =>  36,
+   *                  "name"  =>  "Mr.  Mike",
+   *                ],
+   *                [
+   *                  "age"  =>  46,
+   *                  "name"  =>  "Mr.  Alan",
+   *                  "children"  =>  [
+   *                    "age"  =>  8,
+   *                    "name"  =>  "Allison",
+   *                  ],
+   *                ],
+   *            ],
+   *          ]
+   *
+   * ```
+   * @param callable    $fn    The function to be applied to the items of the array
+   * @param array       $ar
+   * @param string|null $items If null the function will be applied just to the item of the parent array
+   * @return array
+   */
+  public static function rmap(callable $fn, array $ar, string $items = null): array
+  {
+    $res = [];
+    foreach ($ar as $key => $a) {
+      if (\is_array($a) && $items && isset($a[$items]) && \is_array($a[$items])) {
+        $a[$items] = self::map($fn, $a[$items], $items);
+      }
+      $is_false = $a === false;
+      $r        = $fn($a, $key);
+      if ($is_false) {
+        $res[] = $r;
+      }
+      elseif ($r !== false) {
         $res[] = $r;
       }
     }

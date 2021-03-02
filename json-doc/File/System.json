@@ -937,7 +937,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file, $decoder = NULL)\n  {\n    if ($c = $this->getContents($file)) {\n      if (is_callable($decoder)) {\n        return $decoder($c);\n      }\n      else {\n        $encoding = false;\n        if (!$decoder) {\n          $encoding = bbn\\Str::fileExt($file);\n        }\n        elseif (is_string($decoder)) {\n          $encoding = $decoder;\n        }\n\n        switch ($encoding) {\n          case 'json':\n            return json_decode($c);\n          case 'yml':\n          case 'yaml':\n            return yaml_parse($c);\n          default:\n            return unserialize($c);\n        }\n      }\n    }\n\n    return null;\n  }",
+            "code": "function($file, $decoder = NULL, $as_array = false)\n  {\n    if ($c = $this->getContents($file)) {\n      if (is_callable($decoder)) {\n        return $decoder($c);\n      }\n      else {\n        $encoding = false;\n        if (!$decoder) {\n          $encoding = bbn\\Str::fileExt($file);\n        }\n        elseif (is_string($decoder)) {\n          $encoding = $decoder;\n        }\n\n        switch ($encoding) {\n          case 'json':\n            return json_decode($c, $as_array);\n          case 'yml':\n          case 'yaml':\n            return yaml_parse($c);\n          default:\n            return unserialize($c);\n        }\n      }\n    }\n\n    return null;\n  }",
             "startLine": 513,
             "endLine": 541,
             "isDeprecated": false,
@@ -946,7 +946,7 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": null,
             "parent": false,
@@ -967,6 +967,15 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "as_array",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
                     "default_name": ""
                 }
             ]

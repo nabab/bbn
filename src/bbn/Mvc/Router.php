@@ -199,7 +199,7 @@ class Router
   }
 
 
-  public function getLocale($plugin): string
+  public function getLocale($plugin): ?string
   {
     return $this->_textdomains[$plugin] ?? null;
   }

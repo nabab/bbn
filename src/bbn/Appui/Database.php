@@ -172,8 +172,12 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection code (user@host or host)
    * @return null|string
    */
-  public function hostId(string $host, string $engine = 'mysql'): ?string
+  public function hostId(string $host = null, string $engine = 'mysql'): ?string
   {
+    if (empty($host)) {
+      $host = $this->db->getConnectionCode();
+    }
+
     $r = self::getOptionId($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine);
     return $r ?: null;
   }

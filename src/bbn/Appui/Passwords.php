@@ -87,18 +87,24 @@ class Passwords extends bbn\Models\Cls\Db
    */
   public function userStore(string $password, string $id_pref, bbn\User $user): bool
   {
-    if ($password && ($to_store = $user->crypt($password))) {
-      $arch =& $this->class_cfg['arch']['passwords'];
-      return (bool)$this->db->insertUpdate(
-        $this->class_cfg['table'],
-        [
-          $arch['id_user_option'] => $id_pref,
-          $arch['password'] => base64_encode($to_store)
-        ]
-      );
+    if (!$password) {
+      throw new \Exception("No password given");
     }
 
-    return false;
+    if (!($to_store = $user->crypt($password))) {
+      throw new \Exception("Impossible to crypt the password");
+    }
+
+    $arch =& $this->class_cfg['arch']['passwords'];
+
+    return (bool)$this->db->insertUpdate(
+      $this->class_cfg['table'],
+      [
+        $arch['id_user_option'] => $id_pref,
+        $arch['password'] => base64_encode($to_store)
+      ]
+    );
+
   }
 
 

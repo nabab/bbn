@@ -165,12 +165,7 @@ class Mailbox extends bbn\Models\Cls\Basic
       }
 
       if (isset($this->mbParam)) {
-        try {
-          $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
-        }
-        catch (\Exception $e) {
-          throw new \Exception($e->getMessage());
-        }
+        $this->stream = imap_open($this->mbParam . $this->folder, $this->login, $this->pass);
 
         if ($this->stream) {
           $this->folders[$this->folder] = [
