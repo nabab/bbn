@@ -370,7 +370,7 @@ class Dashboard
             && ($o = $this->opt->option($w[$this->archBits['id_option']]))
         ) {
           // Checking the permission
-          if ($this->perm->has($o[$this->archOpt['id']])) {
+          if ($this->perm->readOption($o[$this->archOpt['id']])) {
             if ($cfg = $this->pref->getBitCfg($w[$this->archBits['id']])) {
               $o = X::mergeArrays($o, $cfg);
             }

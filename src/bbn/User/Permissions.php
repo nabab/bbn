@@ -109,11 +109,14 @@ class Permissions extends bbn\Models\Cls\Basic
               $plugin['name'],
               'plugins',
             );
+            $path = substr($path, strlen($plugin['url']));
           }
+
           break;
         }
       }
     }
+
     if (!$root) {
       $root = $this->opt->fromCode($type, self::$option_root_id);
     }
@@ -122,7 +125,7 @@ class Permissions extends bbn\Models\Cls\Basic
       throw new \Exception(X::_("Impossible to find the permission code"));
     }
 
-    $parts  = explode('/', $path);
+    $parts  = trim(explode('/', $path));
     $parent = $root;
     foreach ($parts as $i => $p){
       $is_last = $i === (\count($parts) - 1);
@@ -452,12 +455,6 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     return null;
-  }
-
-
-  public function optionHasPermission($id)
-  {
-
   }
 
 
