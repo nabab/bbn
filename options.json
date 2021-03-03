@@ -3435,7 +3435,7 @@
       "permissions": 1
     },
     "text": "Plugins",
-    "code": "_plugins_",
+    "code": "plugins",
     "icon": "nf nf-mdi-puzzle"
   }
 ]
