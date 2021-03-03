@@ -196,8 +196,8 @@ class Option extends bbn\Models\Cls\Db
           }
         }
 
-        if ($id_alias = $this->alias($id)) {
-          $this->deleteCache($id_alias);
+        if (!$subs && ($id_alias = $this->alias($id))) {
+          $this->deleteCache($id_alias, false, true);
         }
 
         $this->cacheDelete($id);
@@ -2991,7 +2991,7 @@ class Option extends bbn\Models\Cls\Db
    * @param array $cfg The config value
    * @return int|false number of affected rows
    */
-  public function setCfg($id, array $cfg, bool $merge = false)
+  public function setCfg($id, array $cfg, bool $merge = false): ?int
   {
     if ($this->check() && $this->exists($id)) {
       if (isset($cfg['inherited_from'])) {
