@@ -88,6 +88,7 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function fromPath(string $path, $type = 'access', $create = false): ?string
   {
+    $opath = $path;
     $parent = null;
     $root   = false;
     if (($type === 'access') && $this->plugins && !empty($path)) {
@@ -100,7 +101,7 @@ class Permissions extends bbn\Models\Cls\Basic
               substr($plugin['name'], 6),
               BBN_APPUI
             );
-            $path = substr($path, strlen($plugin['url']));
+            $path = substr($path, strlen($plugin['url']) + 1);
           }
           elseif ($plugin['name']) {
             $root = $this->opt->fromCode(
@@ -109,7 +110,7 @@ class Permissions extends bbn\Models\Cls\Basic
               $plugin['name'],
               'plugins',
             );
-            $path = substr($path, strlen($plugin['url']));
+            $path = substr($path, strlen($plugin['url']) + 1);
           }
 
           break;
@@ -125,15 +126,16 @@ class Permissions extends bbn\Models\Cls\Basic
       throw new \Exception(X::_("Impossible to find the permission code"));
     }
 
-    $parts  = trim(explode('/', $path));
+    $parts  = explode('/', trim($path, '/'));
     $parent = $root;
+
     foreach ($parts as $i => $p){
       $is_last = $i === (\count($parts) - 1);
       if (!empty($p)) {
         $prev_parent = $parent;
         // Adds a slash for each bit of the path except the last one
         $parent = $this->opt->fromCode($p.($is_last ? '' : '/'), $prev_parent);
-        // If not found looking for a subpermission
+            // If not found looking for a subpermission
         if (!$parent && !$is_last) {
           $parent = $this->opt->fromCode($p, $prev_parent);
         }
