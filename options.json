@@ -2595,18 +2595,21 @@
                         "num": 1,
                         "text": "Access",
                         "code": "access",
+                        "id_alias": ["access", "permissions", "appui"],
                         "icon": "nf nf-mdi-door"
                       },
                       {
                         "num": 2,
                         "text": "Plugins",
                         "code": "plugins",
+                        "id_alias": ["plugins", "permissions", "appui"],
                         "icon": "nf nf-mdi-puzzle"
                       },
                       {
                         "num": 3,
                         "text": "Options",
                         "code": "options",
+                        "id_alias": ["options", "permissions", "appui"],
                         "icon": "nf nf-fa-cogs"
                       }
                     ]
