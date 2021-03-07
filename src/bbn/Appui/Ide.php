@@ -552,7 +552,7 @@ class Ide
 
         $file_path = substr($url,  strlen($real['repository']['name']) + 1);
 
-        $file_path = substr($file_path, 0, Strpos($file_path,$file_name) - 1);
+        $file_path = substr($file_path, 0, strpos($file_path,$file_name) - 1);
 
         $val = [
           'repository' => $real['repository'],
@@ -570,7 +570,9 @@ class Ide
           $f = array_merge($f, $preferences);
         }
 
-        if (($permissions = $this->getFilePermissions()) && (($this->project === 'apst-app') || (constant('BBN_APP_NAME') === 'apst-app'))) {
+        if (($permissions = $this->getFilePermissions())
+            && ($this->project === BBN_APP_NAME)
+        ) {
           $f = array_merge($f, $permissions);
           /*if ( $id_opt = $this->optionId() ){
             $val_opt = $this->options->option($id_opt);
@@ -882,6 +884,7 @@ class Ide
    */
   public function getFilePermissions(string $file = null)
   {
+
     if (empty($file)) {
       $file = self::$current_file;
     }
@@ -1059,44 +1062,62 @@ class Ide
       $file = self::$current_file;
     }
 
+    if (empty($file)) {
+      throw new \Exception(X::_("The file can't be empty"));
+    }
+
     if (!empty($file)
-        && $this->fs->isDir($this->getAppPath())
         // It must be a controller
         && (strpos($file, '/mvc/public/') !== false)
     ) {
       $is_file = $type === 'file';
-      // Check if it's an external route
-      foreach ($this->routes as  $r){
-        if (strpos($file, $r['path']) === 0) {
-          // Remove route
-          $f = substr($file, \strlen($r['path']), \strlen($file));
-          // Remove /mvc/public
-          $f = substr($f, \strlen('src/mvc/public'), \strlen($f));
-          // Add the route's name to path
-          $f = $r['url'] . '/' . $f;
-          break;
-        }
+      $plugin = false;
+      $root_path = $this->getAppPath().'mvc/public/';
+      if (strpos($file, $root_path) === 0) {
+        // Remove root path
+        $f = substr($file, \strlen($root_path));
       }
-
       // Internal route
       if (empty($f)) {
-        $root_path = $this->getAppPath().'mvc/public/';
-        if (strpos($file, $root_path) === 0) {
-          // Remove root path
-          $f = substr($file, \strlen($root_path), \strlen($file));
+        // Check if it's an external route
+        foreach ($this->routes as  $r){
+          if (substr($r['path'], -1) !== '/') {
+            $r['path'] .= '/';
+          }
+
+          if (strpos($file, $r['path']) === 0) {
+            $plugin = $r['name'];
+            // Remove route
+            $f = substr($file, \strlen($r['path']));
+            // Remove /mvc/public
+            $f = substr($f, \strlen('src/mvc/public'));
+            break;
+          }
         }
       }
 
       if (!empty($f)) {
         $bits = \bbn\X::removeEmpty(explode('/', $f));
-        $code = $is_file ? \bbn\Str::fileExt(array_pop($bits), 1)[0] : array_pop($bits).'/';
+        $code = $is_file ? basename(array_pop($bits), '.php') : array_pop($bits).'/';
         $bits = array_map(
           function ($b) {
             return $b.'/';
           }, array_reverse($bits)
         );
         array_unshift($bits, $code);
-        array_push($bits, $this->_permissions());
+        if ($plugin) {
+          array_push(
+            $bits,
+            'access',
+            'permissions',
+            strpos($plugin, 'appui-') === 0 ? substr($plugin, 6) : $plugin,
+            strpos($plugin, 'appui-') === 0 ? 'appui' : null
+          );
+        }
+        else {
+          array_push($bits, $this->_permissions());
+        }
+
         return $this->options->fromCode($bits);
       }
     }

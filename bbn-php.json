@@ -5277,7 +5277,7 @@
                         "text": "option",
                         "value": "option",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/option",
-                        "desc": "Returns an option's full content as an array"
+                        "desc": "Returns an option's full content as an array."
                     },
                     {
                         "type": "method",
@@ -13790,7 +13790,7 @@
                         "text": "getAccounts",
                         "value": "getAccounts",
                         "url": "bbn-php\/doc\/method\/User\/Emails\/getAccounts",
-                        "desc": "Returns the list of the accounts of the current user."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -13798,7 +13798,7 @@
                         "text": "getAccountsIds",
                         "value": "getAccountsIds",
                         "url": "bbn-php\/doc\/method\/User\/Emails\/getAccountsIds",
-                        "desc": "Returns the list of the accounts' IDs of the current user."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -13870,7 +13870,7 @@
                         "text": "getList",
                         "value": "getList",
                         "url": "bbn-php\/doc\/method\/User\/Emails\/getList",
-                        "desc": "Returns a list of emails based on their folder."
+                        "desc": ""
                     },
                     {
                         "type": "method",

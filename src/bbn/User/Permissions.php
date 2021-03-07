@@ -10,10 +10,10 @@ use bbn\Str;
 
 /**
  * A permission system linked to options, User classes and preferences.
- * 
+ *
  * A permission is an optioon under the permission option ("permissions", "appui") or one oof its aliases.
  * They are ONLY permissions.
- * 
+ *
  * No!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.
  * No!!! Deleting a permission deletes the preference
  *
@@ -55,15 +55,15 @@ class Permissions extends bbn\Models\Cls\Basic
   public function __construct(array $routes = null)
   {
     if (!($this->opt = bbn\Appui\Option::getInstance())) {
-      die('Impossible to construct permissions: you need to instantiate options before');
+      throw new \Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));
     }
 
     if (!($this->user = bbn\User::getInstance())) {
-      die('Impossible to construct permissions: you need to instantiate user before');
+      throw new \Exception(X::_('Impossible to construct permissions: you need to instantiate user before'));
     }
 
     if (!($this->pref = Preferences::getInstance())) {
-      die('Impossible to construct permissions: you need to instantiate preferences before');
+      throw new \Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));
     }
 
     if ($routes) {
@@ -88,7 +88,7 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function fromPath(string $path, $type = 'access', $create = false): ?string
   {
-    $opath = $path;
+    $opath  = $path;
     $parent = null;
     $root   = false;
     if (($type === 'access') && $this->plugins && !empty($path)) {
@@ -460,23 +460,16 @@ class Permissions extends bbn\Models\Cls\Basic
   }
 
 
-  /**
-   * Checks if the category represented by the given option ID is readable by the current user
-   *
-   * @param string|null $id_option
-   * @return bool|null
-   */
-  public function readOption(string $id_option = null, bool $force = false): ?bool
+  public function optionToPermission(string $id_option): ?string
   {
-
     if (bbn\Str::isUid($id_option)) {
       $aliases = $this->opt->getAliasItems($id_option);
-      $root        = self::getOptionId('options');
+      $root    = self::getOptionId('options');
       $id_perm = null;
-      $all = [];
+      $all     = [];
       foreach ($aliases as $a) {
         $parents = $this->opt->parents($a);
-        $all[] = $parents;
+        $all[]   = $parents;
         if (in_array($root, $parents)) {
           $id_perm = $a;
           break;
@@ -494,11 +487,25 @@ class Permissions extends bbn\Models\Cls\Basic
         }
       }
 
-      if ($id_perm) {
-        return $this->pref->has($id_option, $force);
-      }
+      return $id_perm ?: null;
+    }
+  }
 
+
+  /**
+   * Checks if the category represented by the given option ID is readable by the current user
+   *
+   * @param string|null $id_option
+   * @return bool|null
+   */
+  public function readOption(string $id_option = null, bool $force = false): ?bool
+  {
+    if ($this->user->isAdmin()) {
       return true;
+    }
+
+    if ($id_perm = $this->optionToPermission($id_option)) {
+      return $this->pref->has($id_option, $force) ?: $this->user->isAdmin();
     }
 
     return null;
@@ -529,7 +536,7 @@ class Permissions extends bbn\Models\Cls\Basic
       'rootAccess' => $access,
       'rootOptions' => $options
     ]];
-    $all = array_merge(
+    $all     = array_merge(
       $this->opt->fullOptions($appui),
       $this->opt->fullOptions($plugins)
     );
@@ -538,7 +545,7 @@ class Permissions extends bbn\Models\Cls\Basic
           && ($id_perm = $this->opt->fromCode('access', 'permissions', $o['id']))
       ) {
         $id_option = $this->opt->fromCode('options', 'permissions', $o['id']);
-        $tmp = $this->opt->option($id_perm);
+        $tmp       = $this->opt->option($id_perm);
         if (!$only_with_children || !empty($tmp['num_children'])) {
           $sources[] = [
             'text' => $o['text'],
@@ -588,7 +595,7 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     $res = ['total' => false];
     /** @var int The option's ID of the permissions' root $id_permission (permissions, appui) */
-    
+
     if ($id_permission = $this->getOptionRoot()) {
 
       /** @var string The option's ID for appui */
@@ -603,9 +610,9 @@ class Permissions extends bbn\Models\Cls\Basic
       $id_plugins = $this->getOptionId('plugins');
 
       /** @todo Add the possibility to do it for another project? */
-      $fs = new bbn\File\System();
+      $fs  = new bbn\File\System();
       $all = [];
-      $fn = function ($a) {
+      $fn  = function ($a) {
         return !empty($a['num'])
           || ((substr($a['name'], -4) === '.php')
               && (basename($a['name']) !== '_ctrl.php'));
@@ -638,6 +645,7 @@ class Permissions extends bbn\Models\Cls\Basic
               $root = $this->opt->add(['text' => $route['name'], 'code' => $route['name'], 'id_parent' => $id_plugins]);
             }
           }
+
           if (!$root) {
             continue;
             throw new \Exception(sprintf(X::_("Impossible to find the appui plugin %s"), substr($route['name'], 6)));
@@ -657,6 +665,7 @@ class Permissions extends bbn\Models\Cls\Basic
               $it['cfg']     = json_encode(['order' => $i + 1]);
               $res['total'] += $this->_add($it, $root);
             }
+
             unset($it);
           }
         }
@@ -672,9 +681,9 @@ class Permissions extends bbn\Models\Cls\Basic
       );
       if ($id_option && ($permissions = $this->db->getColArray($query))) {
         foreach ($permissions as $id){
-          $all = [];
-          $p = $this->opt->option($id);
-          $cfg = $this->opt->getCfg($p['id']) ?: [];
+          $all     = [];
+          $p       = $this->opt->option($id);
+          $cfg     = $this->opt->getCfg($p['id']) ?: [];
           $parents = array_reverse($this->opt->parents($p['id']));
           if ((count($parents) > 2) && \in_array($parents[1], [$appui, $plugins])) {
             $root = $this->opt->fromCode('options', 'permissions', $parents[2]);
@@ -738,11 +747,12 @@ class Permissions extends bbn\Models\Cls\Basic
 
   public function create(array $item): ?int
   {
+    X::log($item, "permissions");
     if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {
-      $cf = $this->opt->getClassCfg();
-      $res = 0;
+      $cf       = $this->opt->getClassCfg();
+      $res      = 0;
       $subitems = false;
-      $id = $this->db->selectOne(
+      $id       = $this->db->selectOne(
         $cf['table'],
         $cf['arch']['options']['id'],
         [
@@ -754,7 +764,7 @@ class Permissions extends bbn\Models\Cls\Basic
         $subitems = $item['items'];
         unset($item['items']);
       }
-  
+
       if (!$id) {
         $id = $this->opt->add($item);
         if ($id) {
@@ -765,7 +775,7 @@ class Permissions extends bbn\Models\Cls\Basic
       if ($id && $subitems) {
         foreach ($subitems as $it) {
           $it['id_parent'] = $id;
-          $res += (int)$this->create($it);
+          $res            += (int)$this->create($it);
         }
       }
 

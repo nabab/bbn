@@ -233,7 +233,7 @@ class Mysql implements bbn\Db\Engines
     $r     = [];
     foreach ($items as $m) {
       if (!bbn\Str::checkName($m)) {
-        return false;
+        return '';
       }
 
       $r[] = $this->qte . $m . $this->qte;

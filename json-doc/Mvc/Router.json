@@ -258,7 +258,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": [

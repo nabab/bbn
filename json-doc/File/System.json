@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File\/System.php",
     "startLine": 26,
-    "endLine": 1697,
+    "endLine": 1696,
     "contentConstructor": {
         "file": "bbn\\File\\System",
         "returns": null
@@ -1716,9 +1716,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $exclude = '', $only_dir = false, $filter = NULL, $hidden = false)\n  {\n    $r    = [];\n    $dirs = self::getDirs($dir, $hidden);\n    if (\\is_array($dirs)) {\n      foreach ($dirs as $d){\n        if (basename($d) !== $exclude) {\n          $x        = [\n            'name' => $d,\n            'type' => 'dir',\n            'num' => 0,\n            'items' => self::getTree($d, $exclude, $only_dir, $filter, $hidden)\n          ];\n          $x['num'] = \\count($x['items']);\n        }\n\n        if ($filter) {\n          if ($filter($x)) {\n            $r[] = $x;\n          }\n        }\n        else{\n          $r[] = $x;\n        }\n      }\n\n      if (!$only_dir) {\n        $files = self::getFiles($dir, false, $hidden);\n\n        foreach ($files as $f){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\Str::fileExt($f)\n          ];\n          if ($filter) {\n            if ($filter($x)) {\n              $r[] = $x;\n            }\n          }\n          else{\n            $r[] = $x;\n          }\n        }\n      }\n    }\n\n    return $r;\n  }",
+            "code": "function($dir, $exclude = '', $only_dir = false, $filter = NULL, $hidden = false)\n  {\n    $r    = [];\n    $dirs = self::getDirs($dir, $hidden);\n    if (\\is_array($dirs)) {\n      foreach ($dirs as $d){\n        if (basename($d) !== $exclude) {\n          $x        = [\n            'name' => $d,\n            'type' => 'dir',\n            'num' => 0,\n            'items' => self::getTree($d, $exclude, $only_dir, $filter, $hidden)\n          ];\n          $x['num'] = \\count($x['items']);\n          if (empty($x['items'])) {\n            unset($x['items']);\n          }\n        }\n\n        if (!empty($x['items']) || $this->_check_filter($x, $filter)) {\n          $r[] = $x;\n        }\n      }\n\n      if (!$only_dir) {\n        $files = self::getFiles($dir, false, $hidden);\n\n        foreach ($files as $f){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\Str::fileExt($f)\n          ];\n          if ($this->_check_filter($x, $filter)) {\n            $r[] = $x;\n          }\n        }\n      }\n    }\n\n    return $r;\n  }",
             "startLine": 913,
-            "endLine": 961,
+            "endLine": 954,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

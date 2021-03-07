@@ -202,7 +202,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item)\n  {\n    $items = explode('.', str_replace($this->qte, '', $item));\n    $r     = [];\n    foreach ($items as $m) {\n      if (!bbn\\Str::checkName($m)) {\n        return false;\n      }\n\n      $r[] = $this->qte . $m . $this->qte;\n    }\n\n    return implode('.', $r);\n  }",
+            "code": "function($item)\n  {\n    $items = explode('.', str_replace($this->qte, '', $item));\n    $r     = [];\n    foreach ($items as $m) {\n      if (!bbn\\Str::checkName($m)) {\n        return '';\n      }\n\n      $r[] = $this->qte . $m . $this->qte;\n    }\n\n    return implode('.', $r);\n  }",
             "startLine": 230,
             "endLine": 243,
             "isDeprecated": false,
