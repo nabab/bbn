@@ -678,7 +678,19 @@ MYSQL
           $is_uid    = false;
           $is_date   = false;
           $is_bool   = false;
+          $is_json   = false;
           $model     = null;
+          // Dealing with JSON fields and null filter value
+          if (in_array($f['operator'], ['isnull', 'isnotnull'])
+              && (
+                strpos($field, '->>')
+                || (isset($cfg['fields'][$field]) && strpos($cfg['fields'][$field], '->>'))
+              )
+          ) {
+            $field   = 'JSON_TYPE('.($cfg['fields'][$field] ?? $field).')';
+            $is_json = true;
+          }
+
           if ($is_having) {
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
           }
@@ -843,11 +855,11 @@ MYSQL
 
             /** @todo Check if it is working with an array */
             case 'isnull':
-              $res .= 'IS NULL';
+              $res .= $is_json ? '= \'NULL\'' : 'IS NULL';
               break;
 
             case 'isnotnull':
-              $res .= 'IS NOT NULL';
+              $res .= $is_json ? '!= \'NULL\'' : 'IS NOT NULL';
               break;
 
             case 'isempty':

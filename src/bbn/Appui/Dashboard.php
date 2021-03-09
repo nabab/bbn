@@ -439,6 +439,49 @@ class Dashboard
     return $id;
   }
 
+  public function getNativeWidgets(string $url = ''){
+    /** @var array The final result */
+    $res = [];
+    /** @var array The user's own preferences */
+    $widgetPrefs = [];
+    if (!!$this->id) {
+      // Looking for the widgets
+      if ($widgets = $this->pref->getBits($this->id, false)) {
+        foreach ($widgets as $w) {
+          // Getting the option
+          if (!empty($w[$this->archBits['id_option']])
+            && ($o = $this->opt->option($w[$this->archBits['id_option']]))
+          ) {
+            // Set "text" property coming from the bit
+            $o[$this->archOpt['text']] = $w[$this->archBits['text']];
+            // Set "num" property coming from the bit
+            $o[$this->archOpt['num']] = $w[$this->archBits['num']];
+            // Set "id_option" property coming from the option
+            $o[$this->archBits['id_option']] = $o[$this->archOpt['id']];
+            // Set "id" property coming from the bit
+            $o[$this->archBits['id']] = $w[$this->archBits['id']];
+            // Set "cfg" properties coming from the bit
+            if ($cfg = $this->pref->getBitCfg($w[$this->archBits['id']])) {
+              $o = X::mergeArrays($o, $cfg);
+            }
+            // Set the widget's url
+            if (!empty($o[$this->archOpt['code']])) {
+              $o['url'] = $url.$o[$this->archOpt['code']];
+            }
+            unset(
+              $o[$this->archOpt['id_alias']],
+              $o['num_children'],
+              $o[$this->archOpt['id_parent']]
+            );
+            $res[] = $o;
+          }
+        }
+      }
+    }
+    X::sort_by($res, $this->archOpt['num'], 'asc');
+    return $res;
+  }
+
   private function _check(){
     if (!Str::isUid($this->id)) {
       throw new \Exception(_("The dashboard's ID is mandatory"));

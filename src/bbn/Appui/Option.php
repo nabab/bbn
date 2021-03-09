@@ -1682,6 +1682,33 @@ class Option extends bbn\Models\Cls\Db
     return null;
   }
 
+  /**
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @returns array|null
+   */
+  public function fullTreeRef($code = null): ?array
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+        && ($res = $this->option($id))
+    ) {
+      $res['items'] = [];
+      if ($opts = $this->fullOptionsRef($id)) {
+        foreach ($opts as $o){
+          if ($t = $this->fullTree($o)) {
+            $res['items'][] = $t;
+          }
+        }
+      }
+      else{
+        unset($res['items']);
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
 
   /**
    * Returns a formatted content of the cfg column as an array
