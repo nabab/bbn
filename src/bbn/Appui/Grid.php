@@ -102,6 +102,7 @@ class Grid extends bbn\Models\Cls\Cache
       $db_cfg = [
         'tables' => $cfg['tables'] ?? ($cfg['table'] ? (\is_string($cfg['table']) ? [$cfg['table']] : $cfg['table']) : null),
         'fields' => !empty($cfg['fields']) ? (array)$cfg['fields'] : [],
+        'ofields' => !empty($cfg['ofields']) ? (array)$cfg['ofields'] : [],
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
         'join' => $cfg['join'] ?? [],
         'group_by' => $cfg['group_by'] ?? [],

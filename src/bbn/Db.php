@@ -956,6 +956,16 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
         }
       }
 
+      foreach ($res['ofields'] as $idx => $col){
+        if (!isset($res['available_fields'][$col])) {
+          $res['available_fields'][$col] = $col;
+        }
+
+        if (\is_string($idx) && !isset($res['available_fields'][$idx])) {
+          $res['available_fields'][$idx] = $res['available_fields'][$col];
+        }
+      }
+
       foreach ($res['fields'] as $idx => &$col){
         if (strpos($col, '(')
             || strpos($col, '-')
@@ -5207,6 +5217,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     $res = [
       'kind' => 'SELECT',
       'fields' => [],
+      'ofields' => [],
       'where' => [],
       'order' => [],
       'limit' => 0,
@@ -5246,7 +5257,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       }
     }
 
-    $res           = array_merge(
+    $res = array_merge(
       $res, [
       'aliases' => [],
       'values' => [],
