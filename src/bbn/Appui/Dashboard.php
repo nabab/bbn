@@ -50,6 +50,24 @@ class Dashboard
   /** @var string */
   protected $idList;
 
+  /** @var string */
+  protected $idWidgets;
+
+  /** @var array */
+  protected $nativeWidgetFields = [
+    'component',
+    'itemComponent',
+    'closable',
+    'observe',
+    'limit',
+    'buttonsRight',
+    'buttonsLeft',
+    'options',
+    'cache'
+  ];
+
+  /** @var array */
+  protected $widgetFields = [];
 
   /**
    * dashboard constructor.
@@ -66,17 +84,23 @@ class Dashboard
     $this->archPref = $this->cfgPref['arch']['user_options'];
     $this->archBits = $this->cfgPref['arch']['user_options_bits'];
     self::optionalInit();
+    $this->widgetFields = \array_merge($this->nativeWidgetFields, \array_values($this->archBits));
+    $this->nativeWidgetFields = \array_merge($this->nativeWidgetFields, \array_values($this->archOpt));
     $this->idList = $this->getOptionId('list');
     if (!Str::isUid($this->idList)) {
       throw new \Exception(_("Unable to load the option 'list'"));
     }
+    $this->idWidgets = $this->getOptionId('widgets');
+    if (!Str::isUid($this->idWidgets)) {
+      throw new \Exception(_("Unable to load the option 'widgets'"));
+    }
     if (func_num_args()) {
       $this->id = $this->getId($id);
       if (!Str::isUid($this->id)) {
-        throw new \Exception(_("Unable to load the dashboard using identifier: %s", $id));
+        throw new \Exception(sprintf(_("Unable to load the dashboard using identifier: %s"), $id));
       }
       if (!($this->code = $this->getCode($id))) {
-        throw new \Exception(_("Unable to load the dashboard code using identifier: %s", $id));
+        throw new \Exception(sprintf(_("Unable to load the dashboard code using identifier: %s"), $id));
       }
     }
   }
@@ -118,24 +142,27 @@ class Dashboard
    */
   public function update(array $d): bool
   {
-    if (!Str::isUid($this->id)) {
-      throw new \Exception(_("The dashboard's ID is mandatory"));
+    if ($this->_check()) {
+      if (empty($d['code'])) {
+        throw new \Exception(_("The dashboard's code is mandatory"));
+      }
+      if (empty($d[$this->archPref['text']])) {
+        throw new \Exception(_("The dashboard's text is mandatory"));
+      }
+      $t =& $this;
+      $data = \array_filter($d, function($f) use($t){
+        return \in_array($f, \array_values($t->archPref), true);
+      }, ARRAY_FILTER_USE_KEY);
+      $data[$this->archPref['cfg']] = ($cfg = $this->pref->getCfg(false, $d)) ? json_encode($cfg) : null;
+      unset($data[$this->archPref['id']]);
+      return (bool)$this->db->update($this->cfgPref['table'], $data, [$this->archPref['id'] => $this->id]);
     }
-    if (empty($d['code'])) {
-      throw new \Exception(_("The dashboard's code is mandatory"));
-    }
-    if (empty($d[$this->archPref['text']])) {
-      throw new \Exception(_("The dashboard's text is mandatory"));
-    }
-    $t =& $this;
-    $data = \array_filter($d, function($f) use($t){
-      return \in_array($f, \array_values($t->archPref), true);
-    }, ARRAY_FILTER_USE_KEY);
-    $data[$this->archPref['cfg']] = ($cfg = $this->pref->getCfg(false, $d)) ? json_encode($cfg) : null;
-    unset($data[$this->archPref['id']]);
-    return (bool)$this->db->update($this->cfgPref['table'], $data, [$this->archPref['id'] => $this->id]);
   }
 
+  /**
+   * Deletes the current dashboard
+   * @return bool
+   */
   public function delete(): bool
   {
     if ($this->_check()){
@@ -145,27 +172,154 @@ class Dashboard
   }
 
 
-  public function add(array $widget): ?string
+  /**
+   * Adds a widget to the current dashboard
+   * @param string $id The native widget's ID
+   * @return string|null
+   */
+  public function addWidget(string $id): ?string
   {
-    if (!!$this->id
-      && !empty($widget[$this->archOpt['text']])
-      && !empty($widget[$this->archOpt['code']])
-      && (!empty($widget['component']) || !empty($widget['itemComponent']))
-    ) {
-      $widget[$this->archOpt['id_parent']] = $this->id;
-      $widget[$this->archOpt['id_alias']]  = $widget[$this->archOpt['id_alias']] ?? null;
-      $widget['closable']                  = $widget['closable'] ?? false;
-      $widget['observe']                   = $widget['observe'] ?? false;
-      $widget['limit']                     = $widget['limit'] ?? 5;
-      $widget['buttonsRight']              = $widget['buttonsRight'] ?? [];
-      $widget['buttonsLeft']               = $widget['buttonsLeft'] ?? [];
-      $widget['options']                   = $widget['options'] ?? new \stdClass();
-      return $this->opt->add($widget);
+    if ($this->_check()) {
+      if (!Str::isUid($id)) {
+        throw new \Exception(_("The id must be a uuid"));
+      }
+      if (!($text = $this->opt->text($id))) {
+        throw new \Exception(sprintf(_("No text for the widget with id %s"), $id));
+      }
+      return $this->pref->addBit($this->id, [
+        $this->archBits['id_option'] => $id,
+        $this->archBits['text'] => $text,
+        $this->archBits['num'] => $this->pref->getMaxBitNum($this->id, null, true) ?: 1
+      ]);
     }
-
     return null;
   }
 
+  /**
+   * Updates a widget (Bit)
+   * @param string $id The widget's ID (bit)
+   * @param array $widget The widget data
+   * @return bool
+   */
+  public function updateWidget(string $id, array $widget): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    if (!($opt = $this->getWidgetOption($id, true))) {
+      throw new \Exception(sprintf(_("No option found with this id %s"), $id));
+    }
+    $d1 = $this->pref->getBitCfg(null, $this->_prepareWidget($widget));
+    $d2 = $this->pref->getBitCfg(null, $this->_prepareWidget($opt));
+    $toSave = \array_filter($d1, function($v, $k) use($d2){
+      return $d2[$k] != $v;
+    }, ARRAY_FILTER_USE_BOTH);
+    $toSave[$this->archBits['text']] = $widget[$this->archBits['text']];
+    return (bool)$this->pref->updateBit($id, $toSave);
+  }
+
+  /**
+   * Removes a widget (Bit)
+   * @param string $id The widget's ID (bit)
+   * @return bool
+   */
+  public function deleteWidget(string $id): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    $res = false;
+    if ($this->_check() && $this->pref->deleteBit($id)) {
+      $res = true;
+      if ($alias = $this->db->selectAll($this->cfgPref['table'], [], [$this->archPref['id_alias'] => $this->id])) {
+        foreach ($alias as $a) {
+          if (($cfg = \json_decode($a->{$this->archPref['cfg']}, true))
+            && isset($cfg['widget'], $cfg['widget'][$id])
+          ) {
+            unset($cfg['widget'][$id]);
+            if (!$this->pref->setCfg($a->${$this->archPref['id']}, $cfg)){
+              $res = false;
+            }
+          }
+        }
+      }
+    }
+    return $res;
+  }
+
+  /**
+   * Set the widget's order number property
+   * @param string $id The widget's ID (bit)
+   * @param int $num The new order number
+   * @return bool
+   */
+  public function setOrderWidget(string $id, int $num): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    if (!($bit = $this->pref->getBit($id, false))) {
+      throw new \Exception(sprintf(_("No widget found witheì the id %s"), $id));
+    }
+    if ((int)$bit[$this->archBits['num']] === $num) {
+      return true;
+    }
+    return (bool)$this->db->update($this->cfgPref['tables']['user_options_bits'], [
+      $this->archBits['num'] => $num
+    ], [
+      $this->archBits['id'] => $id
+    ]);
+  }
+
+  /**
+   * Adds a native widget
+   * @param array $widget
+   * @return string!null
+   */
+  public function addNativeWidget(array $widget): ?string
+  {
+    if ($id = $this->opt->add($this->_prepareNativeWidget($widget))) {
+      if (!$this->perm->optionToPermission($id)) {
+        /** @todo add permissions */
+      }
+      return $id;
+    }
+    return null;
+  }
+
+  /**
+   * Updates a native widget
+   * @param string $id The native widget's ID
+   * @param array $widget The native widget's data
+   * @return bool
+   */
+  public function updateNativeWidget(string $id, array $widget): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    return !!$this->opt->set($id, $this->_prepareNativeWidget($widget));
+  }
+
+  /**
+   * Deletes a native widget
+   * @param string The widget's ID
+   * @return bool
+   */
+  public function deleteNativeWidget(string $id): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    $idPerm = $this->perm->optionToPermission($id);
+    if ($this->opt->remove($id)) {
+      if ($idPerm) {
+        $this->opt->remove($idPerm);
+      }
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Saves the widget configuration
@@ -273,7 +427,7 @@ class Dashboard
    * @param string $url The url to set to the widget's property.
    * @return array
    */
-  public function getWidgets(string $url = ''): array
+  public function getUserWidgets(string $url = ''): array
   {
     $widgets = $this->_getWidgets($url);
     return [
@@ -317,7 +471,7 @@ class Dashboard
    * @param string $url
    * @return array
    */
-  public function getWidgetsCode(string $url = ''): array
+  public function getUserWidgetsCode(string $url = ''): array
   {
     $widgets = $this->_getWidgets($url, true);
     $ret     = [];
@@ -439,12 +593,16 @@ class Dashboard
     return $id;
   }
 
-  public function getNativeWidgets(string $url = ''){
+  /**
+   * Returns the dashboard's widgets
+   * @param string $url
+   * @return array
+   */
+  public function getWidgets(string $url = ''): array
+  {
     /** @var array The final result */
     $res = [];
-    /** @var array The user's own preferences */
-    $widgetPrefs = [];
-    if (!!$this->id) {
+    if ($this->_check()) {
       // Looking for the widgets
       if ($widgets = $this->pref->getBits($this->id, false)) {
         foreach ($widgets as $w) {
@@ -482,6 +640,10 @@ class Dashboard
     return $res;
   }
 
+  /**
+   * Checks if the id property is set
+   * @return bool
+   */
   private function _check(){
     if (!Str::isUid($this->id)) {
       throw new \Exception(_("The dashboard's ID is mandatory"));
@@ -489,6 +651,59 @@ class Dashboard
     return true;
   }
 
+  /**
+   * Checks the native widget's properties
+   * @param array $widget
+   * @return array
+   */
+  private function _prepareNativeWidget(array $widget): array
+  {
+    if (empty($widget[$this->archOpt['text']])) {
+      throw new \Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archOpt['text']));
+    }
+    if (empty($widget[$this->archOpt['code']])) {
+      throw new \Exception(_("The widget's 'code' property is mandatory"));
+    }
+    if ((empty($widget['component']) && empty($widget['itemComponent']))) {
+      throw new \Exception(_("The widget's 'component' or 'itemComponent' property is mandatory"));
+    }
+    $widget[$this->archOpt['id_parent']] = empty($widget[$this->archOpt['id_parent']]) ? $this->idWidgets : $widget[$this->archOpt['id_parent']];
+    if (empty($widget[$this->archOpt['id_parent']])) {
+      throw new \Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archOpt['id_parent']));
+    }
+    $widget[$this->archOpt['id_alias']] = $widget[$this->archOpt['id_alias']] ?? null;
+    $widget['closable'] = $widget['closable'] ?? false;
+    $widget['observe'] = $widget['observe'] ?? false;
+    $widget['limit'] = $widget['limit'] ?? 5;
+    $widget['buttonsRight'] = $widget['buttonsRight'] ?? [];
+    $widget['buttonsLeft'] = $widget['buttonsLeft'] ?? [];
+    $widget['options'] = $widget['options'] ?? new \stdClass();
+    $widget['cache'] = $widget['cache'] ?? 0;
+    foreach ($widget as $field => $val) {
+      if (!\in_array($field, $this->nativeWidgetFields)) {
+        unset($widget[$field]);
+      }
+    }
+    return $widget;
+  }
+
+  /**
+   * Checks the widget's properties
+   * @param array $widget
+   * @return array
+   */
+  private function _prepareWidget(array $widget): array
+  {
+    if (empty($widget[$this->archBits['text']])) {
+      throw new \Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archBits['text']));
+    }
+    foreach ($widget as $field => $val) {
+      if (!\in_array($field, $this->widgetFields)) {
+        unset($widget[$field]);
+      }
+    }
+    return $widget;
+  }
 
   /**
    * Gets the widgets list of a dashboard.

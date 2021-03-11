@@ -1694,7 +1694,7 @@ class Option extends bbn\Models\Cls\Db
       $res['items'] = [];
       if ($opts = $this->fullOptionsRef($id)) {
         foreach ($opts as $o){
-          if ($t = $this->fullTree($o)) {
+          if ($t = $this->fullTreeRef($o)) {
             $res['items'][] = $t;
           }
         }

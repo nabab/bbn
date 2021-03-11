@@ -1246,7 +1246,7 @@ class Preferences extends bbn\Models\Cls\Db
   public function updateBit(string $id, array $cfg, $merge_config = false): ?int
   {
     if (\bbn\Str::isUid($id)) {
-      $c      = $this->class_cfg['arch']['user_options_bits'];
+      $c = $this->class_cfg['arch']['user_options_bits'];
       if (\array_key_exists($c['id'], $cfg)) {
         unset($cfg[$c['id']]);
       }
@@ -1255,7 +1255,6 @@ class Preferences extends bbn\Models\Cls\Db
         $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
       }
 
-      
       $to_cfg = $this->getBitCfg(null, $cfg[$c['cfg']] ?? $cfg);
       if (isset($to_cfg['items'])) {
         unset($to_cfg['items']);
