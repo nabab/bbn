@@ -2636,6 +2636,38 @@
         ]
       },
       {
+        "text": "Permissions",
+        "code": "permissions",
+        "icon": "nf nf-fa-key",
+        "cfg": {
+          "show_code": 1,
+          "show_value": 1,
+          "sortable": 1,
+          "allow_children": 1,
+          "inheritance": "cascade"
+        },
+        "items": [
+          {
+            "num": 1,
+            "text": "Acc\u00e8s",
+            "code": "access",
+            "icon": "nf nf-fa-files_o"
+          },
+          {
+            "num": 2,
+            "text": "Plugins",
+            "code": "plugins",
+            "icon": "fa fa-plug"
+          },
+          {
+            "num": 3,
+            "text": "Options",
+            "code": "options",
+            "icon": "nf nf-fa-cogs"
+          }
+        ]
+      },
+      {
         "cfg": {
           "show_code": 1,
           "show_icon": 1,
