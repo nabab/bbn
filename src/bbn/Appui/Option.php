@@ -3579,7 +3579,12 @@ class Option extends bbn\Models\Cls\Db
         foreach ($todo as $id => $td) {
           if (!empty($td['id_alias'])) {
             if ($id_alias = $this->fromCode(...$td['id_alias'])) {
-              $this->setAlias($id, $id_alias);
+              try {
+                $this->setAlias($id, $id_alias);
+              }
+              catch (\Exception $e) {
+                throw new \Exception($e->getMessage());
+              }
             }
             else {
               X::log($td['id_alias']);
