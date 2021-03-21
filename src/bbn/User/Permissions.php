@@ -594,97 +594,127 @@ class Permissions extends bbn\Models\Cls\Basic
   public function updateAll(array $routes)
   {
     $res = ['total' => false];
-    /** @var int The option's ID of the permissions' root $id_permission (permissions, appui) */
 
+    /** @var string The ID option for permissions < appui */
     if ($id_permission = $this->getOptionRoot()) {
 
       /** @var string The option's ID for appui */
       $appui = $this->opt->fromCode('appui');
-      /** @var string The option's ID for appui */
+
+      /** @var string The option's ID for plugins */
       $plugins = $this->opt->fromCode('plugins');
+
       /** @var string The option's ID of the permissions on options $id_option */
       $id_option = $this->getOptionId('options');
+
       /** @var string The option's ID of the permissions on pages (controllers) $id_page */
       $id_page = $this->getOptionId('access');
+
       /** @var string The option's ID of the permissions on pages (controllers) $id_page */
       $id_plugins = $this->getOptionId('plugins');
 
-      /** @todo Add the possibility to do it for another project? */
-      $fs  = new bbn\File\System();
-      $all = [];
-      $fn  = function ($a) {
+      /** @var function Filter php files */
+      $fn = function ($a) {
         return !empty($a['num'])
           || ((substr($a['name'], -4) === '.php')
               && (basename($a['name']) !== '_ctrl.php'));
       };
 
-      $res['total'] = 0;
-      if ($id_page
-          && ($root = bbn\Mvc::getAppPath().'mvc/public')
-          && ($all = $fs->getTree($root, '', false, $fn))
-      ) {
-        $all = $this->_treat($all);
-        usort($all, [$this, '_sort']);
-        array_walk($all, [$this, '_walk']);
-        foreach ($all as $i => &$it){
-          $it['cfg']     = json_encode(['order' => $i + 1]);
-          $res['total'] += $this->_add($it, $id_page);
+      // The app base access
+      if ($id_page) {
+
+        /** @todo Add the possibility to do it for another project? */
+        $fs = new bbn\File\System();
+
+        $res['total'] = 0;
+        // All files in public from the main app
+        if ($all = $fs->getTree(bbn\Mvc::getAppPath().'mvc/public', '', false, $fn)) {
+          $all = $this->_treat($all);
+          usort($all, [$this, '_sort']);
+          array_walk($all, [$this, '_walk']);
+          foreach ($all as $i => &$it){
+            $it['cfg']     = json_encode(['order' => $i + 1]);
+            $res['total'] += $this->_add($it, $id_page);
+          }
+
+          unset($it);
         }
 
-        unset($it);
-      }
-
-      if (!empty($routes)) {
-        foreach ($routes as $url => $route) {
-          $root = false;
-          if (strpos($route['name'], 'appui-') === 0) {
-            $root = $this->opt->fromCode('access', 'permissions', substr($route['name'], 6), 'appui');
-          }
-          else {
-            if (!($root = $this->opt->fromCode($route['name'], $id_plugins))) {
-              $root = $this->opt->add(['text' => $route['name'], 'code' => $route['name'], 'id_parent' => $id_plugins]);
+        if (!empty($routes)) {
+          foreach ($routes as $url => $route) {
+            $root = false;
+            if (strpos($route['name'], 'appui-') === 0) {
+              $root = $this->opt->fromCode('access', 'permissions', substr($route['name'], 6), 'appui');
             }
-          }
-
-          if (!$root) {
-            continue;
-            throw new \Exception(sprintf(X::_("Impossible to find the appui plugin %s"), substr($route['name'], 6)));
-          }
-
-          if ($all = $fs->getTree(
-            $route['path'].'src/mvc/public',
-            '',
-            false,
-            $fn
-          )
-          ) {
-            $all = $this->_treat($all);
-            usort($all, [$this, '_sort']);
-            array_walk($all, [$this, '_walk']);
-            foreach ($all as $i => &$it){
-              $it['cfg']     = json_encode(['order' => $i + 1]);
-              $res['total'] += $this->_add($it, $root);
+            elseif (!($root = $this->opt->fromCode($route['name'], $id_plugins))) {
+              $root = $this->opt->add(
+                [
+                  'text' => $route['name'],
+                  'code' => $route['name'],
+                  'id_parent' => $id_plugins
+                ]
+              );
             }
 
-            unset($it);
+            if (!$root) {
+              $err = X::_(
+                "Impossible to find the plugin %s",
+                substr($route['name'], 6)
+              );
+              X::log($err, 'updatePermissions');
+              continue;
+              throw new \Exception($err);
+            }
+
+            if ($all = $fs->getTree(
+              $route['path'].'src/mvc/public',
+              '',
+              false,
+              $fn
+            )
+            ) {
+              $all = $this->_treat($all);
+              usort($all, [$this, '_sort']);
+              array_walk($all, [$this, '_walk']);
+              foreach ($all as $i => &$it){
+                $it['cfg']     = json_encode(['order' => $i + 1]);
+                $res['total'] += $this->_add($it, $root);
+              }
+
+              unset($it);
+            }
           }
         }
       }
 
       $cf = $this->opt->getClassCfg();
       // $id_option must be set to generate the option's permissions
-      $query = sprintf(
-        'SELECT `%s` AS id FROM `%s` WHERE JSON_EXTRACT(`%s`, \'$.permissions\') IS NOT NULL',
-        $cf['arch']['options']['id'],
+      $tmp = $this->db->getColumnValues(
         $cf['table'],
-        $cf['arch']['options']['cfg']
+        $cf['arch']['options']['id'],
+        [[$cf['arch']['options']['cfg'], 'contains', '"permissions":']]
       );
-      if ($id_option && ($permissions = $this->db->getColArray($query))) {
-        foreach ($permissions as $id){
-          $all     = [];
-          $p       = $this->opt->option($id);
-          $cfg     = $this->opt->getCfg($p['id']) ?: [];
-          $parents = array_reverse($this->opt->parents($p['id']));
+      if ($id_option && $tmp) {
+        $permissions = [];
+        foreach ($tmp as $id) {
+          /** @var array The option's config */
+          $cfg = $this->opt->getCfg($id) ?: [];
+          if (!empty($cfg['permissions'])) {
+            $permissions[$id] = $cfg;
+          }
+
+          if (isset($cfg['scfg']) && !empty($cfg['scfg']['permissions'])) {
+            foreach ($this->opt->items($id) as $ido) {
+              $permissions[$ido] = $cfg['scfg'];
+            }
+          }
+        }
+
+        foreach ($permissions as $id => $cfg) {
+          $all = [];
+          /** @var array The parents, starting from root */
+          $parents = array_reverse($this->opt->parents($id));
+          // Looking for the root of the options' permissions
           if ((count($parents) > 2) && \in_array($parents[1], [$appui, $plugins])) {
             $root = $this->opt->fromCode('options', 'permissions', $parents[2]);
           }
@@ -693,12 +723,12 @@ class Permissions extends bbn\Models\Cls\Basic
           }
 
           if (!empty($cfg['inheritance']) && ($cfg['inheritance'] === 'cascade')) {
-            if (($tmp = $this->opt->fullTree($p['id'])) && !empty($tmp['items'])) {
+            if (($tmp = $this->opt->fullTree($id)) && !empty($tmp['items'])) {
               $all = $tmp['items'];
             }
           }
           else {
-            $all = $this->opt->fullOptions($p['id']);
+            $all = $this->opt->fullOptions($id);
           }
 
           if (!empty($all)) {
@@ -724,7 +754,7 @@ class Permissions extends bbn\Models\Cls\Basic
               $items = [[
                 'text' => '',
                 'code' => null,
-                'id_alias' => $p['id'],
+                'id_alias' => $id,
                 'items' => $all
               ]];
             }

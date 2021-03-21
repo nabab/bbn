@@ -684,10 +684,11 @@ MYSQL
           if (in_array($f['operator'], ['isnull', 'isnotnull'])
               && (
                 strpos($field, '->>')
-                || (isset($cfg['available_fields'][$field]) && strpos($cfg['available_fields'][$field], '->>'))
+                || (isset($cfg['fields'][$field]) && strpos($cfg['fields'][$field], '->>'))
+                || (isset($cfg['ofields'][$field]) && strpos($cfg['ofields'][$field], '->>'))
               )
           ) {
-            $field   = 'JSON_TYPE('.($cfg['available_fields'][$field] ?? $field).')';
+            $field   = 'JSON_TYPE('.($cfg['fields'][$field] ?? ($cfg['ofields'][$field] ?? $field)).')';
             $is_json = true;
           }
 

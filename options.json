@@ -3433,8 +3433,7 @@
       "categories": 1,
       "show_code": 1,
       "show_icon": 1,
-      "i18n": "en",
-      "permissions": 1
+      "i18n": "en"
     },
     "text": "Plugins",
     "code": "plugins",

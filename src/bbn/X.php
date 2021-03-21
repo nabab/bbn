@@ -1536,7 +1536,7 @@ class X
   {
     while (\count($keys)) {
       $r = array_shift($keys);
-      if (isset($ar[$r])) {
+      if (array_key_exists($r, $ar)) {
         $ar = $ar[$r];
         if (!count($keys)) {
           return $ar;

@@ -35,7 +35,7 @@ class Compiler extends bbn\Models\Cls\Basic
    *
    * @var array
    */
-  private static $_min_suffixes = ['.min', '-min', '.pack'];
+  private static $_min_suffixes = ['.min', '-min', '.pack', '.prod'];
 
   /**
    * @var array
