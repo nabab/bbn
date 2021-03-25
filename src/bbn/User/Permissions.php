@@ -772,7 +772,7 @@ class Permissions extends bbn\Models\Cls\Basic
           }
 
           if (!empty($all)) {
-            $all = X::rmap(
+            $all = X::map(
               function ($a) {
                 $tmp = [
                   'text' => '',
