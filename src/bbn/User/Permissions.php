@@ -754,10 +754,12 @@ class Permissions extends bbn\Models\Cls\Basic
               break;
             case 'cascade':
             case 'all':
-              $tmp = $this->opt->fullTree($id);
-              $all = $tmp && !empty($tmp['items']) ? $tmp['items'] : [];
+              $all = $this->opt->fullTree($id);
               if ($mode === 'all') {
-                array_unshift($all, $this->opt->option($id));
+                $all = [$all];
+              }
+              else {
+                $all = $all['items'] ?? [];
               }
               break;
             case 'children':
@@ -813,9 +815,7 @@ class Permissions extends bbn\Models\Cls\Basic
 
   public function create(array $item): ?int
   {
-    X::log($item, "permissions");
-    if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {
-      $cf       = $this->opt->getClassCfg();
+    if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {      $cf       = $this->opt->getClassCfg();
       $res      = 0;
       $subitems = false;
       $id       = $this->db->selectOne(
@@ -839,9 +839,12 @@ class Permissions extends bbn\Models\Cls\Basic
       }
 
       if ($id && $subitems) {
+        //die(var_dump($subitems, $item));
         foreach ($subitems as $it) {
           $it['id_parent'] = $id;
-          $res            += (int)$this->create($it);
+          $it['text']      = '';
+          $it['code']      = null;
+          $res             += (int)$this->create($it);
         }
       }
 
