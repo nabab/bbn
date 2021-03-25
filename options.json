@@ -2578,7 +2578,7 @@
               "show_value": 1,
               "allow_children": 1,
               "inheritance": "cascade",
-              "permissions": "children",
+              "permissions": "cascade",
               "show_icon": 1,
               "i18n": "en"
             },
