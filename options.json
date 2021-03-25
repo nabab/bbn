@@ -3,6 +3,7 @@
     "cfg": {
       "categories": 1,
       "show_code": 1,
+      "frozen": 1,
       "show_icon": 1,
       "i18n": "en"
     },
@@ -13,6 +14,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "show_icon": 1,
           "i18n": "en"
@@ -25,6 +27,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -37,6 +40,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -49,6 +53,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -61,6 +66,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -73,6 +79,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -85,6 +92,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -98,6 +106,7 @@
         "cfg": {
           "allow_children": 1,
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "i18n": "en"
         },
@@ -109,6 +118,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -121,6 +131,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -181,6 +192,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "i18n": "en",
           "show_icon": 1
@@ -193,6 +205,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "allow_children": 1,
               "i18n": "en",
               "show_icon": 1,
@@ -316,6 +329,7 @@
                 }
               ],
               "show_code": 1,
+              "frozen": 1,
               "show_icon": 1,
               "show_value": null,
               "sortable": 1
@@ -329,6 +343,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "show_icon": 1,
           "i18n": "en"
@@ -340,7 +355,8 @@
         "items": [
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "MySQL",
             "code": "mysql",
@@ -349,6 +365,8 @@
               {
                 "cfg": {
                   "show_code": 1,
+                  "frozen": 1,
+                  "frozen": 1,
                   "show_alias": 1,
                   "schema": [
                     {
@@ -421,7 +439,8 @@
           },
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "PostgreSQL",
             "code": "pgsql",
@@ -444,7 +463,8 @@
             "items": [
               {
                 "cfg": {
-                  "show_code": 1
+                  "show_code": 1,
+                  "frozen": 1
                 },
                 "text": "Databases",
                 "code": "dbs"
@@ -452,6 +472,7 @@
               {
                 "cfg": {
                   "show_code": 1,
+                  "frozen": 1,
                   "show_value": 1,
                   "schema": [
                     {
@@ -561,6 +582,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "show_icon": 1,
           "i18n": "en"
@@ -569,7 +591,7 @@
         "code": "email",
         "icon": "nf nf-fa-at",
         "plugin": true,
-        "items": [
+        "items": [ 
           {
             "text": "Accounts",
             "code": "accounts"
@@ -581,6 +603,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1,
               "show_icon": 1
             },
@@ -648,6 +671,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1
             },
             "text": "Types",
@@ -676,6 +700,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -688,6 +713,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -712,6 +738,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -724,6 +751,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -746,6 +774,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -758,6 +787,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -818,6 +848,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -859,7 +890,8 @@
                   "type": "string"
                 }
               ],
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             }
           },
           {
@@ -931,6 +963,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_value": 1,
           "allow_children": 1,
           "show_icon": 1,
@@ -944,6 +977,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1,
               "show_alias": 1,
               "allow_children": 1,
@@ -978,6 +1012,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1
             },
             "text": "Paths' types",
@@ -1045,7 +1080,8 @@
               },
               {
                 "cfg": {
-                  "show_code": 1
+                  "show_code": 1,
+                  "frozen": 1
                 },
                 "text": "Cli",
                 "code": "cli",
@@ -1493,7 +1529,8 @@
           },
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "Theme",
             "code": "theme",
@@ -1551,6 +1588,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2308,6 +2346,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "show_icon": 1,
           "i18n": "en"
@@ -2320,6 +2359,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1,
               "sortable": 1
             },
@@ -2339,6 +2379,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2352,6 +2393,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2364,6 +2406,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "i18n": "en",
           "show_icon": 1
         },
@@ -2395,6 +2438,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2407,6 +2451,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "write": true,
           "show_icon": 1,
@@ -2419,7 +2464,8 @@
         "items": [
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "Media types",
             "code": "media",
@@ -2457,6 +2503,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "write": true
             },
             "text": "Notes types",
@@ -2505,6 +2552,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_value": 1,
           "allow_children": 1,
           "show_icon": 1,
@@ -2526,10 +2574,11 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1,
               "allow_children": 1,
               "inheritance": "cascade",
-              "permissions": 1,
+              "permissions": "children",
               "show_icon": 1,
               "i18n": "en"
             },
@@ -2541,6 +2590,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2552,6 +2602,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2564,6 +2615,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_icon": 1,
               "allow_children": 1,
               "i18n": "en"
@@ -2580,6 +2632,7 @@
                   {
                     "cfg": {
                       "show_code": 1,
+                      "frozen": 1,
                       "show_icon": 1,
                       "sortable": 1,
                       "allow_children": 1,
@@ -2615,6 +2668,7 @@
                   }, {
                     "cfg": {
                       "show_code": 1,
+                      "frozen": 1,
                       "show_icon": 1,
                       "allow_children": 1,
                       "show_alias": 1,
@@ -2641,6 +2695,7 @@
         "icon": "nf nf-fa-key",
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_value": 1,
           "sortable": 1,
           "allow_children": 1,
@@ -2670,6 +2725,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -2681,6 +2737,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "show_icon": 1,
           "i18n": "en"
@@ -2693,6 +2750,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "allow_children": 1
             },
             "text": "List",
@@ -2701,6 +2759,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "allow_children": 1
             },
             "text": "Plugins",
@@ -2719,6 +2778,7 @@
                       {
                         "cfg": {
                           "show_code": 1,
+                          "frozen": 1,
                           "show_alias": 1,
                           "show_value": 1,
                           "i18n": "en"
@@ -2730,6 +2790,7 @@
                           {
                             "cfg": {
                               "show_code": 1,
+                              "frozen": 1,
                               "show_alias": 1
                             },
                             "text": "Languages",
@@ -2750,6 +2811,7 @@
                           {
                             "cfg": {
                               "show_code": 1,
+                              "frozen": 1,
                               "show_alias": 1,
                               "show_value": 1
                             },
@@ -2760,6 +2822,7 @@
                               {
                                 "cfg": {
                                   "show_code": 1,
+                                  "frozen": 1,
                                   "show_alias": 1,
                                   "show_value": 1
                                 },
@@ -2787,6 +2850,7 @@
                               {
                                 "cfg": {
                                   "show_code": 1,
+                                  "frozen": 1,
                                   "show_alias": 1,
                                   "show_value": 1
                                 },
@@ -2797,6 +2861,7 @@
                               {
                                 "cfg": {
                                   "show_code": 1,
+                                  "frozen": 1,
                                   "show_alias": 1,
                                   "show_value": 1
                                 },
@@ -2807,6 +2872,7 @@
                               {
                                 "cfg": {
                                   "show_code": 1,
+                                  "frozen": 1,
                                   "show_alias": 1,
                                   "show_value": 1
                                 },
@@ -2835,6 +2901,7 @@
                             "icon": "nf nf-fa-envira",
                             "cfg": {
                               "show_code": 1,
+                              "frozen": 1,
                               "show_alias": 1,
                               "show_icon": 1,
                               "allow_children": 1,
@@ -2938,6 +3005,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_value": 1,
           "sortable": 1,
           "show_icon": 1,
@@ -2952,6 +3020,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_value": 1,
               "sortable": 1
             },
@@ -2961,6 +3030,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "allow_children": 1
             },
             "text": "Plugins",
@@ -3013,6 +3083,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3024,6 +3095,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3036,6 +3108,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3048,35 +3121,40 @@
         "items": [
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "Active",
             "code": "active"
           },
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "Disabled",
             "code": "disabled"
           },
           {
             "cfg": {
-              "show_code": 1
+              "show_code": 1,
+              "frozen": 1
             },
             "text": "Types",
             "code": "types",
             "items": [
               {
                 "cfg": {
-                  "show_code": 1
+                  "show_code": 1,
+                  "frozen": 1
                 },
                 "text": "Totals",
                 "code": "totals"
               },
               {
                 "cfg": {
-                  "show_code": 1
+                  "show_code": 1,
+                  "frozen": 1
                 },
                 "text": "Variations",
                 "code": "variations"
@@ -3088,6 +3166,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3099,6 +3178,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3110,6 +3190,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "allow_children": 1,
           "inheritance": "cascade",
           "show_icon": 1,
@@ -3365,6 +3446,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3438,6 +3520,7 @@
       {
         "cfg": {
           "show_code": 1,
+          "frozen": 1,
           "show_icon": 1,
           "allow_children": 1,
           "i18n": "en"
@@ -3450,6 +3533,7 @@
           {
             "cfg": {
               "show_code": 1,
+              "frozen": 1,
               "show_icon": 1,
               "allow_children": 1
             },
@@ -3464,6 +3548,7 @@
     "cfg": {
       "categories": 1,
       "show_code": 1,
+      "frozen": 1,
       "show_icon": 1,
       "i18n": "en"
     },

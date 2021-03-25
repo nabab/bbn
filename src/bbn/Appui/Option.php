@@ -1781,7 +1781,7 @@ class Option extends bbn\Models\Cls\Db
         $cfg[$m] = empty($cfg[$m]) ? 0 : 1;
       }
 
-      $mandatories = ['desc', 'inheritance'];
+      $mandatories = ['desc', 'inheritance', 'permissions'];
       foreach ($mandatories as $m){
         $cfg[$m] = empty($cfg[$m]) ? '' : $cfg[$m];
       }

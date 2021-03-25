@@ -20,7 +20,6 @@ namespace bbn\Mvc;
 use bbn;
 use bbn\X;
 
-
 class Environment
 {
 
@@ -35,64 +34,68 @@ class Environment
    * @var null|array
    */
   private $_params;
+
   /**
    * The mode of the output (doc, html, json, txt, Xml...)
    * @var null|string
    */
   private $_mode;
+
   /**
    * The request sent to the server to get the actual controller.
    * @var null|string
    */
   private $_url;
+
   /**
    * @var array $_POST
    */
   private $_post;
+
   /**
    * @var array $_GET
    */
   private $_get;
+
   /**
    * @var array $_FILES
    */
   private $_files;
+
   /**
    * Determines if it is sent through the command line
    * @var boolean
    */
   private $cli;
+
   private $new_url;
 
-  private static function _initialize()
-  {
-    self::$_initiated = true;
-    self::$_input = file_get_contents('php://input');
-  }
 
-  private function setParams($path)
+  public static function detectLanguage(): array
   {
-    if (!isset($this->_params)) {
-      $this->_params = [];
-      $tmp = explode('/', bbn\Str::parsePath($path));
-      foreach ($tmp as $t) {
-        if (!empty($t) || bbn\Str::isNumber($t)) {
-          if (\in_array($t, bbn\Mvc::$reserved, true)) {
-            $msg = X::_('The controller you are asking for contains one of these reserved words')
-                .': '.implode(', ', bbn\Mvc::$reserved);
-            throw new \Exception($msg);
-          }
+    $httpAcceptLanguageHeader = self::_getHttpAcceptLanguageHeader();
 
-          $this->_params[] = $t;
-        }
-      }
+    if ($httpAcceptLanguageHeader == null) {
+      return [];
     }
+
+    $locales = self::_getWeightedLocales($httpAcceptLanguageHeader);
+
+    $sortedLocales = self::_sortLocalesByWeight($locales);
+
+    return array_map(
+      function ($weightedLocale) {
+        return $weightedLocale['locale'];
+      }, $sortedLocales
+    );
   }
+
 
   public static function getInput()
   {
     return self::$_input;
   }
+
 
   /**
    * Change the output mode (content-type)
@@ -105,11 +108,46 @@ class Environment
     if (Router::isMode($mode)) {
       $this->_mode = $mode;
     }
+
     return $this->_mode;
   }
 
+
+  private function _setLocale()
+  {
+
+  }
+
+
+  private function _tryLocales(array $locales): ?string
+  {
+    foreach ($locales as $l) {
+      if (setlocale(LC_TIME, $l)) {
+        define('BBN_LOCALE', $l);
+        return $l;
+      }
+    }
+
+    return null;
+  }
+
+
   private function _init()
   {
+    $locales = [
+      BBN_LANG . '_' . strtoupper(BBN_LANG) . '.utf8',
+      BBN_LANG . '_' . strtoupper(BBN_LANG),
+      BBN_LANG,
+      'en_EN.utf8',
+      'en-EN.utf8',
+      'en_EN',
+      'en-EN',
+      'en_US.utf8',
+      'en-US.utf8',
+      'en_US',
+      'en-US',
+      'en',
+    ];
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->_post
     if (php_sapi_name() === 'cli') {
@@ -118,26 +156,32 @@ class Environment
     }
     // Non CLI request
     else {
+      if ($user_locales = self::detectLanguage()) {
+        array_unshift($locales, ...$user_locales);
+      }
+
       if (!isset($this->_post)) {
         $this->getPost();
       }
+
       if ($this->_has_post) {
         self::_dot_to_array($this->_post);
         /** @todo Remove the json parameter from the bbn.js functions */
         $this->setMode(BBN_DEFAULT_MODE);
       }
-      else if (\count($_FILES)) {
+      elseif (\count($_FILES)) {
         $this->setMode(BBN_DEFAULT_MODE);
       }
       // If no post, assuming to be a DOM document
       else {
         $this->setMode('dom');
       }
+
       if (isset($_SERVER['REQUEST_URI'])) {
         $current = $_SERVER['REQUEST_URI'];
       }
-      if (
-        isset($current) && (BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false)
+
+      if (isset($current) && (BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false)
       ) {
         $url = explode("?", urldecode($current))[0];
         if (BBN_CUR_PATH === '/') {
@@ -147,9 +191,20 @@ class Environment
         }
       }
     }
+
+    if (defined('BBN_LANG') && !defined('BBN_LOCALE')) {
+      if ($locale = $this->_tryLocales($locales)) {
+        define('BBN_LOCALE', $locale);
+      }
+      else {
+        throw new \Exception("Impossible to find a corresponding locale on this server for this app");
+      }
+    }
+
     $this->_url = implode('/', $this->_params ?: []);
     return $this;
   }
+
 
   public function __construct($url = false)
   {
@@ -158,6 +213,7 @@ class Environment
       $this->_init();
     }
   }
+
 
   public function setPrepath($path)
   {
@@ -172,8 +228,10 @@ class Environment
         }
       }
     }
+
     return true;
   }
+
 
   /**
    * Returns true if called from CLI/Cron, false otherwise
@@ -191,13 +249,16 @@ class Environment
         }
       }
     }
+
     return $this->_cli;
   }
+
 
   public function getUrl()
   {
     return $this->_url;
   }
+
 
   public function simulate($url, $post = false, $arguments = null)
   {
@@ -208,10 +269,12 @@ class Environment
     $this->_url = $url;
   }
 
+
   public function getMode()
   {
     return $this->_mode;
   }
+
 
   public function getCli()
   {
@@ -220,6 +283,7 @@ class Environment
       if ($this->isCli() === 'direct') {
         array_shift($argv);
       }
+
       $this->_post = [];
       if (isset($argv[1])) {
         $this->setParams($argv[1]);
@@ -233,52 +297,28 @@ class Environment
           }
         }
       }
+
       return $this->_post;
     }
   }
+
 
   public function getGet()
   {
     if (!isset($this->_get)) {
       $this->_get = [];
       if (\count($_GET) > 0) {
-        $this->_get = array_map(function ($a) {
-          return bbn\Str::correctTypes($a);
-        }, $_GET);
+        $this->_get = array_map(
+          function ($a) {
+            return bbn\Str::correctTypes($a);
+          }, $_GET
+        );
       }
     }
+
     return $this->_get;
   }
 
-  private static function _set_index(array $keys, array &$arr, $val)
-  {
-    $new_arr = &$arr;
-    while (\count($keys)) {
-      $var = array_shift($keys);
-      if (!isset($new_arr[$var])) {
-        $new_arr[$var] = \count($keys) ? [] : $val;
-        $new_arr = &$new_arr[$var];
-      }
-    }
-    return $arr;
-  }
-
-  private static function _dot_to_array(&$val)
-  {
-    if (\is_array($val)) {
-      $to_unset = [];
-      foreach ($val as $key => $v) {
-        $keys = explode('.', $key);
-        if (\count($keys) > 1) {
-          self::_set_index($keys, $val, $v);
-          $to_unset[] = $key;
-        }
-      }
-      foreach ($to_unset as $a) {
-        unset($val[$a]);
-      }
-    }
-  }
 
   public function getPost()
   {
@@ -289,24 +329,28 @@ class Environment
       elseif (!empty($_POST)) {
         $this->_post = $_POST;
       }
+
       if (!$this->_post) {
         $this->_post = [];
       }
       else {
         $this->_has_post = true;
-        $this->_post = bbn\Str::correctTypes($this->_post);
+        $this->_post     = bbn\Str::correctTypes($this->_post);
         foreach ($this->_post as $k => $v) {
           if (X::indexOf($k, '_bbn_') === 0) {
             if (!defined(strtoupper(substr($k, 1)))) {
               define(strtoupper(substr($k, 1)), $v);
             }
+
             unset($this->_post[$k]);
           }
         }
       }
     }
+
     return $this->_post;
   }
+
 
   public function getFiles()
   {
@@ -324,10 +368,12 @@ class Environment
                 if (!isset($j)) {
                   $j = 0;
                 }
+
                 $j++;
                 $file = bbn\Str::fileExt($f['name'][$i], true);
-                $v = $file[0] . '_' . $j . '.' . $file[1];
+                $v    = $file[0] . '_' . $j . '.' . $file[1];
               }
+
               $this->_files[$n][] = [
                 'name' => $v,
                 'tmp_name' => $f['tmp_name'][$i],
@@ -335,13 +381,14 @@ class Environment
                 'error' => $f['error'][$i],
                 'size' => $f['size'][$i],
               ];
-              $names[] = $v;
+              $names[]            = $v;
             }
           } else {
             $this->_files[$n] = $f;
           }
         }
       }
+
       /* @todo Maybe something for managing PUT requests
       else if (!empty(self::$_input) && !bbn\Str::isJson(self::$_input)) {
         $this->_files[] = [
@@ -354,19 +401,155 @@ class Environment
       }
       */
     }
+
     return $this->_files;
   }
+
 
   public function getParams()
   {
     return $this->_params;
   }
 
+
   public function getRequest(): ?string
   {
     if (self::$_initiated) {
       return $this->_url;
     }
+
     return null;
   }
+
+
+  private static function _getHttpAcceptLanguageHeader(): ?string
+  {
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+      return trim($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+    }
+
+    return null;
+  }
+
+
+  private static function _getWeightedLocales($httpAcceptLanguageHeader)
+  {
+    if (strlen($httpAcceptLanguageHeader) == 0) {
+      return [];
+    }
+
+    $weightedLocales = [];
+
+    // We break up the string 'en-CA,ar-EG;q=0.5' along the commas,
+    // and iterate over the resulting array of individual locales. Once
+    // we're done, $weightedLocales should look like
+    // [['locale' => 'en-CA', 'q' => 1.0], ['locale' => 'ar-EG', 'q' => 0.5]]
+    foreach (explode(',', $httpAcceptLanguageHeader) as $locale) {
+      // separate the locale key ("ar-EG") from its weight ("q=0.5")
+      $localeParts = explode(';', $locale);
+
+      $weightedLocale = ['locale' => $localeParts[0]];
+
+      if (count($localeParts) == 2) {
+        // explicit weight e.g. 'q=0.5'
+        $weightParts = explode('=', $localeParts[1]);
+
+        // grab the '0.5' bit and parse it to a float
+        $weightedLocale['q'] = floatval($weightParts[1]);
+      } else {
+        // no weight given in string, ie. implicit weight of 'q=1.0'
+        $weightedLocale['q'] = 1.0;
+      }
+
+      $weightedLocales[] = $weightedLocale;
+    }
+
+    return $weightedLocales;
+  }
+
+  /**
+   * Sort by high to low `q` value
+   */
+  private static function _sortLocalesByWeight($locales)
+  {
+    usort($locales, function ($a, $b) {
+      // usort will cast float values that we return here into integers,
+      // which can mess up our sorting. So instead of subtracting the `q`,
+      // values and returning the difference, we compare the `q` values and
+      // explicitly return integer values.
+      if ($a['q'] == $b['q']) {
+        return 0;
+      }
+
+      if ($a['q'] > $b['q']) {
+        return -1;
+      }
+
+      return 1;
+    });
+
+    return $locales;
+  }
+
+  private static function _initialize()
+  {
+    self::$_initiated = true;
+    self::$_input     = file_get_contents('php://input');
+  }
+
+
+  private function setParams($path)
+  {
+    if (!isset($this->_params)) {
+      $this->_params = [];
+      $tmp           = explode('/', bbn\Str::parsePath($path));
+      foreach ($tmp as $t) {
+        if (!empty($t) || bbn\Str::isNumber($t)) {
+          if (\in_array($t, bbn\Mvc::$reserved, true)) {
+            $msg = X::_('The controller you are asking for contains one of these reserved words')
+                .': '.implode(', ', bbn\Mvc::$reserved);
+            throw new \Exception($msg);
+          }
+
+          $this->_params[] = $t;
+        }
+      }
+    }
+  }
+
+
+  private static function _set_index(array $keys, array &$arr, $val)
+  {
+    $new_arr = &$arr;
+    while (\count($keys)) {
+      $var = array_shift($keys);
+      if (!isset($new_arr[$var])) {
+        $new_arr[$var] = \count($keys) ? [] : $val;
+        $new_arr       = &$new_arr[$var];
+      }
+    }
+
+    return $arr;
+  }
+
+
+  private static function _dot_to_array(&$val)
+  {
+    if (\is_array($val)) {
+      $to_unset = [];
+      foreach ($val as $key => $v) {
+        $keys = explode('.', $key);
+        if (\count($keys) > 1) {
+          self::_set_index($keys, $val, $v);
+          $to_unset[] = $key;
+        }
+      }
+
+      foreach ($to_unset as $a) {
+        unset($val[$a]);
+      }
+    }
+  }
+
+
 }

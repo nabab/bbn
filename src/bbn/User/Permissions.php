@@ -460,6 +460,30 @@ class Permissions extends bbn\Models\Cls\Basic
   }
 
 
+  public function getParentCfg(string $id_option): ?array
+  {
+    foreach ($this->opt->parents($id_option) as $i => $p) {
+      $cfg = $this->opt->getCfg($p);
+      if (!empty($cfg['permissions'])) {
+        if ((!$i && ($cfg['permissions'] === 'children')) 
+          || in_array($cfg['permissions'], ['all', 'cascade'])
+        ) {
+          return [
+            'cfg' => $cfg['permissions'],
+            'from' => $p,
+            'from_text' => $this->opt->text($p),
+            'cascade' => in_array($cfg['permissions'], ['all', 'cascade'])
+          ];
+        }
+
+        break;
+      }
+    }
+
+    return null;
+  }
+
+
   public function optionToPermission(string $id_option): ?string
   {
     if (bbn\Str::isUid($id_option)) {
@@ -508,7 +532,7 @@ class Permissions extends bbn\Models\Cls\Basic
       return $this->pref->has($id_option, $force) ?: $this->user->isAdmin();
     }
 
-    return null;
+    return true;
   }
 
 
@@ -694,23 +718,25 @@ class Permissions extends bbn\Models\Cls\Basic
         $cf['arch']['options']['id'],
         [[$cf['arch']['options']['cfg'], 'contains', '"permissions":']]
       );
+
       if ($id_option && $tmp) {
         $permissions = [];
         foreach ($tmp as $id) {
           /** @var array The option's config */
           $cfg = $this->opt->getCfg($id) ?: [];
           if (!empty($cfg['permissions'])) {
-            $permissions[$id] = $cfg;
+            $permissions[$id] = $cfg['permissions'];
           }
 
           if (isset($cfg['scfg']) && !empty($cfg['scfg']['permissions'])) {
             foreach ($this->opt->items($id) as $ido) {
-              $permissions[$ido] = $cfg['scfg'];
+              $permissions[$ido] = $cfg['scfg']['permissions'];
             }
           }
         }
 
-        foreach ($permissions as $id => $cfg) {
+
+        foreach ($permissions as $id => $mode) {
           $all = [];
           /** @var array The parents, starting from root */
           $parents = array_reverse($this->opt->parents($id));
@@ -722,13 +748,23 @@ class Permissions extends bbn\Models\Cls\Basic
             $root = $id_option;
           }
 
-          if (!empty($cfg['inheritance']) && ($cfg['inheritance'] === 'cascade')) {
-            if (($tmp = $this->opt->fullTree($id)) && !empty($tmp['items'])) {
-              $all = $tmp['items'];
-            }
-          }
-          else {
-            $all = $this->opt->fullOptions($id);
+          switch ($mode) {
+            case 'single':
+              $all = [$this->opt->option($id)];
+              break;
+            case 'cascade':
+            case 'all':
+              $tmp = $this->opt->fullTree($id);
+              $all = $tmp && !empty($tmp['items']) ? $tmp['items'] : [];
+              if ($mode === 'all') {
+                array_unshift($all, $this->opt->option($id));
+              }
+              break;
+            case 'children':
+            case 1:
+            case '1':
+              $all = $this->opt->fullOptions($id);
+              break;
           }
 
           if (!empty($all)) {
