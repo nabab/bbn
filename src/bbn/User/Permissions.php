@@ -617,6 +617,8 @@ class Permissions extends bbn\Models\Cls\Basic
 
   public function updateAll(array $routes)
   {
+    $this->opt->deleteCache();
+
     $res = ['total' => false];
 
     /** @var string The ID option for permissions < appui */
@@ -773,6 +775,8 @@ class Permissions extends bbn\Models\Cls\Basic
             $all = X::rmap(
               function ($a) {
                 $tmp = [
+                  'text' => '',
+                  'code' => null,
                   'id_alias' => $a['id']
                 ];
                 if (!empty($a['items'])) {
@@ -815,7 +819,9 @@ class Permissions extends bbn\Models\Cls\Basic
 
   public function create(array $item): ?int
   {
-    if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {      $cf       = $this->opt->getClassCfg();
+    X::log($item, "permissions");
+    if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {
+      $cf       = $this->opt->getClassCfg();
       $res      = 0;
       $subitems = false;
       $id       = $this->db->selectOne(
@@ -842,8 +848,6 @@ class Permissions extends bbn\Models\Cls\Basic
         //die(var_dump($subitems, $item));
         foreach ($subitems as $it) {
           $it['id_parent'] = $id;
-          $it['text']      = '';
-          $it['code']      = null;
           $res             += (int)$this->create($it);
         }
       }

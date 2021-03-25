@@ -186,7 +186,7 @@ class Option extends bbn\Models\Cls\Db
    * @param boolean $subs Used internally only for deleting children's cache without their parent
    * @return options
    */
-  public function deleteCache($id = null, $deep = false, $subs = false): self
+  public function deleteCache(string $id = null, $deep = false, $subs = false): self
   {
     if ($this->check()) {
       if (bbn\Str::isUid($id)) {
