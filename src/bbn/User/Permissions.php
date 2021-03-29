@@ -529,7 +529,7 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     if ($id_perm = $this->optionToPermission($id_option)) {
-      return $this->pref->has($id_option, $force) ?: $this->user->isAdmin();
+      return $this->pref->has($id_perm, $force) ?: $this->user->isAdmin();
     }
 
     return true;
@@ -623,7 +623,6 @@ class Permissions extends bbn\Models\Cls\Basic
 
     /** @var string The ID option for permissions < appui */
     if ($id_permission = $this->getOptionRoot()) {
-
       /** @var string The option's ID for appui */
       $appui = $this->opt->fromCode('appui');
 
@@ -715,11 +714,49 @@ class Permissions extends bbn\Models\Cls\Basic
 
       $cf = $this->opt->getClassCfg();
       // $id_option must be set to generate the option's permissions
-      $tmp = $this->db->getColumnValues(
-        $cf['table'],
-        $cf['arch']['options']['id'],
-        [[$cf['arch']['options']['cfg'], 'contains', '"permissions":']]
-      );
+      $tmp = $this->db->getColumnValues([
+        'table' => $cf['table'],
+        'fields' => [$cf['arch']['options']['id']],
+        'join' => [
+          [
+            'table' => $cf['table'],
+            'alias' => 'parent_option',
+            'type' => 'left',
+            'on' => [
+              [
+                'field' => 'parent_option.'.$cf['arch']['options']['id'],
+                'exp' => $cf['table'].'.'.$cf['arch']['options']['id_parent']
+              ], [
+                'field' => 'parent_option.'.$cf['arch']['options']['cfg'],
+                'operator' => 'doesnotcontain',
+                'value' => '"permissions":'
+              ]
+            ]
+          ]
+        ],
+        'where' => [
+          [
+            'field' => $cf['table'].'.'.$cf['arch']['options']['cfg'],
+            'operator' => 'contains',
+            'value' => '"permissions":'
+          ], [
+            'field' => $cf['table'].'.'.$cf['arch']['options']['id'],
+            'operator' => '!=',
+            'value' => $this->opt->getRoot()
+          ], [
+            'field' => $cf['table'].'.'.$cf['arch']['options']['id'],
+            'operator' => '!=',
+            'value' => $this->opt->fromCode('appui')
+          ], [
+            'field' => $cf['table'].'.'.$cf['arch']['options']['id'],
+            'operator' => '!=',
+            'value' => $this->opt->fromCode('plugins')
+          ], [
+            'field' => 'parent_option.'.$cf['arch']['options']['id'],
+            'operator' => 'isnull'
+          ]
+        ]
+      ]);
 
       if ($id_option && $tmp) {
         $permissions = [];
@@ -730,11 +767,13 @@ class Permissions extends bbn\Models\Cls\Basic
             $permissions[$id] = $cfg['permissions'];
           }
 
+          /*
           if (isset($cfg['scfg']) && !empty($cfg['scfg']['permissions'])) {
             foreach ($this->opt->items($id) as $ido) {
               $permissions[$ido] = $cfg['scfg']['permissions'];
             }
           }
+          */
         }
 
 
@@ -750,29 +789,31 @@ class Permissions extends bbn\Models\Cls\Basic
             $root = $id_option;
           }
 
+          $it = false;
           switch ($mode) {
             case 'single':
-              $all = [$this->opt->option($id)];
+              if ($tmp = $this->opt->option($id)) {
+                $it = $tmp;
+              }
               break;
             case 'cascade':
             case 'all':
-              $all = $this->opt->fullTree($id);
-              if ($mode === 'all') {
-                $all = [$all];
-              }
-              else {
-                $all = $all['items'] ?? [];
+              if ($tmp = $this->opt->fullTree($id)) {
+                $it = $tmp;
               }
               break;
             case 'children':
             case 1:
             case '1':
-              $all = $this->opt->fullOptions($id);
+              if ($tmp = $this->opt->fullOptions($id)) {
+                $it = $this->opt->option($id);
+                $it['items'] = $tmp;
+              }
               break;
           }
 
-          if (!empty($all)) {
-            $all = X::map(
+          if ($it) {
+            $all = X::rmap(
               function ($a) {
                 $tmp = [
                   'text' => '',
@@ -785,26 +826,12 @@ class Permissions extends bbn\Models\Cls\Basic
 
                 return $tmp;
               },
-              $all,
+              [$it],
               'items'
             );
 
-            if ($root === $id_option) {
-              $items = $all;
-            }
-            else {
-              $items = [[
-                'text' => '',
-                'code' => null,
-                'id_alias' => $id,
-                'items' => $all
-              ]];
-            }
-
-            foreach ($items as $it) {
-              $it['id_parent'] = $root;
-              $res['total']   += $this->create($it);
-            }
+            $all[0]['id_parent'] = $root;
+            $res['total'] += $this->create($all[0]);
           }
         }
       }

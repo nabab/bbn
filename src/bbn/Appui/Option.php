@@ -1740,6 +1740,7 @@ class Option extends bbn\Models\Cls\Db
       $c   =& $this->class_cfg;
       $cfg = $this->db->selectOne($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
       $cfg = bbn\Str::isJson($cfg) ? json_decode($cfg, true) : [];
+      $perm = $cfg['permissions'] ?? false;
       // Looking for parent with inheritance
       $parents = array_reverse($this->parents($id));
       $last    = \count($parents) - 1;
@@ -1754,11 +1755,16 @@ class Option extends bbn\Models\Cls\Db
         }
 
         if (!empty($parent_cfg['inheritance']) || !empty($parent_cfg['scfg']['inheritance'])) {
-          if ((($i === $last)
-              && (              ($parent_cfg['inheritance'] === 'children')
-              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'children')))              )
-              || (($parent_cfg['inheritance'] === 'cascade')
-              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'cascade'))              )
+          if (
+              (($i === $last)
+              && (
+              ($parent_cfg['inheritance'] === 'children')
+              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'children')))
+              )
+              || (
+              ($parent_cfg['inheritance'] === 'cascade')
+              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'cascade'))
+            )
           ) {
             // Keeping in the option cfg properties which don't exist in the parent
             $cfg                 = array_merge((array)$cfg, $parent_cfg['scfg'] ?? $parent_cfg);
@@ -1774,6 +1780,10 @@ class Option extends bbn\Models\Cls\Db
             $cfg['inherit_from'] = $p;
           }
         }
+      }
+
+      if ($perm) {
+        $cfg['permissions'] = $perm;
       }
 
       $mandatories = ['show_code', 'show_alias', 'show_value', 'show_icon', 'sortable', 'allow_children', 'frozen'];
