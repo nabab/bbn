@@ -558,10 +558,14 @@ class Permissions extends bbn\Models\Cls\Basic
     $sources = [[
       'text' => _("Main application"),
       'rootAccess' => $access,
-      'rootOptions' => $options
+      'rootOptions' => $options,
+      'code' => ''
     ]];
     $all     = array_merge(
-      $this->opt->fullOptions($appui),
+      array_map(function($a) {
+        $a['code'] = 'appui-'.$a['code'];
+        return $a;
+      }, $this->opt->fullOptions($appui)),
       $this->opt->fullOptions($plugins)
     );
     foreach ($all as $o) {
@@ -573,6 +577,7 @@ class Permissions extends bbn\Models\Cls\Basic
         if (!$only_with_children || !empty($tmp['num_children'])) {
           $sources[] = [
             'text' => $o['text'],
+            'code' => $o['code'],
             'rootAccess' => $id_perm,
             'rootOptions' => $id_option
           ];
