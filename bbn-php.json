@@ -1106,7 +1106,7 @@
                         "text": "getWidgets",
                         "value": "getWidgets",
                         "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getWidgets",
-                        "desc": "Gets the widgets list of a dashboard and the order list."
+                        "desc": "Returns the dashboard's widgets"
                     },
                     {
                         "type": "method",
@@ -1114,7 +1114,7 @@
                         "text": "getWidgetsCode",
                         "value": "getWidgetsCode",
                         "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getWidgetsCode",
-                        "desc": "Gets an associative array of widgets by code"
+                        "desc": ""
                     },
                     {
                         "type": "method",
