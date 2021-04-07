@@ -808,14 +808,14 @@ class Permissions extends bbn\Models\Cls\Basic
               break;
             case 'cascade':
             case 'all':
-              if ($tmp = $this->opt->fullTree($id)) {
+              if ($tmp = $this->opt->fullTreeRef($id)) {
                 $it = $tmp;
               }
               break;
             case 'children':
             case 1:
             case '1':
-              if ($tmp = $this->opt->fullOptions($id)) {
+              if ($tmp = $this->opt->fullOptionsRef($id)) {
                 $it = $this->opt->option($id);
                 $it['items'] = $tmp;
               }
