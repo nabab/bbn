@@ -151,24 +151,6 @@
                 "id_alias": ["dashboard", "appui"],
                 "items": [
                   {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "cron",
-                            "id_alias": ["cron", "widgets", "appui-dashboard", "plugins", "cron", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
@@ -215,18 +197,7 @@
               }
             },
             "text": "Dashboards",
-            "code": "list",
-            "plugin": true,
-            "items": [
-              {
-                "text": "Default dashboard",
-                "code": "default"
-              },
-              {
-                "text": "Plugins dashboard",
-                "code": "plugins"
-              }
-            ]
+            "code": "list"
           },
           {
             "cfg": {
@@ -331,6 +302,7 @@
               "show_code": 1,
               "frozen": 1,
               "show_icon": 1,
+              "permissions": "cascade",
               "show_value": null,
               "sortable": 1
             },
@@ -539,24 +511,6 @@
                 "code": "appui-dashboard",
                 "id_alias": ["dashboard", "appui"],
                 "items": [
-                  {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "databases",
-                            "id_alias": ["databases", "widgets", "appui-dashboard", "plugins", "database", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
                   {
                     "text": "Widgets",
                     "code": "widgets",
@@ -807,24 +761,6 @@
                 "id_alias": ["dashboard", "appui"],
                 "items": [
                   {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "last_changes",
-                            "id_alias": ["last_changes", "widgets", "appui-dashboard", "plugins", "history", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
@@ -903,32 +839,6 @@
                 "code": "appui-dashboard",
                 "id_alias": ["dashboard", "appui"],
                 "items": [
-                  {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "wp",
-                            "id_alias": ["wp", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
-                          },
-                          {
-                            "code": "staff_absent",
-                            "id_alias": ["staff_absent", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
-                          },
-                          {
-                            "code": "staff_absent_soon",
-                            "id_alias": ["staff_absent_soon", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
                   {
                     "text": "Widgets",
                     "code": "widgets",
@@ -1546,24 +1456,6 @@
                 "code": "appui-dashboard",
                 "id_alias": ["dashboard", "appui"],
                 "items": [
-                  {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "ide_recent_files",
-                            "id_alias": ["ide_recent_files", "widgets", "appui-dashboard", "plugins", "ide", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
                   {
                     "text": "Widgets",
                     "code": "widgets",
@@ -2964,24 +2856,6 @@
                 "id_alias": ["dashboard", "appui"],
                 "items": [
                   {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "sessions",
-                            "id_alias": ["projects", "widgets", "appui-dashboard", "plugins", "project", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
@@ -3041,24 +2915,6 @@
                 "code": "appui-dashboard",
                 "id_alias": ["dashboard", "appui"],
                 "items": [
-                  {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "servers",
-                            "id_alias": ["servers", "widgets", "appui-dashboard", "plugins", "server", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
                   {
                     "text": "Widgets",
                     "code": "widgets",
@@ -3394,28 +3250,6 @@
                 "id_alias": ["dashboard", "appui"],
                 "items": [
                   {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "tasks",
-                            "id_alias": ["tasks", "widgets", "appui-dashboard", "plugins", "task", "appui"]
-                          },
-                          {
-                            "code": "all_tasks",
-                            "id_alias": ["all_tasks", "widgets", "appui-dashboard", "plugins", "task", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
                     "text": "Widgets",
                     "code": "widgets",
                     "id_alias": ["widgets", "dashboard", "appui"],
@@ -3465,28 +3299,6 @@
                 "code": "appui-dashboard",
                 "id_alias": ["dashboard", "appui"],
                 "items": [
-                  {
-                    "text": "Dashboards",
-                    "code": "list",
-                    "id_alias": ["list", "dashboard", "appui"],
-                    "items": [
-                      {
-                        "text": "Plugins dashboard",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "list", "dashboard", "appui"],
-                        "items": [
-                          {
-                            "code": "users",
-                            "id_alias": ["users", "widgets", "appui-dashboard", "plugins", "usergroup", "appui"]
-                          },
-                          {
-                            "code": "sessions",
-                            "id_alias": ["users", "widgets", "appui-dashboard", "plugins", "usergroup", "appui"]
-                          }
-                        ]
-                      }
-                    ]
-                  },
                   {
                     "text": "Widgets",
                     "code": "widgets",

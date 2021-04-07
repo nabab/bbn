@@ -278,10 +278,9 @@ class Dashboard
    */
   public function addNativeWidget(array $widget): ?string
   {
-    if ($id = $this->opt->add($this->_prepareNativeWidget($widget))) {
-      if (!$this->perm->optionToPermission($id)) {
-        /** @todo add permissions */
-      }
+    if (($id = $this->opt->add($this->_prepareNativeWidget($widget)))
+      && $this->perm->createFromId($id)
+    ) {
       return $id;
     }
     return null;
@@ -584,6 +583,9 @@ class Dashboard
       throw new \Exception(_('A wrong argument value is passed'));
     }
     if (Str::isUid($id)) {
+      if ($id_alias = $this->db->selectOne($this->cfgPref['tables']['user_options'], $this->archPref['id_alias'], [$this->archPref['id'] => $id])) {
+        $id = $id_alias;
+      }
       return $this->db->selectOne(
         $this->cfgPref['tables']['user_options'],
         $this->archPref['cfg'] . '->>"$.code"',

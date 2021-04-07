@@ -3034,8 +3034,13 @@ class Option extends bbn\Models\Cls\Db
       if (isset($cfg['inherited_from'])) {
         unset($cfg['inherited_from']);
       }
+
       if (isset($cfg['id'])) {
         unset($cfg['id']);
+      }
+
+      if (isset($cfg['permissions']) && !in_array($cfg['permissions'], ['single', 'cascade', 'all', 'children'])) {
+        unset($cfg['permissions']);
       }
 
       if ($merge && ($old_cfg = $this->getCfg($id))) {

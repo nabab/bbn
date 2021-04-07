@@ -1173,7 +1173,7 @@ class Database extends bbn\Models\Cls\Cache
 
 
   /**
-   * Returns the ID of the host of the given DB.
+   * Returns the ID of the current host for the given DB.
    *
    * @param string $id_db
    * @return string|null

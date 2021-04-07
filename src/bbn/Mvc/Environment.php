@@ -123,7 +123,6 @@ class Environment
   {
     foreach ($locales as $l) {
       if (setlocale(LC_TIME, $l)) {
-        define('BBN_LOCALE', $l);
         return $l;
       }
     }

@@ -2656,10 +2656,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function count($table, array $where = []): ?int
   {
-    $args          = \is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [
+    $args = \is_string($table) ? [
       'tables' => [$table],
       'where' => $where
-    ];
+    ] : $table;
     $args['count'] = true;
     if (!empty($args['bbn_db_processed'])) {
       unset($args['bbn_db_processed']);
@@ -5285,6 +5285,9 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
         }
 
         $res['tables'][$i] = $this->tfn($t);
+        if (is_null($res['tables'][$i])) {
+          die(var_dump($t, $this->getCurrent()));
+        }
       }
     }
     else{

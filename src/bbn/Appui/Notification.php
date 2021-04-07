@@ -82,9 +82,8 @@ class Notification extends bbn\Models\Cls\Db
               ], [$pcfg['arch']['user_options']['id_option'] => BBN_ID_PERMISSION]
             );
             $is_public   = (bool)$this->opt->getProp(BBN_ID_PERMISSION, 'public');
-            $perm_parent = $this->db->selectOne($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$list_opt]);
+            $perm_parent = $this->perms->optionToPermission($list_opt, true);
           }
-
           $parent = $list_opt;
           foreach ($bits as $i => $code) {
             $text = ($i === 0) && !empty($cat_text) ? $cat_text : (($i === 1) && !empty($opt_text) ? $opt_text : $code);
@@ -97,18 +96,10 @@ class Notification extends bbn\Models\Cls\Db
                 ]
               );
             }
-
             if ($perms) {
-              if (!($pp = $this->opt->fromCode($p, $perm_parent))) {
-                $pp = $this->opt->add(
-                  [
-                  $ocfg['arch']['options']['text'] => $text,
-                  $ocfg['arch']['options']['code'] => 'opt'.$p,
-                  $ocfg['arch']['options']['id_parent'] => $perm_parent,
-                  $ocfg['arch']['options']['id_alias'] => $p,
-                  'public' => $is_public
-                  ]
-                );
+              if (!($pp = $this->perms->optionToPermission($p))) {
+                $pp = $this->perms->optionToPermission($p, true);
+                $this->opt->setProp($pp, ['public' => $is_public]);
                 if (!$is_public) {
                   foreach ($permissions as $perm) {
                     $this->db->insert(
@@ -121,10 +112,8 @@ class Notification extends bbn\Models\Cls\Db
                   }
                 }
               }
-
               $perm_parent = $pp;
             }
-
             $parent = $p;
             if ($i === 1) {
               $id_opt = $parent;
