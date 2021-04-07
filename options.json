@@ -188,7 +188,6 @@
             "cfg": {
               "show_code": 1,
               "frozen": 1,
-              "allow_children": 1,
               "i18n": "en",
               "show_icon": 1,
               "scfg": {
@@ -300,6 +299,7 @@
                 }
               ],
               "show_code": 1,
+              "allow_children": 1,
               "frozen": 1,
               "show_icon": 1,
               "permissions": "cascade",
