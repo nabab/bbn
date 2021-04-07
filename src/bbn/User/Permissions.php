@@ -737,18 +737,16 @@ class Permissions extends bbn\Models\Cls\Basic
                 'field' => 'parent_option.'.$cf['arch']['options']['id'],
                 'exp' => $cf['table'].'.'.$cf['arch']['options']['id_parent']
               ], [
-                'field' => 'parent_option.'.$cf['arch']['options']['cfg'],
-                'operator' => 'doesnotcontain',
-                'value' => '"permissions":'
+                'field' => 'JSON_EXTRACT('.$this->db->tfn('parent_option.'.$cf['arch']['options']['cfg'], true).', "$.permissions")',
+                'operator' => 'isnotnull'
               ]
             ]
           ]
         ],
         'where' => [
           [
-            'field' => $cf['table'].'.'.$cf['arch']['options']['cfg'],
-            'operator' => 'contains',
-            'value' => '"permissions":'
+            'field' =>  'JSON_EXTRACT('.$this->db->tfn($cf['table'].'.'.$cf['arch']['options']['cfg'], true).', "$.permissions")',
+            'operator' => 'isnotnull'
           ], [
             'field' => $cf['table'].'.'.$cf['arch']['options']['id'],
             'operator' => '!=',
