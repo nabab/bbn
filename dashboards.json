@@ -1,0 +1,61 @@
+[
+  {
+    "text": "Plugins dashboard",
+    "code": "plugins",
+    "id_option": ["list", "dashboard", "appui"],
+    "items": [
+      {
+        "code": "cron",
+        "id_option": ["cron", "widgets", "appui-dashboard", "plugins", "cron", "appui"]
+      },
+      {
+        "code": "databases",
+        "id_option": ["databases", "widgets", "appui-dashboard", "plugins", "database", "appui"]
+      },
+      {
+        "code": "last_changes",
+        "id_option": ["last_changes", "widgets", "appui-dashboard", "plugins", "history", "appui"]
+      },
+      {
+        "code": "wp",
+        "id_option": ["wp", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
+      },
+      {
+        "code": "staff_absent",
+        "id_option": ["staff_absent", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
+      },
+      {
+        "code": "staff_absent_soon",
+        "id_option": ["staff_absent_soon", "widgets", "appui-dashboard", "plugins", "hr", "appui"]
+      },
+      {
+        "code": "ide_recent_files",
+        "id_option": ["ide_recent_files", "widgets", "appui-dashboard", "plugins", "ide", "appui"]
+      },
+      {
+        "code": "projects",
+        "id_option": ["projects", "widgets", "appui-dashboard", "plugins", "project", "appui"]
+      },
+      {
+        "code": "servers",
+        "id_option": ["servers", "widgets", "appui-dashboard", "plugins", "server", "appui"]
+      },
+      {
+        "code": "tasks",
+        "id_option": ["tasks", "widgets", "appui-dashboard", "plugins", "task", "appui"]
+      },
+      {
+        "code": "all_tasks",
+        "id_option": ["all_tasks", "widgets", "appui-dashboard", "plugins", "task", "appui"]
+      },
+      {
+        "code": "users",
+        "id_option": ["users", "widgets", "appui-dashboard", "plugins", "usergroup", "appui"]
+      },
+      {
+        "code": "sessions",
+        "id_option": ["users", "widgets", "appui-dashboard", "plugins", "usergroup", "appui"]
+      }
+    ]
+  }
+]
