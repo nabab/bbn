@@ -866,7 +866,10 @@ class X
         $r = 'Resource '.get_resource_type($a);
       }
       elseif (Str::isBuid($a)) {
-        $r = '0x'.bin2hex($a);
+        $tmp = bin2hex($a);
+        if (strlen($tmp) === 32) {
+          $r = '0x'.bin2hex($a);
+        }
       }
 
       $st .= $r.PHP_EOL;

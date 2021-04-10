@@ -463,16 +463,20 @@ class Cache
   {
     switch (self::$type) {
       case 'apc':
+        /*
         if (\apc_exists($item)) {
           return \apc_fetch($item);
         }
         break;
+        */
       case 'memcache':
+        /*
         $tmp = $this->obj->get($item);
         if ($tmp !== $item) {
           return $tmp;
         }
         break;
+        */
       case 'files':
         $file = self::_file($item, $this->path);
         if (!$this->fs->isFile($file)) {

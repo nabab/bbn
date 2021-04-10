@@ -342,8 +342,8 @@ class Option extends bbn\Models\Cls\Db
       /** @var int|false $tmp */
       if (!$tmp && ($tmp = $this->db->selectOne(
         $c['table'], $c['arch']['options']['id'], [
-          $c['arch']['options']['id_parent'] => $id_parent,
-          $c['arch']['options']['code'] => $true_code
+          [$c['arch']['options']['id_parent'], '=', $id_parent],
+          [$c['arch']['options']['code'], '=', $true_code]
         ]
       ))
       ) {
@@ -888,16 +888,32 @@ class Option extends bbn\Models\Cls\Db
         return $r;
       }
 
-      $opt = $this->db->rselectAll(
-        $this->class_cfg['table'],
-        [$this->class_cfg['arch']['options']['id'], $this->class_cfg['arch']['options']['text']],
-        [$this->class_cfg['arch']['options']['id_parent'] => $id],
-        [$this->class_cfg['arch']['options']['text'] => 'ASC']
-      );
-      $res = [];
-      foreach ($opt as $r){
-        $res[$r[$this->class_cfg['arch']['options']['id']]] = $r[$this->class_cfg['arch']['options']['text']];
-      }
+      $cf  =& $this->class_cfg['arch']['options'];
+      $res = $this->db->selectAllByKeys([
+        'tables' => [$this->class_cfg['table']],
+        'fields' => [
+          'id' => $this->class_cfg['table'].'.'.$cf['id'],
+          'text' => 'IFNULL('.
+            $this->db->tfn($this->class_cfg['table'].'.'.$cf['text'], true).', '.
+            $this->db->tfn('alias.'.$cf['text'], true).
+            ')'
+        ],
+        'join' => [
+          [
+            'table' => $this->class_cfg['table'],
+            'alias' => 'alias',
+            'type'  => 'LEFT',
+            'on'    => [
+              [
+                'field' => $this->class_cfg['table'].'.'.$cf['id_alias'],
+                'exp'   => 'alias.'.$cf['id']
+              ]
+            ]
+          ]
+        ],
+        'where' => [$this->class_cfg['table'].'.'.$cf['id_parent'] => $id],
+        'order' => ['text' => 'ASC']
+      ]);
 
       $this->cacheSet($id, __FUNCTION__, $res);
       return $res;
@@ -2384,10 +2400,10 @@ class Option extends bbn\Models\Cls\Db
    * @param boolean $return_num If set to true the function will return the number of rows inserted otherwise the ID of the newly created option
    * @return int|string|false
    */
-  public function add(array $it, $force = false, $return_num = false)
+  public function add(array $it, $force = false, $return_num = false, $with_id = false)
   {
     if ($this->check()) {
-      $res   = null;
+      $res   = $return_num ? 0 : null;
       $items = !empty($it['items']) && \is_array($it['items']) ? $it['items'] : false;
       $id    = null;
       try {
@@ -2424,7 +2440,7 @@ class Option extends bbn\Models\Cls\Db
             && $force
             && (null !== $it[$c['code']])
         ) {
-          $res = $this->db->update(
+          $res = (int)$this->db->update(
             $this->class_cfg['table'],
             [
               $c['text'] => $it[$c['text']],
@@ -2446,12 +2462,12 @@ class Option extends bbn\Models\Cls\Db
           $c['num'] => $it[$c['num']] ?? null,
           $c['cfg'] => $it[$c['cfg']] ?? null
         ];
-        if (!empty($it['id'])) {
+        if (!empty($it['id']) && $with_id) {
           $values['id'] = $it['id'];
         }
 
         if (!$id
-            && ($res = $this->db->insert($this->class_cfg['table'], $values))
+            && ($res = (int)$this->db->insert($this->class_cfg['table'], $values))
         ) {
           $id = $this->db->lastId();
         }
@@ -2463,12 +2479,12 @@ class Option extends bbn\Models\Cls\Db
         if ($items && bbn\Str::isUid($id)) {
           foreach ($items as $item){
             $item['id_parent'] = $id;
-            $tmp               = (int)$this->add($item, $force, $return_num);
-            if ($return_num && $tmp) {
-              $res += $tmp;
-            }
+            $res              += (int)$this->add($item, $force, $return_num, $with_id);
           }
         }
+      }
+      else {
+        X::log($it, 'OptionAddErrors');
       }
 
       return $return_num ? $res : $id;
@@ -4242,7 +4258,7 @@ class Option extends bbn\Models\Cls\Db
 
       // If code is empty it MUST be null
       if (empty($it[$c['text']])) {
-        $it[$c['text']] = '';
+        $it[$c['text']] = null;
       }
 
       // Unsetting computed values

@@ -790,7 +790,7 @@ class Str
     if (\is_string($st) && (\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st)) {
       $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);
       if (!$enc || ($enc === '8bit')) {
-        return true;
+        return preg_match('~[^\x20-\x7E\t\r\n]~', $st) > 0;
       }
     }
 
@@ -1109,7 +1109,7 @@ class Str
    * Replaces accented characters with their character without the accent.
    *
    * ```php
-   * X::dump(\bbn\Str::removeAccents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
+   * X::dump(\bbn\Str::removeAccents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
    * // (string) "TA¨st  FA¬lA¨  A²A¨A A¹e"
    * ```
    *
@@ -1135,7 +1135,7 @@ class Str
    * ```php
    * X::dump(\bbn\Str::checkName("Paul"));
    * // (bool) true
-   * X::dump(\bbn\Str::checkName("Pa ul"));
+   * X::dump(\bbn\Str::checkName("Pa ul"));
    * // (bool) false
    * ```
    *
@@ -1407,7 +1407,7 @@ class Str
           $st .= $v;
         }
         elseif (is_string($v)) {
-          if (!ctype_print($v) && (\strlen($v) === 16)) {
+          if (self::isBuid($v)) {
             $st .= '0x'.bin2hex($v);
           }
           elseif (!$remove_empty || !empty($v)) {
@@ -1680,6 +1680,5 @@ class Str
 
     return str_replace(PHP_EOL, '<br>', $st);
   }
-
 
 }
