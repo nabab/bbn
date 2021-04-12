@@ -140,25 +140,17 @@
                 "id_alias": ["dashboard", "appui"],
                 "items": [
                   {
-                    "text": "Plugins",
-                    "code": "plugins",
-                    "id_alias": ["plugins", "widgets", "dashboard", "appui"],
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
                     "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
-                        "text": "Widgets",
-                        "code": "widgets",
-                        "id_alias": ["widgets", "dashboard", "appui"],
-                        "icon": "nf nf-mdi-widgets",
-                        "items": [
-                          {
-                            "text": "CRON",
-                            "code": "cron",
-                            "observe":false,
-                            "closable":true,
-                            "component":"appui-cron-widget-cron"
-                          }
-                        ]
+                        "text": "CRON",
+                        "code": "cron",
+                        "observe":false,
+                        "closable":true,
+                        "component":"appui-cron-widget-cron"
                       }
                     ]
                   }
@@ -303,13 +295,7 @@
             },
             "text": "Widgets",
             "code": "widgets",
-            "icon": "nf nf-mdi-widgets",
-            "items": [
-              {
-                "text": "Plugins",
-                "code": "plugins"
-              }
-            ]
+            "icon": "nf nf-mdi-widgets"
           }
         ]
       },
@@ -2404,6 +2390,69 @@
               {
                 "text": "Tasks",
                 "code": "tasks"
+              }
+            ]
+          },
+          {
+            "cfg": {
+              "show_code": 1,
+              "allow_children": 1
+            },
+            "text": "Plugins",
+            "code": "plugins",
+            "items": [
+              {
+                "text": "Dashboard",
+                "code": "appui-dashboard",
+                "id_alias": ["dashboard", "appui"],
+                "items": [
+                  {
+                    "text": "Widgets",
+                    "code": "widgets",
+                    "id_alias": ["widgets", "dashboard", "appui"],
+                    "icon": "nf nf-mdi-widgets",
+                    "items": [
+                      {
+                        "text": "News",
+                        "code": "news",
+                        "limit":5,
+                        "closable":false,
+                        "component": "appui-note-widget-news",
+                        "buttonsRight": [
+                          {
+                            "icon": "nf nf-fa-sticky_note",
+                            "text": "Create a news",
+                            "action": "toggleForm"
+                          },
+                          {
+                            "icon": "nf nf-fa-list_ul",
+                            "text": "News",
+                            "action": "openNews"
+                          }
+                        ]
+                      },
+                      {
+                        "text": "My notes",
+                        "code": "personal",
+                        "limit": 5,
+                        "closable": false,
+                        "component": "appui-note-widget-personal",
+                        "buttonsRight": [
+                          {
+                            "icon": "nf nf-fa-sticky_note",
+                            "text": "New note",
+                            "action": "toggleForm"
+                          },
+                          {
+                            "icon": "nf nf-fa-list_ul",
+                            "text": "Post-it",
+                            "action": "openPostit"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }

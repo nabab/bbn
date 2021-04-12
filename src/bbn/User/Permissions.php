@@ -519,18 +519,18 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     if (bbn\Str::isUid($id_option)) {
       $aliases = $this->opt->getAliasItems($id_option);
-      $root    = self::getOptionId('options');
+      $root    = $this->optionPermissionRoot($id_option);
       $id_perm = null;
       $all     = [];
       foreach ($aliases as $a) {
         $parents = $this->opt->parents($a);
-        $all[]   = $parents;
         if (in_array($root, $parents)) {
           $id_perm = $a;
           break;
         }
       }
 
+      /*
       if (!$id_perm) {
         foreach ($aliases as $i => $a) {
           foreach ($all[$i] as $b) {
@@ -541,6 +541,7 @@ class Permissions extends bbn\Models\Cls\Basic
           }
         }
       }
+      */
 
       if (!$id_perm && $create) {
         $this->createFromId($id_option);
