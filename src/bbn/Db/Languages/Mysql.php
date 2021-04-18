@@ -1475,6 +1475,31 @@ MYSQL
   }
 
 
+  /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    if ($tmp = $this->tableFullName($table)) {
+      $bits = X::split($tmp, '.');
+      return $this->db->getOne(
+        "SELECT table_comment
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE table_schema = ?
+        AND table_name = ?",
+        $bits[0],
+        $bits[1]
+      );
+    }
+
+    return '';
+  }
+
+
   public function getCreate(string $table, array $model = null): string
   {
     $st = '';

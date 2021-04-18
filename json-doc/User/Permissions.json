@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "A permission system linked to options, User classes and preferences.\n *\nA permission is an optioon under the permission option (\"permissions\", \"appui\") or one oof its aliases.\nThey are ONLY permissions.\n *\nNo!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.\nNo!!! Deleting a permission deletes the preference",
+        "description": "A permission system linked to options, User classes and preferences.\n *\nA permission is an option under the permission option (\"permissions\", \"appui\") or one of its aliases.\nThey are ONLY permissions.\n *\nNo!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.\nNo!!! Deleting a permission deletes the preference",
         "tags": {
             "copyright": "BBN Solutions",
             "since": "Nov 24, 2016, 13:23:12 +0000",
@@ -19,8 +19,8 @@
     ],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Permissions.php",
-    "startLine": 30,
-    "endLine": 1020,
+    "startLine": 33,
+    "endLine": 1252,
     "contentConstructor": {
         "file": "bbn\\User\\Permissions",
         "returns": null
@@ -28,16 +28,16 @@
     "methods": {
         "__construct": {
             "name": "__construct",
-            "summary": "permissions constructor.",
+            "summary": "Permissions constructor.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $routes = NULL)\n  {\n    if (!($this->opt = bbn\\Appui\\Option::getInstance())) {\n      throw new \\Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));\n    }\n\n    if (!($this->user = bbn\\User::getInstance())) {\n      throw new \\Exception(X::_('Impossible to construct permissions: you need to instantiate user before'));\n    }\n\n    if (!($this->pref = Preferences::getInstance())) {\n      throw new \\Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));\n    }\n\n    if ($routes) {\n      foreach ($routes as $url => $plugin) {\n        $plugin['url']   = $url;\n        $this->plugins[] = $plugin;\n      }\n    }\n\n    self::retrieverInit($this);\n    self::optionalInit();\n    $this->db = bbn\\Db::getInstance();\n  }",
-            "startLine": 55,
-            "endLine": 79,
+            "code": "function(array $routes = NULL)\n  {\n    if (!($this->opt = Option::getInstance())) {\n      throw new \\Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));\n    }\n\n    if (!($this->user = User::getInstance())) {\n      throw new \\Exception(X::_('Impossible to construct permissions: you need to instantiate user before'));\n    }\n\n    if (!($this->pref = Preferences::getInstance())) {\n      throw new \\Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));\n    }\n\n    if ($routes) {\n      foreach ($routes as $url => $plugin) {\n        $plugin['url']   = $url;\n        $this->plugins[] = $plugin;\n      }\n    }\n\n    self::retrieverInit($this);\n    self::optionalInit();\n    $this->db = Db::getInstance();\n  }",
+            "startLine": 60,
+            "endLine": 84,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -70,8 +70,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, $type = 'access', $create = false)\n  {\n    $opath  = $path;\n    $parent = null;\n    $root   = false;\n    if (($type === 'access') && $this->plugins && !empty($path)) {\n      foreach ($this->plugins as $plugin) {\n        if (strpos($path, $plugin['url'].'\/') === 0) {\n          if (strpos($plugin['name'], 'appui-') === 0) {\n            $root = $this->opt->fromCode(\n              'access',\n              'permissions',\n              substr($plugin['name'], 6),\n              BBN_APPUI\n            );\n            $path = substr($path, strlen($plugin['url']) + 1);\n          }\n          elseif ($plugin['name']) {\n            $root = $this->opt->fromCode(\n              'access',\n              'permissions',\n              $plugin['name'],\n              'plugins',\n            );\n            $path = substr($path, strlen($plugin['url']) + 1);\n          }\n\n          break;\n        }\n      }\n    }\n\n    if (!$root) {\n      $root = $this->opt->fromCode($type, self::$option_root_id);\n    }\n\n    if (!$root) {\n      throw new \\Exception(X::_(\"Impossible to find the permission code\"));\n    }\n\n    $parts  = explode('\/', trim($path, '\/'));\n    $parent = $root;\n\n    foreach ($parts as $i => $p){\n      $is_last = $i === (\\count($parts) - 1);\n      if (!empty($p)) {\n        $prev_parent = $parent;\n        \/\/ Adds a slash for each bit of the path except the last one\n        $parent = $this->opt->fromCode($p.($is_last ? '' : '\/'), $prev_parent);\n            \/\/ If not found looking for a subpermission\n        if (!$parent && !$is_last) {\n          $parent = $this->opt->fromCode($p, $prev_parent);\n        }\n        elseif ($is_last && $prev_parent && !$parent && $create) {\n          if ($this->_add(\n            [\n              'code' => $p,\n              'text' => $p\n            ],\n            $prev_parent\n          )\n          ) {\n            $parent = $this->db->lastId();\n          }\n        }\n      }\n    }\n\n    return $parent ?: null;\n  }",
-            "startLine": 89,
-            "endLine": 158,
+            "startLine": 96,
+            "endLine": 165,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -93,7 +93,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type"
                 },
                 {
                     "name": "type",
@@ -117,7 +118,7 @@
         },
         "toPath": {
             "name": "toPath",
-            "summary": "",
+            "summary": "Returns the path corresponding to the given ID",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -125,8 +126,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option)\n  {\n    $p    = [];\n    $bits = $this->opt->getCodePath($id_option);\n    \/\/ Minimum: appui, plugin, permissions, path\n    if (empty($bits) || (count($bits) < 4)) {\n      return null;\n    }\n\n    $bits = array_reverse($bits);\n    if (array_shift($bits) !== 'appui') {\n      return null;\n    }\n\n    $root   = array_shift($bits);\n    $ok     = false;\n    $prefix = '';\n    \/\/ Main application\n    if ($root === 'permissions') {\n      if (array_shift($bits) !== 'access') {\n        throw new \\Exception(\"The permission should be under access\");\n      }\n\n      $ok = true;\n    }\n    \/\/ Plugins\n    elseif ($plugin = X::getRow($this->plugins, ['name' => 'appui-'.$root])) {\n      if ((array_shift($bits) !== 'permissions') || (array_shift($bits) !== 'access')) {\n        throw new \\Exception(\"The permission should be under permissions\/access of the plugin\");\n      }\n\n      $prefix = $plugin['url'].'\/';\n      $ok     = true;\n    }\n\n    if ($ok) {\n      return $prefix.X::join($bits, '');\n    }\n\n    return null;\n  }",
-            "startLine": 161,
-            "endLine": 201,
+            "startLine": 175,
+            "endLine": 215,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -154,16 +155,16 @@
         },
         "options": {
             "name": "options",
-            "summary": "Returns the result of Appui\\Option::options filtered with only the ones authorized to the current user.",
+            "summary": "Returns the result of Option::Options filtered through current user's permissions.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_option = NULL, $type = 'access')\n  {\n    if (($id_option = $this->_get_id_option($id_option, $type))\n        && ($os = $this->opt->options(\\func_get_args()))\n    ) {\n      $res = [];\n      foreach ($os as $o){\n        if ($this->pref->has($o['id'])) {\n          $res[] = $o;\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 211,
-            "endLine": 227,
+            "code": "function($id_option = NULL, $type = 'access')\n  {\n    if (($id_option = $this->_get_id_option($id_option, $type))\n        && ($os = $this->opt->options($id_option))\n    ) {\n      $res = [];\n      foreach ($os as $id => $o){\n        if ($this->pref->has($id)) {\n          $res[$id] = $o;\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 225,
+            "endLine": 241,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -185,7 +186,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -200,16 +202,16 @@
         },
         "fullOptions": {
             "name": "fullOptions",
-            "summary": "Returns the result of Appui\\Option::full_options filtered with only the ones authorized to the current user.",
+            "summary": "Returns the result of Option::fullOptions filtered through current user's permissions.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_option = NULL, $type = 'access')\n  {\n    if (($id_option = $this->_get_id_option($id_option, $type))\n        && ($os = $this->opt->fullOptions(\\func_get_args()))\n    ) {\n      $res = [];\n      foreach ($os as $o){\n        \/* if ( ($ids = $this->pref->retrieveIds($o['id'])) && ($cfg = $this->pref->get($ids[0])) ){\n          $res[] = X::mergeArrays($o, $cfg);\n        } *\/\n        if ($this->has($o['id'], $type)) {\n          $res[] = X::mergeArrays($o, $this->pref->getByOption($o['id']) ?: []);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 237,
-            "endLine": 256,
+            "code": "function($id_option = NULL, $type = 'access')\n  {\n    if (($id_option = $this->_get_id_option($id_option, $type))\n        && ($os = $this->opt->fullOptions($id_option))\n    ) {\n      $res = [];\n      foreach ($os as $o){\n        \/* if ( ($ids = $this->pref->retrieveIds($o['id'])) && ($cfg = $this->pref->get($ids[0])) ){\n          $res[] = X::mergeArrays($o, $cfg);\n        } *\/\n        if ($this->has($o['id'], $type)) {\n          $res[] = X::mergeArrays($o, $this->pref->getByOption($o['id']) ?: []);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 251,
+            "endLine": 270,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -231,7 +233,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -254,8 +257,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option = NULL, $type = 'access')\n  {\n    if ($id_option = $this->_get_id_option($id_option, $type)) {\n      return $this->pref->options($id_option ?: $this->getCurrent());\n    }\n\n    return null;\n  }",
-            "startLine": 266,
-            "endLine": 273,
+            "startLine": 280,
+            "endLine": 287,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -277,7 +280,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -300,8 +304,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option = NULL, $type = 'access')\n  {\n    if ($id_option = $this->_get_id_option($id_option, $type)) {\n      return $this->pref->fullOptions($id_option ?: $this->getCurrent());\n    }\n\n    return null;\n  }",
-            "startLine": 283,
-            "endLine": 290,
+            "startLine": 297,
+            "endLine": 304,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -323,7 +327,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -346,8 +351,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option = NULL, $type = 'access', $force = false)\n  {\n    \/*\n    if ( $all = $this->getAll($id_option, $type) ){\n      $r = [];\n      foreach ( $all as $a ){\n        if ( $this->has($a['id'], '', $force) ){\n          $r[] = $a;\n        }\n      }\n      return $r;\n    }\n    *\/\n    if (($id_option = $this->_get_id_option($id_option, $type))\n        && $this->has($id_option, $type, $force)\n    ) {\n      return $this->pref->option($id_option);\n    }\n\n    return null;\n  }",
-            "startLine": 301,
-            "endLine": 321,
+            "startLine": 315,
+            "endLine": 335,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -369,7 +374,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -378,7 +384,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "access",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Force permission check"
                 },
                 {
                     "name": "force",
@@ -401,8 +408,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option = NULL, $type = 'access', $force = false)\n  {\n    if (!$force && $this->user && $this->user->isDev()) {\n      return true;\n    }\n\n    if ($id_option = $this->_get_id_option($id_option, $type)) {\n      $option = $this->opt->option($id_option);\n      if (!empty($option['public'])) {\n        return true;\n      }\n\n      return $this->pref->has($id_option, $force);\n    }\n\n    return false;\n  }",
-            "startLine": 332,
-            "endLine": 348,
+            "startLine": 346,
+            "endLine": 362,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -423,7 +430,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -432,7 +440,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "access",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Force permission check"
                 },
                 {
                     "name": "force",
@@ -455,8 +464,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option = NULL, $type = 'access', $force = false)\n  {\n    if (!$force && $this->user && $this->user->isDev()) {\n      return true;\n    }\n\n    if ($this->has($id_option, $type, $force)) {\n      return true;\n    }\n\n    if (($id_option = $this->_get_id_option($id_option, $type))\n        && ($options = $this->opt->fullOptions($id_option))\n    ) {\n      foreach ($options as $option){\n        if ($this->hasDeep($option['id'], $type, $force)) {\n          return true;\n        }\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 359,
-            "endLine": 380,
+            "startLine": 373,
+            "endLine": 394,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -477,7 +486,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -486,7 +496,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "access",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Force permission check"
                 },
                 {
                     "name": "force",
@@ -501,7 +512,7 @@
         },
         "is": {
             "name": "is",
-            "summary": "Checks if an option corresponds to the given path.",
+            "summary": "Alias of fromPath.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -509,8 +520,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, $type = 'access')\n  {\n    return $this->fromPath($path, $type);\n  }",
-            "startLine": 390,
-            "endLine": 393,
+            "startLine": 404,
+            "endLine": 407,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -532,7 +543,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -555,8 +567,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $arr)\n  {\n    $res = [];\n    if (isset($arr[0])) {\n      foreach ($arr as $a){\n        if (isset($a['id']) && $this->has($a['id'])) {\n          $res[] = $a;\n        }\n      }\n    }\n    elseif (isset($arr['items'])) {\n      $res = $arr;\n      unset($res['items']);\n      foreach ($arr['items'] as $a){\n        if (isset($a['id']) && $this->has($a['id'])) {\n          if (!isset($res['items'])) {\n            $res['items'] = [];\n          }\n\n          $res['items'][] = $a;\n        }\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 402,
-            "endLine": 427,
+            "startLine": 418,
+            "endLine": 443,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -583,7 +595,7 @@
         },
         "add": {
             "name": "add",
-            "summary": "Grants a new permission to a user or a group",
+            "summary": "Grants a new permission to a user or a group.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -591,8 +603,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option, $type = 'access')\n  {\n    if ($id_option = $this->_get_id_option($id_option, $type)) {\n      return $this->pref->setByOption($id_option, []);\n    }\n\n    return null;\n  }",
-            "startLine": 436,
-            "endLine": 443,
+            "startLine": 453,
+            "endLine": 460,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -615,7 +627,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "option"
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -638,8 +650,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option, $type = 'access')\n  {\n    if ($id_option = $this->_get_id_option($id_option, $type)) {\n      return $this->pref->delete($id_option);\n    }\n\n    return null;\n  }",
-            "startLine": 453,
-            "endLine": 460,
+            "startLine": 470,
+            "endLine": 477,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -661,7 +673,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type: access or option"
                 },
                 {
                     "name": "type",
@@ -676,7 +689,7 @@
         },
         "getParentCfg": {
             "name": "getParentCfg",
-            "summary": "",
+            "summary": "Returns the permissions inherited properties.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -684,8 +697,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option)\n  {\n    foreach ($this->opt->parents($id_option) as $i => $p) {\n      $cfg = $this->opt->getCfg($p);\n      if (!empty($cfg['permissions'])) {\n        if ((!$i && ($cfg['permissions'] === 'children')) \n          || in_array($cfg['permissions'], ['all', 'cascade'])\n        ) {\n          return [\n            'cfg' => $cfg['permissions'],\n            'from' => $p,\n            'from_text' => $this->opt->text($p),\n            'cascade' => in_array($cfg['permissions'], ['all', 'cascade'])\n          ];\n        }\n\n        break;\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 463,
-            "endLine": 484,
+            "startLine": 486,
+            "endLine": 507,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -713,23 +726,23 @@
         },
         "optionToPermission": {
             "name": "optionToPermission",
-            "summary": "",
+            "summary": "Returns the corresponding permission of a given option.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_option)\n  {\n    if (bbn\\Str::isUid($id_option)) {\n      $aliases = $this->opt->getAliasItems($id_option);\n      $root    = self::getOptionId('options');\n      $id_perm = null;\n      $all     = [];\n      foreach ($aliases as $a) {\n        $parents = $this->opt->parents($a);\n        $all[]   = $parents;\n        if (in_array($root, $parents)) {\n          $id_perm = $a;\n          break;\n        }\n      }\n\n      if (!$id_perm) {\n        foreach ($aliases as $i => $a) {\n          foreach ($all[$i] as $b) {\n            if ($this->opt->alias($b) === $root) {\n              $id_perm = $a;\n              break;\n            }\n          }\n        }\n      }\n\n      return $id_perm ?: null;\n    }\n  }",
-            "startLine": 487,
-            "endLine": 516,
+            "code": "function($id_option, $create = false)\n  {\n    if (bbn\\Str::isUid($id_option)) {\n      $aliases = $this->opt->getAliasItems($id_option);\n      $root    = $this->optionPermissionRoot($id_option);\n      $id_perm = null;\n      $all     = [];\n      foreach ($aliases as $a) {\n        $parents = $this->opt->parents($a);\n        if (in_array($root, $parents)) {\n          $id_perm = $a;\n          break;\n        }\n      }\n\n      \/*\n      if (!$id_perm) {\n        foreach ($aliases as $i => $a) {\n          foreach ($all[$i] as $b) {\n            if ($this->opt->alias($b) === $root) {\n              $id_perm = $a;\n              break;\n            }\n          }\n        }\n      }\n      *\/\n\n      if (!$id_perm && $create) {\n        $this->createFromId($id_option);\n        return $this->optionToPermission($id_option);\n      }\n\n      return $id_perm ?: null;\n    }\n  }",
+            "startLine": 518,
+            "endLine": 553,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
                 "string",
@@ -744,13 +757,23 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
+                    "default_name": "",
+                    "description": "The permission will be created if it doesn't exist."
+                },
+                {
+                    "name": "create",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
                     "default_name": ""
                 }
             ]
         },
         "readOption": {
             "name": "readOption",
-            "summary": "Checks if the category represented by the given option ID is readable by the current user",
+            "summary": "Checks if the given option is readable by the current user.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -758,8 +781,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option = NULL, $force = false)\n  {\n    if ($this->user->isAdmin()) {\n      return true;\n    }\n\n    if ($id_perm = $this->optionToPermission($id_option)) {\n      return $this->pref->has($id_perm, $force) ?: $this->user->isAdmin();\n    }\n\n    return true;\n  }",
-            "startLine": 525,
-            "endLine": 536,
+            "startLine": 562,
+            "endLine": 573,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -796,7 +819,7 @@
         },
         "writeOption": {
             "name": "writeOption",
-            "summary": "Checks if the category represented by the given option ID is writable by the current user",
+            "summary": "Checks if the given option is writable by the current user.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -804,8 +827,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option, $force = false)\n  {\n    return $this->readOption($id_option, $force);\n  }",
-            "startLine": 545,
-            "endLine": 548,
+            "startLine": 582,
+            "endLine": 585,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -842,16 +865,16 @@
         },
         "getSources": {
             "name": "getSources",
-            "summary": "",
+            "summary": "Returns an array corresponding to the different roots for permissions in the project.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($only_with_children = true)\n  {\n    $appui   = $this->opt->fromCode('appui');\n    $root    = $this->opt->fromCode('permissions', $appui);\n    $access  = $this->opt->fromCode('access', $root);\n    $options = $this->opt->fromCode('options', $root);\n    $plugins = $this->opt->fromCode('plugins');\n    $sources = [[\n      'text' => _(\"Main application\"),\n      'rootAccess' => $access,\n      'rootOptions' => $options,\n      'code' => ''\n    ]];\n    $all     = array_merge(\n      array_map(function($a) {\n        $a['code'] = 'appui-'.$a['code'];\n        return $a;\n      }, $this->opt->fullOptions($appui)),\n      $this->opt->fullOptions($plugins)\n    );\n    foreach ($all as $o) {\n      if (!empty($o['plugin'])\n          && ($id_perm = $this->opt->fromCode('access', 'permissions', $o['id']))\n      ) {\n        $id_option = $this->opt->fromCode('options', 'permissions', $o['id']);\n        $tmp       = $this->opt->option($id_perm);\n        if (!$only_with_children || !empty($tmp['num_children'])) {\n          $sources[] = [\n            'text' => $o['text'],\n            'code' => $o['code'],\n            'rootAccess' => $id_perm,\n            'rootOptions' => $id_option\n          ];\n        }\n      }\n    }\n\n    return $sources;\n  }",
-            "startLine": 551,
-            "endLine": 589,
+            "code": "function($only_with_children = true)\n  {\n    $appui   = $this->opt->fromCode('appui');\n    $root    = $this->opt->fromCode('permissions', $appui);\n    $access  = $this->opt->fromCode('access', $root);\n    $options = $this->opt->fromCode('options', $root);\n    $plugins = $this->opt->fromCode('plugins');\n    $sources = [[\n      'text' => _(\"Main application\"),\n      'rootAccess' => $access,\n      'rootOptions' => $options,\n      'code' => ''\n    ]];\n    $all     = array_merge(\n      array_map(\n        function($a) {\n          $a['code'] = 'appui-'.$a['code'];\n          return $a;\n        },\n        $this->opt->fullOptions($appui)\n      ),\n      $this->opt->fullOptions($plugins)\n    );\n    foreach ($all as $o) {\n      if (!empty($o['plugin'])\n          && ($id_perm = $this->opt->fromCode('access', 'permissions', $o['id']))\n      ) {\n        $id_option = $this->opt->fromCode('options', 'permissions', $o['id']);\n        $tmp       = $this->opt->option($id_perm);\n        if (!$only_with_children || !empty($tmp['num_children'])) {\n          $sources[] = [\n            'text' => $o['text'],\n            'code' => $o['code'],\n            'rootAccess' => $id_perm,\n            'rootOptions' => $id_option\n          ];\n        }\n      }\n    }\n\n    return $sources;\n  }",
+            "startLine": 595,
+            "endLine": 636,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -878,7 +901,7 @@
         },
         "accessExists": {
             "name": "accessExists",
-            "summary": "",
+            "summary": "Checks if the given permission corresponds to real file in mvc\/public.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
@@ -886,8 +909,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_perm)\n  {\n    $real    = false;\n    $parents = array_reverse($this->opt->parents($id_perm));\n    $access  = $this->opt->fromCode('access', 'permissions', 'appui');\n    if (in_array($access, $parents, true)) {\n      $path_to_file = $this->opt->toPath($id_perm, '', $access);\n      if (substr($path_to_file, -1) === '\/') {\n        return is_dir(bbn\\Mvc::getAppPath().'mvc\/public\/'.substr($path_to_file, 0, -1));\n      }\n\n      return file_exists(bbn\\Mvc::getAppPath().'mvc\/public\/'.$path_to_file.'.php');\n    }\n    else {\n      $plugin_name = $this->opt->code($parents[2]);\n      if ($this->opt->code($parents[1]) === 'appui') {\n        $plugin_name = 'appui-'.$plugin_name;\n      }\n\n      $path_to_file = $this->opt->toPath($id_perm, '', $parents[4]);\n      if (substr($path_to_file, -1) === '\/') {\n        return is_dir(bbn\\Mvc::getPluginPath($plugin_name).'mvc\/public\/'.substr($path_to_file, 0, -1));\n      }\n\n      return file_exists(bbn\\Mvc::getPluginPath($plugin_name).'mvc\/public\/'.$path_to_file.'.php');\n    }\n\n    return false;\n  }",
-            "startLine": 592,
-            "endLine": 620,
+            "startLine": 646,
+            "endLine": 674,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -912,18 +935,198 @@
                 }
             ]
         },
-        "updateAll": {
-            "name": "updateAll",
-            "summary": "",
+        "accessPluginRoot": {
+            "name": "accessPluginRoot",
+            "summary": "Returns",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Permissions",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $routes)\n  {\n    $this->opt->deleteCache();\n\n    $res = ['total' => false];\n\n    \/** @var string The ID option for permissions < appui *\/\n    if ($id_permission = $this->getOptionRoot()) {\n      \/** @var string The option's ID for appui *\/\n      $appui = $this->opt->fromCode('appui');\n\n      \/** @var string The option's ID for plugins *\/\n      $plugins = $this->opt->fromCode('plugins');\n\n      \/** @var string The option's ID of the permissions on options $id_option *\/\n      $id_option = $this->getOptionId('options');\n\n      \/** @var string The option's ID of the permissions on pages (controllers) $id_page *\/\n      $id_page = $this->getOptionId('access');\n\n      \/** @var string The option's ID of the permissions on pages (controllers) $id_page *\/\n      $id_plugins = $this->getOptionId('plugins');\n\n      \/** @var function Filter php files *\/\n      $fn = function ($a) {\n        return !empty($a['num'])\n          || ((substr($a['name'], -4) === '.php')\n              && (basename($a['name']) !== '_ctrl.php'));\n      };\n\n      \/\/ The app base access\n      if ($id_page) {\n\n        \/** @todo Add the possibility to do it for another project? *\/\n        $fs = new bbn\\File\\System();\n\n        $res['total'] = 0;\n        \/\/ All files in public from the main app\n        if ($all = $fs->getTree(bbn\\Mvc::getAppPath().'mvc\/public', '', false, $fn)) {\n          $all = $this->_treat($all);\n          usort($all, [$this, '_sort']);\n          array_walk($all, [$this, '_walk']);\n          foreach ($all as $i => &$it){\n            $it['cfg']     = json_encode(['order' => $i + 1]);\n            $res['total'] += $this->_add($it, $id_page);\n          }\n\n          unset($it);\n        }\n\n        if (!empty($routes)) {\n          foreach ($routes as $url => $route) {\n            $root = false;\n            if (strpos($route['name'], 'appui-') === 0) {\n              $root = $this->opt->fromCode('access', 'permissions', substr($route['name'], 6), 'appui');\n            }\n            elseif (!($root = $this->opt->fromCode($route['name'], $id_plugins))) {\n              $root = $this->opt->add(\n                [\n                  'text' => $route['name'],\n                  'code' => $route['name'],\n                  'id_parent' => $id_plugins\n                ]\n              );\n            }\n\n            if (!$root) {\n              $err = X::_(\n                \"Impossible to find the plugin %s\",\n                substr($route['name'], 6)\n              );\n              X::log($err, 'updatePermissions');\n              continue;\n              throw new \\Exception($err);\n            }\n\n            if ($all = $fs->getTree(\n              $route['path'].'src\/mvc\/public',\n              '',\n              false,\n              $fn\n            )\n            ) {\n              $all = $this->_treat($all);\n              usort($all, [$this, '_sort']);\n              array_walk($all, [$this, '_walk']);\n              foreach ($all as $i => &$it){\n                $it['cfg']     = json_encode(['order' => $i + 1]);\n                $res['total'] += $this->_add($it, $root);\n              }\n\n              unset($it);\n            }\n          }\n        }\n      }\n\n      $cf = $this->opt->getClassCfg();\n      \/\/ $id_option must be set to generate the option's permissions\n      $tmp = $this->db->getColumnValues([\n        'table' => $cf['table'],\n        'fields' => [$cf['arch']['options']['id']],\n        'join' => [\n          [\n            'table' => $cf['table'],\n            'alias' => 'parent_option',\n            'type' => 'left',\n            'on' => [\n              [\n                'field' => 'parent_option.'.$cf['arch']['options']['id'],\n                'exp' => $cf['table'].'.'.$cf['arch']['options']['id_parent']\n              ], [\n                'field' => 'parent_option.'.$cf['arch']['options']['cfg'],\n                'operator' => 'doesnotcontain',\n                'value' => '\"permissions\":'\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          [\n            'field' => $cf['table'].'.'.$cf['arch']['options']['cfg'],\n            'operator' => 'contains',\n            'value' => '\"permissions\":'\n          ], [\n            'field' => $cf['table'].'.'.$cf['arch']['options']['id'],\n            'operator' => '!=',\n            'value' => $this->opt->getRoot()\n          ], [\n            'field' => $cf['table'].'.'.$cf['arch']['options']['id'],\n            'operator' => '!=',\n            'value' => $this->opt->fromCode('appui')\n          ], [\n            'field' => $cf['table'].'.'.$cf['arch']['options']['id'],\n            'operator' => '!=',\n            'value' => $this->opt->fromCode('plugins')\n          ], [\n            'field' => 'parent_option.'.$cf['arch']['options']['id'],\n            'operator' => 'isnull'\n          ]\n        ]\n      ]);\n\n      if ($id_option && $tmp) {\n        $permissions = [];\n        foreach ($tmp as $id) {\n          \/** @var array The option's config *\/\n          $cfg = $this->opt->getCfg($id) ?: [];\n          if (!empty($cfg['permissions'])) {\n            $permissions[$id] = $cfg['permissions'];\n          }\n\n          \/*\n          if (isset($cfg['scfg']) && !empty($cfg['scfg']['permissions'])) {\n            foreach ($this->opt->items($id) as $ido) {\n              $permissions[$ido] = $cfg['scfg']['permissions'];\n            }\n          }\n          *\/\n        }\n\n\n        foreach ($permissions as $id => $mode) {\n          $all = [];\n          \/** @var array The parents, starting from root *\/\n          $parents = array_reverse($this->opt->parents($id));\n          \/\/ Looking for the root of the options' permissions\n          if ((count($parents) > 2) && \\in_array($parents[1], [$appui, $plugins])) {\n            $root = $this->opt->fromCode('options', 'permissions', $parents[2]);\n          }\n          else {\n            $root = $id_option;\n          }\n\n          $it = false;\n          switch ($mode) {\n            case 'single':\n              if ($tmp = $this->opt->option($id)) {\n                $it = $tmp;\n              }\n              break;\n            case 'cascade':\n            case 'all':\n              if ($tmp = $this->opt->fullTree($id)) {\n                $it = $tmp;\n              }\n              break;\n            case 'children':\n            case 1:\n            case '1':\n              if ($tmp = $this->opt->fullOptions($id)) {\n                $it = $this->opt->option($id);\n                $it['items'] = $tmp;\n              }\n              break;\n          }\n\n          if ($it) {\n            $all = X::rmap(\n              function ($a) {\n                $tmp = [\n                  'text' => '',\n                  'code' => null,\n                  'id_alias' => $a['id']\n                ];\n                if (!empty($a['items'])) {\n                  $tmp['items'] = $a['items'];\n                }\n\n                return $tmp;\n              },\n              [$it],\n              'items'\n            );\n\n            $all[0]['id_parent'] = $root;\n            $res['total'] += $this->create($all[0]);\n          }\n        }\n      }\n\n      $this->opt->deleteCache();\n    }\n\n    return $res;\n\n  }",
-            "startLine": 623,
-            "endLine": 849,
+            "code": "function($name)\n  {\n    $args = ['access', 'permissions'];\n    if (strpos($name, 'appui-') === 0) {\n      array_push($args, substr($name, 6), 'appui');\n    }\n    else {\n      array_push($args, $name, 'plugins');\n    }\n    X::log($args, 'errorUpdatePermissions');\n\n    return $this->opt->fromCode(...$args);\n  }",
+            "startLine": 684,
+            "endLine": 696,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "optionPermissionRoot": {
+            "name": "optionPermissionRoot",
+            "summary": "Returns",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $create = false)\n  {\n    \/** @var string The option's ID for appui *\/\n    $appui   = $this->opt->fromCode('appui');\n    \/** @var string The option's ID for plugins *\/\n    $plugins = $this->opt->fromCode('plugins');\n    \/** @var array The parents, the first being root *\/\n    $parents = array_reverse($this->opt->parents($id));\n    $num     = count($parents);\n\n    \/\/ Looking for the root of the options' permissions\n    if (($num > 2) && \\in_array($parents[1], [$appui, $plugins])) {\n\n      if (($num > 4) && ($this->opt->code($parents[3]) === 'plugins')) {\n        $root_parent = $this->opt->fromCode('plugins', 'permissions', $parents[2]);\n        if (!$root_parent) {\n          throw new \\Exception(\"Impossible to find a parent for plugin $plugin\");\n        }\n\n        $plugin  = $this->opt->code($parents[4]);\n        if ($parents[1] === $appui) {\n          $alias = $this->opt->fromCode('options', 'permissions', $plugin, 'appui');\n        }\n        else {\n          $alias = $this->opt->fromCode('options', 'permissions', $plugin, 'plugins');\n        }\n\n        $id_root = $this->opt->fromCode($plugin, $root_parent);\n        if (!$id_root && $create) {\n          $id_root = $this->opt->add([\n            'id_parent' => $root_parent,\n            'code' => $plugin,\n            'text' => $plugin,\n            'id_alias' => $alias\n          ]);\n        }\n\n        return $id_root;\n      }\n\n      return $this->opt->fromCode('options', 'permissions', $parents[2]);\n    }\n\n    \/** @var string The option's ID of the permissions on options $id_option *\/\n    return $this->getOptionId('options');\n  }",
+            "startLine": 706,
+            "endLine": 751,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "create",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "accessUpdatePath": {
+            "name": "accessUpdatePath",
+            "summary": "Updates all access permission for the given path in the given root.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $root)\n  {\n    $num = 0;\n    $fs  = new bbn\\File\\System();\n    $ff  = ['\\\\bbn\\\\User\\\\Permissions', 'fFilter'];\n    if ($all = $fs->getTree($path.'mvc\/public', '', false, $ff)) {\n      $all = self::fTreat($all);\n      usort($all, ['\\\\bbn\\User\\\\Permissions', 'fSort']);\n      array_walk($all, ['\\\\bbn\\\\User\\\\Permissions', 'fWalk']);\n      foreach ($all as $i => $it) {\n        $it['cfg'] = json_encode(['order' => $i + 1]);\n        $num      += $this->_add($it, $root);\n      }\n    }\n\n    return $num;\n  }",
+            "startLine": 762,
+            "endLine": 778,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The ID of the root access option"
+                },
+                {
+                    "name": "root",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "accessUpdateApp": {
+            "name": "accessUpdateApp",
+            "summary": "Updates all access permission for the main app.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($id_page = $this->getOptionId('access')) {\n      return $this->accessUpdatePath(bbn\\Mvc::getAppPath(), $id_page);\n    }\n\n    return null;\n  }",
+            "startLine": 786,
+            "endLine": 793,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "optionsUpdateAll": {
+            "name": "optionsUpdateAll",
+            "summary": "Updates all the permission for the options.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $cf = $this->opt->getClassCfg();\n    $of =& $cf['arch']['options'];\n\n    $num = 0;\n\n    $tmp = $this->db->getColumnValues(\n      [\n        'table' => $cf['table'],\n        'fields' => [$of['id']],\n        'join' => [\n          [\n            'table' => $cf['table'],\n            'alias' => 'parent_option',\n            'type' => 'left',\n            'on' => [\n              [\n                'field' => 'parent_option.'.$of['id'],\n                'exp' => $cf['table'].'.'.$of['id_parent']\n              ], [\n                'field' => 'parent_option.'.$of['cfg'],\n                'operator' => 'contains',\n                'value' => '\"permissions\":'\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          [\n            'field' =>  $cf['table'].'.'.$of['cfg'],\n            'operator' => 'contains',\n            'value' => '\"permissions\":'\n          ], [\n            'field' => $cf['table'].'.'.$of['id'],\n            'operator' => '!=',\n            'value' => $this->opt->getRoot()\n          ], [\n            'field' => $cf['table'].'.'.$of['id'],\n            'operator' => '!=',\n            'value' => $this->opt->fromCode('appui')\n          ], [\n            'field' => $cf['table'].'.'.$of['id'],\n            'operator' => '!=',\n            'value' => $this->opt->fromCode('plugins')\n          ], [\n            'field' => 'parent_option.'.$of['id'],\n            'operator' => 'isnull'\n          ]\n        ]\n      ]\n    );\n\n    if ($tmp) {\n      $permissions = [];\n      foreach ($tmp as $id) {\n        \/** @var array The option's config *\/\n        $cfg = $this->opt->getCfg($id) ?: [];\n        if (!empty($cfg['permissions'])) {\n          $permissions[$id] = $cfg['permissions'];\n          foreach ($this->opt->getAliasItems($id) as $alias) {\n            $permissions[$alias] = $cfg['permissions'];\n          }\n        }\n\n        \/*\n        if (isset($cfg['scfg']) && !empty($cfg['scfg']['permissions'])) {\n          foreach ($this->opt->items($id) as $ido) {\n            $permissions[$ido] = $cfg['scfg']['permissions'];\n          }\n        }\n        *\/\n      }\n\n\n      foreach ($permissions as $id => $mode) {\n        $all = [];\n        \/** @var array The parents, starting from root *\/\n        if (!($root = $this->optionPermissionRoot($id, true))) {\n          continue;\n        }\n\n        $it = false;\n        switch ($mode) {\n          case 'single':\n            if ($tmp = $this->opt->option($id)) {\n              $it = $tmp;\n            }\n            break;\n          case 'cascade':\n          case 'all':\n            if ($tmp = $this->opt->fullTree($id)) {\n              $it = $tmp;\n            }\n            break;\n          case 'children':\n          case 1:\n          case '1':\n            if ($tmp = $this->opt->fullOptions($id)) {\n              $it = $this->opt->option($id);\n              $it['items'] = $tmp;\n            }\n            break;\n        }\n\n        if ($it) {\n          $all = X::rmap(\n            function ($a) {\n              $tmp = [\n                'text' => '',\n                'code' => null,\n                'id_alias' => $a['id']\n              ];\n              if (!empty($a['items'])) {\n                $tmp['items'] = $a['items'];\n              }\n\n              return $tmp;\n            },\n            [$it],\n            'items'\n          );\n\n          $all[0]['id_parent'] = $root;\n          $num += $this->createOptionPermission($all[0]);\n        }\n      }\n    }\n\n    return $num;\n  }",
+            "startLine": 801,
+            "endLine": 931,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "updateAll": {
+            "name": "updateAll",
+            "summary": "update All",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $routes)\n  {\n    $this->opt->deleteCache();\n\n    $res = ['total' => false];\n\n    \/** @var string The ID option for permissions < appui *\/\n    if ($id_permission = $this->getOptionRoot()) {\n      \/** @var string The option's ID for appui *\/\n      $appui = $this->opt->fromCode('appui');\n\n      \/** @var string The option's ID for plugins *\/\n      $plugins = $this->opt->fromCode('plugins');\n\n      \/** @var string The option's ID of the permissions on pages (controllers) $id_page *\/\n      $id_page = $this->getOptionId('access');\n\n      \/** @var string The option's ID of the permissions on pages (controllers) $id_page *\/\n      $id_plugins = $this->getOptionId('plugins');\n\n      \/\/ The app base access\n      if ($id_page) {\n\n        \/** @todo Add the possibility to do it for another project? *\/\n        $fs = new bbn\\File\\System();\n\n        $res['total'] = (int)$this->accessUpdateApp();\n\n        if (!empty($routes)) {\n          foreach ($routes as $url => $route) {\n            $root = $this->accessPluginRoot($route['name']);\n\n            if (!$root) {\n              $err = X::_(\n                \"Impossible to find the plugin %s\",\n                substr($route['name'], 6)\n              );\n              X::log($err, 'errorUpdatePermissions');\n              continue;\n              throw new \\Exception($err);\n            }\n\n            $res['total'] += $this->accessUpdatePath($route['path'].'src\/', $root);\n          }\n        }\n      }\n\n      $res['total'] += $this->optionsUpdateAll();\n\n      $this->opt->deleteCache();\n    }\n\n    return $res;\n\n  }",
+            "startLine": 941,
+            "endLine": 995,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -946,8 +1149,8 @@
                 }
             ]
         },
-        "create": {
-            "name": "create",
+        "createFromId": {
+            "name": "createFromId",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -955,9 +1158,46 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $item)\n  {\n    X::log($item, \"permissions\");\n    if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {\n      $cf       = $this->opt->getClassCfg();\n      $res      = 0;\n      $subitems = false;\n      $id       = $this->db->selectOne(\n        $cf['table'],\n        $cf['arch']['options']['id'],\n        [\n          $cf['arch']['options']['id_parent'] => $item['id_parent'],\n          $cf['arch']['options']['id_alias'] => $item['id_alias']\n        ]\n      );\n      if (!empty($item['items'])) {\n        $subitems = $item['items'];\n        unset($item['items']);\n      }\n\n      if (!$id) {\n        $id = $this->opt->add($item);\n        if ($id) {\n          $res++;\n        }\n      }\n\n      if ($id && $subitems) {\n        \/\/die(var_dump($subitems, $item));\n        foreach ($subitems as $it) {\n          $it['id_parent'] = $id;\n          $res             += (int)$this->create($it);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n\n  }",
-            "startLine": 852,
-            "endLine": 892,
+            "code": "function($id)\n  {\n    \/\/ The option\n    if ($opt = $this->opt->option($id)) {\n      \/\/ All the parents from the closest\n      $parents = $this->opt->parents($id);\n      \/\/ The farest parent having permissions set\n      $id_parent = false;\n      foreach ($parents as $i => $p) {\n        $cfg = $this->opt->getCfg($p);\n        if (!$cfg['permissions']) {\n          break;\n        }\n        else {\n          if (!$i && ($cfg['permissions'] === 'children')) {\n            $id_parent = $p;\n          }\n          elseif (in_array($cfg['permissions'], ['all', 'cascade'])) {\n            $id_parent = $p;\n          }\n        }\n      }\n      \/\/ If no parent with permissions this option must have it\n      if (!$id_parent) {\n        $cfg = $this->opt->getCfg($id);\n        if (!$cfg['permissions']) {\n          return null;\n        }\n\n        \/** @var string The option's ID for appui *\/\n        $appui = $this->opt->fromCode('appui');\n\n        \/** @var string The option's ID for plugins *\/\n        $plugins = $this->opt->fromCode('plugins');\n\n        \/** @var string The option's ID of the permissions on options $id_option *\/\n        $id_option = $this->getOptionId('options');\n        \/\/ we need to locate the root of the permission\n        $rparents = array_reverse($parents);\n        \/\/ Looking for the root of the options' permissions\n        if ((count($rparents) > 2) && \\in_array($rparents[1], [$appui, $plugins])) {\n          $id_perm = $this->opt->fromCode('options', 'permissions', $rparents[2]);\n        }\n        else {\n          $id_perm = $id_option;\n        }\n        \n      }\n      \/\/ Otherwise the parent permission needs to exist\n      elseif (!($id_perm = $this->optionToPermission($id_parent))) {\n        return null;\n      }\n\n      return $this->opt->add([\n        'id_parent' => $id_perm,\n        'id_alias' => $id\n      ]) ? 1 : 0;\n    }\n\n    return null;\n  }",
+            "startLine": 998,
+            "endLine": 1058,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createOptionPermission": {
+            "name": "createOptionPermission",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $item)\n  {\n    if (X::hasProps($item, ['id_parent', 'id_alias'], true)) {\n      $cf       = $this->opt->getClassCfg();\n      $co       =& $cf['arch']['options'];\n      $res      = 0;\n      $children = false;\n      $id       = $this->db->selectOne(\n        $cf['table'],\n        $co['id'],\n        [\n          $co['id_parent'] => $item['id_parent'],\n          $co['id_alias'] => $item['id_alias']\n        ]\n      );\n      if (!empty($item['items'])) {\n        $children = $item['items'];\n        unset($item['items']);\n      }\n\n      if (!$id) {\n        $item['text'] = null;\n        $id = $this->opt->add($item);\n        X::log($this->opt->getPathArray($item['id_alias']), 'insertPerm');\n        if ($id) {\n          $res++;\n        }\n\n      }\n      elseif ($this->opt->text($id)) {\n        $this->db->update(\n          $cf['table'],\n          [\n            $co['text'] => null,\n            $co['cfg'] => null,\n            $co['value'] => null\n          ],\n          [$co['id'] => $id]\n        );\n      }\n\n      if ($id && $children) {\n        \/\/die(var_dump($subitems, $item));\n        foreach ($children as $it) {\n          $it['id_parent'] = $id;\n          $res             += (int)$this->createOptionPermission($it);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n\n  }",
+            "startLine": 1061,
+            "endLine": 1115,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -976,6 +1216,214 @@
                     "name": "item",
                     "position": 0,
                     "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fFilter": {
+            "name": "fFilter",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $a)\n  {\n    return !empty($a['num'])\n      || ((substr($a['name'], -4) === '.php')\n          && (basename($a['name']) !== '_ctrl.php'));\n\n  }",
+            "startLine": 1118,
+            "endLine": 1124,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "a",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fTreat": {
+            "name": "fTreat",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $tree, $parent = false)\n  {\n    $res = [];\n    foreach ($tree as $i => $t){\n      $code      = $t['type'] === 'dir' ? basename($t['name']).'\/' : basename($t['name'], '.php');\n      $text      = $t['type'] === 'dir' ? basename($t['name']) : basename($t['name'], '.php');\n      $o         = [\n        'code' => $code,\n        'text' => $text\n      ];\n      if ($t['type'] === 'file') {\n        $o['type'] = 'file';\n      }\n\n      if (!empty($t['items'])) {\n        $o['items'] = self::fTreat($t['items'], $o['code']);\n      }\n\n      array_push($res, $o);\n    }\n\n    return $res;\n  }",
+            "startLine": 1127,
+            "endLine": 1149,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "tree",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "parent",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "fSort": {
+            "name": "fSort",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($a, $b)\n  {\n    if (substr($a['code'], -1) === '\/') {\n      $a['code'] = '00'.$a['code'];\n    }\n\n    if (substr($b['code'], -1) === '\/') {\n      $b['code'] = '00'.$b['code'];\n    }\n\n    $a = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a['code'], 'lower')));\n    $b = str_replace('.', '0', str_replace('_', '1', Str::changeCase($b['code'], 'lower')));\n    return strcmp($a, $b);\n  }",
+            "startLine": 1153,
+            "endLine": 1166,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "a",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "b",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fWalk": {
+            "name": "fWalk",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(&$a)\n  {\n    if (!empty($a['items'])) {\n      usort($a['items'],  ['\\\\bbn\\User\\\\Permissions', 'fSort']);\n      array_walk($a['items'], ['\\\\bbn\\User\\\\Permissions', 'fWalk']);\n    }\n  }",
+            "startLine": 1170,
+            "endLine": 1176,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "a",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fMerge": {
+            "name": "fMerge",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(&$target, $src, $path)\n  {\n    $parts = explode('\/', $path);\n    foreach ($parts as $p){\n      if (!empty($p)) {\n        foreach ($target as $i => $a){\n          if (($a['code'] === $p.'\/') && !empty($target[$i]['items'])) {\n            self::fMerge($target[$i]['items'], $src, substr($path, \\strlen($p) + 1));\n            return;\n          }\n        }\n\n        array_push(\n          $target, [\n          'code' => $p.'\/',\n          'text' => $p,\n          'items' => $src\n          ]\n        );\n      }\n    }\n  }",
+            "startLine": 1179,
+            "endLine": 1200,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "target",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "src",
+                    "position": 1,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 2,
+                    "type": null,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1920,7 +2368,7 @@
         "current": "f8bf3120194711eb83ae0050560a97cd"
     },
     "constants": null,
-    "numMethods": 49,
+    "numMethods": 60,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 6,
@@ -1961,11 +2409,11 @@
     "namespaceName": "bbn\\User",
     "shortName": "Permissions",
     "summary": "A permission system linked to options, User classes and preferences.",
-    "description": "*\nA permission is an optioon under the permission option (\"permissions\", \"appui\") or one oof its aliases.\nThey are ONLY permissions.\n *\nNo!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.\nNo!!! Deleting a permission deletes the preference",
+    "description": "*\nA permission is an option under the permission option (\"permissions\", \"appui\") or one of its aliases.\nThey are ONLY permissions.\n *\nNo!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.\nNo!!! Deleting a permission deletes the preference",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\nA permission is an optioon under the permission option (&quot;permissions&quot;, &quot;appui&quot;) or one oof its aliases.\nThey are ONLY permissions.\n<\/em>\nNo!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.\nNo!!! Deleting a permission deletes the preference<\/p>"
+            "content": "<p><em>\nA permission is an option under the permission option (&quot;permissions&quot;, &quot;appui&quot;) or one of its aliases.\nThey are ONLY permissions.\n<\/em>\nNo!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.\nNo!!! Deleting a permission deletes the preference<\/p>"
         }
     ]
 }

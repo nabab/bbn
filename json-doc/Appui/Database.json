@@ -1641,7 +1641,7 @@
         },
         "retrieveHost": {
             "name": "retrieveHost",
-            "summary": "Returns the ID of the host of the given DB.",
+            "summary": "Returns the ID of the current host for the given DB.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Appui\\Database",

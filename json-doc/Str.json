@@ -16,7 +16,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Str.php",
     "startLine": 20,
-    "endLine": 1685,
+    "endLine": 1684,
     "contentConstructor": null,
     "methods": {
         "cast": {
@@ -1224,7 +1224,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($st)\n  {\n    if (\\is_string($st) && (\\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st)) {\n      $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);\n      if (!$enc || ($enc === '8bit')) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "code": "function($st)\n  {\n    if (\\is_string($st) && (\\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st)) {\n      $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);\n      if (!$enc || ($enc === '8bit')) {\n        return preg_match('~[^\\x20-\\x7E\\t\\r\\n]~', $st) > 0;\n      }\n    }\n\n    return false;\n  }",
             "startLine": 788,
             "endLine": 798,
             "isDeprecated": false,
@@ -1611,7 +1611,7 @@
         "removeAccents": {
             "name": "removeAccents",
             "summary": "Replaces accented characters with their character without the accent.",
-            "description": "*\n```php\nX::dump(\\bbn\\Str::removeAccents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3\u00a0\u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\"\n```",
+            "description": "*\n```php\nX::dump(\\bbn\\Str::removeAccents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3 \u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\"\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -1619,7 +1619,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "X::dump(\\bbn\\Str::removeAccents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3\u00a0\u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\""
+                    "content": "X::dump(\\bbn\\Str::removeAccents(\"T\u00c3\u00a8st F\u00c3\u00acl\u00c3\u00a8 \u00c3\u00b2\u00c3\u00a8\u00c3 \u00c3\u00b9\u00e8\"));\n\/\/ (string) \"TA\u00a8st  FA\u00aclA\u00a8  A\u00b2A\u00a8A A\u00b9e\""
                 }
             ],
             "file": "bbn\\Str",
@@ -1656,7 +1656,7 @@
         "checkName": {
             "name": "checkName",
             "summary": "Checks if a string complies with SQL naming convention.",
-            "description": "*\n```php\nX::dump(\\bbn\\Str::checkName(\"Paul\"));\n\/\/ (bool) true\nX::dump(\\bbn\\Str::checkName(\"Pa\u00a0ul\"));\n\/\/ (bool) false\n```",
+            "description": "*\n```php\nX::dump(\\bbn\\Str::checkName(\"Paul\"));\n\/\/ (bool) true\nX::dump(\\bbn\\Str::checkName(\"Pa ul\"));\n\/\/ (bool) false\n```",
             "description_parts": [
                 {
                     "type": "text",
@@ -1664,7 +1664,7 @@
                 },
                 {
                     "type": "code",
-                    "content": "X::dump(\\bbn\\Str::checkName(\"Paul\"));\n\/\/ (bool) true\nX::dump(\\bbn\\Str::checkName(\"Pa\u00a0ul\"));\n\/\/ (bool) false"
+                    "content": "X::dump(\\bbn\\Str::checkName(\"Paul\"));\n\/\/ (bool) true\nX::dump(\\bbn\\Str::checkName(\"Pa ul\"));\n\/\/ (bool) false"
                 }
             ],
             "file": "bbn\\Str",
@@ -1899,7 +1899,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($o, $remove_empty = false, $lev = 1)\n  {\n    $st    = '';\n    $space = '    ';\n    if (\\is_object($o) && ($cls = \\get_class($o)) && (strpos($cls, 'stdClass') === false)) {\n      $st .= \"Object \".$cls;\n      \/*\n      $o = array_filter((array)$o, function($k) use ($cls){\n        if ( strpos($k, '*') === 0 ){\n          return false;\n        }\n        if ( strpos($k, $cls) === 0 ){\n          return false;\n        }\n        return true;\n      }, ARRAY_FILTER_USE_KEY);\n      *\/\n    }\n    elseif (\\is_object($o) || \\is_array($o)) {\n      $is_object = \\is_object($o);\n      $is_array  = !$is_object && \\is_array($o);\n      $is_assoc  = $is_object || ($is_array && X::isAssoc($o));\n      $st       .= $is_assoc ? '{' : '[';\n      $st       .= PHP_EOL;\n      foreach ($o as $k => $v){\n        if ($remove_empty && ( ( \\is_string($v) && empty($v) ) || ( \\is_array($v) && \\count($v) === 0 ) )) {\n          continue;\n        }\n\n        $st .= str_repeat($space, $lev);\n        if ($is_assoc) {\n          $st .= ( \\is_string($k) ? '\"'.self::escapeDquote($k).'\"' : $k ). ': ';\n        }\n\n        if (\\is_array($v)) {\n          $st .= self::export($v, $remove_empty, $lev + 1);\n        }\n        elseif ($v === 0) {\n          $st .= '0';\n        }\n        elseif (null === $v) {\n          $st .= 'null';\n        }\n        elseif (\\is_bool($v)) {\n          $st .= $v === false ? 'false' : 'true';\n        }\n        elseif (\\is_int($v) || \\is_float($v)) {\n          $st .= $v;\n        }\n        elseif (is_string($v)) {\n          if (!ctype_print($v) && (\\strlen($v) === 16)) {\n            $st .= '0x'.bin2hex($v);\n          }\n          elseif (!$remove_empty || !empty($v)) {\n            $st .= '\"'.self::escapeDquote($v).'\"';\n          }\n        }\n        else {\n          try{\n            $cls = get_class($v);\n          }\n          catch (\\Exception $e){\n            $st .= '\"Unknown\"';\n          }\n\n          if ($cls) {\n            if ($cls === 'stdClass') {\n              $st .= self::export($v, $remove_empty, $lev + 1);\n            }\n            else{\n              $st .= 'Object '.$cls;\n            }\n          }\n        }\n\n        $st .= ','.PHP_EOL;\n      }\n\n      $st .= str_repeat($space, $lev - 1);\n      $st .= $is_assoc ? '}' : ']';\n      \/\/$st .= \\is_object($o) ? '}' : ']';\n    }\n\n    return $st;\n  }",
+            "code": "function($o, $remove_empty = false, $lev = 1)\n  {\n    $st    = '';\n    $space = '    ';\n    if (\\is_object($o) && ($cls = \\get_class($o)) && (strpos($cls, 'stdClass') === false)) {\n      $st .= \"Object \".$cls;\n      \/*\n      $o = array_filter((array)$o, function($k) use ($cls){\n        if ( strpos($k, '*') === 0 ){\n          return false;\n        }\n        if ( strpos($k, $cls) === 0 ){\n          return false;\n        }\n        return true;\n      }, ARRAY_FILTER_USE_KEY);\n      *\/\n    }\n    elseif (\\is_object($o) || \\is_array($o)) {\n      $is_object = \\is_object($o);\n      $is_array  = !$is_object && \\is_array($o);\n      $is_assoc  = $is_object || ($is_array && X::isAssoc($o));\n      $st       .= $is_assoc ? '{' : '[';\n      $st       .= PHP_EOL;\n      foreach ($o as $k => $v){\n        if ($remove_empty && ( ( \\is_string($v) && empty($v) ) || ( \\is_array($v) && \\count($v) === 0 ) )) {\n          continue;\n        }\n\n        $st .= str_repeat($space, $lev);\n        if ($is_assoc) {\n          $st .= ( \\is_string($k) ? '\"'.self::escapeDquote($k).'\"' : $k ). ': ';\n        }\n\n        if (\\is_array($v)) {\n          $st .= self::export($v, $remove_empty, $lev + 1);\n        }\n        elseif ($v === 0) {\n          $st .= '0';\n        }\n        elseif (null === $v) {\n          $st .= 'null';\n        }\n        elseif (\\is_bool($v)) {\n          $st .= $v === false ? 'false' : 'true';\n        }\n        elseif (\\is_int($v) || \\is_float($v)) {\n          $st .= $v;\n        }\n        elseif (is_string($v)) {\n          if (self::isBuid($v)) {\n            $st .= '0x'.bin2hex($v);\n          }\n          elseif (!$remove_empty || !empty($v)) {\n            $st .= '\"'.self::escapeDquote($v).'\"';\n          }\n        }\n        else {\n          try{\n            $cls = get_class($v);\n          }\n          catch (\\Exception $e){\n            $st .= '\"Unknown\"';\n          }\n\n          if ($cls) {\n            if ($cls === 'stdClass') {\n              $st .= self::export($v, $remove_empty, $lev + 1);\n            }\n            else{\n              $st .= 'Object '.$cls;\n            }\n          }\n        }\n\n        $st .= ','.PHP_EOL;\n      }\n\n      $st .= str_repeat($space, $lev - 1);\n      $st .= $is_assoc ? '}' : ']';\n      \/\/$st .= \\is_object($o) ? '}' : ']';\n    }\n\n    return $st;\n  }",
             "startLine": 1360,
             "endLine": 1444,
             "isDeprecated": false,

@@ -1318,6 +1318,19 @@ class Sqlite implements bbn\Db\Engines
 
 
   /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    return '';
+  }
+
+
+  /**
    * @param null|string $table The table for which to create the statement
    * @return string
      */

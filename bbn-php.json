@@ -1444,7 +1444,7 @@
                         "text": "retrieveHost",
                         "value": "retrieveHost",
                         "url": "bbn-php\/doc\/method\/Appui\/Database\/retrieveHost",
-                        "desc": "Returns the ID of the host of the given DB."
+                        "desc": "Returns the ID of the current host for the given DB."
                     },
                     {
                         "type": "method",
@@ -14288,7 +14288,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/__construct",
-                        "desc": "permissions constructor."
+                        "desc": "Permissions constructor."
                     },
                     {
                         "type": "method",
@@ -14296,7 +14296,7 @@
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/add",
-                        "desc": "Grants a new permission to a user or a group"
+                        "desc": "Grants a new permission to a user or a group."
                     },
                     {
                         "type": "method",
@@ -14320,7 +14320,7 @@
                         "text": "fullOptions",
                         "value": "fullOptions",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/fullOptions",
-                        "desc": "Returns the result of Appui\\Option::full_options filtered with only the ones authorized to the current user."
+                        "desc": "Returns the result of Option::fullOptions filtered through current user's permissions."
                     },
                     {
                         "type": "method",
@@ -14368,7 +14368,7 @@
                         "text": "is",
                         "value": "is",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/is",
-                        "desc": "Checks if an option corresponds to the given path."
+                        "desc": "Alias of fromPath."
                     },
                     {
                         "type": "method",
@@ -14376,7 +14376,7 @@
                         "text": "options",
                         "value": "options",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/options",
-                        "desc": "Returns the result of Appui\\Option::options filtered with only the ones authorized to the current user."
+                        "desc": "Returns the result of Option::Options filtered through current user's permissions."
                     },
                     {
                         "type": "method",
@@ -14384,7 +14384,7 @@
                         "text": "readOption",
                         "value": "readOption",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/readOption",
-                        "desc": "Checks if the category represented by the given option ID is readable by the current user"
+                        "desc": "Checks if the given option is readable by the current user."
                     },
                     {
                         "type": "method",
@@ -14400,7 +14400,7 @@
                         "text": "toPath",
                         "value": "toPath",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/toPath",
-                        "desc": ""
+                        "desc": "Returns the path corresponding to the given ID"
                     },
                     {
                         "type": "method",
@@ -14408,7 +14408,7 @@
                         "text": "updateAll",
                         "value": "updateAll",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/updateAll",
-                        "desc": ""
+                        "desc": "update All"
                     },
                     {
                         "type": "method",
@@ -14416,7 +14416,7 @@
                         "text": "writeOption",
                         "value": "writeOption",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/writeOption",
-                        "desc": "Checks if the category represented by the given option ID is writable by the current user"
+                        "desc": "Checks if the given option is writable by the current user."
                     }
                 ]
             },

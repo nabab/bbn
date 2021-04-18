@@ -1464,6 +1464,19 @@ MYSQL
   }
 
 
+  /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    return '';
+  }
+
+
   public function getCreate(string $table, array $model = null): string
   {
     $st = '';

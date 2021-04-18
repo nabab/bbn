@@ -104,6 +104,19 @@ class Dashboard
   }
 
 
+  /**
+   * Returns true if the given code corresoponds to an existing 
+   *
+   * @param [type] $code
+   *
+   * @return void
+   */
+  public function exists(string $code)
+  {
+    return !!$this->getId($code);
+  }
+
+  
   /** 
    * Sets the current dashboard by setting code and id properies.
    */

@@ -4183,6 +4183,19 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    return $this->language->getTableComment($table);
+  }
+
+
+  /**
    * Return SQL code for table creation.
    *
    * ```php
