@@ -390,4 +390,14 @@ interface Engines
   public function getUid(): string;
 
 
+  /**
+   * Renames the given table to the new given name.
+   * 
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool;
+
+
 }

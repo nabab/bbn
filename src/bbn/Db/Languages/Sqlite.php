@@ -1331,6 +1331,26 @@ class Sqlite implements bbn\Db\Engines
 
 
   /**
+   * Renames the given table to the new given name.
+   * 
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool
+  {
+    if ($this->db->check() && Str::checkName($table, $newName)) {
+      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+      $res = $this->db->query(sprintf("ALTER TABLE %s RENAME TO %s", $table, $newName));
+      return !!$res;
+    }
+
+    return false;
+  }
+
+
+  /**
    * @param null|string $table The table for which to create the statement
    * @return string
      */

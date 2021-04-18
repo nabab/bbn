@@ -4767,6 +4767,20 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
+   * Renames the given table to the new given name.
+   * 
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool
+  {
+    return $this->language->renameTable($table, $newName);
+  }
+
+
+
+  /**
    * Sets the has_error_all variable to true.
    *
    * @return void
