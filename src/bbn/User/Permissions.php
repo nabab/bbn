@@ -130,7 +130,7 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     if (!$root) {
-      throw new \Exception(X::_("Impossible to find the permission code"));
+      throw new \Exception(X::_("Impossible to find the permission code for $path"));
     }
 
     $parts  = explode('/', trim($path, '/'));

@@ -1378,7 +1378,7 @@ class X
             }
           }
           else {
-            $ok = $v === $filter;
+            $ok = $v === $where;
           }
 
           if ($ok) {

@@ -944,38 +944,35 @@ class Database extends bbn\Models\Cls\Cache
             }
 
             $w['id_option'] = $this->columnId($k, $table_id);
+            $w['option']    = $w['id_option'] ? $this->o->option($w['id_option']) : [];
           }
         );
       }
     };
+
     if ($model = $conn->modelize($ftable)) {
       if ($table
           && ($table_id = $this->tableId($table, $db, $host, $engine))
       ) {
         $keys($model);
         $fields($model);
-      }
+        $model['id_option'] = $table_id;
+        $model['option']    = $this->o->option($table_id);
+}
       elseif (empty($table)) {
         array_walk(
           $model,
-          function (&$w, $k) use (&$table_id, &$keys, &$fields, $host, $engine) {
-            $table          = $this->db->tsn($k);
-            $db             = substr($k, 0, Strrpos($k, $table) - 1);
+          function (&$w, $k) use (&$table_id, &$keys, &$fields, $host, $engine, $db) {
+            $table = $this->db->tsn($k);
             if ($table_id = $this->tableId($table, $db, $host, $engine)) {
               $w['id_option'] = $table_id;
+              $w['option']    = $this->o->option($w['id_option']);
               $keys($w);
               $fields($w);
             }
           }
         );
       }
-
-      /*
-      else {
-        $keys($model);
-        $fields($model);
-      }
-      */
     }
 
     if (!empty($old_db) && ($old_db !== $db)) {
@@ -1273,7 +1270,7 @@ class Database extends bbn\Models\Cls\Cache
           && $id_keys
           && $db
           && ($conn = $this->connection($host_id, $engine['code'], $db))
-          && ($m = $conn->modelize($table))
+          && ($m = $conn->modelize($db.'.'.$table))
           && !empty($m['fields'])
       ) {
         $num_cols     = 0;
@@ -1463,6 +1460,102 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     return $res;
+  }
+
+
+  /**
+   * Generates a grid configuration based on the table structure and columns options.
+   *
+   * @param string $table
+   * @param string $db
+   * @param string $host
+   * @param string $engine
+   *
+   * @return array|null
+   */
+  public function getGridConfig(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?array
+  {
+    if ($model = $this->modelize($table, $db, $host, $engine)) {
+      $res = [
+        'js' => [
+          'columns' => []
+        ],
+        'php' => [
+          'tables' => [$table],
+          'fields' => [],
+          'join' => [],
+          'order' => []
+        ]
+      ];
+      if (!$db) {
+        $db = $this->db->getCurrent();
+      }
+
+      $tIdx  = 0;
+      $cIdx  = 0;
+      $alias = Str::genpwd(5);
+      foreach ($model['fields'] as $col => $f) {
+        $js = [
+          'text' => $col,
+          'field' => $col
+        ];
+        if (!empty($f['option'])) {
+          $js['text'] = $f['option']['text'];
+          if (!empty($f['option']['width'])) {
+            $js['width'] = $f['option']['width'];
+          }
+
+          if (!empty($f['option']['editor'])) {
+            $js['editor'] = $f['option']['editor'];
+          }
+
+          if (!empty($f['option']['component'])) {
+            $js['component'] = $f['option']['component'];
+          }
+        }
+
+        if (!empty($model['cols'][$col])) {
+          foreach ($model['cols'][$col] as $c) {
+            if (!empty($model['keys'][$c]['ref_table'])) {
+              $tIdx++;
+              $cIdx++;
+              $tmodel = $this->modelize($model['keys'][$c]['ref_table']);
+              if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {
+                foreach ($tmodel['option']['dcolumns'] as $dcol) {
+                  $res['php']['fields'][$alias.'_c'.$cIdx] = $alias.'_t'.$tIdx.'.'.$dcol;
+                }
+              }
+              else {
+                foreach ($tmodel['fields'] as $tcol => $tf) {
+                  
+                }
+              }
+
+              $res['php']['join'][] = [
+                'type' => $f['null'] ? 'left' : '',
+                'table' => $model['keys'][$c]['ref_db'].'.'.$model['keys'][$c]['ref_table'],
+                'alias' => $alias.'_t'.$tIdx,
+                'on' [
+                  [
+                    'field' => $alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],
+                    'exp' => $table.'.'.$c
+                  ]
+                ]
+              ];
+            }
+          }
+        }
+
+        switch ($f['type']) {
+          case 'varchar':
+          case 'char':
+            break;
+        }
+        
+      }
+    }
+
+    return null;
   }
 
 
