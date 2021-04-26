@@ -463,6 +463,7 @@ class Mvc implements Mvc\Api
           if (in_array($url, $this->forbidden_routes, true)) {
             return false;
           }
+
           foreach ($this->forbidden_routes as $ar) {
             if (substr($ar, -1) === '*') {
               if (strpos($url, substr($ar, 0, -1)) === 0) {
@@ -470,6 +471,7 @@ class Mvc implements Mvc\Api
               }
             }
           }
+
           return true;
         }
       }
@@ -509,7 +511,7 @@ class Mvc implements Mvc\Api
     $randoms = [];
     $_random = function ($i) use (&$randoms) {
       if (!isset($randoms[$i])) {
-        $randoms[$i] = md5(\bbn\Str::genpwd());
+        $randoms[$i] = md5(Str::genpwd());
       }
 
       return $randoms[$i];
@@ -535,7 +537,7 @@ class Mvc implements Mvc\Api
           X::logError($e->getCode(), , $bbn_inc_file, 1);
         }
         */
-        eval('?>'.$bbn_inc_content);
+        eval('use bbn\X as xx; use bbn\Str as st; ?>'.$bbn_inc_content);
 
         $c = ob_get_contents();
         ob_end_clean();

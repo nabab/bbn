@@ -107,6 +107,7 @@ class User extends Models\Cls\Basic
         'login' => 'login',
         'admin' => 'admin',
         'dev' => 'dev',
+        'theme' => 'theme',
         'cfg' => 'cfg',
         'active' => 'active',
         'enckey' => 'enckey'

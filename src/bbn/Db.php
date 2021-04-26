@@ -4733,10 +4733,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
         ) {
           $res[] = hex2bin($v);
         }
-        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
-            && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
-            && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
-            && (\strlen($v) < 19))            )
+        elseif (\is_string($v) && ((($cfg['values_desc'][$i]['type'] === 'date')
+            && (\strlen($v) < 10)) || (($cfg['values_desc'][$i]['type'] === 'time')
+            && (\strlen($v) < 8)) || (($cfg['values_desc'][$i]['type'] === 'datetime')
+            && (\strlen($v) < 19)))
         ) {
           $res[] = $v.'%';
         }

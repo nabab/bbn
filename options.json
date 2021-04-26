@@ -104,7 +104,121 @@
         "text": "Core",
         "code": "core",
         "icon": "nf nf-custom-electron",
-        "plugin": true
+        "plugin": true,
+        "items": [
+          {
+            "cfg": {
+              "allow_children": 1,
+              "show_code": 1,
+              "schema": [
+                {
+                  "title": "Is dark",
+                  "field": "isDark",
+                  "type": "boolean",
+                  "showable": true,
+                  "editable": true,
+                  "hidden": false,
+                  "width": 70,
+                  "options": {
+                    "value": true,
+                    "novalue": false
+                  },
+                  "cls": "bbn-c",
+                  "default": false
+                }
+              ]
+            },
+            "text": "Themes",
+            "code": "themes",
+            "items": [
+              {
+                "code": "neutral",
+                "text": "Neutral",
+                "isDark": false
+              },
+              {
+                "code": "uniform",
+                "text": "Uniform",
+                "isDark": false
+              },
+              {
+                "code": "black",
+                "text": "Black",
+                "isDark": true
+              },
+              {
+                "code": "blue",
+                "text": "Blue",
+                "isDark": false
+              },
+              {
+                "code": "default",
+                "text": "Default",
+                "isDark": false
+              },
+              {
+                "code": "dark",
+                "text": "Dark",
+                "isDark": true
+              },
+              {
+                "code": "flat",
+                "text": "Flat",
+                "isDark": false
+              },
+              {
+                "code": "jeans",
+                "text": "Jeans",
+                "isDark": false
+              },
+              {
+                "code": "grey",
+                "text": "Grey",
+                "isDark": true
+              },
+              {
+                "code": "moonlight",
+                "text": "Moonlight",
+                "isDark": true
+              },
+              {
+                "code": "mirko",
+                "text": "Mirko",
+                "isDark": true
+              },
+              {
+                "code": "grinks",
+                "text": "Grinks",
+                "isDark": false
+              },
+              {
+                "code": "turquoise-light2",
+                "text": "Turquoise light variant",
+                "isDark": false
+              },
+              {
+                "code": "turquoise-dark2",
+                "text": "Turquoise dark variant",
+                "isDark": true
+              },
+              {
+                "code": "turquoise-dark",
+                "text": "Turquoise dark",
+                "isDark": true
+              },
+              {
+                "code": "turquoise-light",
+                "text": "Turquoise light",
+                "isDark": false
+              },
+              {
+                "code": "moonlight-variant",
+                "text": "Moonlight variant",
+                "isDark": true
+              }
+            ]
+          }
+        ]
       },
       {
         "cfg": {

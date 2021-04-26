@@ -190,7 +190,7 @@ class Cms extends bbn\Models\Cls\Db
 	 */
 	public function getAll(int $limit = 50, int $start = 0): array 
 	{
-		$pages = $this->_notes->getByType($this->_options->fromCode('pages', 'types', 'note', 'appui'), false,$limit, $start);
+		$pages = $this->_notes->getByType($this->_options->fromCode('pages', 'types', 'note', 'appui'), false, $limit, $start);
 		$tmp = array_map(function($a){
 			$a['is_published'] = $this->isPublished($a['id_note']);
 			$a['url'] = $this->hasUrl($a['id_note']) ? $this->getUrl($a['id_note']) : '';
@@ -199,7 +199,7 @@ class Cms extends bbn\Models\Cls\Db
 			$a['end'] = $this->getEnd($a['id_note']);
 			$a['files'] = $this->_notes->getMedias($a['id_note']) ?: [];
 			return $a;
-		}, $pages); 
+		}, $pages);
 		return $tmp; 
 	}
 

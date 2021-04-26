@@ -26,10 +26,15 @@
     <properties>
         <property name="maxPadding" value="80"/>
     </properties>
+
 </rule>
 <rule ref="Generic.Formatting.NoSpaceAfterCast"/>
 <rule ref="Generic.Functions.CallTimePassByReference"/>
-<rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/>
+<rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman">
+    <properties>
+        <property name="BraceOnSameLine" value="false"/>
+    </properties>
+</rule>
 <rule ref="Generic.Metrics.CyclomaticComplexity"/>
 <rule ref="Generic.Metrics.NestingLevel"/>
 <rule ref="Generic.NamingConventions.ConstructorName"/>

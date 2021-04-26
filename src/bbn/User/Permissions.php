@@ -754,18 +754,42 @@ class Permissions extends bbn\Models\Cls\Basic
   /**
    * Updates all access permission for the given path in the given root.
    *
-   * @param string $path The path to look for files in (mustn't include mvc/public)
-   * @param string $root The ID of the root access option
+   * @param string $path    The path to look for files in (mustn't include mvc/public)
+   * @param string $root    The ID of the root access option
+   * @param string $url     The path part of the URL root of the given absolute path
+   * @param string $urlPath The part of the absolute path corresponding to the url
    *
    * @return int
    */
-  public function accessUpdatePath(string $path, string $root): int
+  public function accessUpdatePath(
+      string $path,
+      string $root,
+      string $url = ''
+  ): int
   {
+    if (!empty($url) && (substr($url, -1) !== '/')) {
+      $url .= '/';
+    }
+
     $num = 0;
     $fs  = new bbn\File\System();
-    $ff  = ['\\bbn\\User\\Permissions', 'fFilter'];
+    $ff  = function ($a) use ($url, $path) {
+      $mvc = \bbn\Mvc::getInstance();
+      if (empty($url)) {
+        $a['path'] = substr($a['name'], strlen(\bbn\Mvc::appPath().'mvc/public/'));
+      }
+      else {
+        $a['path'] = $url.substr($a['name'], strlen($path.'mvc/public/'));
+      }
+
+      if (substr($a['path'], -4) === '.php') {
+        $a['path'] = substr($a['path'], 0, -4);
+      }
+
+      return \bbn\User\Permissions::fFilter($a);
+    };
     if ($all = $fs->getTree($path.'mvc/public', '', false, $ff)) {
-      $all = self::fTreat($all);
+      $all = self::fTreat($all, false);
       usort($all, ['\\bbn\User\\Permissions', 'fSort']);
       array_walk($all, ['\\bbn\\User\\Permissions', 'fWalk']);
       foreach ($all as $i => $it) {
@@ -938,11 +962,11 @@ class Permissions extends bbn\Models\Cls\Basic
    *
    * @return void
    */
-  public function updateAll(array $routes)
+  public function updateAll(array $routes, $withApp = false)
   {
     $this->opt->deleteCache();
 
-    $res = ['total' => false];
+    $res = ['total' => 0];
 
     /** @var string The ID option for permissions < appui */
     if ($id_permission = $this->getOptionRoot()) {
@@ -964,7 +988,9 @@ class Permissions extends bbn\Models\Cls\Basic
         /** @todo Add the possibility to do it for another project? */
         $fs = new bbn\File\System();
 
-        $res['total'] = (int)$this->accessUpdateApp();
+        if ($withApp) {
+          $res['total'] += (int)$this->accessUpdateApp();
+        }
 
         if (!empty($routes)) {
           foreach ($routes as $url => $route) {
@@ -980,7 +1006,7 @@ class Permissions extends bbn\Models\Cls\Basic
               throw new \Exception($err);
             }
 
-            $res['total'] += $this->accessUpdatePath($route['path'].'src/', $root);
+            $res['total'] += $this->accessUpdatePath($route['path'].'src/', $root, $url);
           }
         }
       }
@@ -1117,14 +1143,21 @@ class Permissions extends bbn\Models\Cls\Basic
 
   public static function fFilter(array $a): bool
   {
-    return !empty($a['num'])
+    $mvc = bbn\Mvc::getInstance();
+    if (!empty($a['num'])
       || ((substr($a['name'], -4) === '.php')
-          && (basename($a['name']) !== '_ctrl.php'));
+          && (basename($a['name']) !== '_ctrl.php'))
+    ) {
+      if (!$mvc->isAuthorizedRoute($a['path'])) {
+        return true;
+      }
+    }
 
+    return false;
   }
 
 
-  public static function fTreat(array $tree, $parent=false)
+  public static function fTreat(array $tree, $parent = false)
   {
     $res = [];
     foreach ($tree as $i => $t){
