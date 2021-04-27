@@ -30,7 +30,7 @@
     },
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db.php",
     "startLine": 18,
-    "endLine": 5612,
+    "endLine": 5626,
     "contentConstructor": {
         "file": "bbn\\Db",
         "returns": null
@@ -7528,7 +7528,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    $res = [];\n    if (!empty($cfg['values'])) {\n      foreach ($cfg['values'] as $i => $v) {\n        \/\/ Transforming the values if needed\n        if (($cfg['values_desc'][$i]['type'] === 'binary')\n            && ($cfg['values_desc'][$i]['maxlength'] === 16)\n            && Str::isUid($v)\n        ) {\n          $res[] = hex2bin($v);\n        }\n        elseif (\\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')\n            && (\\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')\n            && (\\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')\n            && (\\strlen($v) < 19))            )\n        ) {\n          $res[] = $v.'%';\n        }\n        elseif (!empty($cfg['values_desc'][$i]['operator'])) {\n          switch ($cfg['values_desc'][$i]['operator']){\n            case 'contains':\n            case 'doesnotcontain':\n              $res[] = '%'.$v.'%';\n              break;\n            case 'startswith':\n              $res[] = $v.'%';\n              break;\n            case 'endswith':\n              $res[] = '%'.$v;\n              break;\n            default:\n              $res[] = $v;\n          }\n        }\n        else{\n          $res[] = $v;\n        }\n      }\n    }\n\n    return $res;\n  }",
+            "code": "function(array $cfg)\n  {\n    $res = [];\n    if (!empty($cfg['values'])) {\n      foreach ($cfg['values'] as $i => $v) {\n        \/\/ Transforming the values if needed\n        if (($cfg['values_desc'][$i]['type'] === 'binary')\n            && ($cfg['values_desc'][$i]['maxlength'] === 16)\n            && Str::isUid($v)\n        ) {\n          $res[] = hex2bin($v);\n        }\n        elseif (\\is_string($v) && ((($cfg['values_desc'][$i]['type'] === 'date')\n            && (\\strlen($v) < 10)) || (($cfg['values_desc'][$i]['type'] === 'time')\n            && (\\strlen($v) < 8)) || (($cfg['values_desc'][$i]['type'] === 'datetime')\n            && (\\strlen($v) < 19)))\n        ) {\n          $res[] = $v.'%';\n        }\n        elseif (!empty($cfg['values_desc'][$i]['operator'])) {\n          switch ($cfg['values_desc'][$i]['operator']){\n            case 'contains':\n            case 'doesnotcontain':\n              $res[] = '%'.$v.'%';\n              break;\n            case 'startswith':\n              $res[] = $v.'%';\n              break;\n            case 'endswith':\n              $res[] = '%'.$v;\n              break;\n            default:\n              $res[] = $v;\n          }\n        }\n        else{\n          $res[] = $v;\n        }\n      }\n    }\n\n    return $res;\n  }",
             "startLine": 4724,
             "endLine": 4766,
             "isDeprecated": false,
@@ -7552,6 +7552,53 @@
                     "has_default": false,
                     "default": "",
                     "default_name": ""
+                }
+            ]
+        },
+        "renameTable": {
+            "name": "renameTable",
+            "summary": "Renames the given table to the new given name.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $newName)\n  {\n    return $this->language->renameTable($table, $newName);\n  }",
+            "startLine": 4776,
+            "endLine": 4779,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The current table's name"
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame The new name."
                 }
             ]
         },
@@ -8711,12 +8758,13 @@
                         "text": {
                             "position": 6,
                             "type": "varchar",
-                            "null": 0,
+                            "null": 1,
                             "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
+                            "default": "NULL",
                             "maxlength": 255
                         },
                         "value": {
@@ -19901,8 +19949,32 @@
                             "default": "NULL",
                             "maxlength": 16
                         },
-                        "excerpt": {
+                        "mime": {
                             "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "",
+                            "maxlength": 25
+                        },
+                        "lang": {
+                            "position": 6,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "",
+                            "maxlength": 2
+                        },
+                        "excerpt": {
+                            "position": 7,
                             "type": "text",
                             "null": 0,
                             "key": null,
@@ -19912,30 +19984,6 @@
                             "generation": ""
                         },
                         "private": {
-                            "position": 6,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 0,
-                            "maxlength": 1
-                        },
-                        "locked": {
-                            "position": 7,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 0,
-                            "maxlength": 1
-                        },
-                        "pinned": {
                             "position": 8,
                             "type": "tinyint",
                             "null": 0,
@@ -19947,8 +19995,32 @@
                             "default": 0,
                             "maxlength": 1
                         },
-                        "creator": {
+                        "locked": {
                             "position": 9,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "pinned": {
+                            "position": 10,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "creator": {
+                            "position": 11,
                             "type": "binary",
                             "null": 0,
                             "key": "MUL",
@@ -19959,7 +20031,7 @@
                             "maxlength": 16
                         },
                         "active": {
-                            "position": 10,
+                            "position": 12,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -24460,7 +24532,7 @@
         "retriever_exists": true
     },
     "constants": [],
-    "numMethods": 181,
+    "numMethods": 182,
     "numProperties": 0,
     "numConstants": 100,
     "numStaticProperties": 6,
@@ -24797,12 +24869,13 @@
                         "text": {
                             "position": 6,
                             "type": "varchar",
-                            "null": 0,
+                            "null": 1,
                             "key": null,
                             "extra": "",
                             "signed": true,
                             "virtual": false,
                             "generation": "",
+                            "default": "NULL",
                             "maxlength": 255
                         },
                         "value": {
@@ -35987,8 +36060,32 @@
                             "default": "NULL",
                             "maxlength": 16
                         },
-                        "excerpt": {
+                        "mime": {
                             "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "",
+                            "maxlength": 25
+                        },
+                        "lang": {
+                            "position": 6,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "",
+                            "maxlength": 2
+                        },
+                        "excerpt": {
+                            "position": 7,
                             "type": "text",
                             "null": 0,
                             "key": null,
@@ -35998,30 +36095,6 @@
                             "generation": ""
                         },
                         "private": {
-                            "position": 6,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 0,
-                            "maxlength": 1
-                        },
-                        "locked": {
-                            "position": 7,
-                            "type": "tinyint",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": false,
-                            "virtual": false,
-                            "generation": "",
-                            "default": 0,
-                            "maxlength": 1
-                        },
-                        "pinned": {
                             "position": 8,
                             "type": "tinyint",
                             "null": 0,
@@ -36033,8 +36106,32 @@
                             "default": 0,
                             "maxlength": 1
                         },
-                        "creator": {
+                        "locked": {
                             "position": 9,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "pinned": {
+                            "position": 10,
+                            "type": "tinyint",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": 0,
+                            "maxlength": 1
+                        },
+                        "creator": {
+                            "position": 11,
                             "type": "binary",
                             "null": 0,
                             "key": "MUL",
@@ -36045,7 +36142,7 @@
                             "maxlength": 16
                         },
                         "active": {
-                            "position": 10,
+                            "position": 12,
                             "type": "int",
                             "null": 0,
                             "key": null,

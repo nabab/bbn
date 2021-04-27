@@ -4442,7 +4442,7 @@
                         "text": "getMediaNotes",
                         "value": "getMediaNotes",
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaNotes",
-                        "desc": "returns all the notes linked to the media"
+                        "desc": "returns all the notes linked to the media."
                     },
                     {
                         "type": "method",

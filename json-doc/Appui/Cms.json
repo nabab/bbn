@@ -138,7 +138,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($limit = 50, $start = 0)\n  {\n\t\t$pages = $this->_notes->getByType($this->_options->fromCode('pages', 'types', 'note', 'appui'), false,$limit, $start);\n\t\t$tmp = array_map(function($a){\n\t\t\t$a['is_published'] = $this->isPublished($a['id_note']);\n\t\t\t$a['url'] = $this->hasUrl($a['id_note']) ? $this->getUrl($a['id_note']) : '';\n\t\t\t$a['type'] = 'pages';\n\t\t\t$a['start'] = $this->getStart($a['id_note']);\n\t\t\t$a['end'] = $this->getEnd($a['id_note']);\n\t\t\t$a['files'] = $this->_notes->getMedias($a['id_note']) ?: [];\n\t\t\treturn $a;\n\t\t}, $pages); \n\t\treturn $tmp; \n  }",
+            "code": "function($limit = 50, $start = 0)\n  {\n\t\t$pages = $this->_notes->getByType($this->_options->fromCode('pages', 'types', 'note', 'appui'), false, $limit, $start);\n\t\t$tmp = array_map(function($a){\n\t\t\t$a['is_published'] = $this->isPublished($a['id_note']);\n\t\t\t$a['url'] = $this->hasUrl($a['id_note']) ? $this->getUrl($a['id_note']) : '';\n\t\t\t$a['type'] = 'pages';\n\t\t\t$a['start'] = $this->getStart($a['id_note']);\n\t\t\t$a['end'] = $this->getEnd($a['id_note']);\n\t\t\t$a['files'] = $this->_notes->getMedias($a['id_note']) ?: [];\n\t\t\treturn $a;\n\t\t}, $pages);\n\t\treturn $tmp; \n  }",
             "startLine": 191,
             "endLine": 204,
             "isDeprecated": false,
