@@ -1087,10 +1087,82 @@
                     {
                         "type": "method",
                         "class": "Appui\/Dashboard",
-                        "text": "add",
-                        "value": "add",
-                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/add",
+                        "text": "addNativeWidget",
+                        "value": "addNativeWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/addNativeWidget",
+                        "desc": "Adds a native widget"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "addWidget",
+                        "value": "addWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/addWidget",
+                        "desc": "Adds a widget to the current dashboard"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "delete",
+                        "value": "delete",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/delete",
+                        "desc": "Deletes the current dashboard"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "deleteNativeWidget",
+                        "value": "deleteNativeWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/deleteNativeWidget",
+                        "desc": "Deletes a native widget"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "deleteWidget",
+                        "value": "deleteWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/deleteWidget",
+                        "desc": "Removes a widget (Bit)"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "exists",
+                        "value": "exists",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/exists",
+                        "desc": "Returns true if the given code corresoponds to an existing"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "get",
+                        "value": "get",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/get",
                         "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getCode",
+                        "value": "getCode",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getCode",
+                        "desc": "Returns the dashboard code"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getDashboardByWidget",
+                        "value": "getDashboardByWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getDashboardByWidget",
+                        "desc": "Gets the dashboard by a widget ID (bit)"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getId",
+                        "value": "getId",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getId",
+                        "desc": "Returns the dashboard id by its code"
                     },
                     {
                         "type": "method",
@@ -1103,6 +1175,46 @@
                     {
                         "type": "method",
                         "class": "Appui\/Dashboard",
+                        "text": "getUserDashboard",
+                        "value": "getUserDashboard",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getUserDashboard",
+                        "desc": "Gets the user's customized dashborad of the given id"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getUserDashboards",
+                        "value": "getUserDashboards",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getUserDashboards",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getUserWidgets",
+                        "value": "getUserWidgets",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getUserWidgets",
+                        "desc": "Gets the widgets list of a dashboard and the order list."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getUserWidgetsCode",
+                        "value": "getUserWidgetsCode",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getUserWidgetsCode",
+                        "desc": "Gets an associative array of widgets by code"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "getWidgetOption",
+                        "value": "getWidgetOption",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getWidgetOption",
+                        "desc": "Gets the widget option"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
                         "text": "getWidgets",
                         "value": "getWidgets",
                         "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getWidgets",
@@ -1111,10 +1223,10 @@
                     {
                         "type": "method",
                         "class": "Appui\/Dashboard",
-                        "text": "getWidgetsCode",
-                        "value": "getWidgetsCode",
-                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/getWidgetsCode",
-                        "desc": ""
+                        "text": "insert",
+                        "value": "insert",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/insert",
+                        "desc": "Creates a new dashboard"
                     },
                     {
                         "type": "method",
@@ -1127,10 +1239,50 @@
                     {
                         "type": "method",
                         "class": "Appui\/Dashboard",
+                        "text": "setCurrent",
+                        "value": "setCurrent",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/setCurrent",
+                        "desc": "Sets the current dashboard by setting code and id properies."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "setOrderWidget",
+                        "value": "setOrderWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/setOrderWidget",
+                        "desc": "Set the widget's order number property"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
                         "text": "sort",
                         "value": "sort",
                         "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/sort",
                         "desc": "Sorts the widgets' order"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "update",
+                        "value": "update",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/update",
+                        "desc": "Updates the current dashboard"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "updateNativeWidget",
+                        "value": "updateNativeWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/updateNativeWidget",
+                        "desc": "Updates a native widget"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Dashboard",
+                        "text": "updateWidget",
+                        "value": "updateWidget",
+                        "url": "bbn-php\/doc\/method\/Appui\/Dashboard\/updateWidget",
+                        "desc": "Updates a widget (Bit)"
                     }
                 ]
             },
@@ -1337,6 +1489,14 @@
                     {
                         "type": "method",
                         "class": "Appui\/Database",
+                        "text": "getGridConfig",
+                        "value": "getGridConfig",
+                        "url": "bbn-php\/doc\/method\/Appui\/Database\/getGridConfig",
+                        "desc": "Generates a grid configuration based on the table structure and columns options."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Database",
                         "text": "hostId",
                         "value": "hostId",
                         "url": "bbn-php\/doc\/method\/Appui\/Database\/hostId",
@@ -1405,6 +1565,14 @@
                         "value": "keys",
                         "url": "bbn-php\/doc\/method\/Appui\/Database\/keys",
                         "desc": "Returns a list of keys for the giuven table."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Database",
+                        "text": "length2Width",
+                        "value": "length2Width",
+                        "url": "bbn-php\/doc\/method\/Appui\/Database\/length2Width",
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -4069,6 +4237,14 @@
                     {
                         "type": "method",
                         "class": "Appui\/Medias",
+                        "text": "getThumbsSizes",
+                        "value": "getThumbsSizes",
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsSizes",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
                         "text": "insert",
                         "value": "insert",
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/insert",
@@ -5026,6 +5202,14 @@
                     {
                         "type": "method",
                         "class": "Appui\/Option",
+                        "text": "fullTreeRef",
+                        "value": "fullTreeRef",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/fullTreeRef",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
                         "text": "fusion",
                         "value": "fusion",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fusion",
@@ -5037,6 +5221,30 @@
                         "text": "getAliases",
                         "value": "getAliases",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliases",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "getAliasFullOptions",
+                        "value": "getAliasFullOptions",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliasFullOptions",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "getAliasItems",
+                        "value": "getAliasItems",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliasItems",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "getAliasOptions",
+                        "value": "getAliasOptions",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliasOptions",
                         "desc": ""
                     },
                     {
@@ -5270,6 +5478,14 @@
                         "value": "nativeTree",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/nativeTree",
                         "desc": "Returns a hierarchical structure as stored in its original form in the database"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
+                        "text": "opAlias",
+                        "value": "opAlias",
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/opAlias",
+                        "desc": "Returns the merge between an option and its alias as an array."
                     },
                     {
                         "type": "method",
@@ -7571,6 +7787,14 @@
                             {
                                 "type": "method",
                                 "class": "Db\/Languages\/Mysql",
+                                "text": "getTableComment",
+                                "value": "getTableComment",
+                                "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getTableComment",
+                                "desc": "Returns the comment (or an empty string if none) for a given table."
+                            },
+                            {
+                                "type": "method",
+                                "class": "Db\/Languages\/Mysql",
                                 "text": "getTables",
                                 "value": "getTables",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getTables",
@@ -7639,6 +7863,14 @@
                                 "value": "postCreation",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/postCreation",
                                 "desc": "Actions to do once the PDO object has been created"
+                            },
+                            {
+                                "type": "method",
+                                "class": "Db\/Languages\/Mysql",
+                                "text": "renameTable",
+                                "value": "renameTable",
+                                "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/renameTable",
+                                "desc": "Renames the given table to the new given name."
                             },
                             {
                                 "type": "method",
@@ -7956,6 +8188,14 @@
                             {
                                 "type": "method",
                                 "class": "Db\/Languages\/Pgsql",
+                                "text": "getTableComment",
+                                "value": "getTableComment",
+                                "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getTableComment",
+                                "desc": "Returns the comment (or an empty string if none) for a given table."
+                            },
+                            {
+                                "type": "method",
+                                "class": "Db\/Languages\/Pgsql",
                                 "text": "getTables",
                                 "value": "getTables",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getTables",
@@ -8024,6 +8264,14 @@
                                 "value": "postCreation",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/postCreation",
                                 "desc": "Actions to do once the PDO object has been created"
+                            },
+                            {
+                                "type": "method",
+                                "class": "Db\/Languages\/Pgsql",
+                                "text": "renameTable",
+                                "value": "renameTable",
+                                "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/renameTable",
+                                "desc": "Renames the given table to the new given name."
                             },
                             {
                                 "type": "method",
@@ -8349,6 +8597,14 @@
                             {
                                 "type": "method",
                                 "class": "Db\/Languages\/Sqlite",
+                                "text": "getTableComment",
+                                "value": "getTableComment",
+                                "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getTableComment",
+                                "desc": "Returns the comment (or an empty string if none) for a given table."
+                            },
+                            {
+                                "type": "method",
+                                "class": "Db\/Languages\/Sqlite",
                                 "text": "getTables",
                                 "value": "getTables",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getTables",
@@ -8417,6 +8673,14 @@
                                 "value": "postCreation",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/postCreation",
                                 "desc": "Actions to do once the PDO object has been created"
+                            },
+                            {
+                                "type": "method",
+                                "class": "Db\/Languages\/Sqlite",
+                                "text": "renameTable",
+                                "value": "renameTable",
+                                "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/renameTable",
+                                "desc": "Renames the given table to the new given name."
                             },
                             {
                                 "type": "method",
@@ -9326,6 +9590,14 @@
                     {
                         "type": "method",
                         "class": "Db\/Engines",
+                        "text": "getTableComment",
+                        "value": "getTableComment",
+                        "url": "bbn-php\/doc\/method\/Db\/Engines\/getTableComment",
+                        "desc": "Returns the comment (or an empty string if none) for a given table."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Engines",
                         "text": "getTables",
                         "value": "getTables",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getTables",
@@ -9386,6 +9658,14 @@
                         "value": "postCreation",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/postCreation",
                         "desc": "Actions to do once the PDO object has been created"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Engines",
+                        "text": "renameTable",
+                        "value": "renameTable",
+                        "url": "bbn-php\/doc\/method\/Db\/Engines\/renameTable",
+                        "desc": "Renames the given table to the new given name."
                     },
                     {
                         "type": "method",
@@ -12618,6 +12898,14 @@
                     {
                         "type": "method",
                         "class": "Mvc\/Environment",
+                        "text": "detectLanguage",
+                        "value": "detectLanguage",
+                        "url": "bbn-php\/doc\/method\/Mvc\/Environment\/detectLanguage",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Environment",
                         "text": "getCli",
                         "value": "getCli",
                         "url": "bbn-php\/doc\/method\/Mvc\/Environment\/getCli",
@@ -13675,281 +13963,281 @@
         "items": [
             {
                 "type": "class",
-                "value": "Emails",
-                "text": "Emails",
-                "url": "bbn-php\/doc\/class\/User\/Emails",
+                "value": "Email",
+                "text": "Email",
+                "url": "bbn-php\/doc\/class\/User\/Email",
                 "desc": "",
                 "items": [
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "__construct",
                         "value": "__construct",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/__construct",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/__construct",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "addAccount",
                         "value": "addAccount",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/addAccount",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/addAccount",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "addContactFromMail",
                         "value": "addContactFromMail",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/addContactFromMail",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/addContactFromMail",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "addLinkToMail",
                         "value": "addLinkToMail",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/addLinkToMail",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/addLinkToMail",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "addSentToLink",
                         "value": "addSentToLink",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/addSentToLink",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/addSentToLink",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "checkConfig",
                         "value": "checkConfig",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/checkConfig",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/checkConfig",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "checkFolder",
                         "value": "checkFolder",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/checkFolder",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/checkFolder",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "createFolder",
                         "value": "createFolder",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/createFolder",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/createFolder",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "createFolderDb",
                         "value": "createFolderDb",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/createFolderDb",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/createFolderDb",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "deleteAccount",
                         "value": "deleteAccount",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/deleteAccount",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/deleteAccount",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "deleteFolder",
                         "value": "deleteFolder",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/deleteFolder",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/deleteFolder",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "deleteFolderDb",
                         "value": "deleteFolderDb",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/deleteFolderDb",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/deleteFolderDb",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getAccount",
                         "value": "getAccount",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getAccount",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getAccount",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getAccounts",
                         "value": "getAccounts",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getAccounts",
-                        "desc": ""
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getAccounts",
+                        "desc": "Returns the list of the accounts of the current user."
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getAccountsIds",
                         "value": "getAccountsIds",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getAccountsIds",
-                        "desc": ""
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getAccountsIds",
+                        "desc": "Returns the list of the accounts' IDs of the current user."
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getAccountTypes",
                         "value": "getAccountTypes",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getAccountTypes",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getAccountTypes",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getContact",
                         "value": "getContact",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getContact",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getContact",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getContacts",
                         "value": "getContacts",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getContacts",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getContacts",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getEmail",
                         "value": "getEmail",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getEmail",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getEmail",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getFolder",
                         "value": "getFolder",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getFolder",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getFolder",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getFolders",
                         "value": "getFolders",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getFolders",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getFolders",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getFolderTypes",
                         "value": "getFolderTypes",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getFolderTypes",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getFolderTypes",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getLink",
                         "value": "getLink",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getLink",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getLink",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getList",
                         "value": "getList",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getList",
-                        "desc": ""
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getList",
+                        "desc": "Returns a list of emails based on their folder."
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getMailbox",
                         "value": "getMailbox",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getMailbox",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getMailbox",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "getStructure",
                         "value": "getStructure",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/getStructure",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/getStructure",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "insertEmail",
                         "value": "insertEmail",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/insertEmail",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/insertEmail",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "renameFolder",
                         "value": "renameFolder",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/renameFolder",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/renameFolder",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "renameFolderDb",
                         "value": "renameFolderDb",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/renameFolderDb",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/renameFolderDb",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "reset",
                         "value": "reset",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/reset",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/reset",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "retrieveEmail",
                         "value": "retrieveEmail",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/retrieveEmail",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/retrieveEmail",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "syncEmails",
                         "value": "syncEmails",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/syncEmails",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/syncEmails",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "syncFolders",
                         "value": "syncFolders",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/syncFolders",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/syncFolders",
                         "desc": ""
                     },
                     {
                         "type": "method",
-                        "class": "User\/Emails",
+                        "class": "User\/Email",
                         "text": "updateAccount",
                         "value": "updateAccount",
-                        "url": "bbn-php\/doc\/method\/User\/Emails\/updateAccount",
+                        "url": "bbn-php\/doc\/method\/User\/Email\/updateAccount",
                         "desc": ""
                     }
                 ]
@@ -13980,6 +14268,14 @@
                     {
                         "type": "method",
                         "class": "User\/Manager",
+                        "text": "addPermission",
+                        "value": "addPermission",
+                        "url": "bbn-php\/doc\/method\/User\/Manager\/addPermission",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Manager",
                         "text": "copy",
                         "value": "copy",
                         "url": "bbn-php\/doc\/method\/User\/Manager\/copy",
@@ -13988,9 +14284,25 @@
                     {
                         "type": "method",
                         "class": "User\/Manager",
+                        "text": "createPermission",
+                        "value": "createPermission",
+                        "url": "bbn-php\/doc\/method\/User\/Manager\/createPermission",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Manager",
                         "text": "deactivate",
                         "value": "deactivate",
                         "url": "bbn-php\/doc\/method\/User\/Manager\/deactivate",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Manager",
+                        "text": "deletePermission",
+                        "value": "deletePermission",
+                        "url": "bbn-php\/doc\/method\/User\/Manager\/deletePermission",
                         "desc": ""
                     },
                     {
@@ -14228,6 +14540,14 @@
                     {
                         "type": "method",
                         "class": "User\/Manager",
+                        "text": "removePermission",
+                        "value": "removePermission",
+                        "url": "bbn-php\/doc\/method\/User\/Manager\/removePermission",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Manager",
                         "text": "sendMail",
                         "value": "sendMail",
                         "url": "bbn-php\/doc\/method\/User\/Manager\/sendMail",
@@ -14293,10 +14613,58 @@
                     {
                         "type": "method",
                         "class": "User\/Permissions",
+                        "text": "accessExists",
+                        "value": "accessExists",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/accessExists",
+                        "desc": "Checks if the given permission corresponds to real file in mvc\/public."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "accessPluginRoot",
+                        "value": "accessPluginRoot",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/accessPluginRoot",
+                        "desc": "Returns"
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "accessUpdateApp",
+                        "value": "accessUpdateApp",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/accessUpdateApp",
+                        "desc": "Updates all access permission for the main app."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "accessUpdatePath",
+                        "value": "accessUpdatePath",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/accessUpdatePath",
+                        "desc": "Updates all access permission for the given path in the given root."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/add",
                         "desc": "Grants a new permission to a user or a group."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "createFromId",
+                        "value": "createFromId",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/createFromId",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "createOptionPermission",
+                        "value": "createOptionPermission",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/createOptionPermission",
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -14309,6 +14677,22 @@
                     {
                         "type": "method",
                         "class": "User\/Permissions",
+                        "text": "fFilter",
+                        "value": "fFilter",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/fFilter",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "fMerge",
+                        "value": "fMerge",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/fMerge",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
                         "text": "fromPath",
                         "value": "fromPath",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/fromPath",
@@ -14317,10 +14701,34 @@
                     {
                         "type": "method",
                         "class": "User\/Permissions",
+                        "text": "fSort",
+                        "value": "fSort",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/fSort",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "fTreat",
+                        "value": "fTreat",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/fTreat",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
                         "text": "fullOptions",
                         "value": "fullOptions",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/fullOptions",
                         "desc": "Returns the result of Option::fullOptions filtered through current user's permissions."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "fWalk",
+                        "value": "fWalk",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/fWalk",
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -14349,6 +14757,22 @@
                     {
                         "type": "method",
                         "class": "User\/Permissions",
+                        "text": "getParentCfg",
+                        "value": "getParentCfg",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/getParentCfg",
+                        "desc": "Returns the permissions inherited properties."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "getSources",
+                        "value": "getSources",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/getSources",
+                        "desc": "Returns an array corresponding to the different roots for permissions in the project."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
                         "text": "has",
                         "value": "has",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/has",
@@ -14373,10 +14797,34 @@
                     {
                         "type": "method",
                         "class": "User\/Permissions",
+                        "text": "optionPermissionRoot",
+                        "value": "optionPermissionRoot",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/optionPermissionRoot",
+                        "desc": "Returns"
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
                         "text": "options",
                         "value": "options",
                         "url": "bbn-php\/doc\/method\/User\/Permissions\/options",
                         "desc": "Returns the result of Option::Options filtered through current user's permissions."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "optionsUpdateAll",
+                        "value": "optionsUpdateAll",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/optionsUpdateAll",
+                        "desc": "Updates all the permission for the options."
+                    },
+                    {
+                        "type": "method",
+                        "class": "User\/Permissions",
+                        "text": "optionToPermission",
+                        "value": "optionToPermission",
+                        "url": "bbn-php\/doc\/method\/User\/Permissions\/optionToPermission",
+                        "desc": "Returns the corresponding permission of a given option."
                     },
                     {
                         "type": "method",
@@ -15196,6 +15644,23 @@
                                 "desc": ""
                             }
                         ]
+                    }
+                ]
+            },
+            {
+                "type": "class",
+                "value": "CssXpath",
+                "text": "CssXpath",
+                "url": "bbn-php\/doc\/class\/Util\/CssXpath",
+                "desc": "This file is part of CssXpath",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Util\/CssXpath",
+                        "text": "convert",
+                        "value": "convert",
+                        "url": "bbn-php\/doc\/method\/Util\/CssXpath\/convert",
+                        "desc": "css -> xpath"
                     }
                 ]
             },
@@ -16103,6 +16568,14 @@
             {
                 "type": "method",
                 "class": "Db",
+                "text": "alter",
+                "value": "alter",
+                "url": "bbn-php\/doc\/method\/Db\/alter",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Db",
                 "text": "arrangeConditions",
                 "value": "arrangeConditions",
                 "url": "bbn-php\/doc\/method\/Db\/arrangeConditions",
@@ -16458,6 +16931,38 @@
                 "text": "fmodelize",
                 "value": "fmodelize",
                 "url": "bbn-php\/doc\/method\/Db\/fmodelize",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Db",
+                "text": "getAlter",
+                "value": "getAlter",
+                "url": "bbn-php\/doc\/method\/Db\/getAlter",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Db",
+                "text": "getAlterColumn",
+                "value": "getAlterColumn",
+                "url": "bbn-php\/doc\/method\/Db\/getAlterColumn",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Db",
+                "text": "getAlterKey",
+                "value": "getAlterKey",
+                "url": "bbn-php\/doc\/method\/Db\/getAlterKey",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Db",
+                "text": "getAlterTable",
+                "value": "getAlterTable",
+                "url": "bbn-php\/doc\/method\/Db\/getAlterTable",
                 "desc": ""
             },
             {
@@ -16839,6 +17344,14 @@
             {
                 "type": "method",
                 "class": "Db",
+                "text": "getTableComment",
+                "value": "getTableComment",
+                "url": "bbn-php\/doc\/method\/Db\/getTableComment",
+                "desc": "Returns the comment (or an empty string if none) for a given table."
+            },
+            {
+                "type": "method",
+                "class": "Db",
                 "text": "getTables",
                 "value": "getTables",
                 "url": "bbn-php\/doc\/method\/Db\/getTables",
@@ -17123,6 +17636,14 @@
                 "value": "removeVirtual",
                 "url": "bbn-php\/doc\/method\/Db\/removeVirtual",
                 "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Db",
+                "text": "renameTable",
+                "value": "renameTable",
+                "url": "bbn-php\/doc\/method\/Db\/renameTable",
+                "desc": "Renames the given table to the new given name."
             },
             {
                 "type": "method",
@@ -17766,6 +18287,14 @@
                 "value": "getPluginModel",
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginModel",
                 "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "Mvc",
+                "text": "getPluginPath",
+                "value": "getPluginPath",
+                "url": "bbn-php\/doc\/method\/Mvc\/getPluginPath",
+                "desc": "Returns the URL part of the given plugin."
             },
             {
                 "type": "method",
@@ -19239,6 +19768,14 @@
             {
                 "type": "method",
                 "class": "X",
+                "text": "flatten",
+                "value": "flatten",
+                "url": "bbn-php\/doc\/method\/X\/flatten",
+                "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "X",
                 "text": "fromCsv",
                 "value": "fromCsv",
                 "url": "bbn-php\/doc\/method\/X\/fromCsv",
@@ -19587,6 +20124,14 @@
                 "value": "retrieveObjectVar",
                 "url": "bbn-php\/doc\/method\/X\/retrieveObjectVar",
                 "desc": ""
+            },
+            {
+                "type": "method",
+                "class": "X",
+                "text": "rmap",
+                "value": "rmap",
+                "url": "bbn-php\/doc\/method\/X\/rmap",
+                "desc": "Applies the given function at all levels of a multidimensional array after picking the items (if defined param $item)."
             },
             {
                 "type": "method",

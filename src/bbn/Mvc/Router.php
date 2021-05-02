@@ -143,7 +143,7 @@ class Router
       $path = str_replace('//', '/', $path);
     }
 
-    $path = trim($path, '/\\ ');
+    //$path = trim($path, '/\\ ');
 
     return $path ?: '.';
   }
@@ -925,7 +925,7 @@ class Router
     ) {
       if (!X::hasProp($this->_textdomains, $plugin)) {
         $lang_path = $this->_routes['root'][$plugin]['path'] . 'src/locale';
-        $idx_file = $lang_path.'/index.txt';
+        $idx_file  = $lang_path.'/index.txt';
         if (!is_file($idx_file)) {
           if (is_dir(dirname($idx_file))) {
             $idx = '';
@@ -943,6 +943,7 @@ class Router
         bind_textdomain_codeset($textdomain, 'UTF-8');
         $this->_textdomains[$plugin] = $textdomain;
       }
+
       //$lang_path = \dirname($this->_routes['root'][$plugin]['path']).'/src/locale';
       return $this->_textdomains[$plugin];
     }

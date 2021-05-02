@@ -18,7 +18,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
     "startLine": 28,
-    "endLine": 954,
+    "endLine": 955,
     "contentConstructor": {
         "file": "bbn\\Mvc\\Router",
         "returns": null
@@ -69,7 +69,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    $path = trim($path, '\/\\\\ ');\n\n    return $path ?: '.';\n  }",
+            "code": "function($path)\n  {\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    \/\/$path = trim($path, '\/\\\\ ');\n\n    return $path ?: '.';\n  }",
             "startLine": 140,
             "endLine": 149,
             "isDeprecated": false,

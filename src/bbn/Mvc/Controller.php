@@ -643,9 +643,7 @@ class Controller implements Api
    */
   public function getLess($path='')
   {
-    if ($r = $this->getView($path, 'css', false)) {
-      return \CssMin::minify($r);
-    }
+    return $r = $this->getView($path, 'css', false);
   }
 
 
