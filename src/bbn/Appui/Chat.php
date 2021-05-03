@@ -882,6 +882,10 @@ SQL;
    */
   public function getUserStatus(string $id = null): bool
   {
+    if (!$this->user) {
+      return false;
+    }
+
     $ucfg = $this->user->getClassCfg();
     $cfg  = json_decode($this->db->selectOne($ucfg['table'], $ucfg['arch']['users']['cfg'], [$ucfg['arch']['users']['id'] => $id ?: $this->user->getId()]), true);
     return !isset($cfg['appui-chat']['online']) || !empty($cfg['appui-chat']['online']);

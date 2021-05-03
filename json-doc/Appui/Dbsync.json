@@ -5730,7 +5730,7 @@
                             "ref_db": "apst_app",
                             "ref_table": "apst_adherents",
                             "ref_column": "id",
-                            "constraint": "apst_attestations_ibfk_2",
+                            "constraint": "apst_attestations_ibfk_1",
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
@@ -5742,7 +5742,7 @@
                             "ref_db": "apst_app",
                             "ref_table": "apst_adherents",
                             "ref_column": "id",
-                            "constraint": "apst_attestations_ibfk_2",
+                            "constraint": "apst_attestations_ibfk_1",
                             "update": "CASCADE",
                             "delete": "CASCADE",
                             "unique": 0
