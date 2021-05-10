@@ -19949,32 +19949,8 @@
                             "default": "NULL",
                             "maxlength": 16
                         },
-                        "mime": {
-                            "position": 5,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 25
-                        },
-                        "lang": {
-                            "position": 6,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 2
-                        },
                         "excerpt": {
-                            "position": 7,
+                            "position": 5,
                             "type": "text",
                             "null": 0,
                             "key": null,
@@ -19984,7 +19960,7 @@
                             "generation": ""
                         },
                         "private": {
-                            "position": 8,
+                            "position": 6,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -19996,7 +19972,7 @@
                             "maxlength": 1
                         },
                         "locked": {
-                            "position": 9,
+                            "position": 7,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -20008,7 +19984,7 @@
                             "maxlength": 1
                         },
                         "pinned": {
-                            "position": 10,
+                            "position": 8,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -20020,7 +19996,7 @@
                             "maxlength": 1
                         },
                         "creator": {
-                            "position": 11,
+                            "position": 9,
                             "type": "binary",
                             "null": 0,
                             "key": "MUL",
@@ -20031,7 +20007,7 @@
                             "maxlength": 16
                         },
                         "active": {
-                            "position": 12,
+                            "position": 10,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -36060,32 +36036,8 @@
                             "default": "NULL",
                             "maxlength": 16
                         },
-                        "mime": {
-                            "position": 5,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 25
-                        },
-                        "lang": {
-                            "position": 6,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 2
-                        },
                         "excerpt": {
-                            "position": 7,
+                            "position": 5,
                             "type": "text",
                             "null": 0,
                             "key": null,
@@ -36095,7 +36047,7 @@
                             "generation": ""
                         },
                         "private": {
-                            "position": 8,
+                            "position": 6,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -36107,7 +36059,7 @@
                             "maxlength": 1
                         },
                         "locked": {
-                            "position": 9,
+                            "position": 7,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -36119,7 +36071,7 @@
                             "maxlength": 1
                         },
                         "pinned": {
-                            "position": 10,
+                            "position": 8,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -36131,7 +36083,7 @@
                             "maxlength": 1
                         },
                         "creator": {
-                            "position": 11,
+                            "position": 9,
                             "type": "binary",
                             "null": 0,
                             "key": "MUL",
@@ -36142,7 +36094,7 @@
                             "maxlength": 16
                         },
                         "active": {
-                            "position": 12,
+                            "position": 10,
                             "type": "int",
                             "null": 0,
                             "key": null,
