@@ -22,4 +22,9 @@
       <directory>tests</directory>
     </testsuite>
   </testsuites>
+  <php>
+    <const name="BBN_APP_PATH" value="./" />
+    <const name="BBN_APP_NAME" value="Testing" />
+    <const name="BBN_DATA_PATH" value="tests/storage/" />
+  </php>
 </phpunit>
