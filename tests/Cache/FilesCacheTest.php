@@ -52,14 +52,14 @@ class FilesCacheTest extends TestCase
 
 
     /** @test */
-    public function if_returns_false_if_the_given_key_not_stored()
+    public function it_returns_false_if_the_given_key_not_stored()
     {
         $this->assertFalse($this->cache->get('foobar'));
     }
 
 
     /** @test */
-    public function if_returns_false_if_the_given_key_is_stored_but_expired()
+    public function it_returns_false_if_the_given_key_is_stored_but_expired()
     {
         $this->cache->set('foo', 'bar', 15);
 
