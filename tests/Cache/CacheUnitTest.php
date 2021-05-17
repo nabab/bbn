@@ -117,7 +117,7 @@ class CacheUnitTest extends TestCase
 
 
     /** @test */
-  public function it_returns_the_has_of_the_given_item()
+  public function it_returns_the_hash_of_the_given_item()
   {
       $this->cache->set('foo', 'bar');
       $file = $this->invokeGetRawMethod('foo');
