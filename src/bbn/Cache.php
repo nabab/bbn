@@ -192,17 +192,21 @@ class Cache
   }
 
 
-  /**
-   * Constructor - this is a singleton: it can't be called more then once.
-   *
-   * @param string $engine The type of engine to use
-   */
+    /**
+     * Constructor - this is a singleton: it can't be called more then once.
+     *
+     * @param string $engine The type of engine to use
+     *
+     * @throws Exception
+     */
   public function __construct(string $engine = null)
   {
     /** @todo APC doesn't work */
     $engine = 'files';
     if (self::$is_init) {
-      die("Only one cache object can be called. Use static function Cache::getEngine()");
+      throw new \Exception(
+        "Only one cache object can be called. Use static function Cache::getEngine()"
+      );
     }
 
     if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {
@@ -280,15 +284,20 @@ class Cache
   }
 
 
-  /**
-   * Deletes all the cache from the given path or globally if none is given.
-   *
-   * @param string $st The path of the items to delete
-   * @return bool|int
-   */
+    /**
+     * Deletes all the cache from the given path or globally if none is given.
+     *
+     * @param string|null $st The path of the items to delete
+     *
+     * @return bool|int
+     */
   public function deleteAll(string $st = null): bool
   {
     if (self::$type === 'files') {
+      if ($st === null) {
+          $st = '';
+      }
+
       $dir = self::_dir($st, $this->path, false);
       if ($this->fs->isDir($dir)) {
         return !!$this->fs->delete($dir, $dir === $this->path ? false : true);
@@ -388,9 +397,9 @@ class Cache
   /**
    * Stores the given value in the cache for as long as says the TTL.
    *
-   * @param string                                  $item The name of the item
-   * @param $val The value to be stored in the cache
-   * @param int                                     $ttl  The length in seconds during which the value will be considered as valid
+   * @param string $item The name of the item
+   * @param mixed  $val  The value to be stored in the cache
+   * @param int    $ttl  The length in seconds during which the value will be considered as valid
    * @return bool Returns true in case of success false otherwise
    */
   public function set(string $item, $val, int $ttl = 10, float $exec = null): bool
@@ -428,7 +437,7 @@ class Cache
               'exec' => $exec,
               'value' => $val
             ];
-            if ($this->fs->putContents($file, Json_encode($value, JSON_PRETTY_PRINT))) {
+            if ($this->fs->putContents($file, json_encode($value, JSON_PRETTY_PRINT))) {
               return true;
             }
           }
@@ -484,7 +493,7 @@ class Cache
           if ($this->fs->isFile($tmp_file)) {
             $num = 0;
             while (!$this->fs->isFile($file) && ($num < self::$max_wait)) {
-              X::log([$item, $file, $tmp_file, Date('Y-m-d H:i:s')], 'wait_for_cache');
+              X::log([$item, $file, $tmp_file, date('Y-m-d H:i:s')], 'wait_for_cache');
               sleep(1);
               $num++;
             }
@@ -495,7 +504,7 @@ class Cache
             && ($t = json_decode($t, true))
         ) {
           if ($t
-              && (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
+              && (!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))
               && (!$t['expire'] || ($t['expire'] > time()))
           ) {
             return $t;
@@ -525,14 +534,16 @@ class Cache
   }
 
 
-  /**
-   * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
-   *
-   * @param string   $item The name of the item
-   * @param function $fn   The function which returns the value for the cache
-   * @param int      $ttl  The cache length
-   * @return mixed
-   */
+    /**
+     * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
+     *
+     * @param callable $fn   The function which returns the value for the cache
+     * @param string   $item The name of the item
+     * @param int      $ttl  The cache length
+     *
+     * @return mixed
+     * @throws \Exception
+     */
   public function getSet(callable $fn, string $item, int $ttl = 0)
   {
     switch (self::$type) {
@@ -546,11 +557,11 @@ class Cache
         $data = null;
         // Can't get the data
         if (!$tmp) {
-          $file     = self::_file($item, $this->path);
+          $file = self::_file($item, $this->path);
           // Temporary file will be created to tell other processes the cache is being created
           $tmp_file = dirname($file).'/_'.basename($file);
           // Will become true if the cache should be created
-          $do       = false;
+          $do = false;
           // If the temporary file doesn't exist we create one
           if (!$this->fs->isFile($tmp_file)) {
             $this->fs->createPath(dirname($tmp_file));
@@ -559,6 +570,7 @@ class Cache
             if ($this->fs->isFile($file)) {
               $this->fs->delete($file);
             }
+
             $timer = new Util\Timer();
             $timer->start();
             try {
