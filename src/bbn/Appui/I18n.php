@@ -1033,21 +1033,25 @@ class I18n extends bbn\Models\Cls\Cache
                   // @var  $id takes the id of the original expression in db
                   if (!isset($id) && !($id = $this->db->selectOne(
                     'bbn_i18n', 'id', [
-                    ['exp', 'LIKE', $original],
-                    ['lang', 'LIKE', $path_source_lang]
+                      'exp' => $original,
+                      'lang' => $path_source_lang
                     ]
                   ))
                   ) {
-                    $prev = $this->db->last();
                     if (!$this->db->insertIgnore(
                       'bbn_i18n', [
-                      'exp' => $original,
-                      'lang' => $path_source_lang
+                        'exp' => $original,
+                        'lang' => $path_source_lang
                       ]
                     )
                     ) {
-                      \bbn\X::hdump($original,$prev,$path_source_lang,$t->getReference());
-                      $errors[] = $original;
+                      throw new \Exception(
+                        sprintf(
+                          _("Impossible to insert the original string %s in the original language %s"),
+                          $original,
+                          $path_source_lang
+                        )
+                      );
                     }
                     else {
                       $id = $this->db->lastId();
@@ -1079,7 +1083,13 @@ class I18n extends bbn\Models\Cls\Cache
                         $row[$lng.'_db'] = $row[$lng.'_po'];
                       }
                       else{
-                        die("Error");
+                        throw new \Exception(
+                          sprintf(
+                            _("Impossible to insert or update the expression \"%s\" in %s"),
+                            $row[$lng.'_po'],
+                            $lng
+                          )
+                        );
                       }
                     }
 
@@ -1169,7 +1179,6 @@ class I18n extends bbn\Models\Cls\Cache
       if (substr($path, -1) !== '/') {
         $path .= '/';
       }
-
     }
 
     return $path.'locale';
