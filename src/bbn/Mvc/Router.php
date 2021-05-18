@@ -874,6 +874,10 @@ class Router
   {
     // Mode exists
     if (self::isMode($mode)) {
+      if ($this->_is_known($path, $mode)) {
+        return $this->_get_known($path, $mode);
+      }
+
       $plugin     = $this->_find_plugin($path);
       $plugin_url = $plugin ? $plugin['url'] : false;
       $root       = $this->_get_classic_root($mode);
