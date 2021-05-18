@@ -1054,7 +1054,10 @@ class Controller implements Api
       $basename = basename($this->_file, '.php');
       if (X::indexOf(['index', 'home'], $basename) > -1) {
         $bits = X::split($this->_path, '/');
-        if (end($bits) !== $basename) {
+        if ((count($bits) === 1) && ($bits[0] === '.')) {
+          $path = $basename;
+        }
+        elseif (end($bits) !== $basename) {
           $bits[] = $basename;
           $path = X::join($bits, '/');
         }
