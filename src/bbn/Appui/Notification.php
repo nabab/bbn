@@ -48,7 +48,9 @@ class Notification extends bbn\Models\Cls\Db
     $user,
     $pref,
     $perms,
-    $cfg;
+    $cfg,
+    $lastDbId,
+    $lastId;
 
 
   public function __construct(bbn\Db $db)
@@ -102,13 +104,17 @@ class Notification extends bbn\Models\Cls\Db
                 $this->opt->setProp($pp, ['public' => $is_public]);
                 if (!$is_public) {
                   foreach ($permissions as $perm) {
-                    $this->db->insert(
+                    $this->lastDbId = $this->db->lastId();
+                    if ($this->db->insert(
                       $pcfg['table'], [
                       $pcfg['arch']['user_options']['id_option'] => $pp,
                       $pcfg['arch']['user_options']['id_user'] => $perm->{$pcfg['arch']['user_options']['id_user']},
                       $pcfg['arch']['user_options']['id_group'] => $perm->{$pcfg['arch']['user_options']['id_group']}
                       ]
-                    );
+                    ) ) {
+                      $this->lastId = $this->db->lastId();
+                    }
+                    $this->db->setLastInsertId($this->lastDbId);
                   }
                 }
               }
@@ -155,6 +161,7 @@ class Notification extends bbn\Models\Cls\Db
         $this->class_cfg['arch']['content']['content'] => $content,
         $this->class_cfg['arch']['content']['creation'] => \date('Y-m-d H:i:s')
       ];
+      $this->lastDbId = $this->db->lastId();
       if ($this->db->insert($this->class_cfg['tables']['content'], $notification)) {
         $id = $this->db->lastId();
         if (empty($users) && !$user_excluded) {
@@ -173,9 +180,10 @@ class Notification extends bbn\Models\Cls\Db
               $this->fields['id_user'] => $u
               ]
             );
+            $this->lastId = $this->db->lastId();
           }
         }
-
+        $this->db->setLastInsertId($this->lastDbId);
         return (bool)$i;
       }
     }
@@ -524,6 +532,9 @@ class Notification extends bbn\Models\Cls\Db
     return null;
   }
 
+  public function getLastId(){
+    return $this->lastId;
+  }
 
   public function contUnread(string $id_user = null): int
   {
@@ -731,13 +742,16 @@ class Notification extends bbn\Models\Cls\Db
         && bbn\Str::isEmail($email)
     ) {
       $templ['title'] = str_replace('{{app_name}}', defined('BBN_SITE_TITLE') ? BBN_SITE_TITLE : BBN_CLIENT_NAME, $templ['title']);
-      return (bool)$this->db->insert(
+      $this->lastDbId = $this->db->lastId();
+      $ret = (bool)$this->db->insert(
         'bbn_emails', [
         'email' => $email,
         'subject' => $templ['title'],
         'text' => $rendered
         ]
       );
+      $this->db->setLastInsertId($this->lastDbId);
+      return $ret;
     }
 
     return null;
