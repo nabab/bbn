@@ -1,8 +1,8 @@
 <?php
-namespace bbn\Db;
+namespace bbn\Db2;
 
 use bbn;
-use bbn\Db;
+use bbn\Db2;
 use bbn\X;
 use bbn\Str;
 
@@ -106,13 +106,13 @@ class Sync
   }
 
   /**
-   * @param bbn\Db $db
+   * @param bbn\Db2 $db
    * @param array $sync_cfg
    * @param array  $tables
    * @param string  $sync_table
    * @return void
    */
-  public static function init(Db $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void
+  public static function init(Db2 $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void
   {
     if (self::$is_init) {
       throw new \Exception("Impossible to init twice the dbsync class");
@@ -164,7 +164,7 @@ class Sync
         self::$tables[$i] = self::$current_connection->tfn($t);
       }
       self::$current_connection->setTrigger(
-        '\\bbn\Db\\sync::trigger',
+        '\\bbn\Db2\\sync::trigger',
         ['delete', 'update', 'insert'],
         ['before', 'after'],
         self::$tables
@@ -363,7 +363,7 @@ class Sync
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public static function sync(bbn\Db $db, $dbs='', $sync_table='', $num_try = 0)
+  public static function sync(bbn\Db2 $db, $dbs='', $sync_table='', $num_try = 0)
   {
     if (!self::isInit()) {
       die("DB sync is not initiated");

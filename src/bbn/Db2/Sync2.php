@@ -1,8 +1,8 @@
 <?php
-namespace bbn\Db;
+namespace bbn\Db2;
 
 use bbn;
-use bbn\Db;
+use bbn\Db2;
 use bbn\X;
 use bbn\Str;
 
@@ -93,7 +93,7 @@ class Sync2 extends bbn\Models\Cls\Db
    */
   private $max_retry = 5;
 
-  public function __construct(Db $db, array $tables, array $sync_cfg = null, array $arch = [])
+  public function __construct(Db2 $db, array $tables, array $sync_cfg = null, array $arch = [])
   {
     parent::__construct($db);
     Singleton::init($this);
@@ -105,7 +105,7 @@ class Sync2 extends bbn\Models\Cls\Db
   }
 
   /**
-   * @param bbn\Db $db
+   * @param bbn\Db2 $db
    * @param array $sync_cfg
    * @param array  $tables
    * @param string  $sync_table
@@ -163,7 +163,7 @@ class Sync2 extends bbn\Models\Cls\Db
         $this->tables[$i] = $this->current_connection->tableFullName($t);
       }
       $this->current_connection->setTrigger(
-        '\\bbn\Db\\sync::trigger',
+        '\\bbn\Db2\\sync::trigger',
         ['delete', 'update', 'insert'],
         ['before', 'after'],
         $this->tables
@@ -360,7 +360,7 @@ class Sync2 extends bbn\Models\Cls\Db
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public function sync(bbn\Db $db, $dbs='', $sync_table='', $num_try = 0)
+  public function sync(bbn\Db2 $db, $dbs='', $sync_table='', $num_try = 0)
   {
     if (!self::isInit()) {
       die("DB sync is not initiated");

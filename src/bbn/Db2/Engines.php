@@ -2,7 +2,7 @@
 /**
  * @package db
  */
-namespace bbn\Db;
+namespace bbn\Db2;
 
 use bbn;
 
@@ -24,11 +24,11 @@ interface Engines
 {
 
 
-  /**
+  /*
    * @param array $cfg The user's options
    * @return array|null The final configuration
-   */
   public function getConnection(array $cfg = []): ?array;
+   */
 
 
   /**

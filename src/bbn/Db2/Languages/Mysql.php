@@ -19,12 +19,9 @@ use bbn\X;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
-class Mysql implements bbn\Db\Engines
+class Mysql implements bbn\Db2\Engines
 {
-  protected $pdo;
-
-  /** @var bbn\Db The connection object */
-  protected $db;
+  use bbn\Models\Tts\Pdo;
 
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
@@ -124,33 +121,14 @@ class Mysql implements bbn\Db\Engines
 
   /**
    * Constructor
-   * @param bbn\Db $db
+   * @param bbn\Db2 $db
    */
-  public function __construct(bbn\Db $db = null)
+  public function __construct(array $cfg, bbn\Db2 $db = null)
   {
     if (!\extension_loaded('pdo_mysql')) {
       die('The MySQL driver for PDO is not installed...');
     }
 
-    $this->db = $db;
-  }
-
-
-  /*****************************************************************************************************************
-   *                                                                                                                *
-   *                                                                                                                *
-   *                                               ENGINES INTERFACE                                                *
-   *                                                                                                                *
-   *                                                                                                                *
-   *****************************************************************************************************************/
-
-
-  /**
-   * @param array $cfg The user's options
-   * @return array|null The final configuration
-   */
-  public function getConnection(array $cfg = []): array
-  {
     if (!X::hasProps($cfg, ['host', 'user'])) {
       if (!defined('BBN_DB_HOST')) {
         die("No DB host defined");
@@ -183,7 +161,7 @@ class Mysql implements bbn\Db\Engines
 
     $cfg['code_db']   = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
-    $cfg['args']      = ['mysql:host='
+    $params           = ['mysql:host='
         .(in_array($cfg['host'], ['localhost', '127.0.0.1']) ? gethostname() : $cfg['host'])
         .';port='.$cfg['port']
         .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
@@ -191,189 +169,24 @@ class Mysql implements bbn\Db\Engines
       $cfg['pass'],
       [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
     ];
-    return $cfg;
-  }
 
-
-  /**
-   * Actions to do once the PDO object has been created
-   *
-   * @return void
-   */
-  public function postCreation()
-  {
-    return;
-  }
-
-
-  /**
-   * Changes the current database to the given one.
-   * @param string $db The database name or file
-   * @return bool
-   */
-  public function change(string $db): bool
-  {
-    if (($this->db->getCurrent() !== $db) && bbn\Str::checkName($db)) {
-      $this->db->rawQuery("USE `$db`");
-      return true;
+    try {
+      $tmp = new \PDO(...$params);
+    }
+    catch (\PDOException $e){
+      $err = X::_("Impossible to create the connection")." $engine/$db "
+             .X::_("with the following error").$e->getMessage();
+      throw new \Exception($err);
     }
 
-    return false;
-  }
-
-
-  /**
-   * Returns a database item expression escaped like database, table, column, key names
-   *
-   * @param string $item The item's name (escaped or not)
-   * @return string
-   */
-  public function escape(string $item): string
-  {
-    $items = explode('.', str_replace($this->qte, '', $item));
-    $r     = [];
-    foreach ($items as $m) {
-      if (!bbn\Str::checkName($m)) {
-        return false;
-      }
-
-      $r[] = $this->qte . $m . $this->qte;
+    unset($cfg['pass']);
+    if (isset($tmp)) {
+      $this->pdo = $tmp;
+      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->cfg = $cfg;
+      $this->db  = $db;
     }
 
-    return implode('.', $r);
-  }
-
-
-  /**
-   * Returns a table's full name i.e. database.table
-   *
-   * @param string $table   The table's name (escaped or not)
-   * @param bool   $escaped If set to true the returned string will be escaped
-   * @return null|string
-   */
-  public function tableFullName(string $table, bool $escaped = false): ?string
-  {
-    $bits = explode('.', $table);
-    if (\count($bits) === 3) {
-      $db    = trim($bits[0], ' ' . $this->qte);
-      $table = trim($bits[1]);
-    } elseif (\count($bits) === 2) {
-      $db    = trim($bits[0], ' ' . $this->qte);
-      $table = trim($bits[1], ' ' . $this->qte);
-    } else {
-      $db    = $this->db->getCurrent();
-      $table = trim($bits[0], ' ' . $this->qte);
-    }
-
-    if (bbn\Str::checkName($db, $table)) {
-      return $escaped ? $this->qte . $db . $this->qte . '.' . $this->qte . $table . $this->qte : $db . '.' . $table;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Returns a table's simple name i.e. table
-   *
-   * @param string $table   The table's name (escaped or not)
-   * @param bool   $escaped If set to true the returned string will be escaped
-   * @return null|string
-   */
-  public function tableSimpleName(string $table, bool $escaped = false): ?string
-  {
-    if ($table = trim($table)) {
-      $bits = explode('.', $table);
-      switch (\count($bits)) {
-        case 1:
-          $table = trim($bits[0], ' ' . $this->qte);
-          break;
-        case 2:
-          $table = trim($bits[1], ' ' . $this->qte);
-          break;
-        case 3:
-          $table = trim($bits[1], ' ' . $this->qte);
-          break;
-      }
-
-      if (bbn\Str::checkName($table)) {
-        return $escaped ? $this->qte . $table . $this->qte : $table;
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Returns a column's full name i.e. table.column
-   *
-   * @param string      $col     The column's name (escaped or not)
-   * @param null|string $table   The table's name (escaped or not)
-   * @param bool        $escaped If set to true the returned string will be escaped
-   * @return string | false
-   */
-  public function colFullName(string $col, $table = null, $escaped = false): ?string
-  {
-    if ($col = trim($col)) {
-      $bits = explode('.', $col);
-      $ok   = null;
-      $col  = trim(array_pop($bits), ' ' . $this->qte);
-      if ($table && ($table = $this->tableSimpleName($table))) {
-        $ok = 1;
-      } elseif (\count($bits)) {
-        $table = trim(array_pop($bits), ' ' . $this->qte);
-        $ok    = 1;
-      }
-
-      if ((null !== $ok) && bbn\Str::checkName($table, $col)) {
-        return $escaped ? $this->qte . $table . $this->qte . '.' . $this->qte . $col . $this->qte : $table . '.' . $col;
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Returns a column's simple name i.e. column
-   *
-   * @param string $col     The column's name (escaped or not)
-   * @param bool   $escaped If set to true the returned string will be escaped
-   * @return null|string
-   */
-  public function colSimpleName(string $col, bool $escaped = false): ?string
-  {
-    if ($bits = explode('.', $col)) {
-      $col = trim(end($bits), ' ' . $this->qte);
-      if (bbn\Str::checkName($col)) {
-        return $escaped ? $this->qte . $col . $this->qte : $col;
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Returns true if the given string is the full name of a table ('database.table').
-   * @param string $table
-   * @return bool
-   */
-  public function isTableFullName(string $table): bool
-  {
-    return strpos($table, '.') ? true : false;
-  }
-
-
-  /**
-   * Returns true if the given string is the full name of a column ('table.column').
-   * @param string $col
-   * @return bool
-   */
-  public function isColFullName(string $col): bool
-  {
-    return (bool)strpos($col, '.');
   }
 
 

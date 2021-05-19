@@ -2,7 +2,7 @@
 /**
  * @package db
  */
-namespace bbn\Db\Languages;
+namespace bbn\Db2\Languages;
 
 use bbn;
 use bbn\Str;
@@ -19,7 +19,7 @@ use bbn\X;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
-class Pgsql implements bbn\Db\Engines
+class Pgsql implements bbn\Db2\Engines
 {
 
   /** @var bbn\Db The connection object */
@@ -123,9 +123,9 @@ class Pgsql implements bbn\Db\Engines
 
   /**
    * Constructor
-   * @param bbn\Db $db
+   * @param bbn\Db2 $db
    */
-  public function __construct(bbn\Db $db = null)
+  public function __construct(bbn\Db2 $db = null)
   {
     if (!\extension_loaded('pdo_mysql')) {
       die('The MySQL driver for PDO is not installed...');

@@ -2,7 +2,7 @@
 /**
  * @package db
  */
-namespace bbn\Db;
+namespace bbn\Db2;
 
 use bbn;
 /**
@@ -16,7 +16,7 @@ use bbn;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
  */
-class Json //implements bbn\Db\Api
+class Json //implements bbn\Db2\Api
 {
   private $db;
   

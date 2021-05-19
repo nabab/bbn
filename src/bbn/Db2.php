@@ -115,7 +115,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   protected $hash;
 
   /**
-   * @var Db\Languages\Mysql Can be other driver
+   * @var Db2\Languages\Mysql Can be other driver
    */
   protected $language = false;
 
@@ -123,21 +123,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @var integer $cache_renewal
    */
   protected $cache_renewal = 3600;
-
-  /**
-   * @var array $list_queries
-   */
-  protected $list_queries = [];
-
-  /**
-   * @var int $max_queries
-   */
-  protected $max_queries = 50;
-
-  /**
-   * @var int $length_queries
-   */
-  protected $length_queries = 60;
 
   /**
    * @var mixed $last_insert_id
@@ -150,46 +135,9 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   protected $id_just_inserted;
 
   /**
-   * @var mixed $hash_contour
-   */
-  protected $hash_contour = '__BBN__';
-
-  /**
-   * @var string \$last_query
-   */
-  protected $last_query;
-
-  /**
-   * The information that will be accessed by Db\Query as the current statement's options
-   * @var array $last_params
-   */
-  protected $last_params = ['sequences' => false, 'values' => false];
-
-  /**
-   * @var string \$last_query
-   */
-  protected $last_real_query;
-
-  /**
-   * The information that will be accessed by Db\Query as the current statement's options
-   * @var array $last_params
-   */
-  protected $last_real_params = ['sequences' => false, 'values' => false];
-
-  /**
    * @var array $last_cfg
    */
   protected $last_cfg;
-
-  /**
-   * @var mixed $last_prepared
-   */
-  protected $last_prepared;
-
-  /**
-   * @var array $queries
-   */
-  protected $queries = [];
 
   /**
    * @var array $cfgs The configs recorded for helpers functions
@@ -334,6 +282,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function __construct(array $cfg = [])
   {
+    //die("BOOH");
     if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
       $cfg['engine'] = BBN_DB_ENGINE;
     }
@@ -341,29 +290,22 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     if (isset($cfg['engine'])) {
       $engine = $cfg['engine'];
       $db     = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');
-      $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
+      $cls    = '\\bbn\\Db2\\Languages\\'.ucwords($engine);
       if (!class_exists($cls)) {
+        throw new \Exception(X::_("The database engine %s is not recognized", $engine));
         die("Sorry the engine class $engine does not exist");
       }
 
       self::retrieverInit($this);
       $this->cacheInit();
-      $this->language = new $cls($this);
+      $this->language = new $cls($cfg, $this);
       if (isset($cfg['on_error'])) {
         $this->on_error = $cfg['on_error'];
       }
 
-      if ($cfg = $this->getConnection($cfg)) {
+      if ($cfg = $this->language->getCfg()) {
+        $this->cfg = $cfg;
         $this->qte = $this->language->qte;
-        try{
-          parent::__construct(...($cfg['args'] ?: []));
-        }
-        catch (\PDOException $e){
-          $err = X::_("Impossible to create the connection")." $engine/$db "
-                 .X::_("with the following error").$e->getMessage();
-          throw new \Exception($err);
-        }
-
         $this->language->postCreation();
         $this->current  = $cfg['db'] ?? null;
         $this->engine   = $cfg['engine'];
@@ -371,7 +313,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
         $this->username = $cfg['user'] ?? null;
         $this->connection_code = $cfg['code_host'];
         $this->hash     = $this->_make_hash($cfg['args']);
-        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         if (!empty($cfg['cache_length'])) {
           $this->cache_renewal = (int)$cfg['cache_length'];
         }
@@ -444,7 +385,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function isAggregateFunction(string $f): bool
   {
-    $cls = '\\bbn\\Db\\languages\\'.$this->engine;
+    $cls = '\\bbn\\Db2\\languages\\'.$this->engine;
     return $cls::isAggregateFunction($f);
   }
 
@@ -1034,7 +975,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
       $res['where_st']  = $this->language->getWhere($res);
       $res['group_st']  = $this->language->getGroupBy($res);
       $res['having_st'] = $this->language->getHaving($res);
-      $cls              = '\\bbn\\Db\\languages\\'.$this->engine;
+      $cls              = '\\bbn\\Db2\\languages\\'.$this->engine;
       if (empty($res['count'])
           && (count($res['fields']) === 1)
           && ($cls::isAggregateFunction(reset($res['fields'])))
@@ -1330,50 +1271,9 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function startFancyStuff(): self
   {
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [Db\Query::class, [$this]]);
-    $this->_fancy = 1;
-    return $this;
-  }
-
-
-  /**
-   * Clear.
-   *
-   * ```php
-   * $db->clear()
-   * // (void)
-   * ```
-   *
-   * @return db
-   */
-  public function clear(): self
-  {
-    $this->queries      = [];
-    $this->list_queries = [];
-    return $this;
-  }
-
-
-  /**
-   * Return an object with all the properties of the statement and where it is carried out.
-   *
-   * ```php
-   * X::dump($db->addStatement('SELECT name FROM table_users'));
-   * // (db)
-   * ```
-   *
-   * @param string $statement
-   * @return db
-   */
-  public function addStatement($statement, $params): self
-  {
-    $this->last_real_query  = $statement;
-    $this->last_real_params = $params;
-    if ($this->_last_enabled) {
-      $this->last_query  = $statement;
-      $this->last_params = $params;
+    if ($this->language) {
+      $this->language->startFancyStuff();
     }
-
     return $this;
   }
 
@@ -2225,7 +2125,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getOne()
   {
-    /** @var Db\Query $r */
+    /** @var Db2\Query $r */
     if ($r = $this->query(...\func_get_args())) {
       return $r->fetchColumn(0);
     }
@@ -3268,225 +3168,25 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Executes a writing statement and returns the number of affected rows or return a query object for the reading * statement
+   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
+   * @todo far vedere a thomams perche non funziona in lettura
    *
    * ```php
    * X::dump($db->query("DELETE FROM table_users WHERE name LIKE '%lucy%'"));
    * // (int) 3
    * X::dump($db->query("SELECT * FROM table_users WHERE name = 'John"));
-   * // (bbn\Db\Query) Object
+   * // (bbn\Db2\Query) Object
    * ```
    *
    * @param array|string $statement
-   * @return int|Db\Query
+   * @return false|int
    */
   public function query($statement)
   {
     if ($this->check()) {
-      $args = \func_get_args();
-      // If fancy is false we just use the regular PDO query function
-      if (!$this->_fancy) {
-        return parent::query(...$args);
-      }
-
-      // The function can be called directly with func_get_args()
-      while ((\count($args) === 1) && \is_array($args[0])){
-        $args = $args[0];
-      }
-
-      if (!empty($args[0]) && \is_string($args[0])) {
-        // The first argument is the statement
-        $statement = trim(array_shift($args));
-
-        // Sending a hash as second argument from helper functions will bind it to the saved statement
-        if (count($args)
-            && \is_string($args[0])
-            && isset($this->queries[$args[0]])
-        ) {
-          $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
-          $hash_sent = array_shift($args);
-        }
-        else {
-          $hash = $this->_make_hash($statement);
-        }
-
-        $driver_options = [];
-        if (count($args)
-            && \is_array($args[0])
-        ) {
-          // Case where drivers are arguments
-          if (!array_key_exists(0, $args[0])) {
-            $driver_options = array_shift($args);
-          }
-          // Case where values are in a single argument
-          elseif (\count($args) === 1) {
-            $args = $args[0];
-          }
-        }
-
-        /** @var array $params Will become the property last_params each time a query is executed */
-        $params     = [
-          'statement' => $statement,
-          'values' => [],
-          'last' => microtime(true)
-        ];
-        $num_values = 0;
-        foreach ($args as $i => $arg){
-          if (!\is_array($arg)) {
-            $params['values'][] = $arg;
-            $num_values++;
-          }
-          elseif (isset($arg[2])) {
-            $params['values'][] = $arg[2];
-            $num_values++;
-          }
-        }
-
-        if (!isset($this->queries[$hash])) {
-          /** @var int $placeholders The number of placeholders in the statement */
-          $placeholders = 0;
-          if ($sequences = $this->parseQuery($statement)) {
-            /* Or looking for question marks */
-            $sequences = array_keys($sequences);
-            preg_match_all('/(\?)/', $statement, $exp);
-            $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
-            while ($sequences[0] === 'OPTIONS'){
-              array_shift($sequences);
-            }
-
-            $params['kind']      = $sequences[0];
-            $params['union']     = isset($sequences['UNION']);
-            $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
-            $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
-          }
-          elseif (($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
-            $params['kind'] = 'PRAGMA';
-          }
-          else{
-            die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
-          }
-
-          // This will add to the queries array
-          $this->_add_query(
-            $hash,
-            $statement,
-            $params['kind'],
-            $placeholders,
-            $driver_options
-          );
-          if (!empty($hash_sent)) {
-            $this->queries[$hash_sent] = $hash;
-          }
-        }
-        // The hash of the hash for retrieving a query based on the helper's config's hash
-        elseif (\is_string($this->queries[$hash])) {
-          $hash = $this->queries[$hash];
-        }
-
-        $this->_update_query($hash);
-        $q =& $this->queries[$hash];
-        /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
-        if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
-          $params['values'] = array_merge(
-            $params['values'],
-            array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
-          );
-          $num_values       = \count($params['values']);
-        }
-
-        /* The number of values must match the number of placeholders to bind */
-        if ($num_values !== $q['placeholders']) {
-          $this->error(
-            'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
-            .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
-            .print_r(\func_get_args(), true)
-            .print_r($q, true)
-          );
-          exit;
-        }
-
-        if ($q['exe_time'] === 0) {
-          $time = $q['last'];
-        }
-
-        // That will always contains the parameters of the last query done
-
-        $this->addStatement($q['sql'], $params);
-        // If the statement is a structure modifier we need to clear the cache
-        if ($q['structure']) {
-          $tmp                = $q;
-          $this->queries      = [$hash => $tmp];
-          $this->list_queries = [[
-            'hash' => $hash,
-            'last' => $tmp['last']
-          ]];
-          unset($tmp);
-          /** @todo Clear the cache */
-        }
-
-        try{
-          // This is a writing statement, it will execute the statement and return the number of affected rows
-          if ($q['write']) {
-            // A prepared query already exists for the writing
-            /** @var Db\Query */
-            if ($q['prepared']) {
-              $r = $q['prepared']->init($params['values'])->execute();
-            }
-            // If there are no values we can assume the statement doesn't need to be prepared and is just executed
-            elseif ($num_values === 0) {
-              // Native PDO function which returns the number of affected rows
-              $r = $this->exec($q['sql']);
-            }
-            // Preparing the query
-            else{
-              // Native PDO function which will use Db\Query as base class
-              /** @var Db\Query */
-              $q['prepared'] = $this->prepare($q['sql'], $q['options']);
-              $r             = $q['prepared']->execute();
-            }
-          }
-          // This is a reading statement, it will prepare the statement and return a query object
-          else{
-            if (!$q['prepared']) {
-              // Native PDO function which will use Db\Query as base class
-              $q['prepared'] = $this->prepare($q['sql'], $driver_options);
-            }
-            else{
-              // Returns the same Db\Query object
-              $q['prepared']->init($params['values']);
-            }
-          }
-
-          if (!empty($time) && ($q['exe_time'] === 0)) {
-            $q['exe_time'] = microtime(true) - $time;
-          }
-        }
-        catch (\PDOException $e){
-          $this->error($e);
-        }
-
-        if ($this->check()) {
-          // So if read statement returns the query object
-          if (!$q['write']) {
-            return $q['prepared'];
-          }
-
-          // If it is a write statement returns the number of affected rows
-          if ($q['prepared'] && $q['write']) {
-            $r = $q['prepared']->rowCount();
-          }
-
-          // If it is an insert statement we (try to) set the last inserted ID
-          if (($q['kind'] === 'INSERT') && $r) {
-            $this->setLastInsertId();
-          }
-
-          return $r ?? false;
-        }
-      }
+      return $this->language->query(...\func_get_args());
     }
 
-    return false;
   }
 
 
@@ -5100,7 +4800,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * @returns null|Db\Query|int A selection query or the number of affected rows by a writing query
+   * @returns null|Db2\Query|int A selection query or the number of affected rows by a writing query
    */
   private function _exec()
   {
@@ -5128,7 +4828,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
           // Executing the query
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
-          /** @var \bbn\Db\Query */
+          /** @var \bbn\Db2\Query */
           $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
         }
 

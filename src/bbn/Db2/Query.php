@@ -53,9 +53,9 @@ class Query extends \PDOStatement implements Actions
 
 
   /**
-   * @param bbn\Db $db
+   * @param bbn\Db2 $db
    */
-  protected function __construct(bbn\Db $db)
+  protected function __construct(bbn\Db2 $db)
   {
     if (!empty($this->queryString)) {
       $this->db        = $db;
