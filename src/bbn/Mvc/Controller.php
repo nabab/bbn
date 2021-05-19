@@ -326,17 +326,13 @@ class Controller implements Api
    * @param array  $model The data model to fill the view with
    * @return void
    */
-  public function render($view, $model='')
+  public function render(string $view, array $model = null): string
   {
     if (empty($model) && !empty($this->data)) {
       $model = $this->data;
     }
 
-    if (\is_string($view)) {
-      return \is_array($model) ? bbn\Tpl::render($view, $model) : $view;
-    }
-
-    die(X::hdump("Problem with the template", $view, $this->_path, $this->mode));
+    return \is_array($model) ? bbn\Tpl::render($view, $model) : $view;
   }
 
 
@@ -507,7 +503,7 @@ class Controller implements Api
     if (\is_null($this->_is_controlled)) {
       if ($this->_plugin) {
         $router = Router::getInstance();
-        if ($textDomain = $router->getLocale($this->_plugin)) {
+        if ($textDomain = $router->getLocaleDomain($this->_plugin)) {
           $oldTextDomain = textdomain(null);
           if ($textDomain !== $oldTextDomain) {
             textdomain($textDomain);

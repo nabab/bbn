@@ -133,6 +133,18 @@ trait Common
   }
 
 
+  public function setLocale(string $locale)
+  {
+    return $this->_mvc->setLocale($locale);
+  }
+
+
+  public function getLocale(): ?string
+  {
+    return $this->_mvc->getLocale();
+  }
+
+
   public function appPath($raw = false): string
   {
     return \bbn\Mvc::getAppPath($raw);
@@ -185,6 +197,5 @@ trait Common
   {
     return \bbn\Mvc::getUserDataPath($id_user, $plugin);
   }
-
 
 }
