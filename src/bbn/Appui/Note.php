@@ -200,6 +200,7 @@ class Note extends bbn\Models\Cls\Db
 
       $excerpt = $this->getExcerpt($title, $content);
       $id_note = false;
+
     if (($usr = bbn\User::getInstance())
         && $this->db->insert(
           $cf['table'],
@@ -212,7 +213,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['locked'] => !empty($locked) ? 1 : 0,
           $cf['arch']['notes']['creator'] => $usr->getId(),
           $cf['arch']['notes']['mime'] => $mime,
-          $cf['arch']['notes']['lang'] => $lang,
+          $cf['arch']['notes']['lang'] => $lang
           ]
         )
         && ($id_note = $this->db->lastId())

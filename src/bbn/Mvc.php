@@ -500,6 +500,19 @@ class Mvc implements Mvc\Api
   }
 
 
+  public function setLocale(string $locale)
+  {
+    $this->env->setLocale($locale);
+    $this->initLocaleDomain();
+  }
+
+
+  public function getLocale(): ?string
+  {
+    return $this->env->getLocale();
+  }
+
+
   public function fetchDir($dir, $mode)
   {
     return $this->router->fetchDir($dir, $mode);
@@ -641,20 +654,13 @@ class Mvc implements Mvc\Api
   }
 
 
-  private function initLocale()
+  private function initLocaleDomain()
   {
-    if (defined('BBN_LOCALE') && is_dir(self::getAppPath().'locale')) {
-      putenv('LANG='.BBN_LOCALE);
-      //setlocale(LC_ALL, '');
-      setlocale(LC_MESSAGES,BBN_LOCALE);
-      //setlocale(LC_CTYPE, BBN_LOCALE);
-      //$domains = glob($root.'/'.$locale.'/LC_MESSAGES/messages-*.mo');
-      //$current = basename($domains[0],'.mo');
-      //$timestamp = preg_replace('{messages-}i','',$current);
-      $name = defined('BBN_APP_NAME') ? BBN_APP_NAME : 'bbn-app';
-      bindtextdomain($name, self::getAppPath().'locale');
-      bind_textdomain_codeset($name, 'UTF-8');
-      textdomain($name);
+    if ($this->router
+      && $this->getLocale()
+      && ($textdomain = $this->router->getLocaleDomain())
+    ) {
+      textdomain($textdomain);
     }
 
     return $this;
@@ -697,8 +703,8 @@ class Mvc implements Mvc\Api
       }
     }
 
-    $this->initLocale();
     $this->router = new Mvc\Router($this, $routes);
+    $this->initLocaleDomain();
     $this->route();
   }
 

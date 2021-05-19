@@ -169,7 +169,7 @@ JAVASCRIPT;
           chdir(dirname($this->_file));
           if ($this->_plugin) {
             $router = Router::getInstance();
-            if ($textDomain = $router->getLocale($this->_plugin)) {
+            if ($textDomain = $router->getLocaleDomain($this->_plugin)) {
               $oldTextDomain = textdomain(null);
               if ($textDomain !== $oldTextDomain) {
                 textdomain($textDomain);
