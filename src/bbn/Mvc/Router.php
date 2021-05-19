@@ -330,6 +330,12 @@ class Router
   }
 
 
+    /**
+     * @param string $path
+     * @param string $mode
+     *
+     * @return array|mixed|null
+     */
   public function route(string $path, string $mode): ?array
   {
     if (self::isMode($mode)) {
@@ -416,7 +422,7 @@ class Router
    *
    * @return string
    */
-  private function _get_root(string $mode): string
+  private function _get_root(string $mode): ?string
   {
     if (self::isMode($mode)) {
       return $this->_root . $this->_get_mode_path($mode);
@@ -635,7 +641,7 @@ class Router
 
 
   /**
-   * Return the actual controller file corresponding to a gievn path.
+   * Return the actual controller file corresponding to a given path.
    *
    * @param string $path
    * @param string $mode
