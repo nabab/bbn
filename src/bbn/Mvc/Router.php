@@ -160,6 +160,7 @@ class Router
     $this->_mvc    = $mvc;
     $this->_routes = $routes;
     $this->_root   = $this->_mvc->appPath();
+    $this->_registerLocaleDomain();
   }
 
 
@@ -199,9 +200,9 @@ class Router
   }
 
 
-  public function getLocale($plugin): ?string
+  public function getLocaleDomain(string $plugin = null): ?string
   {
-    return $this->_textdomains[$plugin] ?? null;
+    return $this->_textdomains[$plugin ?: 'main'] ?? null;
   }
 
 
@@ -237,9 +238,7 @@ class Router
       $root      .= 'components/';
       $path       = implode('/', $parts);
       $dir        = $root . $path;
-      if (!empty($plugin)) {
-        $this->_registerLocale($plugin);
-      }
+      $this->_registerLocaleDomain($plugin);
 
       if (is_dir($dir)) {
         $res   = [
@@ -569,19 +568,9 @@ class Router
     // The root in the main application where to search in is defined according to the mode
     $root = $this->_get_root($mode);
     if (!empty($o['plugin'])) {
-      $this->_registerLocale($o['plugin']);
+      $this->_registerLocaleDomain($o['plugin']);
       $plugin_root = $this->_get_alt_root($mode, $o['plugin']);
       $plugin_path = substr($path, strlen($o['plugin']) + 1);
-      /*
-      if (!$plugin_root || !$plugin_path) {
-        die(var_dump($plugin_root, $plugin_path, $o));
-        return null;
-      }
-      */
-      $plugin = $o['plugin'];
-    }
-    else {
-      $plugin = '-';
     }
 
     // About to define self::$_known[$mode][$path] so first check it has not already been defined
@@ -829,10 +818,10 @@ class Router
 
   private function _find_translation(string $plugin = null): ?string
   {
-    if (\defined('BBN_LANG')) {
+    if ($locale = $this->getLocale()) {
       $fpath = $plugin ? $this->pluginPath($plugin) : $this->_mvc->appPath();
-      if (file_exists($fpath . 'locale/' . BBN_LANG . '/' . BBN_LANG . '.json')) {
-        return $fpath . 'locale/' . BBN_LANG . '/' . BBN_LANG . '.json';
+      if (file_exists($fpath."locale/$locale/$locale.json")) {
+        return $fpath."locale/$locale/$locale.json";
       }
     }
 
@@ -921,14 +910,29 @@ class Router
   }
 
 
-  private function _registerLocale(string $plugin): ?string
+  /**
+   * Setting up the textdomain (locale) for the given plugin.
+   *
+   * @param string $plugin
+   *
+   * @return string|null
+   */
+  private function _registerLocaleDomain(string $plugin = null): ?string
   {
-    if (\defined('BBN_LOCALE')
-        && isset($this->_routes['root'][$plugin]['name'])
+    if (empty($plugin)) {
+      if (is_dir($this->appPath().'locale')) {
+        $lang_path = $this->appPath().'locale';
+        $name      = 'main';
+      }
+    }
+    elseif (isset($this->_routes['root'][$plugin]['name'])
         && is_dir($this->_routes['root'][$plugin]['path'] . 'src/locale')
     ) {
-      if (!X::hasProp($this->_textdomains, $plugin)) {
-        $lang_path = $this->_routes['root'][$plugin]['path'] . 'src/locale';
+      $lang_path = $this->_routes['root'][$plugin]['path'] . 'src/locale';
+      $name      = $this->_routes['root'][$plugin]['name'];
+    }
+    if (isset($lang_path)) {
+      if (!X::hasProp($this->_textdomains, $name)) {
         $idx_file  = $lang_path.'/index.txt';
         if (!is_file($idx_file)) {
           if (is_dir(dirname($idx_file))) {
@@ -942,14 +946,14 @@ class Router
           $idx = file_get_contents($idx_file);
         }
 
-        $textdomain = $this->_routes['root'][$plugin]['name'].$idx;
+        $textdomain = $name.$idx;
         bindtextdomain($textdomain, $lang_path);
         bind_textdomain_codeset($textdomain, 'UTF-8');
-        $this->_textdomains[$plugin] = $textdomain;
+        $this->_textdomains[$name] = $textdomain;
       }
 
       //$lang_path = \dirname($this->_routes['root'][$plugin]['path']).'/src/locale';
-      return $this->_textdomains[$plugin];
+      return $this->_textdomains[$name];
     }
 
     return null;

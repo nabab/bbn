@@ -62,6 +62,12 @@ class Environment
    */
   private $_files;
 
+
+  /**
+   * @var string The current active locale, shared with the whole MVC.
+   */
+  private $_locale;
+
   /**
    * Determines if it is sent through the command line
    * @var boolean
@@ -133,20 +139,6 @@ class Environment
 
   private function _init()
   {
-    $locales = [
-      BBN_LANG . '_' . strtoupper(BBN_LANG) . '.utf8',
-      BBN_LANG . '_' . strtoupper(BBN_LANG),
-      BBN_LANG,
-      'en_EN.utf8',
-      'en-EN.utf8',
-      'en_EN',
-      'en-EN',
-      'en_US.utf8',
-      'en-US.utf8',
-      'en_US',
-      'en-US',
-      'en',
-    ];
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->_post
     if (php_sapi_name() === 'cli') {
@@ -155,20 +147,12 @@ class Environment
     }
     // Non CLI request
     else {
-      if ($user_locales = self::detectLanguage()) {
-        array_unshift($locales, ...$user_locales);
-      }
-
       if (!isset($this->_post)) {
         $this->getPost();
       }
 
-      if ($this->_has_post) {
-        self::_dot_to_array($this->_post);
+      if ($this->_has_post || \count($_FILES)) {
         /** @todo Remove the json parameter from the bbn.js functions */
-        $this->setMode(BBN_DEFAULT_MODE);
-      }
-      elseif (\count($_FILES)) {
         $this->setMode(BBN_DEFAULT_MODE);
       }
       // If no post, assuming to be a DOM document
@@ -185,22 +169,15 @@ class Environment
         $url = explode("?", urldecode($current))[0];
         if (BBN_CUR_PATH === '/') {
           $this->setParams($url);
-        } else {
+        }
+        else {
           $this->setParams(substr($url, \strlen(BBN_CUR_PATH)));
         }
       }
     }
 
-    if (defined('BBN_LANG') && !defined('BBN_LOCALE')) {
-      if ($locale = $this->_tryLocales($locales)) {
-        define('BBN_LOCALE', $locale);
-      }
-      else {
-        throw new \Exception("Impossible to find a corresponding locale on this server for this app");
-      }
-    }
-
     $this->_url = implode('/', $this->_params ?: []);
+    $this->setLocale();
     return $this;
   }
 
@@ -211,6 +188,122 @@ class Environment
       self::_initialize();
       $this->_init();
     }
+  }
+
+
+  /**
+   * Sets the current locale.
+   * If no parameter is provided and the constant BBN_LANG and BBN_LOCALE are not defined
+   * the function will also definew those constants.
+   *
+   * @param string $locale
+   *
+   * @return void
+   */
+  public function setLocale(string $locale = null)
+  {
+    $locales = [];
+    if (empty($locale)) {
+      array_push(
+        $locales,
+        'en-EN.utf8',
+        'en_EN.utf8',
+        'en-EN',
+        'en-US.utf8',
+        'en_US.utf8',
+        'en-US',
+        'en',
+      );
+
+      if (!defined('BBN_LOCALE')) {
+        // No user detection for CLI: default language 
+        if ($this->_mode === 'cli') {
+          if (defined('BBN_LANG')) {
+            $lang = BBN_LANG;
+          }
+        }
+        else {
+          $user_locales = self::detectLanguage();
+          if (!defined('BBN_LANG') && $user_locales) {
+            if (strpos($user_locales[0], '-')) {
+              if ($lang = X::split($user_locales[0], '-')[0]) {
+                define('BBN_LANG', $lang);
+              }
+            }
+            elseif (strpos($user_locales[0], '_')) {
+              if ($lang = X::split($user_locales[0], '_')[0]) {
+                define('BBN_LANG', $lang);
+              }
+            }
+            elseif ($user_locales[0]) {
+              define('BBN_LANG', $user_locales[0]);
+            }
+          }
+          if (!defined('BBN_LANG')) {
+            throw new \Exception("Impossible to determine the language");
+          }
+          $lang = BBN_LANG;
+        }
+
+        if (isset($lang)) {
+          array_unshift(
+            $locales,
+            $lang . '-' . strtoupper($lang) . '.utf8',
+            $lang . '_' . strtoupper($lang) . '.utf8',
+            $lang . '-' . strtoupper($lang),
+            $lang
+          );
+
+          if (!empty($user_locales)) {
+            array_unshift($locales, ...$user_locales);
+          }
+        }
+      }
+    }
+    elseif (!strpos($locale, '-') && !strpos($locale, '_')) {
+      if ($locale === 'en') {
+        array_unshift(
+          $locales,
+          'en_US.utf8',
+          'en-US.utf8',
+          'en_US',
+          'en-US'
+        );
+      }
+      array_unshift(
+        $locales,
+        strtolower($locale) . '-' . strtoupper($locale) . '.utf8',
+        strtolower($locale) . '_' . strtoupper($locale) . '.utf8',
+        strtolower($locale) . '-' . strtoupper($locale),
+        strtolower($locale)
+      );
+    }
+    else {
+      $locales[] = $locale;
+    }
+
+    if ($confirmed = $this->_tryLocales($locales)) {
+      if (!defined('BBN_LOCALE')) {
+        define('BBN_LOCALE', $confirmed);
+      }
+
+      $this->_locale = $confirmed;
+      if (!isset($lang)) {
+        $lang = X::split(X::split($this->_locale, '-')[0], '_')[0];
+      }
+
+      putenv("LANG=".$this->_locale);
+      setlocale(LC_MESSAGES, $this->_locale);
+    }
+    else {
+      throw new \Exception("Impossible to find a corresponding locale on this server for this app");
+    }
+  }
+
+
+  public function getLocale()
+  {
+    return $this->_locale;
   }
 
 
@@ -515,40 +608,5 @@ class Environment
       }
     }
   }
-
-
-  private static function _set_index(array $keys, array &$arr, $val)
-  {
-    $new_arr = &$arr;
-    while (\count($keys)) {
-      $var = array_shift($keys);
-      if (!isset($new_arr[$var])) {
-        $new_arr[$var] = \count($keys) ? [] : $val;
-        $new_arr       = &$new_arr[$var];
-      }
-    }
-
-    return $arr;
-  }
-
-
-  private static function _dot_to_array(&$val)
-  {
-    if (\is_array($val)) {
-      $to_unset = [];
-      foreach ($val as $key => $v) {
-        $keys = explode('.', $key);
-        if (\count($keys) > 1) {
-          self::_set_index($keys, $val, $v);
-          $to_unset[] = $key;
-        }
-      }
-
-      foreach ($to_unset as $a) {
-        unset($val[$a]);
-      }
-    }
-  }
-
 
 }
