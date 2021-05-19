@@ -213,6 +213,7 @@ class Environment
         'en_US.utf8',
         'en-US',
         'en',
+        'en_US'
       );
 
       if (!defined('BBN_LOCALE')) {

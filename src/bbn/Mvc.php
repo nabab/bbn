@@ -54,7 +54,7 @@ class Mvc implements Mvc\Api
   ];
 
   /**
-   * @var string Database object
+   * @var bool
    */
   private static $_is_debug = false;
 
@@ -269,7 +269,7 @@ class Mvc implements Mvc\Api
 
   /**
    * Returns the full path of the logs.
-   * 
+   *
    * @todo Not sure it makes sense to have the plugin as for now all logs are in the same directory.
    *
    * @param string $plugin
@@ -286,7 +286,7 @@ class Mvc implements Mvc\Api
    * Returns ths full path of the cache
    *
    * @todo Not sure it makes sense to have the plugin as for now all logs are in the same directory.
-   * 
+   *
    * @param string $plugin
    *
    * @return string
@@ -312,12 +312,12 @@ class Mvc implements Mvc\Api
 
   /**
    * Returns the URL part of the given plugin.
-   * 
+   *
    * @param string $plugin_name the plugin
-   * 
-   * @return null|string
+   *
+   * @return null|string|false
    */
-  public static function getPluginUrl(string $plugin_name): ?string
+  public static function getPluginUrl(string $plugin_name)
   {
     if ($mvc = self::getInstance()) {
       return $mvc->pluginUrl($plugin_name);
@@ -329,9 +329,9 @@ class Mvc implements Mvc\Api
 
   /**
    * Returns the URL part of the given plugin.
-   * 
+   *
    * @param string $plugin_name the plugin
-   * 
+   *
    * @return null|string
    */
   public static function getPluginPath(string $plugin_name): ?string
@@ -345,7 +345,7 @@ class Mvc implements Mvc\Api
 
 
   /**
-   * Returns 
+   * Returns
    *
    * @param string $id_user
    * @param string $plugin
@@ -367,7 +367,6 @@ class Mvc implements Mvc\Api
 
     if ($id_user) {
       return self::getDataPath().'users/'.$id_user.'/tmp/'.($plugin ? $plugin.'/' : '');
-      ;
     }
 
     return null;
@@ -464,9 +463,9 @@ class Mvc implements Mvc\Api
             return false;
           }
 
-          foreach ($this->forbidden_routes as $ar) {
-            if (substr($ar, -1) === '*') {
-              if (strpos($url, substr($ar, 0, -1)) === 0) {
+          foreach ($this->forbidden_routes as $ar2) {
+            if (substr($ar2, -1) === '*') {
+              if (strpos($url, substr($ar2, 0, -1)) === 0) {
                 return false;
               }
             }
@@ -484,13 +483,11 @@ class Mvc implements Mvc\Api
   public function setRoot($root)
   {
     /** @todo a proper verification of the path */
-    if (strpos($root, -1) !== '/') {
+    if (strpos($root, '/',-1) === false) {
       $root .= '/';
     }
 
-    if (1) {
-      $this->root = $root;
-    }
+    $this->root = $root;
   }
 
 
@@ -564,31 +561,6 @@ class Mvc implements Mvc\Api
 
 
   /**
-   * @param string         $bbn_inc_file
-   * @param Mvc\Controller $ctrl
-   * @return string
-   */
-  public static function includeController(string $bbn_inc_file, Mvc\Controller $ctrl, $bbn_is_super = false)
-  {
-    if ($ctrl->isCli()) {
-      return include $bbn_inc_file;
-    }
-
-    ob_start();
-    $r = include $bbn_inc_file;
-    if ($output = ob_get_contents()) {
-      ob_end_clean();
-    }
-
-    if ($bbn_is_super) {
-      return $r ? true : false;
-    }
-
-    return $output;
-  }
-
-
-  /**
    * This function gets the content of a view file and adds it to the loaded_views array.
    *
    * @param string $p The full path to the view file
@@ -627,14 +599,13 @@ class Mvc implements Mvc\Api
 
   public static function debug($state = 1)
   {
-    self::$_is_debug = $state;
+    self::$_is_debug = (bool)$state;
   }
 
 
   private function route($url = false)
   {
     if (\is_null($this->info)) {
-      //die(var_dump($this->getUrl(), $this->getMode(), $this->getRoute($this->getUrl(), $this->getMode())));
       $this->info = $this->getRoute($this->getUrl(), $this->getMode());
     }
 
@@ -703,9 +674,9 @@ class Mvc implements Mvc\Api
       }
     }
 
-    $this->router = new Mvc\Router($this, $routes);
     $this->initLocaleDomain();
-    $this->route();
+    $this->router = new Mvc\Router($this, $routes);
+      $this->route();
   }
 
 
@@ -770,7 +741,14 @@ class Mvc implements Mvc\Api
     return $this;
   }*/
 
-  public function getRoute($path, $mode, $root = null)
+    /**
+     * @param      $path
+     * @param      $mode
+     * @param null $root
+     *
+     * @return array|mixed|null
+     */
+    public function getRoute($path, $mode, $root = null)
   {
     return $this->router->route($path, $mode, $root);
   }
@@ -794,7 +772,7 @@ class Mvc implements Mvc\Api
   }
 
 
-  public function getParams(): array
+  public function getParams(): ?array
   {
         return $this->env->getParams();
   }
