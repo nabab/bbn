@@ -35,6 +35,10 @@ class MvcTest extends TestCase
     self::initMvc();
   }
 
+    protected function tearDown(): void
+    {
+        \Mockery::close();
+    }
 
     /**
      * @param null       $db
@@ -169,7 +173,7 @@ class MvcTest extends TestCase
 
       /*
       *  Ensure the route function works
-      *  Since it depends the Router class, it will be mocked
+      *  Since it depends the Router class, it will be mocked to return an array
       */
       $router_mock = $this->mockClassMethod(Mvc\Router::class, 'route', ['key' => 'value']);
 
@@ -187,11 +191,11 @@ class MvcTest extends TestCase
      * @param string $name
      * @param        $value
      *
-     * @return mixed
+     * @return void
      */
   protected function setNonPublicPropertyValue(string $name, $value)
   {
-      return ReflectionHelpers::setNonPublicPropertyValue(
+      ReflectionHelpers::setNonPublicPropertyValue(
         $name,
         self::$mvc,
         $value
@@ -646,48 +650,102 @@ class MvcTest extends TestCase
       $this->assertSame('POST', self::$mvc->getRequest());
   }
 
-/** @test */
-    public function it_returns_env_params_value()
-    {
-        $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getParams', ['foo' => 'bar']);
-        $this->setNonPublicPropertyValue('env', $env_mock);
+    /** @test */
+  public function it_returns_env_params_value()
+  {
+      $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getParams', ['foo' => 'bar']);
+      $this->setNonPublicPropertyValue('env', $env_mock);
 
-        $this->assertSame(['foo' => 'bar'], self::$mvc->getParams());
-    }
+      $this->assertSame(['foo' => 'bar'], self::$mvc->getParams());
+  }
 
     /** @test */
-    public function it_returns_env_post_value()
-    {
-        $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getPost', ['foo' => 'bar']);
-        $this->setNonPublicPropertyValue('env', $env_mock);
+  public function it_returns_env_post_value()
+  {
+      $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getPost', ['foo' => 'bar']);
+      $this->setNonPublicPropertyValue('env', $env_mock);
 
-        $this->assertSame(['foo' => 'bar'], self::$mvc->getPost());
-    }
-
-    /** @test */
-    public function it_returns_env_get_value()
-    {
-        $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getGet', ['foo' => 'bar']);
-        $this->setNonPublicPropertyValue('env', $env_mock);
-
-        $this->assertSame(['foo' => 'bar'], self::$mvc->getGet());
-    }
+      $this->assertSame(['foo' => 'bar'], self::$mvc->getPost());
+  }
 
     /** @test */
-    public function it_returns_env_files_value()
-    {
-        $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getFiles', ['foo' => 'bar']);
-        $this->setNonPublicPropertyValue('env', $env_mock);
+  public function it_returns_env_get_value()
+  {
+      $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getGet', ['foo' => 'bar']);
+      $this->setNonPublicPropertyValue('env', $env_mock);
 
-        $this->assertSame(['foo' => 'bar'], self::$mvc->getFiles());
-    }
+      $this->assertSame(['foo' => 'bar'], self::$mvc->getGet());
+  }
 
     /** @test */
-    public function it_returns_env_mode_value()
-    {
-        $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getMode', 'foobar');
-        $this->setNonPublicPropertyValue('env', $env_mock);
+  public function it_returns_env_files_value()
+  {
+      $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getFiles', ['foo' => 'bar']);
+      $this->setNonPublicPropertyValue('env', $env_mock);
 
-        $this->assertSame('foobar', self::$mvc->getMode());
-    }
+      $this->assertSame(['foo' => 'bar'], self::$mvc->getFiles());
+  }
+
+    /** @test */
+  public function it_returns_env_mode_value()
+  {
+      $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getMode', 'cli');
+      $this->setNonPublicPropertyValue('env', $env_mock);
+
+      $this->assertSame('cli', self::$mvc->getMode());
+  }
+
+    /** @test */
+  public function it_sets_env_mode_value()
+  {
+      self::$mvc->setMode('public');
+      $this->assertSame('public', self::$mvc->getMode());
+  }
+
+    /** @test */
+  public function it_check_whether_is_called_cli_or_not()
+  {
+    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'isCli', true);
+    $this->setNonPublicPropertyValue('env', $env_mock);
+
+    $this->assertTrue(self::$mvc->isCli());
+  }
+
+    /** @test */
+  public function it_should_reroute()
+  {
+    // Mock the Environment class and ensure the methods are being called
+    $env_mock = \Mockery::mock(Mvc\Environment::class);
+
+    $env_mock->shouldReceive([
+        'simulate' => 'return void',
+    ])
+      ->with('foo/bar', false, false);
+
+    $env_mock->shouldReceive([
+      'getUrl'   =>  'return http://foo.bar'
+    ]);
+
+    $env_mock->shouldReceive([
+      'getMode'   =>  'return public'
+    ]);
+
+    $this->setNonPublicPropertyValue('env', $env_mock);
+
+    // Mock the Router class
+    $router_mock = \Mockery::mock(Mvc\Router::class);
+
+    $router_mock->shouldReceive('reset')
+      ->andReturnSelf();
+
+    $router_mock->shouldReceive('route')
+      ->andReturn(['foo' => 'bar']);
+
+    $this->setNonPublicPropertyValue('router', $router_mock);
+
+    // TODO: this gives error `Error : Call to a member function reset() on null`
+    self::$mvc->reroute('foo/bar');
+
+//    $this->assertTrue(self::$mvc->check());
+  }
 }

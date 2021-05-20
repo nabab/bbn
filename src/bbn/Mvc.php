@@ -818,14 +818,14 @@ class Mvc implements Mvc\Api
      * This will reroute a controller to another one seemlessly. Chainable
      *
      * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-     * @return void
+     * @return $this
      */
   public function reroute($path='', $post = false, $arguments = false)
   {
     $this->env->simulate($path, $post, $arguments);
-      $this->is_routed     = false;
-      $this->is_controlled = null;
-    $this->info            = null;
+    $this->is_routed     = false;
+    $this->is_controlled = null;
+    $this->info          = null;
     $this->router->reset();
     $this->route();
     if ($arguments || !isset($this->info['args'])) {
@@ -833,7 +833,8 @@ class Mvc implements Mvc\Api
     }
 
     $this->controller->reset($this->info);
-      return $this;
+
+    return $this;
   }
 
 
@@ -1219,7 +1220,7 @@ class Mvc implements Mvc\Api
     /**
      * Returns the rendered result from the current mvc if successufully processed
      * process() (or check()) must have been called before.
-     *
+     *x
      * @return string|false
      */
   public function process()
