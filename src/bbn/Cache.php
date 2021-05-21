@@ -205,7 +205,7 @@ class Cache
     $engine = 'files';
     if (self::$is_init) {
       throw new \Exception(
-        "Only one cache object can be called. Use static function Cache::getEngine()"
+        X::_("Only one cache object can be called. Use static function Cache::getEngine()")
       );
     }
 
