@@ -9,16 +9,16 @@ trait Mockable
   /**
    * @param string $class
    * @param string $method
-   * @param $value
+   * @param $return_value
    * @param string $times
    * @return \Mockery\MockInterface
    */
-  protected function mockClassMethod(string $class, string $method, $value, string $times = 'once')
+  protected function mockClassMethod(string $class, string $method, $return_value, string $times = 'once')
   {
       return ReflectionHelpers::mockClassMethod(
         $class,
         $method,
-        $value,
+        $return_value,
         $times
       );
   }

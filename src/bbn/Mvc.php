@@ -676,7 +676,7 @@ class Mvc implements Mvc\Api
 
     $this->initLocaleDomain();
     $this->router = new Mvc\Router($this, $routes);
-      $this->route();
+    $this->route();
   }
 
 
@@ -832,6 +832,10 @@ class Mvc implements Mvc\Api
       $this->info['args'] = $arguments;
     }
 
+    if (!$this->controller) {
+      throw new \Exception(X::_('Controller is not set'));
+    }
+
     $this->controller->reset($this->info);
 
     return $this;
@@ -845,7 +849,7 @@ class Mvc implements Mvc\Api
    */
   public function hasView(string $path = '', string $mode = 'html'): bool
   {
-    return array_key_exists($mode, self::$_loaded_views[$mode]) && isset(self::$_loaded_views[$mode][$path]);
+    return array_key_exists($mode, self::$_loaded_views) && isset(self::$_loaded_views[$mode][$path]);
   }
 
 
@@ -870,13 +874,16 @@ class Mvc implements Mvc\Api
    *
    * @param string $path
    * @param string $mode
-   * @param array  $data
-   * @return string|false
+   * @param array|null $data
+   * @return string
+   * @throws \Exception
    */
-  public function getView(string $path, string $mode = 'html', array $data=null)
+  public function getView(string $path, string $mode = 'html', ?array $data=null)
   {
     if (!router::isMode($mode) || !($path = Router::parse($path))) {
-      die("Incorrect mode $path $mode");
+      throw new \Exception(
+        X::_("Incorrect mode $path $mode")
+      );
     }
 
     $view = null;
@@ -889,7 +896,7 @@ class Mvc implements Mvc\Api
     }
 
     if (\is_object($view) && $view->check()) {
-      return \is_array($data) ? $view->get($data) : $view->get();
+      return $view->get($data);
     }
 
     return '';
@@ -942,13 +949,15 @@ class Mvc implements Mvc\Api
    *
    * @param string $full_path
    * @param string $mode
-   * @param array  $data
+   * @param array|null $data
    * @return string|false
    */
-  public function getExternalView(string $full_path, string $mode = 'html', array $data=null)
+  public function getExternalView(string $full_path, string $mode = 'html', ?array $data=null)
   {
     if (!router::isMode($mode) && ($full_path = Str::parsePath($full_path))) {
-      die("Incorrect mode $full_path $mode");
+      throw new \Exception(
+        X::_("Incorrect mode $full_path $mode")
+      );
     }
 
     if (($this->getMode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))) {
@@ -965,7 +974,7 @@ class Mvc implements Mvc\Api
     }
 
     if (\is_object($view) && $view->check()) {
-      return \is_array($data) ? $view->get($data) : $view->get();
+      return $view->get($data);
     }
 
     return '';
@@ -1233,7 +1242,7 @@ class Mvc implements Mvc\Api
       }
 
       if (!$this->controller) {
-        $this->controller = new Mvc\Controller($this, $this->info, $this->data, $this->obj);
+        $this->controller = new Mvc\Controller($this, $this->info, $this->data);
       }
 
       //die(var_dump($this->info));
