@@ -163,7 +163,9 @@ class Cache
       }
     }
 
-    return 0;
+    throw new \Exception(
+      X::_("Wrong ttl parameter")
+    );
   }
 
 
