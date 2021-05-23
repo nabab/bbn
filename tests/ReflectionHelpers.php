@@ -4,11 +4,15 @@ namespace tests;
 
 class ReflectionHelpers
 {
+
+
     /**
-     * @param string      $name
-     * @param object|     $object $object
+     * Get the value of non public properties in an object.
      *
-     * @return mixed|\ReflectionProperty
+     * @param string $name
+     * @param object $object $object
+     *
+     * @return mixed
      * @throws \ReflectionException
      */
   public static function getNonPublicProperty(string $name, object $object)
@@ -22,9 +26,12 @@ class ReflectionHelpers
 
 
     /**
-     * @param string      $name
-     * @param object      $object
-     * @param             $value
+     * Set the value of non public properties in an object.
+     * And Convert it to be accessible.
+     *
+     * @param string $name
+     * @param object $object
+     * @param        $value
      *
      * @throws \ReflectionException
      */
@@ -38,6 +45,9 @@ class ReflectionHelpers
 
 
     /**
+     *
+     * Convert a non public method to be accessible in an object and return a ReflectionMethod.
+     *
      * @param string $name
      * @param object $object
      *
@@ -51,22 +61,6 @@ class ReflectionHelpers
       $method->setAccessible(true);
 
       return $method;
-  }
-
-
-  /**
-   * @param string $class
-   * @param string $method
-   * @param $value
-   * @param string $times
-   * @return \Mockery\MockInterface
-   */
-  public static function mockClassMethod(string $class, string $method, $value, string $times = 'once')
-  {
-    $mockery = \Mockery::mock($class);
-    $mockery->shouldReceive($method)->andReturn($value)->{$times}();
-
-    return $mockery;
   }
 
 

@@ -43,7 +43,6 @@ class MvcTest extends TestCase
   public static function setUpBeforeClass(): void
   {
     define('BBN_TEST_PATH', 'test_path/');
-    self::initMvc();
   }
 
 
@@ -60,14 +59,14 @@ class MvcTest extends TestCase
   protected static function initMvc($db = null, ?array $routes = null)
   {
     $routes = $routes ?? [
-        'root' => [
-            self::$plugin['test_plugin']['url'] => [
-                'root' => 'TEST',
-                'name' => self::$plugin['test_plugin']['name'],
-                'url'  => self::$plugin['test_plugin']['url'],
-                'path' => self::$plugin['test_plugin']['path']
-            ]
-        ]
+      'root' => [
+          self::$plugin['test_plugin']['url'] => [
+              'root' => 'TEST',
+              'name' => self::$plugin['test_plugin']['name'],
+              'url'  => self::$plugin['test_plugin']['url'],
+              'path' => self::$plugin['test_plugin']['path']
+          ]
+      ]
       ];
     if (!defined('BBN_LANG')) {
       define('BBN_LANG', 'en');
@@ -84,7 +83,10 @@ class MvcTest extends TestCase
    */
   protected function registerPlugin(?array $value = null)
   {
+    // Convert the registerPlugin method to be accessible
     $method = ReflectionHelpers::getNonPublicMethod('registerPlugin', self::$mvc);
+
+    // Invoke the registerPlugin method on the the mvc object using given parameters
     $method->invoke(
             self::$mvc,
             $value ?? [
@@ -97,6 +99,9 @@ class MvcTest extends TestCase
 
 
   /**
+   *
+   * Create a file on the fly to be used in tests
+   *
    * @param string $filename
    * @param string $file_content
    * @param string $dirname
@@ -121,30 +126,16 @@ class MvcTest extends TestCase
 
 
   /**
-   * Reset the MVC instant.
+   * Reset the MVC instance.
    *
    * @return void
    */
   protected function resetMvcInstant()
   {
-    if (self::$mvc === null) {
-      return;
+    if (self::$mvc) {
+      self::$mvc->destory();
+      self::$mvc = null;
     }
-
-    $reflectionClass = new ReflectionClass(self::$mvc);
-
-    $singleton_instance = $reflectionClass->getProperty('singleton_instance');
-    $singleton_instance->setAccessible(true);
-    $singleton_instance->setValue(null);
-
-    $singleton_exists = $reflectionClass->getProperty('singleton_exists');
-    $singleton_exists->setAccessible(true);
-    $singleton_exists->setValue(false);
-
-    $env_reflection_class = new ReflectionClass(Mvc\Environment::class);
-    $initiated            = $env_reflection_class->getProperty('_initiated');
-    $initiated->setAccessible(true);
-    $initiated->setValue(false);
 
     self::initMvc(...func_get_args());
   }
@@ -204,9 +195,12 @@ class MvcTest extends TestCase
         ?string $times = null
     ) {
     /*
-      * Since it depends the Router class, it will be mocked to return an array
-      * And ensure that the `route` method of the Router instance is called
-      */
+      * MVC depends the Router class so we will mock it
+      * And replace the `router` property in MVC with the mocked version
+      * Then we set expectations that the `route` method should be called $times times
+      * And return a specific value $return_value.
+      *
+     */
     $router_mock = $this->mockClassMethod(
             Mvc\Router::class,
             'route',
@@ -225,6 +219,9 @@ class MvcTest extends TestCase
 
 
   /**
+   * Set the value of non public properties in an object.
+   * And Convert it to be accessible.
+   *
    * @param string $name
    * @param        $value
    *
@@ -232,11 +229,22 @@ class MvcTest extends TestCase
    */
   protected function setNonPublicPropertyValue(string $name, $value)
   {
-    ReflectionHelpers::setNonPublicPropertyValue(
-            $name,
-            self::$mvc,
-            $value
-        );
+    ReflectionHelpers::setNonPublicPropertyValue($name, self::$mvc, $value);
+  }
+
+
+  /**
+   * Mock the environment class and set method expectations then return the mock.
+   *
+   * @param string $method
+   * @param $value
+   * @return MockInterface
+   */
+  protected function mockEnvironmentClass(string $method, $value)
+  {
+    $env_mock = $this->mockClassMethod(Mvc\Environment::class, $method, $value);
+
+    return $env_mock;
   }
 
 
@@ -255,12 +263,16 @@ class MvcTest extends TestCase
     $this->constructorTest();
     $this->assertNull(ReflectionHelpers::getNonPublicProperty('db', self::$mvc));
 
+    // Here we will create a DB class stub
     $db_class_stub = '<?php
       namespace foo;
       class Db {
       
       }';
-    $file_path     = self::createFile('Db.php', $db_class_stub, 'stubs');
+
+    // Then will create a PHP file with the stub content (DB class)
+    // So that it can be used to initialize the MVC with.
+    $file_path = self::createFile('Db.php', $db_class_stub, 'stubs');
     include $file_path;
     $this->resetMvcInstant(new Db());
     $this->constructorTest();
@@ -277,6 +289,31 @@ class MvcTest extends TestCase
   {
     Locale::setDefault('sv');
     $this->assertSame('sv', Locale::getDefault());
+  }
+
+
+  /** @test */
+  public function mvc_instance_can_be_destroyed()
+  {
+    $reflectionClass = new ReflectionClass(self::$mvc);
+
+    $singleton_instance = $reflectionClass->getProperty('singleton_instance');
+    $singleton_instance->setAccessible(true);
+
+    $singleton_exists = $reflectionClass->getProperty('singleton_exists');
+    $singleton_exists->setAccessible(true);
+
+    $env_property = $reflectionClass->getProperty('env');
+    $env_property->setAccessible(true);
+
+    $_app_name_property = $reflectionClass->getProperty('_app_name');
+    $_app_name_property->setAccessible(true);
+
+    self::$mvc->destory();
+
+    $this->assertNull($singleton_instance->getValue(self::$mvc));
+    $this->assertFalse($singleton_exists->getValue(self::$mvc));
+    $this->assertNull(self::$mvc->getInstance());
   }
 
 
@@ -362,7 +399,6 @@ class MvcTest extends TestCase
   /** @test */
   public function it_register_plugins_and_returns_them_when_needed()
   {
-    $this->resetMvcInstant();
     $this->registerPlugin();
 
     $plugins = ReflectionHelpers::getNonPublicProperty('plugins', self::$mvc);
@@ -375,7 +411,6 @@ class MvcTest extends TestCase
   /** @test */
   public function it_checks_whether_or_not_it_has_a_plugin()
   {
-    $this->resetMvcInstant();
     $this->registerPlugin();
 
     $this->assertTrue(self::$mvc->hasPlugin('test_plugin2'));
@@ -389,7 +424,6 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_plugin_url_if_exists_and_false_if_not()
   {
-    $this->resetMvcInstant();
     $this->registerPlugin();
 
     $this->assertSame('http://foobar.baz', Mvc::getPluginUrl('test_plugin2'));
@@ -588,7 +622,6 @@ class MvcTest extends TestCase
   /** @test */
   public function it_executes_a_php_view()
   {
-    // TODO: the $bbn_inc_file parameter is never used in side the method!
     $result = Mvc::includePhpView('', '<?php echo $variable;', ['variable' => 'value']);
 
     $this->assertSame('value', $result);
@@ -635,10 +668,14 @@ class MvcTest extends TestCase
    */
   public function it_checks_whether_a_corresponding_file_has_been_found_or_not()
   {
+    // Mock the Router class and set expectations that the `route` method
+    // Should be called once and return an array
     $router_mock = $this->mockClassMethod(Mvc\Router::class, 'route', ['key' => 'value']);
+
+    // Then swap the `router` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('router', $router_mock);
 
-    // Call the route function again so that that it uses the mocked router
+    // Call the route function again so that it uses the mocked router
     ReflectionHelpers::getNonPublicMethod('route', self::$mvc)->invoke(self::$mvc);
 
     $this->assertTrue(self::$mvc->check());
@@ -658,7 +695,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_the_file()
   {
+    // Mock the Router class method and set expectations
+    // That the `route` method should be called once and return an array
     $router_mock = $this->mockClassMethod(Mvc\Router::class, 'route', ['file' => 'foo']);
+
+    // Then swap the `router` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('router', $router_mock);
 
     ReflectionHelpers::getNonPublicMethod('route', self::$mvc)->invoke(self::$mvc);
@@ -670,8 +711,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_url_value()
   {
-    // Mock the Environment class method
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getUrl', 'http://foo.bar');
+    // Mock the Environment class method and set expectations
+    // That the `getUrl` method should be called once and return a string
+    $env_mock = $this->mockEnvironmentClass('getUrl', 'http://foo.bar');
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame('http://foo.bar', self::$mvc->getUrl());
@@ -681,7 +725,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_request_value()
   {
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getRequest', 'POST');
+    // Mock the Environment class method and set expectations
+    // That the `getRequest` method should be called once and return a string
+    $env_mock = $this->mockEnvironmentClass('getRequest', 'POST');
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame('POST', self::$mvc->getRequest());
@@ -691,7 +739,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_params_value()
   {
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getParams', ['foo' => 'bar']);
+    // Mock the Environment class method and set expectations
+    // That the `getParams` method should be called once and return an array
+    $env_mock = $this->mockEnvironmentClass('getParams', ['foo' => 'bar']);
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame(['foo' => 'bar'], self::$mvc->getParams());
@@ -701,7 +753,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_post_value()
   {
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getPost', ['foo' => 'bar']);
+    // Mock the Environment class method and set expectations
+    // That the `getPost` method should be called once and return an array
+    $env_mock = $this->mockEnvironmentClass('getPost', ['foo' => 'bar']);
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame(['foo' => 'bar'], self::$mvc->getPost());
@@ -711,7 +767,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_get_value()
   {
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getGet', ['foo' => 'bar']);
+    // Mock the Environment class method and set expectations
+    // That the `getGet` method should be called once and return an array
+    $env_mock = $this->mockEnvironmentClass('getGet', ['foo' => 'bar']);
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame(['foo' => 'bar'], self::$mvc->getGet());
@@ -721,7 +781,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_files_value()
   {
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getFiles', ['foo' => 'bar']);
+    // Mock the Environment class method and set expectations
+    // That the `getFiles` method should be called once and return an array
+    $env_mock = $this->mockEnvironmentClass('getFiles', ['foo' => 'bar']);
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame(['foo' => 'bar'], self::$mvc->getFiles());
@@ -731,7 +795,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_returns_env_mode_value()
   {
-    $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'getMode', 'cli');
+    // Mock the Environment class method and set expectations
+    // That the `getFiles` method should be called once and return a string
+    $env_mock = $this->mockEnvironmentClass('getMode', 'cli');
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertSame('cli', self::$mvc->getMode());
@@ -749,7 +817,11 @@ class MvcTest extends TestCase
   /** @test */
   public function it_check_whether_is_called_cli_or_not()
   {
+    // Mock the Environment class method and set expectations
+    // That the `isCli` method should be called once and return boolean
     $env_mock = $this->mockClassMethod(Mvc\Environment::class, 'isCli', true);
+
+    // Then swap the `env` property in Mvc with the mocked version
     $this->setNonPublicPropertyValue('env', $env_mock);
 
     $this->assertTrue(self::$mvc->isCli());
@@ -759,14 +831,16 @@ class MvcTest extends TestCase
   /** @test */
   public function it_should_reroute_and_arguments_added_to_info_property_if_provided()
   {
+    // Swap the `router` property in Mvc with a mocked version of Router
     $router_mock = $this->replaceRouterInstanceWithMockery();
 
-    // Make sure that the `reset` method is called on the Router instance
+    // Then make sure that the `reset` method is called on the Router instance
     $router_mock->shouldReceive('reset')->andReturnSelf();
 
-    // Make sure that the `route` method is called on the Router instance
+    // Then make sure that the `route` method is called on the Router instance
     $router_mock->shouldReceive('route');
 
+    // Swap the `router` property in Mvc with the modified mocked version of Router
     $this->setNonPublicPropertyValue('router', $router_mock);
 
     self::$mvc->process();
@@ -825,7 +899,10 @@ class MvcTest extends TestCase
   /** @test */
   public function it_can_add_and_check_for_a_view()
   {
+    // Mock a View class
     $view_mock = Mockery::mock(Mvc\View::class);
+
+    // Then add the mocked version to the list of views
     self::$mvc->addToViews('test_path', 'html', $view_mock);
 
     $this->assertTrue(self::$mvc->hasView('test_path', 'html'));
@@ -848,9 +925,14 @@ class MvcTest extends TestCase
   /** @test */
   public function get_view_returns_content_when_a_view_exits()
   {
+    // Mock the View class
     $view_mock = Mockery::mock(Mvc\View::class);
 
+    // Then set expectations that the `check` method should be called once and return true
     $view_mock->shouldReceive('check')->andReturnTrue();
+
+    // Set expectations that the `get` method should be called once
+    // With null as arguments and return string
     $view_mock->shouldReceive('get')->with(null)->andReturn('content');
 
     self::$mvc->addToViews('test_path2', 'html', $view_mock);
