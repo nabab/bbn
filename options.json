@@ -300,6 +300,11 @@
             "code": "list"
           },
           {
+            "text": "Default dashboard",
+            "code": "default",
+            "icon": "nf nf-mdi-asterisk"
+          },
+          {
             "cfg": {
               "i18n": "en",
               "schema": [
