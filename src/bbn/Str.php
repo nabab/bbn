@@ -37,6 +37,8 @@ class Str
    * // (string) "122"
    * X::dump(\bbn\Str::cast(1));
    * // (string) "1"
+   * X::dump(\bbn\Str::cast(['foo' => 'bar'])
+   * // (string) ""
    * ```
    *
    * @param mixed $st The item to cast.
@@ -105,7 +107,7 @@ class Str
    */
   public static function escapeAllQuotes($st): string
   {
-    return self::escapeDquotes(self::escapeSquotes($st));
+    return addcslashes(self::cast($st), "'\"\\\r\n\t");
   }
 
 
@@ -307,11 +309,12 @@ class Str
    * ```
    *
    * @param mixed  $st   The item to be.
-   * @param string $mode A selection of configuration: "all" (default), "2n1", "html", "code".
+   * @param string $mode A selection of configuration: "all" (default), "2nl", "html", "code".
    * @return string
    */
   public static function clean($st, $mode='all'): string
   {
+    //TODO: How this should work if it's an array!
     if (\is_array($st)) {
       reset($st);
       $i = \count($st);
@@ -338,7 +341,7 @@ class Str
       }
       elseif ($mode == '2nl') {
         $st = mb_ereg_replace("[\r]","",$st);
-        $st = mb_ereg_replace("\n{2,}","\n",$st);
+        $st = mb_ereg_replace("(\s*\n){2,}","\n",$st);
       }
       elseif ($mode == 'html') {
         $st = mb_ereg_replace("[\t\r\n]",'',$st);
@@ -408,8 +411,13 @@ class Str
 
 
   /**
-  * @todo comment this
-  */
+   * Strip special characters except the below:
+   * - ~ , ; [ ] ( ) .
+   * And removes more that two trailing periods
+   *
+   * @param string $st
+   * @return string
+   */
   public static function sanitize(string $st): string
   {
     $file = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $st);
@@ -436,7 +444,7 @@ class Str
   public static function encodeFilename($st, $maxlength = 50, $extension = null, $is_path = false): string
   {
     $st      = self::removeAccents(self::cast($st));
-    $allowed = '~\-_.,\(\[\)\]';
+    $allowed = '~\-_.\(\[\)\]';
 
     // Arguments order doesn't matter
     $args = \func_get_args();
@@ -471,8 +479,18 @@ class Str
       $st = substr($st, 0, -(\strlen($extension) + 1));
     }
 
-    $st  = mb_ereg_replace("([^\w\s\d".$allowed.".])", '', $st);
-    $st  = mb_ereg_replace("([\.]{2,})", '', $st);
+    // Replace non allowed character with single space
+    $st = mb_ereg_replace("([^\w\d".$allowed.".])", ' ', $st);
+
+    // Replace two or more spaces to one space
+    $st = mb_ereg_replace("\s{2,}", ' ', $st);
+
+    // Replace single spaces to under score
+    $st = mb_ereg_replace("\s", '_', $st);
+
+    // Remove the . character
+    $st = mb_ereg_replace("\.", '', $st);
+    ;
     $res = mb_substr($st, 0, $maxlength);
     if ($extension) {
       $res .= '.' . $extension;
@@ -504,11 +522,11 @@ class Str
     }
 
     for ($i = 0; $i < $maxlength; $i++){
-      if (mb_ereg_match('[A-z0-9]',mb_substr($st,$i,1))) {
-        $res .= mb_substr($st,$i,1);
+      if (mb_ereg_match('[A-z0-9]', $substr = mb_substr($st, $i, 1))) {
+        $res .= $substr;
       }
       elseif ((mb_strlen($res) > 0)
-          && (mb_substr($res,-1) != '_')
+          && (mb_substr($res, -1) != '_')
           && ($i < ( mb_strlen($st) - 1 ))
       ) {
         $res .= '_';
@@ -650,7 +668,10 @@ class Str
    */
   public static function isNumber(): bool
   {
-    $args = \func_get_args();
+    if (empty($args = \func_get_args())) {
+      return false;
+    }
+
     foreach ($args as $a){
       if (\is_string($a)) {
         if (!preg_match('/^-?(?:\d+|\d*\.\d+)$/', $a)) {
@@ -1635,13 +1656,13 @@ class Str
     }
 
     $filter = $nl ? ['p', 'br'] : [];
-    $tmp = strip_tags($st, $filter);
+    $tmp    = strip_tags($st, $filter);
     if (empty($tmp)) {
       $config = array(
         'clean' => 'yes',
         'output-html' => 'yes',
       );
-      $tidy = tidy_parse_string($st, $config, 'utf8');
+      $tidy   = tidy_parse_string($st, $config, 'utf8');
       $tidy->cleanRepair();
       $st = strip_tags((string)$tidy, $filter);
     }
@@ -1659,8 +1680,8 @@ class Str
 
     $st = preg_replace("/<p[^>]*?>/i", "", $st);
     $st = str_ireplace("</p>", PHP_EOL.PHP_EOL, $st);
-    $p = '/<br[^>]*>/i';
-    $r = PHP_EOL;
+    $p  = '/<br[^>]*>/i';
+    $r  = PHP_EOL;
     return trim(html_entity_decode(preg_replace($p, $r, $st)));
   }
 
@@ -1680,5 +1701,6 @@ class Str
 
     return str_replace(PHP_EOL, '<br>', $st);
   }
+
 
 }
