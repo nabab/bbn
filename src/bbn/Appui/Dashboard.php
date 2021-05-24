@@ -626,6 +626,43 @@ class Dashboard
     );
   }
 
+  /**
+   * Gets the user's default dashboard
+   * @return string|null
+   */
+  public function getDefault(): ?string
+  {
+    if (($id_opt = $this->getOptionId('default'))
+      && ($all = $this->pref->getAll($id_opt))
+    ) {
+      if ($by_id_user = \array_filter(
+        $all,
+        function ($a) {
+          return !empty($a['id_user']) && !empty($a['id_alias']);
+        }
+      )) {
+        return $by_id_user[0]['id_alias'];
+      }
+      elseif ($by_id_group = \array_filter(
+        $all,
+        function ($a) {
+          return !empty($a['id_group']) && !empty($a['id_alias']);
+        }
+      )) {
+        return $by_id_group[0]['id_alias'];
+      }
+      elseif ($by_public = \array_filter(
+        $all,
+        function ($a) {
+          return !empty($a['public']) && !empty($a['id_alias']);
+        }
+      )) {
+        return $by_public[0]['id_alias'];
+      }
+    }
+    return null;
+  }
+
 
   /**
    * Returns the dashboard id by its code
