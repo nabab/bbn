@@ -1129,11 +1129,16 @@ class Controller implements Api
   }
 
 
+  /**
+   * @return string
+   */
   public function getPrepath()
   {
     if ($this->exists()) {
       return $this->_mvc->getPrepath();
     }
+
+    return '';
   }
 
 
@@ -1398,6 +1403,11 @@ class Controller implements Api
   }
 
 
+  /**
+   * Transform the output object using a callback
+   *
+   * @param callable $fn
+   */
   public function transform(callable $fn): void
   {
     $this->obj = $fn($this->obj);

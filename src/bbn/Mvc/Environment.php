@@ -315,7 +315,7 @@ class Environment
     $path = X::removeEmpty(explode('/', $path));
     if (\count($path)) {
       foreach ($path as $p) {
-        if ($this->_params[0] === $p) {
+        if (!empty($this->_params[0]) && $this->_params[0] === $p) {
           array_shift($this->_params);
           $this->_url = substr($this->_url, \strlen($p) + 1);
         } else {

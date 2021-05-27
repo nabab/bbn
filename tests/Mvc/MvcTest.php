@@ -2,9 +2,9 @@
 
 namespace tests\Mvc;
 
+use bbn\Db;
 use bbn\Mvc;
 use Exception;
-use foo\Db;
 use Locale;
 use Mockery;
 use Mockery\MockInterface;
@@ -36,7 +36,7 @@ class MvcTest extends TestCase
 
   protected function setUp(): void
   {
-    $this->resetMvcInstant();
+    $this->resetMvcInstance();
   }
 
 
@@ -88,13 +88,13 @@ class MvcTest extends TestCase
 
     // Invoke the registerPlugin method on the the mvc object using given parameters
     $method->invoke(
-            self::$mvc,
-            $value ?? [
+      self::$mvc,
+      $value ?? [
         'name' => 'test_plugin2',
         'url'  => 'http://foobar.baz',
         'path' => 'foo/baz/'
-          ]
-        );
+            ]
+    );
   }
 
 
@@ -130,7 +130,7 @@ class MvcTest extends TestCase
    *
    * @return void
    */
-  protected function resetMvcInstant()
+  protected function resetMvcInstance()
   {
     if (self::$mvc) {
       self::$mvc->destory();
@@ -169,15 +169,15 @@ class MvcTest extends TestCase
     $this->assertSame(BBN_DATA_PATH, $data_path);
 
     $this->assertInstanceOf(
-            Mvc\Router::class,
-            ReflectionHelpers::getNonPublicProperty('router', self::$mvc)
-        );
+      Mvc\Router::class,
+      ReflectionHelpers::getNonPublicProperty('router', self::$mvc)
+    );
 
     // Ensure plugin is registered
     $this->assertSame(
-            array_replace_recursive(self::$plugin, ['test_plugin' => ['path' => 'test_path/foo/bar/']]),
-            self::$mvc->getPlugins()
-        );
+      array_replace_recursive(self::$plugin, ['test_plugin' => ['path' => 'test_path/foo/bar/']]),
+      self::$mvc->getPlugins()
+    );
 
     $this->replaceRouterInstanceWithMockery();
     $this->assertTrue(self::$mvc->check());
@@ -185,15 +185,16 @@ class MvcTest extends TestCase
 
 
   /**
-   * @param string[]    $return_value
+   * @param mixed       $return_value
    * @param string|null $times
    * @return MockInterface
    * @throws ReflectionException
    */
   protected function replaceRouterInstanceWithMockery(
-        array $return_value = ['key' => 'value'],
-        ?string $times = null
-    ) {
+      $return_value = ['key' => 'value'],
+      ?int $times = 1
+  )
+  {
     /*
       * MVC depends the Router class so we will mock it
       * And replace the `router` property in MVC with the mocked version
@@ -202,11 +203,11 @@ class MvcTest extends TestCase
       *
      */
     $router_mock = $this->mockClassMethod(
-            Mvc\Router::class,
-            'route',
-            $return_value,
-            $times ?? 'once'
-        );
+      Mvc\Router::class,
+      function ($mock) use ($return_value, $times) {
+        $mock->shouldReceive('route')->andReturn($return_value)->times($times);
+      }
+    );
 
     // Set the router property to the mocked router class
     $this->setNonPublicPropertyValue('router', $router_mock);
@@ -259,7 +260,7 @@ class MvcTest extends TestCase
   /** @test */
   public function constructor_test_when_db_is_not_null()
   {
-    $this->resetMvcInstant(new stdClass());
+    $this->resetMvcInstance(new stdClass());
     $this->constructorTest();
     $this->assertNull(ReflectionHelpers::getNonPublicProperty('db', self::$mvc));
 
@@ -274,12 +275,12 @@ class MvcTest extends TestCase
     // So that it can be used to initialize the MVC with.
     $file_path = self::createFile('Db.php', $db_class_stub, 'stubs');
     include $file_path;
-    $this->resetMvcInstant(new Db());
+    $this->resetMvcInstance(new \foo\Db());
     $this->constructorTest();
     $this->assertInstanceOf(
-            Db::class,
-            ReflectionHelpers::getNonPublicProperty('db', self::$mvc)
-        );
+      \foo\Db::class,
+      ReflectionHelpers::getNonPublicProperty('db', self::$mvc)
+    );
     unlink($file_path);
   }
 
@@ -390,9 +391,9 @@ class MvcTest extends TestCase
   {
     $this->assertSame(BBN_DATA_PATH . 'content/', Mvc::getContentPath());
     $this->assertSame(
-            BBN_DATA_PATH . 'plugins/dummy_plugin/',
-            Mvc::getContentPath('dummy_plugin')
-        );
+      BBN_DATA_PATH . 'plugins/dummy_plugin/',
+      Mvc::getContentPath('dummy_plugin')
+    );
   }
 
 
@@ -456,9 +457,9 @@ class MvcTest extends TestCase
   {
     $this->assertSame(BBN_DATA_PATH . 'users/1/tmp/', Mvc::getUserTmpPath('1'));
     $this->assertSame(
-            BBN_DATA_PATH . 'users/1/tmp/dummy_plugin/',
-            Mvc::getUserTmpPath('1', 'dummy_plugin')
-        );
+      BBN_DATA_PATH . 'users/1/tmp/dummy_plugin/',
+      Mvc::getUserTmpPath('1', 'dummy_plugin')
+    );
   }
 
 
@@ -475,9 +476,9 @@ class MvcTest extends TestCase
   {
     $this->assertSame(BBN_DATA_PATH . 'users/1/data/', Mvc::getUserDataPath('1'));
     $this->assertSame(
-            BBN_DATA_PATH . 'users/1/data/dummy_plugin/',
-            Mvc::getUserDataPath('1', 'dummy_plugin')
-        );
+      BBN_DATA_PATH . 'users/1/data/dummy_plugin/',
+      Mvc::getUserDataPath('1', 'dummy_plugin')
+    );
   }
 
 
@@ -560,9 +561,9 @@ class MvcTest extends TestCase
 
     $this->assertEquals(2, $result);
     $this->assertSame(
-            ['route1', 'route2'],
-            ReflectionHelpers::getNonPublicProperty('authorized_routes', self::$mvc)
-        );
+      ['route1', 'route2'],
+      ReflectionHelpers::getNonPublicProperty('authorized_routes', self::$mvc)
+    );
   }
 
 
@@ -573,9 +574,9 @@ class MvcTest extends TestCase
 
     $this->assertEquals(2, $result);
     $this->assertSame(
-            ['route3', 'route4'],
-            ReflectionHelpers::getNonPublicProperty('forbidden_routes', self::$mvc)
-        );
+      ['route3', 'route4'],
+      ReflectionHelpers::getNonPublicProperty('forbidden_routes', self::$mvc)
+    );
   }
 
 
@@ -642,13 +643,13 @@ class MvcTest extends TestCase
   {
     Mvc::setDbInController(true);
     $this->assertTrue(
-            ReflectionHelpers::getNonPublicProperty('db_in_controller', self::$mvc)
-        );
+      ReflectionHelpers::getNonPublicProperty('db_in_controller', self::$mvc)
+    );
 
     Mvc::setDbInController(false);
     $this->assertFalse(
-            ReflectionHelpers::getNonPublicProperty('db_in_controller', self::$mvc)
-        );
+      ReflectionHelpers::getNonPublicProperty('db_in_controller', self::$mvc)
+    );
   }
 
 
@@ -681,7 +682,7 @@ class MvcTest extends TestCase
     $this->assertTrue(self::$mvc->check());
 
     // Do it again but the value is null this time
-    $this->resetMvcInstant();
+    $this->resetMvcInstance();
 
     $router_mock = $this->mockClassMethod(Mvc\Router::class, 'route', null);
     $this->setNonPublicPropertyValue('router', $router_mock);
@@ -843,7 +844,12 @@ class MvcTest extends TestCase
     // Swap the `router` property in Mvc with the modified mocked version of Router
     $this->setNonPublicPropertyValue('router', $router_mock);
 
-    self::$mvc->process();
+    $controller_mock = Mockery::mock(Mvc\Controller::class);
+    $controller_mock->shouldReceive('reset');
+
+    // Swap the controller property with the mocked version
+    $this->setNonPublicPropertyValue('controller', $controller_mock);
+
     self::$mvc->reroute('foo/bar', false, ['arg' => 'arg_value']);
 
     $info = ReflectionHelpers::getNonPublicProperty('info', self::$mvc);
@@ -853,13 +859,13 @@ class MvcTest extends TestCase
     $this->assertSame('foo/bar', self::$mvc->getRequest());
     $this->assertSame(['foo', 'bar', 'arg_value'], self::$mvc->getParams());
     $this->assertSame(
-            [
+      [
         'args' => [
         'arg' => 'arg_value'
         ]
-          ],
-            $info
-        );
+            ],
+      $info
+    );
 
     // Reroute again with arguments is false
     self::$mvc->reroute('foo/baz', false, false);
@@ -871,11 +877,11 @@ class MvcTest extends TestCase
     $info = ReflectionHelpers::getNonPublicProperty('info', self::$mvc);
 
     $this->assertSame(
-            [
+      [
         'args' => false
-          ],
-            $info
-        );
+            ],
+      $info
+    );
   }
 
 
@@ -914,7 +920,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function get_view_throws_an_exception_if_mode_no_found()
+  public function get_view_throws_an_exception_if_mode_not_found()
   {
     $this->expectException(Exception::class);
 
@@ -960,7 +966,7 @@ class MvcTest extends TestCase
 
     // This to ensure that when a view doesn't exist in the loaded views
     // It can return true if the `$this->router->route` returns true
-    $this->replaceRouterInstanceWithMockery(['key' => 'value'], 'twice');
+    $this->replaceRouterInstanceWithMockery(['key' => 'value'], 2);
     $this->assertTrue(self::$mvc->viewExists('test_path4', 'html'));
   }
 
@@ -970,7 +976,7 @@ class MvcTest extends TestCase
   {
     $this->assertFalse(self::$mvc->modelExists('test_model'));
 
-    $this->replaceRouterInstanceWithMockery(['key' => 'value'], 'twice');
+    $this->replaceRouterInstanceWithMockery(['key' => 'value'], 2);
     $this->assertTrue(self::$mvc->modelExists('test_model'));
   }
 
@@ -1006,17 +1012,430 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_plugin_from_component()
+  public function getPluginFromComponent_method_returns_plugin_name_from_component_if_exists_and_null_otherwise()
   {
-    $this->resetMvcInstant();
     $this->registerPlugin(
-            $plugin = [
-        'name' => 'plugin',
+      $plugin = [
+        'name' => 'appui',
         'url'  => 'http://foo.bar',
-        'path' => 'foo/bar/baz'
-          ]
-        );
+        'path' => 'foo/bar/baz/'
+            ]
+    );
 
-    $this->assertSame($plugin, self::$mvc->getPluginFromComponent('plugin-'));
+    $this->assertSame($plugin, self::$mvc->getPluginFromComponent('appui-table'));
+    $this->assertNull(self::$mvc->getPluginFromComponent('appui'));
+    $this->assertNull(self::$mvc->getPluginFromComponent('unknown-plugin-'));
+  }
+
+
+  /** @test */
+  public function routeComponent_method_returns_component_from_the_given_name_if_exists()
+  {
+    $data = [
+      'file'       => 'foo/bar/baz/src/components/form/form.js',
+      'path'       => 'form',
+      'plugin'     => 'http://foo.bar',
+      'component'  => true,
+      'ext'       => 'js',
+      'mode'      => 'js',
+      'i18n'      => 'foo/bar/baz/src/components/form/locale/en/en.json'
+    ];
+
+    // Mock the `routeComponent` method in the Router class to return the previous data.
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeComponent')->andReturn($data);
+
+    $this->assertSame($data, self::$mvc->routeComponent('appui2-form'));
+  }
+
+  /** @test */
+  public function routeComponent_method_returns_null_if_the_given_name_does_not_exist()
+  {
+    // Mock the `routeComponent` method in the Router class to return null.
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeComponent')->andReturnNull();
+
+    $this->assertNull(self::$mvc->routeComponent('appui2-plugin'));
+  }
+
+
+    /** @test */
+    public function customPluginView_method_returns_content_if_custom_view_plugin_exists()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeCustomPlugin')->andReturnNull();
+    $this->assertNull(self::$mvc->customPluginView('path', 'js', [], 'plugin'));
+
+    // getPluginView is an alias of customPluginView
+    $this->assertNull(self::$mvc->getPluginView('path', 'js', [], 'plugin'));
+
+    // The method cannot be tested when the plugin exists as it's creating a new concrete
+    // View object inside which cannot be mocked.
+  }
+
+  /** @test */
+  public function customPluginModel_method_returns_content_if_custom_plugin_model_exists()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeCustomPlugin')->andReturnNull();
+    $this->assertNull(
+      self::$mvc->customPluginModel('path', [], new Mvc\Controller(self::$mvc, []), 'plugin')
+    );
+
+    // getPluginModel is an alias for customPluginModel
+    $this->assertNull(
+      self::$mvc->getPluginModel('path', [], new Mvc\Controller(self::$mvc, []), 'plugin')
+    );
+
+    /// The method cannot be tested when the plugin exists as it's creating a new concrete
+    // Model object inside which cannot be mocked.
+  }
+
+  /** @test */
+  public function hasSubpluginModel_method_checks_if_a_sub_plugin_model_exists()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeSubplugin')->andReturn([
+        'file'      => 'foo/bar/baz/src/appui-database/plugins/appui-dashboard/model/test.php',
+        'path'      => 'poller',
+        'plugin'    => 'appui-database',
+        'ext'       => 'php',
+        'mode'      => 'model',
+        'i18n'      => 'foo/bar/baz/src/appui-database/locale/en/en.json'
+      ]);
+
+    $this->assertTrue(
+      self::$mvc->hasSubpluginModel('poller', 'appui-database', 'appui-dashboard')
+    );
+
+    $this->resetMvcInstance();
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeSubplugin')->andReturnNull();
+
+    $this->assertFalse(
+      self::$mvc->hasSubpluginModel('poller', 'appui-database', 'appui-dashboard')
+    );
+  }
+
+  /** @test */
+  public function subpluginModel_method_returns_a_sub_plugin_model_if_exists()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('routeSubplugin')->andReturnNull();
+
+    $this->assertNull(
+      self::$mvc->subpluginModel(
+        'poller',
+        [],
+        new Mvc\Controller(self::$mvc, []),
+        'appui-database',
+        'appui-dashboard'
+      )
+    );
+
+    // getSubpluginModel is an alias for subpluginModel
+    $this->assertNull(
+      self::$mvc->getSubpluginModel(
+        'poller',
+        [],
+        new Mvc\Controller(self::$mvc, []),
+        'appui-database',
+        'appui-dashboard'
+      )
+    );
+
+    // The method cannot be tested when the sub-plugin exists as it's creating a new concrete
+    // Model object inside which cannot be mocked.
+  }
+
+  /** @test */
+  public function getModel_method_gets_the_model_if_exists_and_empty_array_otherwise()
+  {
+    $this->replaceRouterInstanceWithMockery(null, 2);
+
+    $this->assertEmpty(self::$mvc->getModel('path', [], new Mvc\Controller(self::$mvc, [])));
+
+    // The method cannot be tested when model exists as it's creating a new concrete
+    // Model object inside which cannot be mocked.
+  }
+
+/** @test */
+  public function getCachedModel_method_returns_the_model_in_cache_if_exists_or_save_it_otherwise()
+  {
+    $this->replaceRouterInstanceWithMockery(null, 2);
+
+    $this->assertEmpty(self::$mvc->getCachedModel('path', [], new Mvc\Controller(self::$mvc, [])));
+
+    // The method cannot be tested when model exists as it's creating a new concrete
+    // Model object inside which cannot be mocked.
+  }
+
+  /** @test */
+  public function addInc_method_adds_a_property_to_the_mvc_object_if_not_already_declared()
+  {
+    self::$mvc->addInc('foo', 'bar');
+
+    $this->assertTrue(
+      property_exists(self::$mvc->inc, 'foo')
+    );
+
+    $this->assertSame('bar', self::$mvc->inc->foo);
+  }
+
+  /** @test */
+  public function addInc_method_does_not_add_a_property_to_the_mvc_if_already_declared()
+  {
+    self::$mvc->addInc('foo', 'bar');
+    self::$mvc->addInc('foo', 'baz');
+
+    $this->assertSame('bar', self::$mvc->inc->foo);
+  }
+
+  /** @test */
+  public function process_method_returns_the_rendered_result_from_current_mvc_if_successful()
+  {
+    $this->replaceRouterInstanceWithMockery();
+
+    $controller_mock = Mockery::mock(Mvc\Controller::class);
+    $controller_mock->shouldReceive('process')->once()->andReturnSelf();
+
+    // Swap the controller property with the mocked version
+    $this->setNonPublicPropertyValue('controller', $controller_mock);
+
+    self::$mvc->process();
+    $this->assertIsObject(self::$mvc->obj);
+    $this->assertSame('stdClass', get_class(self::$mvc->obj));
+  }
+
+  /** @test */
+  public function process_method_throws_an_exception_if_info_is_not_array()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setNonPublicPropertyValue('info', 'foo');
+    self::$mvc->process();
+  }
+
+  /** @test */
+  public function hasContent_method_returns_true_if_the_registered_controller_has_content()
+  {
+    $this->replaceRouterInstanceWithMockery();
+
+    $controller_mock = Mockery::mock(Mvc\Controller::class);
+    $controller_mock->shouldReceive('hasContent')->once()->andReturnTrue();
+
+    // Swap the controller property with the mocked version
+    $this->setNonPublicPropertyValue('controller', $controller_mock);
+
+    $this->assertTrue(self::$mvc->hasContent());
+  }
+
+  /** @test */
+  public function hasContent_method_returns_false_if_the_registered_controller_has_no_content()
+  {
+    $this->replaceRouterInstanceWithMockery();
+
+    $controller_mock = Mockery::mock(Mvc\Controller::class);
+    $controller_mock->shouldReceive('hasContent')->once()->andReturnFalse();
+
+    // Swap the controller property with the mocked version
+    $this->setNonPublicPropertyValue('controller', $controller_mock);
+
+    $this->assertFalse(self::$mvc->hasContent());
+  }
+
+  /** @test */
+  public function transform_method_test()
+  {
+    $this->replaceRouterInstanceWithMockery();
+
+    $controller_mock = Mockery::mock(Mvc\Controller::class);
+    $controller_mock->shouldReceive('transform')->once()->andReturnFalse();
+
+    // Swap the controller property with the mocked version
+    $this->setNonPublicPropertyValue('controller', $controller_mock);
+
+    self::$mvc->transform(function (){});
+
+    // The method returns void but we needed to set expectation that the
+    // `transform` method will be called on the Controller object
+    $this->assertTrue(true);
+  }
+
+/** @test */
+  public function output_method_outputs_controller_instance_object()
+  {
+    // The method cannot be tested when it's successful as it's creating a new concrete
+    // Output object inside which cannot be mocked.
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function output_method_throws_an_exception_if_object_property_is_not_an_object()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->replaceRouterInstanceWithMockery();
+
+    $controller_mock = $this->mockClassMethod(Mvc\Controller::class, function ($mock) {
+      $mock->shouldReceive('get')->once()->andReturn('output');
+    });
+
+    // Swap the controller property with the mocked version
+    $this->setNonPublicPropertyValue('controller', $controller_mock);
+
+    // Mock the `isCli` method on the Environment instance
+    // So that it returns false to avoid exit() since testing is using CLI
+    $env_mock = $this->mockEnvironmentClass('isCli', false);
+    $this->setNonPublicPropertyValue('env', $env_mock);
+
+    self::$mvc->output();
+  }
+
+  /** @test */
+  public function getDb_method_returns_db_if_exists()
+  {
+    Mvc::setDbInController(true);
+
+    // Mock the Db class
+    $db_mock = Mockery::mock(Db::class);
+
+    // Swap the `db` property with the mocked version
+    ReflectionHelpers::setNonPublicPropertyValue('db', self::$mvc, $db_mock);
+
+    $this->assertNotNull(self::$mvc->getDb());
+    $this->assertSame($db_mock, self::$mvc->getDb());
+  }
+
+  /** @test */
+  public function getDb_method_returns_null_if_db_is_null()
+  {
+    Mvc::setDbInController(true);
+
+    $this->assertNull(self::$mvc->getDb());
+  }
+
+  /** @test */
+  public function getDb_method_returns_null_if_db_in_controller_is_false()
+  {
+    Mvc::setDbInController(false);
+
+    // Mock the Db class
+    $db_mock = Mockery::mock(Db::class);
+
+    // Swap the `db` property with the mocked version
+    ReflectionHelpers::setNonPublicPropertyValue('db', self::$mvc, $db_mock);
+
+    $this->assertNull(self::$mvc->getDb());
+  }
+
+  /** @test */
+  public function setPrepath_method_return_true_if_not_exists_and_can_be_set()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
+    $router_mock->shouldReceive('setPrepath')->once()->andReturnTrue();
+
+    $env_mock = $this->mockEnvironmentClass('setPrepath', true);
+    $env_mock->shouldReceive('getParams')->once()->andReturn([
+      'foobar' => 'baz'
+    ]);
+    $this->setNonPublicPropertyValue('env', $env_mock);
+
+    $this->assertSame(1, self::$mvc->setPrepath('bar'));
+    $this->assertSame(['foobar' => 'baz'], self::$mvc->params);
+  }
+
+  /** @test */
+  public function setPrepath_method_return_true_if_exists()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
+
+    $this->assertSame(1, self::$mvc->setPrepath('foo'));
+    $this->assertTrue(!isset(self::$mvc->params));
+  }
+
+  /** @test */
+  public function setPrepath_method_throws_an_exception_if_not_exists_and_env_setPrepath_returns_false()
+  {
+    $this->expectException(\Exception::class);
+
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
+
+    $env_mock = $this->mockEnvironmentClass('setPrepath', false);
+
+    $this->setNonPublicPropertyValue('env', $env_mock);
+
+    self::$mvc->setPrepath('bar');
+  }
+
+  /** @test */
+  public function setPrepath_method_throws_an_exception_if_not_exists_and_router_setPrepath_returns_false()
+  {
+    $this->expectException(\Exception::class);
+
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
+    $router_mock->shouldReceive('setPrepath')->once()->andReturnTrue();
+
+    $env_mock = $this->mockEnvironmentClass('setPrepath', true);
+
+    $this->setNonPublicPropertyValue('env', $env_mock);
+
+    self::$mvc->setPrepath('bar');
+  }
+
+  /** @test */
+  public function setPrepath_method_throws_an_exception_check_method_fails()
+  {
+    $this->setNonPublicPropertyValue('info', null);
+    $this->expectException(\Exception::class);
+
+    self::$mvc->setPrepath('bar');
+  }
+
+  /** @test */
+  public function getPrepath_method_returns_prepath()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getPrepath')->once()->andReturn('foo');
+
+    $this->assertSame('foo', self::$mvc->getPrepath());
+  }
+
+  /** @test */
+  public function getPrepath_method_returns_empty_string_when_check_method_fails()
+  {
+    $this->setNonPublicPropertyValue('info', null);
+
+    $this->assertSame('', self::$mvc->getPrepath());
+  }
+
+  /** @test */
+  public function getRoutes_method_returns_routes_if_exist()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getRoutes')->once()->andReturn(['foo' => 'bar']);
+
+    $this->assertSame('bar', self::$mvc->getRoutes('foo'));
+  }
+
+  /** @test */
+  public function getRoutes_method_returns_false_routes_does_not_exist()
+  {
+    $router_mock = $this->replaceRouterInstanceWithMockery();
+    $router_mock->shouldReceive('getRoutes')->once()->andReturn(['foo' => 'bar']);
+
+    $this->assertFalse(self::$mvc->getRoutes('baz'));
+  }
+
+  /** @test */
+  public function getRoutes_method_returns_false_when_check_method_fails()
+  {
+    $this->setNonPublicPropertyValue('info', null);
+
+    $this->assertFalse(self::$mvc->getRoutes('baz'));
   }
 }

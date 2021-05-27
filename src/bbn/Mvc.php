@@ -97,7 +97,7 @@ class Mvc implements Mvc\Api
     protected $controller;
 
     /**
-     * @var db Database object
+     * @var Db Database object
      */
     protected $db;
 
@@ -576,15 +576,13 @@ class Mvc implements Mvc\Api
     }
 
 
-    /**
-     * This function gets the content of a view file and adds it to the loaded_views array.
-     *
-     * @param string $p The full path to the view file
-     * @return string The content of the view
-     */
-    public static function setDbInController($r=false)
+  /**
+   * @param bool $r
+   * @return void
+   */
+    public static function setDbInController(bool $r=false)
     {
-        self::$db_in_controller = $r ? true : false;
+        self::$db_in_controller = $r;
     }
 
 
@@ -988,7 +986,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Undocumented function
+     * Retrieves the plugin's name from the component's name if any.
      *
      * @param string $name
      *
@@ -1001,7 +999,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Undocumented function
+     * Retrieves component's data from the given plugin name if exists.
      *
      * @param string $name
      *
@@ -1014,7 +1012,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Undocumented function
+     * Retrieves a view of a custom plugin.
      *
      * @param string $path
      * @param string $mode
@@ -1025,7 +1023,7 @@ class Mvc implements Mvc\Api
      */
     public function customPluginView(string $path, string $mode, array $data, string $plugin): ?string
     {
-      if ($plugin && ($route = $this->router->routeCustomPlugin(router::parse($path), $mode, $plugin))) {
+      if ($plugin && ($route = $this->router->routeCustomPlugin(Router::parse($path), $mode, $plugin))) {
           $view = new Mvc\View($route);
         if ($view->check()) {
             return \is_array($data) ? $view->get($data) : $view->get();
@@ -1039,7 +1037,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Undocumented function
+     * Retrieves a model of a custom plugin.
      *
      * @param string         $path
      * @param array          $data
@@ -1128,7 +1126,7 @@ class Mvc implements Mvc\Api
      * @param string $path Path to the model
      * @param array  $data Data to send to the model
      *
-     * @return array|false A data model
+     * @return array|null A data model
      */
     public function getModel($path, array $data, Mvc\Controller $ctrl)
     {
@@ -1141,12 +1139,33 @@ class Mvc implements Mvc\Api
     }
 
 
+    /**
+     * An alias for customPluginModel()
+     *
+     * @param string         $path
+     * @param array          $data
+     * @param Mvc\Controller $ctrl
+     * @param string         $plugin
+     * @param int|null       $ttl
+     * @return array|null
+     */
     public function getPluginModel(string $path, array $data, Mvc\Controller $ctrl, string $plugin, int $ttl = null)
     {
         return $this->customPluginModel(router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);
     }
 
 
+    /**
+     * An alias for
+     *
+     * @param string         $path
+     * @param array          $data
+     * @param Mvc\Controller $ctrl
+     * @param string         $plugin
+     * @param string         $subplugin
+     * @param int|null       $ttl
+     * @return array|null
+     */
     public function getSubpluginModel(string $path, array $data, Mvc\Controller $ctrl, string $plugin, string $subplugin, int $ttl = null)
     {
         return $this->subpluginModel($path, $data, $ctrl, $plugin, $subplugin, $ttl);
@@ -1158,7 +1177,7 @@ class Mvc implements Mvc\Api
      *
      * @params string path to the model
      * @params array data to send to the model
-     * @return array|false A data model
+     * @return array|null A data model
      */
     public function getCachedModel(string $path, array $data, Mvc\Controller $ctrl, int $ttl = 10)
     {
@@ -1180,7 +1199,7 @@ class Mvc implements Mvc\Api
      *
      * @params string path to the model
      * @params array data to send to the model
-     * @return array|false A data model
+     * @return void
      */
     public function setCachedModel($path, array $data, Mvc\Controller $ctrl, $ttl = 10)
     {
@@ -1190,10 +1209,8 @@ class Mvc implements Mvc\Api
 
       if ($route = $this->router->route(router::parse($path), 'model')) {
           $model = new Mvc\Model($this->db, $route, $ctrl, $this);
-          return $model->model_set_cache($data, '', $ttl);
+          $model->setCache($data, '', $ttl);
       }
-
-        return [];
     }
 
 
@@ -1202,7 +1219,7 @@ class Mvc implements Mvc\Api
      *
      * @params string path to the model
      * @params array data to send to the model
-     * @return array|false A data model
+     * @return void
      */
     public function deleteCachedModel($path, array $data, Mvc\Controller $ctrl)
     {
@@ -1212,10 +1229,8 @@ class Mvc implements Mvc\Api
 
       if ($route = $this->router->route(router::parse($path), 'model')) {
           $model = new Mvc\Model($this->db, $route, $ctrl, $this);
-          return $model->deleteCache($data, '');
+          $model->deleteCache($data, '');
       }
-
-        return [];
     }
 
 
@@ -1233,10 +1248,11 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Returns the rendered result from the current mvc if successufully processed
+     * Returns the rendered result from the current mvc if successfully processed
      * process() (or check()) must have been called before.
-     *x
-     * @return string|false
+     *
+     * @return void
+     * @throws \Exception
      */
     public function process()
     {
@@ -1244,19 +1260,23 @@ class Mvc implements Mvc\Api
           $this->obj = new \stdClass();
         if (!\is_array($this->info)) {
             $this->log("No info in MVC", $this->info);
-            die("No info in MVC");
+            throw new \Exception(X::_("No info in MVC"));
         }
 
         if (!$this->controller) {
             $this->controller = new Mvc\Controller($this, $this->info, $this->data);
         }
 
-          //die(var_dump($this->info));
           $this->controller->process();
       }
     }
 
 
+    /**
+     * Checks if the controller has content.
+     *
+     * @return bool
+     */
     public function hasContent()
     {
       if ($this->check() && $this->controller) {
@@ -1267,6 +1287,11 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Transform the output object on Controller instance given a callback
+   *
+   * @param callable $fn
+   */
     public function transform(callable $fn)
     {
       if ($this->check() && $this->controller) {
@@ -1275,7 +1300,12 @@ class Mvc implements Mvc\Api
     }
 
 
-    public function output()
+  /**
+   *
+   *
+   * @throws \Exception
+   */
+  public function output()
     {
       if ($this->check() && $this->controller) {
           $obj = $this->controller->get();
@@ -1292,10 +1322,10 @@ class Mvc implements Mvc\Api
         }
 
         if ((\gettype($obj) !== 'object') || (\get_class($obj) !== 'stdClass')) {
-            die(X::dump("Unexpected output: ".\gettype($obj)));
+            throw new \Exception(X::__("Unexpected output: ".\gettype($obj)));
         }
 
-        if (X::countProperties($this->obj)) {
+        if ($this->obj && X::countProperties($this->obj)) {
             $obj = X::mergeObjects($obj, $this->obj);
         }
 
@@ -1308,10 +1338,10 @@ class Mvc implements Mvc\Api
     }
 
 
-    /**
-     * @return bool
-     */
-    public function getDb(): ?db
+  /**
+   * @return Db|null
+   */
+    public function getDb(): ?Db
     {
       if (self::$db_in_controller && $this->db) {
           return $this->db;
@@ -1321,7 +1351,12 @@ class Mvc implements Mvc\Api
     }
 
 
-    public function setPrepath($path)
+  /**
+   * @param string $path
+   * @return int
+   * @throws \Exception
+   */
+  public function setPrepath($path)
     {
       if ($this->check()) {
         if ($this->router->getPrepath(false) === $path) {
@@ -1334,24 +1369,37 @@ class Mvc implements Mvc\Api
         }
       }
 
-        die("The set_prepath method cannot be used in this MVC");
+        throw new \Exception(
+          X::_("The setPrepath method cannot be used in this MVC")
+        );
     }
 
 
+  /**
+   * @return string
+   */
     public function getPrepath()
     {
       if ($this->check()) {
           return $this->router->getPrepath();
       }
+
+      return '';
     }
 
 
+  /**
+   * @param string $type
+   * @return false|mixed
+   */
     public function getRoutes($type = 'root')
     {
       if ($this->check()) {
           $routes = $this->router->getRoutes();
-          return isset($routes[$type]) ? $routes[$type] : false;
+          return $routes[$type] ?? false;
       }
+
+      return false;
     }
 
 
