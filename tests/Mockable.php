@@ -11,22 +11,25 @@ trait Mockable
    * Mock a class then set expectations of a method $method to be called $times times
    * Then return the mock instance.
    *
-   * @param string $class
-   * @param string $method
-   * @param $return_value
-   * @param string $times
+   * @param string  $class
+   * @param mixed  $arg Callback or the value
+   * @param null   $return
    * @return \Mockery\MockInterface
    */
   protected function mockClassMethod
   (
     string $class,
-    string $method,
-    $return_value,
-    string $times = 'once'
+    $arg,
+    $return = null
   )
   {
     $mockery = \Mockery::mock($class);
-    $mockery->shouldReceive($method)->andReturn($return_value)->{$times}();
+
+    if (is_callable($arg)) {
+      $arg($mockery);
+    } else {
+      $mockery->shouldReceive($arg)->andReturn($return);
+    }
 
     return $mockery;
   }

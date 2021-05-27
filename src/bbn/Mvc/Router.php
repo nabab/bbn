@@ -189,7 +189,10 @@ class Router
     return true;
   }
 
-
+  /**
+   * @param int $with_slash
+   * @return string
+   */
   public function getPrepath($with_slash = 1): string
   {
     if (!empty($this->_prepath)) {
@@ -206,6 +209,12 @@ class Router
   }
 
 
+  /**
+   * Retrieves the plugin's name from the component's name if any.
+   *
+   * @param string $name
+   * @return array|null
+   */
   public function getPluginFromComponent(string $name): ?array
   {
     foreach ($this->getPlugins() as $n => $p) {
@@ -218,6 +227,10 @@ class Router
   }
 
 
+  /**
+   * @param string $name
+   * @return array|null
+   */
   public function routeComponent(string $name): ?array
   {
     if ($p = $this->getPluginFromComponent($name)) {
