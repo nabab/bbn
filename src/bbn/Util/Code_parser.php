@@ -15,7 +15,6 @@ namespace bbn\Util;
  * @category  Utilities
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
- & @todo Change make_love_with_me to bbn\Str::clean
  */
 class code_parser 
 {
@@ -185,30 +184,6 @@ class code_parser
 	/**
 	 * @return void 
 	 */
-	private function make_love_with_me($s)
-	{
-		$s = str_replace("\n"," ",$s);
-		$s = str_replace("\r","",$s);
-		$s = str_replace("\t"," ",$s);
-		foreach ( self::$specials as $char )
-		{
-			/* negative value used in css shortcuts need their spaces */
-			if ( !$this->css || $char !== '-' )
-			{
-				while ( strpos($s,$char.' ') !== false )
-					$s = str_replace($char.' ',$char,$s);
-				while ( strpos($s,' '.$char) !== false )
-					$s = str_replace(' '.$char,$char,$s);
-			}
-		}
-		$s = str_replace('<?p'.'hp','<?p'.'hp ',$s);
-		$s = str_replace('?'.'>',' ?'.'>',$s);
-		return preg_replace('/\s{2,}/',' ',$s);
-	}
-
-	/**
-	 * @return void 
-	 */
 	public function get_sequences()
 	{
 		return $this->sequences;
@@ -234,13 +209,10 @@ class code_parser
 	public function get_minified()
 	{
 		$r = '';
-		foreach ( $this->sequences as $s )
-		{
-			if ( $s['kind'] === 'code' )
-				$r .= $this->make_love_with_me($s['content']);
-			else if ( $s['kind'] == 'double_quotes' || $s['kind'] == 'single_quotes' || $s['kind'] == 'regex' )
-				$r .= $s['content'];
+		foreach ( $this->sequences as $s ) {
+			$r .= $s['content'];
 		}
+
 		return $r;
 	}
 
