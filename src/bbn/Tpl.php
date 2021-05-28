@@ -7,28 +7,45 @@ class Tpl {
 
   static private $engine, $tmp;
 
-  static public function renderer(string $st){
-    if ( !\defined('BBN_DATA_PATH') ){
-      $dir = sys_get_temp_dir();
-      if ( !@mkdir($dir.'/tmp') && !is_dir($dir.'/tmp') ){
-        die('Impossible to create the template directory in '.$dir);
-      }
-      define('BBN_DATA_PATH', $dir.'/');
+  /**
+   * Generates a Mustache template function ready to receive parameters and returns it.
+   * 
+   * A temporary file is created if it does not already exists.
+   * 
+   * @param string $st The template's content
+   * @return callable A function that can be called with the data as argument
+   */
+  static public function renderer(string $st): callable
+  {
+    if (\defined('BBN_DATA_PATH')) {
+      $dir = File\Dir::createPath(BBN_PATA_PATH.'tmp/bbn-templates');
     }
+    else {
+      $dir = File\Dir::createPath(sys_get_temp_dir().'/bbn-templates');
+    }
+
+    if (!$dir) {
+      throw new \Exception(X::_("Impossible to create the template directory"));
+    }
+
     $md5 = md5($st);
-    $file = BBN_DATA_PATH.'tmp/tpl.'.$md5.'.php';
-    if ( file_exists($file) ){
-      return include($file);
+    $file = $dir.'/tpl.'.$md5.'.php';
+    if (!file_exists($file)) {
+      $tpl = LightnCandy::compile(
+        $st,
+        [
+          'flags' => LightnCandy::FLAG_MUSTACHELOOKUP |
+            LightnCandy::FLAG_PARENT |
+            LightnCandy::FLAG_HANDLEBARSJS |
+            LightnCandy::FLAG_ERROR_LOG
+        ]
+      );
+      file_put_contents($file, '<?php '.$tpl.'?>');
     }
-    $tpl = LightnCandy::compile($st, [
-      'flags' => LightnCandy::FLAG_MUSTACHELOOKUP |
-        LightnCandy::FLAG_PARENT |
-        LightnCandy::FLAG_HANDLEBARSJS |
-        LightnCandy::FLAG_ERROR_LOG
-    ]);
-    file_put_contents($file, '<?php '.$tpl.'?>');
+
     return include($file);
   }
+
 
   static public function render($st, $data){
     if ( is_callable($tpl = self::renderer($st)) ){
