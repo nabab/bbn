@@ -97,30 +97,6 @@ class StrTest extends TestCase
   }
 
 
-  /** @test */
-  public function clean_method_cleans_a_string_based_on_configurations()
-  {
-    $string = 'foo      bar
-    bäz';
-
-    $this->assertSame('foo bar\n bäz', Str::clean($string, 'all'));
-
-    $string = "foo bar 
-    
-    
-    
-    bäz";
-
-    $this->assertSame(
-      'foo bar
-    bäz', Str::clean($string, '2nl')
-    );
-
-    $this->assertSame('foo bar bäz', Str::clean($string, 'html'));
-
-  }
-
-
   /** @test  */
   public function cut_method_strips_html_and_php_tags_from_a_string()
   {
