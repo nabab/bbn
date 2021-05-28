@@ -62,7 +62,6 @@ class Environment
    */
   private $_files;
 
-
   /**
    * @var string The current active locale, shared with the whole MVC.
    */
@@ -213,10 +212,11 @@ class Environment
         'en_US.utf8',
         'en-US',
         'en',
+        'en_US'
       );
 
       if (!defined('BBN_LOCALE')) {
-        // No user detection for CLI: default language 
+        // No user detection for CLI: default language
         if ($this->_mode === 'cli') {
           if (defined('BBN_LANG')) {
             $lang = BBN_LANG;
@@ -239,9 +239,11 @@ class Environment
               define('BBN_LANG', $user_locales[0]);
             }
           }
+
           if (!defined('BBN_LANG')) {
             throw new \Exception("Impossible to determine the language");
           }
+
           $lang = BBN_LANG;
         }
 
@@ -270,6 +272,7 @@ class Environment
           'en-US'
         );
       }
+
       array_unshift(
         $locales,
         strtolower($locale) . '-' . strtoupper($locale) . '.utf8',
@@ -312,7 +315,7 @@ class Environment
     $path = X::removeEmpty(explode('/', $path));
     if (\count($path)) {
       foreach ($path as $p) {
-        if ($this->_params[0] === $p) {
+        if (!empty($this->_params[0]) && $this->_params[0] === $p) {
           array_shift($this->_params);
           $this->_url = substr($this->_url, \strlen($p) + 1);
         } else {
@@ -559,29 +562,33 @@ class Environment
     return $weightedLocales;
   }
 
+
   /**
    * Sort by high to low `q` value
    */
   private static function _sortLocalesByWeight($locales)
   {
-    usort($locales, function ($a, $b) {
-      // usort will cast float values that we return here into integers,
-      // which can mess up our sorting. So instead of subtracting the `q`,
-      // values and returning the difference, we compare the `q` values and
-      // explicitly return integer values.
-      if ($a['q'] == $b['q']) {
-        return 0;
-      }
+    usort(
+      $locales, function ($a, $b) {
+        // usort will cast float values that we return here into integers,
+        // which can mess up our sorting. So instead of subtracting the `q`,
+        // values and returning the difference, we compare the `q` values and
+        // explicitly return integer values.
+        if ($a['q'] == $b['q']) {
+          return 0;
+        }
 
-      if ($a['q'] > $b['q']) {
-        return -1;
-      }
+        if ($a['q'] > $b['q']) {
+          return -1;
+        }
 
-      return 1;
-    });
+        return 1;
+      }
+    );
 
     return $locales;
   }
+
 
   private static function _initialize()
   {
@@ -608,5 +615,6 @@ class Environment
       }
     }
   }
+
 
 }

@@ -163,8 +163,11 @@ class X
         }
       }
 
-      $s = (file_exists($log_file)) ? filesize($log_file) : 0;
-      if ($s > BBN_X_MAX_LOG_FILE) {
+      if (!file_exists($log_file)) {
+        return;
+      }
+
+      if (filesize($log_file) > BBN_X_MAX_LOG_FILE) {
         file_put_contents($log_file.'.old', File_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
       }

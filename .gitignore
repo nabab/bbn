@@ -14,3 +14,4 @@ filemode = false
 *.* text eol=lf
 /vendor
 .phpunit.result.cache
+.php_cs.cache
