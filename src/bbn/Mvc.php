@@ -422,6 +422,11 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Add a route to authorized routes list if not already exists.
+   *
+   * @return int
+   */
     public function addAuthorizedRoute(): int
     {
         $res = 0;
@@ -450,6 +455,12 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Checks if a route is authorized.
+   *
+   * @param $url
+   * @return bool
+   */
     public function isAuthorizedRoute($url): bool
     {
       if (in_array($url, $this->authorized_routes, true)) {
@@ -480,6 +491,12 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Sets the root of the application in the URL (base href).
+   *
+   * @param string $root
+   * @return void
+   */
     public function setRoot($root)
     {
         /** @todo a proper verification of the path */
@@ -491,6 +508,11 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Returns the root of the application in the URL (base href).
+   *
+   * @return string
+   */
     public function getRoot()
     {
         return $this->root;
@@ -766,6 +788,11 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Get the request url.
+   *
+   * @return string|null
+   */
     public function getUrl(): ?string
     {
         return $this->env->getUrl();

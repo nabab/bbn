@@ -349,6 +349,11 @@ class Environment
   }
 
 
+  /**
+   * Get the request url.
+   *
+   * @return string|null
+   */
   public function getUrl()
   {
     return $this->_url;

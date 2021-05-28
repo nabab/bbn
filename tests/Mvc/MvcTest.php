@@ -9,6 +9,7 @@ use Locale;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
+use tests\Files;
 use tests\Reflectable;
 use ReflectionClass;
 use ReflectionException;
@@ -19,7 +20,7 @@ use tests\storage\stubs\stub2;
 
 class MvcTest extends TestCase
 {
-  use Mockable, Reflectable;
+  use Mockable, Reflectable, Files;
 
   /**
    * @var Mvc
@@ -96,33 +97,6 @@ class MvcTest extends TestCase
         'path' => 'foo/baz/'
             ]
     );
-  }
-
-
-  /**
-   *
-   * Create a file on the fly to be used in tests
-   *
-   * @param string $filename
-   * @param string $file_content
-   * @param string $dirname
-   *
-   * @return string
-   */
-  protected function createFile(string $filename, string $file_content, string $dirname)
-  {
-    if (!is_dir($dir = BBN_APP_PATH . BBN_DATA_PATH . $dirname)) {
-      mkdir($dir);
-    }
-
-    $fp = fopen($file_path = "$dir/$filename", 'w');
-    if (!empty($file_content)) {
-      fputs($fp, $file_content);
-    }
-
-    fclose($fp);
-
-    return $file_path;
   }
 
 
