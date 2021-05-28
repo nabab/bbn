@@ -11,7 +11,7 @@ class Controller implements Api
   use Common;
 
   /**
-   * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
+   * The MVC class from which the controller is called
    * @var bbn\Mvc
    */
   private $_mvc;
@@ -23,7 +23,7 @@ class Controller implements Api
   private $_reroutes = [];
 
   /**
-   * Is set to null while not controled, then 1 if controller was found, and false otherwise.
+   * Is set to null while not controlled, then 1 if controller was found, and false otherwise.
    * @var null|boolean
    */
   private $_is_controlled;
@@ -67,7 +67,7 @@ class Controller implements Api
   /**
    * The checkers files (with full path)
    * If any they will be checked before the controller
-   * @var null|string
+   * @var array
    */
   private $_checkers = [];
 
@@ -123,7 +123,9 @@ class Controller implements Api
 
 
   /**
-   * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+   * This will call the initial build a new instance.
+   * It should be called only once from within the script.
+   * All subsequent calls to controllers should be done through $this->add($path).
    *
    * @param bbn\Mvc       $mvc
    * @param array         $files
