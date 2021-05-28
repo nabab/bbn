@@ -14,7 +14,6 @@ use bbn;
  * @category  Utilities
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
- & @todo Change make_love_with_me to bbn\Str::clean
  */
 class Paybox
 {
