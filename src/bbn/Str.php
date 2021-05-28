@@ -37,6 +37,8 @@ class Str
    * // (string) "122"
    * X::dump(\bbn\Str::cast(1));
    * // (string) "1"
+   * X::dump(\bbn\Str::cast(['foo' => 'bar'])
+   * // (string) ""
    * ```
    *
    * @param mixed $st The item to cast.
@@ -105,7 +107,7 @@ class Str
    */
   public static function escapeAllQuotes($st): string
   {
-    return self::escapeDquotes(self::escapeSquotes($st));
+    return addcslashes(self::cast($st), "'\"\\\r\n\t");
   }
 
 
@@ -277,98 +279,6 @@ class Str
   {
     return self::escapeSquotes($st);
   }
-
-
-  /**
-   * Returns an expunged string of several types of character(s) depending on the configuration.
-   *
-   * ```php
-   * $test="this      is
-   * cold";
-   *
-   * X::dump(\bbn\Str::clean($test));
-   * // (string)  "this is\n cold"
-   *
-   * $test1="this is
-   *
-   *
-   * cold";
-   *
-   * X::dump(\bbn\Str::clean($test1,'2nl'));
-   * /* (string)
-   * "this is
-   *  cold"
-   *
-   * X::dump(\bbn\Str::clean($test1,'html'));
-   * // (string)  "this is cold"
-   *
-   * X::dump(\bbn\Str::clean('$x = 9993','code'));
-   * // (string)  "$x=9993"
-   * ```
-   *
-   * @param mixed  $st   The item to be.
-   * @param string $mode A selection of configuration: "all" (default), "2n1", "html", "code".
-   * @return string
-   */
-  public static function clean($st, $mode='all'): string
-  {
-    if (\is_array($st)) {
-      reset($st);
-      $i = \count($st);
-      if (trim($st[0]) == '') {
-        array_splice($st,0,1);
-        $i--;
-      }
-
-      if ($i > 0) {
-        if (trim($st[$i - 1]) === '') {
-          array_splice($st, $i - 1, 1);
-          $i--;
-        }
-      }
-
-      return $st;
-    }
-    else{
-      $st = self::cast($st);
-      if ($mode == 'all') {
-        $st = mb_ereg_replace("\n",'\n',$st);
-        $st = mb_ereg_replace("[\t\r]","",$st);
-        $st = mb_ereg_replace('\s{2,}',' ',$st);
-      }
-      elseif ($mode == '2nl') {
-        $st = mb_ereg_replace("[\r]","",$st);
-        $st = mb_ereg_replace("\n{2,}","\n",$st);
-      }
-      elseif ($mode == 'html') {
-        $st = mb_ereg_replace("[\t\r\n]",'',$st);
-        $st = mb_ereg_replace('\s{2,}',' ',$st);
-      }
-      elseif ($mode == 'code') {
-        $st    = mb_ereg_replace("!/\*.*?\*/!s",'',$st); // comment_pattern
-        $st    = mb_ereg_replace("[\r\n]",'',$st);
-        $st    = mb_ereg_replace("\t"," ",$st);
-        $chars = [';','=','+','-','\(','\)','\{','\}','\[','\]',',',':'];
-        foreach ($chars as $char){
-          while (mb_strpos($st,$char.' ') !== false){
-            $st = mb_ereg_replace($char.' ',$char,$st);
-          }
-
-          while (mb_strpos($st,' '.$char) !== false){
-            $st = mb_ereg_replace(' '.$char,$char,$st);
-          }
-        }
-
-        $st = mb_ereg_replace('<\?p'.'hp','<?p'.'hp ',$st);
-        $st = mb_ereg_replace('\?'.'>','?'.'> ',$st);
-        $st = mb_ereg_replace('\s{2,}',' ',$st);
-      }
-
-      return trim($st);
-    }
-  }
-
-
   /**
    * Cuts a string (HTML and PHP tags stripped) to maximum length inserted.
    *
@@ -408,8 +318,13 @@ class Str
 
 
   /**
-  * @todo comment this
-  */
+   * Strip special characters except the below:
+   * - ~ , ; [ ] ( ) .
+   * And removes more that two trailing periods
+   *
+   * @param string $st
+   * @return string
+   */
   public static function sanitize(string $st): string
   {
     $file = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $st);
@@ -436,7 +351,7 @@ class Str
   public static function encodeFilename($st, $maxlength = 50, $extension = null, $is_path = false): string
   {
     $st      = self::removeAccents(self::cast($st));
-    $allowed = '~\-_.,\(\[\)\]';
+    $allowed = '~\-_.\(\[\)\]';
 
     // Arguments order doesn't matter
     $args = \func_get_args();
@@ -471,8 +386,18 @@ class Str
       $st = substr($st, 0, -(\strlen($extension) + 1));
     }
 
-    $st  = mb_ereg_replace("([^\w\s\d".$allowed.".])", '', $st);
-    $st  = mb_ereg_replace("([\.]{2,})", '', $st);
+    // Replace non allowed character with single space
+    $st = mb_ereg_replace("([^\w\d".$allowed.".])", ' ', $st);
+
+    // Replace two or more spaces to one space
+    $st = mb_ereg_replace("\s{2,}", ' ', $st);
+
+    // Replace single spaces to under score
+    $st = mb_ereg_replace("\s", '_', $st);
+
+    // Remove the . character
+    $st = mb_ereg_replace("\.", '', $st);
+    ;
     $res = mb_substr($st, 0, $maxlength);
     if ($extension) {
       $res .= '.' . $extension;
@@ -504,11 +429,11 @@ class Str
     }
 
     for ($i = 0; $i < $maxlength; $i++){
-      if (mb_ereg_match('[A-z0-9]',mb_substr($st,$i,1))) {
-        $res .= mb_substr($st,$i,1);
+      if (mb_ereg_match('[A-z0-9]', $substr = mb_substr($st, $i, 1))) {
+        $res .= $substr;
       }
       elseif ((mb_strlen($res) > 0)
-          && (mb_substr($res,-1) != '_')
+          && (mb_substr($res, -1) != '_')
           && ($i < ( mb_strlen($st) - 1 ))
       ) {
         $res .= '_';
@@ -650,7 +575,10 @@ class Str
    */
   public static function isNumber(): bool
   {
-    $args = \func_get_args();
+    if (empty($args = \func_get_args())) {
+      return false;
+    }
+
     foreach ($args as $a){
       if (\is_string($a)) {
         if (!preg_match('/^-?(?:\d+|\d*\.\d+)$/', $a)) {
@@ -769,6 +697,13 @@ class Str
 
   /**
    * Checks if the string is a valid UID string.
+   *
+   * ```php
+   * Str::isUid('22e4f42122e4f42122e4f42122e4f421');
+   * // (bool) true
+   * $this->assertFalse(Str::isUid('22e4f42122e4f4212'));
+   * // (bool) false
+   * ```
    *
    * @param string $st
    * @return boolean
@@ -891,7 +826,7 @@ class Str
    */
   public static function isUrl($st)
   {
-    return filter_var($st, FILTER_VALIDATE_URL);
+    return (bool)filter_var($st, FILTER_VALIDATE_URL);
   }
 
 
@@ -917,10 +852,26 @@ class Str
   }
 
 
+  /**
+   * Checks if the argument is a valid ip address.
+   *
+   * ```php
+   * X::dump(\bbn\Str::isIp('198.162.0.1'));
+   * // (bool) true
+   *
+   * X::dump(\bbn\Str::isIp('29e4:4068:a401:f273:dcec:af8f:c8b3:c01c'));
+   * // (bool) true
+   *
+   * X::dump(\bbn\Str::isIp('198.162'));
+   * // (bool) false
+   * ```
+   *
+   * @param $st
+   * @return bool
+   */
   public static function isIp($st): bool
   {
-    $valid = filter_var($st, FILTER_VALIDATE_IP);
-    return $valid;
+    return (bool)filter_var($st, FILTER_VALIDATE_IP);
   }
 
 
@@ -1064,6 +1015,12 @@ class Str
    * ```php
    * X::dump(\bbn\Str::parsePath('\home\user\Desktop'));
    * // (string) "/home/user/Desktop"
+   *
+   *  X::dump(\bbn\Str::parsePath('..\home\user\Desktop'));
+   * // (string) ""
+   *
+   * X::dump(\bbn\Str::parsePath('..\home\user\Desktop', true));
+   * // (string) "home/user/Desktop"
    * ```
    *
    * @param string  $path         The path.
@@ -1110,7 +1067,7 @@ class Str
    *
    * ```php
    * X::dump(\bbn\Str::removeAccents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
-   * // (string) "TA¨st  FA¬lA¨  A²A¨A A¹e"
+   * // (string) TA¨st FA¬lA¨ A²A¨A A¹e"
    * ```
    *
    * @param string $st The string.
@@ -1180,7 +1137,6 @@ class Str
   public static function checkFilename(): bool
   {
     $args = \func_get_args();
-    // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
     foreach ($args as $a){
       if (($a === '..') || !\is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false)) {
         return false;
@@ -1205,8 +1161,8 @@ class Str
    */
   public static function checkPath(): bool
   {
+    //TODO: is this an alias for checkFilename method?
     if ($args = \func_get_args()) {
-      // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
       foreach ($args as $a){
         $bits = X::split($a, DIRECTORY_SEPARATOR);
         foreach ($bits as $b){
@@ -1224,7 +1180,6 @@ class Str
 
 
   /**
-   * Checks if a string complies with SQL naming convention.
    * Returns "true" if slash or backslash are present.
    *
    * ```php
@@ -1241,7 +1196,6 @@ class Str
   public static function hasSlash(): bool
   {
     $args = \func_get_args();
-    // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
     foreach ($args as $a){
       if ((strpos($a, '/') !== false) || (strpos($a, '\\') !== false)) {
         return true;
@@ -1257,7 +1211,10 @@ class Str
    *
    * ```php
    * X::dump(\bbn\Str::getNumbers("test 13 example 24"));
-   * // (string) 1324
+   * // (string) "1324"
+   *
+   * X::dump(\bbn\Str::getNumbers("test example"));
+   * // (string) ""
    * ```
    *
    * @param string $st The string.
@@ -1305,7 +1262,7 @@ class Str
    * ```
    *
    * @param mixed $o The item.
-   * @return array
+   * @return array|string
    */
   public static function makeReadable($o)
   {
@@ -1437,7 +1394,6 @@ class Str
 
       $st .= str_repeat($space, $lev - 1);
       $st .= $is_assoc ? '}' : ']';
-      //$st .= \is_object($o) ? '}' : ']';
     }
 
     return $st;
@@ -1476,6 +1432,12 @@ class Str
    * ```php
    *  var_dump(\bbn\Str::removeComments("<!--this is a comment-->"));
    *  // (string) ""
+   *
+   * var_dump(\bbn\Str::removeComments("// this is a comment"));
+   *  // (string) ""
+   *
+   * var_dump(\bbn\Str::removeComments("/** this is a comment *\/"));
+   *  // (string) ""
    * ```
    *
    * @param string $st
@@ -1483,63 +1445,133 @@ class Str
    */
   public static function removeComments(string $st): string
   {
-    $pattern = '/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
-    return preg_replace($pattern, '', $st);
+    $pattern = '/<!--.*?-->|(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
+    return trim(preg_replace($pattern, '', $st));
   }
 
 
   /**
-  * Converts the bytes to another unit form.
-  *
-  * @param int                                                           $bytes The bytes
-  * @param string The unit you want to convert ('B', 'K', 'M', 'G', 'T')
-  * @parma boolean $stop
-  * @return string
-  */
-  public static function saySize($bytes, $unit = 'B', $stop = false): string
+   * Converts the bytes to another unit form.
+   *
+   * ```php
+   *  var_dump(\bbn\Str::saySize(50000000000, 'G'));
+   *  // (string) "46.57 G"
+   *
+   * var_dump(\bbn\Str::saySize(1048576, 'M', 0));
+   *  // (string) "1 M"
+   *
+   * var_dump(\bbn\Str::saySize(1048576, 'T', 6));
+   *  // (string) "0.000001 T"
+   * ```
+   *
+   * @param int    $bytes     The bytes
+   * @param string $unit
+   * @param int    $percision
+   * @return string
+   * @throws \Exception
+   */
+  public static function saySize($bytes, $unit = 'B', $percision = 2): string
   {
     // pretty printer for byte values
-    //
     $i     = 0;
-    $units = ['', 'K', 'M', 'G', 'T'];
-    while ($stop || ($bytes > 2000)){
-      $i++;
-      $bytes /= 1024;
-      if ($stop === $units[$i]) {
-        break;
-      }
+    $units = ['B', 'K', 'M', 'G', 'T'];
+
+    if (!in_array(($unit = strtoupper($unit)), $units, true)) {
+      throw new \Exception(X::_('Invalid provided unit'));
     }
 
-    $st = $unit === 'B' ? "%d %s" : "%5.2f %s";
-    return sprintf($st.$unit, $bytes, $units[$i]);
+    while (isset($units[$i]) && $unit !== $units[$i]){
+      $i++;
+      $bytes /= 1024;
+    }
+
+    $st = $unit === 'B' ? "%d %s" : "%0.{$percision}f %s";
+
+    return sprintf($st, $bytes, $units[$i]);
   }
 
 
   /**
-   * @param $size
+   * Converts size from one unit to another.
+   *
+   * ```php
+   *  var_dump(\bbn\Str::convertSize(1, 'GB', 'B'));
+   *  // (string) "1073741824B"
+   *
+   * var_dump(\bbn\Str::convertSize(1, 'TB', 'GB'));
+   *  // (string) "1024GB"
+   *
+   * var_dump(\bbn\Str::convertSize(500000, 'MB', 'TB', 6));
+   *  // (string) "0.47684TB"
+   * ```
+   *
+   * @param int $size
    * @param string $unit_orig
    * @param string $unit_dest
+   * @param int    $percision
    * @return string
+   * @throws \Exception
    */
-  public static function convertSize($size, $unit_orig = 'B', $unit_dest = 'MB')
+  public static function convertSize($size, $unit_orig = 'B', $unit_dest = 'MB', $percision = 0)
   {
-    if (strlen($unit_orig) <= 1) {
+    $unit_orig = strtoupper($unit_orig);
+    $unit_dest = strtoupper($unit_dest);
+
+    if (strlen($unit_orig) <= 1 && $unit_orig !== 'B') {
       $unit_orig .= 'B';
     }
 
-    if (strlen($unit_dest) <= 1) {
+    if (strlen($unit_dest) <= 1 && $unit_dest !== 'B') {
       $unit_dest .= 'B';
     }
 
-    $base   = log($size) / log(1024);
-    $suffix = array("", "KB", "MB", "GB", "TB");
-    $f_base = floor($base);
-    return round(pow(1024, $base - floor($base)), 1) . $suffix[$f_base];
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+    if (!in_array($unit_orig, $units)) {
+      throw new \Exception(X::_("Invalid original unit"));
+    }
+
+    if (!in_array($unit_dest, $units)) {
+      throw new \Exception(X::_("Invalid destination unit"));
+    }
+
+    $bytes      = $size;
+    $orig_index = array_search($unit_orig, $units);
+    $dest_index = array_search($unit_dest, $units);
+
+    // If destination unit is smaller than the original then reverse the units array
+    if ($dest_index < $orig_index) {
+      $units      = array_reverse($units);
+      $orig_index = array_search($unit_orig, $units);
+      $dest_index = array_search($unit_dest, $units);
+      $reversed   = true;
+    }
+
+    for ($i = $orig_index + 1; $i <= $dest_index; $i++) {
+      if (isset($reversed)) {
+        $bytes *= 1024;
+      } else {
+        $bytes /= 1024;
+      }
+    }
+
+    return round($bytes, $percision) . $unit_dest;
   }
 
 
   /**
    * Checks whether a JSON string is valid or not. If $return_error is set to true, the error will be returned.
+   *
+   * ```php
+   *  var_dump(\bbn\Str::checkJson("{"foo":"bar"}"));
+   *  // (bool) true
+   *
+   * var_dump(\bbn\Str::checkJson("foo"));
+   *  // (bool) false
+   *
+   * var_dump(\bbn\Str::checkJson("foo", true));
+   *  // (string) "Syntax error, malformed JSON"
+   * ```
    *
    * @param string $json
    * @param bool   $return_error
@@ -1574,6 +1606,28 @@ class Str
   }
 
 
+  /**
+   * Places quotes around a string
+   *
+   *```php
+   *  var_dump(\bbn\Str::asVar('foo'));
+   *  // (string) '"foo"'
+   *
+   *  var_dump(\bbn\Str::asVar("foo", "'"));
+   *  // (string) "'foo'"
+   *
+   * var_dump(\bbn\Str::asVar("foo'bar"));
+   *  // (string) '"foo\'bar"'
+   *
+   * var_dump(\bbn\Str::asVar("foo'bar", "'"));
+   *  // (string) "'foo\'bar'"
+   *
+   * ```
+   *
+   * @param string $var
+   * @param string $quote
+   * @return string
+   */
   public static function asVar(string $var, $quote = '"')
   {
     if (($quote !== "'") && ($quote !== '"')) {
@@ -1587,6 +1641,17 @@ class Str
 
   /**
    * Transforms a markdown string into HTML.
+   *
+   * ```php
+   *  var_dump(\bbn\Str::markdown2html("# foo"));
+   *  // (string) '<h1>foo</h1>'
+   *
+   * var_dump(\bbn\Str::markdown2html("**foo**"));
+   *  // (string) '<p><strong>foo</strong></p>'
+   *
+   * var_dump(\bbn\Str::markdown2html("**foo**", true));
+   *  // (string) '<strong>foo</strong>'
+   * ```
    *
    * @param string  $st          The markdown string
    * @param boolean $single_line If true the result will not contain paragraph or block element
@@ -1605,6 +1670,11 @@ class Str
   /**
    * Converts the given string to camel case.
    *
+   * ```php
+   *  var_dump(\bbn\Str::toCamel("foo bar"));
+   *  // (string) 'fooBar'
+   * ```
+   *
    * @param string $st
    * @param string $sep   A separator
    * @param bool   $first Capitalize first character if true
@@ -1612,6 +1682,8 @@ class Str
    */
   public static function toCamel(string $st, string $sep = '_', bool $first = false): string
   {
+    $st = strtolower($st);
+
     $res = str_replace(' ', '', ucwords(str_replace($sep, ' ', $st)));
     if (!$first) {
         $res[0] = strtolower($res[0]);
@@ -1624,6 +1696,15 @@ class Str
   /**
    * Converts HTML to text replacing paragraphs and brs with new lines.
    *
+   * ```php
+   *  var_dump(\bbn\Str::html2text("<h1>foo bar</h1><br>baz"));
+   *  // (string) 'foo bar
+   * baz'
+   *
+   * var_dump(\bbn\Str::html2text('<h1>foo bar</h1><br>', false));
+   *  // (string) 'foo bar'
+   * ```
+   *
    * @param string $st The HTML string
    * @return string
    */
@@ -1635,13 +1716,13 @@ class Str
     }
 
     $filter = $nl ? ['p', 'br'] : [];
-    $tmp = strip_tags($st, $filter);
+    $tmp    = strip_tags($st, $filter);
     if (empty($tmp)) {
       $config = array(
         'clean' => 'yes',
         'output-html' => 'yes',
       );
-      $tidy = tidy_parse_string($st, $config, 'utf8');
+      $tidy   = tidy_parse_string($st, $config, 'utf8');
       $tidy->cleanRepair();
       $st = strip_tags((string)$tidy, $filter);
     }
@@ -1659,14 +1740,22 @@ class Str
 
     $st = preg_replace("/<p[^>]*?>/i", "", $st);
     $st = str_ireplace("</p>", PHP_EOL.PHP_EOL, $st);
-    $p = '/<br[^>]*>/i';
-    $r = PHP_EOL;
+    $p  = '/<br[^>]*>/i';
+    $r  = PHP_EOL;
     return trim(html_entity_decode(preg_replace($p, $r, $st)));
   }
 
 
   /**
    * Converts text to HTML replacing new lines with brs.
+   *
+   * ```php
+   *  var_dump(\bbn\Str::text2html("foo\n bar"));
+   *  // (string) '<p>foo<br> bar</p>'
+   *
+   * var_dump(\bbn\Str::text2html("foo\n bar", false));
+   *  // (string) 'foo<br> bar'
+   * ```
    *
    * @param string $st The text string
    * @return string
@@ -1680,5 +1769,6 @@ class Str
 
     return str_replace(PHP_EOL, '<br>', $st);
   }
+
 
 }

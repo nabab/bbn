@@ -453,7 +453,7 @@ class Controller implements Api
       foreach ($this->_checkers as $appui_checker_file){
         // If a checker file returns false, the controller is not processed
         // The checker file can define data and inc that can be used in the subsequent controller
-        if (bbn\Mvc::includeController($appui_checker_file, $this, true) === false) {
+        if (self::includeController($appui_checker_file, $this, true) === false) {
           $ok = false;
           break;
         }
@@ -474,7 +474,7 @@ class Controller implements Api
         return false;
       }
 
-      $output = bbn\Mvc::includeController($this->_file, $this);
+      $output = self::includeController($this->_file, $this);
       // If rerouted during the controller
       if ($this->_is_rerouted) {
         $this->_is_rerouted = false;
@@ -1129,11 +1129,16 @@ class Controller implements Api
   }
 
 
+  /**
+   * @return string
+   */
   public function getPrepath()
   {
     if ($this->exists()) {
       return $this->_mvc->getPrepath();
     }
+
+    return '';
   }
 
 
@@ -1398,6 +1403,11 @@ class Controller implements Api
   }
 
 
+  /**
+   * Transform the output object using a callback
+   *
+   * @param callable $fn
+   */
   public function transform(callable $fn): void
   {
     $this->obj = $fn($this->obj);
@@ -1593,5 +1603,27 @@ class Controller implements Api
     return $this->_mvc->modelExists($path);
   }
 
+    /**
+     * @param string         $bbn_inc_file
+     * @param Controller $ctrl
+     * @return string|bool|void
+     */
+    public static function includeController(string $bbn_inc_file, Controller $ctrl, $bbn_is_super = false)
+    {
+        if ($ctrl->isCli()) {
+            return include $bbn_inc_file;
+        }
 
+        ob_start();
+        $r = include $bbn_inc_file;
+        if ($output = ob_get_contents()) {
+            ob_end_clean();
+        }
+
+        if ($bbn_is_super) {
+            return $r ? true : false;
+        }
+
+        return $output;
+    }
 }

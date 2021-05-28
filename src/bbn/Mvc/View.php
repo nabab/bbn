@@ -98,9 +98,10 @@ class View
   /**
    * Processes the controller and checks whether it has been routed or not.
    *
-   * @return bool
+   * @param array|null $data
+   * @return string
    */
-  public function get(array $data=null)
+  public function get(?array $data=null)
   {
     if ($this->check()) {
       if (\is_null($this->_content)) {

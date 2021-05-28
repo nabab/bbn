@@ -189,7 +189,10 @@ class Router
     return true;
   }
 
-
+  /**
+   * @param int $with_slash
+   * @return string
+   */
   public function getPrepath($with_slash = 1): string
   {
     if (!empty($this->_prepath)) {
@@ -206,6 +209,12 @@ class Router
   }
 
 
+  /**
+   * Retrieves the plugin's name from the component's name if any.
+   *
+   * @param string $name
+   * @return array|null
+   */
   public function getPluginFromComponent(string $name): ?array
   {
     foreach ($this->getPlugins() as $n => $p) {
@@ -218,6 +227,10 @@ class Router
   }
 
 
+  /**
+   * @param string $name
+   * @return array|null
+   */
   public function routeComponent(string $name): ?array
   {
     if ($p = $this->getPluginFromComponent($name)) {
@@ -330,6 +343,12 @@ class Router
   }
 
 
+    /**
+     * @param string $path
+     * @param string $mode
+     *
+     * @return array|mixed|null
+     */
   public function route(string $path, string $mode): ?array
   {
     if (self::isMode($mode)) {
@@ -416,7 +435,7 @@ class Router
    *
    * @return string
    */
-  private function _get_root(string $mode): string
+  private function _get_root(string $mode): ?string
   {
     if (self::isMode($mode)) {
       return $this->_root . $this->_get_mode_path($mode);
@@ -635,7 +654,7 @@ class Router
 
 
   /**
-   * Return the actual controller file corresponding to a gievn path.
+   * Return the actual controller file corresponding to a given path.
    *
    * @param string $path
    * @param string $mode

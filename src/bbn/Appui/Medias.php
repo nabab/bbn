@@ -232,7 +232,7 @@ class Medias extends bbn\Models\Cls\Db
         'extension' => $ext
       ];
       if (empty($title)) {
-        $title = Str::clean(str_replace('-', ' ', str_replace('_', ' ', basename($file, ".$ext"))));
+        $title = str_replace('-', ' ', str_replace('_', ' ', basename($file, ".$ext")));
       }
 
       if (!$this->db->insert(

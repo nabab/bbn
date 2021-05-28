@@ -71,13 +71,13 @@ class CacheUnitTest extends TestCase
   public function it_returns_the_ttl_in_seconds_if_parameter_is_string()
   {
       $options = [
-          'xxs' => 30,
-          'xs'  => 60,
-          's'   => 300,
-          'm'   => 3600,
-          'l'   => 3600 * 24,
-          'xl'  => 3600 * 24 * 7,
-          'xxl' => 3600 * 24 * 30
+        'xxs' => 30,
+        'xs'  => 60,
+        's'   => 300,
+        'm'   => 3600,
+        'l'   => 3600 * 24,
+        'xl'  => 3600 * 24 * 7,
+        'xxl' => 3600 * 24 * 30
       ];
 
       foreach ($options as $param => $value) {
@@ -88,14 +88,23 @@ class CacheUnitTest extends TestCase
   }
 
 
-  /** @test */
-  public function it_returns_the_type_of_cache_engine()
+    /** @test */
+  public function it_throws_exception_when_ttl_is_not_valid()
   {
-        $this->assertSame('files', Cache::getType());
+      $this->expectException(\Exception::class);
+
+      Cache::ttl('test');
   }
 
 
-  /** @test */
+    /** @test */
+  public function it_returns_the_type_of_cache_engine()
+  {
+      $this->assertSame('files', Cache::getType());
+  }
+
+
+    /** @test */
   public function it_cannot_be_created_with_the_new_keyword_if_an_instance_was_already_created()
   {
       $this->expectException(Exception::class);
@@ -112,7 +121,6 @@ class CacheUnitTest extends TestCase
       $file = $this->invokeGetRawMethod('foo');
 
       $this->assertSame((int)$file['timestamp'], $this->cache->timestamp('foo'));
-
   }
 
 
@@ -126,7 +134,7 @@ class CacheUnitTest extends TestCase
   }
 
 
-  /** @test */
+    /** @test */
   public function it_checks_whether_or_not_the_given_item_is_more_recent_than_the_given_timestamp()
   {
       $this->cache->set('foo', 'bar');
@@ -142,7 +150,7 @@ class CacheUnitTest extends TestCase
   }
 
 
-  /** @test */
+    /** @test */
   public function it_checks_if_the_value_of_the_item_corresponds_to_the_given_hash()
   {
       $this->cache->set('foo', 'bar');
@@ -158,18 +166,18 @@ class CacheUnitTest extends TestCase
 
 
     /**
-     * @param string $name
+     * @param string $args
      *
      * @return mixed
      * @throws ReflectionException
      */
-  protected function invokeGetRawMethod(string $name)
+  protected function invokeGetRawMethod(string $args)
   {
-    $class_reflection = new ReflectionClass(Cache::class);
-    $method           = $class_reflection->getMethod('getRaw');
-    $method->setAccessible(true);
+      $class_reflection = new ReflectionClass(Cache::class);
+      $method           = $class_reflection->getMethod('getRaw');
+      $method->setAccessible(true);
 
-    return $method->invoke(Cache::getEngine(), $name);
+      return $method->invoke(Cache::getEngine(), $args);
   }
 
 

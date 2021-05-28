@@ -26,5 +26,7 @@
     <const name="BBN_APP_PATH" value="./" />
     <const name="BBN_APP_NAME" value="Testing" />
     <const name="BBN_DATA_PATH" value="tests/storage/" />
+    <const name="BBN_APP_PREFIX" value="appui" />
+    <const name="BBN_LIB_PATH" value="vendor" />
   </php>
 </phpunit>
