@@ -15,7 +15,7 @@ trait Common
 
   /**
    * The MVC class from which the controller is called
-   * @var mvc
+   * @var bbn\Mvc
    */
   private $_mvc;
 

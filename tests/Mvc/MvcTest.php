@@ -9,6 +9,8 @@ use Locale;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
+use tests\Files;
+use tests\Reflectable;
 use ReflectionClass;
 use ReflectionException;
 use stdClass;
@@ -18,7 +20,7 @@ use tests\storage\stubs\stub2;
 
 class MvcTest extends TestCase
 {
-  use Mockable;
+  use Mockable, Reflectable, Files;
 
   /**
    * @var Mvc
@@ -99,33 +101,6 @@ class MvcTest extends TestCase
 
 
   /**
-   *
-   * Create a file on the fly to be used in tests
-   *
-   * @param string $filename
-   * @param string $file_content
-   * @param string $dirname
-   *
-   * @return string
-   */
-  protected function createFile(string $filename, string $file_content, string $dirname)
-  {
-    if (!is_dir($dir = BBN_APP_PATH . BBN_DATA_PATH . $dirname)) {
-      mkdir($dir);
-    }
-
-    $fp = fopen($file_path = "$dir/$filename", 'w');
-    if (!empty($file_content)) {
-      fputs($fp, $file_content);
-    }
-
-    fclose($fp);
-
-    return $file_path;
-  }
-
-
-  /**
    * Reset the MVC instance.
    *
    * @return void
@@ -147,18 +122,18 @@ class MvcTest extends TestCase
   protected function constructorTest()
   {
     // Ensure plugin is registered
-    $plugins = ReflectionHelpers::getNonPublicProperty('plugins', self::$mvc);
+    $plugins = $this->getNonPublicProperty('plugins');
 
     $this->assertIsArray($plugins);
     $this->assertSame($plugins, self::$mvc->getPlugins());
 
     // Ensure paths are set
-    $app_name   = ReflectionHelpers::getNonPublicProperty('_app_name', self::$mvc);
-    $app_path   = ReflectionHelpers::getNonPublicProperty('_app_path', self::$mvc);
-    $app_prefix = ReflectionHelpers::getNonPublicProperty('_app_prefix', self::$mvc);
-    $cur_path   = ReflectionHelpers::getNonPublicProperty('_cur_path', self::$mvc);
-    $lib_path   = ReflectionHelpers::getNonPublicProperty('_lib_path', self::$mvc);
-    $data_path  = ReflectionHelpers::getNonPublicProperty('_data_path', self::$mvc);
+    $app_name   = $this->getNonPublicProperty('_app_name');
+    $app_path   = $this->getNonPublicProperty('_app_path');
+    $app_prefix = $this->getNonPublicProperty('_app_prefix');
+    $cur_path   = $this->getNonPublicProperty('_cur_path');
+    $lib_path   = $this->getNonPublicProperty('_lib_path');
+    $data_path  = $this->getNonPublicProperty('_data_path');
 
     // The below constants are defined in phpunit.xml
     $this->assertSame(BBN_APP_NAME, $app_name);
@@ -170,7 +145,7 @@ class MvcTest extends TestCase
 
     $this->assertInstanceOf(
       Mvc\Router::class,
-      ReflectionHelpers::getNonPublicProperty('router', self::$mvc)
+      $this->getNonPublicProperty('router')
     );
 
     // Ensure plugin is registered
@@ -220,21 +195,6 @@ class MvcTest extends TestCase
 
 
   /**
-   * Set the value of non public properties in an object.
-   * And Convert it to be accessible.
-   *
-   * @param string $name
-   * @param        $value
-   *
-   * @return void
-   */
-  protected function setNonPublicPropertyValue(string $name, $value)
-  {
-    ReflectionHelpers::setNonPublicPropertyValue($name, self::$mvc, $value);
-  }
-
-
-  /**
    * Mock the environment class and set method expectations then return the mock.
    *
    * @param string $method
@@ -253,7 +213,7 @@ class MvcTest extends TestCase
   public function constructor_test_when_db_is_null()
   {
     $this->constructorTest();
-    $this->assertNull(ReflectionHelpers::getNonPublicProperty('db', self::$mvc));
+    $this->assertNull($this->getNonPublicProperty('db'));
   }
 
 
@@ -262,7 +222,7 @@ class MvcTest extends TestCase
   {
     $this->resetMvcInstance(new stdClass());
     $this->constructorTest();
-    $this->assertNull(ReflectionHelpers::getNonPublicProperty('db', self::$mvc));
+    $this->assertNull($this->getNonPublicProperty('db'));
 
     // Here we will create a DB class stub
     $db_class_stub = '<?php
@@ -279,7 +239,7 @@ class MvcTest extends TestCase
     $this->constructorTest();
     $this->assertInstanceOf(
       \foo\Db::class,
-      ReflectionHelpers::getNonPublicProperty('db', self::$mvc)
+      $this->getNonPublicProperty('db')
     );
     unlink($file_path);
   }
@@ -402,7 +362,7 @@ class MvcTest extends TestCase
   {
     $this->registerPlugin();
 
-    $plugins = ReflectionHelpers::getNonPublicProperty('plugins', self::$mvc);
+    $plugins = $this->getNonPublicProperty('plugins');
 
     $this->assertIsArray($plugins);
     $this->assertSame($plugins, self::$mvc->getPlugins());
@@ -562,7 +522,7 @@ class MvcTest extends TestCase
     $this->assertEquals(2, $result);
     $this->assertSame(
       ['route1', 'route2'],
-      ReflectionHelpers::getNonPublicProperty('authorized_routes', self::$mvc)
+      $this->getNonPublicProperty('authorized_routes')
     );
   }
 
@@ -575,7 +535,7 @@ class MvcTest extends TestCase
     $this->assertEquals(2, $result);
     $this->assertSame(
       ['route3', 'route4'],
-      ReflectionHelpers::getNonPublicProperty('forbidden_routes', self::$mvc)
+      $this->getNonPublicProperty('forbidden_routes')
     );
   }
 
@@ -643,12 +603,12 @@ class MvcTest extends TestCase
   {
     Mvc::setDbInController(true);
     $this->assertTrue(
-      ReflectionHelpers::getNonPublicProperty('db_in_controller', self::$mvc)
+      $this->getNonPublicProperty('db_in_controller')
     );
 
     Mvc::setDbInController(false);
     $this->assertFalse(
-      ReflectionHelpers::getNonPublicProperty('db_in_controller', self::$mvc)
+      $this->getNonPublicProperty('db_in_controller')
     );
   }
 
@@ -852,7 +812,7 @@ class MvcTest extends TestCase
 
     self::$mvc->reroute('foo/bar', false, ['arg' => 'arg_value']);
 
-    $info = ReflectionHelpers::getNonPublicProperty('info', self::$mvc);
+    $info = $this->getNonPublicProperty('info');
 
     $this->assertTrue(self::$mvc->check());
     $this->assertSame('foo/bar', self::$mvc->getUrl());
@@ -874,7 +834,7 @@ class MvcTest extends TestCase
     $this->assertSame('foo/baz', self::$mvc->getRequest());
     $this->assertSame(['foo', 'baz'], self::$mvc->getParams());
 
-    $info = ReflectionHelpers::getNonPublicProperty('info', self::$mvc);
+    $info = $this->getNonPublicProperty('info');
 
     $this->assertSame(
       [
@@ -1437,5 +1397,10 @@ class MvcTest extends TestCase
     $this->setNonPublicPropertyValue('info', null);
 
     $this->assertFalse(self::$mvc->getRoutes('baz'));
+  }
+
+  public function getInstance()
+  {
+    return self::$mvc;
   }
 }

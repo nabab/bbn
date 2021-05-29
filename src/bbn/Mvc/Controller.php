@@ -11,7 +11,7 @@ class Controller implements Api
   use Common;
 
   /**
-   * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
+   * The MVC class from which the controller is called
    * @var bbn\Mvc
    */
   private $_mvc;
@@ -23,7 +23,7 @@ class Controller implements Api
   private $_reroutes = [];
 
   /**
-   * Is set to null while not controled, then 1 if controller was found, and false otherwise.
+   * Is set to null while not controlled, then 1 if controller was found, and false otherwise.
    * @var null|boolean
    */
   private $_is_controlled;
@@ -67,7 +67,7 @@ class Controller implements Api
   /**
    * The checkers files (with full path)
    * If any they will be checked before the controller
-   * @var null|string
+   * @var array
    */
   private $_checkers = [];
 
@@ -123,7 +123,9 @@ class Controller implements Api
 
 
   /**
-   * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+   * This will call the initial build a new instance.
+   * It should be called only once from within the script.
+   * All subsequent calls to controllers should be done through $this->add($path).
    *
    * @param bbn\Mvc       $mvc
    * @param array         $files
@@ -163,24 +165,46 @@ class Controller implements Api
   }
 
 
+  /**
+   * Add a route to authorized routes list if not already exists.
+   *
+   * @return int
+   */
   public function addAuthorizedRoute(): int
   {
     return $this->_mvc->addAuthorizedRoute(...\func_get_args());
   }
 
 
+  /**
+   * Checks if a route is authorized.
+   *
+   * @param $url
+   * @return bool
+   */
   public function isAuthorizedRoute($url): bool
   {
     return $this->_mvc->isAuthorizedRoute($url);
   }
 
 
+  /**
+   * Returns the root of the application in the URL (base href).
+   *
+   * @return string
+   */
   public function getRoot()
   {
     return $this->_mvc->getRoot();
   }
 
 
+  /**
+   * Sets the root of the application in the URL (base href).
+   *
+   * @param string $root
+   * @return $this
+   */
   public function setRoot($root)
   {
     $this->_mvc->setRoot($root);
@@ -188,12 +212,22 @@ class Controller implements Api
   }
 
 
+  /**
+   * Get the request url.
+   *
+   * @return string|null
+   */
   public function getUrl()
   {
     return $this->_mvc->getUrl();
   }
 
 
+  /**
+   * Returns the internal path to the controller.
+   *
+   * @return string|null
+   */
   public function getPath()
   {
     return $this->_path;
@@ -211,6 +245,11 @@ class Controller implements Api
   }
 
 
+  /**
+   * Checks if the internal path to the controller exists.
+   *
+   * @return bool
+   */
   public function exists()
   {
     return !empty($this->_path);
@@ -233,7 +272,7 @@ class Controller implements Api
 
 
   /**
-   * Returns the current controller's root drrectory.
+   * Returns the current controller's root directory.
    *
    * @return string
    */
@@ -270,7 +309,7 @@ class Controller implements Api
 
 
   /**
-   * Returns the current controller's path.
+   * Returns the current controller's route.
    *
    * @return string
    */
@@ -285,7 +324,7 @@ class Controller implements Api
 
 
   /**
-   * Returns the current controller's file's name.
+   * Returns the current controller's directory name.
    *
    * @return string
    */
@@ -311,7 +350,9 @@ class Controller implements Api
 
 
   /**
-   * @return mixed
+   * If the controller is inside a plugin it will its name and null otherwise.
+   *
+   * @return null|string
    */
   public function getPlugin()
   {
@@ -322,9 +363,9 @@ class Controller implements Api
   /**
    * This directly renders content with arbitrary values using the existing Mustache engine.
    *
-   * @param string $view  The view to be rendered
-   * @param array  $model The data model to fill the view with
-   * @return void
+   * @param string $view The view to be rendered
+   * @param array|null $model The data model to fill the view with
+   * @return string
    */
   public function render(string $view, array $model = null): string
   {
@@ -348,7 +389,7 @@ class Controller implements Api
 
 
   /**
-   * This will reroute a controller to another one seemlessly. Chainable
+   * This will reroute a controller to another one seamlessly.
    *
    * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
    * @return void
@@ -366,7 +407,7 @@ class Controller implements Api
   /**
    * This will include a file from within the controller's path. Chainable
    *
-   * @param string $file_name If .php is ommited it will be added
+   * @param string $file_name If .php is omitted it will be added
    * @return $this
    */
   public function incl($file_name)
@@ -379,7 +420,6 @@ class Controller implements Api
 
       if ((strpos($file_name, '..') === false) && file_exists($d.$file_name)) {
         $bbn_path = $d.$file_name;
-        $ctrl     =& $this;
         unset($d, $file_name);
         include $bbn_path;
       }
@@ -409,6 +449,12 @@ class Controller implements Api
   }
 
 
+  /**
+   * Register a plugin class using spl_autoload.
+   *
+   * @param $plugin_path
+   * @return $this
+   */
   public function registerPluginClasses($plugin_path): self
   {
     spl_autoload_register(
@@ -524,9 +570,14 @@ class Controller implements Api
   }
 
 
+  /**
+   * Checks if the controller has been rerouted
+   *
+   * @return bool
+   */
   public function hasBeenRerouted()
   {
-    return $this->_is_rerouted;
+    return (bool)$this->_is_rerouted;
   }
 
 

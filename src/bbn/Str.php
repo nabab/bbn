@@ -1162,6 +1162,11 @@ class Str
   public static function checkPath(): bool
   {
     //TODO: is this an alias for checkFilename method?
+    /*
+     * checkFileName checks if a string is not empty, doesn't contain directory separators, and is not '..' (it should also check '.')
+     * checkPath split the string around the directory separators and checks each bit with the function checkFileName
+      * The basic goal is to not have a dir/../../../../other_dir as path
+     */
     if ($args = \func_get_args()) {
       foreach ($args as $a){
         $bits = X::split($a, DIRECTORY_SEPARATOR);
