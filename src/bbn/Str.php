@@ -1,7 +1,6 @@
 <?php
 namespace bbn;
 
-use function GuzzleHttp\Psr7\str;
 
 /**
  * Class text
