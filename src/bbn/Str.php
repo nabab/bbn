@@ -279,6 +279,25 @@ class Str
   {
     return self::escapeSquotes($st);
   }
+
+
+  /**
+   * Trims, and removes extra spaces (all more than one)
+   *
+   * ```php
+   * X::dump(Str::cleanSpaces(" Hello     World\n\n\n  !!!    "));
+   * // (string)  "Hello World !!!"
+   * ```
+   *
+   * @param string $st The string to escape.
+   * @return string
+   */
+  public static function cleanSpaces(string $st): string
+  {
+    return trim(preg_replace('/\s+/', ' ', $st));
+  }
+
+
   /**
    * Cuts a string (HTML and PHP tags stripped) to maximum length inserted.
    *
@@ -294,11 +313,11 @@ class Str
   public static function cut(string $st, int $max = 15): string
   {
     $st = self::cast($st);
-    $st = mb_ereg_replace('&nbsp;',' ',$st);
-    $st = mb_ereg_replace('\n',' ',$st);
+    $st = mb_ereg_replace('&nbsp;', ' ', $st);
+    $st = mb_ereg_replace('\n', ' ', $st);
     $st = strip_tags($st);
     $st = html_entity_decode($st, ENT_QUOTES, 'UTF-8');
-    $st = self::clean($st);
+    $st = self::cleanSpaces($st);
     if (mb_strlen($st) >= $max) {
       // Chars forbidden to finish with a string
       $chars = [' ', '.'];
