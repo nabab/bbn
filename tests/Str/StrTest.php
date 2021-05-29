@@ -97,6 +97,18 @@ class StrTest extends TestCase
   }
 
 
+  /** @test */
+  public function cleanSpaces_trims_and_remove_extra_spaces()
+  {
+    $this->assertSame(
+      'Hello World !!!', Str::cleanSpaces(
+        ' Hello     World
+      !!!    '
+      )
+    );
+  }
+
+
   /** @test  */
   public function cut_method_strips_html_and_php_tags_from_a_string()
   {
@@ -392,12 +404,31 @@ class StrTest extends TestCase
   {
     $this->assertTrue(Str::checkFilename('foo'));
     $this->assertFalse(Str::checkFilename('foo/'));
+    $this->assertFalse(Str::checkFilename('foo\\'));
     $this->assertFalse(Str::checkFilename('foo/bar'));
     $this->assertFalse(Str::checkFilename('foo\bar'));
     $this->assertFalse(Str::checkFilename('../foo'));
+    $this->assertFalse(Str::checkFilename('foo/../bar/.../baz/'));
     $this->assertFalse(Str::checkFilename('..'));
+    $this->assertFalse(Str::checkFilename('.'));
     $this->assertFalse(Str::checkFilename(2));
     $this->assertFalse(Str::checkFilename(['foo' => 'bar']));
+  }
+
+
+  /** @test */
+  public function checkPath_method_checks_if_every_bit_of_a_string_does_not_contain_a_filesystem_path()
+  {
+    $this->assertTrue(Str::checkPath('foo'));
+    $this->assertTrue(Str::checkPath('foo/bar'));
+    $this->assertFalse(Str::checkPath('foo/'));
+    $this->assertFalse(Str::checkPath('foo\\'));
+    $this->assertFalse(Str::checkPath('foo/../bar'));
+    $this->assertFalse(Str::checkFilename('foo/../bar/.../baz/'));
+    $this->assertFalse(Str::checkPath('.'));
+    $this->assertFalse(Str::checkPath('..'));
+    $this->assertFalse(Str::checkPath(2));
+    $this->assertFalse(Str::checkPath(['foo' => 'bar']));
   }
 
 
