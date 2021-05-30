@@ -463,13 +463,13 @@ class Ide
   }
 
 
-  public function getAppPath()
+  public function getAppPath(): string
   {
     return $this->projects->getAppPath();
   }
 
 
-  public function getLibPath()
+  public function getLibPath(): string
   {
     return $this->projects->getLibPath();
   }
@@ -2401,7 +2401,7 @@ class Ide
         //temporaney
         if ($rep['root'] !== 'cdn') {
           $totalFiles += $this->fs->getNumFiles($rep['root_path']);
-          if ($found = $this->fs->search($seek, $rep['root_path'], true, false, 'js|php|less|html')) {
+          if ($found = $this->fs->searchContents($seek, $rep['root_path'], true, false, 'js|php|less|html')) {
             foreach ($found as $fn => $val){
               $list = [];
               // case file into folder
