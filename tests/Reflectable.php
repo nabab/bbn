@@ -37,4 +37,17 @@ trait Reflectable
   {
     return ReflectionHelpers::getNonPublicProperty($name, $object ?? $this->getInstance());
   }
+
+  /**
+   * Convert a non public method to be accessible in an object and return a ReflectionMethod.
+   *
+   * @param string $name
+   * @param object|null $object
+   * @return \ReflectionMethod
+   * @throws \ReflectionException
+   */
+  protected function getNonPublicMethod(string $name, ?object $object = null)
+  {
+    return ReflectionHelpers::getNonPublicMethod($name, $object ?? $this->getInstance());
+  }
 }

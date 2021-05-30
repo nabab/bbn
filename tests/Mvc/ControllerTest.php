@@ -4,6 +4,7 @@ namespace Mvc;
 
 use bbn\Mvc;
 use bbn\Mvc\Controller;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
 use tests\Mockable;
@@ -20,7 +21,7 @@ class ControllerTest extends TestCase
 
   protected $info = [
     'mode'      => 'js',
-    'path'      => 'form',
+    'path'      => 'path/to/plugin',
     'file'      => './tests/storage/controllers/controller.php',
     'request'   => 'get',
     'root'      => './tests/',
@@ -28,13 +29,19 @@ class ControllerTest extends TestCase
     'args'      => [
       'foo' => 'bar'
     ],
-    'checkers'  => ''
+    'checkers'  => []
   ];
 
   protected $data = [
     'controller_data' => [
-      'variable_1' => 'value_1',
-      'variable_2' => 'value_2'
+      'variable_1' => [
+        'key_1' => 'value_1',
+        'key_2' => 'value_2',
+      ],
+      'variable_2' => [
+        'key_3' => 'value_3',
+        'key_4' => 'value_4',
+      ],
     ],
     'post'    => ['post_key' => 'post_value'],
     'get'     => ['get_key' => 'get_value'],
@@ -56,6 +63,12 @@ class ControllerTest extends TestCase
     $this->mvc_mock = \Mockery::mock(Mvc::class);
     $this->setMvcMockExpectations();
     $this->init($this->info, $this->data['controller_data']);
+  }
+
+
+  protected function tearDown(): void
+  {
+    Mockery::close();
   }
 
 
@@ -148,7 +161,7 @@ class ControllerTest extends TestCase
   /** @test */
   public function addAuthorizedRoute_method_adds_to_authorized_methods()
   {
-    $this->mvc_mock->shouldReceive('addAuthorizedRoute')->once()->andReturn(1);
+    $this->mvc_mock->shouldReceive('addAuthorizedRoute')->with('route_1')->once()->andReturn(1);
 
     $this->assertSame(1, $this->controller->addAuthorizedRoute('route_1'));
   }
@@ -157,7 +170,7 @@ class ControllerTest extends TestCase
   /** @test */
   public function isAuthorizedRoute_method_checks_if_a_route_is_authorized()
   {
-    $this->mvc_mock->shouldReceive('isAuthorizedRoute')->once()->andReturnTrue();
+    $this->mvc_mock->shouldReceive('isAuthorizedRoute')->with('route_2')->once()->andReturnTrue();
 
     $this->assertTrue($this->controller->isAuthorizedRoute('route_2'));
   }
@@ -175,7 +188,7 @@ class ControllerTest extends TestCase
   /** @test */
   public function setRoot_method_sets_the_root_of_the_application()
   {
-    $this->mvc_mock->shouldReceive('setRoot')->once()->andReturnSelf();
+    $this->mvc_mock->shouldReceive('setRoot')->with('root2/')->once()->andReturnSelf();
 
     $this->assertInstanceOf(Controller::class, $this->controller->setRoot('root2/'));
   }
@@ -220,7 +233,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_returns_the_current_controller_dir_name_if_path_exists_and_is_the_parent_dir()
+  public function getCurrentDir_method_returns_the_current_controller_dir_name_if_path_exists_and_is_the_parent_dir()
   {
     // When dirname of the _$path property  is '.'
     $this->setNonPublicPropertyValue('_path', 'form');
@@ -230,7 +243,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_returns_the_current_controller_dir_name_if_path_exists_and_is_not_the_parent_dir_withd_a_prepath_removed()
+  public function getCurrentDir_method_returns_the_current_controller_dir_name_if_path_exists_and_is_not_the_parent_dir_with_a_prepath_removed()
   {
     $this->setNonPublicPropertyValue('_path', 'prepath/parent/form');
 
@@ -242,7 +255,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_returns_the_current_controller_dir_name_if_path_exists_and_is_not_the_parent_dir_and_no_prepath_removed()
+  public function getCurrentDir_method_returns_the_current_controller_dir_name_if_path_exists_and_is_not_the_parent_dir_and_no_prepath_removed()
   {
     $this->setNonPublicPropertyValue('_path', 'parent/form');
 
@@ -254,7 +267,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getCurrentDir_returns_null_if_path_does_not_exists()
+  public function getCurrentDir_method_returns_null_if_path_does_not_exists()
   {
     $this->setNonPublicPropertyValue('_path', '');
     $this->assertNull($this->controller->getCurrentDir());
@@ -262,7 +275,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalPath_returns_the_current_controller_path_with_a_prepath_removed()
+  public function getLocalPath_method_returns_the_current_controller_path_with_a_prepath_removed()
   {
     $this->setNonPublicPropertyValue('_path', 'prepath/parent/form');
 
@@ -273,7 +286,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalPath_returns_the_current_controller_path_with_no_prepath_removed()
+  public function getLocalPath_method_returns_the_current_controller_path_with_no_prepath_removed()
   {
     $this->setNonPublicPropertyValue('_path', 'parent/form');
 
@@ -284,7 +297,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalRoute_returns_the_current_controller_route_with_prepath_removed()
+  public function getLocalRoute_method_returns_the_current_controller_route_with_prepath_removed()
   {
     $this->setNonPublicPropertyValue('_request', 'prepath/parent/form');
 
@@ -295,7 +308,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function getLocalRoute_returns_the_current_controller_route_with_no_prepath_removed()
+  public function getLocalRoute_method_returns_the_current_controller_route_with_no_prepath_removed()
   {
     $this->setNonPublicPropertyValue('_request', 'parent/form');
 
@@ -310,14 +323,14 @@ class ControllerTest extends TestCase
   {
     // Let's mock the methods `getPrepath` & `getRoot`
     // Since they depends on other classes and will be used in the `getAll` method
-    $this->mvc_mock->shouldReceive('getPrepath')->times(2)->andReturn('');
+    $this->mvc_mock->shouldReceive('getPrepath')->times(3)->andReturn('');
     $this->mvc_mock->shouldReceive('getRoot')->once()->andReturn($this->info['root']);
 
     $result = [
       'controller'  => $this->info['file'],
-      'dir'         => '',
-      'local_path'  => 'form',
-      'local_route' => 'get',
+      'dir'         => dirname($this->info['path']),
+      'local_path'  => $this->info['path'],
+      'local_route' => $this->info['request'],
       'path'        => $this->info['path'],
       'root'        => $this->info['root'],
       'request'     => $this->info['request'],
@@ -368,7 +381,7 @@ class ControllerTest extends TestCase
 
 
   /** @test */
-  public function isCli_checks_if_the_request_is_called_from_cli_or_not()
+  public function isCli_method_checks_if_the_request_is_called_from_cli_or_not()
   {
     $this->mvc_mock->shouldReceive('isCli')->once()->andReturnTrue();
 
@@ -452,23 +465,130 @@ class ControllerTest extends TestCase
     $this->assertInstanceOf(Controller::class, $result);
   }
 
-/** @test */
+
+  /** @test */
   public function registerPluginClasses_method_register_a_class_using_spl_autoload()
   {
+    // Will create php files with classes defined to test files inclusion
     $file_stub = "<?php
     namespace foo3;
     class test3 {}
     ";
 
-    $this->createDir('plugin_path/lib/foo3');
+    $file_stub2 = "<?php
+    namespace foo4;
+    class test4 {}
+    ";
 
-    $file_path = $this->createFile('test3.php', $file_stub, 'plugin_path/lib/foo3');
+    $this->createDir('plugin_path/lib/foo3');
+    $this->createDir('plugin_path/lib/foo4');
+
+    $file_path  = $this->createFile('test3.php', $file_stub, 'plugin_path/lib/foo3');
+    $file_path2 = $this->createFile('test4.php', $file_stub2, 'plugin_path/lib/foo4');
 
     $result = $this->controller->registerPluginClasses(BBN_APP_PATH . BBN_DATA_PATH . 'plugin_path/');
+
     $this->assertTrue(class_exists('\foo3\test3'));
+    $this->assertTrue(class_exists('\foo4\test4'));
     $this->assertInstanceOf(Controller::class, $result);
+
     unlink($file_path);
+    unlink($file_path2);
   }
+
+
+  /** @test */
+  public function control_method_encloses_controller_inclusion()
+  {
+    // Will create a plugin file with a class defined to test plugin class is registered
+    $file_stub = "<?php
+    namespace foo5;
+    class test5 {}
+    ";
+
+    $this->createDir('plugin_path/lib/foo5');
+    $file_path = $this->createFile('test5.php', $file_stub, 'plugin_path/lib/foo5');
+
+    // Here will create a controller file to test it's inclusion
+    $file2_stub = "<?php
+    namespace foo6;
+    class controllerTest {}
+    ";
+
+    $ctrl_path = self::createFile('controller.php',  $file2_stub, 'controllers');
+
+    $this->mvc_mock->shouldReceive('pluginName')->with($this->info['plugin'])->andReturn('plugin_name');
+    $this->mvc_mock->shouldReceive('pluginPath')->with('plugin_name', false)->andReturn(BBN_APP_PATH . BBN_DATA_PATH . 'plugin_path/');
+    $this->mvc_mock->shouldReceive('isCli')->andReturnFalse();
+
+    $method = $this->getNonPublicMethod('control', $this->controller);
+    $method->invoke($this->controller);
+
+    $this->assertTrue(class_exists('\foo5\test5'));
+    $this->assertTrue(class_exists('\foo6\controllerTest'));
+
+    unlink($file_path);
+    unlink($ctrl_path);
+  }
+
+
+  /** @test */
+  public function control_method_returns_false_when_a_checker_file_returns_false()
+  {
+    $this->mvc_mock->shouldReceive('pluginName')->with($this->info['plugin'])->andReturn('plugin_name');
+    $this->mvc_mock->shouldReceive('pluginPath')->with('plugin_name', false)->andReturn(BBN_APP_PATH . BBN_DATA_PATH . 'plugin_path/');
+    $this->mvc_mock->shouldReceive('isCli')->andReturnFalse();
+
+    $method = $this->getNonPublicMethod('control', $this->controller);
+
+    // set file checker
+    $this->setNonPublicPropertyValue('_checkers', ['file_not_exist.php']);
+
+    // Here no php file will be created so that the include $bbn_inc_file returns false
+    // And will silent the method call because when include retunrs false it issue a E_WARNING message
+    $result = @$method->invoke($this->controller);
+
+    $this->assertFalse($result);
+  }
+
+
+  /** @test */
+  public function control_method_does_not_include_when_its_been_already_controlled_and_the_file_property_is_truthy()
+  {
+    $this->setNonPublicPropertyValue('_is_controlled', 1);
+    $this->setNonPublicPropertyValue('_file', 'path/to/file');
+
+    $method = $this->getNonPublicMethod('control', $this->controller);
+    $result = $method->invoke($this->controller);
+
+    $this->assertTrue(!isset($this->obj->content));
+    $this->assertTrue($result);
+  }
+
+
+  /** @test */
+  public function process_method_launches_the_controller()
+  {
+    // The process method calls the control method
+    // So let's mock the Mvc calls inside it like we did in the previous two tests.
+    $this->mvc_mock->shouldReceive('pluginName')->with($this->info['plugin'])->once()->andReturn('plugin_name');
+    $this->mvc_mock->shouldReceive('pluginPath')->with('plugin_name', false)->once()->andReturn(BBN_APP_PATH . BBN_DATA_PATH . 'plugin_path/');
+    $this->mvc_mock->shouldReceive('isCli')->once()->andReturnFalse();
+
+    // Mock the router class so that the getLocaleDomain return a string that we can test.
+    $router_mock = $this->mockClassMethod(
+      Mvc\Router::class, function ($mock) {
+        $mock->shouldReceive('getLocaleDomain')->once()->andReturn('custom');
+      }
+    );
+
+    $this->setNonPublicPropertyValue('retriever_instance', $router_mock, Mvc\Router::class);
+
+    $result = @$this->controller->process();
+
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
 
   /** @test */
   public function hasBeenRerouted_method_checks_if_controller_has_been_rerouted()
@@ -478,5 +598,698 @@ class ControllerTest extends TestCase
     $this->setNonPublicPropertyValue('_is_rerouted', 1);
 
     $this->assertTrue($this->controller->hasBeenRerouted());
+  }
+
+
+  /** @test */
+  public function getJs_method_gets_a_js_view_from_a_path_to_file_encapsulated_in_an_anonymous_function()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('let string = "foobar";')
+      ->with('view', 'js', $data = ['data_1' => 'value_1', 'data_2' => 'value_2']);
+
+    $expected = '<script>(function(){
+let data = {
+    "data_1": "value_1",
+    "data_2": "value_2"
+};let string = "foobar";
+})();</script>';
+
+    $result = $this->controller->getJs('view', $data);
+    $this->assertSame($expected, $result);
+
+    // Test it again with no path provided this time
+    // Notice that the Mvc::getView will be called with first parameter to the _path property
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('let string = "foobar";')
+      ->with($this->info['path'], 'js', $data);
+
+    $result2 = $this->controller->getJs($data);
+    $this->assertSame($expected, $result2);
+
+  }
+
+
+  /** @test */
+  public function getJs_method_gets_a_js_view_from_a_path_to_file_not_encapsulated_in_an_anonymous_function()
+  {
+    // Notice the Mvc::getView should be called with the third param default to the data property
+    // Since we set the data to null in Controller::getJs()
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('let string = "foobar";')
+      ->with('view', 'js', $this->data['controller_data']);
+
+    $result = $this->controller->getJs('view', null,false);
+
+    $expected = '<script>let string = "foobar";</script>';
+
+    $this->assertSame($expected, $result);
+  }
+
+
+  /** @test */
+  public function getJs_method_returns_false_when_mvc_getView_returns_empty_string()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('')
+      ->with('view', 'js', $data = ['data_1' => 'value_1', 'data_2' => 'value_2']);
+
+    $result = $this->controller->getJs('view', $data);
+
+    $this->assertFalse($result);
+  }
+
+
+  /** @test */
+  public function getJsGroup_method_gets_a_js_view_from_a_path_to_dir_encapsulated_in_an_anonymous_function()
+  {
+    $this->mvc_mock->shouldReceive('fetchDir')->once()->andReturn(['path/to/file']);
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('let string = "foobar";')
+      ->with($path = 'path/to/file', 'js', $data = ['data_1' => 'value_1', 'data_2' => 'value_2']);
+
+    $result = $this->controller->getJsGroup($path, $data, true);
+
+    $expected = '<script>(function($){
+let data = {
+    "data_1": "value_1",
+    "data_2": "value_2"
+};let string = "foobar";
+})();</script>';
+
+    $this->assertSame($expected, $result);
+  }
+
+
+  /** @test */
+  public function getJsGroup_method_gets_a_js_view_from_an_array_of_files_not_encapsulated_in_an_anonymous_function()
+  {
+    // Here the Mvc::fetchDir is not called like it did in the previous test since it's an array of files.
+    // And the Mvc::getView will be called twice in the array loop as array count is two.
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('let string = "foobar";')
+      ->with($file1 = 'file1', 'js', $data = ['data_1' => 'value_1', 'data_2' => 'value_2']);
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn('let string2 = "foobar2";')
+      ->with($file2 = 'file2', 'js', $data = ['data_1' => 'value_1', 'data_2' => 'value_2']);
+
+    $result = $this->controller->getJsGroup([$file1, $file2], $data, true);
+
+    $expected = '<script>(function($){
+let data = {
+    "data_1": "value_1",
+    "data_2": "value_2"
+};let string = "foobar";let string2 = "foobar2";
+})();</script>';
+
+    $this->assertSame($expected, $result);
+  }
+
+
+  /** @test */
+  public function getJsGroup_method_throws_an_exception_when_it_fails_to_fetch_files_from_a_dir()
+  {
+    $this->expectException(\Exception::class);
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->once()
+      ->with($path = 'path/to/dir/that/not/exist', 'js')
+      ->andReturnNull();
+
+    $this->controller->getJsGroup($path);
+  }
+
+
+  /** @test */
+  public function getJsGroup_method_throws_an_exception_when_the_dir_is_empty()
+  {
+    $this->expectException(\Exception::class);
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->once()
+      ->andReturn([])
+      ->with($path = 'path/to/empty/dir', 'js');
+
+    $this->controller->getJsGroup($path);
+  }
+
+  /** @test */
+  public function getViewGroup_method_returns_a_view_from_a_dir_path()
+  {
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->andReturn(['file1', 'file2', 'file3'])
+      ->with($path = 'path/to/dir', 'html');
+    // Mvc::getView will be called three times in the array loop as array count is three.
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn($view1 = 'view_content_1 ')
+      ->with('file1', 'html', $this->data['controller_data']);
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn($view2 = 'view_content_2 ')
+      ->with('file2', 'html', $this->data['controller_data']);
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn($view3 = 'view_content_3')
+      ->with('file3', 'html', $this->data['controller_data']);
+
+    $result   = $this->controller->getViewGroup($path);
+
+    $this->assertSame($view1 . $view2 . $view3, $result);
+  }
+
+  /** @test */
+  public function getViewGroup_method_returns_a_view_from_an_array_of_files()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn($view1 = 'view_content_1 ')
+      ->with($file1 = 'file1', 'html', $this->data['controller_data']);
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->andReturn($view2 = 'view_content_2')
+      ->with($file2 = 'file2', 'html', $this->data['controller_data']);
+
+    $result   = $this->controller->getViewGroup([$file1, $file2]);
+
+    $this->assertSame($view1 . $view2, $result);
+  }
+
+  /** @test */
+  public function getViewGroup_method_throws_an_exception_if_it_fails_to_fetch_files_from_dir()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->once()
+      ->andReturnNull()
+      ->with($path = 'path/to/dir/that/not/exist', 'html');
+
+    $this->controller->getViewGroup($path);
+  }
+
+  /** @test */
+  public function getViewGroup_method_throws_an_exception_when_dir_is_empty()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->once()
+      ->with($path = 'path/to/an/empty/dir', 'html')
+      ->andReturn([]);
+
+    $this->controller->getViewGroup($path);
+  }
+
+  /** @test */
+  public function getCss_method_returns_a_css_encapsulated_in_scoped_style_tag()
+  {
+    // This method cannot be tested in this case as it depend on \CssMin::minify($r)
+    // Which is not injected and a static method so  cannot be tested
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function getCss_method_returns_false_when_it_cannot_get_the_view()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/css/file/that/not/exist', 'css', $this->data['controller_data'])
+      ->andReturnFalse();
+
+    $this->assertFalse($this->controller->getCss($path));
+  }
+
+  /** @test */
+  public function getLess_method_returns_a_compiled_less_view_encapsulated_in_a_style_tag()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file', 'css', $this->data['controller_data'])
+      ->andReturn($view = 'less_view');
+
+    $this->assertSame($view, $this->controller->getLess($path));
+  }
+
+  /** @test */
+  public function getLess_method_returns_false_when_it_cannot_get_the_view()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file/that/not/exist', 'css', $this->data['controller_data'])
+      ->andReturnFalse();
+
+    $this->assertFalse($this->controller->getLess($path));
+  }
+
+  /** @test */
+  public function addCss_method_will_add_a_css_view_to_the_output_object_if_it_has_content()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file', 'css', $this->data['controller_data'])
+      ->andReturn('css_view');
+
+    // This method depends on getCss method which cannot be tested as stated previously
+
+    $this->assertInstanceOf(Controller::class, $this->controller->addCss($path));
+  }
+
+  /** @test */
+  public function addCss_method_will_not_add_a_css_view_to_the_output_object_if_has_no_content()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file/that/not/exist', 'css', $this->data['controller_data'])
+      ->andReturnFalse();
+
+    $result = $this->controller->addCss($path);
+
+    $this->assertFalse(isset($this->controller->obj->css));
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function addLess_method_will_add_a_less_view_to_the_output_object_if_it_has_content()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file1', 'css', $this->data['controller_data'])
+      ->andReturn($view1 = 'less_view_1');
+
+    $result = $this->controller->addLess($path);
+
+    $this->assertTrue(isset($this->controller->obj->css));
+    $this->assertSame($view1, $this->controller->obj->css);
+    $this->assertInstanceOf(Controller::class, $result);
+
+    // Add another one
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file2', 'css', $this->data['controller_data'])
+      ->andReturn($view2 = ' less_view_2');
+
+    $result = $this->controller->addLess($path);
+    $this->assertSame($view1 . $view2, $this->controller->obj->css);
+    $this->assertInstanceOf(Controller::class, $result);
+
+  }
+
+  /** @test */
+  public function addLess_method_will_not_add_a_less_view_to_the_output_object_if_it_has_no_content()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file/that/not/exist', 'css', $this->data['controller_data'])
+      ->andReturnFalse();
+
+    $result = $this->controller->addLess($path);
+
+    $this->assertFalse(isset($this->controller->obj->css));
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function addJs_method_will_add_a_js_view_from_a_file_path_to_the_output_object()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file1', 'js', true)
+      ->andReturn($view1 = 'js_view_1 ');
+
+    $result = $this->controller->addJs($path, true);
+
+    $this->assertTrue(isset($this->controller->obj->script));
+    $this->assertSame($view1, $this->controller->obj->script);
+    $this->assertInstanceOf(Controller::class, $result);
+
+    // Add another one but this time with php variable to test the retrieveVar method
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($path = 'path/to/file2', 'js', $this->data['controller_data']['variable_1'])
+      ->andReturn($view2 = 'js_view_2');
+
+    $result2 = $this->controller->addJs($path, '$variable_1');
+
+    $this->assertSame($view1 . $view2, $this->controller->obj->script);
+    $this->assertInstanceOf(Controller::class, $result2);
+
+    // Add another one without providing a path but only data
+    // Default path should be used internally so let's set that expectation
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($this->info['path'], 'js', $data = ['custom_variable' => 'custom_value'])
+      ->andReturn($view3 = 'js_view_3');
+
+    $result3 = $this->controller->addJs($data);
+
+    $this->assertSame($view1 . $view2 . $view3, $this->controller->obj->script);
+    $this->assertInstanceOf(Controller::class, $result3);
+
+    // Add another one with providing only a boolean argument
+    // Default path and default controller data should be used internally so let's set that expectation
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with($this->info['path'], 'js', $this->data['controller_data'])
+      ->andReturn($view4 = 'js_view_4');
+
+    $result3 = $this->controller->addJs(true);
+
+    $this->assertSame($view1 . $view2 . $view3 . $view4, $this->controller->obj->script);
+    $this->assertInstanceOf(Controller::class, $result3);
+  }
+
+  /** @test */
+  public function addJsGroup_method_will_add_a_js_view_from_a_directory_to_the_output_object()
+  {
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->once()
+      ->with($path = 'path/to/dir', 'js')
+      ->andReturn(['file1', 'file2']);
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with('file1', 'js', [])
+      ->andReturn($view1 = 'js_view_1');
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with('file2', 'js', [])
+      ->andReturn($view2 = 'js_view_2');
+
+    $result = $this->controller->addJsGroup($path);
+
+    $this->assertTrue(isset($this->controller->obj->script));
+    $this->assertSame($view1 . $view2, $this->controller->obj->script);
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function addJsGroup_method_will_add_a_js_view_from_an_array_of_files_to_output_object()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with('file1', 'js', $data = ['variable' => 'value'])
+      ->andReturn($view1 = 'js_view_1');
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with('file2', 'js', $data)
+      ->andReturn($view2 = 'js_view_2');
+
+    $result = $this->controller->addJsGroup( ['file1', 'file2'], $data);
+
+    $this->assertTrue(isset($this->controller->obj->script));
+    $this->assertSame($view1 . $view2, $this->controller->obj->script);
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function addJsGroup_method_will_throw_an_exception_if_it_fails_to_fetch_files_from_dir()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->mvc_mock->shouldReceive('fetchDir')
+      ->once()
+      ->with($path = 'path/to/dir/that/not/exist', 'js')
+      ->andReturnNull();
+
+    $result = $this->controller->addJsGroup($path);
+
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function addJsGroup_method_will_throw_an_exception_if_the_files_array_are_empty()
+  {
+    $this->expectException(\Exception::class);
+
+    $result = $this->controller->addJsGroup([]);
+
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function setObj_method_will_add_to_the_output_object_from_an_array()
+  {
+    $result = $this->controller->setObj(['key_1' => 'value_1', 'key_2' => 'value_2']);
+
+    $this->assertSame('value_1', $this->controller->obj->key_1);
+    $this->assertSame('value_2', $this->controller->obj->key_2);
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function setUrl_method_will_set_the_url_in_the_output_object()
+  {
+    $result = $this->controller->setUrl($url = 'path/to');
+
+    $this->assertTrue(isset($this->controller->obj->url));
+    $this->assertSame($url, $this->controller->obj->url);
+    $this->assertInstanceOf(Controller::class, $result);
+
+    $this->controller->setUrl($url = 'new/path/to');
+
+    $this->assertSame($url, $this->controller->obj->url);
+
+  }
+
+  /** @test */
+  public function setTitle_method_sets_the_title_on_the_output_object()
+  {
+    $result = $this->controller->setTitle('foo');
+
+    $this->assertTrue(isset($this->controller->obj->title));
+    $this->assertSame('foo', $this->controller->obj->title);
+    $this->assertInstanceOf(Controller::class, $result);
+
+    $this->controller->setTitle('bar');
+
+    $this->assertSame('bar', $this->controller->obj->title);
+  }
+
+  /** @test */
+  public function setIcon_method_sets_the_icon_on_the_output_object()
+  {
+    $result = $this->controller->setIcon('icon_1');
+
+    $this->assertTrue(isset($this->controller->obj->icon));
+    $this->assertSame('icon_1', $this->controller->obj->icon);
+    $this->assertInstanceOf(Controller::class, $result);
+
+    $this->controller->setIcon('icon_2');
+
+    $this->assertSame('icon_2', $this->controller->obj->icon);
+  }
+
+  /** @test */
+  public function setColor_method_sets_background_and_font_colors_on_the_output_object()
+  {
+    $result = $this->controller->setColor('red', 'blue');
+
+    $this->assertTrue(isset($this->controller->obj->bcolor));
+    $this->assertTrue(isset($this->controller->obj->fcolor));
+    $this->assertSame('red', $this->controller->obj->bcolor);
+    $this->assertSame('blue', $this->controller->obj->fcolor);
+    $this->assertInstanceOf(Controller::class, $result);
+
+    $this->controller->setColor(null, null);
+
+    $this->assertSame('red', $this->controller->obj->bcolor);
+    $this->assertSame('blue', $this->controller->obj->fcolor);
+  }
+
+  /** @test */
+  public function routeComponent_method_returns_component_from_the_given_name_if_exists()
+  {
+    $this->mvc_mock->shouldReceive('routeComponent')
+      ->once()
+      ->with('component_name')
+      ->andReturn($data = [
+        'js' => [
+          'file'       => 'foo/bar/baz/src/components/form/form.js',
+          'path'       => 'form',
+          'plugin'     => 'http://foo.bar',
+          'component'  => true,
+          'ext'       => 'js',
+          'mode'      => 'js',
+          'i18n'      => 'foo/bar/baz/src/components/form/locale/en/en.json'
+        ]
+      ]);
+
+
+    $this->assertSame($data, $this->controller->routeComponent('component_name'));
+  }
+
+  /** @test */
+  public function getComponent_method_returns_a_component_with_content_from_a_given_name()
+  {
+    // Cannot test this method in this case since it depends on the View class
+    // and initialize it in the method itself
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function getComponent_method_returns_null_if_the_returned_component_has_no_js_in_it()
+  {
+    $this->mvc_mock->shouldReceive('routeComponent')
+      ->once()
+      ->with('component_with_no_js')
+      ->andReturn([
+        'css' => [
+          'file'       => 'foo/bar/baz/src/components/form/form.js',
+          'path'       => 'form',
+          'plugin'     => 'http://foo.bar',
+          'component'  => true,
+          'ext'       => 'js',
+          'mode'      => 'js',
+          'i18n'      => 'foo/bar/baz/src/components/form/locale/en/en.json'
+        ]
+      ]);
+
+    $this->assertNull($this->controller->getComponent('component_with_no_js'));
+  }
+
+  /** @test */
+  public function getComponent_method_returns_null_if_a_component_cannot_be_found()
+  {
+    $this->mvc_mock->shouldReceive('routeComponent')
+      ->once()
+      ->with('not_found_component')
+      ->andReturnNull();
+
+    $this->assertNull($this->controller->getComponent('not_found_component'));
+  }
+
+  /** @test */
+  public function jsData_method_sets_the_output_object_data_property_from_an_array()
+  {
+    $result = $this->controller->jsData($data = ['key_1' => 'value_1', 'key_2' => 'value_2']);
+
+    $this->assertTrue(isset($this->controller->obj->data));
+    $this->assertSame($data, $this->controller->obj->data);
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function jsData_method_dont_sets_the_output_object_data_property_if_the_array_is_not_assoc()
+  {
+    $result = $this->controller->jsData(['value_1', 'value_2']);
+
+    $this->assertTrue(!isset($this->controller->obj->data->key_1));
+    $this->assertTrue(!isset($this->controller->obj->data->key_2));
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function jsData_method_adds_to_the_output_object_data_property_if_already_exists()
+  {
+    $this->controller->obj->data = $existing_data = ['existing_key' => 'existing_value'];
+
+    $result = $this->controller->jsData($data = ['key_1' => 'value_1', 'key_2' => 'value_2']);
+
+    $this->assertSame(array_merge($existing_data, $data), $this->controller->obj->data);
+    $this->assertInstanceOf(Controller::class, $result);
+  }
+
+  /** @test */
+  public function getArguments_method_parses_arguments_from_an_array()
+  {
+    $method = $this->getNonPublicMethod('getArguments');
+
+    $this->assertSame(
+      [
+        'path' => $this->info['path'],
+        'data' => $this->data['controller_data'],
+        'die'  => true
+      ],
+      $method->invoke($this->controller, [])
+    );
+
+    $this->assertSame(
+      [
+        'data' => [
+          'key_1' => 'value_1',
+          'key_2' => 'value_2'
+        ],
+        'path' => $this->info['path'],
+        'die' => true
+      ],
+      $method->invoke($this->controller, ['$variable_1'])
+    );
+
+    $this->assertSame(
+      [
+        'path' => 'custom_path',
+        'data' => $this->data['controller_data'],
+        'die' => true
+      ],
+      $method->invoke($this->controller, ['custom_path'])
+    );
+
+    $this->assertSame(
+      [
+        'mode' => 'html',
+        'path' => $this->info['path'],
+        'data' => $this->data['controller_data'],
+        'die' => true
+      ],
+      $method->invoke($this->controller, ['html'])
+    );
+
+    $this->assertSame(
+      [
+        'data' => [
+          'custom_variable' => 'custom_value'
+        ],
+        'path' => $this->info['path'],
+        'die' => true
+      ],
+      $method->invoke($this->controller, [['custom_variable' => 'custom_value']])
+    );
+
+    $this->assertSame(
+      [
+        'die'  => false,
+        'data' => [
+          'custom_variable' => 'custom_value'
+        ],
+        'mode' => 'html',
+        'path' => $this->info['path'],
+      ],
+      $method->invoke($this->controller, ['html', false, ['custom_variable' => 'custom_value']])
+    );
+
+    $this->mvc_mock->shouldReceive('getPrepath')->once()->andReturn('');
+
+    $this->assertSame(
+      [
+        'path' => 'path/to/new_path',
+        'data' => $this->data['controller_data'],
+        'die'  => true,
+      ],
+      $method->invoke($this->controller, ['./new_path'])
+    );
+
+    $this->controller->mode = 'dom';
+
+    $this->assertSame(
+      [
+        'mode' => 'html',
+        'path' => $this->info['path'] . '/index',
+        'data' => $this->data['controller_data'],
+        'die'  => true,
+      ],
+      $method->invoke($this->controller, ['html'])
+    );
   }
 }

@@ -30,12 +30,12 @@ class ReflectionHelpers
      * And Convert it to be accessible.
      *
      * @param string $name
-     * @param object $object
+     * @param object|string $object
      * @param        $value
      *
      * @throws \ReflectionException
      */
-  public static function setNonPublicPropertyValue(string $name, object $object, $value)
+  public static function setNonPublicPropertyValue(string $name, $object, $value)
   {
         $reflectionClass = new \ReflectionClass($object);
         $property        = $reflectionClass->getProperty($name);

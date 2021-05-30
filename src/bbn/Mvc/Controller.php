@@ -582,7 +582,8 @@ class Controller implements Api
 
 
   /**
-   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
+   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML
+   * from a path.
    *
    * @param string $path
    * @return string|false
@@ -609,7 +610,8 @@ class Controller implements Api
 
 
   /**
-   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
+   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML
+   * from a dir or an array of files.
    *
    * @param array|string $files
    * @param array        $data
@@ -633,7 +635,7 @@ class Controller implements Api
 
 
   /**
-   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
+   * This will get a view for embedding in HTML.
    *
    * @param array|string $files
    * @param array        $data
@@ -690,15 +692,15 @@ class Controller implements Api
    */
   public function getLess($path='')
   {
-    return $r = $this->getView($path, 'css', false);
+    return $this->getView($path, 'css', false);
   }
 
 
   /**
-   * This will get a CSS view encapsulated in a scoped style tag.
+   * This will get a CSS view encapsulated in a scoped style tag and add it to the output object.
    *
    * @param string $path
-   * @return string|false
+   * @return self
    */
   public function addCss($path='')
   {
@@ -715,10 +717,10 @@ class Controller implements Api
 
 
   /**
-   * This will get and compile a LESS view encapsulated in a scoped style tag.
+   * This will get and compile a LESS view encapsulated in a scoped style tag and add it to the output object.
    *
    * @param string $path
-   * @return string|false
+   * @return self
    */
   public function addLess($path='')
   {
@@ -735,12 +737,10 @@ class Controller implements Api
 
 
   /**
-   * This will add a javascript view to $this->obj->script
+   * This will add a javascript view from a file path to $this->obj->script
    * Chainable
    *
-   * @param string $path
-   * @param string $mode
-   * @return string|false
+   * @return self
    */
   public function addJs()
   {
@@ -775,12 +775,12 @@ class Controller implements Api
 
 
   /**
-   * This will add a javascript view to $this->obj->script
+   * This will add a javascript view from a directory path or an array of files to $this->obj->script
    * Chainable
    *
-   * @param string $path
-   * @param string $mode
-   * @return string|false
+   * @param mixed $files
+   * @param array $data
+   * @return self
    */
   public function addJsGroup($files = '', array $data = [])
   {
@@ -792,6 +792,12 @@ class Controller implements Api
   }
 
 
+  /**
+   * Adds to the output object from an array.
+   *
+   * @param array $arr
+   * @return $this
+   */
   public function setObj(array $arr)
   {
     foreach ($arr as $k => $a){
@@ -802,13 +808,25 @@ class Controller implements Api
   }
 
 
-  public function setUrl($url)
+  /**
+   * Sets the url on the output object.
+   *
+   * @param string $url
+   * @return $this
+   */
+  public function setUrl(string $url)
   {
     $this->obj->url = $url;
     return $this;
   }
 
 
+  /**
+   * Sets the title on the output object.
+   *
+   * @param $title
+   * @return $this
+   */
   public function setTitle($title)
   {
     $this->obj->title = $title;
@@ -816,6 +834,12 @@ class Controller implements Api
   }
 
 
+  /**
+   * Sets the icon on the output object.
+   *
+   * @param string $icon
+   * @return $this
+   */
   public function setIcon(string $icon)
   {
     $this->obj->icon = $icon;
@@ -823,6 +847,13 @@ class Controller implements Api
   }
 
 
+  /**
+   * Sets background and font colors on the output object.
+   *
+   * @param string|null $bg
+   * @param string|null $txt
+   * @return $this
+   */
   public function setColor(string $bg = null, string $txt = null)
   {
     if ($bg) {
@@ -846,12 +877,25 @@ class Controller implements Api
   }
 
 
+  /**
+   * Returns a component from the given name if exists and null otherwise.
+   *
+   * @param string $name
+   * @return array|null
+   */
   public function routeComponent(string $name)
   {
     return $this->_mvc->routeComponent($name);
   }
 
 
+  /**
+   * Returns a component with it's content from the given name if exists and null otherwise.
+   *
+   * @param string $name
+   * @param array $data
+   * @return array|null
+   */
   public function getComponent(string $name, array $data = []): ?array
   {
     if ($tmp = $this->routeComponent($name)) {
@@ -879,9 +923,15 @@ class Controller implements Api
   }
 
 
+  /**
+   * Sets or add to the output object data property from an array.
+   *
+   * @param array $data
+   * @return $this
+   */
   public function jsData($data)
   {
-    if (X::isAssoc($data)) {
+    if (is_array($data) && X::isAssoc($data)) {
       if (!isset($this->obj->data)) {
         $this->obj->data = $data;
       }
@@ -894,6 +944,12 @@ class Controller implements Api
   }
 
 
+  /**
+   * Parses arguments from an array.
+   *
+   * @param array $args
+   * @return array
+   */
   private function getArguments(array $args)
   {
     $r = [];
@@ -1661,20 +1717,19 @@ class Controller implements Api
      */
     public static function includeController(string $bbn_inc_file, Controller $ctrl, $bbn_is_super = false)
     {
-        if ($ctrl->isCli()) {
-            return include $bbn_inc_file;
-        }
+      if ($ctrl->isCli()) {
+          return include $bbn_inc_file;
+      }
 
-        ob_start();
-        $r = include $bbn_inc_file;
-        if ($output = ob_get_contents()) {
-            ob_end_clean();
-        }
+      ob_start();
+      $r      = include $bbn_inc_file;
+      $output = ob_get_contents();
+      ob_end_clean();
 
-        if ($bbn_is_super) {
-            return $r ? true : false;
-        }
+      if ($bbn_is_super) {
+          return $r ? true : false;
+      }
 
-        return $output;
+      return $output;
     }
 }
