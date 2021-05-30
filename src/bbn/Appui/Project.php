@@ -262,9 +262,9 @@ class Project extends bbn\Models\Cls\Db
    * Gets the real root path from a repository's id as recorded in the options.
    *
    * @param string|array $repository The repository's name (code) or the repository's configuration
-   * @return bool|string
+   * @return string
    */
-  public function getRootPath($rep)
+  public function getRootPath($rep): string
   {
     //if only name else get info repository
     $path       = '';
@@ -311,44 +311,50 @@ class Project extends bbn\Models\Cls\Db
   /**
    * Gets the app path
    *
-   * @return void
+   * @return string
    */
-  public function getAppPath()
+  public function getAppPath(): string
   {
+    // Current project
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getAppPath();
     }
-    else{// case bbn-vue
-
+    else {
+      // Other project
       if (($envs = $this->getEnvironment()) && !empty($envs['app_path'])) {
         return $envs['app_path'].'src/';
       }
+      throw new \Exception(X::_("Impossible to find the application path for %s", $this->name));
     }
   }
 
 
   /**
-   * Gets the app path
+   * Gets the CDN path
    *
-   * @return void
+   * @return string
    */
-  public function getCdnPath()
+  public function getCdnPath(): string
   {
     if ($this->name === BBN_APP_NAME) {
-      return BBN_CDN_PATH;
+      if (defined('BBN_CDN_PATH')) {
+        return BBN_CDN_PATH;
+      }
     }
     elseif ($content = $this->getEnvironment()) {
       return $content['app_path'].'src/';
     }
+
+    throw new \Exception(X::_("Impossible to find the CDN path for %s", $this->name));
   }
 
 
   /**
    * Gets the lib path
    *
-   * @return void
+   * @return string
    */
-  public function getLibPath()
+  public function getLibPath(): string
   {
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getLibPath();
@@ -356,15 +362,17 @@ class Project extends bbn\Models\Cls\Db
     elseif ($content = $this->getEnvironment()) {
       return $content['lib_path'].'bbn\/';
     }
+
+    throw new \Exception(X::_("Impossible to find the libraries path for %s", $this->name));
   }
 
 
   /**
    * Gets the data path
    *
-   * @return void
+   * @return string
    */
-  public function getDataPath(string $plugin = null)
+  public function getDataPath(string $plugin = null): string
   {
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getDataPath($plugin);
@@ -376,15 +384,17 @@ class Project extends bbn\Models\Cls\Db
       }
       return $path;
     }
+
+    throw new \Exception(X::_("Impossible to find the data path for %s", $this->name));
   }
 
 
   /**
    * Gets the data path
    *
-   * @return void
+   * @return string
    */
-  public function getUserDataPath(string $plugin = null)
+  public function getUserDataPath(string $plugin = null): string
   {
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getUserDataPath($plugin);
@@ -396,6 +406,8 @@ class Project extends bbn\Models\Cls\Db
       }
       return $path;
     }
+
+    throw new \Exception(X::_("Impossible to find the user path for %s", $this->name));
   }
 
 
@@ -403,9 +415,9 @@ class Project extends bbn\Models\Cls\Db
    * Makes the repositories' configurations.
    *
    * @param string $code The repository's name (code)
-   * @return array|bool
+   * @return array
    */
-  public function getRepositories(string $project_name ='')
+  public function getRepositories(string $project_name =''): array
   {
     $cats         = [];
     $repositories = [];
