@@ -311,6 +311,23 @@ You can click the following link to access directly your account:<br>
   }
 
 
+  public function getGroupByCode(string $code): ?array
+  {
+    $g = $this->class_cfg['arch']['groups'];
+    if ($group = $this->db->rselect(
+      $this->class_cfg['tables']['groups'], [], [
+      $g['code'] => $code
+      ]
+    )
+    ) {
+      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
+      return $group;
+    }
+
+    return null;
+  }
+
+
   public function getUsers($group_id = null): array
   {
     return $this->db->getColArray(
