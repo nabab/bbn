@@ -637,8 +637,8 @@ You can click the following link to access directly your account:<br>
   {
     if (($usr = $this->getUser($id_user)) && $usr['email']) {
       if (!$this->getMailer()) {
-        return mail($usr['email'], $subject, $text);
-        //throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
+        //return mail($usr['email'], $subject, $text);
+        throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
       }
 
       return $this->mailer->send(
@@ -903,9 +903,11 @@ You can click the following link to access directly your account:<br>
       }
 
       if ($this->db->insert(
-        $this->class_cfg['tables']['groups'], [
-        $g['group'] => $data[$g['group']],
-        $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'
+        $this->class_cfg['tables']['groups'],
+        [
+          $g['group'] => $data[$g['group']],
+          $g['code'] => $data[$g['code']] ?? null,
+          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'
         ]
       )
       ) {

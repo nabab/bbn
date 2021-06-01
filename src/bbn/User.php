@@ -22,12 +22,6 @@ class User extends Models\Cls\Basic
   use Models\Tts\Retriever;
   use Models\Tts\Dbconfig;
 
-  /** @var string The name of the session index in for session data */
-  protected static $sn = 'bbn_session';
-
-  /** @var string The name of the session index in for user data */
-  protected static $un = 'bbn_user';
-
   /** @var array */
   protected static $default_class_cfg = [
     'errors' => [
@@ -148,13 +142,22 @@ class User extends Models\Cls\Basic
      * @var bool
      */
     'hotlinks' => false,
-    'show' => 'name'
+    'show' => 'name',
+    'mailer' => '\\bbn\\Mail'
   ];
+
+  private $_mailer;
 
   /** @var bool Will be true when the user has just logged in. */
   private $_just_login = false;
 
   private $_encryption_key = null;
+
+  /** @var string The name of the session index in for session data */
+  protected $sessIndex = 'bbn_session';
+
+  /** @var string The name of the session index in for user data */
+  protected $userIndex = 'bbn_user';
 
   protected $password_reset = false;
 
@@ -471,7 +474,7 @@ class User extends Models\Cls\Basic
      */
   public function setSession($attr): self
   {
-    if ($this->session->has(self::$un)) {
+    if ($this->session->has($this->userIndex)) {
       $args = \func_get_args();
       if ((\count($args) === 2) && \is_string($args[0])) {
         $attr = [$args[0] => $args[1]];
@@ -479,7 +482,7 @@ class User extends Models\Cls\Basic
 
       foreach ($attr as $key => $val){
         if (\is_string($key)) {
-          $this->session->set($val, self::$un, $key);
+          $this->session->set($val, $this->userIndex, $key);
         }
       }
     }
@@ -496,7 +499,7 @@ class User extends Models\Cls\Basic
   public function unsetSession($attr): self
   {
     $args = \func_get_args();
-    array_unshift($args, self::$un);
+    array_unshift($args, $this->userIndex);
     if ($this->session->has(...$args)) {
       $this->session->uset(...$args);
     }
@@ -513,8 +516,8 @@ class User extends Models\Cls\Basic
      */
   public function getSession($attr = null)
   {
-    if ($this->session->has(self::$un)) {
-      return $attr ? $this->session->get(self::$un, $attr) : $this->session->get(self::$un);
+    if ($this->session->has($this->userIndex)) {
+      return $attr ? $this->session->get($this->userIndex, $attr) : $this->session->get($this->userIndex);
     }
 
     return null;
@@ -540,7 +543,7 @@ class User extends Models\Cls\Basic
      */
   public function hasSession($attr): bool
   {
-    return $this->session->has(self::$un, $attr);
+    return $this->session->has($this->userIndex, $attr);
   }
 
 
@@ -636,7 +639,7 @@ class User extends Models\Cls\Basic
         $this->session->set([]);
       }
       else{
-        $this->session->set([], self::$un);
+        $this->session->set([], $this->userIndex);
       }
     }
 
@@ -919,11 +922,20 @@ class User extends Models\Cls\Basic
   /**
    * Returns an instance of the mailer class.
    *
-   * @return mail
+   * @return Mail
    */
   public function getMailer()
   {
-    return new Mail();
+    if (!$this->_mailer) {
+      if (class_exists($this->class_cfg['mailer'])) {
+        $this->_mailer = new $this->class_cfg['mailer']();
+      }
+      else {
+        throw new \Exception(X::_("Impossible to find the mailer class %s", (string)$this->class_cfg['mailer']));
+      }
+    }
+
+    return $this->_mailer;
   }
 
 
@@ -1185,7 +1197,7 @@ class User extends Models\Cls\Basic
   /**
    * Completes the steps for a full authentication of the user.
    *
-   * @param type $id
+   * @param string $id
    * @return self
    */
   protected function logIn($id): self
@@ -1297,7 +1309,7 @@ class User extends Models\Cls\Basic
         $this->cfg = $r['cfg'] ?: [];
         // Group
         $this->id_group = $r['id_group'];
-        $this->session->set($r, self::$un);
+        $this->session->set($r, $this->userIndex);
         $this->saveSession();
       }
     }
@@ -1493,7 +1505,7 @@ class User extends Models\Cls\Basic
           'tokens' => [],
           'id_session' => $id_session,
           'salt' => $salt
-           ], self::$sn
+           ], $this->sessIndex
         );
         $this->saveSession();
       }
@@ -1517,7 +1529,7 @@ class User extends Models\Cls\Basic
     */
   private function _set_session($attr): self
   {
-    if ($this->session->has(self::$sn)) {
+    if ($this->session->has($this->sessIndex)) {
       $args = \func_get_args();
       if ((\count($args) === 2) && \is_string($args[0])) {
         $attr = [$args[0] => $args[1]];
@@ -1525,7 +1537,7 @@ class User extends Models\Cls\Basic
 
       foreach ($attr as $key => $val){
         if (\is_string($key)) {
-          $this->session->set($val, self::$sn, $key);
+          $this->session->set($val, $this->sessIndex, $key);
         }
       }
     }
@@ -1542,8 +1554,8 @@ class User extends Models\Cls\Basic
     */
   private function _get_session(string $attr = null)
   {
-    if ($this->session->has(self::$sn)) {
-      return $attr ? $this->session->get(self::$sn, $attr) : $this->session->get(self::$sn);
+    if ($this->session->has($this->sessIndex)) {
+      return $attr ? $this->session->get($this->sessIndex, $attr) : $this->session->get($this->sessIndex);
     }
 
     return null;
