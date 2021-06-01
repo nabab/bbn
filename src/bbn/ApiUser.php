@@ -16,10 +16,7 @@ class ApiUser extends User
    */
   public function __construct(int $id_group, Db $db, array $params = [], array $cfg = [])
   {
-    self::$default_class_cfg['conditions'] = [
-      'id_group' => $id_group
-    ];
-
+    self::$default_class_cfg['conditions']['id_group'] = $id_group;
     parent::__construct($db, $params, $cfg);
   }
 
