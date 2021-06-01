@@ -1161,7 +1161,7 @@ class User extends Models\Cls\Basic
   /**
    * Sets the error property once and for all.
    *
-   * @param $err The error code
+   * @param int $err error code
    * @return self
    */
   protected function setError($err): self
