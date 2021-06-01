@@ -311,6 +311,23 @@ You can click the following link to access directly your account:<br>
   }
 
 
+  public function getGroupByCode(string $code): ?array
+  {
+    $g = $this->class_cfg['arch']['groups'];
+    if ($group = $this->db->rselect(
+      $this->class_cfg['tables']['groups'], [], [
+      $g['code'] => $code
+      ]
+    )
+    ) {
+      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];
+      return $group;
+    }
+
+    return null;
+  }
+
+
   public function getUsers($group_id = null): array
   {
     return $this->db->getColArray(
@@ -620,8 +637,8 @@ You can click the following link to access directly your account:<br>
   {
     if (($usr = $this->getUser($id_user)) && $usr['email']) {
       if (!$this->getMailer()) {
-        return mail($usr['email'], $subject, $text);
-        //throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
+        //return mail($usr['email'], $subject, $text);
+        throw new \Exception(X::_("Impossible to make hotlinks without a proper mailer parameter"));
       }
 
       return $this->mailer->send(
@@ -886,9 +903,11 @@ You can click the following link to access directly your account:<br>
       }
 
       if ($this->db->insert(
-        $this->class_cfg['tables']['groups'], [
-        $g['group'] => $data[$g['group']],
-        $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'
+        $this->class_cfg['tables']['groups'],
+        [
+          $g['group'] => $data[$g['group']],
+          $g['code'] => $data[$g['code']] ?? null,
+          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'
         ]
       )
       ) {

@@ -613,6 +613,10 @@ class Router
         // Looking for checker files in each parent directory
         $s['checkers'] = [];
         $tmp           = $path;
+        // There should be a new property fullPath
+        if ((basename($o['file']) === 'index.php') && (basename($o['path']) !== 'index')) {
+          $tmp .= '/index';
+        }
         // Going backwards in the tree, so adding reversely to the array (prepending)
         while (\strlen($tmp) > 0) {
           $tmp     = self::parse(\dirname($tmp));
