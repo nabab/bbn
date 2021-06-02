@@ -480,7 +480,7 @@ class User extends Models\Cls\Basic
    */
   public function getPassword(string $st): string
   {
-    return $this->_crypt($st);
+    return $this->_hash($st);
   }
 
 
@@ -1005,7 +1005,7 @@ class User extends Models\Cls\Basic
     if ($this->id) {
       return (bool)$this->db->insert(
         $this->class_cfg['tables']['passwords'], [
-        $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),
+        $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),
         $this->class_cfg['arch']['passwords']['id_user'] => $this->id,
         $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')
         ]
@@ -1416,7 +1416,7 @@ class User extends Models\Cls\Basic
     */
   private function _check_password(string $pass_given, string $pass_stored): bool
   {
-    return $this->_crypt($pass_given) === $pass_stored;
+    return $this->_hash($pass_given) === $pass_stored;
   }
 
 
@@ -1426,7 +1426,7 @@ class User extends Models\Cls\Basic
     * @param string $st The string to crypt
     * @return string
     */
-  private function _crypt(string $st): string
+  private function _hash(string $st): string
   {
     if (!function_exists($this->class_cfg['encryption'])) {
       $this->class_cfg['encryption'] = 'sha256';

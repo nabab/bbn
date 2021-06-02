@@ -20,6 +20,8 @@ class Project extends bbn\Models\Cls\Db
 
   protected $id_path;
 
+  protected $appPath;
+
   protected $name;
 
   protected $lang;
@@ -70,9 +72,9 @@ class Project extends bbn\Models\Cls\Db
   }
 
 
-  public function getEnvironment($app_name = null): ?array
+  public function getEnvironment($appPath = null): ?array
   {
-    $file_environment = \bbn\Mvc::getAppPath().'cfg/environment';
+    $file_environment = ($appPath ?: \bbn\Mvc::getAppPath()).'cfg/environment';
     if ($this->fs->isFile($file_environment.'.json')) {
       $envs = \json_decode($this->fs->getContents($file_environment.'.json'), true);
     }
@@ -313,19 +315,25 @@ class Project extends bbn\Models\Cls\Db
    *
    * @return string
    */
-  public function getAppPath(): string
+  public function getAppPath(): ?string
   {
-    // Current project
-    if ($this->name === BBN_APP_NAME) {
-      return \bbn\Mvc::getAppPath();
-    }
-    else {
-      // Other project
-      if (($envs = $this->getEnvironment()) && !empty($envs['app_path'])) {
-        return $envs['app_path'].'src/';
+    if (!$this->appPath) {
+      // Current project
+      if ($this->name === BBN_APP_NAME) {
+        $this->appPath = bbn\Mvc::getAppPath();
       }
-      throw new \Exception(X::_("Impossible to find the application path for %s", $this->name));
+      else {
+        $envs = $this->options->fullOptions('env', $this->id);
+        if ($env = X::getRow($envs, ['env' => BBN_ENV])) {
+          $this->appPath = $env['text'];
+          if (substr($this->appPath, -4) !== 'src/') {
+            $this->appPath .= 'src/';
+          }
+        }
+      }
     }
+
+    return $this->appPath;
   }
 
 
@@ -599,13 +607,14 @@ class Project extends bbn\Models\Cls\Db
       $this->code         = $o['code'];
       $this->option       = $o;
       $this->repositories = $this->getRepositories($o['text']);
+
       //the id of the child option 'lang' (children of this option are all languages for which the project is configured)
-      if (!$this->id_langs = $this->options->fromCode('lang', $o['code'], 'list', 'project', 'appui')) {
+      if (!$this->id_langs = $this->options->fromCode('lang', $id)) {
         $this->setIdLangs();
       }
 
       //the id of the child option 'path'
-      $this->id_path = $this->options->fromCode('path', $o['code'], 'list', 'project', 'appui') ?: null;
+      $this->id_path = $this->options->fromCode('path', $id) ?: null;
       return true;
     }
 
