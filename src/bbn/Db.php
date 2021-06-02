@@ -5308,12 +5308,13 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
       foreach ($res['tables'] as $i => $t){
         if (!is_string($t)) {
           X::log([$cfg, debug_backtrace()], 'db_explained');
-          throw new \Exception("Impossible to identify the tables, check the log");
+          throw new \Exception(X::_("Impossible to identify the tables, check the log"));
         }
 
         $res['tables'][$i] = $this->tfn($t);
         if (is_null($res['tables'][$i])) {
-          die(var_dump($t, $this->getCurrent()));
+          X::log([$res, debug_backtrace()], 'db_explained');
+          throw new \Exception(X::_("Impossible to find the table %s, check the log", $i));
         }
       }
     }
