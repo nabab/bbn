@@ -18,7 +18,7 @@ class Tpl {
   static public function renderer(string $st): callable
   {
     if (\defined('BBN_DATA_PATH')) {
-      $dir = File\Dir::createPath(BBN_PATA_PATH.'tmp/bbn-templates');
+      $dir = File\Dir::createPath(BBN_DATA_PATH.'tmp/bbn-templates');
     }
     else {
       $dir = File\Dir::createPath(sys_get_temp_dir().'/bbn-templates');
