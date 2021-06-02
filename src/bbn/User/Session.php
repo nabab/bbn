@@ -67,6 +67,13 @@ class Session
     }
   }
 
+  public static function destroyInstance()
+  {
+    if (self::singletonExists()) {
+      self::$singleton_instance = null;
+      self::$singleton_exists   = false;
+    }
+  }
 
   public function isOpened(): bool
   {
