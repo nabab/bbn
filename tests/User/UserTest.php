@@ -126,12 +126,12 @@ class UserTest extends TestCase
       )
     )->andReturn($this->user_id);
 
-    $crypt_method = $this->getNonPublicMethod('_crypt');
+    $hash_method = $this->getNonPublicMethod('_hash');
 
     // This is the db mock call of fetching user's password
     // from db to compare to the entered password.
     $this->db_mock->shouldReceive('selectOne')->once()->ordered('selectOnes')->andReturn(
-      $crypt_method->invoke($this->user, 'password')
+      $hash_method->invoke($this->user, 'password')
     );
 
     $this->db_mock->shouldReceive('update')->andReturnTrue();
@@ -190,12 +190,12 @@ class UserTest extends TestCase
       [$class_cfg['arch']['hotlinks']['id'] => $this->user_id]
     );
 
-    $crypt_method = $this->getNonPublicMethod('_crypt');
+    $hash_method = $this->getNonPublicMethod('_hash');
 
     // Set expectations of updating the new password
     $this->db_mock->shouldReceive('insert')->once()->andReturn(1)->with(
       $class_cfg['tables']['passwords'], [
-        $class_cfg['arch']['passwords']['pass']    => $crypt_method->invoke($this->user, $this->reset_password_post['pass2']),
+        $class_cfg['arch']['passwords']['pass']    => $hash_method->invoke($this->user, $this->reset_password_post['pass2']),
         $class_cfg['arch']['passwords']['id_user'] => $this->user_id,
         $class_cfg['arch']['passwords']['added']   => date('Y-m-d H:i:s')]
     );
