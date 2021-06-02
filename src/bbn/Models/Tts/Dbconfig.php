@@ -8,7 +8,7 @@
 
 namespace bbn\Models\Tts;
 
-use bbn;
+use bbn\X;
 
 trait Dbconfig
 {
@@ -28,14 +28,14 @@ trait Dbconfig
    * @param array $cfg
    * @return $this
    */
-  private function _init_class_cfg(array $cfg = [])
+  private function _init_class_cfg(array $cfg = null)
   {
     if (isset(self::$default_class_cfg)) {
-      $cfg = bbn\X::mergeArrays(self::$default_class_cfg, $cfg);
+      $cfg = X::mergeArrays(self::$default_class_cfg, $cfg ?: []);
     }
 
     if (!isset($cfg['tables'], $cfg['table'], $cfg['arch'])) {
-      die('The class '.\get_class($this).' is not configured properly to work with trait Dbconfig');
+      throw new \Exception(X::_("The class %s is not configured properly to work with trait Dbconfig", get_class($this)));
     }
 
     $this->class_table = $cfg['table'];

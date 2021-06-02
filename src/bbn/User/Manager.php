@@ -6,6 +6,7 @@ namespace bbn\User;
 
 use bbn;
 use bbn\X;
+use stdClass;
 
 /**
  * A class for managing users
@@ -447,12 +448,14 @@ You can click the following link to access directly your account:<br>
     $u                 =& $this->class_cfg['arch']['users'];
     $fields            = array_unique(array_values($u));
     $cfg[$u['active']] = 1;
-    $cfg[$u['cfg']]    = '{}';
+    $cfg[$u['cfg']]    = new stdClass();
     foreach ($cfg as $k => $v){
       if (!\in_array($k, $fields)) {
+        $cfg[$u['cfg']]->$k = $v;
         unset($cfg[$k]);
       }
     }
+    $cfg[$u['cfg']] = json_encode($cfg[$u['cfg']]);
 
     if (isset($cfg['id'])) {
       unset($cfg['id']);
@@ -653,6 +656,18 @@ You can click the following link to access directly your account:<br>
 
     return null;
   }
+
+  public function setPassword($id, $pass)
+  {
+    return (bool)$this->db->insert(
+      $this->class_cfg['tables']['passwords'], [
+      $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),
+      $this->class_cfg['arch']['passwords']['id_user'] => $id,
+      $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')
+      ]
+    );
+  }
+
 
 
   /**
@@ -1080,6 +1095,22 @@ You can click the following link to access directly your account:<br>
   protected static function setDevGroup($id)
   {
     self::$dev_group = $id;
+  }
+
+
+  /**
+  * Use the configured hash function to encrypt a password string.
+  *
+  * @param string $st The string to crypt
+  * @return string
+  */
+  private function _hash(string $st): string
+  {
+    if (!function_exists($this->class_cfg['encryption'])) {
+      $this->class_cfg['encryption'] = 'sha256';
+    }
+
+    return $this->class_cfg['encryption']($st);
   }
 
 

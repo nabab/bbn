@@ -18,6 +18,7 @@ namespace bbn\File;
 
 use bbn;
 use bbn\X;
+use bbn\Str;
 
 /**
  * Class system
@@ -102,6 +103,13 @@ class System extends bbn\Models\Cls\Basic
     if ($this->mode === 'ssh') {
       @fclose($this->cn);
     }
+  }
+
+
+  public function sanitize(string $filename)
+  {
+    $st = end(explode('/', $filename));
+    return Str::encodeFilename($st);
   }
 
 
