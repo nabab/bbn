@@ -992,18 +992,20 @@ class MvcTest extends TestCase
   public function routeComponent_method_returns_component_from_the_given_name_if_exists()
   {
     $data = [
-      'file'       => 'foo/bar/baz/src/components/form/form.js',
-      'path'       => 'form',
-      'plugin'     => 'http://foo.bar',
-      'component'  => true,
-      'ext'       => 'js',
-      'mode'      => 'js',
-      'i18n'      => 'foo/bar/baz/src/components/form/locale/en/en.json'
+      'js' => [
+        'file'       => 'foo/bar/baz/src/components/form/form.js',
+        'path'       => 'form',
+        'plugin'     => 'http://foo.bar',
+        'component'  => true,
+        'ext'       => 'js',
+        'mode'      => 'js',
+        'i18n'      => 'foo/bar/baz/src/components/form/locale/en/en.json'
+      ]
     ];
 
     // Mock the `routeComponent` method in the Router class to return the previous data.
     $router_mock = $this->replaceRouterInstanceWithMockery();
-    $router_mock->shouldReceive('routeComponent')->andReturn($data);
+    $router_mock->shouldReceive('routeComponent')->with('appui2-form')->andReturn($data);
 
     $this->assertSame($data, self::$mvc->routeComponent('appui2-form'));
   }

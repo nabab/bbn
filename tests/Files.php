@@ -39,8 +39,8 @@ trait Files
     foreach (explode('/', $dirname) as $name) {
       if (!is_dir($dir = BBN_APP_PATH . BBN_DATA_PATH . implode('/', $total_dirs) . '/' . $name)) {
         mkdir($dir);
-        $total_dirs[] = $name;
       }
+      $total_dirs[] = $name;
     }
   }
 }

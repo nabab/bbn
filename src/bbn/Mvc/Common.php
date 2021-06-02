@@ -46,11 +46,15 @@ trait Common
   }
 
 
+  /**
+   * @param $msg
+   * @throws \Exception
+   */
   private function error($msg)
   {
     $msg = "Error from ".\get_class($this).": ".$msg;
     $this->log($msg, 'mvc');
-    die($msg);
+    throw new \Exception(bbn\X::_($msg));
   }
 
 

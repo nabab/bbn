@@ -1,6 +1,7 @@
 <?php
 namespace bbn;
 
+
 /**
  * Class text
  * string manipulation class
@@ -1157,7 +1158,7 @@ class Str
   {
     $args = \func_get_args();
     foreach ($args as $a){
-      if (($a === '..') || !\is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false)) {
+      if (($a === '..' || $a === '.') || !\is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false)) {
         return false;
       }
     }
@@ -1167,7 +1168,7 @@ class Str
 
 
   /**
-   * Checks if a string doesn't contain a filesystem path.
+   * Checks if every bit of a string doesn't contain a filesystem path.
    *
    * ```php
    * X::dump(\bbn\Str::checkFilename("Paul"));
@@ -1180,14 +1181,12 @@ class Str
    */
   public static function checkPath(): bool
   {
-    //TODO: is this an alias for checkFilename method?
-    /*
-     * checkFileName checks if a string is not empty, doesn't contain directory separators, and is not '..' (it should also check '.')
-     * checkPath split the string around the directory separators and checks each bit with the function checkFileName
-      * The basic goal is to not have a dir/../../../../other_dir as path
-     */
     if ($args = \func_get_args()) {
       foreach ($args as $a){
+        if (!is_string($a) || strpos($a, '/', -1) !== false || strpos($a, '\\', -1) !== false ) {
+          return false;
+        }
+
         $bits = X::split($a, DIRECTORY_SEPARATOR);
         foreach ($bits as $b){
           if (!self::checkFilename($b)) {

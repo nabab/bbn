@@ -16,12 +16,7 @@ trait Mockable
    * @param null   $return
    * @return \Mockery\MockInterface
    */
-  protected function mockClassMethod
-  (
-    string $class,
-    $arg,
-    $return = null
-  )
+  protected function mockClassMethod(string $class, $arg, $return = null)
   {
     $mockery = \Mockery::mock($class);
 
