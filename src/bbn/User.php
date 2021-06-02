@@ -242,8 +242,7 @@ class User extends Models\Cls\Basic
     }
     */
     // The user logs in
-    if (isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']])) {
-
+    if ($this->isLoginRequest($params)) {
       /** @todo separate credentials and salt checking */
       if ($this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']) {
         /** @todo separate credentials and salt checking */
@@ -257,9 +256,7 @@ class User extends Models\Cls\Basic
 
     /** @todo revise the process: dying is not the solution! */
     // The user is not known yet
-    elseif (isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']])
-        && ($params[$f['action']] === 'init_password')
-    ) {
+    elseif ($this->isResetPasswordRequest($params)) {
       if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {
         $this->password_reset = true;
         if (($params[$f['pass1']] === $params[$f['pass2']])) {
@@ -281,6 +278,38 @@ class User extends Models\Cls\Basic
     }
   }
 
+  /**
+   * Checks if the it's a login request.
+   *
+   * @param array $params
+   * @return bool
+   */
+  protected function isLoginRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]);
+  }
+
+  /**
+   * Checks if it's a reset password request.
+   *
+   * @param array $params
+   * @return bool
+   */
+  protected function isResetPasswordRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset(
+      $params[$f['key']],
+      $params[$f['id']],
+      $params[$f['pass1']],
+      $params[$f['pass2']],
+      $params[$f['action']]
+    )
+      && $params[$f['action']] === 'init_password';
+  }
 
   public function isReset()
   {
@@ -295,8 +324,7 @@ class User extends Models\Cls\Basic
    */
   public function getSalt(): ?string
   {
-    $salt = $this->_get_session('salt');
-    return $salt;
+    return $this->_get_session('salt');
   }
 
 
@@ -1338,7 +1366,7 @@ class User extends Models\Cls\Basic
     */
   private function _sess_info(string $id_session = null): self
   {
-    if (!str::isUid($id_session)) {
+    if ($id_session !== $this->getIdSession() && !str::isUid($id_session)) {
       $id_session = $this->getIdSession();
     }
     else{
@@ -1346,7 +1374,6 @@ class User extends Models\Cls\Basic
     }
 
     if (empty($cfg)
-        && Str::isUid($id_session)
         && ($id = $this->getSession('id'))
         && ($d = $this->db->rselect(
           $this->class_cfg['tables']['sessions'],
@@ -1361,7 +1388,7 @@ class User extends Models\Cls\Basic
       $cfg = json_decode($d['cfg'], true);
     }
 
-    if (\is_array($cfg)) {
+    if (isset($cfg) && \is_array($cfg)) {
       $this->sess_cfg = $cfg;
     }
     else{
@@ -1405,7 +1432,7 @@ class User extends Models\Cls\Basic
       $this->class_cfg['encryption'] = 'sha256';
     }
 
-    return eval("return {$this->class_cfg['encryption']}('$st');");
+    return $this->class_cfg['encryption']($st);
   }
 
 
@@ -1546,12 +1573,12 @@ class User extends Models\Cls\Basic
   }
 
 
-   /**
-    * Gets an attribute or the whole the "session" part of the session.
-    *
-    * @param string $attr Name of the attribute to get
-    * @return mixed
-    */
+  /**
+   * Gets an attribute or the whole the "session" part of the session.
+   *
+   * @param string|null $attr Name of the attribute to get
+   * @return mixed
+   */
   private function _get_session(string $attr = null)
   {
     if ($this->session->has($this->sessIndex)) {
