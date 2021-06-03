@@ -244,7 +244,9 @@ class User extends Models\Cls\Basic
     // The user logs in
     if ($this->isLoginRequest($params)) {
       /** @todo separate credentials and salt checking */
-      if ($this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']) {
+      if (!empty($this->sess_cfg['fingerprint'])
+          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
+      ) {
         /** @todo separate credentials and salt checking */
         $this->_check_credentials($params);
       }
@@ -463,9 +465,9 @@ class User extends Models\Cls\Basic
         if ($r) {
           $this->setSession(['cfg' => false]);
           $this->_user_info();
-          return $r;
         }
       }
+      return $r ?? false;
     }
 
     return false;

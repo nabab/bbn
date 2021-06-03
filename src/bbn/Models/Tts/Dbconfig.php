@@ -41,7 +41,7 @@ trait Dbconfig
     $this->class_table = $cfg['table'];
     // We completely replace the table structure, no merge
     foreach ($cfg['arch'] as $t => $a){
-      if ($cfg['tables'][$t] === $cfg['table']) {
+      if (isset($cfg['tables'][$t]) && $cfg['tables'][$t] === $cfg['table']) {
         $this->class_table_index = $t;
       }
     }

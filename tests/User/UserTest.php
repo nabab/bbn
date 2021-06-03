@@ -3,6 +3,7 @@
 namespace User;
 
 use bbn\Db;
+use bbn\Mvc;
 use bbn\User;
 use bbn\User\Session;
 use bbn\X;
@@ -20,7 +21,7 @@ class UserTest extends TestCase
   }
 
 
-  protected $user;
+  protected User $user;
 
   protected $db_mock;
 
@@ -42,6 +43,7 @@ class UserTest extends TestCase
   protected $session_index;
 
   protected $user_index;
+
 
   protected function getSessionData()
   {
@@ -67,7 +69,7 @@ class UserTest extends TestCase
       Session::destroyInstance();
     }
 
-    $this->db_mock = \Mockery::mock(Db::class);
+    Mvc::initPath();
     $this->init();
   }
 
@@ -81,9 +83,12 @@ class UserTest extends TestCase
 
     // Init the User class to init a session.
     $this->user = new User($db_mock);
+    \Mockery::close();
 
     $this->session_index = $this->getNonPublicProperty('sessIndex');
     $this->user_index    = $this->getNonPublicProperty('userIndex');
+
+    $this->db_mock = \Mockery::mock(Db::class);
   }
 
 
@@ -108,37 +113,57 @@ class UserTest extends TestCase
 
 
   /**
-   * @param array $conditions
-   * @return User
-   * @throws \ReflectionException
+   * Callback to apply additional mockery expectations.
+   *
+   * @param array $selectOneReturn
+   * @param callable|null $callback
    */
-  protected function prepareLogingIn(array $conditions = [])
+  protected function login(?callable $callback = null)
   {
-    $class_cfg = $this->getClassCgf();
-    // This is the db mock call of checking user credentials
-    $this->db_mock->shouldReceive('selectOne')->once()->ordered('selectOnes')->with(
-      $class_cfg['tables']['users'],
-      $class_cfg['fields']['id'],
-      X::mergeArrays(
-        $conditions,
-        [$class_cfg['arch']['users']['active'] => 1],
-        [($class_cfg['arch']['users']['login'] ?? $class_cfg['arch']['users']['email']) => $this->login_post['user']]
-      )
-    )->andReturn($this->user_id);
-
-    $hash_method = $this->getNonPublicMethod('_hash');
-
-    // This is the db mock call of fetching user's password
-    // from db to compare to the entered password.
-    $this->db_mock->shouldReceive('selectOne')->once()->ordered('selectOnes')->andReturn(
-      $hash_method->invoke($this->user, 'password')
-    );
-
-    $this->db_mock->shouldReceive('update')->andReturnTrue();
-
-    $this->db_mock->shouldReceive('rselect')->ordered()->once()->andReturnNull();
+    if ($callback) {
+      $callback($this->db_mock);
+    }
 
     $this->login_post['appui_salt'] = $this->user->getSalt();
+
+    $this->user = new User($this->db_mock, $this->login_post);
+  }
+
+
+  /**
+   * Manually login a user.
+   *
+   * @param int   $id
+   * @param array $sess_cfg
+   * @return array
+   * @throws \ReflectionException
+   */
+  protected function loginAs(int $id, array $sess_cfg)
+  {
+    // The update method that occurs in the _authenticate method when we call the logIn method
+    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
+
+    // The rselect method that occurs in the _user_info method when we call the logIn method
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
+      $expected_session_data = [
+        'id'        => 2,
+        'id_group'  => 1,
+        'email'     => 'foo@mail.com',
+        'username'  => 'foobar',
+        'login'     => 'baz',
+        'admin'     => 0,
+        'dev'       => 0,
+        'theme'     => 'theme_name',
+        'cfg'       => json_encode($sess_cfg),
+        'active'    => 1,
+        'enckey'    => 'key'
+      ]
+    );
+
+    $login_method = $this->getNonPublicMethod('logIn');
+    $login_method->invoke($this->user, $id);
+
+    return $expected_session_data;
   }
 
 
@@ -151,9 +176,26 @@ class UserTest extends TestCase
   /** @test */
   public function user_can_login()
   {
-    $this->initSessionFingerPrint();
-    $this->prepareLogingIn();
-    $this->user = new User($this->db_mock, $this->login_post);
+    $this->login(
+      function ($db_mock) {
+        $db_mock->shouldReceive('selectOne')->andReturn(
+          json_encode(
+            [
+              'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+                $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+              ),
+              'last_renew'  => time()
+            ]
+          ),
+          $this->user_id,
+          $this->getNonPublicMethod('_hash')->invoke($this->user, 'password')
+        );
+
+        $db_mock->shouldReceive('update')->once()->andReturnTrue();
+
+        $db_mock->shouldReceive('rselect')->once()->andReturnNull();
+      }
+    );
 
     $this->assertNull($this->user->getError());
     $this->assertTrue($this->user->isAuth());
@@ -163,9 +205,24 @@ class UserTest extends TestCase
   /** @test */
   public function isReset_method_returns_false_if_the_request_is_not_a_password_reset()
   {
-    $this->initSessionFingerPrint();
-    $this->prepareLogingIn();
-    $this->user = new User($this->db_mock, $this->login_post);
+    $this->login( function ($db_mock) {
+      $db_mock->shouldReceive('selectOne')->andReturn(
+        json_encode(
+          [
+            'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+              $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+            ),
+            'last_renew'  => time()
+          ]
+        ),
+        $this->user_id,
+        $this->getNonPublicMethod('_hash')->invoke($this->user, 'password')
+      );
+
+      $db_mock->shouldReceive('update')->once()->andReturnTrue();
+
+      $db_mock->shouldReceive('rselect')->once()->andReturnNull();
+    });
 
     $this->assertFalse($this->user->isReset());
   }
@@ -273,30 +330,8 @@ class UserTest extends TestCase
     $this->assertNull($this->user->getId());
     $this->assertNotNull($this->user->getError());
 
-    // Now let's login by calling the logIn method:
-
-    // The update method that occurs in the _authenticate method when we call the logIn method
-    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
-
-    // The rselect method that occurs in the _user_info method when we call the logIn method
-    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
-      $expected_session_data = [
-      'id'        => 2,
-      'id_group'  => 1,
-      'email'     => 'foo@mail.com',
-      'username'  => 'foobar',
-      'login'     => 'baz',
-      'admin'     => 0,
-      'dev'       => 0,
-      'theme'     => 'theme_name',
-      'cfg'       => json_encode($sess_cfg),
-      'active'    => 1,
-      'enckey'    => 'key'
-      ]
-    );
-
-    $login_method = $this->getNonPublicMethod('logIn');
-    $login_method->invoke($this->user, 2);
+    // Now let's manually login as a user
+    $expected_session_data = $this->loginAs(2, $sess_cfg);
 
     // The selectOne method that occurs in the _retrieve_session method
     $this->db_mock->shouldReceive('selectOne')->once()->andReturn(json_encode($sess_cfg));
@@ -307,6 +342,7 @@ class UserTest extends TestCase
     // The rselect method that occurs in the _user_info method
     $this->db_mock->shouldReceive('rselect')->once()->andReturn($expected_session_data);
 
+    // Init the Class again so the checkSession method could run.
     $this->user = new User($this->db_mock);
 
     $actual_session_data = $this->getSessionData();
@@ -325,6 +361,217 @@ class UserTest extends TestCase
   {
     $this->assertTrue(isset($_SESSION[BBN_APP_NAME][$this->session_index]['salt']));
     $this->assertSame($_SESSION[BBN_APP_NAME][$this->session_index]['salt'], $this->user->getSalt());
+  }
+
+
+  /** @test */
+  public function checkSalt_method_checks_the_actual_salt_against_a_given_string()
+  {
+    $this->assertTrue(isset($_SESSION[BBN_APP_NAME][$this->session_index]['salt']));
+    $this->assertTrue($this->user->checkSalt($_SESSION[BBN_APP_NAME][$this->session_index]['salt']));
+  }
+
+
+  /** @test */
+  public function getCfg_method_returns_the_user_current_configuration()
+  {
+    $this->assertNull($this->user->getCfg());
+
+    $sess_cfg = $this->initSessionFingerPrint();
+
+    $this->user = new User($this->db_mock);
+
+    $expected_cfg = $this->loginAs(2, $sess_cfg);
+
+    $this->assertSame(json_decode($expected_cfg['cfg'], true), $this->user->getCfg());
+  }
+
+
+  /** @test */
+  public function getClassCfg_method_returns_the_current_class_configuration()
+  {
+    $this->assertSame($this->getClassCgf(), $this->user->getClassCfg());
+  }
+
+
+  /** @test */
+  public function getPath_method_returns_the_dir_path_for_the_user()
+  {
+    $this->login( function ($db_mock) {
+      $db_mock->shouldReceive('selectOne')->andReturn(
+        json_encode(
+          [
+            'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+              $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+            ),
+            'last_renew'  => time()
+          ]
+        ),
+        $this->user_id,
+        $this->getNonPublicMethod('_hash')->invoke($this->user, 'password')
+      );
+
+      $db_mock->shouldReceive('update')->once()->andReturnTrue();
+
+      $db_mock->shouldReceive('rselect')->once()->andReturnNull();
+    });
+
+    $this->assertSame(BBN_DATA_PATH . "users/$this->user_id/data/", $this->user->getPath());
+  }
+
+
+  /** @test */
+  public function getTmpDir_method_returns_the_tmp_dir_path_for_the_user()
+  {
+    $this->login(
+      function ($db_mock) {
+        $db_mock->shouldReceive('selectOne')->andReturn(
+          json_encode(
+            [
+              'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+                $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+              ),
+              'last_renew'  => time()
+            ]
+          ),
+          $this->user_id,
+          $this->getNonPublicMethod('_hash')->invoke($this->user, 'password')
+        );
+
+        $db_mock->shouldReceive('update')->once()->andReturnTrue();
+
+        $db_mock->shouldReceive('rselect')->once()->andReturnNull();
+      }
+    );
+
+    $this->assertSame(BBN_DATA_PATH . "users/$this->user_id/tmp/", $this->user->getTmpDir());
+  }
+
+
+  /** @test */
+  public function getTables_method_returns_the_list_of_tables_used_by_the_current_class_or_null_if_not_found()
+  {
+    $this->assertSame($expected_tables = $this->getClassCgf()['tables'], $this->user->getTables());
+
+    $this->setNonPublicPropertyValue('class_cfg', []);
+
+    $this->assertNull($this->user->getTables());
+
+    $this->initSessionFingerPrint();
+    $this->user = new User($this->db_mock,[], ['tables' => ['foo' => 'bar']]);
+
+    $this->assertSame(array_merge($expected_tables, ['foo' => 'bar']), $this->user->getTables());
+  }
+
+
+  /** @test */
+  public function getFields_method_returns_list_of_fields_of_given_table_or_all_tables_and_null_if_not_found()
+  {
+    $this->assertSame($this->getClassCgf()['arch']['users'], $this->user->getFields('users'));
+    $this->assertSame($this->getClassCgf()['arch']['groups'], $this->user->getFields('groups'));
+    $this->assertNull($this->user->getFields('foo'));
+
+    $this->assertSame($this->getClassCgf()['arch'], $this->user->getFields());
+
+    $this->setNonPublicPropertyValue('class_cfg', []);
+
+    $this->assertNull($this->user->getFields('users'));
+    $this->assertNull($this->user->getFields());
+
+    $this->initSessionFingerPrint();
+    $this->user = new User(
+      $this->db_mock,[], [
+      'tables' => ['foo' => 'bar'],
+      'arch'   => ['foo' => ['field1', 'field2']]
+      ]
+    );
+
+    $this->assertSame(['field1', 'field2'], $this->user->getFields('foo'));
+    $this->assertSame($this->getClassCgf()['arch'], $this->user->getFields());
+  }
+
+
+  /** @test */
+  public function updateInfo_method_changes_data_in_users_table_if_data_is_valid()
+  {
+    $class_cfg = $this->getClassCgf();
+
+    $expected_session_data = [
+      'id'        => 2,
+      'id_group'  => 1,
+      'email'     => 'foobar@mail.comm',
+      'username'  => 'foobar',
+      'login'     => 'baz',
+      'admin'     => 0,
+      'dev'       => 0,
+      'theme'     => 'bar',
+      'cfg'       => json_encode($this->initSessionFingerPrint()),
+      'active'    => 1,
+      'enckey'    => 'key'
+    ];
+
+    $this->login(
+      function ($db_mock) use ($expected_session_data) {
+        $db_mock->shouldReceive('selectOne')->andReturn(
+          $this->user_id,
+          $this->getNonPublicMethod('_hash')->invoke($this->user, 'password'),
+          json_encode(
+            [
+              'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+                $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+              ),
+              'last_renew'  => time()
+            ]
+          )
+        );
+
+        $db_mock->shouldReceive('update')->twice()->andReturnTrue();
+
+        $db_mock->shouldReceive('rselect')->once()->andReturnNull();
+
+        // This should be called by the method _user_info that occurs in updateInfo method
+        $db_mock->shouldReceive('rselect')->once()->andReturn($expected_session_data);
+      }
+    );
+
+    $expected_session_data['cfg'] = json_decode($expected_session_data['cfg'], true);
+
+    $this->assertTrue($this->user->updateInfo(['email' => 'foobar@mail.com', 'theme' => 'bar']));
+    $this->assertTrue(isset($this->getSessionData()[$this->user_index]));
+    $this->assertSame($expected_session_data, $this->getSessionData()[$this->user_index]);
+
+  }
+
+
+  /** @test */
+  public function updateInfo_method_does_not_changes_data_in_users_table_if_data_is_invalid()
+  {
+    $this->login(
+      function ($db_mock) {
+        $db_mock->shouldReceive('selectOne')->andReturn(
+          json_encode(
+            [
+              'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+                $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+              ),
+              'last_renew'  => time()
+            ]
+          ),
+          $this->user_id,
+          $this->getNonPublicMethod('_hash')->invoke($this->user, 'password')
+        );
+
+        $db_mock->shouldReceive('update')->once()->andReturnTrue();
+        
+        $db_mock->shouldReceive('rselect')->once()->andReturnNull();
+      }
+    );
+
+    $this->assertFalse($this->user->updateInfo(['foo' => 'bar']));
+    $this->assertFalse($this->user->updateInfo(['id' => 50]));
+    $this->assertFalse($this->user->updateInfo(['auth' => 'foo']));
+    $this->assertFalse($this->user->updateInfo(['pass' => 'foo']));
+    $this->assertFalse($this->user->updateInfo(['cfg' => json_encode(['cfg_key' => 'cgf_value'])]));
   }
 
 
