@@ -233,7 +233,7 @@ class Mysql implements bbn\Db\Engines
     $r     = [];
     foreach ($items as $m) {
       if (!bbn\Str::checkName($m)) {
-        return '';
+        throw new \Exception(X::_("Illegal name %s for the column", $m));
       }
 
       $r[] = $this->qte . $m . $this->qte;

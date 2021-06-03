@@ -1121,7 +1121,7 @@ class Str
   public static function checkName(): bool
   {
     $args = \func_get_args();
-    // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
+    // Each argument must be a string made of letters, numbers and underscores
     foreach ($args as $a) {
       if (\is_array($a)) {
         foreach ($a as $b) {
@@ -1135,7 +1135,7 @@ class Str
         return false;
       }
 
-      return \preg_match('/^[A-z]{1}[A-z0-9_]*$/', $a);
+      return \preg_match('/^[A-z0-9_]*$/', $a);
     }
 
     return true;
