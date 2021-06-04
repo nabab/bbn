@@ -302,6 +302,10 @@ class Project extends bbn\Models\Cls\Db
       }
     }
 
+    if (!is_string($path)) {
+      throw new \Exception(X::_("Impossible to determine the path for %s", $rep));
+    }
+
     if ($path && substr($path, -1) !== '/') {
       $path .= '/';
     }
@@ -324,7 +328,7 @@ class Project extends bbn\Models\Cls\Db
       }
       else {
         $envs = $this->options->fullOptions('env', $this->id);
-        if ($env = X::getRow($envs, ['env' => BBN_ENV])) {
+        if ($env = X::getRow($envs, ['type' => BBN_ENV])) {
           $this->appPath = $env['text'];
           if (substr($this->appPath, -4) !== 'src/') {
             $this->appPath .= 'src/';
