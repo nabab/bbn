@@ -590,7 +590,14 @@ class Controller implements Api
    */
   public function getJs($path='', array $data=null, $encapsulated = true)
   {
+    $params = func_get_args();
+    // The model can be set as first argument if the path is default
     if (\is_array($path)) {
+      // In which case the second argument, if defined, is $encapsulated
+      if (array_key_exists(1, $params)) {
+        $encapsulated = $data;
+      }
+
       $data = $path;
       $path = '';
     }

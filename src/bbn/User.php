@@ -191,6 +191,9 @@ class User extends Models\Cls\Basic
   /** @var int */
   protected $id;
 
+  /** @var array */
+  protected $data = [];
+
   /** @var int */
   protected $id_group;
 
@@ -364,6 +367,59 @@ class User extends Models\Cls\Basic
     }
 
     return null;
+  }
+
+
+  /**
+   * Stores or deletes data in the object for the current authenticated user.
+   *
+   * @param string|array $index The name of the index to set, or an associative array of key/values
+   * @param mixed        $data  The data to store; if null the given index will be unset
+   *
+   * @return self Chainable
+   */
+  public function setData($index, $data = null): self
+  {
+    if (!$this->auth) {
+      throw new \Exception(X::_("Impossible to store data on an unauthenticated user"));
+    }
+
+    if (is_array($index) && X::isAssoc($index)) {
+      foreach ($index as $k => $v) {
+        // Unsetting if null
+        if (is_null($v) && array_key_exists($k, $this->data)) {
+          unset($this->data[$k]);
+        }
+        else {
+          $this->data[$k] = $v;
+        }
+      }
+    }
+    elseif (is_string($index)) {
+      $this->data[$index] = $data;
+    }
+    else {
+      throw new \Exception(X::_("Invalid parameters for function setData in user class"));
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * Retrieves data stored in the data property of the user, only if authenticated.
+   *
+   * @param string $idx
+   *
+   * @return void
+   */
+  public function getData(string $idx)
+  {
+    if (!$this->auth) {
+      throw new \Exception(X::_("Impossible to retrieve data for an authenticated user"));
+    }
+
+    return $this->data[$idx] ?? null;
   }
 
 
@@ -1128,7 +1184,7 @@ class User extends Models\Cls\Basic
       if ($fs->isFile($file) && $fs->createPath($path)) {
         $dest = $path.($name ?: basename($file));
         if ($move) {
-          if ($fs->move($file, Dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))) {
+          if ($fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))) {
             return $dest;
           }
         }

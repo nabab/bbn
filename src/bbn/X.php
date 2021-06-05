@@ -145,7 +145,7 @@ class X
    */
   public static function log($st, string $file = 'misc'): void
   {
-    if (\defined('BBN_DATA_PATH')) {
+    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
       $log_file  = BBN_DATA_PATH.'logs/'.$file.'.log';
       $backtrace = array_filter(
         debug_backtrace(), function ($a) {
@@ -163,12 +163,8 @@ class X
         }
       }
 
-      if (!file_exists($log_file)) {
-        return;
-      }
-
       if (filesize($log_file) > BBN_X_MAX_LOG_FILE) {
-        file_put_contents($log_file.'.old', File_get_contents($log_file), FILE_APPEND);
+        file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
       }
       else{

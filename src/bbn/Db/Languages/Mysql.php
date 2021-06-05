@@ -915,7 +915,7 @@ MYSQL
             if (isset($cfg['fields'][$g])) {
               $g = $cfg['fields'][$g];
             }
-
+            
             if (($t = $cfg['available_fields'][$g])
                 && ($cfn = $this->colFullName($g, $t))
             ) {
@@ -925,10 +925,10 @@ MYSQL
               $idxs[] = $this->colSimpleName($cfg['aliases'][$g] ?? $g, true);
             } else {
               $indexes[] = $g;
-              $idxs[]    = $g;
+              $idxs[]    = $cfg['aliases'][$g] ?? $g;
             }
           }
-
+          
           if (!empty($cfg['having'])) {
             if (count($indexes) === count($cfg['group_by'])) {
               $res .= 'COUNT(*) FROM ( SELECT ';
