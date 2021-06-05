@@ -813,7 +813,7 @@ class Sqlite implements bbn\Db\Engines
             }
             else {
               $indexes[] = $g;
-              $idxs[]    = $g;
+              $idxs[]    = $cfg['aliases'][$g] ?? $g;
             }
           }
 
