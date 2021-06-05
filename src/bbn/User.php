@@ -1385,7 +1385,7 @@ class User extends Models\Cls\Basic
     */
   private function _sess_info(string $id_session = null): self
   {
-    if ($id_session !== $this->getIdSession() && !str::isUid($id_session)) {
+    if (!Str::isUid($id_session)) {
       $id_session = $this->getIdSession();
     }
     else{
@@ -1393,6 +1393,7 @@ class User extends Models\Cls\Basic
     }
 
     if (empty($cfg)
+        && Str::isUid($id_session)
         && ($id = $this->getSession('id'))
         && ($d = $this->db->rselect(
           $this->class_cfg['tables']['sessions'],

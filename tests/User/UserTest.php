@@ -3,7 +3,6 @@
 namespace User;
 
 use bbn\Db;
-use bbn\Mail;
 use bbn\Mvc;
 use bbn\User;
 use bbn\User\Session;
@@ -32,13 +31,14 @@ class UserTest extends TestCase
 
   protected $reset_password_post = [
     'key'           => 'key',
-    'id'            => 1,
     'pass1'         => 'new_pass',
     'pass2'         => 'new_pass',
     'appui_action'  => 'init_password'
   ];
 
-  protected $user_id = 1;
+  protected $user_id = '7f4a2c70bcac11eba47652540000cfaa';
+
+  protected $session_id = '7f4a2c70bcac11eba47652540000cfbe';
 
   protected $session_index;
 
@@ -90,7 +90,7 @@ class UserTest extends TestCase
     $db_mock = \Mockery::mock(Db::class);
 
     $db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
     // Init the User class to init a session.
     $this->user = new User($db_mock);
@@ -204,9 +204,10 @@ class UserTest extends TestCase
   protected function getExpectedSession()
   {
     return [
-      'id'        => 2,
+      'id'        => $this->user_id,
       'id_group'  => 1,
       'email'     => 'foobar@mail.comm',
+      'name'      => 'full name',
       'username'  => 'foobar',
       'login'     => 'baz',
       'admin'     => 0,
@@ -222,12 +223,12 @@ class UserTest extends TestCase
   /**
    * Manually login a user.
    *
-   * @param int   $id
-   * @param array $sess_cfg
+   * @param string $id
+   * @param array  $sess_cfg
    * @return array
    * @throws \ReflectionException
    */
-  protected function loginAs(int $id, array $sess_cfg)
+  protected function loginAs(string $id, array $sess_cfg)
   {
     // The update method that occurs in the _authenticate method when we call the logIn method
     $this->db_mock->shouldReceive('update')->once()->andReturn(1);
@@ -235,7 +236,7 @@ class UserTest extends TestCase
     // The rselect method that occurs in the _user_info method when we call the logIn method
     $this->db_mock->shouldReceive('rselect')->once()->andReturn(
       $expected_session_data = [
-        'id'        => 2,
+        'id'        => $this->user_id,
         'id_group'  => 1,
         'email'     => 'foo@mail.com',
         'username'  => 'foobar',
@@ -310,6 +311,8 @@ class UserTest extends TestCase
         $class_cfg['arch']['passwords']['added']   => date('Y-m-d H:i:s')]
     );
 
+    $this->reset_password_post['id'] = $this->user_id;
+
     $this->user = new User($this->db_mock, $this->reset_password_post);
 
     $this->assertTrue($this->user->isReset());
@@ -335,6 +338,8 @@ class UserTest extends TestCase
     // Should never be called
     $this->db_mock->shouldReceive('update')->once()->never();
     $this->db_mock->shouldReceive('insert')->once()->never();
+
+    $this->reset_password_post['id'] = $this->user_id;
 
     $this->user = new User($this->db_mock, $this->reset_password_post);
 
@@ -362,6 +367,8 @@ class UserTest extends TestCase
     $this->db_mock->shouldReceive('update')->once()->never();
     $this->db_mock->shouldReceive('insert')->once()->never();
 
+    $this->reset_password_post['id'] = $this->user_id;
+
     $this->user = new User($this->db_mock, $this->reset_password_post);
 
     $this->assertNotNull($this->user->getError());
@@ -384,19 +391,7 @@ class UserTest extends TestCase
     $this->assertNotNull($this->user->getError());
 
     // Now let's manually login as a user
-    $expected_session_data = $this->loginAs(2, $sess_cfg);
-
-    // The selectOne method that occurs in the _retrieve_session method
-    $this->db_mock->shouldReceive('selectOne')->once()->andReturn(json_encode($sess_cfg));
-
-    // The update method that occurs in the _authenticate method
-    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
-
-    // The rselect method that occurs in the _user_info method
-    $this->db_mock->shouldReceive('rselect')->once()->andReturn($expected_session_data);
-
-    // Init the Class again so the checkSession method could run.
-    $this->user = new User($this->db_mock);
+    $expected_session_data = $this->loginAs($this->user_id, $sess_cfg);
 
     $actual_session_data = $this->getSessionData();
 
@@ -404,7 +399,7 @@ class UserTest extends TestCase
 
     $this->assertSame($expected_session_data, $actual_session_data[$this->user_index]);
     $this->assertTrue($this->user->isAuth());
-    $this->assertSame(2, (int)$this->user->getId());
+    $this->assertSame($this->user_id, $this->user->getId());
     $this->assertNull($this->user->getError());
   }
 
@@ -1128,7 +1123,7 @@ class UserTest extends TestCase
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
     $this->db_mock->shouldNotReceive('update');
 
     $this->user = new User($this->db_mock);
@@ -1176,19 +1171,19 @@ class UserTest extends TestCase
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
     $this->db_mock->shouldReceive('rselect')->twice()->andReturn(
       $data = [
       'id_group'  => 4,
       'cfg'       => json_encode(['foo' => 'bar']),
-      'id'        => 1
+      'id'        => $this->user_id
       ]
     );
 
     $this->user = new User($this->db_mock);
 
     $this->setNonPublicPropertyValue('error', null);
-    $this->setNonPublicPropertyValue('id', 1);
+    $this->setNonPublicPropertyValue('id', $this->user_id);
 
     $result = $this->user->refreshInfo();
 
@@ -1231,7 +1226,7 @@ class UserTest extends TestCase
 
     $this->simpleLogin();
 
-    $this->assertSame(1, (int)$this->user->getId());
+    $this->assertSame($this->user_id, $this->user->getId());
   }
 
 
@@ -1251,7 +1246,7 @@ class UserTest extends TestCase
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
     $this->db_mock->shouldReceive('update')->once()->andReturn(1);
 
@@ -1262,12 +1257,13 @@ class UserTest extends TestCase
     $this->assertSame(1, $this->user->expireHotlink(1));
   }
 
+
   /** @test */
   public function expireHotlink_method_does_not_set_hotline_as_expired_if_there_is_an_error()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
     $this->db_mock->shouldNotReceive('update');
 
@@ -1275,30 +1271,34 @@ class UserTest extends TestCase
 
     $this->assertSame(0, $this->user->expireHotlink(1));
   }
-  
+
+
   /** @test */
   public function getIdFromMagicString_retrieves_user_id_from_hotlink_magic_string()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
-    $this->db_mock->shouldReceive('rselect')->once()->andReturn([
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
+      [
       $this->getClassCgf()['arch']['hotlinks']['magic'] => hash('sha256', 'foobar'),
       'id_user' => 33
-    ]);
+      ]
+    );
 
     $this->user = new User($this->db_mock);
 
     $this->assertSame(33, (int)$this->user->getIdFromMagicString(2, 'foobar'));
   }
 
+
   /** @test */
   public function getIdFromMagicString_returns_null_if_id_is_invalid()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
     $this->db_mock->shouldReceive('rselect')->once()->andReturnNull();
 
@@ -1307,22 +1307,26 @@ class UserTest extends TestCase
     $this->assertNull($this->user->getIdFromMagicString(2, 'foobar'));
   }
 
+
   /** @test */
   public function getIdFromMagicString_returns_null_if_the_ket_does_not_match()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
     $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
-    $this->db_mock->shouldReceive('lastId')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
-    $this->db_mock->shouldReceive('rselect')->once()->andReturn([
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
+      [
       $this->getClassCgf()['arch']['hotlinks']['magic'] => hash('sha256', 'foobar'),
       'id_user' => 33
-    ]);
+      ]
+    );
 
     $this->user = new User($this->db_mock);
 
     $this->assertNull($this->user->getIdFromMagicString(3, 'test'));
   }
+
 
   /** @test */
   public function isAdmin_method_returns_true_if_the_user_is_admin()
@@ -1335,6 +1339,7 @@ class UserTest extends TestCase
     $this->assertTrue($this->user->isAdmin());
   }
 
+
   /** @test */
   public function isAdmin_method_returns_false_if_the_user_is_not_admin()
   {
@@ -1345,6 +1350,7 @@ class UserTest extends TestCase
 
     $this->assertFalse($this->user->isAdmin());
   }
+
 
   /** @test */
   public function isDev_method_returns_true_if_user_is_admin_but_not_a_developer()
@@ -1358,6 +1364,7 @@ class UserTest extends TestCase
     $this->assertTrue($this->user->isDev());
   }
 
+
   /** @test */
   public function isDev_method_returns_true_if_user_is_a_developer_but_not_admin()
   {
@@ -1369,6 +1376,7 @@ class UserTest extends TestCase
 
     $this->assertTrue($this->user->isDev());
   }
+
 
   /** @test */
   public function isDev_method_returns_false_if_user_is_not_a_developer_nor_an_admin()
@@ -1382,11 +1390,13 @@ class UserTest extends TestCase
     $this->assertFalse($this->user->isDev());
   }
 
+
   /** @test */
   public function getManager_method_returns_a_manager_instance()
   {
     $this->assertInstanceOf(User\Manager::class, $this->user->getManager());
   }
+
 
   /** @test */
   public function check_method_checks_if_an_error_has_been_thrown_or_not()
@@ -1397,6 +1407,7 @@ class UserTest extends TestCase
 
     $this->assertTrue($this->user->check());
   }
+
 
   /** @test */
   public function logout_method_un_authenticate_reset_the_config_and_destroys_the_session()
@@ -1444,6 +1455,7 @@ class UserTest extends TestCase
     $this->assertNull($this->getSessionConfig());
   }
 
+
   /** @test */
   public function getMailer_method_returns_an_instance_of_the_mailer_class()
   {
@@ -1455,6 +1467,7 @@ class UserTest extends TestCase
 
     $this->assertInstanceOf($mailer_class, $this->user->getMailer());
   }
+
 
   /** @test */
   public function getMailer_method_throws_exception_if_the_mailer_class_does_not_exist()
@@ -1469,6 +1482,7 @@ class UserTest extends TestCase
     $this->user->getMailer();
   }
 
+
   /** @test */
   public function getMailer_method_returns_the_current_mailer_if_it_exists()
   {
@@ -1477,4 +1491,111 @@ class UserTest extends TestCase
 
     $this->assertInstanceOf($mailer, $this->user->getMailer());
   }
+
+
+  /** @test */
+  public function setPassword_method_returns_false_if_old_password_does_not_match_or_not_logged_in()
+  {
+    $this->assertFalse($this->user->setPassword('foo', 'bar'));
+
+    $hash_method = $this->getNonPublicMethod('_hash');
+
+    $this->db_mock->shouldReceive('selectOne')->twice()->andReturn(
+      null,
+      $hash_method->invoke($this->user, 'wrong_password')
+    );
+
+    $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+
+    $this->user = new User($this->db_mock);
+
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+
+    $this->assertFalse($this->user->setPassword('old_password', 'new_password'));
+  }
+
+
+  /** @test */
+  public function setPassword_method_changes_the_password_after_verification_and_returns_true()
+  {
+    $hash_method = $this->getNonPublicMethod('_hash');
+
+    $this->db_mock->shouldReceive('selectOne')->twice()->andReturn(
+      null,
+      $hash_method->invoke($this->user, 'old_password')
+    );
+
+    $this->db_mock->shouldReceive('insert')->twice()->andReturnTrue();
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+
+    $this->user = new User($this->db_mock);
+
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+
+    $this->assertTrue($this->user->setPassword('old_password', 'new_password'));
+  }
+
+
+  /** @test */
+  public function forcePassword_method_changes_the_password_in_database_and_returns_true()
+  {
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
+
+    $this->db_mock->shouldReceive('insert')->twice()->andReturnTrue();
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+
+    $this->user = new User($this->db_mock);
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+
+    $this->assertTrue($this->user->forcePassword('new_password'));
+  }
+
+
+  /** @test */
+  public function forcePassword_method_returns_false_if_not_authenticated()
+  {
+    $this->assertFalse($this->user->forcePassword('new_password'));
+  }
+
+
+  /** @test */
+  public function getName_method_returns_the_full_name_of_the_current_user()
+  {
+    $data      = $this->loginWithSessionData();
+    $class_cfg = $this->getClassCgf();
+
+    $this->assertTrue(isset($class_cfg['show']));
+    $this->assertTrue(isset($data[$class_cfg['show']]));
+    $this->assertSame($data[$class_cfg['show']], $this->user->getName());
+  }
+
+
+  /** @test */
+  public function getName_method_returns_the_full_name_of_the_given_user_if_exists()
+  {
+    $manager_mock = \Mockery::mock(User\Manager::class);
+    $manager_mock->shouldReceive('getUser')->andReturn(['name' => 'foo']);
+
+    $this->user = \Mockery::mock(User::class)->makePartial();
+
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->setNonPublicPropertyValue('class_cfg', ['show' => 'name']);
+
+    $this->user->shouldReceive('getManager')->andReturn($manager_mock);
+
+    $this->assertSame('foo', $this->user->getName($this->user_id));
+  }
+
+
+  /** @test */
+  public function getName_method_returns_null_when_not_authenticated()
+  {
+    $this->assertNull($this->user->getName());
+    $this->assertNull($this->user->getName('foo'));
+  }
+
+
 }
