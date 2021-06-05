@@ -914,7 +914,7 @@ MYSQL
               $idxs[] = $this->colSimpleName($cfg['aliases'][$g] ?? $g, true);
             } else {
               $indexes[] = $g;
-              $idxs[]    = $g;
+              $idxs[]    = $cfg['aliases'][$g] ?? $g;
             }
           }
 
