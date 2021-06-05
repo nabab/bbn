@@ -191,6 +191,9 @@ class User extends Models\Cls\Basic
   /** @var int */
   protected $id;
 
+  /** @var array */
+  protected $data = [];
+
   /** @var int */
   protected $id_group;
 
@@ -1123,7 +1126,7 @@ class User extends Models\Cls\Basic
       if ($fs->isFile($file) && $fs->createPath($path)) {
         $dest = $path.($name ?: basename($file));
         if ($move) {
-          if ($fs->move($file, Dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))) {
+          if ($fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))) {
             return $dest;
           }
         }
