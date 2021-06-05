@@ -1461,7 +1461,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file, $name = NULL, $move = true)\n  {\n    if ($this->auth) {\n      $fs   = new File\\System();\n      $path = $this->getTmpDir().microtime(true).'\/';\n      if ($fs->isFile($file) && $fs->createPath($path)) {\n        $dest = $path.($name ?: basename($file));\n        if ($move) {\n          if ($fs->move($file, Dirname($dest)) && $fs->rename(dirname($dest).'\/'.basename($file), basename($dest))) {\n            return $dest;\n          }\n        }\n        elseif ($fs->copy($file, $dest)) {\n          return $dest;\n        }\n      }\n    }\n\n    return null;\n  }",
+            "code": "function($file, $name = NULL, $move = true)\n  {\n    if ($this->auth) {\n      $fs   = new File\\System();\n      $path = $this->getTmpDir().microtime(true).'\/';\n      if ($fs->isFile($file) && $fs->createPath($path)) {\n        $dest = $path.($name ?: basename($file));\n        if ($move) {\n          if ($fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'\/'.basename($file), basename($dest))) {\n            return $dest;\n          }\n        }\n        elseif ($fs->copy($file, $dest)) {\n          return $dest;\n        }\n      }\n    }\n\n    return null;\n  }",
             "startLine": 1059,
             "endLine": 1078,
             "isDeprecated": false,
