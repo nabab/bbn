@@ -6,6 +6,7 @@ use bbn\Db;
 use bbn\Mvc;
 use bbn\User;
 use bbn\User\Session;
+use Mockery\Mock;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
 
@@ -73,6 +74,13 @@ class UserTest extends TestCase
   {
     return $this->getNonPublicProperty('sess_cfg');
   }
+
+
+  protected function getfields()
+  {
+    return $this->getNonPublicProperty('fields');
+  }
+
 
   protected function setUp(): void
   {
@@ -1543,7 +1551,6 @@ class UserTest extends TestCase
   public function forcePassword_method_changes_the_password_in_database_and_returns_true()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
-
     $this->db_mock->shouldReceive('insert')->twice()->andReturnTrue();
     $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
 
@@ -1598,4 +1605,420 @@ class UserTest extends TestCase
   }
 
 
+  /** @test */
+  public function getName_method_returns_null_when_show_key_does_not_exist_in_class_cfg_property()
+  {
+    $this->loginWithSessionData();
+
+    $class_cfg = $this->getClassCgf();
+
+    unset($class_cfg['show']);
+
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg);
+
+    $this->assertNull($this->user->getName());
+  }
+
+
+  /** @test */
+  public function addToken_method_generates_and_adds_a_token_in_database()
+  {
+    $this->assertNull($this->user->addToken());
+
+    $this->db_mock->shouldReceive('insert')->twice()->andReturnTrue();
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
+
+    $this->user = new User($this->db_mock);
+
+    $this->setNonPublicPropertyValue('auth', true);
+
+    $this->assertNotNull($result = $this->user->addToken());
+    $this->assertIsString($result);
+  }
+
+
+  /** @test */
+  public function getEmail_method_returns_the_email_of_the_current_user()
+  {
+    $data   = $this->loginWithSessionData();
+    $fields = $this->getfields();
+
+    $this->assertTrue(isset($fields['email']));
+    $this->assertTrue(isset($data[$fields['email']]));
+    $this->assertSame($data[$fields['email']], $this->user->getEmail());
+  }
+
+
+  /** @test */
+  public function getEmail_method_returns_the_email_of_the_given_user()
+  {
+    $manager_mock = \Mockery::mock(User\Manager::class);
+    $manager_mock->shouldReceive('getUser')->andReturn(['email' => 'foo@mail.com']);
+
+    $this->user = \Mockery::mock(User::class)->makePartial();
+
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->setNonPublicPropertyValue('fields', ['email' => 'email']);
+
+    $this->user->shouldReceive('getManager')->andReturn($manager_mock);
+
+    $this->assertSame('foo@mail.com', $this->user->getEmail($this->user_id));
+  }
+
+
+  /** @test */
+  public function getEmail_method_returns_null_if_not_authenticated()
+  {
+    $this->assertNull($this->user->getEmail());
+    $this->assertNull($this->user->getEmail($this->user_id));
+  }
+
+
+  /** @test */
+  public function getEmail_method_returns_null_if_email_key_does_not_exist_in_field_property()
+  {
+    $this->loginWithSessionData();
+    $fields = $this->getfields();
+    unset($fields['email']);
+    $this->setNonPublicPropertyValue('fields', $fields);
+
+    $this->assertNull($this->user->getEmail());
+  }
+
+
+  /** @test */
+  public function crypt_method_encrypts_the_given_string_when_encryption_key_is_not_defined()
+  {
+    $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+    $this->db_mock->shouldReceive('selectOne')->twice()->andReturn(null, 'encryption_key');
+
+    $this->user = new User($this->db_mock);
+
+    $this->setNonPublicPropertyValue('auth', true);
+
+    $this->assertSame(\bbn\Util\Enc::crypt('foo', 'encryption_key'), $this->user->crypt('foo'));
+  }
+
+
+  /** @test */
+  public function crypt_method_encrypts_the_given_string_when_encryption_key_is_defined()
+  {
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->setNonPublicPropertyValue('_encryption_key', 'encryption_key');
+
+    $this->assertSame(\bbn\Util\Enc::crypt('foo', 'encryption_key'), $this->user->crypt('foo'));
+  }
+
+
+  /** @test */
+  public function crypt_method_returns_null_when_not_authenticated_and_encryption_key_is_no_defined()
+  {
+    $this->assertNull($this->user->crypt('foo'));
+  }
+
+
+  /** @test */
+  public function decrypt_method_decrypts_the_given_string_when_encryption_key_is_not_defined()
+  {
+    $this->db_mock->shouldReceive('insert')->once()->andReturnTrue();
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+    $this->db_mock->shouldReceive('selectOne')->twice()->andReturn(null, 'encryption_key');
+
+    $this->user = new User($this->db_mock);
+
+    $this->setNonPublicPropertyValue('auth', true);
+
+    $encrypted_string = \bbn\Util\Enc::crypt('foo', 'encryption_key');
+
+    $this->assertSame(
+      \bbn\Util\Enc::decrypt($encrypted_string, 'encryption_key'),
+      $this->user->decrypt($encrypted_string)
+    );
+  }
+
+
+  /** @test */
+  public function decrypt_method_decrypts_the_given_string_when_encryption_key_is_defined()
+  {
+    $this->setNonPublicPropertyValue('_encryption_key', 'encryption_key');
+
+    $encrypted_string = \bbn\Util\Enc::crypt('foo', 'encryption_key');
+
+    $this->assertSame(
+      \bbn\Util\Enc::decrypt($encrypted_string, 'encryption_key'),
+      $this->user->decrypt($encrypted_string)
+    );
+  }
+
+
+  /** @test */
+  public function decrypt_method_returns_null_when_not_authenticated_and_encryption_key_is_not_defined()
+  {
+    $this->assertNull($this->user->decrypt('foo'));
+  }
+
+
+  /** @test */
+  public function getUser_method_returns_the_current_instance()
+  {
+    $this->assertInstanceOf(User::class, $this->user->getUser());
+  }
+
+
+  /** @test */
+  public function makeFingerprint_method_generates_a_random_string_between_16_and_32_characters()
+  {
+    for ($i = 0; $i < 3; $i++) {
+      $result = $this->user->makeFingerprint();
+
+      $this->assertIsString($result);
+      $this->assertTrue(strlen($result) >= 16 && strlen($result) <= 32);
+    }
+  }
+
+
+  /** @test */
+  public function makeMagicString_method_returns_an_array_with_a_key_and_a_magic_string()
+  {
+    $this->assertIsArray($result = $this->user->makeMagicString());
+    $this->assertTrue(isset($result['key']));
+    $this->assertTrue(isset($result['hash']));
+    $this->assertIsString($result['key']);
+    $this->assertIsString($result['hash']);
+    $this->assertTrue(strlen($result['key']) >= 16 && strlen($result['key']) <= 32);
+  }
+
+
+  /** @test */
+  public function isMagicString_method_checks_if_the_given_string_to_the_given_hash()
+  {
+    $this->assertFalse(
+      $this->user->isMagicString('foo', 'foo')
+    );
+
+    $this->assertTrue(
+      $this->user->isMagicString('foo', hash('sha256', 'foo'))
+    );
+  }
+
+
+  /** @test */
+  public function setError_method_sets_the_error_property_if_it_is_not_set_already()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+
+    $set_error_method = $this->getNonPublicMethod('setError');
+
+    $result = $set_error_method->invoke($this->user, 1);
+    $this->assertSame(1, $this->getNonPublicProperty('error'));
+
+    $set_error_method->invoke($this->user, 12);
+    $this->assertSame(1, $this->getNonPublicProperty('error'));
+
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function getError_method_returns_the_error_if_there_is_one()
+  {
+    $this->setNonPublicPropertyValue('error', 6);
+
+    $class_cfg = $this->getClassCgf();
+
+    $this->assertNotNull($this->user->getError());
+    $this->assertTrue(isset($class_cfg['errors']));
+    $this->assertTrue(is_array($class_cfg['errors']));
+    $this->assertTrue(!empty($class_cfg['errors']));
+
+    $result = $this->user->getError();
+
+    $this->assertIsArray($result);
+    $this->assertTrue(isset($result['code']));
+    $this->assertTrue(isset($result['text']));
+    $this->assertIsInt($result['code']);
+    $this->assertIsString($result['text']);
+    $this->assertSame(6, $result['code']);
+    $this->assertSame($class_cfg['errors'][6], $result['text']);
+  }
+
+
+  /** @test */
+  public function getError_method_returns_null_if_there_is_no_error()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+
+    $this->assertNull($this->user->getError());
+  }
+
+
+  /** @test */
+  public function logIn_method_login_a_user_from_the_provided_id()
+  {
+    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn($this->getExpectedSession());
+
+    $this->user = new User($this->db_mock);
+
+    $this->assertNotNull($this->user->getError());
+    $this->assertNull($this->user->getId());
+    $this->assertFalse($this->user->isAuth());
+
+    $login_method = $this->getNonPublicMethod('logIn');
+    $result       = $login_method->invoke($this->user, $this->user_id);
+
+    $this->assertNull($this->user->getError());
+    $this->assertSame($this->user_id ,$this->user->getId());
+    $this->assertTrue($this->user->isAuth());
+
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function getPrint_method_returns_a_hash_from_user_agent_and_fingerprint()
+  {
+    $this->setNonPublicPropertyValue('user_agent', 'Safari macosX');
+    $this->setNonPublicPropertyValue('accept_lang', 'en');
+
+    $user_agent  = $this->getNonPublicProperty('user_agent');
+    $accept_lang = $this->getNonPublicProperty('accept_lang');
+    $fingerprint = $this->getSessionData()[$this->session_index]['fingerprint'];
+
+    $get_print_method = $this->getNonPublicMethod('getPrint');
+
+    $this->assertSame(
+      sha1($user_agent . $accept_lang . $fingerprint),
+      $get_print_method->invoke($this->user)
+    );
+
+    $this->assertSame(
+      sha1($user_agent . $accept_lang . '2134aaa34'),
+      $get_print_method->invoke($this->user, '2134aaa34')
+    );
+  }
+
+
+  /** @test */
+  public function getPrint_method_returns_null_if_fingerprint_is_not_defined()
+  {
+    $session_data = $this->getNonPublicProperty('data', $this->getSession());
+
+    $this->assertTrue(isset($session_data[$this->session_index]['fingerprint']));
+
+    unset($session_data[$this->session_index]['fingerprint']);
+
+    $this->setNonPublicPropertyValue('data', $session_data, $this->getSession());
+
+    $get_print_method = $this->getNonPublicMethod('getPrint');
+
+    $this->assertNull($get_print_method->invoke($this->user));
+  }
+
+
+  /** @test */
+  public function getIdSession_method_returns_the_database_id_for_the_session_row_if_exists()
+  {
+    $get_id_session_method = $this->getNonPublicMethod('getIdSession');
+
+    $session_data = $this->getNonPublicProperty('data', $this->getSession());
+
+    $this->assertTrue(isset($session_data[$this->session_index]['id_session']));
+
+    $this->assertSame(
+      $session_data[$this->session_index]['id_session'],
+      $get_id_session_method->invoke($this->user)
+    );
+  }
+
+
+  /** @test */
+  public function getIdSession_method_returns_null_if_session_row_does_not_exists()
+  {
+    $get_id_session_method = $this->getNonPublicMethod('getIdSession');
+
+    $session_data = $this->getNonPublicProperty('data', $this->getSession());
+
+    $this->assertTrue(isset($session_data[$this->session_index]['id_session']));
+
+    unset($session_data[$this->session_index]['id_session']);
+
+    $this->setNonPublicPropertyValue('data', $session_data,$this->getSession());
+
+    $this->assertNull(
+      $get_id_session_method->invoke($this->user)
+    );
+  }
+
+  /** @test */
+  public function recordAttempt_method_increments_the_num_attempt_variable()
+  {
+    $record_attempt_method = $this->getNonPublicMethod('recordAttempt');
+
+    $this->setNonPublicPropertyValue('cfg', null);
+
+    $record_attempt_method->invoke($this->user);
+
+    $this->assertTrue(isset($this->getConfig()['num_attempts']));
+    $this->assertSame(1, $this->getConfig()['num_attempts']);
+
+    $this->setNonPublicPropertyValue('cfg', ['num_attempts' => 4]);
+
+    $result = $record_attempt_method->invoke($this->user);
+
+    $this->assertTrue(isset($this->getConfig()['num_attempts']));
+    $this->assertSame(5, $this->getConfig()['num_attempts']);
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+  /** @test */
+  public function login_method_initialize_and_saves_the_session_after_authentication()
+  {
+    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn($this->getExpectedSession());
+
+    $this->user = new User($this->db_mock);
+
+    $this->assertFalse($this->user->isAuth());
+    $this->assertNull($this->user->getId());
+    $this->assertNotNull($this->user->getError());
+
+    $this->setNonPublicPropertyValue('error', null);
+
+    $_login_method = $this->getNonPublicMethod('_login');
+    $result        = $_login_method->invoke($this->user, $this->user_id);
+
+    $this->assertNull($this->user->getError());
+    $this->assertSame($this->user_id ,$this->user->getId());
+    $this->assertTrue($this->user->isAuth());
+
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+  /** @test */
+  public function _login_method_does_not_authenticate_if_there_is_an_error()
+  {
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturn(null);
+    $this->db_mock->shouldReceive('insert')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+
+    $this->user = new User($this->db_mock);
+
+    $this->assertFalse($this->user->isAuth());
+    $this->assertNull($this->user->getId());
+    $this->assertNotNull($this->user->getError());
+
+    $this->setNonPublicPropertyValue('error', 3);
+
+    $_login_method = $this->getNonPublicMethod('_login');
+    $result        = $_login_method->invoke($this->user, $this->user_id);
+
+    $this->assertFalse($this->user->isAuth());
+    $this->assertNull($this->user->getId());
+    $this->assertNotNull($this->user->getError());
+
+    $this->assertInstanceOf(User::class, $result);
+  }
 }
