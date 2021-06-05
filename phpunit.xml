@@ -29,5 +29,6 @@
     <const name="BBN_DATA_PATH" value="tests/storage/" />
     <const name="BBN_APP_PREFIX" value="appui" />
     <const name="BBN_LIB_PATH" value="vendor" />
+    <const name="BBN_ADMIN_EMAIL" value="admin@test.com" />
   </php>
 </phpunit>

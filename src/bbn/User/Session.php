@@ -325,8 +325,14 @@ class Session
       // The value is the first argument
       $value = array_shift($args);
       // Except if it's an array and there is only one argument
-      if (!count($args) && \is_array($value) && bbn\X::isAssoc($value)) {
-        $this->data = bbn\X::mergeArrays($this->data, $value);
+      if (!count($args) && \is_array($value)) {
+        // If the array is empty then the intention is to delete session data.
+        if (empty($value)) {
+          $this->data = [];
+
+        } elseif (bbn\X::isAssoc($value)) {
+          $this->data = bbn\X::mergeArrays($this->data, $value);
+        }
       }
       else{
         $var =& $this->data;

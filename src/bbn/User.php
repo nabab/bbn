@@ -244,7 +244,9 @@ class User extends Models\Cls\Basic
     // The user logs in
     if ($this->isLoginRequest($params)) {
       /** @todo separate credentials and salt checking */
-      if ($this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']) {
+      if (!empty($this->sess_cfg['fingerprint'])
+          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
+      ) {
         /** @todo separate credentials and salt checking */
         $this->_check_credentials($params);
       }
@@ -463,9 +465,9 @@ class User extends Models\Cls\Basic
         if ($r) {
           $this->setSession(['cfg' => false]);
           $this->_user_info();
-          return $r;
         }
       }
+      return $r ?? false;
     }
 
     return false;
@@ -491,15 +493,15 @@ class User extends Models\Cls\Basic
    */
   public function isJustLogin()
   {
-    return $this->_just_login;
+    return (bool)$this->_just_login;
   }
 
 
     /**
    * Sets the given attribute(s) in the user's session.
    *
-     * @return self
-     */
+   * @return self
+   */
   public function setSession($attr): self
   {
     if ($this->session->has($this->userIndex)) {
@@ -508,9 +510,11 @@ class User extends Models\Cls\Basic
         $attr = [$args[0] => $args[1]];
       }
 
-      foreach ($attr as $key => $val){
-        if (\is_string($key)) {
-          $this->session->set($val, $this->userIndex, $key);
+      if(is_array($attr)) {
+        foreach ($attr as $key => $val){
+          if (\is_string($key)) {
+            $this->session->set($val, $this->userIndex, $key);
+          }
         }
       }
     }
@@ -520,11 +524,11 @@ class User extends Models\Cls\Basic
 
 
   /**
-   * Sets the given attribute(s) in the user's session.
+   * Unsets the given attribute(s) in the user's session if exists.
    *
-     * @return self
-     */
-  public function unsetSession($attr): self
+   * @return self
+   */
+  public function unsetSession(): self
   {
     $args = \func_get_args();
     array_unshift($args, $this->userIndex);
@@ -537,7 +541,7 @@ class User extends Models\Cls\Basic
 
 
     /**
-   * Returns session property from the session's user array.
+   * Returns session property from the session's user array (userIndex).
    *
    * @param null|string The property to get
      * @return mixed
@@ -552,34 +556,48 @@ class User extends Models\Cls\Basic
   }
 
 
+  /**
+   * Gets an attribute or the whole the "session" part of the session  (sessIndex).
+   *
+   * @param string|null $attr Name of the attribute to get.
+   * @return mixed|null
+   */
   public function getOsession($attr = null)
   {
     return $this->_get_session($attr);
   }
 
 
-  public function setOsession($attr)
+  /**
+   * Sets an attribute the "session" part of the session (sessIndex).
+   *
+   * @return self
+   */
+  public function setOsession()
   {
-    return $this->_set_session($attr);
+    return $this->_set_session(...func_get_args());
   }
 
 
-    /**
+   /**
    * Checks if the given attribute exists in the user's session.
    *
-     * @return bool
-     */
+   * @return bool
+   */
   public function hasSession($attr): bool
   {
     return $this->session->has($this->userIndex, $attr);
   }
 
 
+  /**
+   * Updates last activity value for the session in database.
+   *
+   * @return self
+   */
   public function updateActivity(): self
   {
-    $id_session = $this->getIdSession();
-    //die(var_dump($id_session, $this->check()));
-    if ($id_session && $this->check()) {
+    if ($id_session = $this->getIdSession() && $this->check()) {
       $p =& $this->class_cfg['arch']['sessions'];
       $this->db->update(
         $this->class_cfg['tables']['sessions'], [
@@ -601,12 +619,12 @@ class User extends Models\Cls\Basic
    * Saves the session config in the database.
    *
    * @todo Use it only when needed!
-     * @return self
-     */
+   * @return self
+   */
   public function saveSession(bool $force = false): self
   {
     $id_session = $this->getIdSession();
-    //die(var_dump($id_session, $this->check()));
+
     if ($this->check()) {
       if ($id_session) {
         $p =& $this->class_cfg['arch']['sessions'];
@@ -682,16 +700,13 @@ class User extends Models\Cls\Basic
   public function checkAttempts(): bool
   {
     if (!isset($this->cfg)) {
-      //x::log("Checking attempts without user config", 'user_login');
-      return false;
+      return true;
     }
 
     if (isset($this->cfg['num_attempts']) && $this->cfg['num_attempts'] > $this->class_cfg['max_attempts']) {
-      //x::log("Checking attempts maxed out!", 'user_login');
       return false;
     }
 
-    //x::log("Checking attempts ok", 'user_login');
     return true;
   }
 
@@ -729,13 +744,15 @@ class User extends Models\Cls\Basic
         $attr = [$args[0] => $args[1]];
       }
 
-      foreach ($attr as $key => $val){
-        if (\is_string($key)) {
-          $this->cfg[$key] = $val;
+      if (is_array($attr)) {
+        foreach ($attr as $key => $val){
+          if (\is_string($key)) {
+            $this->cfg[$key] = $val;
+          }
         }
-      }
 
-      $this->setSession(['cfg' => $this->cfg]);
+        $this->setSession(['cfg' => $this->cfg]);
+      }
     }
 
     return $this;
@@ -751,19 +768,20 @@ class User extends Models\Cls\Basic
   public function unsetCfg($attr): self
   {
     if (null !== $this->cfg) {
-      $args = \func_get_args();
       if (\is_string($attr)) {
         /** @var array $attr */
         $attr = [$attr];
       }
 
-      foreach ($attr as $key){
-        if (isset($key)) {
-          unset($this->cfg[$key]);
+      if (is_array($attr)) {
+        foreach ($attr as $key){
+          if (isset($key)) {
+            unset($this->cfg[$key]);
+          }
         }
-      }
 
-      $this->setSession(['cfg' => $this->cfg]);
+        $this->setSession(['cfg' => $this->cfg]);
+      }
     }
 
     return $this;
@@ -771,10 +789,10 @@ class User extends Models\Cls\Basic
 
 
   /**
-   * Regathers informations from the database.
+   * Regathers information from the database.
    *
-     * @return self
-     */
+   * @return self
+   */
   public function refreshInfo(): self
   {
     if ($this->check()) {
@@ -797,17 +815,19 @@ class User extends Models\Cls\Basic
   }
 
 
-    /**
+  /**
    * Retrieves user's info from session if needed and checks if authenticated.
    *
-     * @return bool
-     */
+   * @return bool
+   */
   public function checkSession()
   {
     if ($this->check()) {
       $this->_retrieve_session();
       return $this->auth;
     }
+
+    return false;
   }
 
 
@@ -900,7 +920,7 @@ class User extends Models\Cls\Basic
 
 
   /**
-   * Checks whether the user is an dev(eloper) or not.
+   * Checks whether the user is an (admin or developer) or not.
    *
    * @return bool
    */
@@ -913,21 +933,19 @@ class User extends Models\Cls\Basic
   /**
    * Gets a bbn\User\Manager instance.
    *
-   * @param Mail $mail
    * @return User\Manager
    */
-  public function getManager(Mail $mail = null)
+  public function getManager()
   {
-    $mgr = new User\Manager($this, $mail);
-    return $mgr;
+    return new User\Manager($this);
   }
 
 
-    /**
+  /**
    * Checks if an error has been thrown or not.
    *
-     * @return bool
-     */
+   * @return bool
+   */
   public function check()
   {
     return $this->getError() ? false : true;
@@ -951,6 +969,7 @@ class User extends Models\Cls\Basic
    * Returns an instance of the mailer class.
    *
    * @return Mail
+   * @throws \Exception
    */
   public function getMailer()
   {
@@ -1366,7 +1385,7 @@ class User extends Models\Cls\Basic
     */
   private function _sess_info(string $id_session = null): self
   {
-    if ($id_session !== $this->getIdSession() && !str::isUid($id_session)) {
+    if (!Str::isUid($id_session)) {
       $id_session = $this->getIdSession();
     }
     else{
@@ -1374,6 +1393,7 @@ class User extends Models\Cls\Basic
     }
 
     if (empty($cfg)
+        && Str::isUid($id_session)
         && ($id = $this->getSession('id'))
         && ($d = $this->db->rselect(
           $this->class_cfg['tables']['sessions'],
@@ -1451,11 +1471,9 @@ class User extends Models\Cls\Basic
       $id         = $this->getSession('id');
       if ($id_session && $id) {
         $this->_sess_info($id_session);
-        //x::log([$this->sess_cfg, $this->_get_session('fingerprint'), $this->getPrint($this->_get_session('fingerprint'))], 'user_login');
         if (isset($this->sess_cfg['fingerprint'])
             && ($this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
         ) {
-          //x::log("THe auth should have worked for id $id", 'user_login');
           $this->_authenticate($id)->_user_info()->_init_dir()->saveSession();
         }
         else {
@@ -1463,7 +1481,6 @@ class User extends Models\Cls\Basic
         }
       }
       else {
-        //x::log([$id_session, $id], 'user_login');
         $this->setError(15);
       }
     }
@@ -1549,7 +1566,7 @@ class User extends Models\Cls\Basic
 
 
    /**
-    * Sets an attribute the "session" part of the session.
+    * Sets an attribute the "session" part of the session (sessIndex).
     *
     * @param mixed $attr Attribute if value follows, or an array with attribute/value keypairs
     * @return self
@@ -1574,9 +1591,9 @@ class User extends Models\Cls\Basic
 
 
   /**
-   * Gets an attribute or the whole the "session" part of the session.
+   * Gets an attribute or the whole the "session" part of the session (sessIndex).
    *
-   * @param string|null $attr Name of the attribute to get
+   * @param string|null $attr Name of the attribute to get.
    * @return mixed
    */
   private function _get_session(string $attr = null)

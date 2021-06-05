@@ -117,11 +117,10 @@ You can click the following link to access directly your account:<br>
   }
 
 
-    /**
-     * @param object       $obj    A user's connection object (\connection or subclass)
-   * @param object|false $mailer A mail object with the send method
+  /**
+   * @param bbn\User $obj A user's connection object (\connection or subclass)
    *
-     */
+   */
   public function __construct(bbn\User $obj)
   {
     if (\is_object($obj) && method_exists($obj, 'getClassCfg')) {
