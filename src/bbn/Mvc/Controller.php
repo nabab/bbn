@@ -1131,13 +1131,19 @@ class Controller implements Api
 
   public function action()
   {
-    $this->obj = $this->addData(
-            ['res' => [
-              'success' => false]
-            ])
+    $res = [
+      'res' => [
+        'success' => false
+      ]
+    ];
+    $tmp = $this->addData($res)
             ->addData($this->post)
-            ->getObjectModel() ?:
-      ['res' => ['success' => false]];
+            ->getObjectModel();
+    if (!$tmp) {
+      $tmp = $res;
+    }
+
+    $this->obj = X::toObject($tmp);
   }
 
 
