@@ -1107,7 +1107,7 @@ class User extends Models\Cls\Basic
         $usr = $mgr->getUser($usr);
       }
 
-      if (isset($usr[$this->class_cfg['show']])) {
+      if (isset($this->class_cfg['show'], $usr[$this->class_cfg['show']])) {
         return $usr[$this->class_cfg['show']];
       }
     }
@@ -1116,6 +1116,11 @@ class User extends Models\Cls\Basic
   }
 
 
+  /**
+   * Generates and insert a token in database.
+   *
+   * @return string|null
+   */
   public function addToken(): ?string
   {
     if ($this->auth) {
@@ -1154,7 +1159,7 @@ class User extends Models\Cls\Basic
         $usr = $mgr->getUser($usr);
       }
 
-      if (isset($usr[$this->fields['email']])) {
+      if (isset($this->fields['email'], $usr[$this->fields['email']])) {
         return $usr[$this->fields['email']];
       }
     }
@@ -1193,6 +1198,12 @@ class User extends Models\Cls\Basic
   }
 
 
+  /**
+   * Encrypts the given string.
+   *
+   * @param string $st
+   * @return string|null
+   */
   public function crypt(string $st): ?string
   {
     if ($enckey = $this->_get_encryption_key()) {
@@ -1203,6 +1214,12 @@ class User extends Models\Cls\Basic
   }
 
 
+  /**
+   * Decrypts the given string.
+   *
+   * @param string $st
+   * @return string|null
+   */
   public function decrypt(string $st): ?string
   {
     if ($enckey = $this->_get_encryption_key()) {
@@ -1271,8 +1288,6 @@ class User extends Models\Cls\Basic
   {
     if (!$this->error) {
       $this->error = $err;
-      //x::log($this->getError(), 'user_login');
-      //die(x::dump($err));
     }
 
     return $this;
@@ -1327,7 +1342,7 @@ class User extends Models\Cls\Basic
     }
 
     if ($fp) {
-      return sha1($this->user_agent.$this->accept_lang./*$this->ip_address .*/ $fp);
+      return sha1($this->user_agent . $this->accept_lang . $fp);
     }
 
     return null;
@@ -1376,7 +1391,7 @@ class User extends Models\Cls\Basic
 
 
    /**
-    * Gathers the user'data from the database and puts it in the session.
+    * Gathers the user's data from the database and puts it in the session.
     *
     * @param array $data User's table data argument if it is already available
     * @return self
