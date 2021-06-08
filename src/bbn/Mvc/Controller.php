@@ -1138,7 +1138,7 @@ class Controller implements Api
     ];
     $tmp = $this->addData($res)
             ->addData($this->post)
-            ->getObjectModel();
+            ->getModel();
     if (!$tmp) {
       $tmp = $res;
     }
