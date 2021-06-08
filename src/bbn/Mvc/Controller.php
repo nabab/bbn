@@ -1131,7 +1131,13 @@ class Controller implements Api
 
   public function action()
   {
-    $this->obj = $this->addData(['res' => ['success' => false]])->addData($this->post)->getObjectModel();
+    $this->obj = $this->addData(
+            ['res' => [
+              'success' => false]
+            ])
+            ->addData($this->post)
+            ->getObjectModel() ?:
+      ['res' => ['success' => false]];
   }
 
 
