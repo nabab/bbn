@@ -136,16 +136,19 @@ class UserTest extends TestCase
    *
    * @param array         $selectOneReturn
    * @param callable|null $callback
+   * @return mixed|null
    */
   protected function login(?callable $callback = null)
   {
     if ($callback) {
-      $callback($this->db_mock);
+      $result = $callback($this->db_mock);
     }
 
     $this->login_post['appui_salt'] = $this->user->getSalt();
 
     $this->user = new User($this->db_mock, $this->login_post);
+
+    return $result ?? null;
   }
 
 
@@ -209,8 +212,14 @@ class UserTest extends TestCase
   }
 
 
-  protected function getExpectedSession()
+  /**
+   * @param array|null $cfg
+   * @return array
+   */
+  protected function getExpectedSession(?array $cfg = null): array
   {
+    $cfg = $cfg ?? $this->initSessionFingerPrint();
+
     return [
       'id'        => $this->user_id,
       'id_group'  => 1,
@@ -221,7 +230,7 @@ class UserTest extends TestCase
       'admin'     => 0,
       'dev'       => 0,
       'theme'     => 'bar',
-      'cfg'       => json_encode($this->initSessionFingerPrint()),
+      'cfg'       => json_encode($cfg),
       'active'    => 1,
       'enckey'    => 'key'
     ];
@@ -262,6 +271,11 @@ class UserTest extends TestCase
     $login_method->invoke($this->user, $id);
 
     return $expected_session_data;
+  }
+
+  protected function replaceDbWithMockedVersion(): void
+  {
+    $this->setNonPublicPropertyValue('db', $this->db_mock);
   }
 
 
@@ -1220,7 +1234,31 @@ class UserTest extends TestCase
   {
     $this->assertFalse($this->user->checkSession());
 
-    $this->loginWithSessionData();
+    $session_data = $this->getExpectedSession();
+
+    $this->login(
+      function ($db_mock) use ($session_data) {
+        $db_mock->shouldReceive('selectOne')->andReturn(
+          $this->user_id,
+          $this->getNonPublicMethod('_hash')->invoke($this->user, 'password'),
+          json_encode(
+            [
+              'fingerprint' => $this->getNonPublicMethod('getPrint')->invoke(
+                $this->user, $this->getSessionData()[$this->session_index]['fingerprint']
+              ),
+              'last_renew'  => time()
+            ]
+          )
+        );
+
+        $db_mock->shouldReceive('update')->twice()->andReturnTrue();
+
+        // This should be called by the method _user_info that occurs in updateInfo method
+        $db_mock->shouldReceive('rselect')->twice()->andReturn($session_data);
+      }
+    );
+
+    $this->setNonPublicPropertyValue('id', null);
 
     $this->assertTrue($this->user->checkSession());
     $this->assertTrue($this->user->check());
@@ -1952,6 +1990,7 @@ class UserTest extends TestCase
     );
   }
 
+
   /** @test */
   public function recordAttempt_method_increments_the_num_attempt_variable()
   {
@@ -1972,6 +2011,7 @@ class UserTest extends TestCase
     $this->assertSame(5, $this->getConfig()['num_attempts']);
     $this->assertInstanceOf(User::class, $result);
   }
+
 
   /** @test */
   public function login_method_initialize_and_saves_the_session_after_authentication()
@@ -1997,8 +2037,9 @@ class UserTest extends TestCase
     $this->assertInstanceOf(User::class, $result);
   }
 
+
   /** @test */
-  public function _login_method_does_not_authenticate_if_there_is_an_error()
+  public function login_method_does_not_authenticate_if_there_is_an_error()
   {
     $this->db_mock->shouldReceive('selectOne')->once()->andReturn(null);
     $this->db_mock->shouldReceive('insert')->once()->andReturn(1);
@@ -2019,6 +2060,874 @@ class UserTest extends TestCase
     $this->assertNull($this->user->getId());
     $this->assertNotNull($this->user->getError());
 
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function user_info_method_fetches_user_data_from_database_and_save_it_in_session()
+  {
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $fields           = $this->getNonPublicProperty('fields');
+    $fields['enckey'] = 'enckey';
+
+    $this->setNonPublicPropertyValue('fields', $fields);
+
+    $this->assertTrue(isset($this->getNonPublicProperty('fields')['enckey']));
+    $this->assertSame('enckey', $this->getNonPublicProperty('fields')['enckey']);
+    $this->assertNull($this->user->getGroup());
+    $this->assertFalse(isset($this->getSessionData()[$this->user_index]));
+
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
+      [
+      'id_group'  => 1,
+      'email'     => 'foobar@mail.comm',
+      ]
+    );
+
+    $user_info_method = $this->getNonPublicMethod('_user_info');
+    $result           = $user_info_method->invoke($this->user);
+
+    $this->assertTrue(!isset($this->getNonPublicProperty('fields')['enckey']));
+    $this->assertSame(1, (int)$this->user->getGroup());
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertTrue(isset($this->getSessionData()[$this->user_index]));
+    $this->assertSame(1, $this->getSessionData()[$this->user_index]['id_group']);
+    $this->assertSame('foobar@mail.comm', $this->getSessionData()[$this->user_index]['email']);
+  }
+
+
+  /** @test */
+  public function user_info_method_does_not_fetch_user_data_from_database_if_the_session_has_config()
+  {
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldNotReceive('rselect');
+
+    $this->assertNull($this->getConfig());
+
+    $session = $this->getSession();
+
+    $session->set(['foo' => 'bar'], $this->user_index, 'cfg');
+    $session->set(3, $this->user_index, 'id_group');
+
+    $this->assertIsArray($cfg = $this->user->getSession('cfg'));
+    $this->assertIsInt($id_group = $this->user->getSession('id_group'));
+    $this->assertTrue(isset($cfg['foo']));
+    $this->assertSame(3, $id_group);
+
+    $user_info_method = $this->getNonPublicMethod('_user_info');
+    $result           = $user_info_method->invoke($this->user);
+
+    $this->assertSame(['foo' => 'bar'], $this->getConfig());
+    $this->assertSame(3, (int)$this->user->getGroup());
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function get_encryption_key_method_retrieves_and_saves_the_ecnryption_key_from_db_if_not_defined()
+  {
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->replaceDbWithMockedVersion();
+
+    $this->assertNull($this->getNonPublicProperty('_encryption_key'));
+
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturn('encryption_key');
+
+    $get_encryption_key_method = $this->getNonPublicMethod('_get_encryption_key');
+    $result                    = $get_encryption_key_method->invoke($this->user);
+
+    $this->assertSame('encryption_key', $this->getNonPublicProperty('_encryption_key'));
+    $this->assertSame('encryption_key', $result);
+  }
+
+
+  /** @test */
+  public function get_encryption_key_method_does_not_retrieve_encryption_key_if_it_is_already_defined()
+  {
+    $this->setNonPublicPropertyValue('auth', true);
+    $this->setNonPublicPropertyValue('_encryption_key', 'encryption_key');
+    $this->replaceDbWithMockedVersion();
+
+    $get_encryption_key_method = $this->getNonPublicMethod('_get_encryption_key');
+    $result                    = $get_encryption_key_method->invoke($this->user);
+
+    $this->db_mock->shouldNotReceive('selectOne');
+
+    $this->assertSame('encryption_key', $this->getNonPublicProperty('_encryption_key'));
+    $this->assertSame('encryption_key', $result);
+  }
+
+
+  /** @test */
+  public function sess_info_method_fetches_all_information_about_user_session_if_session_id_exists_and_id_exists_and_session_exists_in_db()
+  {
+    $session = $this->getSession();
+    $session->set($this->user_id, $this->user_index, 'id');
+
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
+      [
+      'cfg' => json_encode(['foo' => 'bar'])
+      ]
+    );
+
+    $sess_info_method = $this->getNonPublicMethod('_sess_info');
+    $result           = $sess_info_method->invoke($this->user);
+
+    $this->assertSame(['foo' => 'bar'], $this->getSessionConfig());
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function sess_info_sets_an_error_if_session_id_exists_but_id_not_exists()
+  {
+    $this->replaceDbWithMockedVersion();
+    $this->setNonPublicPropertyValue('error', null);
+
+    $this->db_mock->shouldNotReceive('rselect');
+
+    $session_before = $this->getSessionConfig();
+
+    $sess_info_method = $this->getNonPublicMethod('_sess_info');
+    $result           = $sess_info_method->invoke($this->user);
+
+    $this->assertSame($session_before, $this->getSessionConfig());
+    $this->assertSame(14, $this->user->getError()['code']);
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function sess_info_sets_an_error_if_session_id_not_exists_but_id_exists()
+  {
+    $session = $this->getSession();
+    $session->set($this->user_id, $this->user_index, 'id');
+    $session->set(null, $this->session_index, 'id_session');
+
+    $this->replaceDbWithMockedVersion();
+    $this->setNonPublicPropertyValue('error', null);
+
+    $this->db_mock->shouldNotReceive('rselect');
+
+    $session_before = $this->getSessionConfig();
+
+    $sess_info_method = $this->getNonPublicMethod('_sess_info');
+    $result           = $sess_info_method->invoke($this->user);
+
+    $this->assertSame($session_before, $this->getSessionConfig());
+    $this->assertSame(14, $this->user->getError()['code']);
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function sess_info_method_initialize_a_new_session_then_fetches_it_if_session_id_exists_but_session_not_exists_in_db_and_new_session_id_is_differrent()
+  {
+    $session = $this->getSession();
+    $session->set($this->user_id, $this->user_index, 'id');
+
+    $this->replaceDbWithMockedVersion();
+    $this->setNonPublicPropertyValue('error', null);
+
+    // The first call should return null => as if session_id not exists in db
+    // The second call should the cfg => as of the _sess_info recursive call after generating a new session
+    $this->db_mock->shouldReceive('rselect')->twice()->andReturn(
+      null, [
+      'cfg' => json_encode(['foo' => 'bar'])
+      ]
+    );
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturnFalse();
+    $this->db_mock->shouldReceive('insert')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn('aaaa2c70bcac11eba47652540000cfaa');
+
+    $session_before = $this->getSessionConfig();
+
+    $sess_info_method = $this->getNonPublicMethod('_sess_info');
+    $result           = $sess_info_method->invoke($this->user);
+
+    $this->assertNotSame($session_before, $this->getSessionConfig());
+    $this->assertSame(['foo' => 'bar'], $this->getSessionConfig());
+    $this->assertNull($this->user->getError());
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function check_password_method_compares_a_string_with_the_hash()
+  {
+    $hash_method = $this->getNonPublicMethod('_hash');
+    $hash        = $hash_method->invoke($this->user, 'foo');
+
+    $check_password_method = $this->getNonPublicMethod('_check_password');
+
+    $this->assertTrue(
+      $check_password_method->invoke($this->user, 'foo', $hash)
+    );
+
+    $this->assertFalse(
+      $check_password_method->invoke($this->user, 'foo', 'foo')
+    );
+  }
+
+
+  /** @test */
+  public function hash_method_encypts_a_string_based_on_configured_hash_function()
+  {
+    $hash_method = $this->getNonPublicMethod('_hash');
+
+    $this->assertSame(
+      sha1('foo'),
+      $hash_method->invoke($this->user, 'foo')
+    );
+
+    $class_cfg = $this->getClassCgf();
+
+    $class_cfg['encryption'] = 'dummyMethod';
+
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg);
+
+    $this->assertSame(
+      hash('sha256', 'foo'),
+      $hash_method->invoke($this->user, 'foo')
+    );
+
+    unset($class_cfg['encryption']);
+
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg);
+
+    $this->assertSame(
+      hash('sha256', 'foo'),
+      $hash_method->invoke($this->user, 'foo')
+    );
+  }
+
+
+  /** @test */
+  public function retrieve_session_method_fetches_user_info_from_session_if_authenticated()
+  {
+    $this->assertFalse($this->user->isAuth());
+
+    $session = $this->getSession();
+    $session->set($this->user_id, $this->user_index, 'id');
+
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('rselect')->twice()->andReturn(
+      $user_session = [
+        'cfg' => $cfg = json_encode(
+          ['fingerprint' => $this->getNonPublicMethod('getPrint')->invoke($this->user)]
+        ),
+        'id_group' => 66
+      ]
+    );
+
+    $this->db_mock->shouldReceive('update')->twice()->andReturn(1);
+
+    $retrieve_session_method = $this->getNonPublicMethod('_retrieve_session');
+    $result                  = $retrieve_session_method->invoke($this->user);
+
+    $this->assertTrue($this->user->isAuth());
+    $this->assertTrue($this->user->check());
+    $this->assertSame($this->user_id, $this->user->getId());
+    $this->assertSame(66, (int)$this->user->getGroup());
+    $this->assertSame(
+      json_decode($cfg, true)['fingerprint'],
+      $this->getSessionConfig()['fingerprint']
+    );
+
+    $user_session['cfg'] = json_decode($user_session['cfg'], true);
+
+    $this->assertSame($user_session, $this->getSessionData()[$this->user_index]);
+    $this->assertInstanceOf(User::class, $result);
+
+  }
+
+
+  /** @test */
+  public function init_session_method_creates_user_session_if_not_already_exists_in_session()
+  {
+    $this->setNonPublicPropertyValue('sess_cfg', null);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('insert')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+
+    $session = $this->getSession();
+    $session->set(null, $this->session_index);
+
+    $init_session_method = $this->getNonPublicMethod('_init_session');
+
+    $result       = $init_session_method->invoke($this->user);
+    $session_data = $this->getSessionData()[$this->session_index] ?? [];
+
+    $this->assertNotEmpty($session_data);
+    $this->assertNotNull($session_cfg = $this->getNonPublicProperty('sess_cfg'));
+    $this->assertNotEmpty($session_cfg['fingerprint']);
+    $this->assertNotEmpty($session_cfg['last_renew']);
+    $this->assertSame($this->session_id, $session_data['id_session']);
+    $this->assertNotEmpty($session_data['fingerprint']);
+    $this->assertTrue(isset($session_data['tokens']));
+    $this->assertNotEmpty($session_data['salt']);
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertNull($this->getNonPublicProperty('error'));
+  }
+
+
+  /** @test */
+  public function init_session_method_creates_user_session_if_not_already_exists_in_database_but_exists_in_session()
+  {
+    $this->setNonPublicPropertyValue('sess_cfg', null);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturnNull();
+    $this->db_mock->shouldReceive('insert')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn($this->session_id);
+
+    $session = $this->getSession();
+    $session->set(null, $this->session_index, 'salt');
+    $session->set(null, $this->session_index, 'fingerprint');
+    $session->set(null, $this->session_index, 'tokens');
+
+    $init_session_method = $this->getNonPublicMethod('_init_session');
+
+    $result       = $init_session_method->invoke($this->user);
+    $session_data = $this->getSessionData()[$this->session_index] ?? [];
+
+    $this->assertNotEmpty($session_data);
+    $this->assertNotNull($session_cfg = $this->getNonPublicProperty('sess_cfg'));
+    $this->assertNotEmpty($session_cfg['fingerprint']);
+    $this->assertNotEmpty($session_cfg['last_renew']);
+    $this->assertSame($this->session_id, $session_data['id_session']);
+    $this->assertNotEmpty($session_data['fingerprint']);
+    $this->assertTrue(isset($session_data['tokens']));
+    $this->assertNotEmpty($session_data['salt']);
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertNull($this->getNonPublicProperty('error'));
+  }
+
+
+  /** @test */
+  public function init_session_method_get_user_session_when_already_exists_in_both_database_and_session()
+  {
+    $this->setNonPublicPropertyValue('sess_cfg', null);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturn(
+      json_encode(
+        [
+        'fingerprint' => 'fingerprint',
+        'last_renew' => time()
+        ]
+      )
+    );
+
+    $init_session_method = $this->getNonPublicMethod('_init_session');
+
+    $result       = $init_session_method->invoke($this->user);
+    $session_data = $this->getSessionData()[$this->session_index] ?? [];
+
+    $this->assertNotEmpty($session_data);
+    $this->assertNotNull($session_cfg = $this->getNonPublicProperty('sess_cfg'));
+    $this->assertNotEmpty($session_cfg['fingerprint']);
+    $this->assertNotEmpty($session_cfg['last_renew']);
+    $this->assertSame($this->session_id, $session_data['id_session']);
+    $this->assertNotEmpty($session_data['fingerprint']);
+    $this->assertTrue(isset($session_data['tokens']));
+    $this->assertNotEmpty($session_data['salt']);
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertNull($this->getNonPublicProperty('error'));
+  }
+
+
+  /** @test */
+  public function init_session_method_sets_an_error_when_cannot_insert_a_new_session_in_database()
+  {
+    $this->setNonPublicPropertyValue('sess_cfg', null);
+    $this->setNonPublicPropertyValue('error', null);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('insert')->once()->andReturn(0);
+
+    $session = $this->getSession();
+    $session->set(null, $this->session_index);
+
+    $init_session_method = $this->getNonPublicMethod('_init_session');
+
+    $result       = $init_session_method->invoke($this->user);
+    $session_data = $this->getSessionData()[$this->session_index] ?? [];
+
+    $this->assertEmpty($session_data);
+    $this->assertNotNull($session_cfg = $this->getNonPublicProperty('sess_cfg'));
+    $this->assertNotEmpty($session_cfg['fingerprint']);
+    $this->assertNotEmpty($session_cfg['last_renew']);
+    $this->assertFalse(
+      isset(
+        $session_data['id_session'],
+        $session_data['fingerprint'],
+        $session_data['tokens'],
+        $session_data['salt']
+      )
+    );
+
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertSame(16, $this->getNonPublicProperty('error'));
+  }
+
+
+  /** @test */
+  public function set_session_method_sets_an_attribute_in_the_session_index()
+  {
+    $session = $this->getSession();
+    $session->set([], $this->session_index);
+
+    $set_session_method = $this->getNonPublicMethod('_set_session');
+
+    $result = $set_session_method->invoke($this->user, 'foo', 'bar');
+    $set_session_method->invoke($this->user, ['foo2' => 'bar2']);
+
+    $session_data = $this->getSessionData();
+
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertTrue(isset($session_data[$this->session_index]['foo']));
+    $this->assertSame('bar', $session_data[$this->session_index]['foo']);
+    $this->assertInstanceOf(User::class, $result);
+
+    $this->assertTrue(isset($session_data[$this->session_index]['foo2']));
+    $this->assertSame('bar2', $session_data[$this->session_index]['foo2']);
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+
+  /** @test */
+  public function set_session_method_does_not_set_an_attribute_if_session_index_does_not_exist()
+  {
+    $session = $this->getSession();
+    $session->set(null, $this->session_index);
+
+    $set_session_method = $this->getNonPublicMethod('_set_session');
+
+    $result = $set_session_method->invoke($this->user, 'foo');
+
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertEmpty($this->getSessionData());
+  }
+
+
+  /** @test */
+  public function set_session_method_does_not_set_an_attribute_if_argumnet_is_non_assoc_array()
+  {
+    $session = $this->getSession();
+    $session->set(null, $this->session_index);
+
+    $set_session_method = $this->getNonPublicMethod('_set_session');
+
+    $result = $set_session_method->invoke($this->user, ['foo', 'bar']);
+
+    $this->assertInstanceOf(User::class, $result);
+    $this->assertEmpty($this->getSessionData());
+  }
+
+
+  /** @test */
+  public function get_session_method_gets_and_attribute_or_the_whole_sessiom_part_from_session_index()
+  {
+    $session = $this->getSession();
+    $session->set(null, $this->session_index);
+    $session->set('bar', $this->session_index, 'foo');
+    $session->set('bar2', $this->session_index, 'foo2');
+
+    $get_session_method = $this->getNonPublicMethod('_get_session');
+
+    $this->assertSame(
+      'bar',
+      $get_session_method->invoke($this->user, 'foo')
+    );
+
+    $this->assertSame(
+      'bar2',
+      $get_session_method->invoke($this->user, 'foo2')
+    );
+
+    $this->assertNull($get_session_method->invoke($this->user, 'foo3'));
+
+    $this->assertSame(
+      ['foo' => 'bar', 'foo2' => 'bar2'],
+      $get_session_method->invoke($this->user)
+    );
+  }
+
+
+  /** @test */
+  public function get_session_method_returns_null_if_session_index_does_not_exist()
+  {
+    $session = $this->getSession();
+    $session->set(null, $this->session_index);
+
+    $this->assertNull(
+      $this->getNonPublicMethod('_get_session')->invoke($this->user)
+    );
+  }
+
+
+  /** @test */
+  public function check_credentials_method_checks_the_credential_of_the_user()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('auth', false);
+    $this->replaceDbWithMockedVersion();
+
+    $has_method = $this->getNonPublicMethod('_hash');
+
+    $this->db_mock->shouldReceive('selectOne')->twice()->andReturn(
+      $this->user_id,
+      $has_method->invoke($this->user, 'pass')
+    );
+
+    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
+    $this->db_mock->shouldReceive('rselect')->once()->andReturn(
+      [
+      'cfg'      => json_encode(['foo' => 'bar']),
+      'id_group' => 33
+      ]
+    );
+
+    $class_cfg                = $this->getClassCgf();
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+        $class_cfg['fields']['salt']  => $this->getSession()->get($this->session_index, 'salt'),
+        $class_cfg['fields']['user']  => 'user',
+        $class_cfg['fields']['pass']  => 'pass',
+      ]
+    );
+
+    $this->assertTrue($result);
+    $this->assertTrue($this->user->isAuth());
+    $this->assertSame(['foo' => 'bar'], $this->getConfig());
+    $this->assertSame(33, (int)$this->user->getGroup());
+    $this->assertSame(
+      ['cfg' => ['foo' => 'bar'], 'id_group' => 33],
+      $this->getSessionData()[$this->user_index]
+    );
+  }
+
+
+  /** @test */
+  public function check_credentials_method_sets_an_error_if_salt_not_provided()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('auth', false);
+
+    $class_cfg = $this->getClassCgf();
+
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+      $class_cfg['fields']['user'] => 'user',
+      $class_cfg['fields']['pass'] => 'pass'
+      ]
+    );
+
+    $this->assertFalse($result);
+    $this->assertSame(11, $this->getNonPublicProperty('error'));
+    $this->assertFalse($this->user->isAuth());
+  }
+
+
+  /** @test */
+  public function check_credentials_method_sets_an_error_and_destroy_session_if_salt_is_not_valid()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('auth', false);
+
+    $this->assertNotEmpty($this->getSessionData());
+
+    $class_cfg                = $this->getClassCgf();
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+      $class_cfg['fields']['user'] => 'user',
+      $class_cfg['fields']['pass'] => 'pass',
+      $class_cfg['fields']['salt'] => 'foo'
+      ]
+    );
+
+    $this->assertFalse($result);
+    $this->assertSame(17, $this->getNonPublicProperty('error'));
+    $this->assertEmpty($this->getSessionData());
+    $this->assertFalse($this->user->isAuth());
+  }
+
+
+  /** @test */
+  public function check_credentials_method_sets_an_error_if_password_does_not_match()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('auth', false);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('selectOne')->times(4)->andReturn(
+      $this->user_id, 'pass', $this->user_id, 'pass'
+    );
+
+    $class_cfg                = $this->getClassCgf();
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+        $class_cfg['fields']['salt']  => $this->getSession()->get($this->session_index, 'salt'),
+        $class_cfg['fields']['user']  => 'user',
+        $class_cfg['fields']['pass']  => 'pass',
+      ]
+    );
+
+    $this->assertFalse($result);
+    $this->assertFalse($this->user->isAuth());
+    $this->assertSame(['num_attempts' => 1], $this->getConfig());
+    $this->assertSame(6, $this->getNonPublicProperty('error'));
+
+    // Test in case number of attempts is greater than max attempts
+    $this->setNonPublicPropertyValue('error', null);
+
+    $class_cfg                 = $this->getClassCgf();
+    $class_cfg['max_attempts'] = 2;
+
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg);
+
+    $config                 = $this->getConfig();
+    $config['num_attempts'] = 3;
+
+    $this->setNonPublicPropertyValue('cfg', $config);
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+        $class_cfg['fields']['salt']  => $this->getSession()->get($this->session_index, 'salt'),
+        $class_cfg['fields']['user']  => 'user',
+        $class_cfg['fields']['pass']  => 'pass',
+      ]
+    );
+
+    $this->assertFalse($result);
+    $this->assertFalse($this->user->isAuth());
+    $this->assertSame(['num_attempts' => 4], $this->getConfig());
+    $this->assertSame(4, $this->getNonPublicProperty('error'));
+  }
+
+
+  /** @test */
+  public function check_credentials_method_sets_an_error_if_user_not_found_in_database()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('auth', false);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('selectOne')->once()->andReturnFalse();
+
+    $class_cfg                = $this->getClassCgf();
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+        $class_cfg['fields']['salt']  => $this->getSession()->get($this->session_index, 'salt'),
+        $class_cfg['fields']['user']  => 'user',
+        $class_cfg['fields']['pass']  => 'pass',
+      ]
+    );
+
+    $this->assertFalse($result);
+    $this->assertFalse($this->user->isAuth());
+    $this->assertSame(6, $this->getNonPublicProperty('error'));
+  }
+
+
+  /** @test */
+  public function check_credentials_method_sets_an_error_if_user_and_password_params_dont_exist()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('auth', false);
+
+    $class_cfg                = $this->getClassCgf();
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke(
+      $this->user, [
+        $class_cfg['fields']['salt']  => $this->getSession()->get($this->session_index, 'salt')
+      ]
+    );
+
+    $this->assertFalse($result);
+    $this->assertFalse($this->user->isAuth());
+    $this->assertSame(12, $this->getNonPublicProperty('error'));
+  }
+
+  /** @test */
+  public function check_credentials_method_does_not_check_credentials_if_there_is_an_error()
+  {
+    $this->setNonPublicPropertyValue('error', 2);
+    $this->setNonPublicPropertyValue('auth', false);
+
+    $check_credentials_method = $this->getNonPublicMethod('_check_credentials');
+
+    $result = $check_credentials_method->invoke($this->user, 'user', 'pass');
+
+    $this->assertFalse($result);
+    $this->assertSame(2, $this->getNonPublicProperty('error'));
+  }
+
+  /** @test */
+  public function init_dir_method_defines_directory_path_for_the_user()
+  {
+    \bbn\File\Dir::delete(Mvc::getUserDataPath($this->user_id), true);
+    \bbn\File\Dir::delete(Mvc::getUserTmpPath($this->user_id), true);
+
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+    $this->setNonPublicPropertyValue('error', null);
+
+    $init_dir_method = $this->getNonPublicMethod('_init_dir');
+
+    $result = $init_dir_method->invoke($this->user);
+
+    $this->assertInstanceOf(User::class, $result);
+
+    $this->assertSame(
+      Mvc::getUserDataPath($this->user_id),
+      $path = $this->getNonPublicProperty('path')
+    );
+
+    $this->assertSame(
+      Mvc::getUserTmpPath($this->user_id),
+      $temp_path = $this->getNonPublicProperty('tmp_path')
+    );
+
+    $this->assertFalse(file_exists($path));
+    $this->assertFalse(file_exists($temp_path));
+    $this->assertTrue(defined('BBN_USER_PATH'));
+  }
+
+  /** @test */
+  public function init_dir_method_defines_directory_path_for_the_user_and_created_it()
+  {
+    \bbn\File\Dir::delete(Mvc::getUserDataPath($this->user_id), true);
+    \bbn\File\Dir::delete(Mvc::getUserTmpPath($this->user_id), true);
+
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+    $this->setNonPublicPropertyValue('error', null);
+
+    $init_dir_method = $this->getNonPublicMethod('_init_dir');
+
+    $result = $init_dir_method->invoke($this->user, true);
+
+    $this->assertInstanceOf(User::class, $result);
+
+    $this->assertSame(
+      Mvc::getUserDataPath($this->user_id),
+      $path = $this->getNonPublicProperty('path')
+    );
+
+    $this->assertSame(
+      Mvc::getUserTmpPath($this->user_id),
+      $temp_path = $this->getNonPublicProperty('tmp_path')
+    );
+
+    $this->assertTrue(file_exists($path));
+    $this->assertTrue(is_dir($path));
+
+    \bbn\File\Dir::delete($path, true);
+
+    $this->assertTrue(file_exists($temp_path));
+    $this->assertTrue(is_dir($temp_path));
+
+    \bbn\File\Dir::delete($temp_path, true);
+
+    $this->assertTrue(defined('BBN_USER_PATH'));
+  }
+
+  /** @test */
+  public function init_dir_method_does_not_define_a_path_for_the_user_if_no_id_saved()
+  {
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('error', null);
+
+    $init_dir_method = $this->getNonPublicMethod('_init_dir');
+
+    $result = $init_dir_method->invoke($this->user, true);
+
+    $this->assertNull($this->getNonPublicProperty('path'));
+    $this->assertNull($this->getNonPublicProperty('tmp_path'));
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+  /** @test */
+  public function init_dir_method_does_not_define_a_path_for_the_user_if_id_saved_but_there_is_an_error()
+  {
+    $this->setNonPublicPropertyValue('id', $this->user_id);
+    $this->setNonPublicPropertyValue('error', 3);
+
+    $init_dir_method = $this->getNonPublicMethod('_init_dir');
+
+    $result = $init_dir_method->invoke($this->user, true);
+
+    $this->assertNull($this->getNonPublicProperty('path'));
+    $this->assertNull($this->getNonPublicProperty('tmp_path'));
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+  /** @test */
+  public function authenticate_method_sets_the_user_as_authenticated()
+  {
+    $this->setNonPublicPropertyValue('error', null);
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('auth', false);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldReceive('update')->once()->andReturn(1);
+
+    $authenticate_method = $this->getNonPublicMethod('_authenticate');
+
+    $result = $authenticate_method->invoke($this->user, $this->user_id);
+
+    $this->assertTrue($this->user->isAuth());
+    $this->assertNull($this->user->getError());
+    $this->assertInstanceOf(User::class, $result);
+  }
+
+  /** @test */
+  public function authenticate_method_does_not_set_the_user_as_authenticated_if_there_is_an_error()
+  {
+    $this->setNonPublicPropertyValue('error', 2);
+    $this->setNonPublicPropertyValue('id', null);
+    $this->setNonPublicPropertyValue('auth', false);
+    $this->replaceDbWithMockedVersion();
+
+    $this->db_mock->shouldNotReceive('update');
+
+    $authenticate_method = $this->getNonPublicMethod('_authenticate');
+
+    $result = $authenticate_method->invoke($this->user, $this->user_id);
+
+    $this->assertFalse($this->user->isAuth());
+    $this->assertNotNull($this->user->getError());
     $this->assertInstanceOf(User::class, $result);
   }
 }
