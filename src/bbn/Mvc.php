@@ -1146,7 +1146,7 @@ class Mvc implements Mvc\Api
      * @param array  $data   Data for the view
      * @param string $plugin The plugin URL
      *
-     * @return string|false
+     * @return string|null
      */
     public function getPluginView(string $path, string $mode, array $data, string $plugin)
     {
@@ -1190,7 +1190,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * An alias for
+     * An alias for subpluginModel()
      *
      * @param string         $path
      * @param array          $data
