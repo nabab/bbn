@@ -1040,12 +1040,32 @@ class Controller implements Api
   }
 
 
-  public function getExternalView(string $full_path, string $mode = 'html', array $data=null)
+  /**
+   * This will get a view from a different root.
+   *
+   * @param string $full_path
+   * @param string $mode
+   * @param array|null $data
+   *
+   * @return false|string
+   * @throws \Exception
+   */
+  public function getExternalView(string $full_path, string $mode = 'html', ?array $data=null)
   {
     return $this->_mvc->getExternalView($full_path, $mode, $data);
   }
 
 
+  /**
+   * Retrieves a view of a custom plugin.
+   *
+   * @param string $path
+   * @param string $mode
+   * @param array $data
+   * @param string|null $plugin
+   *
+   * @return string|null
+   */
   public function customPluginView(string $path, string $mode = 'html', array $data = [], string $plugin = null): ?string
   {
     if (!$plugin) {

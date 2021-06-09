@@ -1292,4 +1292,89 @@ let data = {
       $method->invoke($this->controller, ['html'])
     );
   }
+
+  /** @test */
+  public function getView_method_will_get_a_view()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with(
+        $this->info['path'],
+        'html',
+        $this->data['controller_data']
+      )
+      ->andReturn('view');
+
+    $result = $this->controller->getView('html');
+
+    $this->assertSame('view', $result);
+  }
+
+  /** @test */
+  public function getView_method_will_get_a_html_view_if_mode_is_not_specified()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+    ->once()
+    ->with(
+      $this->info['path'],
+      'html',
+      $this->data['controller_data']
+    )
+    ->andReturn('view');
+
+    $result = $this->controller->getView(false);
+
+    $this->assertSame('view', $result);
+  }
+
+  /** @test */
+  public function getExternalView_method_gets_a_view_from_different_root()
+  {
+    $this->mvc_mock->shouldReceive('getExternalView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'])
+      ->andReturn('view_content');
+
+    $result = $this->controller->getExternalView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function customPluginView_method_retrieves_a_view_from_custom_plugin()
+  {
+    $this->mvc_mock->shouldReceive('customPluginView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'], 'custom_plugin')
+      ->andReturn('view_content');
+
+    $result = $this->controller->customPluginView('foo/bar', 'html', ['foo' => 'bar'], 'custom_plugin');
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function customPluginView_method_retrieves_a_view_from_current_plugin_if_plugin_is_not_provided()
+  {
+    $this->mvc_mock->shouldReceive('customPluginView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'], $this->getNonPublicProperty('_plugin'))
+      ->andReturn('view_content');
+
+    $result = $this->controller->customPluginView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function customPluginView_method_returns_null_when_plugin_is_not_set()
+  {
+    $this->setNonPublicPropertyValue('_plugin', null);
+
+    $this->mvc_mock->shouldNotReceive('customPluginView');
+
+    $result = $this->controller->customPluginView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertNull($result);
+  }
 }
