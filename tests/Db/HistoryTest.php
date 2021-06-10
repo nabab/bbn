@@ -7,6 +7,7 @@ use bbn\Db;
 use bbn\Db\History;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
+use tests\ReflectionHelpers;
 
 class HistoryTest extends TestCase
 {
@@ -24,6 +25,13 @@ class HistoryTest extends TestCase
   {
     $this->db_mock     = \Mockery::mock(Db::class);
     $this->db_obj_mock = \Mockery::mock(Database::class);
+
+    // Reset the instances
+    $reflectionClass = new \ReflectionClass(History::class);
+    $property        = $reflectionClass->getProperty('instances');
+    $property->setAccessible(true);
+    $property->setValue([]);
+
     $this->init();
   }
 

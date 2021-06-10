@@ -102,7 +102,9 @@ class History
 
     $this->db->setTrigger('\\bbn\\Appui\\History::trigger');
 
-    if (!in_array($this->hash = $this->makeHash(), self::$instances)) {
+    $this->hash = $this->makeHash();
+
+    if (!isset(self::$instances[$this->hash])) {
       self::$instances[$this->hash] = $this;
     }
   }
@@ -1277,7 +1279,7 @@ MYSQL;
                   $this->getColumn(),
                   [$this->getHistoryUidsColumnName('bbn_uid') => $primary_value]
                 ) === 0)
-                
+
                 && ($all = $this->db->rselect(
                   [
                   'table' => $table,
@@ -1560,6 +1562,7 @@ MYSQL;
     return md5($st);
   }
 
+
   /**
    * Returns the hash of the object.
    *
@@ -1569,6 +1572,7 @@ MYSQL;
   {
     return $this->hash;
   }
+
 
   /**
    * Returns an instance of registered history by it's hash.
@@ -1584,5 +1588,6 @@ MYSQL;
 
     return null;
   }
+
 
 }
