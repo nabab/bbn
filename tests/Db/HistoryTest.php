@@ -21,6 +21,8 @@ class HistoryTest extends TestCase
 
   protected array $cfg = [];
 
+  protected $user = 'a113a123';
+
   protected function setUp(): void
   {
     $this->db_mock     = \Mockery::mock(Db::class);
@@ -56,7 +58,12 @@ class HistoryTest extends TestCase
     $this->db_mock->shouldReceive('getForeignKeys')->once()->andReturn(['foo' => 'bar']);
     $this->db_mock->shouldReceive('setTrigger')->once()->andReturnSelf();
 
-    $this->history = new History($this->db_mock, $this->cfg, '123', $this->db_obj_mock);
+    $this->history = new History($this->db_mock, $this->cfg, $this->user, $this->db_obj_mock);
+  }
+
+  protected function getClassConfig()
+  {
+    return $this->getNonPublicProperty('class_cfg');
   }
 
   protected function tearDown(): void
@@ -166,5 +173,82 @@ class HistoryTest extends TestCase
   public function getHash_method_returns_the_hash_of_the_object()
   {
     $this->assertSame($this->getNonPublicProperty('hash'), $this->history->getHash());
+  }
+
+  /** @test */
+  public function get_db_method_returns_the_db_instance()
+  {
+    $method = $this->getNonPublicMethod('_get_db');
+
+    $this->assertInstanceOf(Db::class, $method->invoke($this->history));
+  }
+
+  /** @test */
+  public function get_database_method_returns_the_database_instance()
+  {
+    $method = $this->getNonPublicMethod('_get_database');
+
+    $this->assertInstanceOf(Database::class, $method->invoke($this->history));
+  }
+
+  /** @test */
+  public function insert_method_adds_a_row_in_history_table()
+  {
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
+    $this->db_mock->shouldReceive('disableLast')->once();
+    $this->db_mock->shouldReceive('setLastInsertId')->once()->andReturnSelf();
+    $this->db_mock->shouldReceive('enableLast')->once();
+
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history'],
+        [
+          $class_cfg['arch']['history']['opr'] => 'operation',
+          $class_cfg['arch']['history']['uid'] => 'line',
+          $class_cfg['arch']['history']['col'] => 'column',
+          $class_cfg['arch']['history']['val'] => null,
+          $class_cfg['arch']['history']['ref'] => null,
+          $class_cfg['arch']['history']['tst'] => 'chrono',
+          $class_cfg['arch']['history']['usr'] => $this->user,
+
+        ]
+      )
+      ->andReturn(1);
+
+    $method = $this->getNonPublicMethod('_insert');
+
+    $result =$method->invoke($this->history, [
+      'column'    => 'column',
+      'line'      => 'line',
+      'chrono'    => 'chrono',
+      'operation' => 'operation'
+    ]);
+
+    $this->assertTrue((bool)$result);
+  }
+
+  /** @test */
+  public function insert_method_throws_an_exception_if_the_user_is_not_set()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setNonPublicPropertyValue('user', null);
+
+    $this->db_mock->shouldNotReceive('lastId');
+    $this->db_mock->shouldNotReceive('disableLast');
+    $this->db_mock->shouldNotReceive('insert');
+    $this->db_mock->shouldNotReceive('setLastInsertId');
+    $this->db_mock->shouldNotReceive('enableLast');
+
+    $method = $this->getNonPublicMethod('_insert');
+
+    $method->invoke($this->history, [
+      'column'    => 'column',
+      'line'      => 'line',
+      'chrono'    => 'chrono'
+    ]);
   }
 }

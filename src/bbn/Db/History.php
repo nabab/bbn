@@ -167,7 +167,7 @@ class History
 
       // New row in the history table
       if ($res = $this->db->insert(
-        $this->getHistoryUidsTableName(), [
+        $this->getHistoryTableName(), [
         $this->getHistoryTableColumnName('opr') => $cfg['operation'],
         $this->getHistoryTableColumnName('uid') => $cfg['line'],
         $this->getHistoryTableColumnName('col') => $cfg['column'],
