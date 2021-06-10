@@ -203,9 +203,11 @@ class History
     ) {
       $col      = $this->db->escape('col');
       $where_ar = [];
-      foreach ($model['fields'] as $k => $f){
-        if (!empty($f['id_option'])) {
-          $where_ar[] = $col.' = UNHEX("'.$this->db->escapeValue($f['id_option']).'")';
+      if (isset($model['fields']) && is_array($model['fields'])) {
+        foreach ($model['fields'] as $k => $f){
+          if (!empty($f['id_option'])) {
+            $where_ar[] = $col.' = UNHEX("'.$this->db->escapeValue($f['id_option']).'")';
+          }
         }
       }
 

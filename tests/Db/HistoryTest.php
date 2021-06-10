@@ -192,7 +192,7 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
-  public function insert_method_adds_a_row_in_history_table()
+  public function insert_method_adds_a_row_in_history_table_when_provided_config_has_no_old_ref_param()
   {
     $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
     $this->db_mock->shouldReceive('disableLast')->once();
@@ -231,6 +231,99 @@ class HistoryTest extends TestCase
   }
 
   /** @test */
+  public function insert_method_adds_a_row_in_history_table_when_provided_config_has_a_valid_old_ref_param()
+  {
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
+    $this->db_mock->shouldReceive('disableLast')->once();
+    $this->db_mock->shouldReceive('setLastInsertId')->once()->andReturnSelf();
+    $this->db_mock->shouldReceive('enableLast')->once();
+    $this->db_mock->shouldReceive('count')->once()->andReturn(1);
+
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history'],
+        [
+          $class_cfg['arch']['history']['opr'] => 'operation',
+          $class_cfg['arch']['history']['uid'] => 'line',
+          $class_cfg['arch']['history']['col'] => 'column',
+          $class_cfg['arch']['history']['val'] => null,
+          $class_cfg['arch']['history']['ref'] => '7f4a2c70bcac11eba47652540000cfbe',
+          $class_cfg['arch']['history']['tst'] => 'chrono',
+          $class_cfg['arch']['history']['usr'] => $this->user,
+
+        ]
+      )
+      ->andReturn(1);
+
+    $method = $this->getNonPublicMethod('_insert');
+
+    $result =$method->invoke($this->history, [
+      'column'    => 'column',
+      'line'      => 'line',
+      'chrono'    => 'chrono',
+      'operation' => 'operation',
+      'old'       => '7f4a2c70bcac11eba47652540000cfbe'
+    ]);
+
+    $this->assertTrue((bool)$result);
+  }
+
+  /** @test */
+  public function insert_method_adds_a_row_in_history_table_when_provided_config_has_a_not_valid_old_ref_param()
+  {
+    $this->db_mock->shouldReceive('lastId')->once()->andReturn(22);
+    $this->db_mock->shouldReceive('disableLast')->once();
+    $this->db_mock->shouldReceive('setLastInsertId')->once()->andReturnSelf();
+    $this->db_mock->shouldReceive('enableLast')->once();
+
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history'],
+        [
+          $class_cfg['arch']['history']['opr'] => 'operation',
+          $class_cfg['arch']['history']['uid'] => 'line',
+          $class_cfg['arch']['history']['col'] => 'column',
+          $class_cfg['arch']['history']['val'] => '7f4a2c70',
+          $class_cfg['arch']['history']['ref'] => null,
+          $class_cfg['arch']['history']['tst'] => 'chrono',
+          $class_cfg['arch']['history']['usr'] => $this->user,
+
+        ]
+      )
+      ->andReturn(1);
+
+    $method = $this->getNonPublicMethod('_insert');
+
+    $result =$method->invoke($this->history, [
+      'column'    => 'column',
+      'line'      => 'line',
+      'chrono'    => 'chrono',
+      'operation' => 'operation',
+      'old'       => '7f4a2c70'
+    ]);
+
+    $this->assertTrue((bool)$result);
+  }
+
+  /** @test */
+  public function insert_method_returns_zero_when_required_config_are_not_provided()
+  {
+    $method = $this->getNonPublicMethod('_insert');
+
+    $this->assertSame(0, $method->invoke($this->history, ['column' => 'column', 'line' => 'line']));
+    $this->assertSame(0, $method->invoke($this->history, ['chrono' => 'chrono', 'line' => 'line']));
+    $this->assertSame(0, $method->invoke($this->history, ['line' => 'line']));
+    $this->assertSame(0, $method->invoke($this->history, ['chrono' => 'chrono']));
+    $this->assertSame(0, $method->invoke($this->history, ['column' => 'column']));
+  }
+
+  /** @test */
   public function insert_method_throws_an_exception_if_the_user_is_not_set()
   {
     $this->expectException(\Exception::class);
@@ -250,5 +343,63 @@ class HistoryTest extends TestCase
       'line'      => 'line',
       'chrono'    => 'chrono'
     ]);
+  }
+  
+  /** @test */
+  public function get_table_where_method_returns_a_string_for_the_where_in_the_query_for_the_provided_table()
+  {
+    $method = $this->getNonPublicMethod('_get_table_where');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->with('foo')
+      ->once()
+      ->andReturn(['fields' => [['id_option' => 'foobar']]]);
+
+    $this->db_mock->shouldReceive('escape')->once()->andReturn('col');
+    $this->db_mock->shouldReceive('escapeValue')->once()->andReturn('foobar');
+
+    $this->assertIsString($method->invoke($this->history, 'foo'));
+  }
+
+  /** @test */
+  public function get_table_where_method_returns_null_if_the_provided_table_name_is_not_valid()
+  {
+    $method = $this->getNonPublicMethod('_get_table_where');
+
+    $this->assertNull($method->invoke($this->history, '%foo'));
+  }
+
+  /** @test */
+  public function get_table_where_method_returns_null_if_database_model_returns_null()
+  {
+    $method = $this->getNonPublicMethod('_get_table_where');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->with('foo')
+      ->once()
+      ->andReturnNull();
+
+    $this->assertNull($method->invoke($this->history, 'foo'));
+  }
+
+  /** @test */
+  public function getIdColumn_method_returns_the_column_corresponding_options_id()
+  {
+    $this->db_mock->shouldReceive('tfn')->once()->with('table')->andReturn('db.table');
+    $this->db_mock->shouldReceive('getHost')->once()->andReturn('localhost');
+    $this->db_obj_mock->shouldReceive('columnId')
+      ->once()
+      ->with('col', 'table', 'db', 'localhost')
+      ->andReturn('column_id');
+
+    $this->assertSame('column_id', $this->history->getIdColumn('col', 'table'));
+  }
+
+  /** @test */
+  public function getIdColumn_method_returns_false_when_full_table_cannot_be_retrieved()
+  {
+    $this->db_mock->shouldReceive('tfn')->once()->with('table')->andReturnNull();
+
+    $this->assertFalse((bool)$this->history->getIdColumn('col', 'table'));
   }
 }
