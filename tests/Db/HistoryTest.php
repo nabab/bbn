@@ -47,6 +47,11 @@ class HistoryTest extends TestCase
         'options' => 'bbn_options'
       ]
     ];
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn('admin');
+    $this->db_mock->shouldReceive('getForeignKeys')->once()->andReturn(['foo' => 'bar']);
+    $this->db_mock->shouldReceive('setTrigger')->once()->andReturnSelf();
+
     $this->history = new History($this->db_mock, $cfg, '123', $this->db_obj_mock);
 
     $class_cfg = $this->getNonPublicProperty('class_cfg');
