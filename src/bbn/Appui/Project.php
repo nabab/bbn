@@ -11,6 +11,8 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 
+use function yaml_parse;
+
 class Project extends bbn\Models\Cls\Db
 {
 
@@ -74,22 +76,42 @@ class Project extends bbn\Models\Cls\Db
 
   public function getEnvironment($appPath = null): ?array
   {
-    $file_environment = ($appPath ?: \bbn\Mvc::getAppPath()).'cfg/environment';
+    if (!$appPath) {
+      $appPath = $this->getAppPath();
+    }
+
+    if (!$appPath) {
+      throw new \Exception(X::_("No application path given"));
+    }
+
+    $file_environment = $appPath.'cfg/environment';
     if ($this->fs->isFile($file_environment.'.json')) {
       $envs = \json_decode($this->fs->getContents($file_environment.'.json'), true);
     }
     elseif ($this->fs->isFile($file_environment.'.yml')) {
       try {
-        $envs = \yaml_parse($this->fs->getContents($file_environment.'.yml'), true);
+        $envs = yaml_parse($this->fs->getContents($file_environment.'.yml'));
       }
       catch (\Exception $e) {
         throw new \Exception(
-          "Impossible to parse the file $file_environment"
+          "Impossible to parse the file $file_environment.yaml"
           .PHP_EOL.$e->getMessage()
         );
       }
+      if ($envs === false) {
+        throw new \Exception(X::_("Impossible to parse the file $file_environment.yaml"));
+      }
     }
-    return $envs ? $envs[0] : null;
+
+    if (!empty($envs)) {
+      foreach ($envs as $env) {
+        if ($env['app_path'] === dirname($appPath).'/') {
+          return $env;
+        }
+      }
+    }
+
+    return null;
   }
 
 
