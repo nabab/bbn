@@ -69,6 +69,12 @@ class History
   /** @var array The foregin links atytached to history UIDs' table */
   private array $links;
 
+  /** @var array A collection of DB connections  */
+  private static array $instances = [];
+
+  /** @var string Object hash based on configuration  */
+  private string $hash;
+
 
   /**
    * History constructor.
@@ -95,6 +101,10 @@ class History
     );
 
     $this->db->setTrigger('\\bbn\\Appui\\History::trigger');
+
+    if (!in_array($this->hash = $this->makeHash(), self::$instances)) {
+      self::$instances[$this->hash] = $this;
+    }
   }
 
 
@@ -1267,7 +1277,7 @@ MYSQL;
                   $this->getColumn(),
                   [$this->getHistoryUidsColumnName('bbn_uid') => $primary_value]
                 ) === 0)
-
+                
                 && ($all = $this->db->rselect(
                   [
                   'table' => $table,
@@ -1529,5 +1539,50 @@ MYSQL;
     }
   }
 
+  /**
+   * Makes a string that will be the id of the request.
+   *
+   * @return string
+   *
+   */
+  private function makeHash(): string
+  {
+    $args = $this->class_cfg;
+    if ((\count($args) === 1) && \is_array($args[0])) {
+      $args = $args[0];
+    }
+
+    $st = '';
+    foreach ($args as $a){
+      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+    }
+
+    return md5($st);
+  }
+
+  /**
+   * Returns the hash of the object.
+   *
+   * @return string
+   */
+  public function getHash()
+  {
+    return $this->hash;
+  }
+
+  /**
+   * Returns an instance of registered history by it's hash.
+   *
+   * @param string $hash
+   * @return History|null
+   */
+  public static function getInstanceFromHash(string $hash): ?History
+  {
+    if (isset(self::$instances[$hash]) && self::$instances[$hash] instanceof History) {
+      return self::$instances[$hash];
+    }
+
+    return null;
+  }
 
 }
