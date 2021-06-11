@@ -1040,12 +1040,32 @@ class Controller implements Api
   }
 
 
-  public function getExternalView(string $full_path, string $mode = 'html', array $data=null)
+  /**
+   * This will get a view from a different root.
+   *
+   * @param string $full_path
+   * @param string $mode
+   * @param array|null $data
+   *
+   * @return false|string
+   * @throws \Exception
+   */
+  public function getExternalView(string $full_path, string $mode = 'html', ?array $data=null)
   {
     return $this->_mvc->getExternalView($full_path, $mode, $data);
   }
 
 
+  /**
+   * Retrieves a view of a custom plugin.
+   *
+   * @param string $path
+   * @param string $mode
+   * @param array $data
+   * @param string|null $plugin
+   *
+   * @return string|null
+   */
   public function customPluginView(string $path, string $mode = 'html', array $data = [], string $plugin = null): ?string
   {
     if (!$plugin) {
@@ -1060,18 +1080,30 @@ class Controller implements Api
   }
 
 
-  public function getComponentView(string $name, string $type = 'html', array $data = [])
-  {
-
-  }
-
-
+  /**
+   * This will get a view.
+   *
+   * @param string $path
+   * @param string $type
+   * @param array $data
+   *
+   * @return string|null
+   */
   public function getPluginView(string $path, string $type = 'html', array $data = [])
   {
     return $this->_mvc->getPluginView($path, $type, $data, $this->getPlugin());
   }
 
 
+  /**
+   * Gets views for html, css and js.
+   *
+   * @param string $path
+   * @param array $data
+   * @param array|null $data2
+   *
+   * @return array
+   */
   public function getPluginViews(string $path, array $data = [], array $data2 = null)
   {
     return [
@@ -1082,18 +1114,48 @@ class Controller implements Api
   }
 
 
-  public function getPluginModel($path, $data = [], string $plugin = null, int $ttl = 0)
+  /**
+   * Retrieves a model of a the plugin.
+   *
+   * @param $path
+   * @param array $data
+   * @param string|null $plugin
+   * @param int $ttl
+   *
+   * @return array|null
+   */
+  public function getPluginModel($path, array $data = [], string $plugin = null, int $ttl = 0)
   {
     return $this->_mvc->getPluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $ttl);
   }
 
 
+  /**
+   * Get a sub plugin model (a plugin inside the plugin directory of another plugin).
+   *
+   * @param $path
+   * @param array $data
+   * @param string|null $plugin
+   * @param string $subplugin
+   * @param int $ttl
+   *
+   * @return array|null
+   */
   public function getSubpluginModel($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }
 
 
+  /**
+   * Returns true if the subplugin model exists.
+   *
+   * @param string $path
+   * @param string $plugin
+   * @param string $subplugin
+   *
+   * @return bool
+   */
   public function hasSubpluginModel(string $path, string $plugin, string $subplugin)
   {
     return $this->_mvc->hasSubpluginModel(...\func_get_args());
@@ -1119,6 +1181,14 @@ class Controller implements Api
     return $v;
   }
   */
+
+  /**
+   * Retrieves data from the data property using the key name from the provided variable name.
+   *
+   * @param $var
+   *
+   * @return false|mixed
+   */
   private function retrieveVar($var)
   {
     if (\is_string($var) && (strpos($var, '$') === 0) && isset($this->data[substr($var, 1)])) {
@@ -1129,6 +1199,12 @@ class Controller implements Api
   }
 
 
+  /**
+   * Merges post data and result array witt the current data
+   * and gets the model then sets the output object.
+   *
+   * @return void
+   */
   public function action()
   {
     $res = [
@@ -1147,7 +1223,13 @@ class Controller implements Api
   }
 
 
-  public function cachedAction($ttl = 60)
+  /**
+   * Merges post data and result array witt the current data
+   * and gets the model from cache then sets the output object.
+   *
+   * @param int $ttl
+   */
+  public function cachedAction(int $ttl = 60)
   {
     $this->obj = X::toObject(
       $this->addData(['res' => ['success' => false]])->addData($this->post)->getCachedModel('', $this->data, $ttl)
@@ -1186,7 +1268,10 @@ class Controller implements Api
       }
     }
     if ($this->getRoute($path ?: $this->_path, 'model')) {
-      $model = $ttl === null ? $this->getModel($path, X::mergeArrays($this->post, $this->data)) : $this->getCachedModel($path, X::mergeArrays($this->post, $this->data), $ttl);
+      $model = $ttl === null
+        ? $this->getModel($path, X::mergeArrays($this->post, $this->data))
+        : $this->getCachedModel($path, X::mergeArrays($this->post, $this->data), $ttl);
+
       if ($model && is_array($model)) {
         $this->addData($model);
       }

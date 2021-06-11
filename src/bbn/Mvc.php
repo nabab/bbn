@@ -345,7 +345,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Returns
+     * Returns path for the user's temp dir
      *
      * @param string $id_user
      * @param string $plugin
@@ -373,6 +373,13 @@ class Mvc implements Mvc\Api
     }
 
 
+  /**
+   * Returns path for the user's dir
+   *
+   * @param string|null $id_user
+   * @param string|null $plugin
+   * @return string|null
+   */
     public static function getUserDataPath(string $id_user = null, string $plugin = null):? string
     {
       if (!self::$_app_name) {
@@ -1139,7 +1146,7 @@ class Mvc implements Mvc\Api
      * @param array  $data   Data for the view
      * @param string $plugin The plugin URL
      *
-     * @return string|false
+     * @return string|null
      */
     public function getPluginView(string $path, string $mode, array $data, string $plugin)
     {
@@ -1183,7 +1190,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * An alias for
+     * An alias for subpluginModel()
      *
      * @param string         $path
      * @param array          $data
