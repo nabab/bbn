@@ -22,7 +22,7 @@ class ControllerTest extends TestCase
   protected $info = [
     'mode'      => 'js',
     'path'      => 'path/to/plugin',
-    'file'      => './tests/storage/controllers/controller.php',
+    'file'      => './tests/storage/controllers/home.php',
     'request'   => 'get',
     'root'      => './tests/',
     'plugin'    => 'plugin',
@@ -515,7 +515,7 @@ class ControllerTest extends TestCase
     class controllerTest {}
     ";
 
-    $ctrl_path = self::createFile('controller.php',  $file2_stub, 'controllers');
+    $ctrl_path = self::createFile(basename("{$this->info['file']}"),  $file2_stub, 'controllers');
 
     $this->mvc_mock->shouldReceive('pluginName')->with($this->info['plugin'])->andReturn('plugin_name');
     $this->mvc_mock->shouldReceive('pluginPath')->with('plugin_name', false)->andReturn(BBN_APP_PATH . BBN_DATA_PATH . 'plugin_path/');
@@ -1291,5 +1291,339 @@ let data = {
       ],
       $method->invoke($this->controller, ['html'])
     );
+  }
+
+  /** @test */
+  public function getView_method_will_get_a_view()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+      ->once()
+      ->with(
+        $this->info['path'],
+        'html',
+        $this->data['controller_data']
+      )
+      ->andReturn('view');
+
+    $result = $this->controller->getView('html');
+
+    $this->assertSame('view', $result);
+  }
+
+  /** @test */
+  public function getView_method_will_get_a_html_view_if_mode_is_not_specified()
+  {
+    $this->mvc_mock->shouldReceive('getView')
+    ->once()
+    ->with(
+      $this->info['path'],
+      'html',
+      $this->data['controller_data']
+    )
+    ->andReturn('view');
+
+    $result = $this->controller->getView(false);
+
+    $this->assertSame('view', $result);
+  }
+
+  /** @test */
+  public function getExternalView_method_gets_a_view_from_different_root()
+  {
+    $this->mvc_mock->shouldReceive('getExternalView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'])
+      ->andReturn('view_content');
+
+    $result = $this->controller->getExternalView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function customPluginView_method_retrieves_a_view_from_custom_plugin()
+  {
+    $this->mvc_mock->shouldReceive('customPluginView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'], 'custom_plugin')
+      ->andReturn('view_content');
+
+    $result = $this->controller->customPluginView('foo/bar', 'html', ['foo' => 'bar'], 'custom_plugin');
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function customPluginView_method_retrieves_a_view_from_current_plugin_if_plugin_is_not_provided()
+  {
+    $this->mvc_mock->shouldReceive('customPluginView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'], $this->getNonPublicProperty('_plugin'))
+      ->andReturn('view_content');
+
+    $result = $this->controller->customPluginView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function customPluginView_method_returns_null_when_plugin_is_not_set()
+  {
+    $this->setNonPublicPropertyValue('_plugin', null);
+
+    $this->mvc_mock->shouldNotReceive('customPluginView');
+
+    $result = $this->controller->customPluginView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertNull($result);
+  }
+
+  /** @test */
+  public function getPluginView_method_retrieves_a_view()
+  {
+    $this->mvc_mock->shouldReceive('getPluginView')
+      ->once()
+      ->with('foo/bar', 'html', ['foo' => 'bar'], $this->getNonPublicProperty('_plugin'))
+      ->andReturn('view_content');
+
+    $result = $this->controller->getPluginView('foo/bar', 'html', ['foo' => 'bar']);
+
+    $this->assertSame('view_content', $result);
+  }
+
+  /** @test */
+  public function getPluginViews_method_returns_an_array_of_views()
+  {
+    $path   = 'foo/bar';
+    $data   = ['foo' => 'bar'];
+    $plugin = $this->getNonPublicProperty('_plugin');
+
+    $this->mvc_mock->shouldReceive('getPluginView')
+      ->times(3)
+      ->andReturn('html_content', 'css_content', 'js_content');
+
+    $result   = $this->controller->getPluginViews($path, $data);
+    $expected = [
+      'html'  => 'html_content',
+      'css'   => 'css_content',
+      'js'    => 'js_content'
+    ];
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function getPluginModel_method_returns_a_mode_of_the_provided_plugin()
+  {
+   $this->mvc_mock->shouldReceive('getPluginModel')
+     ->once()
+     ->with(
+       'foo/bar',
+       ['foo' => 'bar'],
+       $this->controller,
+       'custom_plugin',
+       2
+     )
+     ->andReturn(['model' => ['key' => 'value']]
+     );
+
+    $result = $this->controller->getPluginModel(
+      'foo/bar',
+      ['foo' => 'bar'],
+      'custom_plugin',
+      2
+    );
+
+    $this->assertSame(['model' => ['key' => 'value']], $result);
+  }
+
+  /** @test */
+  public function getPluginModel_method_returns_a_mode_of_the_current_plugin_if_no_plugin_provided()
+  {
+    $this->mvc_mock->shouldReceive('getPluginModel')
+      ->once()
+      ->with(
+        'foo/bar',
+        ['foo' => 'bar'],
+        $this->controller,
+        $this->getNonPublicProperty('_plugin'),
+        2
+      )
+      ->andReturn(['model' => ['key' => 'value']]
+      );
+
+    $result = $this->controller->getPluginModel(
+      'foo/bar',
+      ['foo' => 'bar'],
+      null,
+      2
+    );
+
+    $this->assertSame(['model' => ['key' => 'value']], $result);
+  }
+
+  /** @test */
+  public function getSubpluginModel_method_returns_a_sub_plugin_model()
+  {
+    $this->mvc_mock->shouldReceive('getSubpluginModel')
+      ->once()
+      ->with(
+        'foo/bar',
+        ['foo' => 'bar'],
+        $this->controller,
+        'parent_plugin',
+        'sub_plugin',
+        2
+      )
+      ->andReturn(['model' => ['key' => 'value']]);
+
+    $result = $this->controller->getSubpluginModel(
+      'foo/bar',
+      ['foo' => 'bar'],
+      'parent_plugin',
+      'sub_plugin',
+      2
+    );
+
+    $this->assertSame(['model' => ['key' => 'value']], $result);
+  }
+
+  /** @test */
+  public function getSubpluginModel_method_returns_a_sub_plugin_model_of_the_current_plugin_if_no_plugin_provided()
+  {
+    $this->mvc_mock->shouldReceive('getSubpluginModel')
+      ->once()
+      ->with(
+        'foo/bar',
+        ['foo' => 'bar'],
+        $this->controller,
+        $this->getNonPublicProperty('_plugin'),
+        'sub_plugin',
+        20
+      )
+      ->andReturn(['model' => ['key' => 'value']]);
+
+    $result = $this->controller->getSubpluginModel(
+      'foo/bar',
+      ['foo' => 'bar'],
+      null,
+      'sub_plugin',
+      20
+    );
+
+    $this->assertSame(['model' => ['key' => 'value']], $result);
+  }
+
+  /** @test */
+  public function hasSubpluginModel_method_returns_true_if_the_sub_plugin_model_exists()
+  {
+    $this->mvc_mock->shouldReceive('hasSubpluginModel')
+      ->once()
+      ->with('foo/bar', 'plugin', 'sub_plugin')
+      ->andReturnTrue();
+
+    $result = $this->controller->hasSubpluginModel('foo/bar', 'plugin', 'sub_plugin');
+
+    $this->assertTrue($result);
+  }
+
+  /** @test */
+  public function retrieveVar_method_()
+  {
+    $retrieve_var_method = $this->getNonPublicMethod('retrieveVar');
+
+    $this->assertSame(
+      $this->data['controller_data']['variable_2'],
+      $retrieve_var_method->invoke($this->controller, '$variable_2')
+    );
+
+    $this->assertFalse($retrieve_var_method->invoke($this->controller, '$variable_3'));
+    $this->assertFalse($retrieve_var_method->invoke($this->controller, 'variable_2'));
+  }
+
+  /** @test */
+  public function action_method_merges_post_data_and_result_data_with_the_current_data_and_sets_the_output_object()
+  {
+    $this->mvc_mock->shouldReceive('getModel')->once()->andReturn(['foo' => 'bar']);
+
+    $this->controller->action();
+
+   $this->assertSame(
+    array_merge(
+      array_merge($this->data['controller_data'], ['res' => ['success' => false]]),
+      $this->data['post']
+    ),
+     $this->controller->data
+   );
+
+   $this->assertIsObject($this->controller->obj);
+   $this->assertTrue(isset($this->controller->obj->foo));
+   $this->assertSame('bar', $this->controller->obj->foo);
+  }
+
+  /** @test */
+  public function action_method_returns_a_default_result_if_get_model_fails()
+  {
+    $this->controller = Mockery::mock(Controller::class)->makePartial();
+    $this->controller->shouldReceive('getModel')->once()->andReturnFalse();
+
+    $this->controller->action();
+
+    $this->assertSame(['res' => ['success' => false]], $this->controller->data);
+  }
+  
+  /** @test */
+  public function cachedAction_method_merges_post_data_and_result_data_with_the_current_data_and_sets_the_output_object()
+  {
+    $expected_data = array_merge(
+      array_merge($this->data['controller_data'], ['res' => ['success' => false]]),
+      $this->data['post']
+    );
+
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with($this->controller->getPath(), $expected_data, $this->controller ,11)
+      ->andReturn(['foo' => 'bar']);
+
+    $this->controller->cachedAction(11);
+
+    $this->assertSame($expected_data, $this->controller->data);
+    $this->assertTrue(isset($this->controller->obj->foo));
+    $this->assertSame('bar', $this->controller->obj->foo);
+  }
+  
+  /** @test */
+  public function combo_method_compiles_and_echoes_all_the_views_with_the_given_data()
+  {
+    $this->mvc_mock->shouldReceive('getRoute')
+      ->once()
+      ->andReturnTrue();
+
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->with(
+        $this->info['path'] . '/' . basename($this->info['file'], '.php'),
+        \bbn\X::mergeArrays($this->controller->post, $this->controller->data),
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->mvc_mock->shouldReceive('getView')
+      ->times(3)
+      ->andReturn('css_view', 'js_view', 'html_view');
+
+    $this->controller->combo('example');
+
+    $this->assertTrue(isset($this->controller->obj->css));
+    $this->assertSame('css_view', $this->controller->obj->css);
+
+    $this->assertTrue(isset($this->controller->obj->script));
+    $this->assertSame('js_view', $this->controller->obj->script);
+
+    $this->assertTrue(isset($this->controller->obj->title));
+    $this->assertSame('example', $this->controller->obj->title);
+
+    $this->assertTrue(isset($this->controller->data['foo']));
+    $this->assertSame('bar', $this->controller->data['foo']);
   }
 }

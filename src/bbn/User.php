@@ -1390,13 +1390,12 @@ class User extends Models\Cls\Basic
   }
 
 
-   /**
-    * Gathers the user's data from the database and puts it in the session.
-    *
-    * @param array $data User's table data argument if it is already available
-    * @return self
-    */
-  private function _user_info(array $data = null): self
+  /**
+   * Gathers the user's data from the database and puts it in the session.
+   *
+   * @return self
+   */
+  private function _user_info(): self
   {
     if ($this->getId()) {
       // Removing the encryption key to prevent it being saved in the session
@@ -1424,7 +1423,7 @@ class User extends Models\Cls\Basic
           $r[$key]    = $key === $this->fields['cfg'] ? json_decode($val, true) : $val;
         }
 
-        $this->cfg = $r['cfg'] ?: [];
+        $this->cfg = $r['cfg'] ?? [];
         // Group
         $this->id_group = $r['id_group'];
         $this->session->set($r, $this->userIndex);
@@ -1436,6 +1435,11 @@ class User extends Models\Cls\Basic
   }
 
 
+  /**
+   * Retrieves the encryption key from database if not defined and saves it.
+   *
+   * @return string|null
+   */
   private function _get_encryption_key(): ?string
   {
     if (is_null($this->_encryption_key)) {
@@ -1451,7 +1455,7 @@ class User extends Models\Cls\Basic
    /**
     * Gathers all the information about the user's session.
     *
-    * @param string $d The session's table data or its ID
+    * @param string $id_session The session's table data or its ID
     * @return self
     */
   private function _sess_info(string $id_session = null): self
@@ -1483,11 +1487,11 @@ class User extends Models\Cls\Basic
       $this->sess_cfg = $cfg;
     }
     else{
-      if (isset($id)) {
+      if (isset($id_session, $id)) {
         $this->_init_session();
-        $new_id = $this->getSession('id');
-        if ($new_id !== $id) {
-          return $this->_sess_info($new_id);
+        $new_id_session = $this->getIdSession();
+        if ($id_session !== $new_id_session) {
+          return $this->_sess_info($new_id_session);
         }
       }
 
@@ -1519,8 +1523,8 @@ class User extends Models\Cls\Basic
     */
   private function _hash(string $st): string
   {
-    if (!function_exists($this->class_cfg['encryption'])) {
-      $this->class_cfg['encryption'] = 'sha256';
+    if (empty($this->class_cfg['encryption']) || !function_exists($this->class_cfg['encryption'])) {
+      return hash('sha256', $st);
     }
 
     return $this->class_cfg['encryption']($st);
@@ -1639,7 +1643,7 @@ class User extends Models\Cls\Basic
    /**
     * Sets an attribute the "session" part of the session (sessIndex).
     *
-    * @param mixed $attr Attribute if value follows, or an array with attribute/value keypairs
+    * @param mixed $attr Attribute if value follows, or an array with attribute of value key pairs
     * @return self
     */
   private function _set_session($attr): self
@@ -1650,9 +1654,11 @@ class User extends Models\Cls\Basic
         $attr = [$args[0] => $args[1]];
       }
 
-      foreach ($attr as $key => $val){
-        if (\is_string($key)) {
-          $this->session->set($val, $this->sessIndex, $key);
+      if (is_array($attr)) {
+        foreach ($attr as $key => $val){
+          if (\is_string($key)) {
+            $this->session->set($val, $this->sessIndex, $key);
+          }
         }
       }
     }
