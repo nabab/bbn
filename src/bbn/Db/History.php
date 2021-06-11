@@ -5,11 +5,14 @@ namespace bbn\Db;
 use bbn\Appui\Database;
 use bbn\Db;
 use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\Report;
 use bbn\Str;
 use bbn\X;
 
 class History
 {
+
+  use Report;
 
   use Dbconfig;
 
@@ -56,6 +59,12 @@ class History
 
   /** @var boolean Setting it to false avoid execution of history triggers */
   private $enabled = true;
+
+  /*** @var int Number of times the enabled= method is called */
+  private $enabled_count = 0;
+
+  /*** @var int Number of times the disable method is called */
+  private $disabled_count = 0;
 
   /** @var float The current date can be overwritten if this variable is set */
   private $date;
@@ -230,7 +239,7 @@ class History
   {
     if ($full_table = $this->db->tfn($table)) {
       [$database, $table] = explode('.', $full_table);
-      return $this->database_obj->columnId($column, $table, $database, $this->db->getHost());
+      return $this->database_obj->columnId($column, $table, $database);
     }
 
     return false;
@@ -243,6 +252,7 @@ class History
   public function disable(): void
   {
     $this->enabled = false;
+    $this->disabled_count++;
   }
 
 
@@ -252,6 +262,7 @@ class History
   public function enable(): void
   {
     $this->enabled = true;
+    $this->enabled_count++;
   }
 
 
@@ -265,10 +276,10 @@ class History
 
 
   /**
-   * @param $d
+   * @param string $d
    * @return null|float
    */
-  public function validDate($d): ?float
+  public function validDate(string $d): ?float
   {
     if (!Str::isNumber($d)) {
       $d = strtotime($d);
@@ -343,7 +354,7 @@ class History
   public function setDate($date): void
   {
     // Sets the current date
-    if (Str::isNumber($date) && !($date = strtotime($date))) {
+    if (!Str::isNumber($date) && !($date = strtotime($date))) {
       return;
     }
 
@@ -353,7 +364,7 @@ class History
       $date = $t;
     }
 
-    $this->date = $date;
+    $this->date = (float)$date;
   }
 
 
@@ -382,7 +393,6 @@ class History
    */
   public function setUser($user): void
   {
-    // Sets the history table name
     if (Str::isUid($user)) {
       $this->user = $user;
     }
@@ -522,8 +532,7 @@ MYSQL;
               'operator' => '=',
               'exp' => $line
             ]]
-          ]]
-        ],
+          ]]],
         'where' => $where,
         'order' => [$chrono => 'ASC']
         ]
@@ -623,8 +632,7 @@ MYSQL;
     if (!($when = $this->validDate($when))) {
       $this->_report_error("The date $when is incorrect", __CLASS__, __LINE__);
     }
-    elseif (($model = $this->database_obj->modelize($table)) && ($cfg = $this->getTableCfg($table))
-    ) {
+    elseif (($model = $this->database_obj->modelize($table)) && ($cfg = $this->getTableCfg($table))) {
       // Time is after last modification: the current is given
       $this->disable();
       if ($when >= time()) {
@@ -653,7 +661,8 @@ MYSQL;
               $this->getHistoryTableName(),
               [
                 $this->getHistoryTableColumnName('val'),
-                $this->getHistoryTableColumnName('ref')]
+                $this->getHistoryTableColumnName('ref')
+              ]
               , [
               $this->getHistoryTableColumnName('uid') => $id,
               $this->getHistoryTableColumnName('col') => $model['fields'][$col]['id_option'],
@@ -694,7 +703,7 @@ MYSQL;
   public function getValBack(string $table, string $id, $when, $column)
   {
     if ($row = $this->getRowBack($table, $id, $when, [$column])) {
-      return $row[$column];
+      return $row[$column] ?? false;
     }
 
     return false;
@@ -948,7 +957,7 @@ MYSQL;
   {
     // Check history is enabled and table's name correct
     if (($table = $this->db->tfn($table))) {
-      if ($force || !isset($this->$structures[$table])) {
+      if ($force || !isset($this->structures[$table])) {
         if ($model = $this->database_obj->modelize($table)) {
           $this->structures[$table] = [
             'history' => false,
@@ -1018,7 +1027,7 @@ MYSQL;
    */
   public function isLinked(string $table): bool
   {
-    return ($ftable = $this->db->tfn($table)) && isset($this->$links[$ftable]);
+    return ($ftable = $this->db->tfn($table)) && isset($this->links[$ftable]);
   }
 
 

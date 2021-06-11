@@ -17,6 +17,6 @@ trait Report
   private static $_debug;
 
   private static function _report_error($error, $class, $line){
-    die(var_dump("BOOOO", $error));
+    throw new \Exception(bbn\X::_($error));
   }
 }

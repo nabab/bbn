@@ -6,7 +6,6 @@ use bbn\Db;
 use bbn\Mvc;
 use bbn\User;
 use bbn\User\Session;
-use Mockery\Mock;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
 
