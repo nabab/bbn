@@ -238,9 +238,13 @@ class Router
       $prefix     = $p['name'] . '-';
       $plugin     = $p['name'];
       $plugin_url = $p['url'];
-    } else {
-      $prefix     = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';
+    }
+    else {
       $root       = $this->appPath();
+      $prefix     = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';
+      if (X::indexOf($name, $prefix) !== 0) {
+        $prefix = substr($name, 0, strpos($name, '-') + 1);
+      }
       $plugin     = null;
       $plugin_url = null;
     }
