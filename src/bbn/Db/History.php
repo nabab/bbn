@@ -210,7 +210,7 @@ class History
     if (Str::checkName($table)
         && ($model = $this->database_obj->modelize($table))
     ) {
-      $col      = $this->db->escape('col');
+      $col      = $this->db->escape($this->getHistoryTableColumnName('col'));
       $where_ar = [];
       if (isset($model['fields']) && is_array($model['fields'])) {
         foreach ($model['fields'] as $k => $f){
@@ -710,10 +710,15 @@ MYSQL;
   }
 
 
+  /**
+   * @param string $table
+   * @param string $id
+   * @return float|null
+   */
   public function getCreationDate(string $table, string $id): ?float
   {
     if ($res = $this->getCreation($table, $id)) {
-      return $res['date'];
+      return $res['date'] ?? null;
     }
 
     return null;
@@ -798,7 +803,7 @@ MYSQL;
    */
   public function getHistory(string $table, string $id, string $col = '')
   {
-    if ($this->check($table) && ($modelize = $this->getTableCfg($table))) {
+    if ($this->check() && ($modelize = $this->getTableCfg($table))) {
       $pat    = [
         'ins' => 'INSERT',
         'upd' => 'UPDATE',
@@ -817,7 +822,7 @@ MYSQL;
 
       if (!empty($col)) {
         if (!Str::isUid($col)) {
-          $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? $this->getHistoryTableColumnName($this->getHistoryTableColumnName('ref')) : $this->getHistoryTableColumnName($this->getHistoryTableColumnName('val'));
+          $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? $this->getHistoryTableColumnName('ref') : $this->getHistoryTableColumnName('val');
 
           $col = $this->database_obj->columnId($col, $table);
         }
@@ -859,6 +864,8 @@ MYSQL;
 
       return $r;
     }
+
+    return [];
   }
 
 
@@ -888,6 +895,12 @@ MYSQL;
   }
 
 
+  /**
+   * @param string $table
+   * @param string $id
+   * @param string $column
+   * @return array
+   */
   public function getColumnHistory(string $table, string $id, string $column)
   {
     if ($this->check()
@@ -898,12 +911,16 @@ MYSQL;
         $column = X::find($modelize['fields'], ['id_option' => strtolower($column)]);
       }
 
+      if (null === $column || !isset($modelize['fields'][$column])) {
+        throw new \Error(X::_("Impossible to find the option $column"));
+      }
+
       $current = $this->db->selectOne(
         $table, $column, [
         $primary[0] => $id
         ]
       );
-      $val     = $modelize['fields'][$column] === 'binary' ? $this->getHistoryTableColumnName('ref') : $this->getHistoryTableColumnName('val');
+      $val = $modelize['fields'][$column] === 'binary' ? $this->getHistoryTableColumnName('ref') : $this->getHistoryTableColumnName('val');
 
       $hist = $this->getHistory($table, $id, $column);
       $r    = [];
@@ -944,6 +961,8 @@ MYSQL;
 
       return $r;
     }
+
+    return [];
   }
 
 
@@ -1001,6 +1020,8 @@ MYSQL;
 
 
   /**
+   * Returns information about all tables in the given database.
+   *
    * @param string|null $db
    * @param bool        $force
    * @return array

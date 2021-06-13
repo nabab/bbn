@@ -27,6 +27,8 @@ class HistoryTest extends TestCase
 
   protected $id_table = '322a2c70bcac11eba47652540000cfaa';
 
+  protected $id_option = '777ccc70bcac11eba47652540000cfaa';
+
   protected $column = '144a2c70bcac11eba47652540000cfaa';
 
   protected $uid  = '312f2c70bcac11eba47652540000cfaa';
@@ -77,6 +79,34 @@ class HistoryTest extends TestCase
   protected function getClassConfig()
   {
     return $this->getNonPublicProperty('class_cfg');
+  }
+
+  /**
+   * @param string|null $uid
+   * @return array
+   */
+  private function getModelizeMethodReturnValue(?string  $uid = null)
+  {
+    return [
+      'fields' => [
+        'column1' => [
+          'id_option' => $uid ?? $this->uid,
+          'type'      => 'binary'
+        ],
+        'primary_column' => [
+          'extra'     => 'auto_increment',
+          'type'      => 'int',
+          'maxlength' => 33
+        ]
+      ],
+      'keys' => [
+        'PRIMARY' => [
+          'columns' => [
+            'primary_column'
+          ]
+        ]
+      ]
+    ];
   }
 
   protected function tearDown(): void
@@ -1128,25 +1158,7 @@ MYSQL;
           'column1' => ['id_option' => $this->uid]
         ],
       ]
-      ,[
-        'fields' => [
-          [
-            'id_option' => $this->uid
-          ],
-          'primary_column' => [
-            'extra'     => 'auto_increment',
-            'type'      => 'int',
-            'maxlength' => 33
-          ]
-        ],
-        'keys' => [
-          'PRIMARY' => [
-            'columns' => [
-              'primary_column'
-            ]
-          ]
-        ]
-      ]
+      , $this->getModelizeMethodReturnValue()
     );
 
     $this->db_mock->shouldReceive('tfn')->twice()->andReturn('db.table_name');
@@ -1164,6 +1176,8 @@ MYSQL;
     $this->assertIsArray($result);
     $this->assertNotEmpty($result);
     $this->assertSame(['foo' => 'bar'], $result);
+    $this->assertSame(1, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(1, $this->getNonPublicProperty('disabled_count'));
   }
 
   /** @test */
@@ -1182,25 +1196,7 @@ MYSQL;
           'column1' => ['id_option' => $this->uid]
         ],
       ]
-      ,[
-        'fields' => [
-          [
-            'id_option' => $this->uid
-          ],
-          'primary_column' => [
-            'extra'     => 'auto_increment',
-            'type'      => 'int',
-            'maxlength' => 33
-          ]
-        ],
-        'keys' => [
-          'PRIMARY' => [
-            'columns' => [
-              'primary_column'
-            ]
-          ]
-        ]
-      ]
+      , $this->getModelizeMethodReturnValue()
     );
 
     $this->db_mock->shouldReceive('tfn')->times(4)->andReturn('db.table_name');
@@ -1225,6 +1221,8 @@ MYSQL;
     );
 
     $this->assertNull($result);
+    $this->assertSame(2, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(2, $this->getNonPublicProperty('disabled_count'));
   }
 
   /** @test */
@@ -1243,23 +1241,7 @@ MYSQL;
           'column1' => ['id_option' => $this->uid]
         ],
       ]
-      ,[
-        'fields' => [
-          'column1'  => ['id_option' => $this->uid],
-          'primary_column' => [
-            'extra'     => 'auto_increment',
-            'type'      => 'int',
-            'maxlength' => 33
-          ]
-        ],
-        'keys' => [
-          'PRIMARY' => [
-            'columns' => [
-              'primary_column'
-            ]
-          ]
-        ]
-      ]
+      , $this->getModelizeMethodReturnValue()
     );
 
     $this->db_mock->shouldReceive('tfn')->times(4)->andReturn('db.table_name');
@@ -1291,6 +1273,8 @@ MYSQL;
     $this->assertIsArray($result);
     $this->assertNotEmpty($result);
     $this->assertSame(['column1' => 'ref_value'], $result);
+    $this->assertSame(2, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(2, $this->getNonPublicProperty('disabled_count'));
   }
 
   /** @test */
@@ -1309,23 +1293,7 @@ MYSQL;
           'column1' => ['id_option' => $this->uid]
         ],
       ]
-      ,[
-        'fields' => [
-          'column1'  => ['id_option' => $this->uid],
-          'primary_column' => [
-            'extra'     => 'auto_increment',
-            'type'      => 'int',
-            'maxlength' => 33
-          ]
-        ],
-        'keys' => [
-          'PRIMARY' => [
-            'columns' => [
-              'primary_column'
-            ]
-          ]
-        ]
-      ]
+      , $this->getModelizeMethodReturnValue()
     );
 
     $this->db_mock->shouldReceive('tfn')->times(4)->andReturn('db.table_name');
@@ -1375,23 +1343,7 @@ MYSQL;
           'column1' => ['id_option' => $this->uid]
         ],
       ]
-      ,[
-        'fields' => [
-          'column1'  => ['id_option' => $this->uid],
-          'primary_column' => [
-            'extra'     => 'auto_increment',
-            'type'      => 'int',
-            'maxlength' => 33
-          ]
-        ],
-        'keys' => [
-          'PRIMARY' => [
-            'columns' => [
-              'primary_column'
-            ]
-          ]
-        ]
-      ]
+      , $this->getModelizeMethodReturnValue()
     );
 
     $this->db_mock->shouldReceive('tfn')->times(4)->andReturn('db.table_name');
@@ -1442,23 +1394,7 @@ MYSQL;
           'column1' => ['id_option' => $this->uid]
         ],
       ]
-      ,[
-        'fields' => [
-          'column1' => ['id_option' => $this->uid],
-          'primary_column' => [
-            'extra'     => 'auto_increment',
-            'type'      => 'int',
-            'maxlength' => 33
-          ]
-        ],
-        'keys' => [
-          'PRIMARY' => [
-            'columns' => [
-              'primary_column'
-            ]
-          ]
-        ]
-      ]
+      , $this->getModelizeMethodReturnValue()
     );
 
     $this->db_mock->shouldReceive('tfn')->times(4)->andReturn('db.table_name');
@@ -1491,6 +1427,8 @@ MYSQL;
     $this->assertIsArray($result);
     $this->assertNotEmpty($result);
     $this->assertSame(['column1' => 'val_value'], $result);
+    $this->assertSame(2, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(2, $this->getNonPublicProperty('disabled_count'));
   }
 
   /** @test */
@@ -1501,6 +1439,9 @@ MYSQL;
     $this->assertNull(
       $this->history->getRowBack('table_name', $this->id_table, '2021-06-11')
     );
+
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
   }
 
   /** @test */
@@ -1520,6 +1461,8 @@ MYSQL;
     $this->assertNull(
       $this->history->getRowBack('table_name', $this->id_table, '2021-06-11')
     );
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
   }
 
 
@@ -1529,6 +1472,8 @@ MYSQL;
     $this->expectException(\Exception::class);
 
     $this->history->getRowBack('table_name', $this->id_table, 'foo');
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
   }
 
   /** @test */
@@ -1577,5 +1522,1500 @@ MYSQL;
     $result = $history_mock->getValBack('table_name', $this->id_table, '2021-06-11', 'column');
 
     $this->assertFalse($result);
+  }
+
+  /** @test */
+  public function getCreationDate_method_returns_creation_date()
+  {
+    $history_partial_mock = \Mockery::mock(History::class)->makePartial();
+
+    $history_partial_mock->shouldReceive('getCreation')
+      ->once()
+      ->with('table_name', $this->id_table)
+      ->andReturn(['date' => $time = (float)time()]);
+
+    $this->assertSame(
+      $time,
+      $history_partial_mock->getCreationDate('table_name', $this->id_table)
+    );
+  }
+
+  /** @test */
+  public function getCreationDate_method_returns_null_if_date_key_is_missing_returned_from_getCreation()
+  {
+    $history_partial_mock = \Mockery::mock(History::class)->makePartial();
+
+    $history_partial_mock->shouldReceive('getCreation')
+      ->once()
+      ->with('table_name', $this->id_table)
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertNull($history_partial_mock->getCreationDate('table_name', $this->id_table));
+  }
+
+  /** @test */
+  public function getCreationDate_method_returns_null_when_getCreation_returns_null()
+  {
+    $history_partial_mock = \Mockery::mock(History::class)->makePartial();
+
+    $history_partial_mock->shouldReceive('getCreation')
+      ->once()
+      ->with('table_name', $this->id_table)
+      ->andReturnNull();
+
+    $this->assertNull($history_partial_mock->getCreationDate('table_name', $this->id_table));
+  }
+  
+  /** @test */
+  public function getCreation_method_returns_creation_date()
+  {
+    // first will set expectations of methods called in
+    // getTableCfg() and getIdColumn() methods
+    $this->db_mock->shouldReceive('tfn')
+      ->times(3)
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->uid);
+
+    $this->db_obj_mock->shouldReceive('columnId')
+      ->once()
+      ->with('primary_column', 'table_name', 'db')
+      ->andReturn($this->column);
+
+    $class_cfg = $this->getClassConfig();
+
+    // Set expectations of calling the Db::reselect in the method being tested
+    // and that includes expectations of parameters it should be called with.
+    $this->db_mock->shouldReceive('rselect')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history'],
+        [
+          'date' => $class_cfg['arch']['history']['tst'],
+          'user' => $class_cfg['arch']['history']['usr']
+        ],
+        [
+          $class_cfg['arch']['history']['uid'] => $this->id_table,
+          $class_cfg['arch']['history']['col'] => $this->column, // Returned from columnId() mock
+          $class_cfg['arch']['history']['opr'] => 'INSERT'
+
+        ],
+        [
+          $class_cfg['arch']['history']['tst'] => 'DESC'
+        ]
+      )
+      ->andReturn($expected = ['date' => (float)time()]);
+
+
+    $result = $this->history->getCreation('table_name', $this->id_table);
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame($expected, $result);
+    $this->assertSame(1, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(1, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function getCreation_method_returns_null_when_getTableCfg_returns_null()
+  {
+    $this->db_mock->shouldReceive('tfn')->once()->andReturnNull();
+
+    $this->assertNull(
+      $this->history->getCreation('table_name', $this->id_table)
+    );
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function getCreation_method_returns_null_when_getIdColumn_returns_null()
+  {
+    // first will set expectations of methods called in
+    // getTableCfg() and getIdColumn() methods
+    // The third time this functions is called (in getIdColumn())
+    // should return null
+    $this->db_mock->shouldReceive('tfn')
+      ->times(3)
+      ->andReturn('db.table_name', 'db.table_name', null);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->uid);
+
+    $this->assertNull(
+      $this->history->getCreation('table_name', $this->id_table)
+    );
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function getCreation_method_returns_null_when_rselect_from_db_returns_null()
+  {
+    // first will set expectations of methods called in
+    // getTableCfg() and getIdColumn() methods
+    $this->db_mock->shouldReceive('tfn')
+      ->times(3)
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->uid);
+
+    $this->db_obj_mock->shouldReceive('columnId')
+      ->once()
+      ->with('primary_column', 'table_name', 'db')
+      ->andReturn($this->column);
+
+    $class_cfg = $this->getClassConfig();
+
+    // Set expectations of calling the Db::reselect in the method being tested
+    // and that includes expectations of parameters it should be called with.
+    $this->db_mock->shouldReceive('rselect')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history'],
+        [
+          'date' => $class_cfg['arch']['history']['tst'],
+          'user' => $class_cfg['arch']['history']['usr']
+        ],
+        [
+          $class_cfg['arch']['history']['uid'] => $this->id_table,
+          $class_cfg['arch']['history']['col'] => $this->column, // Returned from columnId() mock
+          $class_cfg['arch']['history']['opr'] => 'INSERT'
+
+        ],
+        [
+          $class_cfg['arch']['history']['tst'] => 'DESC'
+        ]
+      )
+      ->andReturnNull();
+
+
+    $result = $this->history->getCreation('table_name', $this->id_table);
+
+    $this->assertNull($result);
+    $this->assertSame(1, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(1, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function getLastDate_method_returns_last_date_when_column_is_specified()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('getIdColumn')
+      ->once()
+      ->with('column_name', 'table_name')
+      ->andReturn($this->column);
+
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history'],
+        $class_cfg['arch']['history']['tst'],
+        [
+          $class_cfg['arch']['history']['uid'] => $this->uid,
+          $class_cfg['arch']['history']['col'] => $this->column
+        ],
+        [
+          $class_cfg['arch']['history']['tst'] => 'DESC'
+        ]
+      )
+      ->andReturn($expected = (float)time());
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg, $history_mock);
+
+    $result = $history_mock->getLastDate('table_name', $this->uid, 'column_name');
+
+    $this->assertIsFloat($result);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function getLastDate_method_returns_last_date_when_column_is_not_specified()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue($this->id_option)
+      );
+
+    $this->db_mock->shouldReceive('escape')
+      ->times(4)
+      ->andReturn(
+        $col    = $class_cfg['arch']['history']['col'],
+        $tab    = $class_cfg['tables']['history'],
+        $chrono = $class_cfg['arch']['history']['tst'],
+        $line   = $class_cfg['arch']['history']['uid'],
+      );
+
+    $this->db_mock->shouldReceive('escapeValue')
+      ->once()
+      ->with($this->id_option)
+      ->andReturn($this->id_option);
+
+    $expected_where = "$col = UNHEX(\"$this->id_option\")";
+
+    $expected_sql    = <<< MYSQL
+SELECT $chrono
+FROM $tab
+WHERE $line = ?
+AND ($expected_where)
+ORDER BY $chrono DESC
+MYSQL;
+
+    $this->db_mock->shouldReceive('getOne')
+      ->once()
+      ->with($expected_sql, hex2bin($this->uid))
+      ->andReturn($expected_result = (float)time());
+
+    $result = $this->history->getLastDate('table_name', $this->uid);
+
+    $this->assertIsFloat($result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getLastDate_method_returns_null_when_column_is_provided_but_id_column_is_null()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('getIdColumn')
+      ->once()
+      ->with('column_name', 'table_name')
+      ->andReturnNull();
+
+    $this->assertNull(
+      $history_mock->getLastDate('table_name', $this->uid, 'column_name')
+    );
+  }
+
+  /** @test */
+  public function getLastDate_method_returns_null_when_column_is_not_provided_and_get_table_where_method_returns_null()
+  {
+    $this->assertNull(
+      $this->history->getLastDate('%table_name%', $this->uid)
+    );
+  }
+
+  /** @test */
+  public function getHistory_method_returns_history_from_db_when_column_is_not_specified()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $operations = [
+      'ins' => 'INSERT',
+      'upd' => 'UPDATE',
+      'res' => 'RESTORE',
+      'del' => 'DELETE'
+    ];
+
+    $class_cfg = $this->getClassConfig();
+
+    $expected_fields = [
+      'date' => $class_cfg['arch']['history']['tst'],
+      'user' => $class_cfg['arch']['history']['usr'],
+      $class_cfg['arch']['history']['col'],
+      $class_cfg['arch']['history']['val'],
+      $class_cfg['arch']['history']['ref']
+    ];
+
+    $expected_where  = [
+      $class_cfg['arch']['history']['uid'] => $this->uid
+    ];
+
+    foreach ($operations as $key => $operation) {
+      $expected_where[$class_cfg['arch']['history']['opr']] = $operation;
+
+      $this->db_mock->shouldReceive('rselectAll')
+        ->once()
+        ->ordered()
+        ->with(
+          [
+            'table' => $class_cfg['tables']['history'],
+            'fields' => $expected_fields,
+            'where' => [
+              'conditions' => $expected_where
+            ],
+            'order' => [[
+              'field' => $class_cfg['arch']['history']['tst'],
+              'dir' => 'desc'
+            ]]
+          ]
+        )
+        ->andReturn($expected_results[$key] = ["foo_{$key}" => "bar_{$key}"]);
+    }
+
+
+    $result = $this->history->getHistory('table_name', $this->uid);
+
+    $this->assertIsArray($result);
+    $this->assertSame($expected_results, $result);
+  }
+
+  /** @test */
+  public function getHistory_method_returns_history_from_db_when_column_is_specified_and_is_not_uid()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $this->db_obj_mock->shouldReceive('columnId')
+      ->once()
+      ->with('column1', 'table_name')
+      ->andReturn($this->column);
+
+    $operations = [
+      'ins' => 'INSERT',
+      'upd' => 'UPDATE',
+      'res' => 'RESTORE',
+      'del' => 'DELETE'
+    ];
+
+    $class_cfg = $this->getClassConfig();
+
+    $expected_fields = [
+      'date' => $class_cfg['arch']['history']['tst'],
+      'user' => $class_cfg['arch']['history']['usr'],
+      $class_cfg['arch']['history']['col'],
+      $class_cfg['arch']['history']['ref']
+    ];
+
+    $expected_where  = [
+      $class_cfg['arch']['history']['uid'] => $this->uid,
+      $class_cfg['arch']['history']['col'] => $this->column // returned from columnId() mock
+    ];
+
+    foreach ($operations as $key => $operation) {
+      $expected_where[$class_cfg['arch']['history']['opr']] = $operation;
+
+      $this->db_mock->shouldReceive('rselectAll')
+        ->once()
+        ->ordered()
+        ->with(
+          [
+            'table' => $class_cfg['tables']['history'],
+            'fields' => $expected_fields,
+            'where' => [
+              'conditions' => $expected_where
+            ],
+            'order' => [[
+              'field' => $class_cfg['arch']['history']['tst'],
+              'dir' => 'desc'
+            ]]
+          ]
+        )
+        ->andReturn($expected_results[$key] = ["foo_{$key}" => "bar_{$key}"]);
+    }
+
+    $result = $this->history->getHistory('table_name', $this->uid, 'column1');
+
+    $this->assertIsArray($result);
+    $this->assertSame($expected_results, $result);
+  }
+
+  /** @test */
+  public function getHistory_method_returns_history_from_db_when_column_is_specified_and_is_uid()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        $this->getModelizeMethodReturnValue($this->column)
+      );
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $operations = [
+      'ins' => 'INSERT',
+      'upd' => 'UPDATE',
+      'res' => 'RESTORE',
+      'del' => 'DELETE'
+    ];
+
+    $class_cfg = $this->getClassConfig();
+
+    $expected_fields = [
+      'date' => $class_cfg['arch']['history']['tst'],
+      'user' => $class_cfg['arch']['history']['usr'],
+      $class_cfg['arch']['history']['col'],
+      $class_cfg['arch']['history']['ref']
+    ];
+
+    $expected_where  = [
+      $class_cfg['arch']['history']['uid'] => $this->uid,
+      $class_cfg['arch']['history']['col'] => $this->column // returned from columnId() mock
+    ];
+
+    foreach ($operations as $key => $operation) {
+      $expected_where[$class_cfg['arch']['history']['opr']] = $operation;
+
+      $this->db_mock->shouldReceive('rselectAll')
+        ->once()
+        ->ordered()
+        ->with(
+          [
+            'table' => $class_cfg['tables']['history'],
+            'fields' => $expected_fields,
+            'where' => [
+              'conditions' => $expected_where
+            ],
+            'order' => [[
+              'field' => $class_cfg['arch']['history']['tst'],
+              'dir' => 'desc'
+            ]]
+          ]
+        )
+        ->andReturn($expected_results[$key] = ["foo_{$key}" => "bar_{$key}"]);
+    }
+
+    $result = $this->history->getHistory('table_name', $this->uid, $this->column);
+
+    $this->assertIsArray($result);
+    $this->assertSame($expected_results, $result);
+  }
+
+  /** @test */
+  public function getHistory_method_throws_exception_when_column_is_specified_and_is_uid_but_not_found_in_id_option_field()
+  {
+    $this->expectException(\Error::class);
+
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')->once()->andReturn($this->cuerrent_db);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        $this->getModelizeMethodReturnValue() // This insert $this->uid in the id_option field instead of $this->column
+      );
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->getHistory('table_name', $this->uid, $this->column);
+  }
+
+  /** @test */
+  public function getHistory_method_returns_empty_array_when_check_returns_false()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+
+    $history_mock->shouldReceive('check')->once()->andReturnFalse();
+
+    $result = $history_mock->getHistory('table_name', $this->uid);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getHistory_method_returns_empty_array_when_getTableCfg_returns_null()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $history_mock->shouldReceive('getTableCfg')->once()->andReturnNull();
+
+    $result = $history_mock->getHistory('table_name', $this->uid);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getFullHistory_method_returns_and_array_of_history()
+  {
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('table_name')
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('escape')
+      ->once()
+      ->with($class_cfg['arch']['history']['col'])
+      ->andReturn($col = $class_cfg['arch']['history']['col']);
+
+    $this->db_mock->shouldReceive('escape')
+      ->once()
+      ->with($class_cfg['tables']['history'])
+      ->andReturn($tab = $class_cfg['tables']['history']);
+
+    $this->db_mock->shouldReceive('escape')
+      ->once()
+      ->with($class_cfg['arch']['history']['uid'])
+      ->andReturn($line = $class_cfg['arch']['history']['uid']);
+
+    $this->db_mock->shouldReceive('escape')
+      ->once()
+      ->with($class_cfg['arch']['history']['tst'])
+      ->andReturn($chrono = $class_cfg['arch']['history']['tst']);
+
+    $this->db_mock->shouldReceive('escapeValue')
+      ->once()
+      ->with($this->uid)
+      ->andReturn($this->uid);
+
+    $expected_where = "$col = UNHEX(\"$this->uid\")";
+
+    $expected_sql    = <<< MYSQL
+SELECT *
+FROM $tab
+WHERE $line = ?
+AND ($expected_where)
+ORDER BY $chrono ASC
+MYSQL;
+
+    $this->db_mock->shouldReceive('getRows')
+      ->once()
+      ->with($expected_sql, hex2bin($this->uid))
+      ->andReturn($expected_result = ['foo' => 'bar']);
+
+    $result = $this->history->getFullHistory('table_name', $this->uid);
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getFullHistory_returns_empty_array_when_get_table_where_method_returns_null()
+  {
+    $result = $this->history->getFullHistory('%table_name%', $this->uid);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_returns_an_array_when_upd_key_exists_in_history()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $history_mock->shouldReceive('getTableCfg')
+      ->once()
+      ->andReturn(
+      $this->getModelizeMethodReturnValue($this->column)
+    );
+
+    $history_mock->shouldReceive('getHistory')
+      ->once()
+      ->andReturn([
+        'upd' => [
+          [
+            $class_cfg['arch']['history']['val'] => 'val_value_2',
+            $class_cfg['arch']['history']['ref'] => 'ref_value_2',
+            'date' => '2021-06-12',
+            'user' => 'user_2'
+          ],
+          [
+            $class_cfg['arch']['history']['val'] => 'val_value_1',
+            $class_cfg['arch']['history']['ref'] => 'ref_value_1',
+            'date' => '2021-06-11',
+            'user' => 'user_1'
+          ]
+        ]
+      ]);
+
+    $history_mock->shouldReceive('getCreation')
+      ->once()
+      ->with('table_name', $this->uid)
+      ->andReturn(
+        [
+          'date' => $creation_date = (float)time(),
+          'user' => $creation_user = $this->user
+        ]
+      );
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg, $history_mock);
+
+    $this->db_mock->shouldReceive('getPrimary')
+      ->once()
+      ->with('table_name')
+      ->andReturn(['id']);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with('table_name', 'column1', ['id' => $this->uid])
+      ->andReturn('val_from_selectOne');
+
+    $result          = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+    $expected_result = [
+      [
+        'date' => $creation_date,
+        'val'  => 'val_value_1',
+        'user' => $creation_user
+      ],
+      [
+        'date' => '2021-06-11',
+        'val'  => 'val_value_2',
+        'user' => 'user_1'
+      ],
+      [
+        'date' => '2021-06-12',
+        'val'  => 'val_from_selectOne', // returned from selectOne mock
+        'user' => 'user_2'
+      ]
+    ];
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_returns_an_array_when_upd_key_is_empty_and_ins_key_exists_in_history()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $history_mock->shouldReceive('getTableCfg')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue($this->column)
+      );
+
+    $history_mock->shouldReceive('getHistory')
+      ->once()
+      ->andReturn([
+        'ins' => [
+          [
+            $class_cfg['arch']['history']['val'] => 'val_value_2',
+            $class_cfg['arch']['history']['ref'] => 'ref_value_2',
+            'date' => '2021-06-12',
+            'user' => 'user_2'
+          ],
+          [
+            $class_cfg['arch']['history']['val'] => 'val_value_1',
+            $class_cfg['arch']['history']['ref'] => 'ref_value_1',
+            'date' => '2021-06-11',
+            'user' => 'user_1'
+          ]
+        ]
+      ]);
+
+    $history_mock->shouldReceive('getCreation')
+      ->once()
+      ->with('table_name', $this->uid)
+      ->andReturn(
+        [
+          'date' => (float)time(),
+          'user' => $this->user
+        ]
+      );
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg, $history_mock);
+
+    $this->db_mock->shouldReceive('getPrimary')
+      ->once()
+      ->with('table_name')
+      ->andReturn(['id']);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with('table_name', 'column1', ['id' => $this->uid])
+      ->andReturn('val_from_selectOne');
+
+    $result          = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+    $expected_result = [
+      [
+        'date' => '2021-06-12',
+        'val'  => 'val_from_selectOne',
+        'user' => 'user_2'
+      ]
+    ];
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_throws_an_exception_when_the_provided_column_is_not_uid_and_not_exists_in_id_option_field()
+  {
+    $this->expectException(\Error::class);
+
+    $class_cfg = $this->getClassConfig();
+
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $history_mock->shouldReceive('getTableCfg')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue($this->column)
+      );
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg, $history_mock);
+
+    $this->db_mock->shouldReceive('getPrimary')
+      ->once()
+      ->with('table_name')
+      ->andReturn(['id']);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $result          = $history_mock->getColumnHistory('table_name', $this->uid, 'column');
+    $expected_result = [
+      [
+        'date' => '2021-06-12',
+        'val'  => 'val_from_selectOne',
+        'user' => 'user_2'
+      ]
+    ];
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_throws_an_exception_when_the_provided_column_is_uid_and_not_exists_in_id_option_field()
+  {
+    $this->expectException(\Error::class);
+
+    $class_cfg = $this->getClassConfig();
+
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $history_mock->shouldReceive('getTableCfg')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue($this->uid)
+      );
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg, $history_mock);
+
+    $this->db_mock->shouldReceive('getPrimary')
+      ->once()
+      ->with('table_name')
+      ->andReturn(['id']);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $result          = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+    $expected_result = [
+      [
+        'date' => '2021-06-12',
+        'val'  => 'val_from_selectOne',
+        'user' => 'user_2'
+      ]
+    ];
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_returns_an_empty_array_when_getCreation_method_returns_null()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $history_mock->shouldReceive('getTableCfg')
+      ->once()
+      ->andReturn(
+        $this->getModelizeMethodReturnValue($this->column)
+      );
+
+    $history_mock->shouldReceive('getHistory')
+      ->once()
+      ->andReturn([]);
+
+    $history_mock->shouldReceive('getCreation')
+      ->once()
+      ->with('table_name', $this->uid)
+      ->andReturnNull();
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+    $this->setNonPublicPropertyValue('class_cfg', $class_cfg, $history_mock);
+
+    $this->db_mock->shouldReceive('getPrimary')
+      ->once()
+      ->with('table_name')
+      ->andReturn(['id']);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with('table_name', 'column1', ['id' => $this->uid])
+      ->andReturn('val_from_selectOne');
+
+    $result = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_returns_an_empty_array_when_check_method_returns_null()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $history_mock->shouldReceive('check')->once()->andReturnFalse();
+
+    $result = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_returns_an_empty_array_when_getPrimary_method_returns_empty_array()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $this->db_mock->shouldReceive('getPrimary')->once()->andReturn([]);
+
+    $result = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getColumnHistory_method_returns_an_empty_array_when_getTableCfg_method_returns_null()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+
+    $history_mock->shouldReceive('check')->once()->andReturnTrue();
+    $this->db_mock->shouldReceive('getPrimary')->once()->andReturn(['id']);
+    $history_mock->shouldReceive('getTableCfg')->once()->andReturnNull();
+
+    $result = $history_mock->getColumnHistory('table_name', $this->uid, $this->column);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getTableCfg_method_returns_all_information_of_a_given_table()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        [
+          'fields' => [
+            'column1' => [
+              'id_option' => $this->uid,
+              'type'      => 'binary'
+            ],
+            'primary_column' => [
+              'extra'     => 'auto_increment',
+              'type'      => 'int',
+              'maxlength' => 22
+            ]
+          ],
+          'keys' => [
+            'PRIMARY' => [
+              'columns' => [
+                'primary_column'
+              ]
+            ]
+          ]
+        ]
+      );
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    // Called in the isLinked() method
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->getTableCfg('table_name');
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+
+    $structures = $this->getNonPublicProperty('structures');
+
+    $this->assertIsArray($structures);
+    $this->assertNotEmpty($structures);
+
+    // Returned from modelize() method mock.
+    $expected_structures = [
+      'db.table_name' => $expected_result = [
+        'history'         => 1,
+        'primary'         => 'primary_column',
+        'primary_type'    => 'int',
+        'primary_length'  => 22,
+        'auto_increment'  => true,
+        'id'              => $this->id_table,
+        'fields'          => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ]
+        ]
+      ]
+    ];
+
+    $this->assertSame($expected_structures, $structures);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getTableCfg_method_returns_null_when_tfn_method_returns_null()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name')
+    );
+  }
+
+  /** @test */
+  public function getTableCfg_returns_the_current_table_structure_when_exists_without_calling_modelize_method()
+  {
+    $structures = [
+      'db.table_name' => $expected_result = [
+        'history'         => 1,
+        'primary'         => 'primary_column',
+        'primary_type'    => 'int',
+        'primary_length'  => 11,
+        'auto_increment'  => true,
+        'id'              => $this->id_table,
+        'fields'          => [
+          'column2' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ]
+        ]
+      ]
+    ];
+
+    $this->db_mock->shouldReceive('tfn')
+      ->with('table_name')
+      ->once()
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldNotReceive('modelize');
+
+    $this->setNonPublicPropertyValue('structures', $structures);
+
+    $result = $this->history->getTableCfg('table_name');
+
+    $this->assertSame($expected_result, $result);
+    $this->assertSame($structures, $this->getNonPublicProperty('structures'));
+  }
+
+  /** @test */
+  public function getTableCfg_returns_full_information_about_the_given_table_even_if_it_is_already_saved_when_force_is_true()
+  {
+    $saved_structures = [
+      'db.table_name' => $old_results = [
+        'history'         => 1,
+        'primary'         => 'primary_column',
+        'primary_type'    => 'int',
+        'primary_length'  => 30,
+        'auto_increment'  => true,
+        'id'              => $this->id_table,
+        'fields'          => [
+          'column' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ]
+        ]
+      ]
+    ];
+
+    $this->setNonPublicPropertyValue('structures', $saved_structures);
+
+    $this->db_mock->shouldNotReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        [
+          'fields' => [
+            'another_column' => [
+              'id_option' => $this->uid,
+              'type'      => 'binary'
+            ],
+            'another_primary_column' => [
+              'extra'     => 'auto_increment',
+              'type'      => 'int',
+              'maxlength' => 40
+            ]
+          ],
+          'keys' => [
+            'PRIMARY' => [
+              'columns' => [
+                'another_primary_column'
+              ]
+            ]
+          ]
+        ]
+      );
+
+    $expected_structures = [
+      'db.table_name' => $expected_result = [
+        'history'         => 1,
+        'primary'         => 'another_primary_column',
+        'primary_type'    => 'int',
+        'primary_length'  => 40,
+        'auto_increment'  => true,
+        'id'              => $this->id_table,
+        'fields'          => [
+          'another_column' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ]
+        ]
+      ]
+    ];
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    $result = $this->history->getTableCfg('table_name', true);
+
+    $this->assertSame($expected_structures, $this->getNonPublicProperty('structures'));
+    $this->assertNotSame($old_results, $result);
+    $this->assertSame($expected_result, $result);
+  }
+
+  /** @test */
+  public function getTableCfg_method_returns_null_when_modelize_method_returns_null()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name')
+    );
+    $this->assertEmpty($this->getNonPublicProperty('structures'));
+  }
+
+  /** @test */
+  public function getTableCfg_method_returns_null_when_modelize_method_returns_null_and_force_is_true()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name', true)
+    );
+    $this->assertEmpty($this->getNonPublicProperty('structures'));
+  }
+
+  /** @test */
+  public function getTableCfg_returns_null_when_isLinked_method_returns_false()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        $this->getModelizeMethodReturnValue()
+      );
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->setNonPublicPropertyValue('links', []);
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name', true)
+    );
+
+    $this->assertSame([
+      'db.table_name' => [
+        'history' => false,
+        'primary' => false,
+        'primary_type' => null,
+        'primary_length' => 0,
+        'auto_increment' => false,
+        'id' => null,
+        'fields' => []
+      ]
+    ], $this->getNonPublicProperty('structures'));
+  }
+
+  /** @test */
+  public function getTableCfg_returns_null_when_PRIMARY_key_does_not_exist_in_the_model_array()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'keys' => []
+      ]);
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name', true)
+    );
+  }
+
+  /** @test */
+  public function getTableCfg_returns_null_when_columns_key_in_PRIMARY_array_count_does_not_equal_to_one()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column',
+              'another_column',
+            ]
+          ]
+        ]
+      ]);
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name', true)
+    );
+  }
+
+  /** @test */
+  public function getTableCfg_returns_null_when_fields_primary_column_array_is_empty()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn(
+        [
+          'fields' => [
+            'primary_column' => [],
+          ],
+          'keys' => [
+            'PRIMARY' => [
+              'columns' => [
+                'primary_column'
+              ]
+            ]
+          ]
+        ]
+      );
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->assertNull(
+      $this->history->getTableCfg('table_name', true)
+    );
+  }
+
+  /** @test */
+  public function getDbCfg_method_returns_information_about_all_tables_in_the_given_database()
+  {
+    $history_mock = \Mockery::mock(History::class)->makePartial();
+    $this->setNonPublicPropertyValue('db', $this->db_mock, $history_mock);
+
+    $this->db_mock->shouldReceive('getTables')
+      ->once()
+      ->with('db')
+      ->andReturn([
+        'table1', 'table2'
+      ]);
+
+    // The getTableCfg() method should be called twice
+    // in the loop since the getTables() returned array of count two
+    $history_mock->shouldReceive('getTableCfg')
+      ->twice()
+      ->andReturn(
+        [
+          'db.table1' => [
+            'foo1' => 'bar1'
+          ]
+        ],
+        [
+          'db.table2' => [
+            'foo2' => 'bar2'
+          ]
+        ]
+      );
+
+
+    $result = $history_mock->getDbCfg('db');
+
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+    $this->assertSame([
+      'table1'  => [
+        'db.table1' => [
+          'foo1' => 'bar1'
+        ]
+      ],
+      'table2'  => [
+        'db.table2' => [
+          'foo2' => 'bar2'
+        ]
+      ]
+    ], $result);
+  }
+
+  /** @test */
+  public function getDbCfg_method_returns_empty_array_when_no_tables_found()
+  {
+    $this->db_mock->shouldReceive('getTables')
+      ->once()
+      ->with('db')
+      ->andREturn([]);
+
+    $result = $this->history->getDbCfg('db');
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getDbCfg_method_returns_empty_array_when_getTables_returns_null()
+  {
+    $this->db_mock->shouldReceive('getTables')
+      ->once()
+      ->with('db')
+      ->andReturnNull();
+
+    $result = $this->history->getDbCfg('db');
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
   }
 }
