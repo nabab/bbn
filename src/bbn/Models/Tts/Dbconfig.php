@@ -263,7 +263,7 @@ trait Dbconfig
     // Plus a bunch of user-defined additional fields in the same table
     $this->fields = $cfg['arch'][$this->class_table_index];
     $this->class_cfg = $cfg;
-    $this->_is_init = true;
+    $this->_is_init_class_cfg = true;
 
     return $this;
   }
