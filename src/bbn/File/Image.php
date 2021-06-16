@@ -455,7 +455,7 @@ class Image extends bbn\File
   }
 
 
-    /**
+  /**
    * If the file is an image will return its width in pixel.
    *
      * ```php
@@ -474,7 +474,7 @@ class Image extends bbn\File
       }
     }
 
-      return 0;
+    return 0;
   }
 
 
@@ -497,11 +497,11 @@ class Image extends bbn\File
       }
     }
 
-      return 0;
+    return 0;
   }
 
 
-    /**
+  /**
    * Resize the width and the height of the image. If is given only width or height the other dimension will be set on auto.
      *
      * @todo $max_h and $max_w doesn't work.
