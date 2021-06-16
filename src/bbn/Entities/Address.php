@@ -1,7 +1,7 @@
 <?php
 namespace bbn\Entities;
 
-use bbn\X;
+use bbn\Db;
 use bbn\Models\Tts\Dbconfig;
 
 class Address
@@ -34,7 +34,7 @@ class Address
   /**
    * Constructor.
    *
-   * @param db    $db
+   * @param Db    $db
    * @param array $cfg
    * @param array $params
    */
