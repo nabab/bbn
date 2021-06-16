@@ -78,7 +78,9 @@ trait Dbconfig
   {
     if ($data = $this->prepare($data)) {
       $ccfg = $this->getClassCfg();
-      return !!$this->db->insert($ccfg['table'], $data);
+      if ($this->db->insert($ccfg['table'], $data)) {
+        return $this->db->lastId();
+      }
     }
 
     return null;
