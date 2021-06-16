@@ -469,7 +469,10 @@ You can click the following link to access directly your account:<br>
           ) {
             $cfg[$u['id']] = $this->db->lastId();
             // Envoi d'un lien
-            $this->makeHotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
+            if ($this->class_cfg['hotlinks']) {
+              $this->makeHotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
+            }
+
             return $cfg;
           }
           break;
