@@ -7,7 +7,6 @@ use bbn\Db;
 use bbn\Db\History;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
-use function Symfony\Component\Translation\t;
 
 class HistoryTest extends TestCase
 {
@@ -3018,4 +3017,55 @@ MYSQL;
     $this->assertIsArray($result);
     $this->assertEmpty($result);
   }
+
+  /** @test */
+  public function isLinked_method_returns_true_if_a_table_exists_in_the_links_array()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['columns']]);
+
+    $this->assertTrue($this->history->isLinked('table_name'));
+  }
+
+  /** @test */
+  public function isLinked_method_returns_false_if_tfn_returns_null()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturnNull();
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['columns']]);
+
+    $this->assertFalse($this->history->isLinked('table_name'));
+  }
+
+  /** @test */
+  public function isLinked_method_returns_false_if_table_does_not_exists_in_the_links_array()
+  {
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturnNull();
+
+    $this->setNonPublicPropertyValue('links', ['db.another_table_name' => ['columns']]);
+
+    $this->assertFalse($this->history->isLinked('table_name'));
+  }
+
+  /** @test */
+  public function getLinks_method_returns_all_the_linked_tables()
+  {
+    $this->setNonPublicPropertyValue('links', $expected_result = [
+      'db.table_name' => 'columns','db.another_table_name' => ['columns']
+    ]);
+
+    $this->assertSame($expected_result, $this->history->getLinks());
+  }
+
+
 }

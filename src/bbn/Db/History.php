@@ -109,7 +109,9 @@ class History
       $this->getHistoryUidsTableName(), $this->admin_db
     );
 
-    $this->db->setTrigger('\\bbn\\Appui\\History::trigger');
+    $this->db->setTrigger(function (array $cfg) {
+      return $this->trigger($cfg);
+    });
 
     $this->hash = $this->makeHash();
 
@@ -1052,6 +1054,9 @@ MYSQL;
   }
 
 
+  /**
+   * @return array
+   */
   public function getLinks()
   {
     return $this->links;
