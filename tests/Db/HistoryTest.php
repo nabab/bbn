@@ -3067,5 +3067,1481 @@ MYSQL;
     $this->assertSame($expected_result, $this->history->getLinks());
   }
 
+  /** @test */
+  public function trigger_method_test_when_kind_is_select_and_its_a_right_join_with_no_write_param_in_config()
+  {
+    $class_cfg = $this->getClassConfig();
 
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with($class_cfg['tables']['history'])
+      ->andReturn("db.{$class_cfg['tables']['history']}");
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with($class_cfg['tables']['history_uids'])
+      ->andReturn("db.{$class_cfg['tables']['history_uids']}");
+
+    $this->db_mock->shouldReceive('csn')
+      ->once()
+      ->with($history_uuids_table = $class_cfg['tables']['history_uids'])
+      ->andReturn($history_uuids_table);
+
+    // Called three times when setting $post_join['table'],  $post_join['alias'] & $new_join['alias']
+    $this->db_mock->shouldReceive('tsn')
+      ->times(3)
+      ->with($history_uuids_table)
+      ->andReturn($history_uuids_table);
+
+    // Called to get field for $post_join['on']['conditions'][0]['field']
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $bbn_uid_col = $class_cfg['arch']['history_uids']['bbn_uid'],
+        "{$history_uuids_table}1"
+      )
+      ->andReturn($cfn_1 = "{$history_uuids_table}1.$bbn_uid_col");
+
+    // Called to get field for $post_join['on']['conditions'][1]['field']
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with('primary_column', 'right_join_table', true)
+      ->andReturn($cfn_2 = 'right_join_table.primary_column');
+
+    // Called to get field for $post_join['on']['conditions'][0]['exp']
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $bbn_active_col = $class_cfg['arch']['history_uids']['bbn_active'],
+        "{$history_uuids_table}1"
+      )
+      ->andReturn($cfn_3 = "{$history_uuids_table}1.$bbn_active_col");
+
+    $this->db_mock->shouldReceive('modelize')
+      ->twice()
+      ->andReturn([
+        // Called when checking for joins
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ],
+            'ref_table' => $history_uuids_table
+          ]
+        ]
+      ],
+        [ // Called when looping through tables $cfg['tables']
+          'keys' => [
+            'PRIMARY' => [
+              'columns' => [
+                'primary_column'
+              ],
+              'ref_table' => $history_uuids_table,
+              'ref_db'    => 'db'
+            ]
+          ]
+        ]);
+
+    // Called when looping through $cfg['tables']
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.' . $history_uuids_table)
+      ->andReturn($history_uuids_table);
+
+    // Called to get field for $new_join['on']['conditions'][0]['field']
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        "{$history_uuids_table}2.$bbn_uid_col"
+      )
+      ->andReturn($cfn_4 = "{$history_uuids_table}2.$bbn_uid_col" );
+
+    // Called to get field for $new_join['on']['conditions'][0]['exp']
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        'primary_column', 'table_name', true
+      )
+      ->andReturn($cfn_5 = "{$history_uuids_table}2.$bbn_uid_col" );
+
+    // Called to get field for $new_join['on']['conditions'][1]['field']
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        "{$history_uuids_table}2.$bbn_active_col"
+      )
+      ->andReturn($cfn_6 = "{$history_uuids_table}2.$bbn_active_col" );
+
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'SELECT',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => []
+    ];
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'history' => [],
+      'join'    => [
+        [
+          'table' => $history_uuids_table,
+          'alias' => $history_uuids_table.'1',
+          'type' => 'right',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => $cfn_1,
+                'operator' => 'eq',
+                'exp' => $cfn_2
+              ], [
+                'field' => $cfn_3,
+                'operator' => '=',
+                'exp' => '1'
+              ]
+            ],
+            'logic' => 'AND'
+          ]
+        ],
+        [
+          'table' => $history_uuids_table,
+          'alias' => $history_uuids_table.'2',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => $cfn_4,
+                'operator' => 'eq',
+                'exp' => $cfn_5
+              ], [
+                'field' => $cfn_6,
+                'operator' => '=',
+                'exp' => '1'
+              ]
+            ],
+            'logic' => 'AND'
+          ]
+        ]
+      ],
+      'where'   => []
+    ]);
+
+    $this->db_mock->shouldReceive('reprocessCfg')
+      ->once()
+      ->with($expected_cfg)
+      ->andReturn($expected_cfg);
+
+    $result = $this->history->trigger($cfg);
+
+   $this->assertSame($expected_cfg, $result);
+   $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+   $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_kind_is_select_and_its_a_left_join()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with($class_cfg['tables']['history'])
+      ->andReturn("db.{$class_cfg['tables']['history']}");
+
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with($class_cfg['tables']['history_uids'])
+      ->andReturn("db.{$class_cfg['tables']['history_uids']}");
+
+    $this->db_mock->shouldReceive('csn')
+      ->once()
+      ->with($history_uuids_table = $class_cfg['tables']['history_uids'])
+      ->andReturn($history_uuids_table);
+
+
+    $this->db_mock->shouldReceive('modelize')
+      ->twice()
+      ->andReturn([
+        // Called when checking for joins
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ],
+            'ref_table' => $history_uuids_table
+          ]
+        ]
+      ],
+        [ // Called when looping through tables $cfg['tables']
+          'keys' => [
+            'PRIMARY' => [
+              'columns' => [
+                'primary_column'
+              ],
+              'ref_table' => $history_uuids_table,
+              'ref_db'    => 'db'
+            ]
+          ]
+        ]);
+
+    // Called when looping through $cfg['tables']
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('db.' . $history_uuids_table)
+      ->andReturn($history_uuids_table);
+
+   $this->db_mock->shouldReceive('replaceTableInConditions')
+     ->once()
+     ->withSomeOfArgs(
+       ['condition_1' => 'condition_1_value'],
+       'left_join_table'
+     )
+     ->andReturn(['condition_1' => 'condition_1_value']);
+
+   $this->db_mock->shouldReceive('cfn')
+     ->once()
+     ->with(
+       $col   = $class_cfg['arch']['history_uids']['bbn_uid'],
+       $table = $class_cfg['tables']['history_uids'] . '1'
+     )
+     ->andReturn($table.$col);
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with('primary_column', 'left_join_table', true)
+      ->andReturn($cfn_2 = 'left_join_table.primary_column');
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $col   = $class_cfg['arch']['history_uids']['bbn_active'],
+        $table = $class_cfg['tables']['history_uids'] . '1'
+      )
+      ->andReturn($cfn_3 = $table.$col);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->times(3)
+      ->with($class_cfg['tables']['history_uids'])
+      ->andReturn($class_cfg['tables']['history_uids']);
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $col   = $class_cfg['arch']['history_uids']['bbn_uid'],
+        $table = $class_cfg['tables']['history_uids'] . '1'
+      )
+      ->andReturn($cfn_1 = $table.$col);
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->withSomeOfArgs('primary_column', true)
+      ->andReturn($cfn_4 = 'table_alias.primary_column');
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $col = $class_cfg['tables']['history_uids'] . '2.' . $class_cfg['arch']['history_uids']['bbn_uid']
+      )
+      ->andReturn($cfn_5 = $col);
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->withSomeOfArgs('primary_column', true)
+      ->andReturn($cfn_4 = 'table_alias.primary_column');
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $col = $class_cfg['tables']['history_uids'] . '2.' . $class_cfg['arch']['history_uids']['bbn_active']
+      )
+      ->andReturn($cfn_6 = $col);
+
+
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'SELECT',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'left',
+          'table' => 'left_join_table',
+          'on'    => [
+            'conditions' => [
+              'condition_1' => 'condition_1_value'
+            ]
+          ]
+        ]
+      ],
+      'filters' => []
+    ];
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'join'    => [
+        [
+          'table' => $history_uuids_table,
+          'alias' => $history_uuids_table.'1',
+          'type' => 'left',
+          'on' => [
+            'conditions' => [
+              [
+                'field'    => $cfn_1,
+                'operator' => 'eq',
+                'exp'      => $cfn_4
+              ]
+            ],
+            'logic' => 'AND'
+          ]
+        ],
+        [
+          'type'  => 'left',
+          'table' => 'left_join_table',
+          'on' => [
+            'conditions' => [
+              [
+                'field'    => $cfn_1,
+                'operator' => 'eq',
+                'exp'      => $cfn_2
+              ],
+              [
+                'field'    => $cfn_3,
+                'operator' => '=',
+                'exp'      => '1'
+              ]
+            ],
+            'logic' => 'AND'
+          ]
+        ],
+        [
+          'table' => $class_cfg['tables']['history_uids'],
+          'alias' => $class_cfg['tables']['history_uids'] . '2',
+          'on' => [
+            'conditions' => [
+              [
+                'field'    => $cfn_5,
+                'operator' => 'eq',
+                'exp'      => $cfn_4
+              ],
+              [
+                'field'    => $cfn_6,
+                'operator' => '=',
+                'exp'      => '1'
+              ]
+            ],
+            'logic' => 'AND'
+          ]
+        ]
+      ],
+      'filters' => [],
+      'history' => [],
+      'where'   => []
+    ]);
+
+    $this->db_mock->shouldReceive('reprocessCfg')
+      ->once()
+      ->andReturn($expected_cfg);
+
+    $result = $this->history->trigger($cfg);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_kind_is_insert_and_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_primary_is_defined()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'INSERT',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => [],
+      'write'   => true,
+      'values_desc' => [
+        'primary' => true
+      ],
+      'fields' => $fields = [
+        'id'       => 'primary_column',
+        'username' => 'unique_column'
+      ],
+      'values' => [
+        'id'        => $this->uid,
+        'username'  => 'foobar'
+      ],
+      'generate_id' => false
+    ];
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $history_uuids_table = $class_cfg['tables']['history_uids'],
+        $class_cfg['arch']['history_uids']['bbn_active'],
+        [$bbn_uid_col = $class_cfg['arch']['history_uids']['bbn_uid'] => $this->uid]
+      )
+      ->andReturn(0);
+
+    $this->db_mock->shouldReceive('rselect')
+      ->once()
+      ->with([
+        'table' => 'db.table_name',
+        'fields' => $fields,
+        'join' => [[
+          'table' => $history_uuids_table,
+          'on' => [
+            'conditions' => [[
+              'field' => 'primary_column',
+              'exp' => 'bbn_uid'
+            ], [
+              'field' => $class_cfg['arch']['history_uids']['bbn_active'],
+              'value' => 0
+            ]]
+          ]
+        ]],
+        'where' => [
+          'conditions' => [[
+            'field' => 'primary_column',
+            'value' => $this->uid
+          ]]
+        ]
+      ])
+      ->andReturn([
+        'unique_column' => 'username'
+      ]);
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'trig'  => true,
+      'run'   => false,
+      'value' => 2,
+      'history' => [
+        [
+          'operation' => 'RESTORE',
+          'column' => $this->uid,
+          'line' => $this->uid
+        ]
+      ]
+    ]);
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $history_uuids_table,
+        [$class_cfg['arch']['history_uids']['bbn_active'] => 1],
+        [[$bbn_uid_col, '=', $this->uid]]
+      )
+      ->andReturn(2);
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        'db.table_name',
+        ['unique_column' => 'foobar'],
+        ['primary_column' => $this->uid]
+      )
+      ->andReturn(1);
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->uid,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(2, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(1, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_kind_is_insert_and_there_is_a_write_param_in_config_and_moment_is_before_and_primary_is_not_defined()
+  {
+    $class_cfg = $this->getClassConfig();
+
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'INSERT',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => [],
+      'write'   => true,
+      'values_desc' => [
+        'primary' => true
+      ],
+      'fields' => $fields = [
+        'id'       => 'primary_column',
+        'username' => 'unique_column'
+      ],
+      'values' => [
+        'id'        => $this->uid,
+        'username'  => 'foobar'
+      ],
+      'generate_id' => true
+    ];
+
+    $this->db_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ],
+          [
+            'unique'  => [
+              'unique_column'
+            ],
+            'columns' => [
+              'unique_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with(
+        $bbn_uid_col = $class_cfg['arch']['history_uids']['bbn_uid'],
+        $history_uuids_table = $class_cfg['tables']['history_uids']
+      )
+      ->andReturn($history_uuids_table . $bbn_uid_col);
+
+    $this->db_mock->shouldReceive('cfn')
+      ->once()
+      ->with('primary_column', 'db.table_name', true)
+      ->andReturn('table_name.primary_column');
+
+    // Called to get tge primary value from db
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with([
+        'tables' => ['db.table_name'],
+        'fields' => ['primary_column'],
+        'join' => [[
+          'table' => $history_uuids_table,
+          'on' => [[
+            'field' => $history_uuids_table . $bbn_uid_col,
+            'operator' => 'eq',
+            'exp' => 'table_name.primary_column'
+          ]]
+        ]],
+        'where' => [
+          'conditions' => [[
+            'field' => 'unique_column',
+            'operator' => 'eq',
+            'value' => 'foobar'
+          ]],
+          'logic' => 'AND'
+        ]
+      ])
+      ->andReturn('primary_value');
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $history_uuids_table,
+        $class_cfg['arch']['history_uids']['bbn_active'],
+        [$bbn_uid_col => 'primary_value']
+      )
+      ->andReturn(0);
+
+    $this->db_mock->shouldReceive('rselect')
+      ->once()
+      ->with([
+        'table' => 'db.table_name',
+        'fields' => $fields,
+        'join' => [[
+          'table' => $history_uuids_table,
+          'on' => [
+            'conditions' => [[
+              'field' => 'primary_column',
+              'exp' => 'bbn_uid'
+            ], [
+              'field' => $class_cfg['arch']['history_uids']['bbn_active'],
+              'value' => 0
+            ]]
+          ]
+        ]],
+        'where' => [
+          'conditions' => [[
+            'field' => 'primary_column',
+            'value' => 'primary_value'
+          ]]
+        ]
+      ])
+      ->andReturn([
+        'unique_column' => 'username'
+      ]);
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'trig'  => true,
+      'run'   => false,
+      'value' => 1,
+      'history' => [
+        [
+          'operation' => 'RESTORE',
+          'column' => $this->uid,
+          'line' => 'primary_value'
+        ]
+      ]
+    ]);
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $history_uuids_table,
+        [$class_cfg['arch']['history_uids']['bbn_active'] => 1],
+        [[$bbn_uid_col, '=', 'primary_value']]
+      )
+      ->andReturn(1);
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        'db.table_name',
+        ['unique_column' => 'foobar'],
+        ['primary_column' => 'primary_value']
+      )
+      ->andReturn(1);
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->uid,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(3, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(2, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_kind_is_update_and_primary_is_defined()
+  {
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'UPDATE',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => [],
+      'write'   => true,
+      'values_desc' => [
+        'id' => ['primary' => true]
+      ],
+      'fields' => [
+        'id'       => 'primary_column',
+        'username' => 'unique_column'
+      ],
+      'values' => [
+        'id'        => $this->uid,
+        'username'  => 'foobar'
+      ],
+      'generate_id' => true
+    ];
+
+    $this->db_mock->shouldReceive('rselect')
+      ->once()
+      ->with(
+        'db.table_name',
+        ['id' => 'primary_column', 'username' => 'unique_column'],
+        ['primary_column' => $this->uid]
+      )
+      ->andReturn([
+        'primary_column' => 'old_id'
+      ]);
+
+    // Called when looping through $cfg['fields'] which has count of two
+    $this->db_mock->shouldReceive('csn')
+      ->twice()
+      ->andReturn('primary_column', 'unique_column');
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'history' => [
+        [
+          'operation' => 'UPDATE',
+          'column' => $this->uid,
+          'line' => $this->uid,
+          'old' => 'old_id'
+        ]
+      ]
+    ]);
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->uid,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_kind_is_update_and_primary_is_not_defined()
+  {
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'UPDATE',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => [],
+      'write'   => true,
+      'values_desc' => [
+        'username' => ['primary' => false]
+      ],
+      'fields' => [
+        'id'       => 'primary_column',
+        'username' => 'unique_column'
+      ],
+      'values' => [
+        'id'        => $this->uid,
+        'username'  => 'foobar'
+      ],
+      'generate_id' => true,
+      'filter' => []
+    ];
+
+    $this->db_mock->shouldReceive('getColumnValues')
+      ->once()
+      ->with('db.table_name', 'primary_column', [])
+      ->andReturn(['id_1']);
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        'db.table_name',
+        [
+          'primary_column' => $this->uid,
+          'unique_column'  => 'foobar'
+        ],
+        ['primary_column' => 'id_1']
+      )
+      ->andReturn(2);
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'trig' => false,
+      'run'   => false,
+      'value' => 2,
+    ]);
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->uid,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_its_a_right_join_and_there_is_a_write_param_in_config_and_moment_is_before_and_kind_is_delete_and_primary_where_is_false()
+  {
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'DELETE',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => [],
+      'write'   => true,
+      'values_desc' => [
+        'username' => ['primary' => false]
+      ],
+      'fields' => [
+        'id'       => 'primary_column',
+        'username' => 'unique_column'
+      ],
+      'values' => [
+        'id'        => $this->uid,
+        'username'  => 'foobar'
+      ],
+      'generate_id' => true,
+      'filter' => []
+    ];
+
+    $this->db_mock->shouldReceive('getColumnValues')
+      ->once()
+      ->with('db.table_name', 'primary_column', [])
+      ->andReturn(['id_1']);
+
+    $this->db_mock->shouldReceive('delete')
+      ->once()
+      ->with(
+        'db.table_name',
+        ['primary_column' => 'id_1']
+      )
+      ->andReturn(3);
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'trig' => false,
+      'run'   => false,
+      'value' => 3,
+    ]);
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'id_option' => $this->uid,
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->uid,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(0, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(0, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_when_kind_is_delete_and_there_is_a_write_param_in_config_and_moment_is_before_and_primary_where_is_true()
+  {
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'DELETE',
+      'moment' => 'before',
+      'tables_full' => [],
+      'join' => [
+        [
+          'type' => 'right',
+          'table' => 'right_join_table'
+        ]
+      ],
+      'filters' => [],
+      'write'   => true,
+      'values_desc' => [
+        'id' => ['primary' => true]
+      ],
+      'fields' => [
+        'id'       => 'primary_column',
+        'username' => 'unique_column'
+      ],
+      'values' => [
+        'id'        => $this->uid,
+        'username'  => 'foobar'
+      ],
+      'generate_id' => true,
+      'filter' => []
+    ];
+
+    $class_cfg = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $class_cfg['tables']['history_uids'],
+        [$class_cfg['arch']['history_uids']['bbn_active'] => 0],
+        [$class_cfg['arch']['history_uids']['bbn_uid'] => $this->uid]
+      )
+      ->andReturn(3);
+
+    $expected_cfg = array_merge_recursive($cfg, [
+      'trig' => 1,
+      'run'   => false,
+      'value' => 3,
+      'history' => [
+        [
+          'operation' => 'DELETE',
+          'column' => $this->id_option,
+          'line' => $this->uid,
+          'old' => null
+        ]
+      ]
+    ]);
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->id_option,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(1, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(1, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_test_there_is_a_write_param_in_config_and_moment_is_after()
+  {
+    $cfg = [
+      'tables' => ['table_name'],
+      'kind'  => 'UPDATE',
+      'moment' => 'after',
+      'write'  => true,
+      'history' => [
+        [
+          'operation' => 'UPDATE',
+          'column' => $this->column,
+          'line' => $this->uid,
+          'old' => null,
+          'chrono' => $chrono = microtime(true)
+        ]
+      ],
+    ];
+
+    $class_cgf = $this->getClassConfig();
+
+    $this->db_mock->shouldReceive('lastId')
+      ->once()
+      ->andReturn('last_id');
+
+    $this->db_mock->shouldReceive('disableLast')
+      ->once();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $class_cgf['tables']['history'],
+        [
+          $class_cgf['arch']['history']['opr'] => 'UPDATE',
+          $class_cgf['arch']['history']['uid'] => $this->uid,
+          $class_cgf['arch']['history']['col'] => $this->column,
+          $class_cgf['arch']['history']['val'] => null,
+          $class_cgf['arch']['history']['ref'] => null,
+          $class_cgf['arch']['history']['tst'] => $chrono,
+          $class_cgf['arch']['history']['usr'] => $this->user,
+        ]
+      )
+      ->andReturn(1);
+
+    $this->db_mock->shouldReceive('setLastInsertId')
+      ->once()
+      ->with('last_id')
+      ->andReturnSelf();
+
+    $this->db_mock->shouldReceive('enableLast')
+      ->once();
+
+    $expected_cfg = [
+      'tables' => ['table_name'],
+      'kind'   => 'UPDATE',
+      'moment' => 'after',
+      'write'  => true
+    ];
+
+    // Called when checking the condition of $cfg['write'] existence
+    $this->db_mock->shouldReceive('tfn')
+      ->once()
+      ->with('table_name')
+      ->andReturn('db.table_name');
+
+    // And the second call in getTableCfg method
+    $this->db_mock->shouldReceive('tfn')
+      ->twice()
+      ->with('db.table_name')
+      ->andReturn('db.table_name');
+
+    $this->db_mock->shouldReceive('getCurrent')
+      ->once()
+      ->andReturn($this->cuerrent_db);
+
+    // Called in the getTableCfg method
+    $this->db_obj_mock->shouldReceive('modelize')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn([
+        'fields' => [
+          'column1' => [
+            'type'      => 'binary'
+          ],
+          'primary_column' => [
+            'extra'     => 'auto_increment',
+            'type'      => 'int',
+            'maxlength' => 33,
+            'id_option' => $this->id_option,
+          ]
+        ],
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => [
+              'primary_column'
+            ]
+          ]
+        ]
+      ]);
+
+    $this->setNonPublicPropertyValue('links', ['db.table_name' => ['primary_column']]);
+
+    $this->db_mock->shouldReceive('tsn')
+      ->once()
+      ->with('db.table_name')
+      ->andReturn('table_name');
+
+    $this->db_obj_mock->shouldReceive('tableId')
+      ->once()
+      ->with('table_name', $this->cuerrent_db)
+      ->andReturn($this->id_table);
+
+    $result = $this->history->trigger($cfg);
+
+    unset($result['history'][0]['chrono']);
+
+    $this->assertSame($expected_cfg, $result);
+    $this->assertSame(1, $this->getNonPublicProperty('enabled_count'));
+    $this->assertSame(1, $this->getNonPublicProperty('disabled_count'));
+  }
+
+  /** @test */
+  public function trigger_method_returns_the_provided_cfg_without_any_processing_when_enabled_is_false()
+  {
+    $this->setNonPublicPropertyValue('enabled', false);
+
+    $cfg = [
+      'foo' => 'bar'
+    ];
+
+    $this->assertSame($cfg, $this->history->trigger($cfg));
+  }
+  
+  /** @test */
+  public function getHistoryTableName_method_returns_history_table_name()
+  {
+    $this->assertSame(
+      $this->getClassConfig()['tables']['history'],
+      $this->getNonPublicMethod('getHistoryTableName')->invoke($this->history)
+    );
+  }
+
+  /** @test */
+  public function getHistoryTableColumns_method_returns_history_table_columns()
+  {
+    $this->assertSame(
+      $this->getClassConfig()['arch']['history'],
+      $this->getNonPublicMethod('getHistoryTableColumns')->invoke($this->history)
+    );
+  }
+
+  /** @test */
+  public function getHistoryTableColumnName_method_returns_the_column_name_in_history_table_from_the_given_key()
+  {
+    $this->assertSame(
+      $this->getClassConfig()['arch']['history']['tst'],
+      $this->getNonPublicMethod('getHistoryTableColumnName')->invoke($this->history, 'tst')
+    );
+  }
+
+  /** @test */
+  public function getHistoryTableColumnName_method_returns_null_when_column_does_not_exist_from_the_given_key()
+  {
+    $this->assertNull(
+      $this->getNonPublicMethod('getHistoryTableColumnName')->invoke($this->history, 'foo')
+    );
+  }
+
+  /** @test */
+  public function getHistoryUidsTableName_method_returns_history_uids_table_name()
+  {
+    $this->assertSame(
+      $this->getClassConfig()['tables']['history_uids'],
+      $this->getNonPublicMethod('getHistoryUidsTableName')->invoke($this->history)
+    );
+  }
+
+  /** @test */
+  public function getHistoryUidsColumns_method_returns_history_uids_table_columns()
+  {
+    $this->assertSame(
+      $this->getClassConfig()['arch']['history_uids'],
+      $this->getNonPublicMethod('getHistoryUidsColumns')->invoke($this->history)
+    );
+  }
+
+  /** @test */
+  public function getHistoryUidsColumnName_method_returns_column_name_in_history_uids_from_the_given_key()
+  {
+    $this->assertSame(
+      $this->getClassConfig()['arch']['history_uids']['bbn_uid'],
+      $this->getNonPublicMethod('getHistoryUidsColumnName')->invoke($this->history, 'bbn_uid')
+    );
+  }
+
+  /** @test */
+  public function getHistoryUidsColumnName_returns_null_when_column_does_not_exists_in_history_uids_table_from_the_given_key()
+  {
+    $this->assertNull(
+      $this->getNonPublicMethod('getHistoryUidsColumnName')->invoke($this->history, 'foo')
+    );
+  }
+
+  /** @test */
+  public function ensureUserIsSet_method_throws_an_exception_when_user_is_not_set()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setNonPublicPropertyValue('user', null);
+
+    $this->getNonPublicMethod('ensureUserIsSet')->invoke($this->history);
+  }
+
+  /** @test */
+  public function makeHash_method_creates_hash_from_the_given_configurations()
+  {
+    $expected_result = "";
+    foreach ($this->getClassConfig() as $item) {
+      $expected_result .= is_array($item) ? serialize($item) : '--' . $item . '--';
+    }
+
+    $expected_result = md5($expected_result);
+
+    $this->assertSame(
+      $expected_result,
+      $this->getNonPublicMethod('makeHash')->invoke($this->history)
+    );
+  }
 }

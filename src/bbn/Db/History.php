@@ -1224,7 +1224,7 @@ MYSQL;
       }
     }
 
-    if ($cfg['write']
+    if (isset($cfg['write'])
         && ($table = $this->db->tfn(current($tables)))
         && ($s = $this->getTableCfg($table))
     ) {
