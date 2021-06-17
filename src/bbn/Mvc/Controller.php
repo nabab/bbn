@@ -1353,6 +1353,11 @@ class Controller implements Api
   }
 
 
+  /**
+   * @param $path
+   * @return $this
+   * @throws \Exception
+   */
   public function setPrepath($path)
   {
     if ($this->exists() && $this->_mvc->setPrepath($path)) {
@@ -1360,7 +1365,7 @@ class Controller implements Api
       return $this;
     }
 
-    die("Prepath $path is not valid");
+    throw new \Exception(X::_("Prepath $path is not valid"));
   }
 
 
@@ -1369,7 +1374,8 @@ class Controller implements Api
    *
    * @params string path to the model
    * @params array data to send to the model
-   * @return array|false A data model
+   * @return array A data model
+   * @throws \Exception
    */
   public function getModel()
   {
@@ -1408,7 +1414,7 @@ class Controller implements Api
 
     if (!\is_array($m)) {
       if ($die) {
-        die("$path is an invalid model");
+        throw new \Exception(X::_("$path is an invalid model"));
       }
 
       return [];
@@ -1419,18 +1425,17 @@ class Controller implements Api
 
 
   /**
-   * This will get the model. There is no order for the arguments.
+   * This will get the cached model. There is no order for the arguments.
    *
    * @params string path to the model
    * @params array data to send to the model
-   * @return array|false A data model
+   * @return array A data model
    */
   public function getCachedModel()
   {
     $args = \func_get_args();
     $die  = false;
     $ttl  = 0;
-    $data = [];
     foreach ($args as $a){
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
@@ -1458,8 +1463,16 @@ class Controller implements Api
     }
 
     $m = $this->_mvc->getCachedModel($path, $data, $this, $ttl);
-    if (!\is_array($m) && $die) {
-      die("$path is an invalid model");
+    if (\is_object($m)) {
+      $m = X::toArray($m);
+    }
+
+    if (!\is_array($m)) {
+      if ($die) {
+        throw new \Exception(X::_("$path is an invalid model"));
+      }
+
+      return [];
     }
 
     return $m;
@@ -1471,6 +1484,7 @@ class Controller implements Api
    *
    * @params string path to the model
    * @params array data to send to the model
+   * @return void
    */
   public function deleteCachedModel()
   {
@@ -1496,7 +1510,7 @@ class Controller implements Api
       $data = $this->data;
     }
 
-    return $this->_mvc->deleteCachedModel($path, $data, $this);
+    $this->_mvc->deleteCachedModel($path, $data, $this);
   }
 
 

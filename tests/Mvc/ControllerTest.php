@@ -84,7 +84,7 @@ class ControllerTest extends TestCase
     $this->mvc_mock->shouldReceive('getPost')->andReturn($this->data['post']);
     $this->mvc_mock->shouldReceive('getGet')->andReturn($this->data['get']);
     $this->mvc_mock->shouldReceive('getFiles')->andReturn($this->data['files']);
-    $this->mvc_mock->shouldReceive('getParams')->andReturn($this->data['params']);
+    $this->mvc_mock->shouldReceive('getParams')->once()->andReturn($this->data['params']);
     $this->mvc_mock->shouldReceive('getUrl')->andReturn($this->data['url']);
   }
 
@@ -152,6 +152,7 @@ class ControllerTest extends TestCase
   /** @test */
   public function constructor_test_when_data_param_is_false()
   {
+    $this->setMvcMockExpectations();
     $this->init($this->info, false);
 
     $this->assertEmpty($this->controller->data);
@@ -1625,5 +1626,478 @@ let data = {
 
     $this->assertTrue(isset($this->controller->data['foo']));
     $this->assertSame('bar', $this->controller->data['foo']);
+  }
+
+  /** @test */
+  public function getContent_method_returns_the_content_of_a_file_located_within_the_data_path()
+  {
+    $file_path = self::createFile('test.txt',  'Hello world!', 'controllers');
+    $file_path = str_replace(BBN_APP_PATH . BBN_DATA_PATH, '',$file_path);
+
+    $this->assertSame('Hello world!', $this->controller->getContent($file_path));
+
+    unlink(BBN_APP_PATH . BBN_DATA_PATH . $file_path);
+  }
+
+  /** @test */
+  public function getContent_method_returns_false_if_path_is_not_valid()
+  {
+    $this->assertFalse($this->controller->getContent('foo/bar'));
+  }
+
+  /** @test */
+  public function getDir_method_returns_the_path_to_the_directory_of_the_current_controller()
+  {
+    $this->assertSame(
+      $this->getNonPublicProperty('_dir'),
+      $this->controller->getDir()
+    );
+  }
+
+  /** @test */
+  public function getPrepath_method_returns_pre_path_from_mvc_object()
+  {
+    $this->mvc_mock->shouldReceive('getPrepath')
+      ->once()
+      ->andReturn('foo');
+
+    $this->assertSame('foo', $this->controller->getPrepath());
+  }
+
+  /** @test */
+  public function getPrepath_method_returns_empty_string_if_path_property_is_empty()
+  {
+    $this->setNonPublicPropertyValue('_path', '');
+
+    $this->assertSame('', $this->controller->getPrepath());
+  }
+
+  /** @test */
+  public function setPrepath_method_sets_the_prepath()
+  {
+    $this->mvc_mock->shouldReceive('setPrepath')
+      ->once()
+      ->with('foo/bar')
+      ->andReturn(1);
+
+    $this->mvc_mock->shouldReceive('getParams')
+      ->once()
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertNotSame(
+      ['foo' => 'bar'],
+      $this->getNonPublicProperty('params')
+    );
+
+    $this->assertInstanceOf(Controller::class, $this->controller->setPrepath('foo/bar'));
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->getNonPublicProperty('params')
+    );
+  }
+
+  /** @test */
+  public function setPrepath_method_throws_an_exception_when_the_path_property_is_empty()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setNonPublicPropertyValue('_path', '');
+
+    $this->controller->setPrepath('foo/bar');
+  }
+
+  /** @test */
+  public function setPrepath_method_throws_an_exception_when_setPrepath_on_mvc_object_throws_exception()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->mvc_mock->shouldReceive('setPrepath')
+      ->once()
+      ->with('foo/bar')
+      ->andThrows(\Exception::class);
+
+    $this->controller->setPrepath('foo/bar');
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_using_controller_data_and_path_when_no_arguments_provided()
+  {
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->with(
+        // Here is expectation of the arguments used to call Mvc::getModel()
+        $this->getNonPublicProperty('_path'),
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+   $this->assertSame(['foo' => 'bar'], $this->controller->getModel());
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_using_the_provided_path()
+  {
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->with(
+        'custom/path/to',
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(['foo' => 'bar'], $this->controller->getModel('custom/path/to'));
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_using_the_provided_data()
+  {
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        ['data_key' => 'data_value'],
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(['foo' => 'bar'], $this->controller->getModel(['data_key' => 'data_value']));
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_using_the_provided_path_and_data()
+  {
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->with(
+        'custom/path/to',
+        ['data_key' => 'data_value'],
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getModel('custom/path/to', ['data_key' => 'data_value'])
+    );
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_when_path_is_not_provided_and_mode_is_dom()
+  {
+    $this->setNonPublicPropertyValue('mode', 'dom');
+
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path') . '/index',
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getModel()
+    );
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  {
+    $this->mvc_mock->shouldReceive('getmodel')
+      ->once()
+      ->with(
+        dirname($this->getNonPublicProperty('_path')) . '/custom_path',
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->mvc_mock->shouldReceive('getPrepath')->once()->andReturn('');
+
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getModel('./custom_path')
+    );
+  }
+
+  /** @test */
+  public function getModel_method_returns_the_model_when_the_returned_model_is_an_object()
+  {
+    $this->mvc_mock->shouldReceive('getmodel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      )
+      ->andReturn((object)['foo' => 'bar']);
+
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getModel()
+    );
+  }
+
+  /** @test */
+  public function getModel_method_throws_an_exception_when_true_is_provided_and_returned_model_is_not_an_array()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->andReturn('foo');
+
+    $this->controller->getModel(true);
+  }
+
+  /** @test */
+  public function getModel_method_returns_an_empty_array_when_false_is_provided_and_returned_model_is_not_an_array()
+  {
+    $this->mvc_mock->shouldReceive('getModel')
+      ->once()
+      ->andReturn('foo');
+
+    $result = $this->controller->getModel(false);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_cached_model_using_controller_data_and_path_and_zero_ttl_when_no_arguments_provided()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        $this->getNonPublicProperty('data'),
+        $this->controller,
+        0
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(['foo' => 'bar'], $this->controller->getCachedModel());
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_cached_model_using_the_provided_path()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        'custom/path/to',
+        $this->getNonPublicProperty('data'),
+        $this->controller,
+        0
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(['foo' => 'bar'], $this->controller->getCachedModel('custom/path/to'));
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_cached_model_using_the_provided_data()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        ['data_key' => 'data_value'],
+        $this->controller,
+        0
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(['foo' => 'bar'], $this->controller->getCachedModel(['data_key' => 'data_value']));
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_cached_model_using_the_ttl()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        $this->getNonPublicProperty('data'),
+        $this->controller,
+        222
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(['foo' => 'bar'], $this->controller->getCachedModel(222));
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_model_using_the_provided_path_and_data_and_ttl()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        'custom/path/to',
+        ['data_key' => 'data_value'],
+        $this->controller,
+        333
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getCachedModel('custom/path/to', ['data_key' => 'data_value'], 333)
+    );
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_cached_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        dirname($this->getNonPublicProperty('_path')) . '/custom_path',
+        $this->getNonPublicProperty('data'),
+        $this->controller,
+        0
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $this->mvc_mock->shouldReceive('getPrepath')->once()->andReturn('');
+
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getCachedModel('./custom_path')
+    );
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_the_cached_model_when_the_returned_model_is_an_object()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        $this->getNonPublicProperty('data'),
+        $this->controller,
+        0
+      )
+      ->andReturn((object)['foo' => 'bar']);
+
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->controller->getCachedModel()
+    );
+  }
+
+  /** @test */
+  public function getCachedModel_method_throws_an_exception_when_true_is_provided_and_returned_cached_model_is_not_an_array()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->andReturn('foo');
+
+    $this->controller->getCachedModel(true);
+  }
+
+  /** @test */
+  public function getCachedModel_method_returns_an_empty_array_when_false_is_provided_and_returned_cached_model_is_not_an_array()
+  {
+    $this->mvc_mock->shouldReceive('getCachedModel')
+      ->once()
+      ->andReturn('foo');
+
+    $result = $this->controller->getCachedModel(false);
+
+    $this->assertIsArray($result);
+    $this->assertEmpty($result);
+  }
+
+  /** @test */
+  public function deleteCachedModel_method_will_delete_the_cached_model_using_controller_data_and_path_when_no_arguments_provided()
+  {
+    $this->mvc_mock->shouldReceive('deleteCachedModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      );
+
+    $this->controller->deleteCachedModel();
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function deleteCachedModel_method_will_delete_the_cached_model_using_the_provided_path()
+  {
+    $this->mvc_mock->shouldReceive('deleteCachedModel')
+      ->once()
+      ->with(
+        'custom/path',
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      );
+
+    $this->controller->deleteCachedModel('custom/path');
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function deleteCachedModel_method_will_delete_the_cached_model_using_the_provided_data()
+  {
+    $this->mvc_mock->shouldReceive('deleteCachedModel')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('_path'),
+        ['foo' => 'bar'],
+        $this->controller
+      );
+
+    $this->controller->deleteCachedModel(['foo' => 'bar']);
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function deleteCachedModel_method_will_delete_the_cached_model_using_the_provided_path_and_data()
+  {
+    $this->mvc_mock->shouldReceive('deleteCachedModel')
+      ->once()
+      ->with(
+        'custom/path',
+        ['foo' => 'bar'],
+        $this->controller
+      );
+
+    $this->controller->deleteCachedModel(['foo' => 'bar'], 'custom/path');
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function deleteCachedModel_method_will_delete_the_cached_model_when_path_is_provided_and_it_starts_with_a_dot_and_a_backslash()
+  {
+    $this->mvc_mock->shouldReceive('deleteCachedModel')
+      ->once()
+      ->with(
+        dirname($this->getNonPublicProperty('_path')) . '/custom_path',
+        $this->getNonPublicProperty('data'),
+        $this->controller
+      );
+
+    $this->mvc_mock->shouldReceive('getPrepath')->once()->andReturn('');
+
+    $this->controller->deleteCachedModel('./custom_path');
+
+    $this->assertTrue(true);
   }
 }
