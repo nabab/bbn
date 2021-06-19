@@ -1128,7 +1128,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getPluginModel($path, array $data = [], string $plugin = null, int $ttl = 0)
+  public function getPluginModel(string $path, array $data = [], string $plugin = null, int $ttl = 0)
   {
     return $this->_mvc->getPluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $ttl);
   }
@@ -1145,7 +1145,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getSubpluginModel($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
+  public function getSubpluginModel(string $path, array $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }
@@ -1378,7 +1378,7 @@ class Controller implements Api
    *
    * @params string path to the model
    * @params array data to send to the model
-   * @return array A data model
+   * @return array|null A data model
    * @throws \Exception
    */
   public function getModel()
@@ -1433,7 +1433,7 @@ class Controller implements Api
    *
    * @params string path to the model
    * @params array data to send to the model
-   * @return array A data model
+   * @return array|null A data model
    */
   public function getCachedModel()
   {
