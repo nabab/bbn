@@ -117,13 +117,6 @@ class Environment
     return $this->_mode;
   }
 
-
-  private function _setLocale()
-  {
-
-  }
-
-
   private function _tryLocales(array $locales): ?string
   {
     foreach ($locales as $l) {
@@ -136,11 +129,15 @@ class Environment
   }
 
 
+  /**
+   * @return self
+   * @throws \Exception
+   */
   private function _init()
   {
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->_post
-    if (php_sapi_name() === 'cli') {
+    if ($this->isCli()) {
       $this->_mode = 'cli';
       $this->getCli();
     }
@@ -181,7 +178,12 @@ class Environment
   }
 
 
-  public function __construct($url = false)
+  /**
+   * Environment constructor.
+   *
+   * @throws \Exception
+   */
+  public function __construct()
   {
     if (!self::$_initiated) {
       self::_initialize();
@@ -193,7 +195,7 @@ class Environment
   /**
    * Sets the current locale.
    * If no parameter is provided and the constant BBN_LANG and BBN_LOCALE are not defined
-   * the function will also definew those constants.
+   * the function will also define those constants.
    *
    * @param string $locale
    *
@@ -304,12 +306,19 @@ class Environment
   }
 
 
+  /**
+   * @return string
+   */
   public function getLocale()
   {
     return $this->_locale;
   }
 
 
+  /**
+   * @param $path
+   * @return bool
+   */
   public function setPrepath($path)
   {
     $path = X::removeEmpty(explode('/', $path));
@@ -319,7 +328,9 @@ class Environment
           array_shift($this->_params);
           $this->_url = substr($this->_url, \strlen($p) + 1);
         } else {
-          die("The prepath $p doesn't seem to correspond to the current path {$this->_url}");
+          throw new \Exception(
+            X::_("The prepath $p doesn't seem to correspond to the current path {$this->_url}")
+          );
         }
       }
     }
@@ -360,6 +371,12 @@ class Environment
   }
 
 
+  /**
+   * @param $url
+   * @param false $post
+   * @param array|null $arguments
+   * @throws \Exception
+   */
   public function simulate($url, $post = false, $arguments = null)
   {
     unset($this->_params);
@@ -370,12 +387,19 @@ class Environment
   }
 
 
+  /**
+   * @return string|null
+   */
   public function getMode()
   {
     return $this->_mode;
   }
 
 
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function getCli()
   {
     global $argv;
@@ -400,9 +424,14 @@ class Environment
 
       return $this->_post;
     }
+
+    return null;
   }
 
 
+  /**
+   * @return array
+   */
   public function getGet()
   {
     if (!isset($this->_get)) {
@@ -420,6 +449,9 @@ class Environment
   }
 
 
+  /**
+   * @return array
+   */
   public function getPost()
   {
     if (!isset($this->_post)) {
@@ -452,6 +484,9 @@ class Environment
   }
 
 
+  /**
+   * @return array
+   */
   public function getFiles()
   {
     if (!isset($this->_files)) {
@@ -484,7 +519,18 @@ class Environment
               $names[]            = $v;
             }
           } else {
+            while (\in_array($f['name'], $names, true)) {
+              if (!isset($jj)) {
+                $jj = 0;
+              }
+
+              $jj++;
+              $file       = bbn\Str::fileExt($f['name'], true);
+              $f['name']  = $file[0] . '_' . $jj . '.' . $file[1];
+            }
+
             $this->_files[$n] = $f;
+            $names[] = $f['name'];
           }
         }
       }
@@ -506,12 +552,18 @@ class Environment
   }
 
 
+  /**
+   * @return array|null
+   */
   public function getParams()
   {
     return $this->_params;
   }
 
 
+  /**
+   * @return string|null
+   */
   public function getRequest(): ?string
   {
     if (self::$_initiated) {
@@ -522,6 +574,9 @@ class Environment
   }
 
 
+  /**
+   * @return string|null
+   */
   private static function _getHttpAcceptLanguageHeader(): ?string
   {
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
@@ -532,6 +587,10 @@ class Environment
   }
 
 
+  /**
+   * @param $httpAcceptLanguageHeader
+   * @return array
+   */
   private static function _getWeightedLocales($httpAcceptLanguageHeader)
   {
     if (strlen($httpAcceptLanguageHeader) == 0) {
@@ -569,9 +628,12 @@ class Environment
 
 
   /**
-   * Sort by high to low `q` value
+   * Sort by high to low `q` value.
+   *
+   * @param array $locales
+   * @return array
    */
-  private static function _sortLocalesByWeight($locales)
+  private static function _sortLocalesByWeight(array $locales)
   {
     usort(
       $locales, function ($a, $b) {
@@ -602,12 +664,18 @@ class Environment
   }
 
 
-  private function setParams($path)
+  /**
+   * @param string $path
+   * @throws \Exception
+   * @return void
+   */
+  private function setParams(string $path)
   {
     if (!isset($this->_params)) {
       $this->_params = [];
       $tmp           = explode('/', bbn\Str::parsePath($path));
       foreach ($tmp as $t) {
+        $t = trim($t);
         if (!empty($t) || bbn\Str::isNumber($t)) {
           if (\in_array($t, bbn\Mvc::$reserved, true)) {
             $msg = X::_('The controller you are asking for contains one of these reserved words')
