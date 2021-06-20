@@ -163,6 +163,15 @@ class EnvironmentTest extends TestCase
   }
 
   /** @test */
+  public function getUrl_method_returns_the_request_url()
+  {
+    $_SERVER['REQUEST_URI'] = 'localhost/foo';
+    $this->initAsNotCli();
+
+    $this->assertSame('localhost/foo', $this->env->getUrl());
+  }
+
+  /** @test */
   public function simulate_method_test()
   {
     $_POST = ['foo' => 'bar'];

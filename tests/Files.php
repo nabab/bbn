@@ -43,4 +43,9 @@ trait Files
       $total_dirs[] = $name;
     }
   }
+
+  protected function getTestingDirName()
+  {
+    return BBN_APP_PATH . BBN_DATA_PATH;
+  }
 }

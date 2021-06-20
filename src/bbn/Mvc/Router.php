@@ -112,13 +112,18 @@ class Router
   private $_root;
 
   /**
+   * @var bool|string
+   */
+  private $alt_root = false;
+
+  /**
    * @var array The list of known external controllers routes
    */
   private $_routes = [];
 
 
   /**
-   * Checks whether Yhe given string is a valid mode.
+   * Checks whether The given string is a valid mode.
    *
    * @param string $mode The mode as defined in self::$_modes
    *
@@ -150,9 +155,10 @@ class Router
 
 
   /**
-   * This will fetch the route to the controller for a given path. Chainable.
+   * Router constructor.
    *
-   * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
+   * @param bbn\Mvc $mvc
+   * @param array $routes
    */
   public function __construct(bbn\Mvc $mvc, array $routes = [])
   {
@@ -164,6 +170,11 @@ class Router
   }
 
 
+  /**
+   * Resets the full path in the mvc/mode of an external app (plugin).
+   *
+   * @return self
+   */
   public function reset(): self
   {
     $this->alt_root = false;
@@ -171,10 +182,14 @@ class Router
   }
 
 
+  /**
+   * @param $path
+   * @return bool
+   */
   public function setPrepath($path): bool
   {
     if (!$this->checkPath($path)) {
-      die("The prepath $path is not valid");
+      throw new Exception(X::_("The prepath $path is not valid"));
     }
 
     $this->_prepath = $path;
@@ -203,6 +218,10 @@ class Router
   }
 
 
+  /**
+   * @param string|null $plugin
+   * @return string|null
+   */
   public function getLocaleDomain(string $plugin = null): ?string
   {
     return $this->_textdomains[$plugin ?: 'main'] ?? null;
@@ -291,6 +310,12 @@ class Router
   }
 
 
+  /**
+   * @param string $path
+   * @param string $mode
+   * @param string $plugin
+   * @return array|null
+   */
   public function routeCustomPlugin(string $path, string $mode, string $plugin): ?array
   {
     if ($root = $this->_get_custom_root($mode, $plugin)) {
@@ -319,6 +344,13 @@ class Router
   }
 
 
+  /**
+   * @param string $path
+   * @param string $mode
+   * @param string $plugin
+   * @param string $subplugin
+   * @return array|null
+   */
   public function routeSubplugin(string $path, string $mode, string $plugin, string $subplugin): ?array
   {
     if ($root = $this->_get_subplugin_root($mode, $plugin, $subplugin)) {
@@ -347,12 +379,12 @@ class Router
   }
 
 
-    /**
-     * @param string $path
-     * @param string $mode
-     *
-     * @return array|mixed|null
-     */
+  /**
+   * @param string $path
+   * @param string $mode
+   *
+   * @return array|mixed|null
+   */
   public function route(string $path, string $mode): ?array
   {
     if (self::isMode($mode)) {
@@ -374,6 +406,11 @@ class Router
   }
 
 
+  /**
+   * @param $path
+   * @param $mode
+   * @return array|null
+   */
   public function fetchDir($path, $mode): ?array
   {
     // Only for views and models
@@ -402,7 +439,7 @@ class Router
         if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
           $dir = $dir1;
         }
-        elseif ($alt_path && ($dir2 = self::parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)
+        elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)
             && is_dir($dir2)
         ) {
           $dir = $dir2;
@@ -426,6 +463,9 @@ class Router
   }
 
 
+  /**
+   * @return array
+   */
   public function getRoutes(): array
   {
     return $this->_routes;
@@ -449,6 +489,13 @@ class Router
   }
 
 
+  /**
+   * Returns the mode path.
+   *
+   * @param string $mode
+   * @return string
+   * @throws Exception
+   */
   private function _get_mode_path(string $mode)
   {
     if ($mode === 'dom') {
@@ -463,7 +510,7 @@ class Router
       return 'mvc/'.$mode.'/';
     }
 
-    die("The mode $mode doesn't exist in router!");
+    throw new \Exception(X::_("The mode $mode doesn't exist in router!"));
   }
 
 
@@ -471,8 +518,8 @@ class Router
    * Get the full path in the mvc/mode of an external app (plugin).
    *
    * @param string $mode The mode as defined in self::$_modes
-   * @param string $path The path of the plugin
-   * @return void
+   * @param string|null $path The path of the plugin
+   * @return string|null
    */
   private function _get_alt_root(string $mode, string $path = null): ?string
   {
@@ -870,22 +917,42 @@ class Router
   }
 
 
+  /**
+   * @param $mode
+   * @param $plugin
+   * @param $subplugin
+   * @return string|null
+   */
   private function _get_subplugin_root($mode, $plugin, $subplugin): ?string
   {
     if (isset(self::$_filetypes[$mode])) {
       return $this->pluginPath($plugin) . 'plugins/' . $subplugin . '/' . $mode . '/';
     }
+
+    return null;
   }
 
 
+  /**
+   * @param $mode
+   * @param $plugin
+   * @return string|null
+   */
   private function _get_custom_root($mode, $plugin): ?string
   {
     if (isset(self::$_filetypes[$mode])) {
       return $this->_root . 'plugins/' . $plugin . '/' . $mode . '/';
     }
+
+    return null;
   }
 
 
+  /**
+   * @param string $path
+   * @param string $mode
+   * @return array|null
+   */
   private function _find_mv(string $path, string $mode): ?array
   {
     // Mode exists
@@ -958,7 +1025,7 @@ class Router
       $lang_path = $this->_routes['root'][$plugin]['path'] . 'src/locale';
       $name      = $this->_routes['root'][$plugin]['name'];
     }
-    if (isset($lang_path)) {
+    if (isset($lang_path, $name)) {
       if (!X::hasProp($this->_textdomains, $name)) {
         $idx_file  = $lang_path.'/index.txt';
         if (!is_file($idx_file)) {
