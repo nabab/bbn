@@ -138,6 +138,10 @@ class Controller implements Api
   }
 
 
+  /**
+   * @param array $info
+   * @param false $data
+   */
   public function reset(array $info, $data = false)
   {
     if (isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
@@ -1124,7 +1128,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getPluginModel($path, array $data = [], string $plugin = null, int $ttl = 0)
+  public function getPluginModel(string $path, array $data = [], string $plugin = null, int $ttl = 0)
   {
     return $this->_mvc->getPluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $ttl);
   }
@@ -1141,7 +1145,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getSubpluginModel($path, $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
+  public function getSubpluginModel(string $path, array $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }
@@ -1353,6 +1357,11 @@ class Controller implements Api
   }
 
 
+  /**
+   * @param $path
+   * @return $this
+   * @throws \Exception
+   */
   public function setPrepath($path)
   {
     if ($this->exists() && $this->_mvc->setPrepath($path)) {
@@ -1360,7 +1369,7 @@ class Controller implements Api
       return $this;
     }
 
-    die("Prepath $path is not valid");
+    throw new \Exception(X::_("Prepath $path is not valid"));
   }
 
 
@@ -1369,7 +1378,8 @@ class Controller implements Api
    *
    * @params string path to the model
    * @params array data to send to the model
-   * @return array|false A data model
+   * @return array|null A data model
+   * @throws \Exception
    */
   public function getModel()
   {
@@ -1408,7 +1418,7 @@ class Controller implements Api
 
     if (!\is_array($m)) {
       if ($die) {
-        die("$path is an invalid model");
+        throw new \Exception(X::_("$path is an invalid model"));
       }
 
       return [];
@@ -1419,18 +1429,17 @@ class Controller implements Api
 
 
   /**
-   * This will get the model. There is no order for the arguments.
+   * This will get the cached model. There is no order for the arguments.
    *
    * @params string path to the model
    * @params array data to send to the model
-   * @return array|false A data model
+   * @return array|null A data model
    */
   public function getCachedModel()
   {
     $args = \func_get_args();
     $die  = false;
     $ttl  = 0;
-    $data = [];
     foreach ($args as $a){
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
@@ -1458,8 +1467,16 @@ class Controller implements Api
     }
 
     $m = $this->_mvc->getCachedModel($path, $data, $this, $ttl);
-    if (!\is_array($m) && $die) {
-      die("$path is an invalid model");
+    if (\is_object($m)) {
+      $m = X::toArray($m);
+    }
+
+    if (!\is_array($m)) {
+      if ($die) {
+        throw new \Exception(X::_("$path is an invalid model"));
+      }
+
+      return [];
     }
 
     return $m;
@@ -1471,6 +1488,7 @@ class Controller implements Api
    *
    * @params string path to the model
    * @params array data to send to the model
+   * @return void
    */
   public function deleteCachedModel()
   {
@@ -1496,12 +1514,12 @@ class Controller implements Api
       $data = $this->data;
     }
 
-    return $this->_mvc->deleteCachedModel($path, $data, $this);
+    $this->_mvc->deleteCachedModel($path, $data, $this);
   }
 
 
   /**
-   * This will get the model. There is no order for the arguments.
+   * This will set the cached model. There is no order for the arguments.
    *
    * @params string path to the model
    * @params array data to send to the model
@@ -1510,7 +1528,7 @@ class Controller implements Api
   public function setCachedModel()
   {
     $args = \func_get_args();
-    $die  = 1;
+
     foreach ($args as $a){
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
@@ -1520,9 +1538,6 @@ class Controller implements Api
       }
       elseif (\is_int($a)) {
         $ttl = $a;
-      }
-      elseif (\is_bool($a)) {
-        $die = $a;
       }
     }
 
@@ -1546,6 +1561,10 @@ class Controller implements Api
   }
 
 
+  /**
+   * @return object|null
+   * @throws \Exception
+   */
   public function getObjectModel(): ?object
   {
     $args      = \func_get_args();
@@ -1588,6 +1607,10 @@ class Controller implements Api
   }
 
 
+  /**
+   * @param int $num
+   * @return bool
+   */
   public function hasArguments(int $num = 1)
   {
     $i = 0;
@@ -1626,10 +1649,10 @@ class Controller implements Api
 
 
   /**
-     * Checks if data exists or if a specific index exists in the data
-     *
-     * @return bool
-     */
+   * Checks if data exists or if a specific index exists in the data
+   *
+   * @return bool
+   */
   public function hasData($idx = null, $check_empty = false)
   {
     if (!\is_array($this->data)) {
@@ -1645,7 +1668,7 @@ class Controller implements Api
 
 
   /**
-   * Checks if there is ny HTML content in the object
+   * Checks if there is any HTML content in the object
    *
    * @return bool
    */
@@ -1660,7 +1683,7 @@ class Controller implements Api
 
 
   /**
-   * Returns the rendered result from the current mvc if successufully processed
+   * Returns the rendered result from the current mvc if successfully processed
    * process() (or check()) must have been called before.
    *
    * @return string|false
@@ -1681,11 +1704,14 @@ class Controller implements Api
   }
 
 
+  /**
+   * @param $mode
+   * @return self
+   */
   public function setMode($mode)
   {
     if ($this->_mvc->setMode($mode)) {
       $this->mode = $mode;
-      //die(var_dump($mode));
     }
 
     return $this;
@@ -1693,10 +1719,10 @@ class Controller implements Api
 
 
   /**
-   * Returns the rendered result from the current mvc if successufully processed
+   * Returns the rendered script result from the current mvc if successfully processed
    * process() (or check()) must have been called before.
    *
-   * @return string|false
+   * @return string
    */
   public function getScript()
   {
@@ -1740,9 +1766,9 @@ class Controller implements Api
 
 
   /**
-   * Merges the existing data if there is with this one. Chainable.
+   * Returns a new Controller instance with the given arguments.
    *
-   * @return void
+   * @return self|false
    */
   public function add($path, $data=[], $internal = false)
   {
@@ -1761,9 +1787,12 @@ class Controller implements Api
 
 
   /**
-   * Merges the existing data if there is with this one. Chainable.
+   * Creates a new Controller instance and merges it's object with the existing one.
    *
-   * @return void
+   * @param string $path
+   * @param array $data
+   * @param bool $internal
+   * @return self
    */
   public function addToObj(string $path, $data=[], $internal = false): self
   {

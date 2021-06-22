@@ -29,7 +29,7 @@ trait Reflectable
    * Get the value of non public property in an object.
    *
    * @param string $name
-   * @param null $object
+   * @param mixed|null $object
    * @return mixed
    * @throws \ReflectionException
    */

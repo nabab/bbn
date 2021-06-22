@@ -4,6 +4,9 @@
  */
 namespace bbn;
 
+use bbn\Api\Permissions\ApiPermissionsContract;
+use phpDocumentor\Parser\Exception;
+
 /**
  * A user authentication Class
  *
@@ -53,6 +56,8 @@ class User extends Models\Cls\Basic
       'sessions' => 'bbn_users_sessions',
       'tokens' => 'bbn_users_tokens',
       'users' => 'bbn_users',
+      'permission_accounts' => 'bbn_users_permission_accounts',
+      'permission_tokens' => 'bbn_users_permission_account_tokens'
     ],
     'arch' => [
       'groups' => [
@@ -106,6 +111,18 @@ class User extends Models\Cls\Basic
         'active' => 'active',
         'enckey' => 'enckey'
       ],
+      'permission_accounts' => [
+        'id'      => 'id',
+        'id_user' => 'id_user',
+        'name'    => 'name' // The combination of 'name' and 'id_user' should be unique.
+      ],
+      'permission_tokens' => [
+        'id'            => 'id',
+        'id_account'    => 'id_account',
+        'access_token'  => 'access_token',
+        'refresh_token' => 'refresh_token',
+        'expire'        => 'expire'
+      ]
     ],
     'fields' => [
       'user' => 'user',
@@ -1808,4 +1825,100 @@ class User extends Models\Cls\Basic
   }
 
 
+  /**
+   * @param string $access_token
+   * @param string $refresh_token
+   * @param int $expires_in
+   * @param string $account_name
+   * @return bool
+   * @throws Exception
+   */
+  public function saveNewPermissionTokens(string $access_token, string $refresh_token, int $expires_in, string $account_name): bool
+  {
+    if ($this->id) {
+      $account_exists = $this->db->count(
+        $this->class_cfg['tables']['permission_accounts'],
+        [
+          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,
+          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,
+        ]
+      );
+      
+      if ($account_exists > 0 ){
+        throw new Exception(X::_('Account already exists!'));
+      }
+      
+      if ($this->db->insert(
+          $this->class_cfg['tables']['permission_accounts'], [
+          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,
+          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,
+        ]
+      )) {
+        return (bool)$this->db->insert(
+          $this->class_cfg['tables']['permission_tokens'], [
+            $this->class_cfg['arch']['permission_tokens']['id_account']    => $this->db->lastId(),
+            $this->class_cfg['arch']['permission_tokens']['access_token']  => $access_token,
+            $this->class_cfg['arch']['permission_tokens']['refresh_token'] => $refresh_token,
+            $this->class_cfg['arch']['permission_tokens']['expire']        => time() + $expires_in,
+          ]
+        );
+      }
+    }
+
+    return false;
+  }
+
+  public function getPermissionAccountFromName(string $account_name)
+  {
+    if ($this->id) {
+      return $this->db->rselect(
+        $this->class_cfg['tables']['permission_accounts'],
+        $this->class_cfg['arch']['permission_accounts'],
+        [
+          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,
+          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,
+        ]
+      );
+    }
+
+    return false;
+  }
+
+  /**
+   * @param string $account_name
+   * @return array|false|null
+   */
+  public function getPermissionTokensFromAccountName(string $account_name)
+  {
+    if ($this->id) {
+      if ($account = $this->getPermissionAccountFromName($account_name)) {
+        return $this->db->rselect(
+          $this->class_cfg['tables']['permission_tokens'],
+          $this->class_cfg['arch']['permission_tokens'],
+          [
+            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account['id'],
+          ]
+        ); 
+      }
+    }
+    
+    return false;
+  }
+
+  public function updatePermissionTokens(string $account_name, string $access_token, string $refresh_token, int $expire_in)
+  {
+    if ($this->id && $account = $this->getPermissionAccountFromName($account_name)) {
+        return $this->db->update(
+          $this->class_cfg['tables']['permission_tokens'], [
+          $this->class_cfg['arch']['permission_tokens']['access_token']   => $access_token,
+          $this->class_cfg['arch']['permission_tokens']['refresh_token']  => $refresh_token,
+          $this->class_cfg['arch']['permission_tokens']['expire']         => time() + $expire_in,
+        ], [
+            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account['id']
+          ]
+        );
+    }
+
+    return false;
+  }
 }

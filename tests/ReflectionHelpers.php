@@ -10,12 +10,12 @@ class ReflectionHelpers
      * Get the value of non public properties in an object.
      *
      * @param string $name
-     * @param object $object $object
+     * @param mixed $object $object
      *
      * @return mixed
      * @throws \ReflectionException
      */
-  public static function getNonPublicProperty(string $name, object $object)
+  public static function getNonPublicProperty(string $name, $object)
   {
       $reflectionClass = new \ReflectionClass($object);
       $property        = $reflectionClass->getProperty($name);

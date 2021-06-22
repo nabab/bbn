@@ -393,7 +393,7 @@ class MvcTest extends TestCase
 
 
   /** @test */
-  public function it_returns_the_url_part_of_a_given_plugin()
+  public function it_returns_the_path_of_a_given_plugin()
   {
     $this->registerPlugin();
 

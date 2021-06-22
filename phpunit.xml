@@ -30,5 +30,7 @@
     <const name="BBN_APP_PREFIX" value="appui" />
     <const name="BBN_LIB_PATH" value="vendor" />
     <const name="BBN_ADMIN_EMAIL" value="admin@test.com" />
+    <const name="BBN_DEFAULT_MODE" value="public" />
+    <const name="BBN_CUR_PATH" value="/" />
   </php>
 </phpunit>

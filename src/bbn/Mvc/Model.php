@@ -70,15 +70,16 @@ class Model extends bbn\Models\Cls\Db
     $inc;
 
 
-    /**
-     * Models are always recreated and reincluded, even if they have from the same path
+  /**
+   * Models are always recreated and reincluded, even if they have from the same path
    * They are all created from bbn\Mvc::get_model
-     *
-     * @param null|bbn\Db $db   The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-   * @param array       $info The full path to the model's file
-   * @param controller  $ctrl The parent controller
-   * @param controller  $mvc  The parent MVC
-     */
+   *
+   * @param null|bbn\Db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+   * @param array $info The full path to the model's file
+   * @param controller $ctrl The parent controller
+   * @param bbn\Mvc $mvc The parent MVC
+   * @throws \Exception
+   */
   public function __construct(bbn\Db $db = null, array $info, Controller $ctrl, bbn\Mvc $mvc)
   {
     if (isset($info['path']) && $this->checkPath($info['path'])) {
@@ -89,7 +90,7 @@ class Model extends bbn\Models\Cls\Db
       $this->cacheInit();
       $this->_ctrl = $ctrl;
       $this->_mvc  = $mvc;
-        $this->inc = &$mvc->inc;
+      $this->inc = &$mvc->inc;
       if (is_file($info['file'])) {
         $this->_path     = $info['path'];
         $this->_file     = $info['file'];
@@ -97,11 +98,16 @@ class Model extends bbn\Models\Cls\Db
       }
     }
     else{
-        $this->error("The model $info[path] doesn't exist");
+        $this->error("The model ". ($info['path'] ?? null) ." doesn't exist");
     }
   }
 
 
+  /**
+   * @param array|null $vars
+   * @param bool $check_empty
+   * @return bool
+   */
   public function checkAction(array $vars = null, bool $check_empty = false): bool
   {
     if (isset($this->data['res'], $this->data['res'])) {
@@ -116,14 +122,19 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $path
+   * @param string $type
+   * @return bool
+   */
   public function isControlledBy(string $path, string $type = 'public'): bool
   {
     if ($this->_ctrl && ($this->_ctrl->getPath() === $path)) {
       if ($type === 'cli') {
-        return $this->mvc->isCli();
+        return $this->_mvc->isCli();
       }
 
-      if ($type === $this->_ctrl->mode) {
+      if ($type === $this->_ctrl->getMode()) {
         return true;
       }
     }
@@ -132,24 +143,41 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @return false|string|null
+   */
   public function getControllerPath()
   {
     return $this->_ctrl ? $this->_ctrl->getPath() : false;
   }
 
 
+  /**
+   * @param string $var
+   * @param bool $check_empty
+   * @return bool
+   */
   public function hasVar(string $var, bool $check_empty = false): bool
   {
     return bbn\X::hasProp($this->data, $var, $check_empty);
   }
 
 
+  /**
+   * @param array $vars
+   * @param bool $check_empty
+   * @return bool
+   */
   public function hasVars(array $vars, bool $check_empty = false): bool
   {
     return bbn\X::hasProps($this->data, $vars, $check_empty);
   }
 
 
+  /**
+   * @param $plugin_path
+   * @return self
+   */
   public function registerPluginClasses($plugin_path): self
   {
     $this->_ctrl->registerPluginClasses($plugin_path);
@@ -157,6 +185,10 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param array|null $data
+   * @return array|null
+   */
   public function get(array $data = null): ?array
   {
     if (\is_null($data)) {
@@ -186,60 +218,124 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * This will get a the content of a file located within the controller data path.
+   *
+   * @return string|false
+   */
   public function getContent(): ?string
   {
     return $this->_ctrl->getContent(...\func_get_args());
   }
 
 
+  /**
+   * This will get the model. There is no order for the arguments.
+   *
+   * @return array|null
+   * @throws \Exception
+   */
   public function getModel(): ?array
   {
     return $this->_ctrl->getModel(...\func_get_args());
   }
 
 
+  /**
+   * This will get the cached model. There is no order for the arguments.
+   *
+   * @return array|null
+   * @throws \Exception
+   */
   public function getCachedModel(): ?array
   {
     return $this->_ctrl->getCachedModel(...\func_get_args());
   }
 
 
-  public function getPluginModel($path, $data = [], string $plugin = null, $ttl = 0): ?array
+  /**
+   * Retrieves a model of a the plugin.
+   *
+   * @param $path
+   * @param array $data
+   * @param string|null $plugin
+   * @param int $ttl
+   * @return array|null
+   */
+  public function getPluginModel($path, array $data = [], string $plugin = null, int $ttl = 0): ?array
   {
     return $this->_ctrl->getPluginModel(...\func_get_args());
   }
 
 
-  public function getSubpluginModel($path, $data = [], string $plugin = null, string $subplugin, $ttl = 0): ?array
+  /**
+   * Get a sub plugin model (a plugin inside the plugin directory of another plugin).
+   *
+   * @param $path
+   * @param array $data
+   * @param string|null $plugin
+   * @param string $subplugin
+   * @param int $ttl
+   * @return array|null
+   */
+  public function getSubpluginModel($path, array $data = [], string $plugin = null, string $subplugin, int $ttl = 0): ?array
   {
     return $this->_ctrl->getSubpluginModel(...\func_get_args());
   }
 
 
+  /**
+   * Returns true if the subplugin model exists.
+   *
+   * @param string $path
+   * @param string $plugin
+   * @param string $subplugin
+   * @return bool
+   */
   public function hasSubpluginModel(string $path, string $plugin, string $subplugin): bool
   {
     return $this->_ctrl->hasSubpluginModel(...\func_get_args());
   }
 
 
+  /**
+   * Returns true if plugin exists and false otherwise.
+   *
+   * @return bool
+   */
   public function hasPlugin(): bool
   {
     return $this->_ctrl->hasPlugin(...\func_get_args());
   }
 
 
+  /**
+   * Returns true if plugin exists and false otherwise.
+   *
+   * @return bool
+   */
   public function isPlugin(): bool
   {
     return $this->_ctrl->isPlugin(...\func_get_args());
   }
 
 
+  /**
+   * Returns the path of the given plugin.
+   *
+   * @return string|null
+   */
   public function pluginPath(): ?string
   {
     return $this->_ctrl->pluginPath(...\func_get_args());
   }
 
 
+  /**
+   * Returns the URL part of the given plugin.
+   *
+   * @return string|null
+   */
   public function pluginUrl(): ?string
   {
     return $this->_ctrl->pluginUrl(...\func_get_args());
@@ -263,75 +359,90 @@ class Model extends bbn\Models\Cls\Db
      *
      * @return bool
      */
-  public function hasData($idx = null, $check_empty = false): bool
-  {
-    if (!\is_array($this->data)) {
-      return false;
-    }
-
-    if (\is_null($idx)) {
-      return !empty($this->data);
-    }
-
-    return \bbn\X::hasProps($this->data, (array)$idx, $check_empty);
-  }
-
-
-    /**
-     * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
-     *
-     * @param array $data
-     * @return void
-     */
-  public function setData(array $data): self
-  {
-      $this->data = $data;
-      return $this;
-  }
-
-
-    /**
-     * Merges the existing data if there is with this one. Chainable.
-     *
-     * @return void
-     */
-  public function addData(array $data): self
-  {
-      $ar = \func_get_args();
-    foreach ($ar as $d){
-      if (\is_array($d)) {
-        $this->data = $this->hasData() ? array_merge($this->data,$d) : $d;
-      }
-    }
-
-      return $this;
-  }
-
-
-  protected function _cache_name($data, $spec = ''): ?string
-  {
-    if ($this->_path) {
-      $cn = 'models/'.$this->_path;
-      if ($spec) {
-        $cn .= '/'.$spec;
+    public function hasData($idx = null, $check_empty = false): bool
+    {
+      if (!\is_array($this->data)) {
+        return false;
       }
 
-      if ($data) {
-        if (is_array($data)) {
-          ksort($data);
+      if (\is_null($idx)) {
+        return !empty($this->data);
+      }
+
+      return \bbn\X::hasProps($this->data, (array)$idx, $check_empty);
+    }
+
+
+  /**
+   * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
+   *
+   * @param array $data
+   * @return self
+   */
+    public function setData(array $data): self
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+
+  /**
+   * Merges the existing data if there is with this one. Chainable.
+   *
+   * @return self
+   */
+    public function addData(array $data): self
+    {
+        $ar = \func_get_args();
+      foreach ($ar as $d){
+        if (\is_array($d)) {
+          $this->data = $this->hasData() ? array_merge($this->data, $d) : $d;
+        }
+      }
+
+        return $this;
+    }
+
+
+  /**
+   * Generates cache name from the given data.
+   *
+   * @param $data
+   * @param string $spec
+   * @return string|null
+   */
+    protected function _cache_name($data, string $spec = ''): ?string
+    {
+      if ($this->_path) {
+        $cn = 'models/'.$this->_path;
+        if ($spec) {
+          $cn .= '/'.$spec;
         }
 
-        $cn .= '/'.md5(serialize($data));
+        if ($data) {
+          if (is_array($data)) {
+            ksort($data);
+          }
+
+          $cn .= '/'.md5(serialize($data));
+        }
+
+        return $cn;
       }
 
-      return $cn;
+      return null;
     }
 
-    return null;
-  }
 
-
-  public function setCache(array $data = null, $spec='', $ttl = 10)
+  /**
+   * Sets a cache from the given data.
+   *
+   * @param array|null $data
+   * @param string $spec
+   * @param int $ttl
+   * @return void
+   */
+  public function setCache(array $data = null, string $spec = '', $ttl = 10)
   {
     if ($this->_path) {
       $d = $this->get($data);
@@ -340,7 +451,13 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
-  public function deleteCache(array $data = null, $spec='')
+  /**
+   * Deletes a cache with the given data.
+   *
+   * @param array|null $data
+   * @param string $spec
+   */
+  public function deleteCache(array $data = null, $spec = '')
   {
     if ($cn = $this->_cache_name($data, $spec)) {
       $this->cacheDelete($cn, '');
@@ -348,7 +465,15 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
-  public function getFromCache(array $data = null, ?string $spec = '', $ttl = 10)
+  /**
+   * Returns the cache for the given item, but if expired or absent creates it before by running the closure.
+   *
+   * @param array|null $data
+   * @param string $spec
+   * @param int $ttl
+   * @return array|null
+   */
+  public function getFromCache(array $data = null, string $spec = '', int $ttl = 10)
   {
     $model =& $this;
     return $this->getSetFromCache(
@@ -356,11 +481,19 @@ class Model extends bbn\Models\Cls\Db
         return $model->get($data);
       }, $data, $spec, $ttl
     );
-    return null;
   }
 
 
-  public function getSetFromCache(\Closure $fn, array $data = null, $spec = '', $ttl = 10): ?array
+  /**
+   * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
+   *
+   * @param \Closure $fn
+   * @param array|null $data
+   * @param string $spec
+   * @param int $ttl
+   * @return array|null
+   */
+  public function getSetFromCache(\Closure $fn, array $data = null, string $spec = '', int $ttl = 10): ?array
   {
     if ($cn = $this->_cache_name($data, $spec)) {
       return $this->cacheGetSet($fn, $cn, '', $ttl) ?: null;

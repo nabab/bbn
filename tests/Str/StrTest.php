@@ -393,7 +393,6 @@ class StrTest extends TestCase
     $this->assertTrue(Str::checkName('foo_bar'));
     $this->assertTrue(Str::checkName('foo_bar_12'));
     $this->assertFalse(Str::checkName('foo bar'));
-    $this->assertFalse(Str::checkName('2foo'));
     $this->assertFalse(Str::checkName(2));
     $this->assertFalse(Str::checkName(['foo' => 'bar']));
   }

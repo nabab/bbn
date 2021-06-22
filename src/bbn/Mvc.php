@@ -328,7 +328,7 @@ class Mvc implements Mvc\Api
 
 
     /**
-     * Returns the URL part of the given plugin.
+     * Returns the path of the given plugin.
      *
      * @param string $plugin_name the plugin
      *
@@ -1271,8 +1271,8 @@ class Mvc implements Mvc\Api
     /**
        * Adds a property to the MVC object inc if it has not been declared.
        *
-       * @return bool
-       */
+       * @return void
+     */
     public function addInc($name, $obj)
     {
       if (!isset($this->inc->{$name})) {
