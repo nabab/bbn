@@ -55,6 +55,7 @@ class User extends Models\Cls\Basic
       'passwords' => 'bbn_users_passwords',
       'sessions' => 'bbn_users_sessions',
       'tokens' => 'bbn_users_tokens',
+      'api_tokens' => 'bbn_users_api_tokens',
       'users' => 'bbn_users',
       'permission_accounts' => 'bbn_users_permission_accounts',
       'permission_tokens' => 'bbn_users_permission_account_tokens'
@@ -98,18 +99,26 @@ class User extends Models\Cls\Basic
         'last' => 'last',
         'dt_last' => 'dt_last'
       ],
+      'api_tokens' => [
+        'id' => 'id',
+        'id_user' => 'id_user',
+        'token' => 'token',
+        'creation' => 'creation',
+      ],
       'users' => [
         'id' => 'id',
         'id_group' => 'id_group',
         'email' => 'email',
         'username' => 'username',
         'login' => 'login',
+        'phone_number' => 'phone_number',
         'admin' => 'admin',
         'dev' => 'dev',
         'theme' => 'theme',
         'cfg' => 'cfg',
         'active' => 'active',
-        'enckey' => 'enckey'
+        'enckey' => 'enckey',
+        'phone_verification_code' => 'phone_verification_code'
       ],
       'permission_accounts' => [
         'id'      => 'id',
@@ -132,7 +141,10 @@ class User extends Models\Cls\Basic
       'id' => 'id',
       'pass1' => 'pass1',
       'pass2' => 'pass2',
-      'action' => 'appui_action'
+      'action' => 'appui_action',
+      'token'  => 'appui_token',
+      'phone_number' => 'phone_number',
+      'phone_verification_code'  => 'phone_verification_code'
     ],
     /**
      * Password saving encryption
@@ -241,62 +253,126 @@ class User extends Models\Cls\Basic
   {
     // The database connection
     $this->db = $db;
-    // The client environment variables
-    $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';
-    $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
 
     // Setting up the class configuration
     $this->_init_class_cfg($cfg);
 
-    // Creating the session's variables if they don't exist yet
-    $this->_init_session();
-    self::retrieverInit($this);
-
     $f =& $this->class_cfg['fields'];
 
-    /*
-    if (x::isCli() && isset($params['id'])) {
-      $this->id = $params['id'];
-      $this->auth = true;
-    }
-    */
-    // The user logs in
-    if ($this->isLoginRequest($params)) {
-      /** @todo separate credentials and salt checking */
-      if (!empty($this->sess_cfg['fingerprint'])
-          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
-      ) {
-        /** @todo separate credentials and salt checking */
-        $this->_check_credentials($params);
-      }
-      else{
-        $this->setError(19);
-        $this->session->destroy();
-      }
-    }
+    if ($this->isPhoneNumberCodeSendingRequest($params)) {
+      // find the user using phone_number in db
+      $user = $this->findByPhoneNumber($params[$f['phone_number']]);
 
-    /** @todo revise the process: dying is not the solution! */
-    // The user is not known yet
-    elseif ($this->isResetPasswordRequest($params)) {
-      if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {
-        $this->password_reset = true;
-        if (($params[$f['pass1']] === $params[$f['pass2']])) {
-          $this->expireHotlink($params[$f['id']]);
-          $this->id = $id;
-          $this->forcePassword($params[$f['pass2']]);
-          $this->session->set([]);
+      if (!$user) {
+        throw new Exception(X::_('Unknown phone number'));
+      }
+
+      // Generate a code
+      $code = Str::genpwd(5, 5);
+
+      // Save it
+      $this->updatePhoneVerificationCode($user['id'], $code);
+
+      // Send the sms with code here
+
+      return true;
+
+    } elseif ($this->isVerifyPhoneNumberRequest($params)) {
+      // find the user using phone_number in db
+      $user = $this->findByPhoneNumber($params[$f['phone_number']]);
+
+      if (!$user) {
+        throw new Exception(X::_('Unknown phone number'));
+      }
+
+      // Verify that the code is correct
+      if ($user['phone_verification_code'] !== $params[$f['phone_verification_code']]) {
+        throw new Exception(X::_('Invalid code'));
+      }
+
+      // Update verification code to null
+      $this->updatePhoneVerificationCode($user['id'], null);
+
+      // Generate a token
+      $token = Str::genpwd(32, 16);
+
+      // Save it in db
+      $this->db->insert(
+        $this->class_cfg['tables']['api_tokens'],[
+          $this->class_cfg['arch']['api_tokens']['id_user']  => $user['id'],
+          $this->class_cfg['arch']['api_tokens']['token']    => $token,
+          $this->class_cfg['arch']['api_tokens']['creation'] => date('Y-m-d H:i:s')
+        ]
+      );
+
+      // Send the token here
+      return json_encode([
+        'token'   => $token,
+        'success' => true
+      ]);
+
+    } elseif ($this->isTokenRequest($params)) {
+      // Find the token and it's associated user in db and authenticate if found
+      if (!$this->findByApiToken($params[$f['fields']['token']])) {
+        throw new \Exception(X::_('Invalid token'));
+      }
+
+      // Now the user is authenticated
+      return true;
+
+    } else {
+      // The client environment variables
+      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
+      $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';
+      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+
+      // Creating the session's variables if they don't exist yet
+      $this->_init_session();
+      self::retrieverInit($this);
+
+      /*
+      if (x::isCli() && isset($params['id'])) {
+        $this->id = $params['id'];
+        $this->auth = true;
+      }
+      */
+      // The user logs in
+      if ($this->isLoginRequest($params)) {
+        /** @todo separate credentials and salt checking */
+        if (!empty($this->sess_cfg['fingerprint'])
+          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
+        ) {
+          /** @todo separate credentials and salt checking */
+          $this->_check_credentials($params);
         }
         else{
-          $this->setError(7);
+          $this->setError(19);
+          $this->session->destroy();
         }
       }
-      else{
-        $this->setError(18);
+
+      /** @todo revise the process: dying is not the solution! */
+      // The user is not known yet
+      elseif ($this->isResetPasswordRequest($params)) {
+        if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {
+          $this->password_reset = true;
+          if (($params[$f['pass1']] === $params[$f['pass2']])) {
+            $this->expireHotlink($params[$f['id']]);
+            $this->id = $id;
+            $this->forcePassword($params[$f['pass2']]);
+            $this->session->set([]);
+          }
+          else{
+            $this->setError(7);
+          }
+        }
+        else{
+          $this->setError(18);
+        }
       }
-    }
-    else {
-      $this->checkSession();
+      else {
+        $this->checkSession();
+      }
     }
   }
 
@@ -331,6 +407,28 @@ class User extends Models\Cls\Basic
       $params[$f['action']]
     )
       && $params[$f['action']] === 'init_password';
+  }
+
+
+  protected function isVerifyPhoneNumberRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['phone_number']], $params[$f['phone_verification_code']]) && $params[$f['action'] === 'verify_phone_number'];
+  }
+
+  protected function isPhoneNumberCodeSendingRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['phone_number']]) && $params[$f['action'] === 'send_phone_number_verification_code'];
+  }
+
+  protected function isTokenRequest(array $params)
+  {
+    $f = $this->class_cfg['fields'];
+
+    return isset($params[$f['token']]);
   }
 
   public function isReset()
@@ -1920,5 +2018,61 @@ class User extends Models\Cls\Basic
     }
 
     return false;
+  }
+
+  /**
+   * @param string $phone_number
+   * @return array|null
+   */
+  protected function findByPhoneNumber(string $phone_number)
+  {
+    return $this->db->rselect(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users'],
+      [
+        $this->class_cfg['arch']['users']['phone_number'] => $phone_number
+      ]
+    );
+  }
+
+
+  /**
+   * @param string $token
+   * @return array|null
+   */
+  protected function findByApiToken(string $token)
+  {
+    if ($user_token =  $this->db->rselect(
+      $this->class_cfg['tables']['api_tokens'],
+      $this->class_cfg['arch']['api_tokens'],
+      [
+        $this->class_cfg['arch']['api_tokens']['token'] => $token
+      ]
+    )) {
+      return $this->db->rselect(
+        $this->class_cfg['tables']['users'],
+        $this->class_cfg['arch']['users'],
+        [
+          $this->class_cfg['arch']['users']['id'] => $user_token['id_user']
+        ]
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * @param string|null $code
+   * @return int|null
+   */
+  protected function updatePhoneVerificationCode($user_id, ?string $code)
+  {
+    return $this->db->update(
+      $this->class_cfg['tables']['users'], [
+      $this->class_cfg['arch']['users']['phone_verification_code'] => $code
+    ], [
+        $this->class_cfg['arch']['users']['id'] => $user_id
+      ]
+    );
   }
 }

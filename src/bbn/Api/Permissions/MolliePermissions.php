@@ -2,7 +2,6 @@
 
 namespace bbn\Api\Permissions;
 
-use bbn\User\Session;
 use League\OAuth2\Client\Grant\RefreshToken;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Mollie\OAuth2\Client\Provider\Mollie;
