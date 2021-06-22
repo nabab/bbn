@@ -2462,6 +2462,10 @@ class Option extends bbn\Models\Cls\Db
           $c['num'] => $it[$c['num']] ?? null,
           $c['cfg'] => $it[$c['cfg']] ?? null
         ];
+        if (isset($it[$c['id']]) && !$this->exists($it[$c['id']])) {
+          $values[$c['id']] = $it[$c['id']];
+        }
+
         if (!empty($it['id']) && $with_id) {
           $values['id'] = $it['id'];
         }
@@ -3384,7 +3388,7 @@ class Option extends bbn\Models\Cls\Db
           }
 
           if (isset($cfg['id'])) {
-            unset($cfg['id']);
+            //unset($cfg['id']);
           }
 
           if (isset($cfg['scfg'])
@@ -3413,7 +3417,6 @@ class Option extends bbn\Models\Cls\Db
           }
 
           unset($o['id_parent']);
-          unset($o['id']);
           if (isset($o['num_children'])) {
             unset($o['num_children']);
           }
@@ -3572,7 +3575,9 @@ class Option extends bbn\Models\Cls\Db
         $tmp   = [];
         $items = [];
         if (isset($o[$c['id']])) {
-          unset($o[$c['id']]);
+          if ($this->exists($o[$c['id']])) {
+            unset($o[$c['id']]);
+          }
         }
 
         $o[$c['id_parent']] = $id_parent ?: $this->default;
