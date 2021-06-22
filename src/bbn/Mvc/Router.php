@@ -563,7 +563,7 @@ class Router
 
 
   /**
-   * Checks whether a path is part of the routes['alias'] array.
+   * Returns the alias of the given path if it is part of the routes['alias'] array.
    *
    * @param mixed $path
    *
@@ -581,7 +581,7 @@ class Router
 
 
   /**
-   * Checks whether a path is know for its corresponding mode.
+   * Checks whether a path is known for its corresponding mode.
    *
    * @param string $path
    * @param string $mode

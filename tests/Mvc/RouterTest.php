@@ -879,4 +879,73 @@ class RouterTest extends TestCase
         ->invoke($this->router, 'html')
     );
   }
+
+  /** @test */
+  public function is_alias_method_checks_if_a_path_is_part_of_alias_in_the_routes_array()
+  {
+    $method = $this->getNonPublicMethod('_is_alias');
+
+    $this->setNonPublicPropertyValue('_routes', ['alias' => ['path/to' => 'foo']]);
+
+    $this->assertSame('path/to', $method->invoke($this->router, 'path/to'));
+    $this->assertSame('path/to', $method->invoke($this->router, 'path//to'));
+    $this->assertSame('path/to', $method->invoke($this->router, 'path/to/app'));
+    $this->assertNull($method->invoke($this->router, 'another/path/to'));
+    $this->assertNull($method->invoke($this->router, '//path//to'));
+
+    $this->setNonPublicPropertyValue('_routes', ['alias' => []]);
+
+    $this->assertNull($method->invoke($this->router, 'path/to'));
+
+    $this->setNonPublicPropertyValue('_routes', []);
+
+    $this->assertNull($method->invoke($this->router, 'path/to'));
+  }
+
+  /** @test */
+  public function get_alias_method_returns_the_alias_of_the_given_path_if_it_is_part_of_the_alias_in_the_routes_array()
+  {
+    $method = $this->getNonPublicMethod('_get_alias');
+
+    $this->setNonPublicPropertyValue('_routes', ['alias' => ['path/to' => 'foo']]);
+
+    $this->assertSame('foo', $method->invoke($this->router, 'path/to'));
+    $this->assertSame('foo', $method->invoke($this->router, 'path//to'));
+    $this->assertNull($method->invoke($this->router, 'another/path/to'));
+    $this->assertNull($method->invoke($this->router, '/path/to'));
+
+    $this->setNonPublicPropertyValue('_routes', ['alias' => ['path/to' => ['foo', 'bar']]]);
+
+    $this->assertSame('foo', $method->invoke($this->router, 'path/to'));
+    $this->assertSame('foo', $method->invoke($this->router, 'path//to'));
+    $this->assertNull($method->invoke($this->router, 'another/path/to'));
+    $this->assertNull($method->invoke($this->router, '//path/to'));
+
+    $this->setNonPublicPropertyValue('_routes', []);
+    $this->assertNull($method->invoke($this->router, 'another/path/to'));
+    $this->assertNull($method->invoke($this->router, '//path/to'));
+  }
+
+  /** @test */
+  public function is_known_method_checks_if_the_given_path_is_known_for_its_corresponding_mode()
+  {
+    $method = $this->getNonPublicMethod('_is_known');
+    $known  = $this->getNonPublicProperty('_known');
+
+    $known['js']['path/to/app'] = [
+      'file' => "./tests/storage/plugins/plugin_name/html/app.js",
+      'path' => 'path/to/app',
+      'ext' => 'js',
+      'plugin' => 'plugin_name',
+      'mode' => 'js',
+      'i18n' => "./tests/storage/plugins/plugin_name/locale/en/en.json",
+    ];
+
+    $this->setNonPublicPropertyValue('_known', $known);
+
+    $this->assertTrue($method->invoke($this->router, 'path/to/app', 'js'));
+    $this->assertFalse($method->invoke($this->router, 'path/to/another/app', 'js'));
+    $this->assertFalse($method->invoke($this->router, 'path/to/app', 'html'));
+    $this->assertFalse($method->invoke($this->router, 'path/to/app', 'foo'));
+  }
 }
