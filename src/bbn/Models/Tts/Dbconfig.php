@@ -97,6 +97,7 @@ trait Dbconfig
   public function delete(string $id): bool
   {
     if ($data = $this->exists($id)) {
+      $ccfg = $this->getClassCfg();
       $f = $ccfg['arch'][$this->class_table_index];
       return !!$this->db->delete($ccfg['table'], [$f['id'] => $id]);
     }
@@ -124,6 +125,7 @@ trait Dbconfig
     }
 
     if ($data = $this->prepare($data)) {
+      $ccfg = $this->getClassCfg();
       $f = $ccfg['arch'][$this->class_table_index];
       return !!$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);
     }
