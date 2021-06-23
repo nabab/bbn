@@ -36,6 +36,11 @@ class UserTest extends TestCase
     'appui_action'  => 'init_password'
   ];
 
+  protected $api_post = [
+    'device_uid'   => '634a2c70bcac11eba47652540000cfaa',
+    'appui_token'  => '634a2c70aaaaa2aaa47652540000cfaa'
+  ];
+
   protected $user_id = '7f4a2c70bcac11eba47652540000cfaa';
 
   protected $session_id = '7f4a2c70bcac11eba47652540000cfbe';
@@ -131,13 +136,11 @@ class UserTest extends TestCase
 
 
   /**
-   * Callback to apply additional mockery expectations.
    *
-   * @param array         $selectOneReturn
-   * @param callable|null $callback
+   * @param callable|null $callback Callback to apply additional mockery expectations.
    * @return mixed|null
    */
-  protected function login(?callable $callback = null)
+  protected function sessionLogin(?callable $callback = null)
   {
     if ($callback) {
       $result = $callback($this->db_mock);
@@ -150,10 +153,41 @@ class UserTest extends TestCase
     return $result ?? null;
   }
 
+  /**
+   * @param array $api_post
+   * @param callable|null $callback Callback to apply additional mockery expectations.
+   * @throws \Exception
+   */
+  protected function tokenRequest(array $api_post = [], ?callable $callback = null)
+  {
+    if ($callback) {
+      $callback($this->db_mock);
+    }
+
+    $this->api_post = array_replace($this->api_post, $api_post);
+
+    $this->user = new User($this->db_mock, $this->api_post, ['tables' => ['api_tokens' => 'bbn_api_tokens']]);
+  }
+
+  protected function verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, $return_value)
+  {
+    $db_mock->shouldReceive('rselect')
+      ->once()
+      ->with(
+        'bbn_api_tokens',
+        $class_cfg['arch']['api_tokens'],
+        [
+          $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+          $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+        ]
+      )
+      ->andReturn($return_value);
+  }
+
 
   protected function simpleLogin()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -185,7 +219,7 @@ class UserTest extends TestCase
   {
     $session_data = $data ?? $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -399,6 +433,395 @@ class UserTest extends TestCase
     $this->assertNull($this->user->getId());
   }
 
+  /** @test */
+  public function api_user_can_request_sending_verification_code_to_his_phone_number()
+  {
+    $this->tokenRequest([
+      'phone_number' => $phone_number = '12345',
+      'appui_action' => 'send_phone_number_verification_code'
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturn([
+          $class_cfg['arch']['users']['id'] => $this->user_id,
+        ]);
+
+      // updatePhoneVerificationCode() method
+      $db_mock->shouldReceive('query')->once()->andReturn(1);
+    });
+
+    $this->assertTrue($this->user->getApiRequestOutput());
+  }
+  
+  /** @test */
+  public function sending_verification_code_request_will_throw_an_exception_when_the_received_token_does_not_match_device_uid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number' => '12345',
+      'appui_action' => 'send_phone_number_verification_code'
+    ], function ($db_mock) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, null);
+    });
+  }
+
+  /** @test */
+  public function sending_verification_code_request_will_throw_an_exception_when_phone_number_does_not_exist_in_db()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number' => $phone_number = '12345',
+      'appui_action' => 'send_phone_number_verification_code'
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturnNull();
+    });
+  }
+  
+  /** @test */
+  public function api_user_can_request_to_verify_phone_number_by_verification_code_and_get_a_new_token_as_a_result()
+  {
+    $this->tokenRequest([
+      'phone_number'            => $phone_number = '12345',
+      'appui_action'            => 'verify_phone_number',
+      'phone_verification_code' => 'abcde'
+
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturn([
+          $class_cfg['arch']['users']['id'] => $this->user_id,
+          $class_cfg['arch']['users']['cfg'] => json_encode(['phone_verification_code' => 'abcde']),
+        ]);
+
+      // updatePhoneVerificationCode() method
+      $db_mock->shouldReceive('query')->once()->andReturn(1);
+
+      // Update user id and the new token in the row with the old token and device uid.
+      $db_mock->shouldReceive('update')
+        ->once()
+        ->withAnyArgs(
+          'bbn_api_tokens',
+          [
+            $class_cfg['arch']['api_tokens']['id_user'] => $this->user_id,
+            $class_cfg['arch']['api_tokens']['token'] => $this->api_post['appui_token'],
+          ]
+        );
+    });
+
+    $result = json_decode($this->user->getApiRequestOutput(), true);
+
+    $this->assertIsArray($result);
+    $this->assertTrue(isset($result['token']));
+    $this->assertNotSame($this->api_post['appui_token'], $result['token']);
+  }
+
+  /** @test */
+  public function verifying_phone_number_will_throw_an_exception_when_the_received_token_does_not_match_device_uid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number'            => '12345',
+      'appui_action'            => 'verify_phone_number',
+      'phone_verification_code' => 'abcde'
+
+    ], function ($db_mock) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, null);
+    });
+  }
+
+  /** @test */
+  public function verifying_phone_number_will_throw_an_exception_when_phone_number_does_not_exist_in_db()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number'            => $phone_number = '12345',
+      'appui_action'            => 'verify_phone_number',
+      'phone_verification_code' => 'abcde'
+
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturnNull();
+    });
+  }
+
+  /** @test */
+  public function verifying_phone_number_will_throw_an_exception_when_the_returned_cfg_is_not_valid_json()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number'            => $phone_number = '12345',
+      'appui_action'            => 'verify_phone_number',
+      'phone_verification_code' => 'abcde'
+
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturn([
+          $class_cfg['arch']['users']['id'] => $this->user_id,
+          $class_cfg['arch']['users']['cfg'] => 'foo',
+        ]);
+
+    });
+  }
+
+  /** @test */
+  public function verifying_phone_number_will_throw_an_exception_when_the_returned_cfg_json_has_no_phone_verification_code()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number'            => $phone_number = '12345',
+      'appui_action'            => 'verify_phone_number',
+      'phone_verification_code' => 'abcde'
+
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturn([
+          $class_cfg['arch']['users']['id'] => $this->user_id,
+          $class_cfg['arch']['users']['cfg'] => json_encode(['foo' => 'bar']),
+        ]);
+
+    });
+  }
+
+  /** @test */
+  public function verifying_phone_number_will_throw_an_exception_when_phone_verification_code_does_not_match()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([
+      'phone_number'            => $phone_number = '12345',
+      'appui_action'            => 'verify_phone_number',
+      'phone_verification_code' => 'abcde'
+
+    ], function ($db_mock) use ($phone_number) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+      ]);
+
+      // findByPhoneNumber() method
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['login'] => $phone_number,
+          ]
+        )
+        ->andReturn([
+          $class_cfg['arch']['users']['id'] => $this->user_id,
+          $class_cfg['arch']['users']['cfg'] => json_encode(['phone_verification_code' => 'zzzzz']),
+        ]);
+
+    });
+  }
+
+  /** @test */
+  public function api_user_can_send_a_token_login_request()
+  {
+    $this->tokenRequest([], function ($db_mock) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+        $class_cfg['arch']['api_tokens']['id_user']    => $this->user_id
+      ]);
+
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['id'] => $this->user_id
+          ]
+        )
+        ->andReturn([
+          $class_cfg['arch']['users']['id'] => $this->user_id
+        ]);
+
+    });
+
+    $this->assertTrue($this->user->getApiRequestOutput());
+    $this->assertSame($this->user_id, $this->user->getId());
+  }
+
+  /** @test */
+  public function verifying_token_login_request_will_throw_an_exception_when_the_received_token_does_not_match_device_uid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([], function ($db_mock) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, null);
+    });
+  }
+
+  /** @test */
+  public function verifying_token_login_request_will_throw_an_exception_when_the_token_saved_id_db_has_a_null_id_user()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([], function ($db_mock) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+        $class_cfg['arch']['api_tokens']['id_user']    => null
+      ]);
+    });
+  }
+
+  /** @test */
+  public function verifying_token_login_request_will_throw_an_exception_when_user_not_found_in_db()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->tokenRequest([], function ($db_mock) {
+      $class_cfg = $this->getClassCgf();
+
+      // verifyTokenAndDeviceUid() method
+      $this->verifyTokenAndDeviceUidMethodExpectation($db_mock, $class_cfg, [
+        $class_cfg['arch']['api_tokens']['token']      => $this->api_post['appui_token'],
+        $class_cfg['arch']['api_tokens']['device_uid'] => $this->api_post['device_uid'],
+        $class_cfg['arch']['api_tokens']['id_user']    => $this->user_id
+      ]);
+
+      $db_mock->shouldReceive('rselect')
+        ->once()
+        ->with(
+          $class_cfg['tables']['users'],
+          $class_cfg['arch']['users'],
+          [
+            $class_cfg['arch']['users']['id'] => $this->user_id
+          ]
+        )
+        ->andReturnNull();
+
+    });
+  }
 
   /** @test */
   public function it_should_check_for_session_if_it_is_not_a_login_nor_password_reset_request()
@@ -529,7 +952,7 @@ class UserTest extends TestCase
   {
     $expected_session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($expected_session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -734,7 +1157,7 @@ class UserTest extends TestCase
   /** @test */
   public function updateActivity_updates_last_activity_for_the_session_in_database_if_logged_in()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -775,7 +1198,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_saves_the_session_config_in_database_if_the_current_time_exceends_last_renew_by_two_seconds_or_more()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -807,7 +1230,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_saves_the_session_config_in_database_if_the_last_renew_does_not_exists()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -838,7 +1261,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_does_not_save_the_session_in_database_if_current_time_does_not_exceed_last_renew()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -870,7 +1293,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_saves_the_session_config_in_database_if_the_last_renew_is_empty()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -902,7 +1325,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_is_forced_to_save_the_session_config_in_database_without_considering_last_renew()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -946,7 +1369,7 @@ class UserTest extends TestCase
   {
     $expected_session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($expected_session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -989,7 +1412,7 @@ class UserTest extends TestCase
   {
     $expected_session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($expected_session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -1045,7 +1468,7 @@ class UserTest extends TestCase
   public function checkAttempts_method_returns_false_if_the_max_number_of_connection_attempts_is_reached()
   {
     // Let's make a failed login
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -1084,7 +1507,7 @@ class UserTest extends TestCase
   /** @test */
   public function checkAttempts_method_returns_true_if_the_max_number_of_connection_attempts_is_not_reached()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -1114,7 +1537,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveCfg_method_saves_user_config_in_the_cfg_field_of_users_table()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -1235,7 +1658,7 @@ class UserTest extends TestCase
 
     $session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -1459,7 +1882,7 @@ class UserTest extends TestCase
   {
     $session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
