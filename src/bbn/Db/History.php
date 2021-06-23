@@ -84,6 +84,9 @@ class History
   /** @var string Object hash based on configuration  */
   private string $hash;
 
+  /** @var array $class_cfg */
+  protected $class_cfg;
+
 
   /**
    * History constructor.

@@ -77,7 +77,7 @@ class HistoryTest extends TestCase
 
   protected function getClassConfig()
   {
-    return $this->getNonPublicProperty('class_cfg');
+    return $this->history->getClassCfg();
   }
 
   /**
@@ -121,7 +121,7 @@ class HistoryTest extends TestCase
   /** @test */
   public function constructor_test()
   {
-    $class_cfg = $this->getNonPublicProperty('class_cfg');
+    $class_cfg = $this->history->getClassCfg();
 
     $object_hash = $this->getNonPublicProperty('hash');
 
