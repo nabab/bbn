@@ -1,7 +1,7 @@
 <?php
 namespace bbn\Entities;
 
-use bbn\X;
+use bbn\Db;
 use bbn\Models\Tts\Dbconfig;
 
 class Address
@@ -19,20 +19,22 @@ class Address
       'addresses' => [
         'id' => 'id',
         'address' => 'address',
-        'pc' => 'pc',
+        'postcode' => 'postcode',
         'city' => 'city',
+        'country' => 'country',
         'phone' => 'phone',
         'email' => 'email',
         'fulladdress' => 'fulladdress',
         'cfg' => 'cfg'
       ],
-    ]
+    ],
+    'country' => ''
   ];
 
   /**
    * Constructor.
    *
-   * @param db    $db
+   * @param Db    $db
    * @param array $cfg
    * @param array $params
    */
@@ -42,60 +44,7 @@ class Address
     $this->db = $db;
     // Setting up the class configuration
     $this->_init_class_cfg($cfg);
-    $this->options = \bbn\Appui\Option::getInstance();eejk
 
-	}
-
-	public function getInfo($id){
-	  $d = $this->db->rselect('bbn_addresses', [], ['id' => $id]);
-	  if ( $d ){
-      if ( !empty($d['tel']) ){
-        $d['tel'] = (string)$d['tel'];
-      }
-      if ( !empty($d['fax']) ){
-        $d['fax'] = (string)$d['fax'];
-      }
-			$d['fadresse'] = $this->fadresse($d);
-      if ( $id_adherent ){
-        $d['roles'] = $this->db->getColumnValues([
-          'tables' => ['apst_liens'],
-          'fields' => ['bbn_options.text'],
-          'join' => [
-            [
-              'table' => 'bbn_addresses',
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => 'bbn_addresses.id',
-                    'operator' => 'eq',
-                    'exp' => 'apst_liens.id_lieu'
-                  ]
-                ],
-                'logic' => 'AND'
-              ]
-            ],
-            [
-              'table' => 'bbn_options',
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => 'bbn_options.id',
-                    'operator' => 'eq',
-                    'exp' => 'apst_liens.type_lien'
-                  ]
-                ],
-                'logic' => 'AND'
-              ]
-            ]
-          ],
-          'where' => [
-            'apst_liens.id_adherent' => $id_adherent,
-            'apst_liens.id_lieu' => $id
-          ]
-        ]);
-      }
-		}
-    return $d;
 	}
 
 	public function search($fn, $cp=null){
@@ -114,7 +63,8 @@ class Address
 		return false;
 	}
 
-	public function seek($p, int $start = 0, int $limit = 100){
+
+  public function seek($p, int $start = 0, int $limit = 100){
     if ( is_array($p) && ( !empty($p['adresse']) ||
         !empty($p['email']) ||
         !empty($p['tel']) ||
@@ -155,27 +105,6 @@ class Address
 		return false;
 	}
 
-  /**
-   * Supprime un tier et tous ses liens si précisé
-   * Si non précisé et que le tier a des liens, il n'est pas supprimé
-   *
-   * @var int $id l'ID du tiers
-   * @var bool $with_links si précisé tous ses liens sont également précisés
-   *
-   * @return bool Succès ou pas de la suppression
-   */
-  public function delete($id, $with_links = false){
-    if ( $this->get_info($id) ){
-      $rels = $this->relations($id);
-      if ( $with_links || empty($rels) ){
-        foreach ( $rels as $k => $r ){
-          $this->db->delete('amiral_liens', ['id' => $k]);
-        }
-        return $this->db->delete('bbn_addresses', ['id' => $id]);
-      }
-    }
-		return false;
-  }
 
   public function fullSearch($p, $start = 0, $limit = 0){
     $r = [];
@@ -183,69 +112,11 @@ class Address
     return $r;
   }
 
+
   public function relations($id){
   }
 
-  public function add($src, $force = false)
-  {
-    $cfg =  $this->getClassCfg();
-    $fds =& $cfg['arch']['addresses'];
-    if ()
-    $id = false;
-    $ville = false;
-    $fn = $this->set_address($fn);	
-    if ( !empty($fn['id_country']) ){
-      if ( ($fn['id_country'] === $this->options->fromCode('FR', 'countries')) && $conf_ville = $this->get_ville(empty($fn['cp']) ? '' : $fn['cp'], empty($fn['ville']) ? '' : $fn['ville']) ){
-        $fn['cp'] = $conf_ville['cp'];
-        $fn['ville'] = $conf_ville['ville'];
-      }
-      if ( $force || !($id = $this->search($fn)) ){
-        if ( $this->db->insert("bbn_addresses", $fn) ){
-          $id = $this->db->lastId();
-        }
-      }
-    }
-    return $id;
-	}
 
-	public function update($id, $fn)
-	{
-    
-    if ( $info = $this->get_info($id) ){
-      $fields = array_keys($this->db->getColumns('bbn_addresses'));
-      foreach ( $fn as $k => $v ){
-        if ( !in_array($k, $fields) ){
-          unset($fn[$k]);
-        }
-      }
-      if ( isset($info['fadresse']) ){
-          unset($info['fadresse']);
-      }
-      //$n count the property changed between $info and $fn
-      $changed = false;
-      foreach ( $info as $i => $val ){
-        if ( \array_key_exists($i, $fn) && ($val !== $fn[$i]) ){
-          $changed = true;
-          break;
-        }
-      }
-      if ( !$changed ){
-        return $id;
-      }
-      else if ( (count($fn) > 0) && $this->db->update('bbn_addresses', $fn, ['id' => $id]) ){
-        return $id;
-      }
-		}
-    return false;
-	}
-
-  public function fadresse($s, $with_br = 1){
-    if (\bbn\Str::isUid($s) ){
-      $s = $this->get_info($s);
-    }
-    
-    return '';
-  }
 
   /*
    * Fusionne l'historique de différents lieux et les supprime tous sauf le premier

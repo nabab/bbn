@@ -111,14 +111,13 @@ class User extends Models\Cls\Basic
         'email' => 'email',
         'username' => 'username',
         'login' => 'login',
-        'phone_number' => 'phone_number',
         'admin' => 'admin',
         'dev' => 'dev',
         'theme' => 'theme',
         'cfg' => 'cfg',
         'active' => 'active',
         'enckey' => 'enckey',
-        'phone_verification_code' => 'phone_verification_code'
+        //'phone_verification_code' => 'phone_verification_code'
       ],
       'permission_accounts' => [
         'id'      => 'id',
@@ -2030,7 +2029,7 @@ class User extends Models\Cls\Basic
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users'],
       [
-        $this->class_cfg['arch']['users']['phone_number'] => $phone_number
+        $this->class_cfg['arch']['users']['login'] => $phone_number
       ]
     );
   }
