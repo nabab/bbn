@@ -1120,6 +1120,7 @@ class Image extends bbn\File
     }
   }
 
+
   public function replaceColor($originalColor, $newColor = null, $precision = 0)
   {
     if (class_exists('\\Imagick')) {
@@ -1134,6 +1135,9 @@ class Image extends bbn\File
           $originalColor, $newColor, 0.1 * \Imagick::getQuantum(), 0
         );
       }
+    }
+    elseif (function_exists('imagecolorset')) {
+      
     }
 
     return false;

@@ -269,7 +269,7 @@ class User extends Models\Cls\Basic
 
     $f =& $this->class_cfg['fields'];
 
-    if ($this->isToken()) {
+    if ($this->isToken() && !empty($params[$f['token']])) {
 
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
@@ -294,7 +294,8 @@ class User extends Models\Cls\Basic
 
         return $this->api_request_output = true;
 
-      } elseif ($this->isVerifyPhoneNumberRequest($params)) {
+      }
+      elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
           throw new \Exception(X::_('Invalid token'));
@@ -341,7 +342,8 @@ class User extends Models\Cls\Basic
           'success' => true
         ]);
 
-      } elseif ($this->isTokenLoginRequest($params)) {
+      }
+      elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
           throw new \Exception(X::_('Invalid token'));
@@ -353,10 +355,9 @@ class User extends Models\Cls\Basic
 
         return $this->api_request_output = true;
 
-      } else {
-        throw new \Exception('Unknown token request');
       }
-    } else {
+    }
+    else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
       $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';
@@ -462,10 +463,9 @@ class User extends Models\Cls\Basic
       && $params[$f['action']] === 'send_phone_number_verification_code';
   }
 
-  protected function isTokenLoginRequest(array $params)
+  protected function isTokenLoginRequest(array $params): bool
   {
     $f = $this->class_cfg['fields'];
-
     return X::hasProps($params, [$f['token'], $f['device_uid']], true);
   }
 
