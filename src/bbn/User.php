@@ -4,8 +4,6 @@
  */
 namespace bbn;
 
-use bbn\Api\Permissions\ApiPermissionsContract;
-use phpDocumentor\Parser\Exception;
 
 /**
  * A user authentication Class
@@ -268,14 +266,14 @@ class User extends Models\Cls\Basic
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
-          throw new Exception(X::_('Invalid token'));
+          throw new \Exception(X::_('Invalid token'));
         }
 
         // find the user using phone_number in db
         $user = $this->findByPhoneNumber($params[$f['phone_number']]);
 
         if (!$user) {
-          throw new Exception(X::_('Unknown phone number'));
+          throw new \Exception(X::_('Unknown phone number'));
         }
 
         // Generate a code
@@ -291,25 +289,25 @@ class User extends Models\Cls\Basic
       } elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
-          throw new Exception(X::_('Invalid token'));
+          throw new \Exception(X::_('Invalid token'));
         }
 
         // find the user using phone_number in db
         $user = $this->findByPhoneNumber($params[$f['phone_number']]);
 
         if (!$user) {
-          throw new Exception(X::_('Unknown phone number'));
+          throw new \Exception(X::_('Unknown phone number'));
         }
 
         // Verify that the code is correct
         $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
         if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
-          throw new Exception(X::_('Invalid code'));
+          throw new \Exception(X::_('Invalid code'));
         }
 
         if ($user_cgf['phone_verification_code'] !== $params[$f['phone_verification_code']]) {
-          throw new Exception(X::_('Invalid code'));
+          throw new \Exception(X::_('Invalid code'));
         }
 
         // Update verification code to null
@@ -331,7 +329,7 @@ class User extends Models\Cls\Basic
 
         // Send the new token here
         return json_encode([
-          'token'   => $token,
+          'token'   => $new_token,
           'success' => true
         ]);
 
@@ -345,7 +343,7 @@ class User extends Models\Cls\Basic
         // Now the user is authenticated
         return true;
       } else {
-        throw new Exception('Unknown token request');
+        throw new \Exception('Unknown token request');
       }
     } else {
       // The client environment variables
@@ -1963,7 +1961,7 @@ class User extends Models\Cls\Basic
    * @param int $expires_in
    * @param string $account_name
    * @return bool
-   * @throws Exception
+   * @throws \Exception
    */
   public function saveNewPermissionTokens(string $access_token, string $refresh_token, int $expires_in, string $account_name): bool
   {
@@ -1977,7 +1975,7 @@ class User extends Models\Cls\Basic
       );
       
       if ($account_exists > 0 ){
-        throw new Exception(X::_('Account already exists!'));
+        throw new \Exception(X::_('Account already exists!'));
       }
       
       if ($this->db->insert(
