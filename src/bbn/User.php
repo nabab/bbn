@@ -315,27 +315,29 @@ class User extends Models\Cls\Basic
         // Update verification code to null
         $this->updatePhoneVerificationCode($user[$this->class_cfg['arch']['users']['id']], null);
 
-        // Generate a token
-        $token = Str::genpwd(32, 16);
+        // Generate a new token
+        $new_token = Str::genpwd(32, 16);
 
-        // Save it in db
-        $this->db->insert(
-          $this->class_cfg['tables']['api_tokens'],[
+        // Update user id and the new token in the row with the old token and device uid.
+        $this->db->update(
+            $this->class_cfg['tables']['api_tokens'],[
             $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],
-            $this->class_cfg['arch']['api_tokens']['token']    => $token,
-            $this->class_cfg['arch']['api_tokens']['creation'] => date('Y-m-d H:i:s')
+            $this->class_cfg['arch']['api_tokens']['token']    => $new_token,
+          ], [
+            $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
+            $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']],
           ]
         );
 
-        // Send the token here
+        // Send the new token here
         return json_encode([
           'token'   => $token,
           'success' => true
         ]);
 
       } elseif ($this->isTokenLoginRequest($params)) {
-        // Find the token associated to the device uid in db then get it's associated userand authenticate if found
-        if (!$this->findByApiToken($params[$f['fields']['token']])) {
+        // Find the token associated to the device uid in db then get it's associated user.
+        if (!$this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
           throw new \Exception(X::_('Invalid token'));
         }
 
@@ -2072,11 +2074,11 @@ class User extends Models\Cls\Basic
    * @param string $token
    * @return array|null
    */
-  protected function findByApiToken(string $token, $device_uid)
+  protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)
   {
-    if ($user_token = $this->verifyTokenAndDeviceUid($token, $device_uid)) {
+    if ($api_token = $this->verifyTokenAndDeviceUid($token, $device_uid)) {
 
-      if (!$user_id = $user_token[$this->class_cfg['arch']['api_tokens']['id_user']]) {
+      if (!$user_id = $api_token[$this->class_cfg['arch']['api_tokens']['id_user']]) {
         return null;
       }
 
