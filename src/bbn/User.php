@@ -243,6 +243,14 @@ class User extends Models\Cls\Basic
   /** @var array $class_cfg */
   protected $class_cfg;
 
+  /**
+   * An output string to be returned when in api requests.
+   * Will be mainly used to return tokens response in api request.
+   *
+   * @var mixed
+   */
+  protected $api_request_output;
+
 
   /**
    * User constructor.
@@ -284,7 +292,7 @@ class User extends Models\Cls\Basic
 
         // Send the sms with code here
 
-        return true;
+        return $this->api_request_output = true;
 
       } elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
@@ -328,20 +336,23 @@ class User extends Models\Cls\Basic
         );
 
         // Send the new token here
-        return json_encode([
+        return $this->api_request_output =  json_encode([
           'token'   => $new_token,
           'success' => true
         ]);
 
       } elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
-        if (!$this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
+        if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
           throw new \Exception(X::_('Invalid token'));
         }
 
 
         // Now the user is authenticated
-        return true;
+        $this->id = $user[$this->class_cfg['arch']['users']['id']];
+
+        return $this->api_request_output = true;
+
       } else {
         throw new \Exception('Unknown token request');
       }
@@ -2074,7 +2085,7 @@ class User extends Models\Cls\Basic
    */
   protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)
   {
-    if ($api_token = $this->verifyTokenAndDeviceUid($token, $device_uid)) {
+    if ($api_token = $this->verifyTokenAndDeviceUid($device_uid, $token)) {
 
       if (!$user_id = $api_token[$this->class_cfg['arch']['api_tokens']['id_user']]) {
         return null;
@@ -2117,5 +2128,10 @@ class User extends Models\Cls\Basic
         $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
       ]
     );
+  }
+
+  public function getApiRequestOutput()
+  {
+    return $this->api_request_output;
   }
 }
