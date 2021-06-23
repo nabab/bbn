@@ -1120,5 +1120,22 @@ class Image extends bbn\File
     }
   }
 
+  public function replaceColor($originalColor, $newColor = null, $precision = 0)
+  {
+    if (class_exists('\\Imagick')) {
+      $this->img = new \Imagick($this->file);
 
+      if ($newColor === null) {
+        $this->img->setImageFormat('png');
+        $this->img->transparentPaintImage($originalColor, 0.0, 0.1 * \Imagick::getQuantum(), 0);
+
+      } else {
+        $this->img->opaquePaintImage(
+          $originalColor, $newColor, 0.1 * \Imagick::getQuantum(), 0
+        );
+      }
+    }
+
+    return false;
+  }
 }
