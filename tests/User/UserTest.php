@@ -59,7 +59,7 @@ class UserTest extends TestCase
 
   protected function getClassCgf()
   {
-    return $this->getNonPublicProperty('class_cfg');
+    return $this->user->getClassCfg();
   }
 
 
