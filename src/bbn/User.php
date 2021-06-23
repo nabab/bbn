@@ -331,7 +331,7 @@ class User extends Models\Cls\Basic
 
         // Send the new token here
         return json_encode([
-          'token'   => $token,
+          'token'   => $new_token,
           'success' => true
         ]);
 
