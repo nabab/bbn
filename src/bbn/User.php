@@ -455,12 +455,12 @@ class User extends Models\Cls\Basic
   {
     $f = $this->class_cfg['fields'];
 
-    return isset($params[$f['token']], $params[$f['device_uid']]);
+    return X::hasProps($params, [$f['token'], $f['device_uid']], true);
   }
 
-  protected function isToken()
+  protected function isToken(): bool
   {
-    return $this->class_cfg['tables']['api_tokens'] !== 'false';
+    return !!$this->class_cfg['tables']['api_tokens'];
   }
 
   public function isReset()
