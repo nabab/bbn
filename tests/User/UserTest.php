@@ -36,6 +36,11 @@ class UserTest extends TestCase
     'appui_action'  => 'init_password'
   ];
 
+  protected $api_post = [
+    'device_uid'   => '634a2c70bcac11eba47652540000cfaa',
+    'appui_token'  => '634a2c70aaaaa2aaa47652540000cfaa'
+  ];
+
   protected $user_id = '7f4a2c70bcac11eba47652540000cfaa';
 
   protected $session_id = '7f4a2c70bcac11eba47652540000cfbe';
@@ -131,13 +136,11 @@ class UserTest extends TestCase
 
 
   /**
-   * Callback to apply additional mockery expectations.
    *
-   * @param array         $selectOneReturn
-   * @param callable|null $callback
+   * @param callable|null $callback Callback to apply additional mockery expectations.
    * @return mixed|null
    */
-  protected function login(?callable $callback = null)
+  protected function sessionLogin(?callable $callback = null)
   {
     if ($callback) {
       $result = $callback($this->db_mock);
@@ -150,10 +153,23 @@ class UserTest extends TestCase
     return $result ?? null;
   }
 
+  protected function tokenRequest(array $api_post = [], ?callable $callback = null)
+  {
+    if ($callback) {
+      $callback($this->db_mock);
+    }
+
+
+
+    $this->api_post = array_replace($this->api_post, $api_post);
+
+    $this->user = new User($this->db_mock, $this->api_post, ['tables' => ['api_tokens' => 'bbn_api_tokens']]);
+  }
+
 
   protected function simpleLogin()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -185,7 +201,7 @@ class UserTest extends TestCase
   {
     $session_data = $data ?? $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -400,6 +416,7 @@ class UserTest extends TestCase
   }
 
 
+
   /** @test */
   public function it_should_check_for_session_if_it_is_not_a_login_nor_password_reset_request()
   {
@@ -529,7 +546,7 @@ class UserTest extends TestCase
   {
     $expected_session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($expected_session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -734,7 +751,7 @@ class UserTest extends TestCase
   /** @test */
   public function updateActivity_updates_last_activity_for_the_session_in_database_if_logged_in()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -775,7 +792,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_saves_the_session_config_in_database_if_the_current_time_exceends_last_renew_by_two_seconds_or_more()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -807,7 +824,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_saves_the_session_config_in_database_if_the_last_renew_does_not_exists()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -838,7 +855,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_does_not_save_the_session_in_database_if_current_time_does_not_exceed_last_renew()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -870,7 +887,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_saves_the_session_config_in_database_if_the_last_renew_is_empty()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -902,7 +919,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveSession_method_is_forced_to_save_the_session_config_in_database_without_considering_last_renew()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -946,7 +963,7 @@ class UserTest extends TestCase
   {
     $expected_session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($expected_session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -989,7 +1006,7 @@ class UserTest extends TestCase
   {
     $expected_session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($expected_session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -1045,7 +1062,7 @@ class UserTest extends TestCase
   public function checkAttempts_method_returns_false_if_the_max_number_of_connection_attempts_is_reached()
   {
     // Let's make a failed login
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -1084,7 +1101,7 @@ class UserTest extends TestCase
   /** @test */
   public function checkAttempts_method_returns_true_if_the_max_number_of_connection_attempts_is_not_reached()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -1114,7 +1131,7 @@ class UserTest extends TestCase
   /** @test */
   public function saveCfg_method_saves_user_config_in_the_cfg_field_of_users_table()
   {
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           json_encode(
@@ -1235,7 +1252,7 @@ class UserTest extends TestCase
 
     $session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,
@@ -1459,7 +1476,7 @@ class UserTest extends TestCase
   {
     $session_data = $this->getExpectedSession();
 
-    $this->login(
+    $this->sessionLogin(
       function ($db_mock) use ($session_data) {
         $db_mock->shouldReceive('selectOne')->andReturn(
           $this->user_id,

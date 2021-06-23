@@ -440,7 +440,7 @@ class User extends Models\Cls\Basic
     $f = $this->class_cfg['fields'];
 
     return isset($params[$f['phone_number']], $params[$f['phone_verification_code']], $params[$f['device_uid']], $params[$f['token']])
-      && $params[$f['action'] === 'verify_phone_number'];
+      && $params[$f['action']] === 'verify_phone_number';
   }
 
   protected function isPhoneNumberCodeSendingRequest(array $params)
@@ -448,7 +448,7 @@ class User extends Models\Cls\Basic
     $f = $this->class_cfg['fields'];
 
     return isset($params[$f['phone_number']], $params[$f['device_uid']], $params[$f['token']])
-      && $params[$f['action'] === 'send_phone_number_verification_code'];
+      && $params[$f['action']] === 'send_phone_number_verification_code';
   }
 
   protected function isTokenLoginRequest(array $params)
