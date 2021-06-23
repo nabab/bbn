@@ -113,8 +113,16 @@ trait Dbconfig
    *
    * @return bool
    */
-  public function update(string $id, array $data): bool
+  public function update(string $id, array $data, bool $addCfg = false): bool
   {
+    if (!$this->exists($id)) {
+      throw new \Exception(X::_("Impossible to find the given row"));
+    }
+
+    if ($addCfg) {
+      $data = array_merge($this->select($id), $data);
+    }
+
     if ($data = $this->prepare($data)) {
       $f = $ccfg['arch'][$this->class_table_index];
       return !!$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);
@@ -211,24 +219,34 @@ trait Dbconfig
     }
 
     $res = [];
-    $hasCfg = !empty($f['cfg']);
-    if ($hasCfg  && !empty($data[$f['cfg']])) {
-      $cfg = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
+    if ($hasCfg = !empty($f['cfg'])) {
+      if (!empty($data[$f['cfg']])) {
+        $cfg = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
+      }
+      elseif (array_key_exists($f['cfg'], $data)) {
+        $res['cfg'] = null;
+        $cfg = null;
+
+      }
+      else {
+        $cfg = [];
+      }
     }
-    else {
-      $cfg = [];
-    }
+    
 
     foreach ($data as $k => $v) {
       if (in_array($k, $f)) {
         $res[$k] = $v;
       }
-      elseif ($hasCfg) {
+      elseif ($hasCfg && is_array($cfg)) {
         $cfg[$k] = $v;
       }
     }
 
-    $res[$f['cfg']] = empty($cfg) ? null : json_encode($cfg);
+    if (!empty($cfg)) {
+      $res[$f['cfg']] = json_encode($cfg);
+    }
+
     if (isset($res[$f['id']])) {
       unset($res[$f['id']]);
     }
