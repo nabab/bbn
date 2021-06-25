@@ -45,7 +45,7 @@ class View
 
   /**
    * Included files (only for LESS)
-   * @var null|string
+   * @var null|array
    */
   private $_checkers;
 
@@ -71,13 +71,11 @@ class View
   /**
    * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
    *
-   * @param object | string $db     The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-   * @param string | object $parent The parent controller</em>
-   * @return bool
+   * @param array $info
    */
   public function __construct(array $info)
   {
-    if (Router::isMode($info['mode'])) {
+    if (!empty($info['mode']) && Router::isMode($info['mode'])) {
       $this->_path      = $info['path'];
       $this->_ext       = $info['ext'];
       $this->_file      = $info['file'];
@@ -89,6 +87,9 @@ class View
   }
 
 
+  /**
+   * @return bool
+   */
   public function check()
   {
     return !empty($this->_file);
@@ -104,7 +105,7 @@ class View
   public function get(?array $data=null)
   {
     if ($this->check()) {
-      if (\is_null($this->_content)) {
+      if (\is_null($this->_content) && is_file($this->_file)) {
         $this->_content = file_get_contents($this->_file);
       }
 
@@ -115,7 +116,9 @@ class View
       if ($this->_checkers) {
         $st = '';
         foreach ($this->_checkers as $chk){
-          $st .= file_get_contents($chk);
+          if (is_file($chk)) {
+            $st .= file_get_contents($chk);
+          }
         }
 
         $this->_content = $st.$this->_content;
@@ -124,7 +127,7 @@ class View
       switch ($this->_ext){
         case 'js':
           // Language variables inclusions in the javascript files
-          if (!empty($this->_lang_file)) {
+          if (!empty($this->_lang_file) && is_file($this->_lang_file)) {
             $tmp  = json_decode(file_get_contents($this->_lang_file), true);
             $path = $this->_plugin && !$this->_component ? substr($this->_path, \strlen($this->_plugin) + 1) : $this->_path;
             //die(var_dump(count($tmp), 'components/'.$this->path.'/'.$this->path, $tmp));

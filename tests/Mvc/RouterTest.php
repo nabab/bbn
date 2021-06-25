@@ -4,7 +4,6 @@ namespace Mvc;
 
 use bbn\Mvc;
 use bbn\Mvc\Router;
-use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
 use tests\Reflectable;
