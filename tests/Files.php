@@ -48,4 +48,28 @@ trait Files
   {
     return BBN_APP_PATH . BBN_DATA_PATH;
   }
+
+  /**
+   * Clears the testing storage dir.
+   * @param $dir
+   */
+  public function cleanTestingDir($sub_dir = null) {
+    $dir = $sub_dir ?? BBN_APP_PATH . BBN_DATA_PATH;
+
+    if (is_dir($dir)) {
+      $objects = scandir($dir);
+
+      foreach ($objects as $object) {
+        if ($object != "." && $object != "..") {
+          if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir. DIRECTORY_SEPARATOR .$object))
+            $this->cleanTestingDir($dir. DIRECTORY_SEPARATOR .$object);
+          else
+            unlink($dir. DIRECTORY_SEPARATOR .$object);
+        }
+      }
+      if ($sub_dir) {
+        rmdir($dir);
+      }
+    }
+  }
 }
