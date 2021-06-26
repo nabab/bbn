@@ -49,12 +49,12 @@ class ReflectionHelpers
      * Convert a non public method to be accessible in an object and return a ReflectionMethod.
      *
      * @param string $name
-     * @param object $object
+     * @param mixed $object
      *
      * @return \ReflectionMethod
      * @throws \ReflectionException
      */
-  public static function getNonPublicMethod(string $name, object $object)
+  public static function getNonPublicMethod(string $name, $object)
   {
       $reflectionClass = new \ReflectionClass($object);
       $method          = $reflectionClass->getMethod($name);

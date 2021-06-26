@@ -14,9 +14,13 @@ trait Files
    *
    * @return string
    */
-  protected function createFile(string $filename, string $file_content, string $dirname)
+  protected function createFile(string $filename, string $file_content, string $dirname, bool $testing_dir = true)
   {
-    if (!is_dir($dir = BBN_APP_PATH . BBN_DATA_PATH . $dirname)) {
+    $dir = $testing_dir
+      ? BBN_APP_PATH . BBN_DATA_PATH . $dirname
+      : $dirname;
+
+    if (!is_dir($dir)) {
       mkdir($dir);
     }
 

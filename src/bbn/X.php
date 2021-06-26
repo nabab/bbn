@@ -30,14 +30,10 @@ class X
   private static $_textdomain;
 
   /**
-  *
-  */
-  private static function _init_count(string $name): void
+   * @param string $name
+   */
+  private static function _init_count(string $name = 'num'): void
   {
-    if (!$name) {
-      $name = 'num';
-    }
-
     if (!isset(self::$_counters[$name])) {
       self::$_counters[$name] = 0;
     }
@@ -82,7 +78,11 @@ class X
   }
 
 
-  public static function countAll($delete = false): array
+  /**
+   * @param bool $delete
+   * @return array
+   */
+  public static function countAll(bool $delete = false): array
   {
     $tmp = self::$_counters;
     if ($delete) {
@@ -93,6 +93,9 @@ class X
   }
 
 
+  /**
+   * @return string
+   */
   public static function tDom(): string
   {
     if (!self::$_textdomain) {
@@ -109,6 +112,10 @@ class X
   }
 
 
+  /**
+   * @param string $string
+   * @return string
+   */
   public static function _(string $string): string
   {
     $res = dgettext(X::tDom(), $string);
@@ -122,7 +129,7 @@ class X
   }
 
   /**
-   * Returns a microtime with 4 digit after the coma
+   * Returns a microtime with 4 digit after the dot
    *
    * @return void
    */
@@ -163,7 +170,7 @@ class X
         }
       }
 
-      if (filesize($log_file) > BBN_X_MAX_LOG_FILE) {
+      if (file_exists($log_file) && filesize($log_file) > BBN_X_MAX_LOG_FILE) {
         file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
       }
@@ -251,7 +258,7 @@ class X
    * @param string       $prop
    * @return boolean|null
    */
-  public static function hasProp(iterable $obj, string $prop, bool $check_empty = false): ?bool
+  public static function hasProp($obj, string $prop, bool $check_empty = false): ?bool
   {
     if (is_array($obj)) {
       return \array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
@@ -271,7 +278,7 @@ class X
    * @param array        $props
    * @return boolean|null
    */
-  public static function hasProps(iterable $obj, array $props, bool $check_empty = false): ?bool
+  public static function hasProps($obj, array $props, bool $check_empty = false): ?bool
   {
     foreach ($props as $p) {
       $test = self::hasProp($obj, $p, $check_empty);
@@ -290,12 +297,13 @@ class X
   /**
    * Check if an array or an object has the given property.
    *
-   * @param  array|object $obj
-   * @param  string       $prop_path
+   * @param array|object $obj
+   * @param array $prop_path
+   * @param bool $check_empty
    * @return boolean|null
    */
   public static function hasDeepProp(
-      iterable $obj,
+      $obj,
       array $prop_path,
       bool $check_empty = false
   ): ?bool
@@ -333,6 +341,13 @@ class X
   }
 
 
+  /**
+   * @param string $path
+   * @param string $format
+   * @param int $max
+   * @param File\System|null $fs
+   * @return string|null
+   */
   public static function makeStoragePath(
       string $path,
       $format = 'Y/m/d',
