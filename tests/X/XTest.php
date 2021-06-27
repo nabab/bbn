@@ -25,6 +25,7 @@ class XTest extends TestCase
   protected function tearDown(): void
   {
     $this->cleanTestingDir(BBN_DATA_PATH . 'logs');
+    \Mockery::close();
   }
 
 
@@ -447,11 +448,15 @@ class XTest extends TestCase
       'bar' => 0
     ];
 
+    $this->assertTrue(X::hasDeepProp($arr, ['foo']));
+    $this->assertTrue(X::hasDeepProp($arr, ['foo'], true));
+
     $this->assertTrue(X::hasDeepProp($arr, ['foo', 'bar1']));
     $this->assertFalse(X::hasDeepProp($arr, ['foo', 'bar1'], true));
+
     $this->assertFalse(X::hasDeepProp($arr, ['foo', 'bar2']));
     $this->assertFalse(X::hasDeepProp($arr, ['foo', 'bar2', true]));
-    $this->assertTrue(X::hasDeepProp($arr, ['foo'], true));
+
     $this->assertFalse(X::hasDeepProp($arr, ['foo', 'bar1'], true));
 
     $this->assertTrue(X::hasDeepProp($arr, ['baz']));
@@ -505,5 +510,319 @@ class XTest extends TestCase
     $this->cleanTestingDir();
   }
 
+  /** @test */
+  public function makeStoragePath_method_creates_dirs_with_for_the_given_date_format()
+  {
+    $result = X::makeStoragePath($path = BBN_DATA_PATH . 'testing', 'm/d/Y');
 
+    $this->assertSame(realpath($path) . '/' . date('m/d/Y') . '/1/', $result);
+    $this->assertTrue(is_dir($result));
+
+    $this->cleanTestingDir();
+  }
+
+  /** @test */
+  public function makeStoragePath_method_creates_and_increments_dirs_number_if_dir_exists_and_contains_other_dirs_or_files()
+  {
+    $dirpath = BBN_DATA_PATH . 'foo/' . date('Y/m/d');
+
+    for ($i = 1; $i <= 10; $i++) {
+      mkdir("$dirpath/$i", 0777, true);
+    }
+
+    mkdir("$dirpath/10/1");
+    touch("$dirpath/10/foo.text");
+
+    $result = X::makeStoragePath($path = BBN_DATA_PATH . 'foo', 'Y/m/d', 2);
+
+    $this->assertSame(realpath($path) . '/' . date('Y/m/d') . '/11/', $result);
+    $this->assertTrue(is_dir($result));
+
+    $this->cleanTestingDir();
+  }
+
+  /** @test */
+  public function makeStoragePath_method_returns_null_when_failed_to_create_the_dir()
+  {
+    $file_system_mock = \Mockery::mock(\bbn\File\System::class);
+
+    $file_system_mock->shouldReceive('createPath')
+      ->once()
+      ->with($path = 'foo/bar/' . date('Y/m/d'))
+      ->andReturn($path);
+
+    $file_system_mock->shouldReceive('isDir')
+      ->once()
+      ->with($path)
+      ->andReturnFalse();
+
+    $result = X::makeStoragePath('foo/bar', 'Y/m/d', 100, $file_system_mock);
+
+    $this->assertNull($result);
+  }
+
+  /** @test */
+  public function makeStoragePath_method_returns_null_when_failed_to_create_the_sub_dir()
+  {
+    $file_system_mock = \Mockery::mock(\bbn\File\System::class);
+
+    $file_system_mock->shouldReceive('createPath')
+      ->once()
+      ->with($path = 'foo/bar/' . date('Y/m/d'))
+      ->andReturn($path);
+
+    $file_system_mock->shouldReceive('isDir')
+      ->once()
+      ->with($path)
+      ->andReturnTrue();
+
+    $file_system_mock->shouldReceive('getDirs')
+      ->once()
+      ->with($path)
+      ->andReturn([]);
+
+    $file_system_mock->shouldReceive('createPath')
+      ->once()
+      ->with("$path/1")
+      ->andReturn("");
+
+    $result = X::makeStoragePath('foo/bar', 'Y/m/d', 100, $file_system_mock);
+
+    $this->assertNull($result);
+  }
+
+  /** @test */
+  public function cleanStoragePath_method_deletes_the_given_dir_with_default_date_format_if_dir_is_empty()
+  {
+    $dirpath = BBN_DATA_PATH . 'foo/' . date('Y/m/d');
+    mkdir($dirpath, 0777, true);
+
+    $result = X::cleanStoragePath($dirpath);
+
+    $this->assertDirectoryDoesNotExist($dirpath);
+    $this->assertSame(4, $result);
+  }
+
+  /** @test */
+  public function cleanStoragePath_method_deletes_the_given_dir_and_date_format_if_dir_is_empty()
+  {
+    $dirpath = BBN_DATA_PATH . 'foo/' . date('m/d');
+    mkdir($dirpath, 0777, true);
+
+    $result = X::cleanStoragePath($dirpath, 'm/d');
+
+    $this->assertDirectoryDoesNotExist($dirpath);
+    $this->assertSame(3, $result);
+  }
+  
+  /** @test */
+  public function cleanStoragePath_method_does_not_delete_the_given_dir_if_it_is_not_empty()
+  {
+    $dirpath = BBN_DATA_PATH . 'foo/' . date('Y/m/d');
+
+    for ($i = 1; $i <= 5;$i++) {
+      mkdir("$dirpath/$i", 0777, true);
+    }
+
+    $result = X::cleanStoragePath($dirpath);
+
+    $this->assertDirectoryExists($dirpath);
+    $this->assertDirectoryExists("$dirpath/1");
+    $this->assertDirectoryExists("$dirpath/5");
+    $this->assertSame(0, $result);
+  }
+
+  /** @test */
+  public function cleanStoragePath_method_returns_null_if_the_given_dir_path_does_not_exist()
+  {
+    $this->assertNull(
+      X::cleanStoragePath('foo')
+    );
+  }
+
+  /** @test */
+  public function mergeObjects_method_merges_two_or_more_object_properties_into_one()
+  {
+    $obj1 = (object)[
+      'a' => 1,
+      'b' => 11,
+      'c' => 111
+    ];
+
+    $obj2 = (object)[
+      'd' => 2,
+      'e' => 22,
+      'c' => 222 // Duplicate property different value
+    ];
+
+    $result = X::mergeObjects($obj1, $obj2);
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('a', $result);
+    $this->assertObjectHasAttribute('b', $result);
+    $this->assertObjectHasAttribute('c', $result);
+    $this->assertObjectHasAttribute('d', $result);
+    $this->assertObjectHasAttribute('e', $result);
+    $this->assertSame(222, $result->c);
+    $this->assertSame(22, $result->e);
+    $this->assertSame(2, $result->d);
+
+    $obj3 = (object)[
+      'f' => 3,
+      'g' => 33
+    ];
+
+    $obj4 = (object)[
+      'f' => 4, // Duplicate property different value
+      'h' => 44
+    ];
+
+    // Test with four objects
+    $result = X::mergeObjects($obj1, $obj2, $obj3, $obj4);
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('a', $result);
+    $this->assertObjectHasAttribute('b', $result);
+    $this->assertObjectHasAttribute('c', $result);
+    $this->assertObjectHasAttribute('d', $result);
+    $this->assertObjectHasAttribute('e', $result);
+    $this->assertObjectHasAttribute('f', $result);
+    $this->assertObjectHasAttribute('g', $result);
+    $this->assertObjectHasAttribute('h', $result);
+    $this->assertSame(222, $result->c);
+    $this->assertSame(22, $result->e);
+    $this->assertSame(33, $result->g);
+    $this->assertSame(4, $result->f);
+  }
+
+  /** @test */
+  public function mergeObjects_method_throws_an_exception_if_the_provided_arguments_is_not_an_object()
+  {
+    $this->expectException(\Exception::class);
+
+    X::mergeObjects(
+      (object)['a' => 1],
+      (object)['b' => 2],
+      'string'
+    );
+  }
+
+  /** @test */
+  public function flatten_method_flattens_a_multi_dimensional_array_for_the_given_children_index_name()
+  {
+    $arr = [
+      [
+        'name'  => 'John Doe',
+        'age'   => '35',
+        'children' => [
+          ['name' => 'Carol', 'age' => '4'],
+          ['name' => 'Jack', 'age' => '6'],
+        ]
+      ],
+      [
+        'name'  => 'Paul',
+        'age'   => '33',
+        'children' => [
+          ['name' => 'Alan', 'age' => '8'],
+          ['name' => 'Allison', 'age' => '2']
+        ]
+    ]
+    ];
+
+    $expected = [
+      ['name' => 'John Doe', 'age' => '35'],
+      ['name' => 'Paul', 'age' => '33'],
+      ['name' => 'Carol', 'age' => '4'],
+      ['name' => 'Jack', 'age' => '6'],
+      ['name' => 'Alan', 'age' => '8'],
+      ['name' => 'Allison', 'age' => '2']
+    ];
+
+    $this->assertSame($expected, X::flatten($arr, 'children'));
+  }
+
+  /** @test */
+  public function mergeArrays_method_merges_two_or_more_arrays_into_one()
+  {
+    $arr1 = ['a', 'b'];
+    $arr2 = ['c', 'd', 'f'];
+    $arr3 = ['e', 'f'];
+
+    $this->assertSame(['a', 'b', 'c', 'd', 'f', 'e', 'f'], X::mergeArrays($arr1, $arr2, $arr3));
+
+    $arr1 = ['a' => 1, 'b' => 2];
+    $arr2 = ['b' => 3, 'c' => 4, 'd' => 5];
+    $arr3 = ['e' => 6, 'b' => 33];
+
+    $expected = ['a' => 1, 'b' => 33, 'c' => 4, 'd' => 5, 'e' => 6];
+
+    $this->assertSame($expected, X::mergeArrays($arr1, $arr2, $arr3));
+  }
+
+  /** @test */
+  public function mergeArrays_method_throws_an_exception_if_the_provided_extra_argument_is_not_an_array()
+  {
+    $this->expectException(\Exception::class);
+
+    X::mergeArrays(['a'], ['b'], 'foo');
+  }
+
+  /** @test */
+  public function toObject_method_converts_a_json_string_or_an_array_to_object()
+  {
+    $result = X::toObject('{"a":1, "b":2}');
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('a', $result);
+    $this->assertObjectHasAttribute('b', $result);
+    $this->assertSame(1, $result->a);
+    $this->assertSame(2, $result->b);
+
+    $result = X::toObject(['a' => 1, 'b' => [2, 3]]);
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('a', $result);
+    $this->assertObjectHasAttribute('b', $result);
+    $this->assertSame(1, $result->a);
+    $this->assertSame([2, 3], $result->b);
+
+    $this->assertNull(X::toObject('foo'));
+  }
+
+  /** @test */
+  public function toArray_method_convert_a_json_string_or_an_object_to_array()
+  {
+    $this->assertSame(
+      ['a' => 1, 'b' => 2],
+      X::toArray((object)['a' => 1, 'b' => 2])
+    );
+
+    $this->assertSame(
+      ['a' => 1, 'b' => 2],
+      X::toArray('{"a":1, "b":2}')
+    );
+
+    $this->assertNull(
+      X::toArray('foo')
+    );
+  }
+
+  /** @test */
+  public function jsObject_method_returns_a_js_object_from_the_given_iterable()
+  {
+    $arr = [
+      'a' => 1,
+      'b' => [
+        'c' => 2,
+        'd' => 3
+      ]
+    ];
+
+    $this->assertJson($result = X::jsObject($arr));
+    $this->assertIsArray($result_arr = json_decode($result, true));
+    $this->assertArrayHasKey('a', $result_arr);
+    $this->assertArrayHasKey('b', $result_arr);
+    $this->assertSame(1, $result_arr['a']);
+    $this->assertSame(['c' => 2, 'd' => 3], $result_arr['b']);
+  }
 }
