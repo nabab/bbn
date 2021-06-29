@@ -30,14 +30,10 @@ class X
   private static $_textdomain;
 
   /**
-  *
-  */
-  private static function _init_count(string $name): void
+   * @param string $name
+   */
+  private static function _init_count(string $name = 'num'): void
   {
-    if (!$name) {
-      $name = 'num';
-    }
-
     if (!isset(self::$_counters[$name])) {
       self::$_counters[$name] = 0;
     }
@@ -82,7 +78,11 @@ class X
   }
 
 
-  public static function countAll($delete = false): array
+  /**
+   * @param bool $delete
+   * @return array
+   */
+  public static function countAll(bool $delete = false): array
   {
     $tmp = self::$_counters;
     if ($delete) {
@@ -93,6 +93,9 @@ class X
   }
 
 
+  /**
+   * @return string
+   */
   public static function tDom(): string
   {
     if (!self::$_textdomain) {
@@ -109,6 +112,10 @@ class X
   }
 
 
+  /**
+   * @param string $string
+   * @return string
+   */
   public static function _(string $string): string
   {
     $res = dgettext(X::tDom(), $string);
@@ -122,7 +129,7 @@ class X
   }
 
   /**
-   * Returns a microtime with 4 digit after the coma
+   * Returns a microtime with 4 digit after the dot
    *
    * @return void
    */
@@ -163,7 +170,7 @@ class X
         }
       }
 
-      if (filesize($log_file) > BBN_X_MAX_LOG_FILE) {
+      if (file_exists($log_file) && filesize($log_file) > BBN_X_MAX_LOG_FILE) {
         file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
         file_put_contents($log_file, $r);
       }
@@ -247,11 +254,42 @@ class X
   /**
    * Check if an array or an object has the given property
    *
+   *```php
+   *
+   * $arr = [
+   *  'a' => 1,
+   *  'b' => '',
+   *  'c' => 0
+   *  ];
+   *
+   * X::hasProp($arr, 'a');
+   * // (bool) true
+   *
+   * X::hasProp($arr, 'b');
+   * // (bool) true
+   *
+   * X::hasProp($arr, 'b', true);
+   * // (bool) false
+   *
+   * X::hasProp($arr, 'c');
+   * // (bool) true
+   *
+   * X::hasProp($arr, 'c', true);
+   * // (bool) false
+   *
+   * X::hasProp($arr, 'd');
+   * // (bool) false
+   *
+   * X::hasProp('string', 'd');
+   * // null
+   *
+   *```
+   *
    * @param array|object $obj
    * @param string       $prop
    * @return boolean|null
    */
-  public static function hasProp(iterable $obj, string $prop, bool $check_empty = false): ?bool
+  public static function hasProp($obj, string $prop, bool $check_empty = false): ?bool
   {
     if (is_array($obj)) {
       return \array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
@@ -267,11 +305,29 @@ class X
   /**
    * Check if an array or an object has the given properties
    *
+   * ```php
+   * $arr = [
+   *    'a' => 1,
+   *    'b' => '',
+   *    'c' => 0
+   *  ];
+   *
+   * X::hasProps($arr, ['a', 'b', 'c']);
+   * // (bool) true
+   *
+   * X::hasProps($arr, ['a', 'b', 'c'], true);
+   * // (bool) false
+   *
+   * * X::hasProps('string', ['a']);
+   * // null
+   *
+   * ```
+   *
    * @param array|object $obj
    * @param array        $props
    * @return boolean|null
    */
-  public static function hasProps(iterable $obj, array $props, bool $check_empty = false): ?bool
+  public static function hasProps($obj, array $props, bool $check_empty = false): ?bool
   {
     foreach ($props as $p) {
       $test = self::hasProp($obj, $p, $check_empty);
@@ -290,12 +346,52 @@ class X
   /**
    * Check if an array or an object has the given property.
    *
-   * @param  array|object $obj
-   * @param  string       $prop_path
+   * ```php
+   * $arr = [
+   *    'a' => ['d' => [], 'e'],
+   *    'b' => 'g',
+   *    'c' => 0
+   *  ];
+   *
+   * X::hasDeepProp($arr, ['a']);
+   * // (bool) true
+   *
+   * X::hasDeepProp($arr, ['a'], true);
+   * // (bool) true
+   *
+   * X::hasDeepProp($arr, ['a', 'd']);
+   * // (bool) true
+   *
+   * X::hasDeepProp($arr, ['a', 'd'], true);
+   * // (bool) false
+   *
+   * X::hasDeepProp($arr, ['a', 'e']);
+   * // (bool) false
+   *
+   * X::hasDeepProp($arr, ['b']);
+   * // (bool) true
+   *
+   * X::hasDeepProp($arr, ['b'], true);
+   * // (bool) true
+   *
+   * X::hasDeepProp($arr, ['b', 'g']);
+   * // (bool) false
+   *
+   * X::hasDeepProp($arr, ['c']);
+   * // (bool) true
+   *
+   * X::hasDeepProp($arr, ['c'], true);
+   * // (bool) false
+   *
+   * ```
+   *
+   * @param array|object $obj
+   * @param array $prop_path
+   * @param bool $check_empty
    * @return boolean|null
    */
   public static function hasDeepProp(
-      iterable $obj,
+      $obj,
       array $prop_path,
       bool $check_empty = false
   ): ?bool
@@ -333,6 +429,26 @@ class X
   }
 
 
+  /**
+   *
+   * ```php
+   *
+   * X::makeStoragePath('foo/bar', 'd/m/Y');
+   * // (string) "/foo/bar/27/06/2021/1/"
+   *
+   *  X::makeStoragePath('foo/bar');
+   * // (string) "/foo/bar/2021/06/27/1/"
+   *
+   * X::makeStoragePath('foo/bar', 'Y/m/d', 1); // path contains a "1" dir which contains 2 dirs or files
+   * // (string) "/foo/bar/2021/06/27/2/"
+   *
+   * ```
+   * @param string $path
+   * @param string $format
+   * @param int $max
+   * @param File\System|null $fs
+   * @return string|null
+   */
   public static function makeStoragePath(
       string $path,
       $format = 'Y/m/d',
@@ -379,6 +495,14 @@ class X
   }
 
 
+  /**
+   * Deletes the for form the given path and date format if it's empty.
+   *
+   * @param string $path
+   * @param string $format
+   * @param File\System|null $fs
+   * @return int|null
+   */
   public static function cleanStoragePath(
       string $path,
       $format = 'Y/m/d',
@@ -415,7 +539,8 @@ class X
 
 
   /**
-   * Returns to a merged object from two objects.
+   * Returns to a merged object from two or more objects.
+   * Property values from later objects overwrite the previous objects.
    *
    * ```php
    * class A {
@@ -428,24 +553,34 @@ class X
    *  public $d = 40;
    * };
    *
+   * * class C {
+   *  public $c = 35;
+   *  public $e = 50;
+   * };
+   *
    * $obj1 = new A;
    * $obj2 = new B;
+   * $obj3 = new C;
    *
-   * X::mergeObjects($obj1, $obj2);
-   * // object {'a': 10, 'b': 20, 'c': 30, 'd': 40}
+   * X::mergeObjects($obj1, $obj2, $obj3);
+   * // object {'a': 10, 'b': 20, 'c': 35, 'd': 40, 'e': 50}
    * ```
    *
    * @param object $o1 The first object to merge.
    * @param object $o2 The second object to merge.
    * @return object The merged object.
+   * @throws \Exception
    */
   public static function mergeObjects(object $o1, object $o2): \stdClass
   {
     $args = \func_get_args();
-    /* @todo check if it's working with more than 2 object arguments */
+
     if (\count($args) > 2) {
       for ($i = \count($args) - 1; $i > 1; $i--) {
-        $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);
+        if (!is_object($args[$i])) {
+          throw new \Exception('The provided argument must be an object, ' . gettype($args[$i]) . ' given.');
+        }
+        $args[$i - 1] = self::mergeObjects($args[$i - 1], $args[$i]);
       }
 
       $o2 = $args[1];
@@ -458,6 +593,47 @@ class X
   }
 
 
+  /**
+   * Flattens a multi-dimensional array for the given children index name.
+   *
+   * ```php
+   *
+   * $arr = [
+   *    [
+   *      'name'  => 'John Doe',
+   *      'age'   => '35',
+   *      'children' => [
+   *          ['name' => 'Carol', 'age' => '4'],
+   *          ['name' => 'Jack', 'age' => '6'],
+   *       ]
+   *    ],
+   *    [
+   *      'name'  => 'Paul',
+   *      'age'   => '33',
+   *      'children' => [
+   *          ['name' => 'Alan', 'age' => '8'],
+   *          ['name' => 'Allison 'age' => '2'],
+   *       ]
+   *    ],
+   *  ];
+   *
+   * X::flatten($arr, 'children');
+   * /* (array)
+   * [
+   *   ['name' => 'John Doe', 'age' => '35'],
+   *   ['name' => 'Paul', 'age' => '33'],
+   *   ['name' => 'Carol', 'age' => '4'],
+   *   ['name' => 'Jack', 'age' => '6'],
+   *   ['name' => 'Alan', 'age' => '8'],
+   *   ['name' => 'Allison', 'age' => '2']
+   *  ]
+   *
+   * ```
+   *
+   * @param array $arr
+   * @param string $children
+   * @return array
+   */
   public static function flatten(array $arr, string $children)
   {
     $toAdd = [];
@@ -486,22 +662,35 @@ class X
 
 
   /**
-   * Returns to a merged array from two or more arrays.
+   * Merges two or more arrays into one.
+   * Values from later array overwrite the previous array.
    *
    * ```php
    * X::mergeArrays([1, 'Test'], [2, 'Example']);
    * // array [1, 'Test', 2, 'Example']
+   *
+   * $arr1 = ['a' => 1, 'b' => 2];
+   * $arr2 = ['b' => 3, 'c' => 4, 'd' => 5];
+   * $arr3 = ['e' => 6, 'b' => 33];
+   *
+   * X::mergeArrays($arr1, $arr2, $arr3)
+   * // (array) ['a' => 1, 'b' => 33, 'c' => 4, 'd' => 5, 'e' => 6]
+   *
    * ```
    *
    * @param array $a1 The first array to merge.
    * @param array $a2 The second array to merge.
    * @return array The merged array.
+   * @throws \Exception
    */
   public static function mergeArrays(array $a1, array $a2): array
   {
     $args = \func_get_args();
     if (\count($args) > 2) {
       for ($i = \count($args) - 1; $i > 1; $i--) {
+        if (!is_array($args[$i])) {
+          throw new \Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.' );
+        }
         $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);
       }
 
@@ -539,13 +728,13 @@ class X
    *
    * ```php
    * X::toObject([[1, 'Test'], [2, 'Example']]);
-   * // object {[1, 'Test'], [2, 'Example']}
+   * // (object) {[1, 'Test'], [2, 'Example']}
    * ```
    *
-   * @param array $ar The array or JSON to convert.
-   * @return false | object
+   * @param mixed $ar The array or JSON to convert.
+   * @return \stdClass|null
    */
-  public static function toObject($ar): \stdClass
+  public static function toObject($ar): ?\stdClass
   {
     if (\is_string($ar)) {
       return json_decode($ar);
@@ -566,17 +755,17 @@ class X
    * $file = new stdClass();
    * $file->foo = "bar";
    * $file->bar = "foo";
-   * echo X::toArray($file);
+   * X::toArray($file);
    * /* array [
    *     'foo' => 'bar',
    *     'bar' => 'foo'
    * ]
    * ```
    *
-   * @param object $obj The object or JSON to convert.
-   * @return false | array
+   * @param mixed $obj The object or JSON to convert.
+   * @return false|null|array
    */
-  public static function toArray($obj): array
+  public static function toArray($obj): ?array
   {
     $obj = \is_string($obj) ? $obj : json_encode($obj);
     return json_decode($obj, true);

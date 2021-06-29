@@ -623,12 +623,12 @@ class Router
   /**
    * Sets and stores a given route, adding the corresponding checkers.
    *
-   * @param array      $o
-   * @param mixed bool
+   * @param array $o
+   * @param bool $save
    */
   private function _set_known(array $o, bool $save = true): ?array
   {
-    // mode, path and file indesxes are mandatory
+    // mode, path and file indexes are mandatory
     if (!isset($o['mode'], $o['path'], $o['file']) || !self::isMode($o['mode']) || !\is_string($o['path']) || !\is_string($o['file'])) {
       return null;
     }
@@ -655,7 +655,7 @@ class Router
         if ($o['ext'] === 'less') {
           $checker_file = '_mixins.less';
         }
-        elseif (($o['mode'] === 'model')) {
+        elseif ($o['mode'] === 'model') {
           $checker_file = '_model.php';
         }
       }
@@ -697,7 +697,7 @@ class Router
     }
 
     if (!$save) {
-      // If not saving the index is unset and the funciton will be relaunched ion case the same request is done again
+      // If not saving the index is unset and the function will be relaunched in case the same request is done again
       $o = self::$_known[$mode][$path];
       unset(self::$_known[$mode][$path]);
 
@@ -718,7 +718,7 @@ class Router
    */
   private function _find_controller($path, $mode): ?array
   {
-    // Removing tgrailing slashes
+    // Removing trailing slashes
     $path = self::parse($path);
     // If the result is already known we just return it
     if ($this->_is_known($path, $mode)) {
@@ -796,6 +796,7 @@ class Router
         // Root index file (if $tmp is at the root level)
         if (($tmp === '.') && !$plugin) {
           // If file exists
+          dump($root . 'index.php', file_exists($root . 'index.php'));
           if (file_exists($root . 'index.php')) {
             $real_path = '.';
             $file      = $root . 'index.php';
@@ -876,6 +877,12 @@ class Router
   }
 
 
+  /**
+   * Returns Plugin info from the given path if exists.
+   *
+   * @param $path
+   * @return array|null
+   */
   private function _find_plugin($path): ?array
   {
     if ($plugins = $this->getPlugins()) {
@@ -890,6 +897,10 @@ class Router
   }
 
 
+  /**
+   * @param string|null $plugin
+   * @return string|null
+   */
   private function _find_translation(string $plugin = null): ?string
   {
     if ($locale = $this->getLocale()) {
@@ -903,17 +914,30 @@ class Router
   }
 
 
+  /**
+   * Alias for _get_root() method
+   *
+   * @param $mode
+   * @return string|null
+   */
   private function _get_classic_root($mode): ?string
   {
     return $this->_get_root($mode);
   }
 
 
+  /**
+   * @param $mode
+   * @param $plugin
+   * @return string|null
+   */
   private function _get_plugin_root($mode, $plugin): ?string
   {
     if (self::isMode($mode)) {
       return $this->pluginPath($plugin) . $this->_get_mode_path($mode);
     }
+
+    return null;
   }
 
 

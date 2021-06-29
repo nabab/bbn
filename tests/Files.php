@@ -14,9 +14,13 @@ trait Files
    *
    * @return string
    */
-  protected function createFile(string $filename, string $file_content, string $dirname)
+  protected function createFile(string $filename, string $file_content, string $dirname, bool $testing_dir = true)
   {
-    if (!is_dir($dir = BBN_APP_PATH . BBN_DATA_PATH . $dirname)) {
+    $dir = $testing_dir
+      ? BBN_APP_PATH . BBN_DATA_PATH . $dirname
+      : $dirname;
+
+    if (!is_dir($dir)) {
       mkdir($dir);
     }
 
@@ -47,5 +51,29 @@ trait Files
   protected function getTestingDirName()
   {
     return BBN_APP_PATH . BBN_DATA_PATH;
+  }
+
+  /**
+   * Clears the testing storage dir.
+   * @param $dir
+   */
+  public function cleanTestingDir($sub_dir = null) {
+    $dir = $sub_dir ?? BBN_APP_PATH . BBN_DATA_PATH;
+
+    if (is_dir($dir)) {
+      $objects = scandir($dir);
+
+      foreach ($objects as $object) {
+        if ($object != "." && $object != "..") {
+          if (is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir. DIRECTORY_SEPARATOR .$object))
+            $this->cleanTestingDir($dir. DIRECTORY_SEPARATOR .$object);
+          else
+            unlink($dir. DIRECTORY_SEPARATOR .$object);
+        }
+      }
+      if ($sub_dir) {
+        rmdir($dir);
+      }
+    }
   }
 }
