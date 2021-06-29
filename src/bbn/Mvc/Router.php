@@ -796,7 +796,7 @@ class Router
         // Root index file (if $tmp is at the root level)
         if (($tmp === '.') && !$plugin) {
           // If file exists
-          dump($root . 'index.php', file_exists($root . 'index.php'));
+
           if (file_exists($root . 'index.php')) {
             $real_path = '.';
             $file      = $root . 'index.php';
