@@ -4226,6 +4226,10 @@ class Option extends bbn\Models\Cls\Db
       throw new \Exception(X::_("Impossible to find the alias"));
     }
 
+    if (array_key_exists($c['id'], $it) && empty($it[$c['id']])) {
+      unset($it[$c['id']]);
+    }
+
     $cfg = null;
     if (isset($it[$c['cfg']])) {
       if (!is_array($it[$c['cfg']])) {
