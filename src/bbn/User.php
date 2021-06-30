@@ -53,7 +53,7 @@ class User extends Models\Cls\Basic
       'passwords' => 'bbn_users_passwords',
       'sessions' => 'bbn_users_sessions',
       'tokens' => 'bbn_users_tokens',
-      'api_tokens' => 'false', // String because array_flip() in Dbconfig only works with integers and string
+      'api_tokens' => 'bbn_users_api_tokens', // String because array_flip() in Dbconfig only works with integers and string
       'users' => 'bbn_users',
       'permission_accounts' => 'bbn_users_permission_accounts',
       'permission_tokens' => 'bbn_users_permission_account_tokens'
@@ -109,6 +109,7 @@ class User extends Models\Cls\Basic
         'id_group' => 'id_group',
         'email' => 'email',
         'username' => 'username',
+        'phone' => 'phone',
         'login' => 'login',
         'admin' => 'admin',
         'dev' => 'dev',
@@ -139,7 +140,7 @@ class User extends Models\Cls\Basic
       'id' => 'id',
       'pass1' => 'pass1',
       'pass2' => 'pass2',
-      'action' => 'appui_action',
+      'action' => 'action',
       'token'  => 'appui_token',
       'device_uid'  => 'device_uid',
       'phone_number' => 'phone_number',
@@ -160,6 +161,11 @@ class User extends Models\Cls\Basic
      * @var integer
      */
     'max_attempts' => 10,
+    /**
+     * Number of times a user can try to log in the period
+     * @var integer
+     */
+    'verification_code_length' => 4,
     /**
      * User ban's length in minutes after max attempts is reached
      * @var integer
@@ -217,6 +223,9 @@ class User extends Models\Cls\Basic
   protected $sql;
 
   /** @var int */
+  protected $verification_code;
+
+  /** @var int */
   protected $id;
 
   /** @var array */
@@ -268,33 +277,29 @@ class User extends Models\Cls\Basic
     $this->_init_class_cfg($cfg);
 
     $f =& $this->class_cfg['fields'];
+    self::retrieverInit($this);
 
-    if ($this->isToken()) {
+    if ($this->isToken() && !empty($params[$f['token']])) {
 
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
-        if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
+        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {
           throw new \Exception(X::_('Invalid token'));
         }
 
-        // find the user using phone_number in db
-        $user = $this->findByPhoneNumber($params[$f['phone_number']]);
-
-        if (!$user) {
-          throw new \Exception(X::_('Unknown phone number'));
-        }
-
+        $this->id = $user_id;
         // Generate a code
-        $code = Str::genpwd(5, 5);
+        $code = random_int(1001, 9999);
 
         // Save it
-        $this->updatePhoneVerificationCode($user[$this->class_cfg['arch']['users']['id']], $code);
+        $this->updatePhoneVerificationCode($params[$f['phone_number']], $code);
 
         // Send the sms with code here
 
         return $this->api_request_output = true;
 
-      } elseif ($this->isVerifyPhoneNumberRequest($params)) {
+      }
+      elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
           throw new \Exception(X::_('Invalid token'));
@@ -307,6 +312,7 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Unknown phone number'));
         }
 
+        $this->id = $user[$this->class_cfg['arch']['users']['id']];
         // Verify that the code is correct
         $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
@@ -314,12 +320,12 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid code'));
         }
 
-        if ($user_cgf['phone_verification_code'] !== $params[$f['phone_verification_code']]) {
+        if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
           throw new \Exception(X::_('Invalid code'));
         }
 
         // Update verification code to null
-        $this->updatePhoneVerificationCode($user[$this->class_cfg['arch']['users']['id']], null);
+        $this->updatePhoneVerificationCode($params[$f['phone_number']], null);
 
         // Generate a new token
         $new_token = Str::genpwd(32, 16);
@@ -336,12 +342,13 @@ class User extends Models\Cls\Basic
         );
 
         // Send the new token here
-        return $this->api_request_output =  json_encode([
+        return $this->api_request_output =  [
           'token'   => $new_token,
           'success' => true
-        ]);
+        ];
 
-      } elseif ($this->isTokenLoginRequest($params)) {
+      }
+      elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
           throw new \Exception(X::_('Invalid token'));
@@ -353,10 +360,9 @@ class User extends Models\Cls\Basic
 
         return $this->api_request_output = true;
 
-      } else {
-        throw new \Exception('Unknown token request');
       }
-    } else {
+    }
+    else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
       $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';
@@ -364,7 +370,6 @@ class User extends Models\Cls\Basic
 
       // Creating the session's variables if they don't exist yet
       $this->_init_session();
-      self::retrieverInit($this);
 
       /*
       if (x::isCli() && isset($params['id'])) {
@@ -451,7 +456,7 @@ class User extends Models\Cls\Basic
     $f = $this->class_cfg['fields'];
 
     return isset($params[$f['phone_number']], $params[$f['phone_verification_code']], $params[$f['device_uid']], $params[$f['token']])
-      && $params[$f['action']] === 'verify_phone_number';
+      && $params[$f['action']] === 'verifyCode';
   }
 
   protected function isPhoneNumberCodeSendingRequest(array $params)
@@ -459,19 +464,18 @@ class User extends Models\Cls\Basic
     $f = $this->class_cfg['fields'];
 
     return isset($params[$f['phone_number']], $params[$f['device_uid']], $params[$f['token']])
-      && $params[$f['action']] === 'send_phone_number_verification_code';
+      && $params[$f['action']] === 'sendSmsCode';
   }
 
-  protected function isTokenLoginRequest(array $params)
+  protected function isTokenLoginRequest(array $params): bool
   {
     $f = $this->class_cfg['fields'];
-
-    return isset($params[$f['token']], $params[$f['device_uid']]);
+    return X::hasProps($params, [$f['token'], $f['device_uid']], true);
   }
 
-  protected function isToken()
+  protected function isToken(): bool
   {
-    return $this->class_cfg['tables']['api_tokens'] !== 'false';
+    return !!$this->class_cfg['tables']['api_tokens'];
   }
 
   public function isReset()
@@ -499,6 +503,12 @@ class User extends Models\Cls\Basic
   public function checkSalt($salt): bool
   {
     return $this->getSalt() === $salt;
+  }
+
+
+  public function getVerificationCode()
+  {
+    return $this->verification_code;
   }
 
 
@@ -2085,11 +2095,7 @@ class User extends Models\Cls\Basic
    */
   protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)
   {
-    if ($api_token = $this->verifyTokenAndDeviceUid($device_uid, $token)) {
-
-      if (!$user_id = $api_token[$this->class_cfg['arch']['api_tokens']['id_user']]) {
-        return null;
-      }
+    if ($user_id = $this->getUserByTokenAndDeviceUid($token, $device_uid)) {
 
       return $this->db->rselect(
         $this->class_cfg['tables']['users'],
@@ -2107,22 +2113,42 @@ class User extends Models\Cls\Basic
    * @param string|null $code
    * @return int|null
    */
-  protected function updatePhoneVerificationCode($user_id, ?string $code)
+  protected function updatePhoneVerificationCode($phone_number, ?string $code)
   {
     $cfg_json_if_null = json_encode(['phone_verification_code' => $code]);
+    // @todo Check the phone number
 
-    return $this->db->query("
-                UPDATE `bbn_users` 
-                SET cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
-                WHERE {$this->class_cfg['arch']['users']['id']} = CAST($user_id AS BINARY)
-                ");
+    $this->verification_code = $code;
+    $cfg = json_encode(['phone_verification_code' => $code]);
+    return $this->db->update(
+      $this->class_cfg['tables']['users'],
+      [
+        $this->class_cfg['arch']['users']['login'] => $phone_number,
+        $this->class_cfg['arch']['users']['phone'] => $phone_number,
+        $this->class_cfg['arch']['users']['cfg'] => $cfg
+      ],
+      [$this->class_cfg['arch']['users']['id'] => $this->id]
+    );
   }
+
+
 
   protected function verifyTokenAndDeviceUid($device_uid, $token)
   {
-    return $this->db->rselect(
+    return $this->db->count(
       $this->class_cfg['tables']['api_tokens'],
-      $this->class_cfg['arch']['api_tokens'],
+      [
+        $this->class_cfg['arch']['api_tokens']['token']      => $token,
+        $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
+      ]
+    );
+  }
+
+  protected function getUserByTokenAndDeviceUid($token, $device_uid)
+  {
+    return $this->db->selectOne(
+      $this->class_cfg['tables']['api_tokens'],
+      $this->class_cfg['arch']['api_tokens']['id_user'],
       [
         $this->class_cfg['arch']['api_tokens']['token']      => $token,
         $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
