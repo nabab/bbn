@@ -2120,10 +2120,7 @@ class User extends Models\Cls\Basic
   protected function updatePhoneVerificationCode($phone_number, ?string $code)
   {
     $cfg_json_if_null = json_encode(['phone_verification_code' => $code]);
-    $phone_number = str_replace('+', '00', $phone_number);
-    if (!ctype_digit($phone_number)) {
-      throw new \Exception("Bad format for ".strip_tags($phone_number));
-    }
+    // @todo Check the phone number
 
     $this->verification_code = $code;
 
