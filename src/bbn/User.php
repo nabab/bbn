@@ -2123,14 +2123,16 @@ class User extends Models\Cls\Basic
     // @todo Check the phone number
 
     $this->verification_code = $code;
-
-    return $this->db->query("
-                UPDATE `{$this->class_cfg['tables']['users']}` 
-                SET {$this->class_cfg['arch']['users']['login']} = ?,
-                {$this->class_cfg['arch']['users']['phone']} = ?,
-                cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
-                WHERE {$this->class_cfg['arch']['users']['id']} = CAST('{$this->id}' AS BINARY)
-                ", $phone_number, $phone_number);
+    $cfg = json_encode(['phone_verification_code' => $code]);
+    return $this->db->update(
+      $this->class_cfg['tables']['users'],
+      [
+        $this->class_cfg['arch']['users']['login'] => $phone_number,
+        $this->class_cfg['arch']['users']['phone'] => $phone_number,
+        $this->class_cfg['arch']['users']['cfg'] => $cfg
+      ],
+      [$this->class_cfg['arch']['users']['id'] => $this->id]
+    );
   }
 
 
