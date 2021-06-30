@@ -283,7 +283,7 @@ class User extends Models\Cls\Basic
 
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
-        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']]))) {
+        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {
           throw new \Exception(X::_('Invalid token'));
         }
 
@@ -2095,11 +2095,7 @@ class User extends Models\Cls\Basic
    */
   protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)
   {
-    if ($api_token = $this->verifyTokenAndDeviceUid($device_uid, $token)) {
-
-      if (!$user_id = $api_token[$this->class_cfg['arch']['api_tokens']['id_user']]) {
-        return null;
-      }
+    if ($user_id = $this->getUserByTokenAndDeviceUid($token, $device_uid)) {
 
       return $this->db->rselect(
         $this->class_cfg['tables']['users'],
@@ -2148,7 +2144,7 @@ class User extends Models\Cls\Basic
     );
   }
 
-  protected function getUserByTokenAndDeviceUid($device_uid, $token)
+  protected function getUserByTokenAndDeviceUid($token, $device_uid)
   {
     return $this->db->selectOne(
       $this->class_cfg['tables']['api_tokens'],
