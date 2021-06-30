@@ -2136,7 +2136,7 @@ class User extends Models\Cls\Basic
 
   protected function getUserByTokenAndDeviceUid($device_uid, $token)
   {
-    return $this->db->rselect(
+    return $this->db->selectOne(
       $this->class_cfg['tables']['api_tokens'],
       $this->class_cfg['arch']['api_tokens']['id_user'],
       [
