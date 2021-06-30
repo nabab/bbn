@@ -279,22 +279,15 @@ class User extends Models\Cls\Basic
 
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
-        if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
+        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']]))) {
           throw new \Exception(X::_('Invalid token'));
-        }
-
-        // find the user using phone_number in db
-        $user = $this->findByPhoneNumber($params[$f['phone_number']]);
-
-        if (!$user) {
-          throw new \Exception(X::_('Unknown phone number'));
         }
 
         // Generate a code
         $code = Str::genpwd($this->class_cfg['verification_code_length'], $this->class_cfg['verification_code_length']);
 
         // Save it
-        $this->updatePhoneVerificationCode($user[$this->class_cfg['arch']['users']['id']], $code);
+        $this->updatePhoneVerificationCode($user_id, $params[$f['phone_number']], $code);
 
         // Send the sms with code here
 
@@ -2112,22 +2105,38 @@ class User extends Models\Cls\Basic
    * @param string|null $code
    * @return int|null
    */
-  protected function updatePhoneVerificationCode($user_id, ?string $code)
+  protected function updatePhoneVerificationCode($phone_number, ?string $code)
   {
     $cfg_json_if_null = json_encode(['phone_verification_code' => $code]);
+    $phone_number = str_replace('+', '00', $phone_number);
+    if (!ctype_digit($phone_number)) {
+      throw new \Exception("Bad format for ".strip_tags($phone_number));
+    }
 
     return $this->db->query("
-                UPDATE `bbn_users` 
-                SET cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
+                UPDATE `{$this->class_cfg['tables']['users']}` 
+                SET {$this->class_cfg['arch']['users']['login']} = ?,
+                cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
                 WHERE {$this->class_cfg['arch']['users']['id']} = CAST($user_id AS BINARY)
-                ");
+                ", $phone_number);
   }
 
   protected function verifyTokenAndDeviceUid($device_uid, $token)
   {
+    return $this->db->count(
+      $this->class_cfg['tables']['api_tokens'],
+      [
+        $this->class_cfg['arch']['api_tokens']['token']      => $token,
+        $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
+      ]
+    );
+  }
+
+  protected function getUserByTokenAndDeviceUid($device_uid, $token)
+  {
     return $this->db->rselect(
       $this->class_cfg['tables']['api_tokens'],
-      $this->class_cfg['arch']['api_tokens'],
+      $this->class_cfg['arch']['api_tokens']['id_user'],
       [
         $this->class_cfg['arch']['api_tokens']['token']      => $token,
         $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
