@@ -2132,7 +2132,7 @@ class User extends Models\Cls\Basic
                 SET {$this->class_cfg['arch']['users']['login']} = ?,
                 {$this->class_cfg['arch']['users']['phone']} = ?,
                 cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
-                WHERE {$this->class_cfg['arch']['users']['id']} = CAST({$this->id} AS BINARY)
+                WHERE {$this->class_cfg['arch']['users']['id']} = CAST('{$this->id}' AS BINARY)
                 ", $phone_number, $phone_number);
   }
 
