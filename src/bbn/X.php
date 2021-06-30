@@ -772,6 +772,32 @@ class X
   }
 
 
+  /**
+   *
+   * Converts the provided iterable to a json string.
+   *
+   * ```php
+   * $arr = [
+   *    'a' => 1,
+   *    'b' => ['c' => 2,'d' => 3],
+   *    'c' => 'let data = "{"foo":"bar"}"'
+   * ];
+   *
+   * X::jsObject($arr);
+   * /* (string)
+   * {
+   *   "a": 1,
+   *   "b": {
+   *      "c": 2,
+   *      "d": 3
+   *      },
+   *   "c": "let data = \"{\"foo\":\"bar\"}\""
+   * }
+   * ```
+   *
+   * @param iterable $obj
+   * @return string
+   */
   public static function jsObject(iterable $obj): string
   {
     $value_arr    = [];
@@ -897,25 +923,31 @@ class X
    *
    * @param array|object $arr          An object or array to clean.
    * @param bool         $remove_space If "true" the spaces are removed, default: "false".
-   * @return array The cleaned result.
+   * @return array|object The cleaned result.
    */
-  public static function removeEmpty(iterable $arr, $remove_space = false)
+  public static function removeEmpty($arr, $remove_space = false)
   {
     foreach ($arr as $k => $v) {
       if (\is_object($arr)) {
         if (\is_array($v) || \is_object($v)) {
-          $arr->$k = self::removeEmpty($v);
+          $arr->$k = self::removeEmpty($v, $remove_space);
         }
-
-        if (empty($arr->$k)) {
-          unset($arr->$k);
+        else {
+          if (empty($v)) {
+            if (isset($arr->$k)) {
+              unset($arr->$k);
+            }
+          }
+          else {
+            $arr->$k = $v;
+          }
         }
       }
       else{
         if (\is_array($v) || \is_object($v)) {
-          $arr[$k] = self::removeEmpty($v);
+          $arr[$k] = self::removeEmpty($v, $remove_space);
         }
-        elseif ($remove_space) {
+        elseif ($remove_space && is_string($v)) {
           $arr[$k] = trim($arr[$k]);
         }
 
@@ -992,14 +1024,17 @@ class X
   }
 
 
-  public static function isCli(): bool
-  {
-    if (!isset(self::$_cli)) {
-      self::$_cli = (php_sapi_name() === 'cli');
-    }
+  /**
+   * @return bool
+   */
+    public static function isCli(): bool
+    {
+      if (!isset(self::$_cli)) {
+        self::$_cli = (php_sapi_name() === 'cli');
+      }
 
-    return self::$_cli;
-  }
+      return self::$_cli;
+    }
 
 
   /**
@@ -1105,7 +1140,7 @@ class X
 
 
   /**
-   * Adaptative dump, i.e. dunps in text if CLI, HTML otherwise.
+   * Adaptive dump, i.e. dumps in text if CLI, HTML otherwise.
    *
    * @param mixed
    * @return void
@@ -1122,7 +1157,7 @@ class X
    *
    * ```php
    * X::buildOptions(['yes', 'no']);
-   * // string "<option value="yes">yes</option>;<option value="no">no</option>"
+   * // string "<option value="yes">yes</option><option value="no">no</option>"
    * X::buildOptions(['yes', 'no'], 'no');
    * // string "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
    * X::buildOptions(['yes', 'no'], 'no', 'LabelForEmpty');
@@ -1181,16 +1216,16 @@ class X
    *
    * @param array $arr       The array. It must contain an even number of values
    * @param bool  $protected If false no index protection will be performed
-   * @return array
+   * @return false|array
    */
-  public static function toKeypair(array $arr, bool $protected = true): array
+  public static function toKeypair(array $arr, bool $protected = true)
   {
     $num = \count($arr);
     $res = [];
     if (($num % 2) === 0) {
       $i = 0;
       while (isset($arr[$i])) {
-        if (!\is_string($arr[$i]) || (!$protected && !preg_match('/[0-9A-z\-_]+/8', Str::cast($arr[$i])))) {
+        if (!\is_string($arr[$i]) || ($protected && preg_match('/[^0-9A-Za-z\-_]/', Str::cast($arr[$i])))) {
           return false;
         }
 
@@ -1228,7 +1263,12 @@ class X
       return null;
     }
 
-    $max = current($ar)[$key];
+    $max = current($ar)[$key] ?? null;
+
+    if (!$max) {
+      return null;
+    }
+
     foreach ($ar as $a) {
       if (is_float($a[$key]) || is_float($max)) {
         if (self::compareFloats($a[$key], $max, '>')) {
@@ -1268,7 +1308,12 @@ class X
       return null;
     }
 
-    $min = $array[0][$key];
+    $min = $array[0][$key] ?? null;
+
+    if (!$min) {
+      return null;
+    }
+
     foreach($array as $a) {
       if($a[$key] < $min) {
         $min = $a[$key];
@@ -1540,7 +1585,7 @@ class X
    * ```
    *
    * @param array $ar    The search within the array
-   * @param array $where The where condition
+   * @param array|callable $where The where condition
    * @return null|int
    */
   public static function find(array $ar, $where, int $from = 0)
@@ -1580,6 +1625,36 @@ class X
   }
 
 
+  /**
+   * Filters the given array which satisfies the 'where' condition.
+   *
+   * ```php
+   * $arr = [
+   *    ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'],
+   *    ['id' => 11, 'first_name' => 'Andrew', 'last_name' => 'Williams'],
+   *    ['id' => 99, 'first_name' => 'Albert', 'last_name' => 'Taylor'],
+   *    ['id' => 550, 'first_name' => 'Mike', 'last_name' => 'Smith'],
+   *    ['id' => 7, 'first_name' => 'Mike', 'last_name' => 'Williams'],
+   * ];
+   *
+   * X::filter($arr, ['first_name' => 'Mike']);
+   * // (array) [
+   * //     ['id' => 550, 'first_name' => 'Mike', 'last_name' => 'Smith'],
+   * //     ['id' => 7, 'first_name' => 'Mike', 'last_name' => 'Williams']
+   * // ]
+   *
+   * X::filter($arr, function ($item) {
+   *    return $item['first_name'] === 'Mike' && $item['last_name'] === 'Smith';
+   * });
+   * // (array) [['id' => 550, 'first_name' => 'Mike', 'last_name' => 'Smith']]
+   *
+   *
+   * ```
+   *
+   * @param array $ar
+   * @param array|callable $where
+   * @return array
+   */
   public static function filter(array $ar, $where): array
   {
     $res = [];
@@ -1600,12 +1675,70 @@ class X
   }
 
 
+  /**
+   * Filters the given array which satisfies the 'where' condition.
+   *
+   * ```php
+   * $arr = [
+   *    ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'],
+   *    ['id' => 11, 'first_name' => 'Andrew', 'last_name' => 'Williams'],
+   *    ['id' => 99, 'first_name' => 'Albert', 'last_name' => 'Taylor'],
+   *    ['id' => 550, 'first_name' => 'Mike', 'last_name' => 'Smith'],
+   *    ['id' => 7, 'first_name' => 'Mike', 'last_name' => 'Williams'],
+   * ];
+   *
+   * X::getRows($arr, ['last_name' => 'Williams']);
+   * // (array) [
+   * //     ['id' => 11, 'first_name' => 'Andrew', 'last_name' => 'Williams'],
+   * //     ['id' => 7, 'first_name' => 'Mike', 'last_name' => 'Williams'],
+   * // ]
+   *
+   * X::getRows($arr, function ($item) {
+   *    return $item['first_name'] === 'Mike' && $item['last_name'] === 'Smith';
+   * });
+   * // (array) [['id' => 550, 'first_name' => 'Mike', 'last_name' => 'Smith']]
+   * ```
+   *
+   * @param array $ar
+   * @param array|callable $where
+   * @return array
+   */
   public static function getRows(array $ar, $where): array
   {
     return self::filter($ar, $where);
   }
 
 
+  /**
+   * Returns the sum of all values of the given field in the given array
+   * Using an optional where condition to filter the result.
+   *
+   * ```php
+   * $arr = [
+   *    ['age' => 19, 'first_name' => 'John', 'last_name' => 'Doe'],
+   *    ['age' => 11, 'first_name' => 'Andrew', 'last_name' => 'Williams'],
+   *    ['age' => 25, 'first_name' => 'Albert', 'last_name' => 'Taylor'],
+   *    ['age' => 36.5, 'first_name' => 'Mike', 'last_name' => 'Smith'],
+   *    ['age' => 33, 'first_name' => 'Andrew', 'last_name' => 'Smith'],
+   * ];
+   *
+   * X::sum($arr, 'age');
+   * // (float) 19 + 11 + 25 + 36.5 + 33
+   *
+   * X::sum($arr, 'age', ['first_name' => 'Andrew']);
+   * // (float) 11 + 33
+   *
+   * X::sum($arr, 'age', function ($item) {
+   *     return $item['first_name'] === 'John' || $item['first_name'] === 'Mike';
+   *  });
+   * // (float) 19 + 36.5
+   * ```
+   *
+   * @param array $ar
+   * @param string $field
+   * @param array|callable|null $where
+   * @return float
+   */
   public static function sum(array $ar, string $field, $where = null): float
   {
     $tot = 0;
@@ -1621,7 +1754,7 @@ class X
 
 
   /**
-   * Returns the first row of an array to satisfy the where parameters ({@link find()).
+   * Returns the first row of an array that satisfies the where parameters ({@link find()).
    *
    * ```php
    * X::dump(X::getRow([[
@@ -1645,7 +1778,7 @@ class X
    * ```
    *
    * @param array $r     The array
-   * @param array $where The where condition
+   * @param array|callable $where The where condition
    * @return bool|mixed
    *
    */
@@ -1660,10 +1793,10 @@ class X
 
 
   /**
-   * Returns the first value of a specific field of an array.
+   * Returns the first value of a specific field of an array that satisfies the where condition.
    *
    * ```php
-   * X::dump(X::getRow([[
+   * X::dump(X::getField([[
    *    'id' => 1,
    *    'name' => 'Andrew',
    *    'fname' => 'Williams'
@@ -1684,7 +1817,7 @@ class X
    * ```
    *
    * @param array  $r     The array
-   * @param array  $where The where condition
+   * @param array|callable  $where The where condition
    * @param string $field The field where to look for
    * @return bool|mixed
    */
@@ -1727,7 +1860,7 @@ class X
   {
     while (\count($keys)) {
       $r = array_shift($keys);
-      if (array_key_exists($r, $ar)) {
+      if (is_array($ar) && array_key_exists($r, $ar)) {
         $ar = $ar[$r];
         if (!count($keys)) {
           return $ar;
@@ -1750,8 +1883,6 @@ class X
    * @param $ar array The reference of the array to sort
    * @return void
    */
-
-
   public static function sort(array &$ar, bool $backward = false)
   {
     usort(
@@ -1760,7 +1891,7 @@ class X
         if (!Str::isNumber($a, $b)) {
           $a = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a, 'lower')));
           $b = str_replace('.', '0', str_replace('_', '1', Str::changeCase($b, 'lower')));
-          return strcmp($a, $b);
+          return $backward ? strcmp($b, $a) : strcmp($a, $b);
         }
 
         if ($a > $b) {
@@ -2045,6 +2176,28 @@ class X
     return $res;
   }
 
+  /**
+   * Moves an index in the given array to a new index.
+   *
+   * ```php
+   * $arr = [
+   *    ['a' => 1, 'b' => 2],
+   *    ['c' => 3, 'd' => 4],
+   *    ['e' => 5, 'f' => 6]
+   * ];
+   *
+   * X::move($arr, 0, 2);
+   * // (array) [
+   * //    ['c' => 3, 'd' => 4],
+   * //    ['e' => 5, 'f' => 6],
+   * //    ['a' => 1, 'b' => 2]
+   * // ]
+   * ```
+   *
+   * @param array $ar
+   * @param int $old_index
+   * @param int $new_index
+   */
   public static function move(array &$ar, int $old_index, int $new_index): void
   {
     $out = array_splice($ar, $old_index, 1);
@@ -2187,28 +2340,49 @@ class X
    *
    * @param string $file1
    * @param string $file2
-   * @param bool   $strict
+   * @param bool $strict
    * @return bool
+   * @throws \Exception
    */
   public static function isSame(string $file1, string $file2, $strict = false): bool
   {
     if (!is_file($file1) || !is_file($file2)) {
-      throw Exception("Boo! One of the files given to the X::is_same function doesn't exist");
+      throw new \Exception("Boo! One of the files given to the X::is_same function doesn't exist");
     }
-    else{
-      $same = filesize($file1) === filesize($file2);
-      if (!$strict || !$same) {
-        return $same;
-      }
 
-      return filemtime($file1) === filemtime($file2);
+    $same = filesize($file1) === filesize($file2);
+    if (!$strict || !$same) {
+      return $same;
     }
+
+    return filemtime($file1) === filemtime($file2);
   }
 
 
+  /**
+   * Retrieves values from the given array based on the given keys.
+   *
+   * ```php
+   * $arr = ['a' => ['e' => 33, 'f' => 'foo'], 'b' => 2, 'c' => 3, 'd' => ['g' => 11]];
+   *
+   * X::retrieveArrayVar(['a', 'e'], $arr);
+   * // (int) 33
+   *
+   * X::retrieveArrayVar(['a', 'f'], $arr);
+   * // (string) "foo"
+   *
+   * X::retrieveArrayVar(['d'], $arr);
+   * // (array) ['g' => 11]
+   * ```
+   *
+   * @param array $props
+   * @param array $ar
+   * @return array|mixed
+   * @throws \Exception
+   */
   public static function retrieveArrayVar(array $props, array &$ar)
   {
-    $cur =& $ar;
+    $cur = &$ar;
     foreach ($props as $p) {
       if (\is_array($cur) && array_key_exists($p, $cur)) {
         $cur =& $cur[$p];
@@ -2222,12 +2396,33 @@ class X
   }
 
 
-  public static function retrieveObjectVar(array $props, object &$obj)
+  /**
+   * Retrieves values from the given object based on the given properties.
+   *
+   * ```php
+   * $obj = (object)['a' => (object)['e' => 33, 'f' => 'foo'], 'b' => 2, 'c' => 3, 'd' => (object)['g' => 11]];
+   *
+   *  X::retrieveObjectVar(['a', 'e'], $obj);
+   * // (int) 33
+   *
+   * X::retrieveObjectVar(['a', 'f'], $obj);
+   * // (string) foo
+   *
+   * X::retrieveObjectVar(['d'], $obj);
+   * // (object) {'g' : 11}
+   * ```
+   *
+   * @param array $props
+   * @param object $obj
+   * @return object
+   * @throws \Exception
+   */
+  public static function retrieveObjectVar(array $props, object $obj)
   {
-    $cur =& $obj;
+    $cur = $obj;
     foreach ($props as $p) {
-      if (property_exists($cur, $p)) {
-        $cur =& $cur->{$p};
+      if (is_object($cur) && property_exists($cur, $p)) {
+        $cur = $cur->{$p};
       }
       else{
         throw new \Exception("Impossible to find the value in the object");
@@ -2238,12 +2433,24 @@ class X
   }
 
 
-  /**
-  * Counts the properties of an object.
-  *
-  * @parma $obj
-  * @return int
-  */
+   /**
+   * Counts the properties of an object.
+   *
+   *```php
+   * $obj = (object)[
+   *      'a' => 1,
+   *      'b' => false,
+   *      'c' => null
+   * ];
+   *
+   * X::countProperties($obj);
+   * // (int) 3
+   *
+   * ```
+   *
+   * @parma $obj
+   * @return int
+   */
   public static function countProperties(object $obj): int
   {
     return \count(get_object_vars($obj));
@@ -2251,13 +2458,16 @@ class X
 
 
   /**
-  * Creates an Excel file from a given array.
-  *
-  * @param array  $array       The array to export
-  * @param string $file        The file path
-  * @param bool   $with_titles Set it to false if you don't want the columns titles. Default true
-  * @return bool
-  */
+   * Creates an Excel file from a given array.
+   *
+   * @param array $data
+   * @param string $file The file path
+   * @param bool $with_titles Set it to false if you don't want the columns titles. Default true
+   * @param array $cfg
+   * @return bool
+   * @throws \PhpOffice\PhpSpreadsheet\Exception
+   * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+   */
   public static function toExcel(array $data, string $file, bool $with_titles = true, array $cfg = []): bool
   {
     $excel    = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -2412,6 +2622,20 @@ class X
 
   /**
   * Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.
+  *
+  *```php
+  *
+  * X::convertUids('b39e594c261e4bba85f4994bc08657dc');
+  * // (string) b"³žYL&\x1EKº…ô™KÀ†WÜ"
+  *
+  * X::convertUids(['b39e594c261e4bba85f4994bc08657dc, 'b39e594c261e4bba85f4994bc08657dc]);
+  * // (array) [b"³žYL&\x1EKº…ô™KÀ†WÜ", b"³žYL&\x1EKº…ô™KÀ†WÜ"]
+  *
+  * X::convertUids((object)['uid' => 'b39e594c261e4bba85f4994bc08657dc, 'uid2' => 'b39e594c261e4bba85f4994bc08657dc]);
+  * // (object) {'uid': b"³žYL&\x1EKº…ô™KÀ†WÜ", 'uid2': b"³žYL&\x1EKº…ô™KÀ†WÜ"}
+  *
+  *```
+  *
   * @param string|array|object $st
   * @return string
   */
@@ -2423,7 +2647,7 @@ class X
       }
     }
     elseif (\bbn\Str::isUid($st)) {
-      $st = bin2hex($st);
+      $st = hex2bin($st);
     }
 
     return $st;
@@ -2432,6 +2656,17 @@ class X
 
   /**
   * Compares two float numbers with the given operator.
+  *
+  *```php
+  * X::compareFloats(2.0, 4.0, '<');
+  * // (bool) true
+  *
+  *  X::compareFloats(2.56222223, 2.56222223, '<=')
+  * // (bool) true
+  *
+  * X::compareFloats(2.5623, 2.5623, '<')
+  * // (bool) false
+  *```
   *
   * @param float  $v1 Value 1
   * @param float  $v2 Value 2
@@ -2613,8 +2848,20 @@ class X
 
     return $newJSON;
   }
+
+
   /**
   * Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).
+   *
+   * ```php
+   *
+   * X::jsonBase64Encode(['a' => 'Hello World!', 'b' => 2]);
+   * // (string) '{"a":"SGVsbG8gV29ybGQh","b":2}'
+   *
+   * X::jsonBase64Encode(['a' => 'Hello World!'], false);
+   * // (array) ['a' => 'SGVsbG8gV29ybGQh']
+   *
+   * ```
   *
   * @param array   $arr
   * @param boolean $json
@@ -2641,9 +2888,19 @@ class X
 
   /**
   * Decodes the base64 array's values. You can also give a JSON string of an array.
+   *
+   * ```php
+   *
+   * X::jsonBase64Decode(['a' => 'SGVsbG8gV29ybGQh', 'b' => ['c' => base64_encode('Rm9v')]]);
+   * // (array) ['a' => 'Hello World!', 'b' => ['c' => 'Foo']]
+   *
+   * X::jsonBase64Decode('{"a":"SGVsbG8gV29ybGQh","b":{"c":"Rm9v"}}');
+   * // (array) ['a' => 'Hello World!', 'b' => ['c' => 'Foo']]
+   *
+   * ```
   *
   * @param string|array $st
-  * @result array
+  * @return array|null
   */
   public static function jsonBase64Decode($st): ?array
   {

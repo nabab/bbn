@@ -42,7 +42,8 @@
     "mck89/peast": "1.10.*",
     "czproject/git-php": "v3.18.*",
     "firebase/php-jwt": "5.2.*",
-    "mollie/oauth2-mollie-php": "^2.0"
+    "mollie/oauth2-mollie-php": "^2.0",
+    "phpoffice/phpspreadsheet": "^1.18"
   },
   "require-dev": {
     "phpunit/phpunit": "9.3.*",
