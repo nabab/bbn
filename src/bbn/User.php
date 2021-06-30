@@ -223,9 +223,6 @@ class User extends Models\Cls\Basic
   protected $sql;
 
   /** @var int */
-  protected $verification_code;
-
-  /** @var int */
   protected $id;
 
   /** @var array */
@@ -292,11 +289,18 @@ class User extends Models\Cls\Basic
         $code = random_int(1001, 9999);
 
         // Save it
-        $this->updatePhoneVerificationCode($params[$f['phone_number']], $code);
+        if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {
+          // Send the sms with code here
 
-        // Send the sms with code here
+          return $this->api_request_output = [
+            'success' => true,
+            'phone_verification_code' => $code
+          ];
+        }
+        else {
+          throw new \Exception(X::_('Impossible to update the user'));
+        }
 
-        return $this->api_request_output = true;
 
       }
       elseif ($this->isVerifyPhoneNumberRequest($params)) {
@@ -503,12 +507,6 @@ class User extends Models\Cls\Basic
   public function checkSalt($salt): bool
   {
     return $this->getSalt() === $salt;
-  }
-
-
-  public function getVerificationCode()
-  {
-    return $this->verification_code;
   }
 
 
@@ -2113,14 +2111,10 @@ class User extends Models\Cls\Basic
    * @param string|null $code
    * @return int|null
    */
-  protected function updatePhoneVerificationCode($phone_number, ?string $code)
+  protected function updatePhoneVerificationCode($phone_number, ?string $code): bool
   {
-    $cfg_json_if_null = json_encode(['phone_verification_code' => $code]);
-    // @todo Check the phone number
-
-    $this->verification_code = $code;
     $cfg = json_encode(['phone_verification_code' => $code]);
-    return $this->db->update(
+    return !!$this->db->update(
       $this->class_cfg['tables']['users'],
       [
         $this->class_cfg['arch']['users']['login'] => $phone_number,
