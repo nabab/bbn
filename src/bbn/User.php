@@ -317,12 +317,10 @@ class User extends Models\Cls\Basic
         $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
         if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
-          X::log([$user, $user_cgf]);
           throw new \Exception(X::_('Invalid code'));
         }
 
-        if ($user_cgf['phone_verification_code'] !== $params[$f['phone_verification_code']]) {
-          X::log([$user, $user_cgf, $params]);
+        if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
           throw new \Exception(X::_('Invalid code'));
         }
 
