@@ -273,6 +273,7 @@ class User extends Models\Cls\Basic
     $this->_init_class_cfg($cfg);
 
     $f =& $this->class_cfg['fields'];
+    self::retrieverInit($this);
 
     if ($this->isToken() && !empty($params[$f['token']])) {
 
@@ -370,7 +371,6 @@ class User extends Models\Cls\Basic
 
       // Creating the session's variables if they don't exist yet
       $this->_init_session();
-      self::retrieverInit($this);
 
       /*
       if (x::isCli() && isset($params['id'])) {
