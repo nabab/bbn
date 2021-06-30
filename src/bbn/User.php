@@ -342,10 +342,10 @@ class User extends Models\Cls\Basic
         );
 
         // Send the new token here
-        return $this->api_request_output =  json_encode([
+        return $this->api_request_output =  [
           'token'   => $new_token,
           'success' => true
-        ]);
+        ];
 
       }
       elseif ($this->isTokenLoginRequest($params)) {
