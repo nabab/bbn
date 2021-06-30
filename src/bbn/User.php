@@ -109,6 +109,7 @@ class User extends Models\Cls\Basic
         'id_group' => 'id_group',
         'email' => 'email',
         'username' => 'username',
+        'phone' => 'phone',
         'login' => 'login',
         'admin' => 'admin',
         'dev' => 'dev',
@@ -2118,9 +2119,10 @@ class User extends Models\Cls\Basic
     return $this->db->query("
                 UPDATE `{$this->class_cfg['tables']['users']}` 
                 SET {$this->class_cfg['arch']['users']['login']} = ?,
+                {$this->class_cfg['arch']['users']['phone']} = ?,
                 cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
                 WHERE {$this->class_cfg['arch']['users']['id']} = CAST({$this->id} AS BINARY)
-                ", $phone_number);
+                ", $phone_number, $phone_number);
   }
 
   protected function verifyTokenAndDeviceUid($device_uid, $token)
