@@ -53,7 +53,7 @@ class User extends Models\Cls\Basic
       'passwords' => 'bbn_users_passwords',
       'sessions' => 'bbn_users_sessions',
       'tokens' => 'bbn_users_tokens',
-      'api_tokens' => 'false', // String because array_flip() in Dbconfig only works with integers and string
+      'api_tokens' => 'bbn_users_api_tokens', // String because array_flip() in Dbconfig only works with integers and string
       'users' => 'bbn_users',
       'permission_accounts' => 'bbn_users_permission_accounts',
       'permission_tokens' => 'bbn_users_permission_account_tokens'
@@ -139,7 +139,7 @@ class User extends Models\Cls\Basic
       'id' => 'id',
       'pass1' => 'pass1',
       'pass2' => 'pass2',
-      'action' => 'appui_action',
+      'action' => 'action',
       'token'  => 'appui_token',
       'device_uid'  => 'device_uid',
       'phone_number' => 'phone_number',
@@ -160,6 +160,11 @@ class User extends Models\Cls\Basic
      * @var integer
      */
     'max_attempts' => 10,
+    /**
+     * Number of times a user can try to log in the period
+     * @var integer
+     */
+    'verification_code_length' => 4,
     /**
      * User ban's length in minutes after max attempts is reached
      * @var integer
@@ -285,7 +290,7 @@ class User extends Models\Cls\Basic
         }
 
         // Generate a code
-        $code = Str::genpwd(5, 5);
+        $code = Str::genpwd($this->class_cfg['verification_code_length'], $this->class_cfg['verification_code_length']);
 
         // Save it
         $this->updatePhoneVerificationCode($user[$this->class_cfg['arch']['users']['id']], $code);
