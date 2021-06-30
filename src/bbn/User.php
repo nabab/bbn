@@ -283,11 +283,12 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token'));
         }
 
+        $this->id = $user_id;
         // Generate a code
         $code = Str::genpwd($this->class_cfg['verification_code_length'], $this->class_cfg['verification_code_length']);
 
         // Save it
-        $this->updatePhoneVerificationCode($user_id, $params[$f['phone_number']], $code);
+        $this->updatePhoneVerificationCode($params[$f['phone_number']], $code);
 
         // Send the sms with code here
 
@@ -307,6 +308,7 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Unknown phone number'));
         }
 
+        $this->id = $user[$this->class_cfg['arch']['users']['id']];
         // Verify that the code is correct
         $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
@@ -319,7 +321,7 @@ class User extends Models\Cls\Basic
         }
 
         // Update verification code to null
-        $this->updatePhoneVerificationCode($user[$this->class_cfg['arch']['users']['id']], null);
+        $this->updatePhoneVerificationCode($params[$f['phone_number']], null);
 
         // Generate a new token
         $new_token = Str::genpwd(32, 16);
@@ -2117,7 +2119,7 @@ class User extends Models\Cls\Basic
                 UPDATE `{$this->class_cfg['tables']['users']}` 
                 SET {$this->class_cfg['arch']['users']['login']} = ?,
                 cfg = IF(cfg IS NULL, '$cfg_json_if_null', JSON_SET(cfg, '$.phone_verification_code', '$code'))
-                WHERE {$this->class_cfg['arch']['users']['id']} = CAST($user_id AS BINARY)
+                WHERE {$this->class_cfg['arch']['users']['id']} = CAST({$this->id} AS BINARY)
                 ", $phone_number);
   }
 
