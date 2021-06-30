@@ -285,7 +285,7 @@ class User extends Models\Cls\Basic
 
         $this->id = $user_id;
         // Generate a code
-        $code = Str::genpwd($this->class_cfg['verification_code_length'], $this->class_cfg['verification_code_length']);
+        $code = random_int(1001, 9999);
 
         // Save it
         $this->updatePhoneVerificationCode($params[$f['phone_number']], $code);
