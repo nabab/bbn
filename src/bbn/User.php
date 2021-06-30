@@ -223,6 +223,9 @@ class User extends Models\Cls\Basic
   protected $sql;
 
   /** @var int */
+  protected $verification_code;
+
+  /** @var int */
   protected $id;
 
   /** @var array */
@@ -500,6 +503,12 @@ class User extends Models\Cls\Basic
   public function checkSalt($salt): bool
   {
     return $this->getSalt() === $salt;
+  }
+
+
+  public function getVerificationCode()
+  {
+    return $this->verification_code;
   }
 
 
@@ -2116,6 +2125,8 @@ class User extends Models\Cls\Basic
       throw new \Exception("Bad format for ".strip_tags($phone_number));
     }
 
+    $this->verification_code = $code;
+
     return $this->db->query("
                 UPDATE `{$this->class_cfg['tables']['users']}` 
                 SET {$this->class_cfg['arch']['users']['login']} = ?,
@@ -2124,6 +2135,8 @@ class User extends Models\Cls\Basic
                 WHERE {$this->class_cfg['arch']['users']['id']} = CAST({$this->id} AS BINARY)
                 ", $phone_number, $phone_number);
   }
+
+
 
   protected function verifyTokenAndDeviceUid($device_uid, $token)
   {
