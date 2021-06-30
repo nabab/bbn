@@ -322,7 +322,7 @@ class User extends Models\Cls\Basic
         }
 
         if ($user_cgf['phone_verification_code'] !== $params[$f['phone_verification_code']]) {
-          X::log([$user, $user_cgf]);
+          X::log([$user, $user_cgf, $params]);
           throw new \Exception(X::_('Invalid code'));
         }
 
