@@ -2470,6 +2470,10 @@ class X
    */
   public static function toExcel(array $data, string $file, bool $with_titles = true, array $cfg = []): bool
   {
+    if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
+      throw new \Exception(X::_("You need the PhpOffice library to use this function"));
+    }
+
     $excel    = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet    = $excel->getActiveSheet();
     $ow       = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
