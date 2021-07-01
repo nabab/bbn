@@ -18,8 +18,7 @@ if (!\defined('BBN_DATA_PATH')) {
 
 class Note extends bbn\Models\Cls\Db
 {
-    use
-    bbn\Models\Tts\References;
+    use bbn\Models\Tts\References;
 
     use bbn\Models\Tts\Optional;
 
@@ -96,7 +95,16 @@ class Note extends bbn\Models\Cls\Db
       ],
     ];
 
+  /** @var array $class_cfg */
+  protected $class_cfg;
 
+
+  /**
+   * Note constructor.
+   *
+   * @param bbn\Db $db
+   * @throws \Exception
+   */
   public function __construct(bbn\Db $db)
   {
       parent::__construct($db);
@@ -105,6 +113,9 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @return Medias
+   */
   public function getMediaInstance()
   {
     if (!$this->medias) {
@@ -115,6 +126,11 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param $title
+   * @param $content
+   * @return string
+   */
   public function getExcerpt($title, $content): string
   {
       $excerpt = '';
@@ -124,14 +140,14 @@ class Note extends bbn\Models\Cls\Db
 
     if (!empty($content)) {
       if (Str::isJson($content)) {
-          $ct = json_decode($content, true);
+        $ct = json_decode($content, true);
         foreach ($ct as $n => $c) {
           if (is_string($c)) {
             if (is_string($n)) {
               $excerpt .= $n.': ';
             }
 
-                $excerpt .= Str::html2text($c, strpos($c, PHP_EOL) > 0).PHP_EOL.PHP_EOL;
+            $excerpt .= Str::html2text($c, strpos($c, PHP_EOL) > 0).PHP_EOL.PHP_EOL;
           } elseif (is_array($c)) {
             foreach ($c as $k => $v) {
               if (is_string($v)) {
@@ -153,6 +169,18 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param $title
+   * @param string $content
+   * @param string|null $type
+   * @param bool $private
+   * @param bool $locked
+   * @param string|null $parent
+   * @param string|null $alias
+   * @param string $mime
+   * @param string $lang
+   * @return false|null
+   */
   public function insert(
       $title,
       $content = '',
@@ -193,7 +221,7 @@ class Note extends bbn\Models\Cls\Db
         $lang = BBN_LANG;
     }
 
-      $cf = &$this->class_cfg;
+    $cf = &$this->class_cfg;
     if (is_null($type)) {
         $type = self::getOptionId('personal', 'types');
     }
@@ -225,9 +253,14 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
-    /**
-     * Adds a new version to the given note.
-     */
+  /**
+   * Adds a new version to the given note.
+   *
+   * @param string $id_note
+   * @param string $title
+   * @param string $content
+   * @return int|null
+   */
   public function insertVersion(string $id_note, string $title, string $content): ?int
   {
     if ($this->check() && ($usr = bbn\User::getInstance()) && ($note = $this->get($id_note))) {
@@ -266,9 +299,17 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $id
+   * @param string $title
+   * @param string $content
+   * @param bool|null $private
+   * @param bool|null $locked
+   * @return int|null
+   */
   public function update(string $id, string $title, string $content, bool $private = null, bool $locked = null): ?int
   {
-      $ok = null;
+    $ok = null;
     if ($old = $this->db->rselect('bbn_notes', [], ['id' => $id])) {
         $ok  = 0;
         $new = [];
@@ -287,8 +328,8 @@ class Note extends bbn\Models\Cls\Db
       if ($old_v = $this->get($id)) {
           $changed = false;
           $new_v   = [
-        'title' => $old_v['title'],
-        'content' => $old_v['content'],
+            'title' => $old_v['title'],
+            'content' => $old_v['content'],
           ];
 
           if ($title !== $old_v['title']) {
@@ -311,6 +352,10 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param $id
+   * @return mixed
+   */
   public function latest($id)
   {
       $cf = &$this->class_cfg;
@@ -323,9 +368,15 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $id
+   * @param int|null $version
+   * @param bool $simple
+   * @return array|null
+   */
   public function get(string $id, int $version = null, bool $simple = false): ? array
   {
-      $cf = &$this->class_cfg;
+    $cf = &$this->class_cfg;
     if (!\is_int($version)) {
         $version = $this->latest($id) ?: 1;
     }
@@ -371,30 +422,35 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $id
+   * @param int|null $version
+   * @return array|null
+   */
   public function getFull(string $id, int $version = null): ? array
   {
-      $cf = &$this->class_cfg;
+    $cf = &$this->class_cfg;
     if (!\is_int($version)) {
         $version = $this->latest($id);
     }
 
     if ($res = $this->db->rselect(
       [
-          'table' => $cf['table'],
-          'fields' => [
-      $cf['arch']['notes']['id'],
-      $cf['arch']['notes']['id_parent'],
-      $cf['arch']['notes']['id_alias'],
-      $cf['arch']['notes']['excerpt'],
-      $cf['arch']['notes']['id_type'],
-      $cf['arch']['notes']['private'],
-      $cf['arch']['notes']['locked'],
-      $cf['arch']['notes']['pinned'],
-      $cf['arch']['versions']['version'],
-      $cf['arch']['versions']['title'],
-      $cf['arch']['versions']['content'],
-      $cf['arch']['versions']['id_user'],
-      $cf['arch']['versions']['creation'],
+        'table' => $cf['table'],
+        'fields' => [
+            $cf['arch']['notes']['id'],
+            $cf['arch']['notes']['id_parent'],
+            $cf['arch']['notes']['id_alias'],
+            $cf['arch']['notes']['excerpt'],
+            $cf['arch']['notes']['id_type'],
+            $cf['arch']['notes']['private'],
+            $cf['arch']['notes']['locked'],
+            $cf['arch']['notes']['pinned'],
+            $cf['arch']['versions']['version'],
+            $cf['arch']['versions']['title'],
+            $cf['arch']['versions']['content'],
+            $cf['arch']['versions']['id_user'],
+            $cf['arch']['versions']['creation'],
           ],
           'join' => [[
           'table' => $cf['tables']['versions'],
@@ -426,29 +482,42 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $url
+   * @return bool
+   */
   public function urlExists(string $url): bool
   {
       return (bool)$this->urlToId($url);
   }
 
 
+  /**
+   * @param string $url
+   * @return string|null
+   */
   public function urlToId(string $url): ?string
   {
     if (!$url) {
         return null;
     }
 
-      $cf = &$this->class_cfg;
+    $cf = &$this->class_cfg;
     if (substr($url, 0, 1) !== '/') {
         $url = '/'.$url;
     }
 
-      $res = $this->db->selectOne($cf['tables']['url'], $cf['arch']['id_note'], [$cf['arch']['url']['url'] => $url]);
+    $res = $this->db->selectOne($cf['tables']['url'], $cf['arch']['url']['id_note'], [$cf['arch']['url']['url'] => $url]);
 
-      return $res ?: null;
+    return $res ?: null;
   }
 
 
+  /**
+   * @param string $url
+   * @param bool $full
+   * @return array|null
+   */
   public function urlToNote(string $url, bool $full = false): ?array
   {
     if ($id = $this->urlToId($url)) {
