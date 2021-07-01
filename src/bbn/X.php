@@ -2932,8 +2932,25 @@ class X
   /**
   * Creates an associative array based on the first array's value.
   *
+  *```php
+  * $arr = [
+  *          [
+  *            'a' => 'foo',
+  *            'b' => 'bar'
+  *          ],
+  *          [
+  *            'a' => 'foo2',
+  *            'b' => 'bar2'
+  *          ]
+  *        ];
+  *
+  * X::indexByFirstVal($arr);
+  * // (array) ['foo' => 'bar', 'foo2' => 'bar2']
+  *```
+  *
   * @param array $ar
-  * @return array*/
+  * @return array
+  */
   public static function indexByFirstVal(array $ar): array
   {
     if (empty($ar) || !isset($ar[0]) || !\count($ar[0])) {
@@ -2954,18 +2971,69 @@ class X
   }
 
 
+  /**
+   * Join array elements with a string
+   *
+   * ```php
+   *
+   * X::join(['foo', 'bar']);
+   * // (string) "foobar"
+   *
+   * X::join(['foo', 'bar'], ' ');
+   * // (string) "foo bar"
+   *
+   * ```
+   *
+   * @param array $ar
+   * @param string $glue
+   * @return string
+   */
   public static function join(array $ar, string $glue = ''): string
   {
     return implode($glue, $ar);
   }
 
 
+  /**
+   * Split a string by a string
+   *
+   * ```php
+   *
+   * X::concat('foo bar', ' ');
+   * // (array) ['foo', 'bar']
+   *
+   * X::concat('foo,bar', ',');
+   * // (array) ['foo', 'bar']
+   *
+   * ```
+   *
+   * @param string $st
+   * @param string $separator
+   * @return array
+   */
   public static function concat(string $st, string $separator): array
   {
     return explode($separator, $st);
   }
 
 
+  /**
+   * Split a string by a string
+   *
+   * ```php
+   *
+   * X::split('foo bar', ' ');
+   * // (array) ['foo', 'bar']
+   *
+   * X::split('foo,bar', ',');
+   * // (array) ['foo', 'bar']
+   *
+   * ```
+   *
+   * @param string $st
+   * @param string $separator
+   * @return array
+   */
   public static function split(string $st, string $separator): array
   {
     return explode($separator, $st);
@@ -2973,7 +3041,28 @@ class X
 
 
   /**
-   * Searches from start to end
+   * Searches from start to end.
+   *
+   * ```php
+   *
+   * X::indexOf(['a', 'b', 'c'], 'b');
+   * // (int) 1
+   *
+   * X::indexOf(['a', 'b', 'c'], 'b', 2);
+   * // (int) -1
+   *
+   * X::indexOf('foobar', 'bar');
+   * // (int) 3
+   *
+   * X::indexOf('foobar', 'bar', 4);
+   * // (int) -1
+   *
+   * ```
+   *
+   * @param $subject
+   * @param $search
+   * @param int $start
+   * @return int
    */
   public static function indexOf($subject, $search, int $start = 0): int
   {
@@ -3000,6 +3089,26 @@ class X
 
   /**
    * Searches from end to start
+   *
+   * ```php
+   *
+   * X::lastIndexOf(['a', 'b', 'c', 'd'], 'c', 3);
+   * // (int) 1
+   *
+   * X::lastIndexOf('foobar', 'bar');
+   * // (int) 3
+   *
+   * X::lastIndexOf('foobar', 'bar', 4);
+   * // (int) -1
+   *
+   * X::lastIndexOf('foobarbar', 'bar');
+   * // (int) 6
+   *
+   * ```
+   * @param $subject
+   * @param $search
+   * @param int|null $start
+   * @return int
    */
   public static function lastIndexOf($subject, $search, int $start = null): int
   {
@@ -3044,6 +3153,35 @@ class X
   }
 
 
+  /**
+   * ```php
+   *
+   * X::output(1, true, null, 'foo', ['a', 'b'], (object)['a' => 1, 'b' => ['c' => 2, 'd' => 3]]);
+   * // (string)
+   * // "1
+   * // true
+   * // null
+   * // foo
+   * //
+   * // [
+   * //   "a",
+   * //   "b",
+   * // ]
+   * //
+   * //
+   * // {
+   * //   "a": 1,
+   * //   "b": {
+   * //     "c": 2,
+   * //     "d": 3,
+   * //   },
+   * // }
+   *
+   *
+   * "
+   *
+   * ```
+   */
   public static function output()
   {
     $wrote = false;
@@ -3079,6 +3217,11 @@ class X
   }
 
 
+  /**
+   * @param $name
+   * @param $arguments
+   * @return mixed|null
+   */
   public static function __callStatic($name, $arguments)
   {
     if ((strpos($name, 'is_') === 0) && function_exists($name)) {
@@ -3091,6 +3234,10 @@ class X
       }
 
       return $res;
+    }
+
+    if (!method_exists(self::class, $name)) {
+      throw new \Exception(self::_("Undefined Method $name"));
     }
   }
 
