@@ -355,7 +355,7 @@ class User extends Models\Cls\Basic
       elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
-          throw new \Exception(X::_('Invalid token'));
+          throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
         }
 
 
