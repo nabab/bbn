@@ -70,7 +70,7 @@ class NoteTest extends TestCase
       $this->option_mock->shouldReceive('fromRootCode')
         ->once()
         ->with('appui')
-        ->andReturn(1);
+        ->andReturn(11);
     }
 
     $this->note = new Note($this->db_mock);
@@ -204,6 +204,19 @@ class NoteTest extends TestCase
       'limit' => $limit,
       'start' => $start,
     ];
+  }
+
+  /** @test */
+  public function constructor_test()
+  {
+    $this->assertSame(
+      $this->getNonPublicProperty('default_class_cfg'),
+      $this->getNonPublicProperty('class_cfg')
+    );
+
+    $this->assertSame('1', $this->getNonPublicProperty('option_appui_id'));
+    $this->assertSame('1', BBN_APPUI);
+    $this->assertSame('11', BBN_APPUI_ROOT);
   }
 
   /** @test */

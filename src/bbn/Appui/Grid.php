@@ -376,7 +376,7 @@ class Grid extends bbn\Models\Cls\Cache
       //unset($this->count_cfg['where']['conditions'][0]['time']);
       //$this->count_cfg['where']['conditions'][0]['value'] = hex2bin($this->count_cfg['where']['conditions'][0]['value']);
       //die(X::dump($this->db->selectOne($this->count_cfg), $this->db->last(), $this->count_cfg, $this->num, $this->db->last_params));
-      if (!BBN_IS_PROD || (($usr = bbn\User::getInstance()) && $usr->isAdmin())) {
+      if (!defined('BBN_IS_PROD') || (($usr = bbn\User::getInstance()) && $usr->isAdmin())) {
         $r['query'] = $this->db->last();
         $r['queryValues'] = array_map(function($a){
           if (\bbn\Str::isBuid($a)) {

@@ -64,6 +64,9 @@ class Medias extends bbn\Models\Cls\Db
       [48, false]
     ];
 
+  /** @var array $class_cfg */
+  protected $class_cfg;
+
   public function __construct(bbn\Db $db)
   {
     parent::__construct($db);
@@ -73,10 +76,14 @@ class Medias extends bbn\Models\Cls\Db
     $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
   }
 
+  /**
+   * @param array|null $media
+   * @return string
+   */
   public function getPath(array $media = null): string
   {
     if (!isset($this->path)) {
-      $this->path = bbn\Mvc::getDataPath('appui-note').'/media';
+      $this->path = bbn\Mvc::getDataPath('appui-note').'media';
     }
 
     $path = $this->path;
@@ -91,7 +98,10 @@ class Medias extends bbn\Models\Cls\Db
 
   /**
    * Gets an array of medias.
-   * @param [type] $cfg a configuration to merge with the database request to the table
+   *
+   * @param array $cfg
+   * @param int $limit
+   * @param int $start
    * @return array|null
    */
   public function browse(array $cfg, int $limit = 20, int $start = 0): ?array
@@ -163,6 +173,11 @@ class Medias extends bbn\Models\Cls\Db
     return null;
   }
 
+
+  /**
+   * @param array $filter
+   * @return int|null
+   */
   public function count(array $filter = []): ?int
   {
     if ($user = bbn\User::getInstance()) {
@@ -183,12 +198,14 @@ class Medias extends bbn\Models\Cls\Db
   /**
    * Adds a new media
    *
-   * @param string  $name
-   * @param array   $content
-   * @param string  $title
-   * @param string  $type
+   * @param string $name
+   * @param array|null $content
+   * @param string $title
+   * @param string $type
    * @param boolean $private
+   * @param string|null $excerpt
    * @return string|null
+   * @throws \Exception
    */
   public function insert(
       string $name,
@@ -273,6 +290,13 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $id_media
+   * @param string $url
+   * @param int $shared
+   * @return int|null
+   * @throws \Exception
+   */
   public function setUrl(string $id_media, string $url, int $shared = 0)
   {
     if ($this->exists($id_media)) {
@@ -287,8 +311,13 @@ class Medias extends bbn\Models\Cls\Db
       );
     }
 
+    return null;
   }
 
+  /**
+   * @param string $id
+   * @return array
+   */
   public function getThumbsSizes(string $id): array
   {
     if (\bbn\Str::isUid($id)
@@ -312,18 +341,18 @@ class Medias extends bbn\Models\Cls\Db
   /**
    * Returns the path to the img for the given $path and size
    * @param string $path
-   * * @param array $size
+   * @param array $size
    */
   public function getThumbs(string $path, array $size = [60, 60], $if_exists = true)
   {
     if (isset($size[0], $size[1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {
       $ext = '.'.Str::fileExt($path);
       $file = substr($path, 0, - strlen($ext));
-      if ($size[0]) {
+      if ($size[0] && Str::isInteger($size[0])) {
         $file .= '_w'.$size[0];
       }
 
-      if ($size[1]) {
+      if ($size[1] && Str::isInteger($size[1])) {
         $file .= '_h'.$size[1];
       }
 
@@ -342,15 +371,17 @@ class Medias extends bbn\Models\Cls\Db
    * If the thumbs files exists for this path it returns an array of the the thumbs filename
    *
    * @param string $path
-   * @return void
+   * @return array
    */
   public function getThumbsPath(string $path)
   {
     $res  = [];
-    $size = [];
+
     if (file_exists($path) && $this->isImage($path)) {
       foreach($this->thumbs_sizes as $size){
-        $res[] = $this->getThumbs($path, $size);
+        if (($result = $this->getThumbs($path, $size)) !== null) {
+          $res[] = $result;
+        }
       }
     }
 
@@ -359,7 +390,7 @@ class Medias extends bbn\Models\Cls\Db
 
 
   /**
-   * Remove the thums files
+   * Remove the thumbs files
    *
    * @param string $path
    * @return void
@@ -379,12 +410,12 @@ class Medias extends bbn\Models\Cls\Db
   /**
    * Returns the name of the thumb file corresponding to the given name and size
    * @param string $name
-   * * @param array $size
+   * @param array $size
    */
   public function getThumbsName(string $name,array $size = [60,60])
   {
     $tmp = explode('.', $name);
-    if ($ext = '.'.$tmp[1]) {
+    if (isset($tmp[1]) && $ext = '.'.$tmp[1]) {
       return $tmp[0].'_w'.$size[0].'h'.$size[1].$ext;
     }
 
@@ -396,7 +427,7 @@ class Medias extends bbn\Models\Cls\Db
    * Deletes the given media
    *
    * @param string $id
-   * @return void
+   * @return bool
    */
   public function delete(string $id)
   {
@@ -430,7 +461,7 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function isImage(string $path)
   {
-    if (is_string($path)) {
+    if (is_string($path) && is_file($path)) {
       $content_type = mime_content_type($path);
       if (strpos($content_type, 'image/') === 0) {
         return true;
@@ -444,10 +475,10 @@ class Medias extends bbn\Models\Cls\Db
   /**
    * Returns the object of the media
    *
-   * @param string  $id
+   * @param string $id
    * @param boolean $details
-   * @param int $width
-   * @return void
+   * @param int|null $width
+   * @return array|false|string
    */
   public function getMedia(string $id, bool $details = false, int $width = null)
   {
@@ -458,12 +489,12 @@ class Medias extends bbn\Models\Cls\Db
         && ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id]))
         && ($link_type !== $media[$cf['arch']['medias']['type']])
     ) {
-      if ($media['content']) {
+      if ($media[$cf['arch']['medias']['content']]) {
         $tmp   = json_decode($media[$cf['arch']['medias']['content']], true);
         $media = array_merge($tmp, $media);
       }
       $media['file'] = (
-        $media['private'] ? bbn\Mvc::getUserDataPath('appui-note') : bbn\Mvc::getDataPath('appui-note')
+        $media['private'] ? bbn\Mvc::getUserDataPath($this->usr->getId(), 'appui-note') : bbn\Mvc::getDataPath('appui-note')
       ).'media/'.($media['path'] ?? '').$id.'/'.$media[$cf['arch']['medias']['name']];
       if ($width && ($sizes = $this->getThumbsSizes($id))) {
         $current = $width;
@@ -486,6 +517,11 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param $medias
+   * @param $dest
+   * @return bool
+   */
   public function zip($medias, $dest)
   {
     if (is_string($medias)) {
@@ -518,10 +554,8 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $id_media
    * @param string $name
    * @param string $title
-   * @return void
+   * @return array|false|string
    */
-
-
   public function update(string $id_media,string $name,string $title)
   {
     $new = [];
@@ -533,7 +567,7 @@ class Medias extends bbn\Models\Cls\Db
         && (($old['name'] !== $name) || ($old['title'] !== $title))
     ) {
         $content = json_decode($old['content'], true);
-      $path      = $root.$content['path'].'/';
+        $path    = $root.$content['path'].'/';
 
       if ($fs->exists($path.$id_media.'/'.$old['name'])) {
         if ($old['name'] !== $name) {
@@ -578,7 +612,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $name
    * @param string $title
    * @param array  $content
-   * @return void
+   * @return int|null
    */
   public function updateDb(string $id_media, string $name, string $title, array $content = [])
   {
@@ -594,12 +628,13 @@ class Medias extends bbn\Models\Cls\Db
       [
       'table' => $this->class_cfg['table'],
       'fields' => $fields,
-            'where' => [
-        'conditions' => [[
-          'field' => $this->class_cfg['arch']['medias']['id'],
-          'value' => $id_media
-        ]]
+          'where' => [
+            'conditions' => [[
+              'field' => $this->class_cfg['arch']['medias']['id'],
+              'value' => $id_media
             ]]
+          ]
+      ]
     );
   }
 
@@ -612,7 +647,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string  $oldName
    * @param string  $newName
    * @param string  $title
-   * @return void
+   * @return array|false|string
    */
   public function updateContent(string $id_media,int $ref, string $oldName, string $newName, string $title)
   {
