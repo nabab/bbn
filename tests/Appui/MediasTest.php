@@ -1216,7 +1216,7 @@ class MediasTest extends TestCase
     $this->partiallyMockMediasClass();
 
     $this->createDir($dir = "plugins/appui-note/media/path/to/$this->id_media");
-    $old_file         = $this->createFile('image_old.jpg', $this->getDummyImageContent(), $dir);
+    $old_file  = $this->createFile('image_old.jpg', $this->getDummyImageContent(), $dir);
 
     // Create thumbs files
     $old_thumb_1 = $this->createFile('image_old_w60h60.jpg', $this->getDummyImageContent(), $dir);
@@ -1277,5 +1277,207 @@ class MediasTest extends TestCase
     $this->assertSame($this->getDummyImageContent(), file_get_contents($new_thumb_2));
   }
 
+  /** @test */
+  public function update_method_returns_an_empty_array_without_updating_db_and_files_when_the_given_media_does_not_exist()
+  {
+    $this->partiallyMockMediasClass();
 
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturnFalse();
+
+    $this->assertSame([], $this->medias->update($this->id_media, 'image.jpg', 'media_title'));
+  }
+
+  /** @test */
+  public function update_method_an_empty_array_without_updating_db_and_files_when_old_name_and_title_are_the_same()
+  {
+    $this->partiallyMockMediasClass();
+
+    $this->createDir($dir = "plugins/appui-note/media/path/to/$this->id_media");
+    $this->createFile('image_old.jpg', $this->getDummyImageContent(), $dir);
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturn([
+        'path'      => 'path/to/',
+        'name'      => 'image_old.jpg',
+        'title'     => 'old_title',
+        'content'   =>  json_encode(['path' => 'path/to/']),
+        'file'      => BBN_DATA_PATH . "$dir/image_old.jpg"
+      ]);
+
+    $this->assertSame([], $this->medias->update($this->id_media, 'image_old.jpg', 'old_title'));
+  }
+
+  /** @test */
+  public function updateContent_method_updates_the_content_of_the_media_when_deleted_and_replaced_in_the_upload()
+  {
+    $this->partiallyMockMediasClass();
+
+    $this->user_mock->shouldReceive('getId')
+      ->once()
+      ->withNoArgs()
+      ->andReturn($this->id_user);
+
+    $this->createDir($tmp_dir = "users/$this->id_user/tmp/12");
+    $this->createFile('old_image.jpg', $this->getDummyImageContent(), $tmp_dir);
+
+    $this->createDir($dir = "plugins/appui-note/media/path/to/$this->id_media");
+    $old_file = $this->createFile('old_image.jpg', $this->getDummyImageContent(), $dir);
+    $dir = dirname($old_file);
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturn([
+        'path'      => 'path/to/',
+        'name'      => 'old_image.jpg',
+        'title'     => 'old_title',
+        'content'   =>  json_encode(['path' => 'path/to/']),
+        'file'      => BBN_DATA_PATH . "$tmp_dir/old_image.jpg"
+      ]);
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturn([
+        'path'      => 'path/to/',
+        'name'      => 'old_image.jpg',
+        'title'     => 'old_title',
+        'content'   =>  json_encode(['path' => 'path/to/']),
+        'file'      => BBN_DATA_PATH . "$dir/old_image.jpg"
+      ]);
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturn([
+        'path'      => 'path/to/',
+        'name'      => 'new_image.jpg',
+        'title'     => 'new_title',
+        'content'   =>  json_encode(['path' => 'path/to/']),
+        'file'      => BBN_DATA_PATH . "$dir/new_image.jpg"
+      ]);
+
+    $this->medias->shouldReceive('removeThumbs')
+      ->once()
+      ->with(str_replace('./', '', $old_file));
+
+    $this->medias->shouldReceive('updateDb')
+      ->once()
+      ->with(
+        $this->id_media, 'new_image.jpg', 'new_title', [
+          'path'      => 'path/to/',
+          'size'      => filesize($old_file),
+          'extension' => 'jpg'
+        ]
+      )
+      ->andReturn(1);
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturn($expected = [
+        'path'      => 'path/to/',
+        'name'      => 'new_image.jpg',
+        'title'     => 'new_title',
+        'content'   =>  json_encode(['path' => 'path/to/']),
+        'file'      => $new_file = "$dir/new_image.jpg"
+      ]);
+
+    $this->assertSame(
+      $expected,
+      $this->medias->updateContent(
+        $this->id_media, 12, 'old_image.jpg', 'new_image.jpg', 'new_title'
+      )
+    );
+
+    $this->assertFileExists($new_file);
+  }
+
+  /** @test */
+  public function updateContent_method_updates_does_not_update_the_content_when_new_file_does_not_exists()
+  {
+    $this->user_mock->shouldReceive('getId')
+      ->once()
+      ->withNoArgs()
+      ->andReturn($this->id_user);
+
+    $this->assertSame(
+      [],
+      $this->medias->updateContent(
+        $this->id_media, 12, 'old_image.jpg', 'new_image.jpg', 'title'
+      )
+    );
+  }
+
+  /** @test */
+  public function updateContent_method_updates_does_not_update_the_content_when_media_id_does_not_exist()
+  {
+    $this->partiallyMockMediasClass();
+
+    $this->user_mock->shouldReceive('getId')
+      ->once()
+      ->withNoArgs()
+      ->andReturn($this->id_user);
+
+    $this->createDir($tmp_dir = "users/$this->id_user/tmp/16");
+    $this->createFile('old_image.jpg', $this->getDummyImageContent(), $tmp_dir);
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturnFalse();
+
+    $this->assertSame(
+      [],
+      $this->medias->updateContent(
+        $this->id_media, 16, 'old_image.jpg', 'new_image.jpg', 'title'
+      )
+    );
+  }
+
+  /** @test */
+  public function getMediaPath_method_returns_the_path_for_the_given_media_id()
+  {
+    $this->partiallyMockMediasClass();
+
+    $this->medias->shouldReceive('getMedia')
+      ->twice()
+      ->with($this->id_media, true)
+      ->andReturn([
+        'name'    => 'image.jpg',
+        'content' => json_encode(['path' => 'path/to/file/'])
+      ]);
+
+    $path = BBN_DATA_PATH . "plugins/appui-note/media/path/to/file/$this->id_media";
+
+    $this->assertSame(
+      "$path/image.jpg",
+      $this->medias->getMediaPath($this->id_media)
+    );
+
+    $this->assertSame(
+      "$path/image_new.jpg",
+      $this->medias->getMediaPath($this->id_media, 'image_new.jpg')
+    );
+  }
+
+  /** @test */
+  public function getMediaPath_method_returns_null_when_the_given_media_id_does_not_exist()
+  {
+    $this->partiallyMockMediasClass();
+
+    $this->medias->shouldReceive('getMedia')
+      ->once()
+      ->with($this->id_media, true)
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->medias->getMediaPath($this->id_media)
+    );
+  }
 }

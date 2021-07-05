@@ -649,14 +649,13 @@ class Medias extends bbn\Models\Cls\Db
    * @param string  $title
    * @return array|false|string
    */
-  public function updateContent(string $id_media,int $ref, string $oldName, string $newName, string $title)
+  public function updateContent(string $id_media, int $ref, string $oldName, string $newName, string $title)
   {
     $tmp_path  = \bbn\Mvc::getUserTmpPath().$ref.'/'.$oldName;
     $fs        = new \bbn\File\System();
     $new_media = [];
     if ($fs->isFile($tmp_path)) {
       $file_content = file_get_contents($tmp_path);
-      $root         = \bbn\Mvc::getDataPath('appui-note').'media/';
 
       if (($media = $this->getMedia($id_media, true))) {
         $old_path  = $this->getMediaPath($id_media, $oldName);
@@ -669,17 +668,17 @@ class Medias extends bbn\Models\Cls\Db
             $media['is_image'] = true;
           }
         }
-      }
 
-      if($this->updateDb(
-        $id_media, $newName, $title, [
-        'path' => $media['path'],
-        'size' => $fs->filesize($full_path),
-        'extension' => pathinfo($newName, PATHINFO_EXTENSION)
-        ]
-      )
-      ) {
-        $new_media = $this->getMedia($id_media, true);
+        if($this->updateDb(
+          $id_media, $newName, $title, [
+            'path' => $media['path'],
+            'size' => $fs->filesize($full_path),
+            'extension' => pathinfo($full_path, PATHINFO_EXTENSION)
+          ]
+        )
+        ) {
+          $new_media = $this->getMedia($id_media, true);
+        }
       }
     }
 
@@ -692,8 +691,8 @@ class Medias extends bbn\Models\Cls\Db
    * Returns the path of the given id_media
    *
    * @param string $id_media
-   * @param string $name
-   * @return void
+   * @param string|null $name
+   * @return string|null
    */
   public function getMediaPath(string $id_media, string $name = null)
   {
