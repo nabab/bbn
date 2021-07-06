@@ -130,7 +130,7 @@ You can click the following link to access directly your account:<br>
         $this->setDefaultListFields();
       }
 
-      $this->db =& $this->usrcls->db;
+      $this->db = $this->usrcls->getDbInstance();
     }
   }
 

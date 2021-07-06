@@ -74,6 +74,8 @@ class MvcTest extends TestCase
       define('BBN_LANG', 'en');
     }
 
+    ReflectionHelpers::setNonPublicPropertyValue('_app_name', Mvc::class, null);
+
     self::$mvc = new Mvc($db, $routes);
   }
 
