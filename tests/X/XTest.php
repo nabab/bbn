@@ -2081,31 +2081,41 @@ White,Red,Green,Blue';
   /** @test */
   public function toExcel_method_creates_an_excel_file_from_the_given_array()
   {
-    $this->createDir('excel');
+    if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
+      $this->expectException(\Exception::class);
 
-    X::toExcel(
-      ['a' => ['a' => 'foo', 'b' => 'bar']],
-      $file = $this->getTestingDirName() . '/excel/example1.xls'
-    );
+      X::toExcel(
+        ['a' => ['a' => 'foo', 'b' => 'bar']],
+        $this->getTestingDirName() . '/excel/example1.xls'
+      );
 
-    $this->assertFileExists($file);
+    } else {
+      $this->createDir('excel');
 
-    X::toExcel(
-      ['a' => ['a' => '$1.00', 'b' => '$500.11', 'c' => '$5000.55']],
-      $file2 = $this->getTestingDirName() . '/excel/example2.xls',
-      true,
-      [
-        'fields' => [
-          ['type' => 'money', 'title' => 'amount'],
-          ['type' => 'money', 'title' => 'amount'],
-          ['type' => 'money', 'title' => 'amount']
+      X::toExcel(
+        ['a' => ['a' => 'foo', 'b' => 'bar']],
+        $file = $this->getTestingDirName() . '/excel/example1.xls'
+      );
+
+      $this->assertFileExists($file);
+
+      X::toExcel(
+        ['a' => ['a' => '$1.00', 'b' => '$500.11', 'c' => '$5000.55']],
+        $file2 = $this->getTestingDirName() . '/excel/example2.xls',
+        true,
+        [
+          'fields' => [
+            ['type' => 'money', 'title' => 'amount'],
+            ['type' => 'money', 'title' => 'amount'],
+            ['type' => 'money', 'title' => 'amount']
+          ]
         ]
-      ]
-    );
+      );
 
-    $this->assertFileExists($file2);
+      $this->assertFileExists($file2);
 
-    $this->cleanTestingDir();
+      $this->cleanTestingDir();
+    }
   }
 
   /** @test */
@@ -2199,5 +2209,132 @@ White,Red,Green,Blue';
     $this->assertSame($expected, X::jsonBase64Decode(json_encode($arr)));
     $this->assertSame(['a' => 2], X::jsonBase64Decode(json_encode(['a' => 2])));
     $this->assertNull(X::jsonBase64Decode('foo'));
+  }
+
+  /** @test */
+  public function indexByFirstVal_method_creates_an_associative_array_from_the_given_first_array_value()
+  {
+    $arr = [
+      [
+        'a' => 'foo',
+        'b' => 'bar'
+      ],
+      [
+        'a' => 'foo2',
+        'b' => 'bar2'
+      ]
+    ];
+
+    $this->assertSame(['foo' => 'bar', 'foo2' => 'bar2'], X::indexByFirstVal($arr));
+    $this->assertSame([], X::indexByFirstVal([]));
+    $this->assertSame([[], 'bar' => []], X::indexByFirstVal([[], 'bar' => []]));
+  }
+
+  /** @test */
+  public function join_method_joins_array_with_a_string()
+  {
+    $this->assertSame('foobar' , X::join(['foo', 'bar']));
+    $this->assertSame('foo bar' , X::join(['foo', 'bar'], ' '));
+    $this->assertSame('foo,bar' , X::join(['foo', 'bar'], ','));
+  }
+
+  /** @test */
+  public function concat_method_splits_a_string_by_a_string()
+  {
+    $this->assertSame(['foo', 'bar'], X::concat('foo bar', ' '));
+    $this->assertSame(['foo', 'bar'], X::concat('foo,bar', ','));
+    $this->assertSame(['foobar'], X::concat('foobar', ' '));
+  }
+
+  /** @test */
+  public function split_method_splits_a_string_by_a_string()
+  {
+    $this->assertSame(['foo', 'bar'], X::split('foo bar', ' '));
+    $this->assertSame(['foo', 'bar'], X::split('foo,bar', ','));
+    $this->assertSame(['foobar'], X::split('foobar', ' '));
+  }
+
+  /** @test */
+  public function indexOf_method_searches_the_given_subject_from_start_to_end()
+  {
+    $this->assertSame(1, X::indexOf(['a', 'b', 'c'], 'b'));
+    $this->assertSame(1, X::indexOf(['a', 'b', 'c'], 'b', 1));
+    $this->assertSame(-1, X::indexOf(['a', 'b', 'c'], 'b', 2));
+
+    $this->assertSame(3, X::indexOf('foobar', 'bar'));
+    $this->assertSame(3, X::indexOf('foobar', 'bar', 2));
+    $this->assertSame(-1, X::indexOf('foobar', 'bar', 4));
+
+    $this->assertSame(-1, X::indexOf((object) ['a', 'b'], 'b'));
+    $this->assertSame(-1, X::indexOf(2, 'b'));
+  }
+
+  /** @test */
+  public function lastIndexOf_method_searches_the_given_from_last_to_end()
+  {
+    $this->assertSame(1, X::lastIndexOf(['a', 'b', 'c', 'd'], 'c', 3));
+    $this->assertSame(3, X::lastIndexOf(['a', 'b', 'c', 'd'], 'a', 3));
+
+    $this->assertSame(3, X::lastIndexOf('foobar', 'bar'));
+    $this->assertSame(-1, X::lastIndexOf('foobar', 'bar', 4));
+    $this->assertSame(6, X::lastIndexOf('foobarbar', 'bar'));
+    $this->assertSame(6, X::lastIndexOf('foobarbar', 'bar', 4));
+
+    $this->assertSame(-1, X::lastIndexOf((object)['a', 'b'], 'b', 0));
+    $this->assertSame(-1, X::lastIndexOf(2, 'b'));
+  }
+
+  /** @test */
+  public function output_method_test()
+  {
+    $expected = <<<OUTPUT
+1
+true
+null
+foo
+
+[
+    "a",
+    "b",
+]
+
+
+{
+    "a": 1,
+    "b": {
+        "c": 2,
+        "d": 3,
+    },
+}
+
+
+OUTPUT;
+
+    $this->expectOutputString($expected);
+
+    X::output(1, true, null, 'foo', ['a', 'b'], (object)['a' => 1, 'b' => ['c' => 2, 'd' => 3]]);
+  }
+
+  /** @test */
+  public function call_static_method_test_forwards_the_call_to_the_function_if_exists_and_stats_with_is()
+  {
+    $this->assertFalse(X::is_file('foo'));
+    $this->assertFalse(X::is_dir('foo'));
+  }
+
+  /** @test */
+  public function call_static_method_throws_an_exception_when_the_function_starts_with_is_but_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+
+    X::is_foo('a');
+  }
+
+  /** @test */
+  public function call_static_method_throws_an_exception_when_the_function_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+
+    X::foo('a');
   }
 }

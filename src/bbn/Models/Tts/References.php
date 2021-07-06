@@ -18,6 +18,9 @@ trait References
     $references_select = '',
     $references_join = '';
 
+  /**
+   * @var bbn\Db
+   */
   protected $db;
 
   private function _get_references(){

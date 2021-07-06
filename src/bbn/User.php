@@ -240,8 +240,8 @@ class User extends Models\Cls\Basic
   /** @var array */
   protected $sess_cfg;
 
-  /** @var db */
-  public $db;
+  /** @var Db */
+  protected $db;
 
   /** @var mixed */
   public $prev_time;
@@ -2156,5 +2156,13 @@ class User extends Models\Cls\Basic
   public function getApiRequestOutput()
   {
     return $this->api_request_output;
+  }
+
+  /**
+   * @return Db db
+   */
+  public function getDbInstance(): Db
+  {
+    return $this->db;
   }
 }
