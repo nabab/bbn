@@ -387,15 +387,40 @@ class Cms extends bbn\Models\Cls\Db
 	public function getFull(): array
 	{
 		// Select all events
-		$events = $this->db->rselectAll($this->class_cfg['table']);
-		$now = strtotime(date('Y-m-d H:i:s'));
+    $now    = strtotime(date('Y-m-d H:i:s'));
+    $events = $this->db->rselectAll([
+      'table' => $this->class_cfg['table'],
+      'fields' => [],
+      'where'  => [
+        'conditions' => [
+          [
+            'logic' => 'OR',
+            'conditions' => [
+              [
+                'field'     => $this->db->cfn($this->class_cfg['arch']['events']['end'], $this->class_cfg['table']),
+                'operator'  => 'isnull',
+              ],
+              [
+                'field'     => $this->db->cfn($this->class_cfg['arch']['events']['end'], $this->class_cfg['table']),
+                'operator'  => '>',
+                'value'     => $now
+              ],
+            ]
+          ]
+        ]
+      ]
+    ]);
+
 		$res = [];
 		if (!empty($events)){
 			foreach ($events as $e){
-				//takes events without end date of with end date > now
+				//takes events without end date or with end date > now
 				if ( 
-					array_key_exists($this->fields['start'], $e) && 
-					(is_null($e['end']) || (strtotime($e['end']) > $now))
+					array_key_exists($this->class_cfg['arch']['events']['start'], $e) &&
+					(
+					  is_null($e[$this->class_cfg['arch']['events']['end']]) ||
+            (strtotime($e[$this->class_cfg['arch']['events']['end']]) > $now)
+          )
 				){
 					// gets the note correspondent to the id_event and push it in $res
           $id_note = $this->_notes->getNoteIdFromEvent($e['id']);
@@ -403,8 +428,8 @@ class Cms extends bbn\Models\Cls\Db
 					if ($id_note && $this->_notes->hasUrl($id_note)){
 						$note           = $this->_notes->get($id_note);
 						$note['url']    = $this->_notes->getUrl($id_note);
-						$note['start']  = $this->getStart($id_note);
-						$note['end']    = $this->getEnd($id_note);
+						$note['start']  = $e[$this->class_cfg['arch']['events']['start']];
+						$note['end']    = $e[$this->class_cfg['arch']['events']['end']];
 						$res[]          = $note;
 					}
 				}

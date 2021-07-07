@@ -1642,4 +1642,108 @@ class CmsTest extends TestCase
       $this->cms->unpublish($this->id_note)
     );
   }
+
+  /** @test */
+  public function getFull_method_returns_all_notes_that_has_a_link_with_bbn_events_table()
+  {
+    $cfg = $this->getClassCgf();
+    $this->partiallyMockCmsInstance();
+
+    $this->db_mock->shouldReceive('cfn')
+      ->twice()
+      ->with($cfg['arch']['events']['end'], $cfg['table'])
+      ->andReturn($end_date_field = "{$cfg['table']}.{$cfg['arch']['events']['end']}");
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'table' => $cfg['table'],
+        'fields' => [],
+        'where'  => [
+          'conditions' => [
+            [
+              'logic' => 'OR',
+              'conditions' => [
+                [
+                  'field'     => $end_date_field,
+                  'operator'  => 'isnull',
+                ],
+                [
+                  'field'     =>  $end_date_field,
+                  'operator'  => '>',
+                  'value'     => strtotime(date('Y-m-d H:i:s'))
+                ],
+              ]
+            ]
+          ]
+        ]
+      ])
+      ->andReturn([
+        $event1 = [
+          'id'    => 1,
+          'start' => date('Y-m-d H:i:s'),
+          'end'   => date('Y-m-d H:i:s', strtotime('+1 Days'))
+        ],
+        $event2 = [
+          'id'    => 2,
+          'start' => date('Y-m-d H:i:s'),
+          'end'   => null
+        ],
+        [
+          'id'    => 3,
+          'start' => date('Y-m-d H:i:s'),
+          'end'   => date('Y-m-d H:i:s', strtotime('-1 Days'))
+        ],
+      ]);
+
+    $expected = [];
+
+    foreach ([$event1, $event2] as $event) {
+      $this->notes_mock->shouldReceive('getNoteIdFromEvent')
+        ->once()
+        ->with($event['id'])
+        ->andReturn($id_note = "note_{$event['id']}");
+
+      $this->notes_mock->shouldReceive('hasUrl')
+        ->once()
+        ->with("note_{$event['id']}")
+        ->andReturnTrue();
+
+      $this->notes_mock->shouldReceive('get')
+        ->once()
+        ->with($id_note)
+        ->andReturn($note = [
+          'id' => $id_note,
+        ]);
+
+      $this->notes_mock->shouldReceive('getUrl')
+        ->once()
+        ->with($id_note)
+        ->andReturn($url = "foo.{$event['id']}");
+
+      $expected[] = array_merge($note, [
+        'url'   => $url,
+        'start' => $event[$cfg['arch']['events']['start']],
+        'end'   => $event[$cfg['arch']['events']['end']]
+      ]);
+    }
+
+    $this->assertSame($expected, $this->cms->getFull());
+  }
+
+  /** @test */
+  public function getFull_method_returns_empty_array_if_no_events_found()
+  {
+    $cfg = $this->getClassCgf();
+
+    $this->db_mock->shouldReceive('cfn')
+      ->twice()
+      ->andReturn("{$cfg['table']}.{$cfg['arch']['events']['end']}");
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->andReturnNull();
+
+    $this->assertSame([], $this->cms->getFull());
+  }
 }
