@@ -355,17 +355,17 @@ class User extends Models\Cls\Basic
       elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
-            return $this->api_request_output =  [
-              'token'   => '',
-              'success' => false
-            ];
-          }
+          throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
+        }
 
 
         // Now the user is authenticated
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
 
-        return $this->api_request_output = true;
+        return $this->api_request_output = [
+          'token'   => $params[$f['token']],
+          'success' => true
+        ];
 
       }
     }
@@ -2117,11 +2117,25 @@ class User extends Models\Cls\Basic
   protected function updatePhoneVerificationCode($phone_number, ?string $code): bool
   {
     $cfg = json_encode(['phone_verification_code' => $code]);
+    try {
+      $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
+    }
+    catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+      return false;
+    }
+    
+    if (!$phone->isValidNumber()) {
+      return false;
+    }
+
+
+    $number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
+
     return !!$this->db->update(
       $this->class_cfg['tables']['users'],
       [
-        $this->class_cfg['arch']['users']['login'] => $phone_number,
-        $this->class_cfg['arch']['users']['phone'] => $phone_number,
+        $this->class_cfg['arch']['users']['login'] => $number,
+        $this->class_cfg['arch']['users']['phone'] => $number,
         $this->class_cfg['arch']['users']['cfg'] => $cfg
       ],
       [$this->class_cfg['arch']['users']['id'] => $this->id]
