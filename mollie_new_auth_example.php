@@ -1,7 +1,7 @@
 <?php
 
 use bbn\Api\Permissions\MolliePermissions;
-use bbn\User\ThirdPartiesManagers\MollieUserManager;
+use bbn\User\ThirdPartiesManagers\MolliePermissionManager;
 
 require 'vendor/autoload.php';
 
@@ -15,7 +15,7 @@ $cfg = [
 
 /** @var $ctrl \bbn\Mvc\Controller */
 
-$mollie_manager = new MollieUserManager($ctrl->inc->user, new MolliePermissions($cfg['dev']));
+$mollie_manager = new MolliePermissionManager($ctrl->inc->user, new MolliePermissions($cfg['dev']));
 
 // If we don't have an authorization code then get one
 if (!isset($_GET['code'])) {

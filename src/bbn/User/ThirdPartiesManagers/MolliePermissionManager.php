@@ -5,7 +5,7 @@ namespace bbn\User\ThirdPartiesManagers;
 use bbn\Api\Permissions\ApiPermissionsContract;
 use bbn\User;
 
-class MollieUserManager
+class MolliePermissionManager
 {
   /**
    * @var User
