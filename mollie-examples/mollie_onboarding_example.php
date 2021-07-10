@@ -1,8 +1,8 @@
 <?php
 
-use bbn\User\ThirdPartiesManagers\MollieOnboardingManager;
+use bbn\User\ThirdPartiesManagers\MollieManager;
 
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 
 /** @var $ctrl \bbn\Mvc\Controller */
 
@@ -10,12 +10,20 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
   // The saved access token in db
   $access_token = $tokens['access_token'];
 
-  $onboarding = new MollieOnboardingManager($access_token);
+  $mollie = new MollieManager($access_token);
+
+  /**
+   * The organization id for the authenticated user.
+   * Save it in database as it will be used to distribute payments.
+   *
+   * @var string
+   */
+  $organization_id = $mollie->getOrganizationId();
 
   /**
    * @var \Mollie\Api\Resources\Onboarding
    */
-  $onboarding_status_object = $onboarding->getOnboardingObject();
+  $onboarding_status_object = $mollie->getOnboardingObject();
 
   /**
    * Either "needs-data", "in-review" or "completed".
@@ -23,7 +31,7 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
    *
    * @var string
    */
-  $onboarding_status = $onboarding->getOnboardingStatus();
+  $onboarding_status = $mollie->getOnboardingStatus();
 
 
   if ($onboarding_status_object->needsData()) {
@@ -54,7 +62,7 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
   }
 
   // Submit onboarding data using API rather than redirecting customer
-  $onboarding->submitOnboardingData([
+  $mollie->submitOnboardingData([
     "organization" => [
       "name" => "Mollie B.V.",
       "address" => [

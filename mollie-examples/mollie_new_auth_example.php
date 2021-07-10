@@ -3,7 +3,7 @@
 use bbn\Api\Permissions\MolliePermissions;
 use bbn\User\ThirdPartiesManagers\MolliePermissionManager;
 
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 
 $cfg = [
   'dev' => [
