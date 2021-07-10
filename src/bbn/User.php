@@ -2080,6 +2080,16 @@ class User extends Models\Cls\Basic
    */
   protected function findByPhoneNumber(string $phone_number)
   {
+    try {
+      $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
+    }
+    catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+      return false;
+    }
+    if (!$phone->isValidNumber()) {
+      return false;
+    }
+    $phone_number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
     return $this->db->rselect(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users'],
