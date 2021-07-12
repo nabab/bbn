@@ -40,10 +40,13 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
     $mollie_manager->enablePaymentMethod($profile_id, 'creditcard');
   }
 
+  $amount = 10;
+  $fees   = 3.5;
+
   $payment = $mollie_manager->createPayment([
     "amount" => [
       "currency" => "EUR",
-      "value" => "10.00" // You must send the correct number of decimals, thus we enforce the use of strings
+      "value" => number_format($amount, 2, '.', '') // You must send the correct number of decimals, thus we enforce the use of strings
     ],
     "description" => "Order #12345",
     "redirectUrl" => "",
@@ -51,6 +54,13 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
     "profileId" => $profile_id,
     "metadata" => [
       "order_id" => "12345",
+    ],
+    "applicationFee" => [
+      "amount" => [
+        "currency" => "EUR",
+        "value" => number_format( $amount * ($fees / 100), 2, '.', '')
+      ],
+      "description" => "Fees" // Required: The description of the application fee. This will appear on settlement reports to the merchant and to you.
     ]
   ]);
 
