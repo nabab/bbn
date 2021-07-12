@@ -11,7 +11,7 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
 
   $mollie_manager = new MollieManager($access_token);
 
-  if (!$mollie_manager->getOnboardingObject()->canReceivePayments) {
+  if (!$mollie_manager->canReceivePayments()) {
     // User cannot receive payment as Mollie needs more information.
     // This should be checked before allowing the user to start accept payments
     // see mollie_onboarding_example.php
@@ -29,11 +29,11 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
       'email'    => 'foo@bar.com',
       'phone'     => '1234567'
     ]);
-    $profile_id = $profile->id;
+    $profile_id = $profile['id'];
   }
   else {
     $profiles = $mollie_manager->getProfiles();
-    $profile_id = $profiles[0]->id;
+    $profile_id = $profiles[0]['id'];
   }
 
   if (!$mollie_manager->hasActivePaymentMethods($profile_id)) {
@@ -65,7 +65,7 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
   ]);
 
   // Redirect to the checkout page
-  header("Location: " . $payment->getCheckoutUrl());
+  header("Location: " . $payment['_links']['checkout']['href']);
 
 }
 else {

@@ -20,10 +20,6 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
    */
   $organization_id = $mollie->getOrganizationId();
 
-  /**
-   * @var \Mollie\Api\Resources\Onboarding
-   */
-  $onboarding_status_object = $mollie->getOnboardingObject();
 
   /**
    * Either "needs-data", "in-review" or "completed".
@@ -34,30 +30,30 @@ if ($tokens = $ctrl->inc->user->getPermissionTokensFromAccountName('My mollie ac
   $onboarding_status = $mollie->getOnboardingStatus();
 
 
-  if ($onboarding_status_object->needsData()) {
+  if ($mollie->onboardingNeedsData()) {
     // The onboarding is not completed and the merchant needs to provide (more) information
 
     /** @var  $link  https://www.mollie.com/dashboard/onboarding */
-    $link = $onboarding_status_object->_links->dashboard->href;
+    $link = $mollie->getDashboardLink();
 
 
-    if ($onboarding_status_object->canReceivePayments) {
+    if ($mollie->canReceivePayments()) {
       // You can start receiving payments. Before Mollie can pay out to your bank,
       // please provide some additional information. <Link to onboarding URL> $link
     } else {
       // Before you can receive payments, Mollie needs more information. <Link to onboarding URL> $link
     }
   }
-  elseif ($onboarding_status_object->isInReview()) {
+  elseif ($mollie->onboardingIsInReview()) {
     // The merchant provided all information and Mollie needs to check this
 
-    if ($onboarding_status_object->canReceivePayments) {
+    if ($mollie->canReceivePayments()) {
       // You can start receiving payments. Mollie is verifying your details to enable settlements to your bank.
     } else {
       // Mollie has all the required information and is verifying your details.
     }
   }
-  elseif ($onboarding_status_object->isCompleted()) {
+  elseif ($mollie->onboardingIsCompleted()) {
     // The onboarding is completed
   }
 

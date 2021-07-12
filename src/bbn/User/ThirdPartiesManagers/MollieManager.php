@@ -2,6 +2,7 @@
 
 namespace bbn\User\ThirdPartiesManagers;
 
+use bbn\X;
 use Mollie\Api\MollieApiClient;
 
 class MollieManager
@@ -34,11 +35,64 @@ class MollieManager
    * @return \Mollie\Api\Resources\Onboarding
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getOnboardingObject(): \Mollie\Api\Resources\Onboarding
+  private function getOnboardingObject(): \Mollie\Api\Resources\Onboarding
   {
     return $this->mollie->onboarding->get();
   }
 
+  /**
+   * @return bool
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function canReceivePayments(): bool
+  {
+    return $this->getOnboardingObject()->canReceivePayments;
+  }
+
+  /**
+   * @return bool
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function canReceiveSettlements(): bool
+  {
+    return $this->getOnboardingObject()->canReceiveSettlements;
+  }
+
+  /**
+   * @return bool
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function onboardingIsInReview(): bool
+  {
+    return $this->getOnboardingObject()->isInReview();
+  }
+
+  /**
+   * @return bool
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function onboardingIsCompleted(): bool
+  {
+    return $this->getOnboardingObject()->isCompleted();
+  }
+
+  /**
+   * @return bool
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function onboardingNeedsData(): bool
+  {
+    return $this->getOnboardingObject()->needsData();
+  }
+
+  /**
+   * @return string
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function getDashboardLink(): string
+  {
+    return $this->getOnboardingObject()->_links->dashboard->href;
+  }
 
   /**
    * @return string
@@ -58,23 +112,51 @@ class MollieManager
    * @param array $data
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function submitOnboardingData(array $data)
+  public function submitOnboardingData(array $data): void
   {
     $this->mollie->onboarding->submit($data);
   }
 
   /**
-   * Once you have created a payment, you should redirect your customer to the URL in the $payment->getCheckoutUrl()
+   * Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']
    *
    * https://docs.mollie.com/reference/v2/payments-api/create-payment
    *
    * @param array $data
-   * @return \Mollie\Api\Resources\Payment
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPayment(array $data): \Mollie\Api\Resources\Payment
+  public function createPayment(array $data): array
   {
-    return $this->mollie->payments->create($data);
+    $payment = $this->mollie->payments->create($data);
+
+    return X::toArray($payment);
+  }
+
+  /**
+   * Creates a Refund on the Payment. The refunded amount is credited to your customer.
+   *
+   * https://docs.mollie.com/reference/v2/refunds-api/create-refund
+   *
+   * @param string $payment_id
+   * @param string $amount
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function refundPayment(string $payment_id, string $amount, array $params = []): array
+  {
+    $payment = $this->mollie->payments->get($payment_id, $params);
+
+    $params = array_merge([
+      "amount" => [
+        "currency" => $payment->amount->currency,
+        "value"    => $amount
+      ]
+    ], $params);
+
+    $refund = $payment->refund($params);
+
+    return X::toArray($refund);
   }
 
   /**
@@ -82,12 +164,14 @@ class MollieManager
    *
    * https://docs.mollie.com/reference/v2/organizations-api/current-organization
    *
-   * @return \Mollie\Api\Resources\Organization
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getOrganization(): \Mollie\Api\Resources\Organization
+  public function getOrganization(): array
   {
-    return $this->mollie->organizations->current();
+    $organization =  $this->mollie->organizations->current();
+
+    return X::toArray($organization);
   }
 
   /**
@@ -98,7 +182,7 @@ class MollieManager
    */
   public function getOrganizationId() :string
   {
-    return $this->getOrganization()->id;
+    return $this->mollie->organizations->current()->id;
   }
 
   /**
@@ -107,12 +191,14 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/profiles-api/create-profile
    * 
    * @param array $data
-   * @return \Mollie\Api\Resources\BaseResource|\Mollie\Api\Resources\Profile
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createProfile(array $data): \Mollie\Api\Resources\Profile
+  public function createProfile(array $data): array
   {
-    return $this->mollie->profiles->create($data);
+    $profile = $this->mollie->profiles->create($data);
+
+    return X::toArray($profile);
   }
 
 
@@ -121,12 +207,14 @@ class MollieManager
    *
    * https://docs.mollie.com/reference/v2/profiles-api/list-profiles
    *
-   * @return \Mollie\Api\Resources\ProfileCollection
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getProfiles(): \Mollie\Api\Resources\ProfileCollection
+  public function getProfiles(): array
   {
-    return $this->mollie->profiles->page();
+    $profiles = $this->mollie->profiles->page();
+
+    return X::toArray($profiles);
   }
 
 
@@ -136,7 +224,7 @@ class MollieManager
    */
   public function hasProfiles(): bool
   {
-    return (bool)$this->getProfiles()->count;
+    return (bool)$this->mollie->profiles->page()->count;
   }
 
   /**
@@ -145,14 +233,16 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/methods-api/list-methods
    *
    * @param string $profile_id
-   * @return \Mollie\Api\Resources\MethodCollection
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getActivePaymentMethods(string $profile_id): \Mollie\Api\Resources\MethodCollection
+  public function getActivePaymentMethods(string $profile_id): array
   {
-    return $this->mollie->methods->allActive([
+    $methods = $this->mollie->methods->allActive([
       'profileId' => $profile_id
     ]);
+
+    return X::toArray($methods);
   }
 
   /**
@@ -161,14 +251,16 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/methods-api/list-methods
    *
    * @param string $profile_id
-   * @return \Mollie\Api\Resources\MethodCollection
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getAllPaymentMethods(string $profile_id): \Mollie\Api\Resources\MethodCollection
+  public function getAllPaymentMethods(string $profile_id): array
   {
-    return $this->mollie->methods->allAvailable([
+    $methods = $this->mollie->methods->allAvailable([
       'profileId' => $profile_id
     ]);
+
+    return X::toArray($methods);
   }
 
   /**
@@ -178,7 +270,10 @@ class MollieManager
    */
   public function hasActivePaymentMethods(string $profile_id): bool
   {
-    return (bool)$this->getActivePaymentMethods($profile_id)->count;
+    return (bool)$this->mollie->methods->allActive([
+      'profileId' => $profile_id
+    ])
+      ->count;
   }
 
   /**
@@ -190,14 +285,16 @@ class MollieManager
    *
    * @param string $profile_id
    * @param string $payment_method
-   * @return \Mollie\Api\Resources\Method
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function enablePaymentMethod(string $profile_id, string $payment_method_id): \Mollie\Api\Resources\Method
+  public function enablePaymentMethod(string $profile_id, string $payment_method_id): array
   {
     $profile = $this->mollie->profiles->get($profile_id);
 
-    return $profile->enableMethod($payment_method_id);
+    $method = $profile->enableMethod($payment_method_id);
+
+    return X::toArray($method);
   }
 
   /**
@@ -210,10 +307,10 @@ class MollieManager
    *  'testmode' => true,
    * ]);
    * foreach ($client_payments as $payment) {
-   *  if ($payment->isPaid()) {
-   *    echo "ID: $payment->id <br>";
-   *    echo "Amount: {$payment->amount->value} {$payment->amount->currency} <br>";
-   *    echo "Status: {$payment->status} <br><br>";
+   *  if (!empty($payment['paidAt'])) {
+   *    echo "ID: $payment['id'] <br>";
+   *    echo "Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>";
+   *    echo "Status: {$payment['status']} <br><br>";
    *  }
    * }
    * ```
@@ -223,12 +320,14 @@ class MollieManager
    * @param array $params
    * @param string|null $from Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well.
    * @param int $limit The number of payments to return (with a maximum of 250).
-   * @return array return array of \Mollie\Api\Resources\Payment objects
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
   public function listPayments(array $params = [], string $from = null, int $limit = 250): array
   {
-    return (array)$this->mollie->payments->page($from, $limit, $params);
+    $payments = $this->mollie->payments->page($from, $limit, $params);
+
+    return X::toArray($payments);
   }
 
   /**
@@ -237,12 +336,15 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/payments-api/get-payment
    *
    * @param string $payment_id
-   * @return \Mollie\Api\Resources\Payment
+   * @param array $params
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getPayment(string $payment_id): \Mollie\Api\Resources\Payment
+  public function getPayment(string $payment_id, array $params = []): array
   {
-    return $this->mollie->payments->get($payment_id);
+    $payment = $this->mollie->payments->get($payment_id, $params);
+
+    return X::toArray($payment);
   }
 
   /**
@@ -253,10 +355,10 @@ class MollieManager
    * ```php
    * $_payments = $mollie_manager->listMainAccountPayments();
    * foreach ($payments as $payment) {
-   *  if ($payment->isPaid()) {
-   *    echo "ID: $payment->id <br>";
-   *    echo "Amount: {$payment->amount->value} {$payment->amount->currency} <br>";
-   *    echo "Status: {$payment->status} <br><br>";
+   *  if (!empty($payment['paidAt'])) {
+   *    echo "ID: $payment['id'] <br>";
+   *    echo "Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>";
+   *    echo "Status: {$payment['status']} <br><br>";
    *  }
    * }
    * ```
@@ -280,7 +382,9 @@ class MollieManager
     $mollie = new MollieApiClient();
     $mollie->setApiKey($api_key);
 
-    return (array)$mollie->payments->page($from, $limit, $params);
+    $payments = $mollie->payments->page($from, $limit, $params);
+
+    return X::toArray($payments);
   }
 
   /**
@@ -290,14 +394,17 @@ class MollieManager
    *
    * @param string $api_key
    * @param string $payment_id
-   * @return \Mollie\Api\Resources\Payment
+   * @param array $params
+   * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
-   */
-  public function getMainAccountPayment(string $api_key, string $payment_id): \Mollie\Api\Resources\Payment
+   `*/
+  public function getMainAccountPayment(string $api_key, string $payment_id, array $params = []): array
   {
     $mollie = new MollieApiClient();
     $mollie->setApiKey($api_key);
 
-    return $mollie->payments->get($payment_id);
+    $payment = $mollie->payments->get($payment_id, $params);
+
+    return X::toArray($payment);
   }
 }
