@@ -203,7 +203,7 @@ class MollieManager
   /**
    * Retrieve all payments created ordered from newest to oldest.
    * This will list all payments not only the paid ones
-   * so when looping through results you can check it a payment is paid:
+   * so when looping through results you can check if a payment is paid:
    *
    * ```php
    * $client_payments = $mollie_manager->listPayments([
@@ -248,13 +248,11 @@ class MollieManager
   /**
    * Retrieve all main account payments created ordered from newest to oldest.
    * This will list all payments not only the paid ones
-   * so when looping through results you can check it a payment is paid:
+   * so when looping through results you can check if a payment is paid:
    *
    * ```php
-   * $client_payments = $mollie_manager->listPayments([
-   *  'testmode' => true,
-   * ]);
-   * foreach ($client_payments as $payment) {
+   * $_payments = $mollie_manager->listMainAccountPayments();
+   * foreach ($payments as $payment) {
    *  if ($payment->isPaid()) {
    *    echo "ID: $payment->id <br>";
    *    echo "Amount: {$payment->amount->value} {$payment->amount->currency} <br>";
