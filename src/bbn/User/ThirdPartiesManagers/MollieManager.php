@@ -85,7 +85,7 @@ class MollieManager
    * @return \Mollie\Api\Resources\Organization
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function getOrganizationObject(): \Mollie\Api\Resources\Organization
+  public function getOrganization(): \Mollie\Api\Resources\Organization
   {
     return $this->mollie->organizations->current();
   }
@@ -98,7 +98,7 @@ class MollieManager
    */
   public function getOrganizationId() :string
   {
-    return $this->getOrganizationObject()->id;
+    return $this->getOrganization()->id;
   }
 
   /**
@@ -198,5 +198,108 @@ class MollieManager
     $profile = $this->mollie->profiles->get($profile_id);
 
     return $profile->enableMethod($payment_method_id);
+  }
+
+  /**
+   * Retrieve all payments created ordered from newest to oldest.
+   * This will list all payments not only the paid ones
+   * so when looping through results you can check it a payment is paid:
+   *
+   * ```php
+   * $client_payments = $mollie_manager->listPayments([
+   *  'testmode' => true,
+   * ]);
+   * foreach ($client_payments as $payment) {
+   *  if ($payment->isPaid()) {
+   *    echo "ID: $payment->id <br>";
+   *    echo "Amount: {$payment->amount->value} {$payment->amount->currency} <br>";
+   *    echo "Status: {$payment->status} <br><br>";
+   *  }
+   * }
+   * ```
+   *
+   * https://docs.mollie.com/reference/v2/payments-api/list-payments
+   *
+   * @param array $params
+   * @param string|null $from Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well.
+   * @param int $limit The number of payments to return (with a maximum of 250).
+   * @return array return array of \Mollie\Api\Resources\Payment objects
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function listPayments(array $params = [], string $from = null, int $limit = 250): array
+  {
+    return (array)$this->mollie->payments->page($from, $limit, $params);
+  }
+
+  /**
+   * Retrieve a single payment object by it's id.
+   *
+   * https://docs.mollie.com/reference/v2/payments-api/get-payment
+   *
+   * @param string $payment_id
+   * @return \Mollie\Api\Resources\Payment
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function getPayment(string $payment_id): \Mollie\Api\Resources\Payment
+  {
+    return $this->mollie->payments->get($payment_id);
+  }
+
+  /**
+   * Retrieve all main account payments created ordered from newest to oldest.
+   * This will list all payments not only the paid ones
+   * so when looping through results you can check it a payment is paid:
+   *
+   * ```php
+   * $client_payments = $mollie_manager->listPayments([
+   *  'testmode' => true,
+   * ]);
+   * foreach ($client_payments as $payment) {
+   *  if ($payment->isPaid()) {
+   *    echo "ID: $payment->id <br>";
+   *    echo "Amount: {$payment->amount->value} {$payment->amount->currency} <br>";
+   *    echo "Status: {$payment->status} <br><br>";
+   *  }
+   * }
+   * ```
+   *
+   * https://docs.mollie.com/reference/v2/payments-api/list-payments
+   *
+   * @param string $api_key
+   * @param array $params
+   * @param string|null $from Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well.
+   * @param int $limit The number of payments to return (with a maximum of 250).
+   * @return array return array of \Mollie\Api\Resources\Payment objects
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function listMainAccountPayments(
+    string $api_key,
+    array $params = [],
+    string $from = null,
+    int $limit = 250
+  ): array
+  {
+    $mollie = new MollieApiClient();
+    $mollie->setApiKey($api_key);
+
+    return (array)$mollie->payments->page($from, $limit, $params);
+  }
+
+  /**
+   * Retrieve a single payment object by it's id.
+   *
+   * https://docs.mollie.com/reference/v2/payments-api/get-payment
+   *
+   * @param string $api_key
+   * @param string $payment_id
+   * @return \Mollie\Api\Resources\Payment
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function getMainAccountPayment(string $api_key, string $payment_id): \Mollie\Api\Resources\Payment
+  {
+    $mollie = new MollieApiClient();
+    $mollie->setApiKey($api_key);
+
+    return $mollie->payments->get($payment_id);
   }
 }
