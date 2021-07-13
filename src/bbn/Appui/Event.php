@@ -87,13 +87,16 @@ class Event extends bbn\Models\Cls\Db
       7 => 'sunday'
     ];
 
+  /** @var array $class_cfg */
+  protected $class_cfg;
+
   /**
    * Filters the recurrences of an event by the month's week.
    * @param array $recurrences
    * @param int $monthweek
    * @return array
    */
-  private function filterRecurrencesByMonthWeek(array $recurrences, int $monthweek): array
+  protected function filterRecurrencesByMonthWeek(array $recurrences, int $monthweek): array
   {
     $t =& $this;
     // Recurring table fields
@@ -143,6 +146,11 @@ class Event extends bbn\Models\Cls\Db
     //$this->opt_id = $this->opt->fromRootCode('event', 'appui');
   }
 
+  /**
+   * @param array $event
+   * @return string|null
+   * @throws \Exception
+   */
   public function insert(array $event): ?string
   {
     $f =& $this->fields;
@@ -200,7 +208,12 @@ class Event extends bbn\Models\Cls\Db
     }
     return null;
   }
-  
+
+  /**
+   * @param string $id
+   * @param array $event
+   * @return int|null
+   */
   public function edit(string $id, array $event): ?int
   {
     if ( \bbn\Str::isUid($id) ){
@@ -245,23 +258,35 @@ class Event extends bbn\Models\Cls\Db
       else if ( !empty($old_is_rec) ){
         $this->deleteRecurrences($id);
       }
+
       return $ok || $ok2;
     }
+
     return null;
   }
 
+  /**
+   * @param string $id
+   * @return bool
+   */
   public function delete(string $id): bool
   {
     if ( \bbn\Str::isUid($id) ){
       return !!$this->db->delete($this->class_table, [$this->fields['id'] => $id]);
     }
+
     return false;
   }
 
+  /**
+   * @param string $id
+   * @return array|null
+   */
   public function get(string $id): ?array
   {
     if ( \bbn\Str::isUid($id) ){
       $t =& $this;
+
       return $this->db->rselect([
         'table' => $this->class_table,
         'fields' => array_map(function($f) use($t){
@@ -281,6 +306,7 @@ class Event extends bbn\Models\Cls\Db
         ]
       ]);
     }
+
     return null;
   }
   
@@ -338,6 +364,7 @@ class Event extends bbn\Models\Cls\Db
         ]
       ]);
     }
+
     return null;
   }
 
@@ -358,10 +385,11 @@ class Event extends bbn\Models\Cls\Db
     $when = $this->getWhenObject($event);
     // Get occurrences
     $occ = $this->makeRecurrencesFields($event, $when->getOccurrencesBetween(new \DateTime($start), new \DateTime($end)));
-    // Specific month's wwek
+    // Specific month's week
     if ( !empty($event[$rf['mw']]) ){
       $occ = $this->filterRecurrencesByMonthWeek($occ, $event[$rf['mw']]);
     }
+
     return $this->filterRecurrencesByExceptions($occ);
   }
 
@@ -452,7 +480,7 @@ class Event extends bbn\Models\Cls\Db
     $when->freq($event[$rf['type']]);
     // Remove the original event from the occurrences
     $excs = $event[$ef['start']];
-    // If the exceptions are pesent add them to exclusions list
+    // If the exceptions are present add them to exclusions list
     if ( !empty($event[$extf['exceptions']]) ){
       if ( \is_array($event[$extf['exceptions']]) ){
         $excs .= implode(',', $event[$extf['exceptions']]);

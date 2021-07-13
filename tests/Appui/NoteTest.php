@@ -2,6 +2,7 @@
 
 namespace Appui;
 
+use bbn\Appui\Cms;
 use bbn\Appui\Medias;
 use bbn\Appui\Note;
 use bbn\Appui\Option;
@@ -1509,6 +1510,137 @@ OUTPUT;
     $this->assertNull(
       $this->note->urlToNote('foo/bar')
     );
+  }
+
+  /** @test */
+  public function hasUrl_method_returns_true_if_the_given_note_is_linked_to_an_url()
+  {
+    $cf = $this->getClassCfg();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $cf['tables']['url'],
+        $cf['arch']['url']['url'],
+        [
+          $cf['arch']['url']['id_note'] => $this->id_note
+        ]
+      )
+      ->andReturn('foo.bar');
+
+    $this->assertTrue($this->note->hasUrl($this->id_note));
+  }
+
+  /** @test */
+  public function getUrl_method_returns_the_url_of_the_given_note_if_exists()
+  {
+    $this->partiallyMockNoteClass();
+
+    $this->note->shouldReceive('hasUrl')
+      ->once()
+      ->with($this->id_note)
+      ->andReturnTrue();
+
+    $cf = $this->getClassCfg();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with([
+        'table' => $cf['tables']['url'],
+        'fields' => [$cf['arch']['url']['url']],
+        'where'  => [
+          'conditions'=>[[
+            'field' => $cf['arch']['url']['id_note'],
+            'value' => $this->id_note
+          ]]
+        ]
+      ])
+      ->andReturn('foo.bar');
+
+    $this->assertSame('foo.bar', $this->note->getUrl($this->id_note));
+  }
+
+  /** @test */
+  public function getUrl_method_returns_null_when_the_given_id_does_not_has_url()
+  {
+    $this->partiallyMockNoteClass();
+
+    $this->note->shouldReceive('hasUrl')
+      ->once()
+      ->with($this->id_note)
+      ->andReturnFalse();
+
+    $this->assertNull($this->note->getUrl($this->id_note));
+  }
+
+  /** @test */
+  public function insertOrUpdateUrl_method_inserts_the_given_url_to_the_given_note_if_it_has_no_url()
+  {
+    $this->partiallyMockNoteClass();
+    $cf = $this->getClassCfg();
+
+    $this->note->shouldReceive('hasUrl')
+      ->once()
+      ->with($this->id_note)
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $cf['tables']['url'],
+        [
+          $cf['arch']['url']['url']     => 'foo.bar',
+          $cf['arch']['url']['id_note'] => $this->id_note
+        ]
+      )
+      ->andReturn(1);
+
+    $this->assertSame(1, $this->note->insertOrUpdateUrl($this->id_note, 'foo.bar'));
+  }
+
+  /** @test */
+  public function insertOrUpdateUrl_method_updates_the_given_url_to_the_given_note_if_it_has_a_url()
+  {
+    $this->partiallyMockNoteClass();
+    $cf = $this->getClassCfg();
+
+    $this->note->shouldReceive('hasUrl')
+      ->once()
+      ->with($this->id_note)
+      ->andReturnTrue();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $cf['tables']['url'],
+        [$cf['arch']['url']['url'] => 'foo.bar'],
+        [
+          $cf['arch']['url']['id_note'] => $this->id_note
+        ]
+      )
+      ->andReturn(1);
+
+    $this->assertSame(1, $this->note->insertOrUpdateUrl($this->id_note, 'foo.bar'));
+  }
+
+  /** @test */
+  public function deleteUrl_method_deletes_url_for_the_given_note()
+  {
+    $cf = $this->getClassCfg();
+
+    $this->db_mock->shouldReceive('delete')
+      ->once()
+      ->with([
+        'table' => $cf['tables']['url'],
+        'where' => [
+          'conditions' => [[
+            'field' => $cf['arch']['url']['id_note'],
+            'value' => $this->id_note
+          ]]
+        ]])
+      ->andReturn(1);
+
+    $this->assertSame(1, $this->note->deleteUrl($this->id_note));
   }
 
   /** @test */
@@ -3155,10 +3287,12 @@ OUTPUT;
         ]
       ]);
 
-    $this->option_mock->shouldReceive('fromCode')
-      ->once()
-      ->with('publication', 'event', 'appui')
-      ->andReturn('123aaf');
+    if (!$this->getNonPublicProperty('_id_event', Cms::class)) {
+      $this->option_mock->shouldReceive('fromCode')
+        ->once()
+        ->with('publication', 'event', 'appui')
+        ->andReturn('123aaf');
+    }
 
     $this->db_mock->shouldReceive('rselectAll')
       ->once()
@@ -3454,8 +3588,7 @@ OUTPUT;
   /** @test */
   public function remove_note_events_method_removes_the_row_corresponding_to_the_given_arguments_in_notes_events_table()
   {
-    $method = $this->getNonPublicMethod('_remove_note_events');
-    $cf     = $this->getClassCfg();
+    $cf = $this->getClassCfg();
 
     $this->db_mock->shouldReceive('delete')
       ->once()
@@ -3469,14 +3602,13 @@ OUTPUT;
       ->andReturn(1);
 
     $this->assertTrue(
-      $method->invoke($this->note, $this->id_note, $this->id_event)
+      $this->note->_remove_note_events($this->id_note, $this->id_event)
     );
   }
 
   /** @test */
   public function insert_notes_events_method_inserts_row_in_notes_events_table_if_the_provided_arguments_does_not_exist()
   {
-    $method = $this->getNonPublicMethod('_insert_notes_events');
     $cf     = $this->getClassCfg();
 
     $this->db_mock->shouldReceive('count')
@@ -3502,14 +3634,13 @@ OUTPUT;
       ->andReturn(1);
 
     $this->assertTrue(
-      $method->invoke($this->note, $this->id_note, $this->id_event)
+      $this->note->_insert_notes_events($this->id_note, $this->id_event)
     );
   }
 
   /** @test */
   public function insert_notes_events_method_does_not_insert_row_when_the_given_arguments_exists()
   {
-    $method = $this->getNonPublicMethod('_insert_notes_events');
     $cf     = $this->getClassCfg();
 
     $this->db_mock->shouldReceive('count')
@@ -3524,8 +3655,41 @@ OUTPUT;
       ->andReturn(1);
 
     $this->assertFalse(
-      $method->invoke($this->note, $this->id_note, $this->id_event)
+      $this->note->_insert_notes_events($this->id_note, $this->id_event)
     );
+  }
+
+  /** @test */
+  public function getEventIdFromNote_method_returns_event_id_for_the_given_note()
+  {
+    $cf = $this->getClassCfg();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $cf['tables']['events'], $cf['arch']['events']['id_event'],
+        [$cf['arch']['events']['id_note'] => $this->id_note]
+      )
+      ->andReturn($this->id_event);
+
+    $this->assertSame($this->id_event, $this->note->getEventIdFromNote($this->id_note));
+  }
+
+  /** @test */
+  public function getNoteIdFromEvent_method_returns_note_id_for_the_given_event()
+  {
+    $cf = $this->getClassCfg();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $cf['tables']['events'],
+        $cf['arch']['events']['id_note'],
+        [$cf['arch']['events']['id_event'] => $this->id_event]
+      )
+      ->andReturn($this->id_note);
+
+    $this->assertSame($this->id_note, $this->note->getNoteIdFromEvent($this->id_event));
   }
 
   /** @test */
@@ -3545,8 +3709,16 @@ OUTPUT;
       $method->invoke($this->note, '2021-07-09', '')
     );
 
-    $this->assertTrue(
+    $this->assertFalse(
       $method->invoke($this->note, '', '2021-07-03')
+    );
+
+    $this->assertFalse(
+      $method->invoke($this->note, '2021-07-09', 'foo')
+    );
+
+    $this->assertFalse(
+      $method->invoke($this->note, 'foo', '2021-07-09')
     );
   }
 }

@@ -531,6 +531,95 @@ class Note extends bbn\Models\Cls\Db
       return null;
   }
 
+  /**
+   * Returns true if the note is linked to an url.
+   *
+   * @param string $id_note
+   * @return bool
+   *
+   */
+  public function hasUrl(string $id_note): bool
+  {
+    if ($this->db->selectOne(
+      $this->class_cfg['tables']['url'],
+      $this->class_cfg['arch']['url']['url'],
+      [
+        $this->class_cfg['arch']['url']['id_note'] => $id_note
+      ])
+    ){
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns the url of the note.
+   *
+   * @param string $id_note
+   * @return string|null
+   */
+  public function getUrl(string $id_note) :?string
+  {
+    if ($this->hasUrl($id_note)){
+      return $this->db->selectOne([
+        'table' => $this->class_cfg['tables']['url'],
+        'fields' => [$this->class_cfg['arch']['url']['url']],
+        'where'  => [
+          'conditions'=>[[
+            'field' => $this->class_cfg['arch']['url']['id_note'],
+            'value' => $id_note
+          ]]
+        ]
+      ]);
+    }
+    return null;
+  }
+
+  /**
+   * Insert the given url to the note if has no url and update it otherwise.
+   *
+   * @param string $id_note
+   * @param string $url
+   * @return int|null
+   */
+  public function insertOrUpdateUrl(string $id_note, string $url)
+  {
+    if (!$this->hasUrl($id_note)) {
+      return $this->db->insert(
+        $this->class_cfg['tables']['url'],
+        [
+          $this->class_cfg['arch']['url']['url']     => $url,
+          $this->class_cfg['arch']['url']['id_note'] => $id_note
+        ]
+      );
+    }
+
+     return $this->db->update(
+       $this->class_cfg['tables']['url'],
+       [$this->class_cfg['arch']['url']['url'] => $url],
+       [
+         $this->class_cfg['arch']['url']['id_note'] => $id_note
+       ]
+     );
+  }
+
+  /**
+   * Deletes url for the given note.
+   *
+   * @param string $id_note
+   * @return int|null
+   */
+  public function deleteUrl(string $id_note)
+  {
+    return $this->db->delete([
+      'table' => $this->class_cfg['tables']['url'],
+      'where' => [
+        'conditions' => [[
+          'field' => $this->class_cfg['arch']['url']['id_note'],
+          'value' => $id_note
+        ]]
+      ]]);
+  }
 
   /**
    * @param null $type
@@ -1040,7 +1129,7 @@ class Note extends bbn\Models\Cls\Db
    * @param string $id   The note's uid
    * @param bool   $keep Set it to true if you want change active property to 0 instead of delete the row from db
    *
-   * @return bool|int
+   * @return false|null|int
    */
   public function remove(string $id, $keep = false)
   {
@@ -1179,10 +1268,10 @@ class Note extends bbn\Models\Cls\Db
    * Removes the row corresponding to the given arguments from bbn_notes_events.
    *
    * @param string $id_note
-   * @param $id_event
+   * @param string $id_event
    * @return bool
    */
-  private function _remove_note_events($id_note, $id_event): bool
+  public function _remove_note_events(string $id_note, string $id_event): bool
   {
     return !!$this->db->delete(
       $this->class_cfg['tables']['events'], [
@@ -1197,10 +1286,10 @@ class Note extends bbn\Models\Cls\Db
    * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
    *
    * @param string $id_note
-   * @param $id_event
+   * @param string $id_event
    * @return bool
    */
-  private function _insert_notes_events($id_note, $id_event): bool
+  public function _insert_notes_events(string $id_note, string $id_event): bool
   {
     if (!$this->db->count(
       $this->class_cfg['tables']['events'],
@@ -1222,24 +1311,53 @@ class Note extends bbn\Models\Cls\Db
     return false;
   }
 
+  /**
+   * Returns event id for the given note.
+   *
+   * @param string $id_note
+   * @return false|mixed
+   */
+  public function getEventIdFromNote(string $id_note)
+  {
+    return $this->db->selectOne(
+      $this->class_cfg['tables']['events'], $this->class_cfg['arch']['events']['id_event'], [
+      $this->class_cfg['arch']['events']['id_note'] => $id_note
+    ]);
+  }
+
+  /**
+   * Returns note id for the given event.
+   *
+   * @param string $id_event
+   * @return false|mixed
+   */
+  public function getNoteIdFromEvent(string $id_event)
+  {
+    return $this->db->selectOne(
+      $this->class_cfg['tables']['events'],
+      $this->class_cfg['arch']['events']['id_note'], [
+        $this->class_cfg['arch']['events']['id_event'] => $id_event
+      ]);
+  }
+
 
   /**
    * If a date is given for $end checks if it's after the start date.
    *
-   * @param string $start
-   * @param string $end
+   * @param string|null $start
+   * @param string|null $end
+   * @return bool
    */
-  private function _check_date(string $start, string $end): bool
+  private function _check_date(?string $start, ?string $end): bool
   {
-    if (isset($start)) {
-      if (!isset($end) || strtotime($end) > strtotime($start)) {
+    if (isset($start)){
+      if (!isset($end) || (($end = strtotime($end)) && ($start = strtotime($start)) && $end > $start)){
         return true;
       }
     } else {
-        return true;
+      return true;
     }
-
-      return false;
+    return false;
   }
 
 
