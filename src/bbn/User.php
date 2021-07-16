@@ -102,6 +102,7 @@ class User extends Models\Cls\Basic
         'id_user' => 'id_user',
         'token' => 'token',
         'creation' => 'creation',
+        'last' => 'last',
         'device_uid' => 'device_uid',
         'device_lang' => 'device_lang',
         'notifications_token' => 'notifications_token'
@@ -376,15 +377,14 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
         }
 
-        // Update the device language
-        if (!empty($params[$f['device_lang']])) {
-          $this->db->update($this->class_cfg['tables']['api_tokens'], [
-            $this->class_cfg['arch']['api_tokens']['device_lang'] => $params[$f['device_lang']]
-          ], [
-            $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
-            $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]
-          ]);
-        }
+        // Update device_lang and last 
+        $this->db->update($this->class_cfg['tables']['api_tokens'], [
+          $this->class_cfg['arch']['api_tokens']['device_lang'] => $params[$f['device_lang']] ?? '',
+          $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')
+        ], [
+          $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
+          $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]
+        ]);
 
         // Now the user is authenticated
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
@@ -2224,6 +2224,28 @@ class User extends Models\Cls\Basic
   public function getApiRequestOutput()
   {
     return $this->api_request_output;
+  }
+
+  public function getApiNotificationsToken(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne([
+      'table' => $this->class_cfg['tables']['api_tokens'],
+      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],
+      'where' => [ 
+        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id
+      ],
+      'order' => [[
+        'field' => $this->class_cfg['arch']['api_tokens']['last'],
+        'dir' => 'DESC'
+      ]]
+    ]);
+  }
+
+  public function getPhoneNumber(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
+      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
+    ]);
   }
 
   /**
