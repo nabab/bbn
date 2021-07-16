@@ -2153,7 +2153,15 @@ class User extends Models\Cls\Basic
    */
   protected function updatePhoneVerificationCode($phone_number, ?string $code): bool
   {
-    $cfg = json_encode(['phone_verification_code' => $code]);
+    if ($oldCfg = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['cfg'], [
+      $this->class_cfg['arch']['users']['id'] => $this->id
+    ])) {
+      $oldCfg = json_decode($oldCfg, true);
+    }
+    else {
+      $oldCfg = [];
+    }
+    $cfg = json_encode(\array_merge($oldCfg, ['phone_verification_code' => $code]));
     try {
       $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
     }
