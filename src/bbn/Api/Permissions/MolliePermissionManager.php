@@ -1,16 +1,13 @@
 <?php
 
-namespace bbn\User\ThirdPartiesManagers;
-
-use bbn\Api\Permissions\ApiPermissionsContract;
-use bbn\User;
+namespace bbn\Api\Permissions;
 
 class MolliePermissionManager
 {
   /**
-   * @var User
+   * @var MollieTokensHandlerContract
    */
-  protected User $user;
+  protected MollieTokensHandlerContract $tokensHandler;
 
   /**
    * @var ApiPermissionsContract
@@ -20,12 +17,12 @@ class MolliePermissionManager
   /**
    * MollieUserManager constructor.
    *
-   * @param User $user The user being authenticated.
+   * @param MollieTokensHandlerContract $tokensHandler
    * @param ApiPermissionsContract $apiPermission
    */
-  public function __construct(User $user, ApiPermissionsContract $apiPermission)
+  public function __construct(MollieTokensHandlerContract $tokensHandler, ApiPermissionsContract $apiPermission)
   {
-    $this->user          = $user;
+    $this->tokensHandler = $tokensHandler;
     $this->apiPermission = $apiPermission;
   }
 
@@ -37,7 +34,7 @@ class MolliePermissionManager
     $authorization_url = $this->apiPermission->getAuthorizationUrl();
 
     // Get the state generated for you and store it to the session.
-    $this->user->setSession($this->apiPermission->getProvider()->getState(), 'oauth2state');
+    $_SESSION['oauth2state'] = $this->apiPermission->getProvider()->getState();
 
     // Redirect the user to the authorization URL.
     header('Location: ' . $authorization_url);
@@ -50,7 +47,6 @@ class MolliePermissionManager
    * @param string $authorization_code
    * @param string $account_name
    * @return mixed
-   * @throws \phpDocumentor\Parser\Exception
    */
   public function getAccessToken(string $authorization_code, string $account_name)
   {
@@ -71,7 +67,6 @@ class MolliePermissionManager
    * @param string $refresh_token
    * @param string $account_name
    * @return string
-   * @throws \phpDocumentor\Parser\Exception
    */
   public function refreshAccessToken(string $refresh_token, string $account_name): string
   {
@@ -103,7 +98,14 @@ class MolliePermissionManager
    */
   public function unsetSessionState()
   {
-    $this->user->unsetSession('oauth2state');
+    if (isset($_SESSION['oauth2state'])) {
+      unset($_SESSION['oauth2state']);
+    }
+  }
+
+  public function getSessionState()
+  {
+    return $_SESSION['oauth2state'] ?? null;
   }
 
   /**
@@ -113,12 +115,10 @@ class MolliePermissionManager
    * @param string $refresh_token
    * @param int $expires_in
    * @param string $account_name
-   * @return bool
-   * @throws \phpDocumentor\Parser\Exception
    */
   protected function saveTokensInDb(string $access_token, string $refresh_token, int $expires_in, string $account_name)
   {
-    return $this->user->saveNewPermissionTokens($access_token, $refresh_token, $expires_in, $account_name);
+    return $this->tokensHandler->saveNewPermissionTokens($access_token, $refresh_token, $expires_in, $account_name);
   }
 
   /**
@@ -128,10 +128,9 @@ class MolliePermissionManager
    * @param string $refresh_token
    * @param int $expires_in
    * @param string $account_name
-   * @return false|int|null
    */
   public function updateTokensInDb(string $access_token, string $refresh_token, int $expires_in, string $account_name)
   {
-    return $this->user->updatePermissionTokens($account_name, $access_token, $refresh_token, $expires_in);
+    return $this->tokensHandler->updatePermissionTokens($account_name, $access_token, $refresh_token, $expires_in);
   }
 }
