@@ -284,6 +284,20 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token'));
         }
 
+        if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))
+          && ($exUser[$f['id']] !== $user_id)
+          && $this->updateApiTokenUserByTokenDevice($params[$f['token']], $params[$f['device_uid']], $exUser[$f['id']])
+        ) {
+          if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [
+            $this->class_cfg['arch']['users']['id'] => $user_id
+          ])) {
+            $this->db->delete($this->class_cfg['table'], [
+              $this->class_cfg['arch']['users']['id'] => $user_id
+            ]);
+          }
+          $user_id = $exUser[$f['id']];
+        }
+
         $this->id = $user_id;
         // Generate a code
         $code = random_int(1001, 9999);
@@ -362,7 +376,10 @@ class User extends Models\Cls\Basic
         // Now the user is authenticated
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
 
-        return $this->api_request_output = true;
+        return $this->api_request_output = [
+          'token'   => $params[$f['token']],
+          'success' => true
+        ];
 
       }
     }
@@ -2077,6 +2094,16 @@ class User extends Models\Cls\Basic
    */
   protected function findByPhoneNumber(string $phone_number)
   {
+    try {
+      $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
+    }
+    catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+      return false;
+    }
+    if (!$phone->isValidNumber()) {
+      return false;
+    }
+    $phone_number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
     return $this->db->rselect(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users'],
@@ -2114,11 +2141,25 @@ class User extends Models\Cls\Basic
   protected function updatePhoneVerificationCode($phone_number, ?string $code): bool
   {
     $cfg = json_encode(['phone_verification_code' => $code]);
+    try {
+      $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
+    }
+    catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+      return false;
+    }
+    
+    if (!$phone->isValidNumber()) {
+      return false;
+    }
+
+
+    $number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
+
     return !!$this->db->update(
       $this->class_cfg['tables']['users'],
       [
-        $this->class_cfg['arch']['users']['login'] => $phone_number,
-        $this->class_cfg['arch']['users']['phone'] => $phone_number,
+        $this->class_cfg['arch']['users']['login'] => $number,
+        $this->class_cfg['arch']['users']['phone'] => $number,
         $this->class_cfg['arch']['users']['cfg'] => $cfg
       ],
       [$this->class_cfg['arch']['users']['id'] => $this->id]
@@ -2148,6 +2189,23 @@ class User extends Models\Cls\Basic
         $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,
       ]
     );
+  }
+
+  protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser): bool
+  {
+    if (!empty($token) && !empty($deviceUid) && !empty($idUser)) {
+      return !!$this->db->update(
+        $this->class_cfg['tables']['api_tokens'],
+        [
+          $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser
+        ],
+        [
+          $this->class_cfg['arch']['api_tokens']['token'] => $token,
+          $this->class_cfg['arch']['api_tokens']['device_uid'] => $deviceUid
+        ]
+      );
+    }
+    return false;
   }
 
   public function getApiRequestOutput()
