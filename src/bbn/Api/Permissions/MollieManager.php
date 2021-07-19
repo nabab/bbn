@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\User\ThirdPartiesManagers;
+namespace bbn\Api\Permissions;
 
 use bbn\X;
 use Mollie\Api\MollieApiClient;

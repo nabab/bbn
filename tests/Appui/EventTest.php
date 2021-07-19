@@ -813,4 +813,287 @@ class EventTest extends TestCase
       $this->event->getRecurrences($start, $end, $event)
     );
   }
+
+  /** @test */
+  public function makeRecurrencesFields_method_makes_fields_structure_on_the_given_event_recurrences()
+  {
+    $cf = $this->getClassCfg();
+
+    $start_field = $cf['arch']['events']['start'];
+    $end_field   = $cf['arch']['events']['end'];
+
+    $event = [
+      $start_field => '2021-07-13 10:00:00',
+      $end_field   => '2021-07-20 10:00:00',
+    ];
+
+    $data = [
+      '2021-07-16 10:00:00',
+      '2021-07-09 10:00:00',
+      new \DateTime('2021-07-16 10:00:00'),
+      '2021-07-13 10:00:00'
+    ];
+
+    $expected = [
+      [
+        $start_field => '2021-07-16 10:00:00',
+        $end_field   => '2021-07-23 10:00:00',
+        'recurrence' => 1
+      ],
+      [
+        $start_field => '2021-07-09 10:00:00',
+        $end_field   => '2021-07-16 10:00:00',
+        'recurrence' => 1
+      ],
+      [
+        $start_field => '2021-07-16 10:00:00',
+        $end_field   => '2021-07-23 10:00:00',
+        'recurrence' => 1
+      ],
+      [
+        $start_field => '2021-07-13 10:00:00',
+        $end_field   => '2021-07-20 10:00:00',
+        'recurrence' => 0
+      ],
+    ];
+
+    $this->assertSame($expected, $this->event->makeRecurrencesFields($event, $data));
+
+    $event2 = [
+      $start_field => '2021-07-13 10:00:00'
+      ];
+
+    $data2 = [
+      '2021-07-16 10:00:00',
+      '2021-07-09 10:00:00',
+      new \DateTime('2021-07-16 10:00:00'),
+      '2021-07-13 10:00:00'
+    ];
+
+    $expected2 = [
+      [
+        $start_field => '2021-07-16 10:00:00',
+        $end_field   => null,
+        'recurrence' => 1
+      ],
+      [
+        $start_field => '2021-07-09 10:00:00',
+        $end_field   => null,
+        'recurrence' => 1
+      ],
+      [
+        $start_field => '2021-07-16 10:00:00',
+        $end_field   => null,
+        'recurrence' => 1
+      ],
+      [
+        $start_field => '2021-07-13 10:00:00',
+        $end_field   => null,
+        'recurrence' => 0
+      ],
+    ];
+
+    $this->assertSame($expected2, $this->event->makeRecurrencesFields($event2, $data2));
+  }
+  
+  /** @test */
+  public function getFirstRecurrence_method_returns_the_date_for_the_first_recurrence_of_a_recurring_date()
+  {
+    $cf = $this->getClassCfg();
+    $this->partiallyMockEventClass();
+
+    $this->event->shouldReceive('getExceptions')
+      ->once()
+      ->with($this->id_event)
+      ->andReturn([
+        [
+          $cf['arch']['exceptions']['day']   => '2021-07-11',
+          $cf['arch']['exceptions']['start'] => '07:00:00',
+        ],
+        [
+          $cf['arch']['exceptions']['day']   => '2021-07-09',
+          $cf['arch']['exceptions']['start'] => '04:00:00',
+        ]
+      ]);
+
+    $event = [
+      $cf['arch']['events']['id']    => $this->id_event,
+      $cf['arch']['events']['start'] => '2021-07-12 09:00:00',
+      $cf['arch']['events']['end']   => '2021-07-19 07:00:00'
+    ];
+
+    $this->event->shouldReceive('getWhenObject')
+      ->once()
+      ->with(array_merge($event, [
+        $cf['extra']['exceptions'] => [
+          '2021-07-11 07:00:00', '2021-07-09 04:00:00'
+        ]
+      ]))
+      ->andReturn($when_mock = \Mockery::mock(When::class));
+
+    $when_mock->startDate = '2021-07-10 11:00:00';
+
+    $when_mock->shouldReceive('getNextOccurrence')
+      ->once()
+      ->with($when_mock->startDate, true)
+      ->andReturn($datetime = new \DateTime('2021-07-20 01:00:00'));
+
+    $this->assertSame(
+      $datetime->format('Y-m-d H:i:s'),
+      $this->event->getFirstRecurrence($event, true, true)
+    );
+  }
+
+  /** @test */
+  public function getFirstRecurrence_method_returns_the_date_for_the_first_recurrence_of_a_recurring_date_when_getExceptions_returns_null()
+  {
+    $cf = $this->getClassCfg();
+    $this->partiallyMockEventClass();
+
+    $event = [
+      $cf['arch']['events']['id']    => $this->id_event,
+      $cf['arch']['events']['start'] => '2021-07-12 09:00:00',
+      $cf['arch']['events']['end']   => '2021-07-19 07:00:00'
+    ];
+
+    $this->event->shouldReceive('getExceptions')
+      ->once()
+      ->with($this->id_event)
+      ->andReturnNull();
+
+    $this->event->shouldReceive('getWhenObject')
+      ->once()
+      ->with(array_merge($event))
+      ->andReturn($when_mock = \Mockery::mock(When::class));
+
+    $when_mock->startDate = '2021-07-10 11:00:00';
+
+    $when_mock->shouldReceive('getNextOccurrence')
+      ->once()
+      ->with($when_mock->startDate, true)
+      ->andReturn($datetime = new \DateTime('2021-07-20 01:00:00'));
+
+    $this->assertSame(
+      $datetime->format('Y-m-d H:i:s'),
+      $this->event->getFirstRecurrence($event, true, true)
+    );
+  }
+
+  /** @test */
+  public function getFirstRecurrence_method_returns_the_date_for_the_first_recurrence_of_a_recurring_date_when_exceptions_is_false()
+  {
+    $cf = $this->getClassCfg();
+    $this->partiallyMockEventClass();
+
+    $event = [
+      $cf['arch']['events']['id']    => $this->id_event,
+      $cf['arch']['events']['start'] => '2021-07-12 09:00:00',
+      $cf['arch']['events']['end']   => '2021-07-19 07:00:00'
+    ];
+
+    $this->event->shouldReceive('getWhenObject')
+      ->once()
+      ->with(array_merge($event))
+      ->andReturn($when_mock = \Mockery::mock(When::class));
+
+    $when_mock->startDate = '2021-07-10 11:00:00';
+
+    $when_mock->shouldReceive('getNextOccurrence')
+      ->once()
+      ->with($when_mock->startDate, true)
+      ->andReturn($datetime = new \DateTime('2021-07-20 01:00:00'));
+
+    $this->assertSame(
+      $datetime->format('Y-m-d H:i:s'),
+      $this->event->getFirstRecurrence($event, true, false)
+    );
+  }
+
+  /** @test */
+  public function getFirstRecurrence_method_returns_null_when_getNextOccurrence_retunrs_false()
+  {
+    $cf = $this->getClassCfg();
+    $this->partiallyMockEventClass();
+
+    $event = [
+      $cf['arch']['events']['id']    => $this->id_event,
+      $cf['arch']['events']['start'] => '2021-07-12 09:00:00',
+      $cf['arch']['events']['end']   => '2021-07-19 07:00:00'
+    ];
+
+    $this->event->shouldReceive('getWhenObject')
+      ->once()
+      ->with(array_merge($event))
+      ->andReturn($when_mock = \Mockery::mock(When::class));
+
+    $when_mock->startDate = '2021-07-10 11:00:00';
+
+    $when_mock->shouldReceive('getNextOccurrence')
+      ->once()
+      ->with($when_mock->startDate, true)
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->event->getFirstRecurrence($event)
+    );
+  }
+
+  /** @test */
+  public function deleteRecurrences_method_deletes_the_recurrences_of_the_given_event_and_returns_true_when_count_equals_the_deleted()
+  {
+    $cf = $this->getClassCfg();
+
+    $query_args = [
+      $cf['tables']['recurring'],
+      [$cf['arch']['recurring']['id_event'] => $this->id_event]
+    ];
+
+    $this->db_mock->shouldReceive('count')
+      ->once()
+      ->with(...$query_args)
+      ->andReturn(1);
+
+
+    $this->db_mock->shouldReceive('delete')
+      ->once()
+      ->with(...$query_args)
+      ->andReturn(1);
+
+    $this->assertTrue(
+      $this->event->deleteRecurrences($this->id_event)
+    );
+  }
+
+  /** @test */
+  public function deleteRecurrences_method_deletes_the_recurrences_of_the_given_event_and_returns_false_when_count_not_equal_the_deleted()
+  {
+    $cf = $this->getClassCfg();
+
+    $query_args = [
+      $cf['tables']['recurring'],
+      [$cf['arch']['recurring']['id_event'] => $this->id_event]
+    ];
+
+    $this->db_mock->shouldReceive('count')
+      ->once()
+      ->with(...$query_args)
+      ->andReturn(3);
+
+    $this->db_mock->shouldReceive('delete')
+      ->once()
+      ->with(...$query_args)
+      ->andReturn(1);
+
+    $this->assertFalse(
+      $this->event->deleteRecurrences($this->id_event)
+    );
+  }
+
+  /** @test */
+  public function deleteRecurrences_method_returns_false_when_the_given_id_event_is_not_valid()
+  {
+    $this->assertFalse(
+      $this->event->deleteRecurrences('123aff')
+    );
+  }
 }
