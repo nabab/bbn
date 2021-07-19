@@ -1005,6 +1005,8 @@ class Note extends bbn\Models\Cls\Db
             $db->cfn($cf['arch']['notes']['id_parent'], $cf['table']),
             $db->cfn($cf['arch']['notes']['id_alias'], $cf['table']),
             $db->cfn($cf['arch']['notes']['id_type'], $cf['table']),
+            $db->cfn($cf['arch']['notes']['mime'], $cf['table']),
+            $db->cfn($cf['arch']['notes']['lang'], $cf['table']),
             $db->cfn($cf['arch']['notes']['private'], $cf['table']),
             $db->cfn($cf['arch']['notes']['locked'], $cf['table']),
             $db->cfn($cf['arch']['notes']['excerpt'], $cf['table']),
