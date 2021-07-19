@@ -131,6 +131,6 @@ class MolliePermissionManager
    */
   public function updateTokensInDb(string $access_token, string $refresh_token, int $expires_in, string $account_name)
   {
-    return $this->tokensHandler->updatePermissionTokens($account_name, $access_token, $refresh_token, $expires_in);
+    return $this->tokensHandler->updatePermissionTokens($access_token, $refresh_token, $expires_in, $account_name);
   }
 }
