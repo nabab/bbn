@@ -7,6 +7,9 @@ use Mollie\Api\MollieApiClient;
 
 class MollieManager
 {
+
+  private MollieApiClient $mollie;
+
   /**
    * MollieManager constructor.
    *
@@ -123,14 +126,43 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/payments-api/create-payment
    *
    * @param array $data
+   * @param string|null $customer_id
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPayment(array $data): array
+  public function createPayment(array $data, ?string $customer_id = null): array
   {
+    if ($customer_id) {
+      $data = array_merge($data, ['customerId' => $customer_id]);
+    }
+
     $payment = $this->mollie->payments->create($data);
 
     return X::toArray($payment);
+  }
+
+  /**
+   * Create a payment for the first time for the user.
+   * Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']
+   *
+   * This will return the customerId in the response.
+   *
+   * @param array $customer_data
+   * @param array $payment_data
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function createPaymentFirstTime(array $customer_data, array $payment_data)
+  {
+    $customer = $this->mollie->customers->create($customer_data);
+
+    try {
+      return $this->createPayment($payment_data, $customer->id);
+    }
+    catch (\Exception $e) {
+      $this->mollie->customers->delete($customer->id);
+      throw new \Exception($e->getMessage());
+    }
   }
 
   /**
@@ -284,7 +316,7 @@ class MollieManager
    * List of payment methods: https://docs.mollie.com/reference/v2/methods-api/list-methods
    *
    * @param string $profile_id
-   * @param string $payment_method
+   * @param string $payment_method_id
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */

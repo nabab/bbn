@@ -41,7 +41,7 @@ if (!$mollie_manager->hasActivePaymentMethods($profile_id)) {
 $amount = 10;
 $fees   = 3.5;
 
-$payment = $mollie_manager->createPayment([
+$payment_data = [
   "amount" => [
     "currency" => "EUR",
     "value" => number_format($amount, 2, '.', '') // You must send the correct number of decimals, thus we enforce the use of strings
@@ -60,7 +60,23 @@ $payment = $mollie_manager->createPayment([
     ],
     "description" => "Fees" // Required: The description of the application fee. This will appear on settlement reports to the merchant and to you.
   ]
-]);
+];
+
+$payment = $mollie_manager->createPayment($payment_data, 'customer_id');
+
+// Create payment for the first time
+$customer_data = [
+  "name" => "Customer A",
+  "email" => "customer@example.org",
+
+  // Provide any data you like, and we will save the data alongside the customer.
+  // Whenever you fetch the customer with our API, we will also include the metadata. You can use up to 1kB of JSON.
+  "metadata" => ['']
+];
+
+$payment = $mollie_manager->createPaymentFirstTime($customer_data, $payment_data);
+
+$customer_id = $payment['customerId'];
 
 // Redirect to the checkout page
 header("Location: " . $payment['_links']['checkout']['href']);
