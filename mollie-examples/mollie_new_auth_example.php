@@ -1,7 +1,8 @@
 <?php
 
+use bbn\Api\Permissions\MolliePermissionManager;
 use bbn\Api\Permissions\MolliePermissions;
-use bbn\User\ThirdPartiesManagers\MolliePermissionManager;
+use bbn\Api\Permissions\MollieTokensHandlerContract;
 
 require '../vendor/autoload.php';
 
@@ -15,14 +16,27 @@ $cfg = [
 
 /** @var $ctrl \bbn\Mvc\Controller */
 
-$mollie_manager = new MolliePermissionManager($ctrl->inc->user, new MolliePermissions($cfg['dev']));
+$token_handler = new class implements MollieTokensHandlerContract {
+
+  public function saveNewPermissionTokens(string $access_token, string $refresh_token, int $expires_in, string $account_name)
+  {
+    // TODO: Implement saveNewPermissionTokens() method.
+  }
+
+  public function updatePermissionTokens(string $access_token, string $refresh_token, int $expires_in, string $account_name)
+  {
+    // TODO: Implement updatePermissionTokens() method.
+  }
+};
+
+$mollie_manager = new MolliePermissionManager($token_handler, new MolliePermissions($cfg['dev']));
 
 // If we don't have an authorization code then get one
 if (!isset($_GET['code'])) {
   $mollie_manager->authorize(); // This will redirect the user to get authorization
 }
 // Check given state against previously stored one to mitigate CSRF attack
-elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
+elseif (empty($_GET['state']) || ($_GET['state'] !== $mollie_manager->getSessionState())) {
   $mollie_manager->unsetSessionState();
   exit('Invalid state');
 }

@@ -434,7 +434,7 @@ class Event extends bbn\Models\Cls\Db
       ($excs = $this->getExceptions($event[$this->fields['id']]))
     ){
       $t =& $this;
-      $event[$this->class_cfg['arch']['extra']['exceptions']] = array_map(function($e) use($t){
+      $event[$this->class_cfg['extra']['exceptions']] = array_map(function($e) use($t){
         return $e[$t->class_cfg['arch']['exceptions']['day']].' '.$e[$t->class_cfg['arch']['exceptions']['start']];
       }, $excs);
     }
@@ -442,6 +442,7 @@ class Event extends bbn\Models\Cls\Db
     if ( $r = $when->getNextOccurrence($when->startDate, $omitstart) ){
       return $r->format('Y-m-d H:i:s');
     }
+
     return null;
   }
 
@@ -456,6 +457,7 @@ class Event extends bbn\Models\Cls\Db
       $todelete = $this->db->count($this->class_cfg['tables']['recurring'], [$this->class_cfg['arch']['recurring']['id_event'] => $id]);
       return $this->db->delete($this->class_cfg['tables']['recurring'], [$this->class_cfg['arch']['recurring']['id_event'] => $id]) === $todelete;
     }
+
     return false;
   }
 
@@ -474,7 +476,7 @@ class Event extends bbn\Models\Cls\Db
     $extf =& $this->class_cfg['arch']['extra'];
     // When object instance
     $when = new \When\When($event[$ef['start']]);
-    // Trick to have the possibility to set the start date different to the first occurence
+    // Trick to have the possibility to set the start date different to the first occurrence
     $when->RFC5545_COMPLIANT = 2;
     // Set the frequency
     $when->freq($event[$rf['type']]);
@@ -494,7 +496,7 @@ class Event extends bbn\Models\Cls\Db
     if ( !empty($event[$rf['interval']]) ){
       $when->interval($event[$rf['interval']] + 1);
     }
-    // Number of occurences
+    // Number of occurrences
     if ( !empty($event[$rf['occurrences']]) ){
       $when->count($event[$rf['occurrences']]);
     }
@@ -538,7 +540,7 @@ class Event extends bbn\Models\Cls\Db
     if ( !empty($event[$rf['ym']]) ){
       $when->bymonth($event[$rf['ym']]);
     }
-    // Specific month's wwek
+    // Specific month's week
     if ( \is_null($event[$rf['mw']]) ){
       $event[$rf['mw']] = [];
     }
