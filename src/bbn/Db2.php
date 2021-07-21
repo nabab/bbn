@@ -62,13 +62,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   private $_cache = [];
 
-  /**
-   * If set to false, Query will return a regular PDOStatement
-   * Use stop_fancy_stuff() to set it to false
-   * And use start_fancy_stuff to set it back to true
-   * @var int $fancy
-   */
-  private $_fancy = 1;
 
   /**
    * Error state of the current connection
@@ -107,15 +100,9 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   /** @var string The connection code as it would be stored in option */
   protected $connection_code;
 
-  /**
-   * @todo is bool or string??
-   * Unique string identifier for current connection
-   * @var string
-   */
-  protected $hash;
 
   /**
-   * @var Db2\Languages\Mysql Can be other driver
+   * @var Db2\Engines Can be other driver
    */
   protected $language = false;
 
@@ -208,6 +195,75 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * @var array
+   */
+  protected $cfg;
+
+
+  /**
+   * Constructor
+   *
+   * ```php
+   * $dbtest = new bbn\Db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
+   *  // (void)
+   * ```
+   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
+   * @throws \Exception
+   */
+  public function __construct(array $cfg = [])
+  {
+    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
+      $cfg['engine'] = BBN_DB_ENGINE;
+    }
+
+    if (isset($cfg['engine'])) {
+      $engine = $cfg['engine'];
+      $cls    = '\\bbn\\Db2\\Languages\\'.ucwords($engine);
+
+      if (!class_exists($cls)) {
+        throw new \Exception(X::_("The database engine %s is not recognized", $engine));
+      }
+
+      self::retrieverInit($this);
+      $this->cacheInit();
+      $this->language = new $cls($cfg, $this);
+
+      if (isset($cfg['on_error'])) {
+        $this->on_error = $cfg['on_error'];
+      }
+
+      if ($cfg = $this->language->getCfg()) {
+        $this->cfg = $cfg;
+        $this->qte = $this->language->qte;
+        $this->language->postCreation();
+        $this->current  = $cfg['db'] ?? null;
+        $this->engine   = $cfg['engine'];
+        $this->host     = $cfg['host'] ?? '127.0.0.1';
+        $this->username = $cfg['user'] ?? null;
+        $this->connection_code = $cfg['code_host'];
+
+        if (!empty($cfg['cache_length'])) {
+          $this->cache_renewal = (int)$cfg['cache_length'];
+        }
+
+        $this->startFancyStuff();
+
+        if (!empty($cfg['error_mode'])) {
+          $this->setErrorMode($cfg['error_mode']);
+        }
+      }
+    }
+
+    if (!$this->engine) {
+      $connection  = $cfg['engine'] ?? 'No engine';
+      $connection .= '/'.($cfg['db'] ?? 'No DB');
+      $this->log(X::_("Impossible to create the connection for").' '.$connection);
+      throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
+    }
+  }
+
+
+  /**
    * Says if the given database engine is supported or not
    *
    * @param string $engine
@@ -256,8 +312,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * Returns a string with the given text in the middle of a "line" of logs.
    *
    * @param string $text The text to write
-   *
-   * @return void
+   * @return string
    */
   public static function getLogLine(string $text = '')
   {
@@ -268,68 +323,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     $tot  = \strlen(self::LINE) - \strlen($text);
     $char = \substr(self::LINE, 0, 1);
     return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
-  }
-
-
-  /**
-   * Constructor
-   *
-   * ```php
-   * $dbtest = new bbn\Db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
-   *  // (void)
-   * ```
-   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
-   */
-  public function __construct(array $cfg = [])
-  {
-    //die("BOOH");
-    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
-      $cfg['engine'] = BBN_DB_ENGINE;
-    }
-
-    if (isset($cfg['engine'])) {
-      $engine = $cfg['engine'];
-      $db     = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');
-      $cls    = '\\bbn\\Db2\\Languages\\'.ucwords($engine);
-      if (!class_exists($cls)) {
-        throw new \Exception(X::_("The database engine %s is not recognized", $engine));
-        die("Sorry the engine class $engine does not exist");
-      }
-
-      self::retrieverInit($this);
-      $this->cacheInit();
-      $this->language = new $cls($cfg, $this);
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
-      if ($cfg = $this->language->getCfg()) {
-        $this->cfg = $cfg;
-        $this->qte = $this->language->qte;
-        $this->language->postCreation();
-        $this->current  = $cfg['db'] ?? null;
-        $this->engine   = $cfg['engine'];
-        $this->host     = $cfg['host'] ?? '127.0.0.1';
-        $this->username = $cfg['user'] ?? null;
-        $this->connection_code = $cfg['code_host'];
-        $this->hash     = $this->_make_hash($cfg['args']);
-        if (!empty($cfg['cache_length'])) {
-          $this->cache_renewal = (int)$cfg['cache_length'];
-        }
-
-        $this->startFancyStuff();
-        if (!empty($cfg['error_mode'])) {
-          $this->setErrorMode($cfg['error_mode']);
-        }
-      }
-    }
-
-    if (!$this->engine) {
-      $connection  = $cfg['engine'] ?? 'No engine';
-      $connection .= '/'.($cfg['db'] ?? 'No DB');
-      $this->log(X::_("Impossible to create the connection for").' '.$connection);
-      throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
-    }
   }
 
 
@@ -417,22 +410,26 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Gets the last hash created.
+   * Gets the created hash.
    *
    * ```php
    * X::dump($db->getHash());
    * // (string) 3819056v431b210daf45f9b5dc2
    * ```
-   *
-   * @todo chiedere e thomas se deve diventare private e se va bene la descrizione
    * @return string
    */
-  public function getHash()
+  public function getHash(): string
   {
-    return $this->hash;
+    return $this->language->getHash();
   }
 
 
+  /**
+   * @param array $conditions
+   * @param $old_name
+   * @param $new_name
+   * @return array
+   */
   public function replaceTableInConditions(array $conditions, $old_name, $new_name)
   {
     return X::map(
@@ -1247,15 +1244,17 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * ```php
    *  $db->stopFancyStuff();
-   * // (void)
+   * // (self)
    * ```
    *
-   * @return db
+   * @return self
    */
   public function stopFancyStuff(): self
   {
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\PDOStatement::class]);
-    $this->_fancy = false;
+    if ($this->language) {
+      $this->language->stopFancyStuff();
+    }
+
     return $this;
   }
 
@@ -1265,15 +1264,16 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * ```php
    * $db->startFancyStuff();
-   * // (void)
+   * // (self)
    * ```
-   * @return db
+   * @return self
    */
   public function startFancyStuff(): self
   {
     if ($this->language) {
       $this->language->startFancyStuff();
     }
+
     return $this;
   }
 
@@ -1929,11 +1929,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * X::dump($db->rawQuery());
    * // (bool)
    * ```
-   * @return bool|\PDOStatement
+   * @return false|\PDOStatement
    */
   public function rawQuery()
   {
-    return parent::query(...\func_get_args());
+    return $this->language->rawQuery(...\func_get_args());
   }
 
 
@@ -4676,17 +4676,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   private function _make_hash(): string
   {
-    $args = \func_get_args();
-    if ((\count($args) === 1) && \is_array($args[0])) {
-      $args = $args[0];
-    }
-
-    $st = '';
-    foreach ($args as $a){
-      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
-    }
-
-    return $this->hash_contour.md5($st).$this->hash_contour;
+    return $this->language->makeHash(\func_get_args());
   }
 
 
@@ -4863,257 +4853,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   }
 
 
-  /**
-   * Normalizes arguments by making it a uniform array.
-   *
-   * <ul><h3>The array will have the following indexes:</h3>
-   * <li>fields</li>
-   * <li>where</li>
-   * <li>filters</li>
-   * <li>order</li>
-   * <li>limit</li>
-   * <li>start</li>
-   * <li>join</li>
-   * <li>group_by</li>
-   * <li>having</li>
-   * <li>values</li>
-   * <li>hashed_join</li>
-   * <li>hashed_where</li>
-   * <li>hashed_having</li>
-   * <li>php</li>
-   * <li>done</li>
-   * </ul>
-   *
-   * @todo Check for the tables and column names legality!
-   *
-   * @param $cfg
-   * @return array
-   */
-  private function _treat_arguments($cfg): array
-  {
-    while (isset($cfg[0]) && \is_array($cfg[0])){
-      $cfg = $cfg[0];
-    }
 
-    if (\is_array($cfg)
-        && array_key_exists('tables', $cfg)
-        && array_key_exists('bbn_db_treated', $cfg)
-        && ($cfg['bbn_db_treated'] === true)
-    ) {
-      return $cfg;
-    }
-
-    $res = [
-      'kind' => 'SELECT',
-      'fields' => [],
-      'where' => [],
-      'order' => [],
-      'limit' => 0,
-      'start' => 0,
-      'group_by' => [],
-      'having' => [],
-    ];
-    if (X::isAssoc($cfg)) {
-      if (isset($cfg['table']) && !isset($cfg['tables'])) {
-        $cfg['tables'] = $cfg['table'];
-        unset($cfg['table']);
-      }
-
-      $res = array_merge($res, $cfg);
-    }
-    elseif (count($cfg) > 1) {
-      $res['kind']   = strtoupper($cfg[0]);
-      $res['tables'] = $cfg[1];
-      if (isset($cfg[2])) {
-        $res['fields'] = $cfg[2];
-      }
-
-      if (isset($cfg[3])) {
-        $res['where'] = $cfg[3];
-      }
-
-      if (isset($cfg[4])) {
-        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
-      }
-
-      if (isset($cfg[5]) && Str::isInteger($cfg[5])) {
-        $res['limit'] = $cfg[5];
-      }
-
-      if (isset($cfg[6]) && !empty($res['limit'])) {
-        $res['start'] = $cfg[6];
-      }
-    }
-
-    $res           = array_merge(
-      $res, [
-      'aliases' => [],
-      'values' => [],
-      'filters' => [],
-      'join' => [],
-      'hashed_join' => [],
-      'hashed_where' => [],
-      'hashed_having' => [],
-      'bbn_db_treated' => true
-      ]
-    );
-    $res['kind']   = strtoupper($res['kind']);
-    $res['write']  = \in_array($res['kind'], self::$write_kinds, true);
-    $res['ignore'] = $res['write'] && !empty($res['ignore']);
-    $res['count']  = !$res['write'] && !empty($res['count']);
-    if (!\is_array($res['tables'])) {
-      $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
-    }
-
-    if (!empty($res['tables'])) {
-      foreach ($res['tables'] as $i => $t){
-        if (!is_string($t)) {
-          X::log([$cfg, debug_backtrace()], 'db_explained');
-          throw new \Exception("Impossible to identify the tables, check the log");
-        }
-
-        $res['tables'][$i] = $this->tfn($t);
-      }
-    }
-    else{
-      throw new \Error(X::_('No table given'));
-      return [];
-    }
-
-    if (!empty($res['fields'])) {
-      if (\is_string($res['fields'])) {
-        $res['fields'] = [$res['fields']];
-      }
-    }
-    elseif (!empty($res['columns'])) {
-      $res['fields'] = (array)$res['columns'];
-    }
-
-    if (!empty($res['fields'])) {
-      if ($res['kind'] === 'SELECT') {
-        foreach ($res['fields'] as $k => $col) {
-          if (\is_string($k)) {
-            $res['aliases'][$col] = $k;
-          }
-        }
-      }
-      elseif ((($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
-          && \is_string(array_keys($res['fields'])[0])
-      ) {
-        $res['values'] = array_values($res['fields']);
-        $res['fields'] = array_keys($res['fields']);
-      }
-    }
-
-    if (!\is_array($res['group_by'])) {
-      $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
-    }
-
-    if (!\is_array($res['where'])) {
-      $res['where'] = [];
-    }
-
-    if (!\is_array($res['order'])) {
-      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
-    }
-
-    if (!Str::isInteger($res['limit'])) {
-      unset($res['limit']);
-    }
-
-    if (!Str::isInteger($res['start'])) {
-      unset($res['start']);
-    }
-
-    if (!empty($cfg['join'])) {
-      foreach ($cfg['join'] as $k => $join){
-        if (\is_array($join)) {
-          if (\is_string($k)) {
-            if (empty($join['table'])) {
-              $join['table'] = $k;
-            }
-            elseif (empty($join['alias'])) {
-              $join['alias'] = $k;
-            }
-          }
-
-          if (isset($join['table'], $join['on']) && ($tmp = $this->treatConditions($join['on'], false))) {
-            if (!isset($join['type'])) {
-              $join['type'] = 'right';
-            }
-
-            $res['join'][] = array_merge($join, ['on' => $tmp]);
-          }
-        }
-      }
-    }
-
-    if ($tmp = $this->treatConditions($res['where'], false)) {
-      $res['filters'] = $tmp;
-    }
-
-    if (!empty($res['having']) && ($tmp = $this->treatConditions($res['having'], false))) {
-      $res['having'] = $tmp;
-    }
-
-    if (!empty($res['group_by'])) {
-      $this->_adapt_filters($res);
-    }
-
-    if (!empty($res['join'])) {
-      $new_join = [];
-      foreach ($res['join'] as $k => $join){
-        if ($tmp = $this->treatConditions($join['on'])) {
-          $new_item             = $join;
-          $new_item['on']       = $tmp['where'];
-          $res['hashed_join'][] = $tmp['hashed'];
-          if (!empty($tmp['values'])) {
-            foreach ($tmp['values'] as $v){
-              $res['values'][] = $v;
-            }
-          }
-
-          $new_join[] = $new_item;
-        }
-      }
-
-      $res['join'] = $new_join;
-    }
-
-    if (!empty($res['filters']) && ($tmp = $this->treatConditions($res['filters']))) {
-      $res['filters']      = $tmp['where'];
-      $res['hashed_where'] = $tmp['hashed'];
-      if (\is_array($tmp) && isset($tmp['values'])) {
-        foreach ($tmp['values'] as $v){
-          $res['values'][] = $v;
-        }
-      }
-    }
-
-    if (!empty($res['having']) && ($tmp = $this->treatConditions($res['having']))) {
-      $res['having']        = $tmp['where'];
-      $res['hashed_having'] = $tmp['hashed'];
-      foreach ($tmp['values'] as $v){
-        $res['values'][] = $v;
-      }
-    }
-
-    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
-      $res['kind'],
-      $res['ignore'],
-      $res['count'],
-      $res['tables'],
-      $res['fields'],
-      $res['hashed_join'],
-      $res['hashed_where'],
-      $res['hashed_having'],
-      $res['group_by'],
-      $res['order'],
-      $res['limit'] ?? 0,
-      $res['start'] ?? 0
-    );
-    return $res;
-  }
 
 
   private function _adapt_filters(&$cfg): void

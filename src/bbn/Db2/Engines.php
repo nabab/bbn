@@ -380,4 +380,24 @@ interface Engines
   public function getUid(): string;
 
 
+  /**
+   * Starts fancy stuff.
+   *
+   * @return $this
+   */
+  public function startFancyStuff(): self;
+
+  /**
+   * Stops fancy stuff.
+   *
+   * @return $this
+   */
+  public function stopFancyStuff(): self;
+
+  /**
+   * Gets the created hash.
+   *
+   * @return string
+   */
+  public function getHash(): string;
 }

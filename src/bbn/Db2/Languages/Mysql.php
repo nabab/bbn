@@ -21,8 +21,6 @@ use bbn\X;
  */
 class Mysql implements bbn\Db2\Engines
 {
-  use bbn\Models\Tts\Pdo;
-
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
 
@@ -100,6 +98,52 @@ class Mysql implements bbn\Db2\Engines
   /** @var string The quote character */
   public $qte = '`';
 
+  /**
+   * @var array
+   */
+  protected array $cfg;
+
+  /**
+   * @var bbn\Db2|null
+   */
+  protected ?bbn\Db2 $db;
+
+  /**
+   * @var \PDO
+   */
+  protected \PDO $pdo;
+
+  /**
+   * If set to false, Query will return a regular PDOStatement
+   * Use stopFancyStuff() to set it to false
+   * And use startFancyStuff to set it back to true
+   * @var int $fancy
+   */
+  private $_fancy = 1;
+
+  /**
+   * @var array $queries
+   */
+  protected $queries = [];
+
+  /**
+   * @var mixed $hash_contour
+   */
+  protected $hash_contour = '__BBN__';
+
+  /**
+   * Unique string identifier for current connection
+   *
+   * @var string
+   */
+  protected $hash;
+
+
+  /**
+   * @var array $cfgs The configs recorded for helpers functions
+   */
+  protected $cfgs = [];
+
 
   /**
    * Returns true if the column name is an aggregate function
@@ -121,28 +165,32 @@ class Mysql implements bbn\Db2\Engines
 
   /**
    * Constructor
-   * @param bbn\Db2 $db
+   *
+   * @param array $cfg
+   * @param bbn\Db2|null $db
+   * @throws \Exception
    */
   public function __construct(array $cfg, bbn\Db2 $db = null)
   {
     if (!\extension_loaded('pdo_mysql')) {
-      die('The MySQL driver for PDO is not installed...');
+      throw new \Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
     if (!X::hasProps($cfg, ['host', 'user'])) {
       if (!defined('BBN_DB_HOST')) {
-        die("No DB host defined");
+        throw new \Exception(X::_("No DB host defined"));
       }
 
       $cfg = [
         'host' => BBN_DB_HOST,
         'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
         'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
-        'db' => defined('BBN_DATABASE') ? BBN_DATABASE : '',
+        'db'   => defined('BBN_DATABASE') ? BBN_DATABASE : '',
       ];
     }
 
     $cfg['engine'] = 'mysql';
+
     if (empty($cfg['host'])) {
       $cfg['host'] = '127.0.0.1';
     }
@@ -171,31 +219,32 @@ class Mysql implements bbn\Db2\Engines
     ];
 
     try {
-      $tmp = new \PDO(...$params);
-    }
-    catch (\PDOException $e){
-      $err = X::_("Impossible to create the connection")." $engine/$db "
-             .X::_("with the following error").$e->getMessage();
-      throw new \Exception($err);
-    }
 
-    unset($cfg['pass']);
-    if (isset($tmp)) {
-      $this->pdo = $tmp;
+      $this->pdo = new \PDO(...$params);
       $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
       $this->cfg = $cfg;
       $this->db  = $db;
-    }
 
+      unset($cfg['pass']);
+    }
+    catch (\PDOException $e){
+      $err = X::_("Impossible to create the connection")." {$cfg['engine']}/$db "
+             .X::_("with the following error").$e->getMessage();
+      throw new \Exception($err);
+    }
   }
 
+  public function getCfg(): array
+  {
+    return $this->cfg;
+  }
 
   /**
    * Disables foreign keys check.
    *
-   * @return bbn\Db
+   * @return bbn\Db2
    */
-  public function disableKeys(): bbn\Db
+  public function disableKeys(): bbn\Db2
   {
     $this->db->rawQuery('SET FOREIGN_KEY_CHECKS=0;');
     return $this->db;
@@ -205,9 +254,9 @@ class Mysql implements bbn\Db2\Engines
   /**
    * Enables foreign keys check.
    *
-   * @return bbn\Db
+   * @return bbn\Db2
    */
-  public function enableKeys(): bbn\Db
+  public function enableKeys(): bbn\Db2
   {
     $this->db->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
     return $this->db;
@@ -1472,7 +1521,7 @@ MYSQL
         <<<MYSQL
 GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 ON $db . *
-TO '$user'@'{$this->db->host}'
+TO '$user'@'{$this->db->getHost()}'
 IDENTIFIED BY '$pass'
 MYSQL
       );
@@ -1666,5 +1715,972 @@ MYSQL
     return $sql;
   }
 
+  /**
+   * Actions to do once the PDO object has been created
+   *
+   * @return void
+   */
+  public function postCreation()
+  {
+    return;
+  }
 
+  /**
+   * Changes the current database to the given one.
+   *
+   * @param string $db The database name or file
+   * @return bool
+   */
+  public function change(string $db)
+  {
+    if (($this->db->getCurrent() !== $db) && bbn\Str::checkName($db)) {
+      $this->db->rawQuery("USE `$db`");
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns a database item expression escaped like database, table, column, key names
+   *
+   * @param string $item The item's name (escaped or not)
+   * @return string
+   * @throws \Exception
+   */
+  public function escape(string $item): string
+  {
+    $items = explode('.', str_replace($this->qte, '', $item));
+    $r     = [];
+
+    foreach ($items as $m) {
+      if (!bbn\Str::checkName($m)) {
+        throw new \Exception(X::_("Illegal name %s for the column", $m));
+      }
+
+      $r[] = $this->qte . $m . $this->qte;
+    }
+
+    return implode('.', $r);
+  }
+
+
+  /**
+   * Returns a table's full name i.e. database.table
+   *
+   * @param string $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
+   * @return string|null
+   */
+  public function tableFullName(string $table, bool $escaped = false): ?string
+  {
+    $bits = explode('.', $table);
+
+    if (\count($bits) === 3) {
+      $db    = trim($bits[0], ' ' . $this->qte);
+      $table = trim($bits[1]);
+    } elseif (\count($bits) === 2) {
+      $db    = trim($bits[0], ' ' . $this->qte);
+      $table = trim($bits[1], ' ' . $this->qte);
+    } else {
+      $db    = $this->db->getCurrent();
+      $table = trim($bits[0], ' ' . $this->qte);
+    }
+
+    if (bbn\Str::checkName($db, $table)) {
+      return $escaped ? $this->qte . $db . $this->qte . '.' . $this->qte . $table . $this->qte : $db . '.' . $table;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns a table's simple name i.e. table
+   *
+   * @param string $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
+   * @return string|null
+   */
+  public function tableSimpleName(string $table, bool $escaped = false): ?string
+  {
+    if ($table = trim($table)) {
+      $bits = explode('.', $table);
+      switch (\count($bits)) {
+        case 1:
+          $table = trim($bits[0], ' ' . $this->qte);
+          break;
+        case 2:
+        case 3:
+          $table = trim($bits[1], ' ' . $this->qte);
+          break;
+      }
+
+      if (bbn\Str::checkName($table)) {
+        return $escaped ? $this->qte . $table . $this->qte : $table;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns a column's full name i.e. table.column
+   *
+   * @param string $col     The column's name (escaped or not)
+   * @param null $table     The table's name (escaped or not)
+   * @param false $escaped  If set to true the returned string will be escaped
+   * @return string|null
+   */
+  public function colFullName(string $col, $table = null, $escaped = false): ?string
+  {
+    if ($col = trim($col)) {
+      $bits = explode('.', $col);
+      $ok   = null;
+      $col  = trim(array_pop($bits), ' ' . $this->qte);
+      if ($table && ($table = $this->tableSimpleName($table))) {
+        $ok = 1;
+      } elseif (\count($bits)) {
+        $table = trim(array_pop($bits), ' ' . $this->qte);
+        $ok    = 1;
+      }
+
+      if ((null !== $ok) && bbn\Str::checkName($table, $col)) {
+        return $escaped ? $this->qte . $table . $this->qte . '.' . $this->qte . $col . $this->qte : $table . '.' . $col;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns a column's simple name i.e. column
+   *
+   * @param string $col     The column's name (escaped or not)
+   * @param bool $escaped   If set to true the returned string will be escaped
+   * @return string|null
+   */
+  public function colSimpleName(string $col, bool $escaped = false): ?string
+  {
+    if ($bits = explode('.', $col)) {
+      $col = trim(end($bits), ' ' . $this->qte);
+      if (bbn\Str::checkName($col)) {
+        return $escaped ? $this->qte . $col . $this->qte : $col;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns true if the given string is the full name of a table ('database.table').
+   *
+   * @param string $table
+   * @return bool
+   */
+  public function isTableFullName(string $table): bool
+  {
+    return (bool)strpos($table, '.');
+  }
+
+  /**
+   * Returns true if the given string is the full name of a column ('table.column').
+   *
+   * @param string $col
+   * @return bool
+   */
+  public function isColFullName(string $col): bool
+  {
+    return (bool)strpos($col, '.');
+  }
+
+  /**
+   * Executes the original PDO query function
+   *
+   * @return false|\PDOStatement
+   */
+  public function rawQuery()
+  {
+    return $this->pdo->query(...\func_get_args());
+  }
+
+  /**
+   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
+   *
+   * @param $statement
+   * @return false|\PDOStatement
+   */
+  public function query($statement)
+  {
+    $args = \func_get_args();
+    // If fancy is false we just use the regular PDO query function
+    if (!$this->_fancy) {
+      return $this->pdo->query(...$args);
+    }
+
+    // The function can be called directly with func_get_args()
+    while ((\count($args) === 1) && \is_array($args[0])){
+      $args = $args[0];
+    }
+
+    if (!empty($args[0]) && \is_string($args[0])) {
+      // The first argument is the statement
+      $statement = trim(array_shift($args));
+
+      // Sending a hash as second argument from helper functions will bind it to the saved statement
+      if (count($args)
+        && \is_string($args[0])
+        && isset($this->queries[$args[0]])
+      ) {
+        $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
+        $hash_sent = array_shift($args);
+      }
+      else {
+        $hash = $this->makeHash($statement);
+      }
+
+      $driver_options = [];
+      if (count($args)
+        && \is_array($args[0])
+      ) {
+        // Case where drivers are arguments
+        if (!array_key_exists(0, $args[0])) {
+          $driver_options = array_shift($args);
+        }
+        // Case where values are in a single argument
+        elseif (\count($args) === 1) {
+          $args = $args[0];
+        }
+      }
+
+      /** @var array $params Will become the property last_params each time a query is executed */
+      $params     = [
+        'statement' => $statement,
+        'values' => [],
+        'last' => microtime(true)
+      ];
+      $num_values = 0;
+      foreach ($args as $i => $arg){
+        if (!\is_array($arg)) {
+          $params['values'][] = $arg;
+          $num_values++;
+        }
+        elseif (isset($arg[2])) {
+          $params['values'][] = $arg[2];
+          $num_values++;
+        }
+      }
+
+      if (!isset($this->queries[$hash])) {
+        /** @var int $placeholders The number of placeholders in the statement */
+        $placeholders = 0;
+        if ($sequences = $this->parseQuery($statement)) {
+          /* Or looking for question marks */
+          $sequences = array_keys($sequences);
+          preg_match_all('/(\?)/', $statement, $exp);
+          $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
+          while ($sequences[0] === 'OPTIONS'){
+            array_shift($sequences);
+          }
+
+          $params['kind']      = $sequences[0];
+          $params['union']     = isset($sequences['UNION']);
+          $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
+          $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
+        }
+        elseif (($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
+          $params['kind'] = 'PRAGMA';
+        }
+        else{
+          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
+        }
+
+        // This will add to the queries array
+        $this->_add_query(
+          $hash,
+          $statement,
+          $params['kind'],
+          $placeholders,
+          $driver_options
+        );
+        if (!empty($hash_sent)) {
+          $this->queries[$hash_sent] = $hash;
+        }
+      }
+      // The hash of the hash for retrieving a query based on the helper's config's hash
+      elseif (\is_string($this->queries[$hash])) {
+        $hash = $this->queries[$hash];
+      }
+
+      $this->_update_query($hash);
+      $q =& $this->queries[$hash];
+      /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
+      if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
+        $params['values'] = array_merge(
+          $params['values'],
+          array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
+        );
+        $num_values       = \count($params['values']);
+      }
+
+      /* The number of values must match the number of placeholders to bind */
+      if ($num_values !== $q['placeholders']) {
+        $this->error(
+          'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
+          .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
+          .print_r(\func_get_args(), true)
+          .print_r($q, true)
+        );
+        exit;
+      }
+
+      if ($q['exe_time'] === 0) {
+        $time = $q['last'];
+      }
+
+      // That will always contains the parameters of the last query done
+
+      $this->addStatement($q['sql'], $params);
+      // If the statement is a structure modifier we need to clear the cache
+      if ($q['structure']) {
+        $tmp                = $q;
+        $this->queries      = [$hash => $tmp];
+        $this->list_queries = [[
+          'hash' => $hash,
+          'last' => $tmp['last']
+        ]];
+        unset($tmp);
+        /** @todo Clear the cache */
+      }
+
+      try{
+        // This is a writing statement, it will execute the statement and return the number of affected rows
+        if ($q['write']) {
+          // A prepared query already exists for the writing
+          /** @var Db\Query */
+          if ($q['prepared']) {
+            $r = $q['prepared']->init($params['values'])->execute();
+          }
+          // If there are no values we can assume the statement doesn't need to be prepared and is just executed
+          elseif ($num_values === 0) {
+            // Native PDO function which returns the number of affected rows
+            $r = $this->exec($q['sql']);
+          }
+          // Preparing the query
+          else{
+            // Native PDO function which will use Db\Query as base class
+            /** @var Db\Query */
+            $q['prepared'] = $this->prepare($q['sql'], $q['options']);
+            $r             = $q['prepared']->execute();
+          }
+        }
+        // This is a reading statement, it will prepare the statement and return a query object
+        else{
+          if (!$q['prepared']) {
+            // Native PDO function which will use Db\Query as base class
+            $q['prepared'] = $this->prepare($q['sql'], $driver_options);
+          }
+          else{
+            // Returns the same Db\Query object
+            $q['prepared']->init($params['values']);
+          }
+        }
+
+        if (!empty($time) && ($q['exe_time'] === 0)) {
+          $q['exe_time'] = microtime(true) - $time;
+        }
+      }
+      catch (\PDOException $e){
+        $this->error($e);
+      }
+
+      if ($this->check()) {
+        // So if read statement returns the query object
+        if (!$q['write']) {
+          return $q['prepared'];
+        }
+
+        // If it is a write statement returns the number of affected rows
+        if ($q['prepared'] && $q['write']) {
+          $r = $q['prepared']->rowCount();
+        }
+
+        // If it is an insert statement we (try to) set the last inserted ID
+        if (($q['kind'] === 'INSERT') && $r) {
+          $this->setLastInsertId();
+        }
+
+        return $r ?? false;
+      }
+    }
+  }
+
+  /**
+   * Starts fancy stuff.
+   *
+   * ```php
+   * $db->startFancyStuff();
+   * // (self)
+   * ```
+   * @return self
+   */
+  public function startFancyStuff(): self
+  {
+    $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\bbn\Db2\Query::class, [$this]]);
+    $this->_fancy = 1;
+
+    return $this;
+  }
+
+  /**
+   * Stops fancy stuff.
+   *
+   * ```php
+   *  $db->stopFancyStuff();
+   * // (self)
+   * ```
+   *
+   * @return self
+   */
+  public function stopFancyStuff(): self
+  {
+    $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\PDOStatement::class]);
+    $this->_fancy = false;
+
+    return $this;
+  }
+
+  /**
+   * Makes a string that will be the id of the request.
+   *
+   * @return string
+   *
+   */
+  public function makeHash(): string
+  {
+    $args = \func_get_args();
+    if ((\count($args) === 1) && \is_array($args[0])) {
+      $args = $args[0];
+    }
+
+    $st = '';
+    foreach ($args as $a){
+      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+    }
+
+    return $this->hash_contour.md5($st).$this->hash_contour;
+  }
+
+  /**
+   * Gets the created hash
+   *
+   * @return string
+   */
+  public function getHash(): string
+  {
+    return $this->hash;
+  }
+
+  /**
+   *
+   * @param array $args
+   * @return array|null
+   * @throws \Exception
+   */
+  public function processCfg(array $args, $force = false): ?array
+  {
+    // Avoid confusion when
+    while (\is_array($args) && isset($args[0]) && \is_array($args[0])){
+      $args = $args[0];
+    }
+
+    if (\is_array($args) && !empty($args['bbn_db_processed'])) {
+      return $args;
+    }
+
+    if (empty($args['bbn_db_treated'])) {
+      $args = $this->_treat_arguments($args);
+    }
+
+    //var_dump("UPD0", $args);
+    if (isset($args['hash'])) {
+      if (isset($this->cfgs[$args['hash']])) {
+        return array_merge(
+          $this->cfgs[$args['hash']], [
+            'values' => $args['values'] ?: [],
+            'where' => $args['where'] ?: [],
+            'filters' => $args['filters'] ?: []
+          ]
+        );
+      }
+
+      $tables_full = [];
+      $res         = array_merge(
+        $args, [
+          'tables' => [],
+          'values_desc' => [],
+          'bbn_db_processed' => true,
+          'available_fields' => [],
+          'generate_id' => false
+        ]
+      );
+      $models      = [];
+
+      foreach ($args['tables'] as $key => $tab) {
+        if (empty($tab)) {
+          $this->db->log(\debug_backtrace());
+          throw new \Exception("$key is not defined");
+        }
+
+        $tfn = $this->tableFullName($tab);
+
+        // 2 tables in the same statement can't have the same idx
+        $idx = \is_string($key) ? $key : $tfn;
+        // Error if they do
+        if (isset($tables_full[$idx])) {
+          $this->db->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']));
+          return null;
+        }
+
+        $tables_full[$idx]   = $tfn;
+        $res['tables'][$idx] = $tfn;
+        if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
+          $models[$tfn] = $model;
+        }
+      }
+
+      if ((\count($res['tables']) === 1)
+        && ($tfn = array_values($res['tables'])[0])
+        && isset($models[$tfn]['keys']['PRIMARY'])
+        && (\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
+        && ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
+      ) {
+        $p                     = $models[$tfn]['fields'][$res['primary']];
+        $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');
+        $res['primary_length'] = $p['maxlength'];
+        $res['primary_type']   = $p['type'];
+        if (($res['kind'] === 'INSERT')
+          && !$res['auto_increment']
+          && !\in_array($this->csn($res['primary']), $res['fields'], true)
+        ) {
+          $res['generate_id'] = true;
+          $res['fields'][]    = $res['primary'];
+        }
+      }
+
+      foreach ($args['join'] as $key => $join){
+        if (!empty($join['table']) && !empty($join['on'])) {
+          $tfn = $this->tfn($join['table']);
+          if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
+            $models[$tfn] = $model;
+          }
+
+          $idx               = $join['alias'] ?? $tfn;
+          $tables_full[$idx] = $tfn;
+        }
+        else{
+          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
+        }
+      }
+
+      foreach ($tables_full as $idx => $tfn){
+        foreach ($models[$tfn]['fields'] as $col => $cfg){
+          $res['available_fields'][$this->cfn($col, $idx)] = $idx;
+          $csn                                             = $this->csn($col);
+          if (!isset($res['available_fields'][$csn])) {
+            /*
+            $res['available_fields'][$csn] = false;
+            }
+            else{
+            */
+            $res['available_fields'][$csn] = $idx;
+          }
+        }
+      }
+
+      foreach ($res['fields'] as $idx => &$col){
+        if (strpos($col, '(')
+          || strpos($col, '-')
+          || strpos($col, "+")
+          || strpos($col, '*')
+          || strpos($col, "/")
+          /*
+        strpos($col, '->"$.')  ||
+        strpos($col, "->'$.") ||
+        strpos($col, '->>"$.')  ||
+        strpos($col, "->>'$.") ||
+        */
+          // string as value
+          || preg_match('/^[\\\'\"]{1}[^\\\'\"]*[\\\'\"]{1}$/', $col)
+        ) {
+          $res['available_fields'][$col] = false;
+        }
+
+        if (\is_string($idx)) {
+          if (!isset($res['available_fields'][$col])) {
+            //$this->log($res);
+            $this->error("Impossible to find the column $col");
+            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
+            return null;
+          }
+
+          $res['available_fields'][$idx] = $res['available_fields'][$col];
+        }
+      }
+
+      // From here the available fields are defined
+      if (!empty($res['filters'])) {
+        $this->arrangeConditions($res['filters'], $res);
+      }
+
+      unset($col);
+      $res['models']      = $models;
+      $res['tables_full'] = $tables_full;
+      switch ($res['kind']){
+        case 'SELECT':
+          if (empty($res['fields'])) {
+            foreach (array_keys($res['available_fields']) as $f){
+              if ($this->isColFullName($f)) {
+                $res['fields'][] = $f;
+              }
+            }
+          }
+
+          //X::log($res, 'sql');
+          if ($res['select_st'] = $this->language->getSelect($res)) {
+            $res['sql'] = $res['select_st'];
+          }
+          break;
+        case 'INSERT':
+          $res = $this->removeVirtual($res);
+          if ($res['insert_st'] = $this->language->getInsert($res)) {
+            $res['sql'] = $res['insert_st'];
+          }
+
+          //var_dump($res);
+          break;
+        case 'UPDATE':
+          $res = $this->removeVirtual($res);
+          if ($res['update_st'] = $this->getUpdate($res)) {
+            $res['sql'] = $res['update_st'];
+          }
+          break;
+        case 'DELETE':
+          if ($res['delete_st'] = $this->getDelete($res)) {
+            $res['sql'] = $res['delete_st'];
+          }
+          break;
+      }
+
+      $res['join_st']   = $this->language->getJoin($res);
+      $res['where_st']  = $this->language->getWhere($res);
+      $res['group_st']  = $this->language->getGroupBy($res);
+      $res['having_st'] = $this->language->getHaving($res);
+      $cls              = '\\bbn\\Db2\\languages\\'.$this->engine;
+      if (empty($res['count'])
+        && (count($res['fields']) === 1)
+        && ($cls::isAggregateFunction(reset($res['fields'])))
+      ) {
+        $res['order_st'] = '';
+        $res['limit_st'] = '';
+      }
+      else {
+        $res['order_st'] = $res['count'] ? '' : $this->language->getOrder($res);
+        $res['limit_st'] = $res['count'] ? '' : $this->language->getLimit($res);
+      }
+
+      if (!empty($res['sql'])) {
+        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'];
+        if ($res['count'] && $res['group_by']) {
+          $res['sql'] .= ') AS t '.PHP_EOL;
+        }
+
+        $res['sql']           .= $res['having_st'].$res['order_st'].$res['limit_st'];
+        $res['statement_hash'] = $this->_make_hash($res['sql']);
+
+        foreach ($res['join'] as $r){
+          $this->getValuesDesc($r['on'], $res, $res['values_desc']);
+        }
+
+        if (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE')) {
+          foreach ($res['fields'] as $name){
+            $desc = [];
+            if (isset($res['models'], $res['available_fields'][$name])) {
+              $t = $res['available_fields'][$name];
+              if (isset($tables_full[$t])
+                && ($model = $res['models'][$tables_full[$t]]['fields'])
+                && ($fname = $this->csn($name))
+                && !empty($model[$fname]['type'])
+              ) {
+                $desc['type']      = $model[$fname]['type'];
+                $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
+              }
+            }
+
+            $res['values_desc'][] = $desc;
+          }
+        }
+
+        $this->getValuesDesc($res['filters'], $res, $res['values_desc']);
+        $this->getValuesDesc($res['having'], $res, $res['values_desc']);
+        $this->cfgs[$res['hash']] = $res;
+      }
+
+      return $res;
+    }
+
+    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
+    return null;
+  }
+
+  /**
+   * Normalizes arguments by making it a uniform array.
+   *
+   * <ul><h3>The array will have the following indexes:</h3>
+   * <li>fields</li>
+   * <li>where</li>
+   * <li>filters</li>
+   * <li>order</li>
+   * <li>limit</li>
+   * <li>start</li>
+   * <li>join</li>
+   * <li>group_by</li>
+   * <li>having</li>
+   * <li>values</li>
+   * <li>hashed_join</li>
+   * <li>hashed_where</li>
+   * <li>hashed_having</li>
+   * <li>php</li>
+   * <li>done</li>
+   * </ul>
+   *
+   * @todo Check for the tables and column names legality!
+   *
+   * @param $cfg
+   * @return array
+   */
+  private function _treat_arguments($cfg): array
+  {
+    while (isset($cfg[0]) && \is_array($cfg[0])){
+      $cfg = $cfg[0];
+    }
+
+    if (\is_array($cfg)
+      && array_key_exists('tables', $cfg)
+      && array_key_exists('bbn_db_treated', $cfg)
+      && ($cfg['bbn_db_treated'] === true)
+    ) {
+      return $cfg;
+    }
+
+    $res = [
+      'kind' => 'SELECT',
+      'fields' => [],
+      'where' => [],
+      'order' => [],
+      'limit' => 0,
+      'start' => 0,
+      'group_by' => [],
+      'having' => [],
+    ];
+    if (X::isAssoc($cfg)) {
+      if (isset($cfg['table']) && !isset($cfg['tables'])) {
+        $cfg['tables'] = $cfg['table'];
+        unset($cfg['table']);
+      }
+
+      $res = array_merge($res, $cfg);
+    }
+    elseif (count($cfg) > 1) {
+      $res['kind']   = strtoupper($cfg[0]);
+      $res['tables'] = $cfg[1];
+      if (isset($cfg[2])) {
+        $res['fields'] = $cfg[2];
+      }
+
+      if (isset($cfg[3])) {
+        $res['where'] = $cfg[3];
+      }
+
+      if (isset($cfg[4])) {
+        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
+      }
+
+      if (isset($cfg[5]) && Str::isInteger($cfg[5])) {
+        $res['limit'] = $cfg[5];
+      }
+
+      if (isset($cfg[6]) && !empty($res['limit'])) {
+        $res['start'] = $cfg[6];
+      }
+    }
+
+    $res           = array_merge(
+      $res, [
+        'aliases' => [],
+        'values' => [],
+        'filters' => [],
+        'join' => [],
+        'hashed_join' => [],
+        'hashed_where' => [],
+        'hashed_having' => [],
+        'bbn_db_treated' => true
+      ]
+    );
+    $res['kind']   = strtoupper($res['kind']);
+    $res['write']  = \in_array($res['kind'], self::$write_kinds, true);
+    $res['ignore'] = $res['write'] && !empty($res['ignore']);
+    $res['count']  = !$res['write'] && !empty($res['count']);
+    if (!\is_array($res['tables'])) {
+      $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
+    }
+
+    if (!empty($res['tables'])) {
+      foreach ($res['tables'] as $i => $t){
+        if (!is_string($t)) {
+          X::log([$cfg, debug_backtrace()], 'db_explained');
+          throw new \Exception("Impossible to identify the tables, check the log");
+        }
+
+        $res['tables'][$i] = $this->tfn($t);
+      }
+    }
+    else{
+      throw new \Error(X::_('No table given'));
+      return [];
+    }
+
+    if (!empty($res['fields'])) {
+      if (\is_string($res['fields'])) {
+        $res['fields'] = [$res['fields']];
+      }
+    }
+    elseif (!empty($res['columns'])) {
+      $res['fields'] = (array)$res['columns'];
+    }
+
+    if (!empty($res['fields'])) {
+      if ($res['kind'] === 'SELECT') {
+        foreach ($res['fields'] as $k => $col) {
+          if (\is_string($k)) {
+            $res['aliases'][$col] = $k;
+          }
+        }
+      }
+      elseif ((($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
+        && \is_string(array_keys($res['fields'])[0])
+      ) {
+        $res['values'] = array_values($res['fields']);
+        $res['fields'] = array_keys($res['fields']);
+      }
+    }
+
+    if (!\is_array($res['group_by'])) {
+      $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
+    }
+
+    if (!\is_array($res['where'])) {
+      $res['where'] = [];
+    }
+
+    if (!\is_array($res['order'])) {
+      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
+    }
+
+    if (!Str::isInteger($res['limit'])) {
+      unset($res['limit']);
+    }
+
+    if (!Str::isInteger($res['start'])) {
+      unset($res['start']);
+    }
+
+    if (!empty($cfg['join'])) {
+      foreach ($cfg['join'] as $k => $join){
+        if (\is_array($join)) {
+          if (\is_string($k)) {
+            if (empty($join['table'])) {
+              $join['table'] = $k;
+            }
+            elseif (empty($join['alias'])) {
+              $join['alias'] = $k;
+            }
+          }
+
+          if (isset($join['table'], $join['on']) && ($tmp = $this->treatConditions($join['on'], false))) {
+            if (!isset($join['type'])) {
+              $join['type'] = 'right';
+            }
+
+            $res['join'][] = array_merge($join, ['on' => $tmp]);
+          }
+        }
+      }
+    }
+
+    if ($tmp = $this->treatConditions($res['where'], false)) {
+      $res['filters'] = $tmp;
+    }
+
+    if (!empty($res['having']) && ($tmp = $this->treatConditions($res['having'], false))) {
+      $res['having'] = $tmp;
+    }
+
+    if (!empty($res['group_by'])) {
+      $this->_adapt_filters($res);
+    }
+
+    if (!empty($res['join'])) {
+      $new_join = [];
+      foreach ($res['join'] as $k => $join){
+        if ($tmp = $this->treatConditions($join['on'])) {
+          $new_item             = $join;
+          $new_item['on']       = $tmp['where'];
+          $res['hashed_join'][] = $tmp['hashed'];
+          if (!empty($tmp['values'])) {
+            foreach ($tmp['values'] as $v){
+              $res['values'][] = $v;
+            }
+          }
+
+          $new_join[] = $new_item;
+        }
+      }
+
+      $res['join'] = $new_join;
+    }
+
+    if (!empty($res['filters']) && ($tmp = $this->treatConditions($res['filters']))) {
+      $res['filters']      = $tmp['where'];
+      $res['hashed_where'] = $tmp['hashed'];
+      if (\is_array($tmp) && isset($tmp['values'])) {
+        foreach ($tmp['values'] as $v){
+          $res['values'][] = $v;
+        }
+      }
+    }
+
+    if (!empty($res['having']) && ($tmp = $this->treatConditions($res['having']))) {
+      $res['having']        = $tmp['where'];
+      $res['hashed_having'] = $tmp['hashed'];
+      foreach ($tmp['values'] as $v){
+        $res['values'][] = $v;
+      }
+    }
+
+    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
+        $res['kind'],
+        $res['ignore'],
+        $res['count'],
+        $res['tables'],
+        $res['fields'],
+        $res['hashed_join'],
+        $res['hashed_where'],
+        $res['hashed_having'],
+        $res['group_by'],
+        $res['order'],
+        $res['limit'] ?? 0,
+        $res['start'] ?? 0
+      );
+    return $res;
+  }
 }
