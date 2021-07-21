@@ -145,16 +145,18 @@ class MollieManager
    * Create a payment for the first time for the user.
    * Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']
    *
-   * This will return the customerId in the response.
+   * This will return the `customerId` and `mandateId` in the response.
    *
    * @param array $customer_data
    * @param array $payment_data
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPaymentFirstTime(array $customer_data, array $payment_data)
+  public function createPaymentFirstTime(array $customer_data, array $payment_data): array
   {
     $customer = $this->mollie->customers->create($customer_data);
+
+    $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);
 
     try {
       return $this->createPayment($payment_data, $customer->id);
@@ -163,6 +165,145 @@ class MollieManager
       $this->mollie->customers->delete($customer->id);
       throw new \Exception($e->getMessage());
     }
+  }
+
+  /**
+   * Charging immediately on-demand.
+   *
+   * https://docs.mollie.com/payments/recurring#payments-recurring-charging-on-demand
+   *
+   * @param array $payment_data
+   * @param string $customer_id
+   * @param string $mandate_id
+   * @return array|null
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function createOnDemandPayment(array $payment_data, string $customer_id, string $mandate_id): ?array
+  {
+    if (!$this->customerHasValidMandate(
+      $customer_id,
+      $mandate_id,
+      array_key_exists('testmode', $payment_data) ? ['test_mode' => $payment_data['testmode']] : [])
+    ) {
+      // If the mandate is not valid then creates a new one by having
+      // The customer performs a first payment: createPaymentFirstTime()
+      // Then update the new customer and mandate id in database.
+      return null;
+    }
+
+    $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);
+
+    return $this->createPayment($payment_data, $customer_id);
+  }
+
+  /**
+   * Checks if the provided mandate is valid.
+   *
+   * @param string $customer_id
+   * @param string $mandate_id
+   * @param array $params
+   * @return bool
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  private function customerHasValidMandate(string $customer_id, string $mandate_id, array $params = []): bool
+  {
+    $mandate = $this->getMandate($customer_id, $mandate_id, $params);
+
+    return $mandate['status'] === 'valid';
+  }
+
+  /**
+   * Retrieve a mandate by its ID and its customer’s ID.
+   *
+   * https://docs.mollie.com/reference/v2/mandates-api/get-mandate
+   *
+   * @param string $customer_id
+   * @param string $mandate_id
+   * @param array $params
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function getMandate(string $customer_id, string $mandate_id, array $params = []): array
+  {
+    $customer = $this->getCustomerFromId($customer_id, $params);
+
+    $mandate = $customer->getMandate($mandate_id, $params);
+
+    return X::toArray($mandate);
+  }
+
+  /**
+   * Retrieve all mandates for the given customerId, ordered from newest to oldest.
+   *
+   * https://docs.mollie.com/reference/v2/mandates-api/list-mandates
+   *
+   * @param string $customer_id
+   * @param array $params
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function listMandates(string $customer_id, array $params = []): array
+  {
+    $customer = $this->getCustomerFromId($customer_id, $params);
+
+    $mandates = $customer->mandates();
+
+    return X::toArray($mandates);
+  }
+
+  /**
+   * Revoke a customer’s mandate.
+   *
+   * You will no longer be able to charge the consumer’s bank account or credit card
+   * with this mandate and all connected subscriptions will be canceled.
+   *
+   * https://docs.mollie.com/reference/v2/mandates-api/revoke-mandate
+   *
+   * @param string $customer_id
+   * @param string $mandate_id
+   * @param array $params
+   * @return void
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function revokeMandate(string $customer_id, string $mandate_id, array $params = []): void
+  {
+    $customer = $this->getCustomerFromId($customer_id, $params);
+
+    $mandate = $customer->getMandate($mandate_id);
+
+    $mandate->revoke();
+  }
+
+  /**
+   * Retrieve a single customer by its ID.
+   *
+   * https://docs.mollie.com/reference/v2/customers-api/get-customer
+   *
+   * @param string $customer_id
+   * @param array $params
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function getCustomer(string $customer_id, array $params = []): array
+  {
+    return X::toArray(
+      $this->getCustomerFromId($customer_id, $params)
+    );
+  }
+
+  /**
+   * Retrieve a single customer by its ID.
+   *
+   * https://docs.mollie.com/reference/v2/customers-api/get-customer
+   *
+   * @param string $customer_id
+   * @param array $params
+   * @return \Mollie\Api\Resources\Customer
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  private function getCustomerFromId(string $customer_id, array $params = []): \Mollie\Api\Resources\Customer
+  {
+    return $this->mollie->customers->get($customer_id, $params);
   }
 
   /**

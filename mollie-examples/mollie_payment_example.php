@@ -62,9 +62,12 @@ $payment_data = [
   ]
 ];
 
-$payment = $mollie_manager->createPayment($payment_data, 'customer_id');
+/**
+ *
+ * Create payment for the first time
+ *
+ */
 
-// Create payment for the first time
 $customer_data = [
   "name" => "Customer A",
   "email" => "customer@example.org",
@@ -74,11 +77,38 @@ $customer_data = [
   "metadata" => ['']
 ];
 
-$payment = $mollie_manager->createPaymentFirstTime($customer_data, $payment_data);
+$first_payment = $mollie_manager->createPaymentFirstTime($customer_data, $payment_data);
 
-$customer_id = $payment['customerId'];
+// Should be saved both in database
+$customer_id = $first_payment['customerId'];
+$mandate_id  = $first_payment['mandateId'];
 
 // Redirect to the checkout page
-header("Location: " . $payment['_links']['checkout']['href']);
+header("Location: " . $first_payment['_links']['checkout']['href']);
+
+
+/**
+ *
+ * Create an on demand payment which will be charged immediately.
+ *
+ * Requires both customerId and mandateId.
+ *
+ */
+
+$on_demand_payment = $mollie_manager->createOnDemandPayment($payment_data, $customer_id, $mandate_id);
+if ($on_demand_payment === null) {
+  // Mandate is not valid then creates a new one by having
+  // The customer performs a first payment
+  // Then update the new customer and mandate id in database.
+
+  $new_first_payment = $mollie_manager->createPaymentFirstTime($customer_data, $payment_data);
+
+  // Update those in database
+  $new_customer_id = $new_first_payment['customerId'];
+  $new_mandate_id  = $new_first_payment['mandateId'];
+
+  // Redirect to the checkout page
+  header("Location: " . $new_first_payment['_links']['checkout']['href']);
+}
 
 
