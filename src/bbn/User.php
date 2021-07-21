@@ -800,7 +800,7 @@ class User extends Models\Cls\Basic
      */
   public function getSession($attr = null)
   {
-    if ($this->session->has($this->userIndex)) {
+    if ($this->session && $this->session->has($this->userIndex)) {
       return $attr ? $this->session->get($this->userIndex, $attr) : $this->session->get($this->userIndex);
     }
 
