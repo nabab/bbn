@@ -2032,6 +2032,22 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   }
 
 
+  public function selfAnalyze()
+  {
+    $o = get_object_vars($this);
+    $res = [];
+    foreach ($o as $k => $v) {
+      try {
+        $res[$k] = strlen(serialize($v));
+      }
+      catch (\Exception $e) {
+        $res[$k] = $e->getMessage();
+      }
+    }
+    return $res;
+  }
+
+
   /**
    * Executes the original PDO query function
    *

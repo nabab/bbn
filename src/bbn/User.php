@@ -102,7 +102,10 @@ class User extends Models\Cls\Basic
         'id_user' => 'id_user',
         'token' => 'token',
         'creation' => 'creation',
-        'device_uid' => 'device_uid'
+        'last' => 'last',
+        'device_uid' => 'device_uid',
+        'device_lang' => 'device_lang',
+        'notifications_token' => 'notifications_token'
       ],
       'users' => [
         'id' => 'id',
@@ -143,6 +146,7 @@ class User extends Models\Cls\Basic
       'action' => 'action',
       'token'  => 'appui_token',
       'device_uid'  => 'device_uid',
+      'device_lang' => 'device_lang',
       'phone_number' => 'phone_number',
       'phone_verification_code'  => 'phone_verification_code'
     ],
@@ -284,6 +288,7 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token'));
         }
 
+        // Check if the phone number is already registered
         if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))
           && ($exUser[$f['id']] !== $user_id)
           && $this->updateApiTokenUserByTokenDevice($params[$f['token']], $params[$f['device_uid']], $exUser[$f['id']])
@@ -350,7 +355,7 @@ class User extends Models\Cls\Basic
 
         // Update user id and the new token in the row with the old token and device uid.
         $this->db->update(
-            $this->class_cfg['tables']['api_tokens'],[
+            $this->class_cfg['tables']['api_tokens'], [
             $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],
             $this->class_cfg['arch']['api_tokens']['token']    => $new_token,
           ], [
@@ -372,6 +377,14 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
         }
 
+        // Update device_lang and last 
+        $this->db->update($this->class_cfg['tables']['api_tokens'], [
+          $this->class_cfg['arch']['api_tokens']['device_lang'] => $params[$f['device_lang']] ?? '',
+          $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')
+        ], [
+          $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
+          $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]
+        ]);
 
         // Now the user is authenticated
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
@@ -787,7 +800,7 @@ class User extends Models\Cls\Basic
      */
   public function getSession($attr = null)
   {
-    if ($this->session->has($this->userIndex)) {
+    if ($this->session && $this->session->has($this->userIndex)) {
       return $attr ? $this->session->get($this->userIndex, $attr) : $this->session->get($this->userIndex);
     }
 
@@ -2140,7 +2153,15 @@ class User extends Models\Cls\Basic
    */
   protected function updatePhoneVerificationCode($phone_number, ?string $code): bool
   {
-    $cfg = json_encode(['phone_verification_code' => $code]);
+    if ($oldCfg = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['cfg'], [
+      $this->class_cfg['arch']['users']['id'] => $this->id
+    ])) {
+      $oldCfg = json_decode($oldCfg, true);
+    }
+    else {
+      $oldCfg = [];
+    }
+    $cfg = json_encode(\array_merge($oldCfg, ['phone_verification_code' => $code]));
     try {
       $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
     }
@@ -2211,6 +2232,28 @@ class User extends Models\Cls\Basic
   public function getApiRequestOutput()
   {
     return $this->api_request_output;
+  }
+
+  public function getApiNotificationsToken(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne([
+      'table' => $this->class_cfg['tables']['api_tokens'],
+      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],
+      'where' => [ 
+        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id
+      ],
+      'order' => [[
+        'field' => $this->class_cfg['arch']['api_tokens']['last'],
+        'dir' => 'DESC'
+      ]]
+    ]);
+  }
+
+  public function getPhoneNumber(string $idUser = ''): ?string
+  {
+    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
+      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
+    ]);
   }
 
   /**
