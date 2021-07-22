@@ -7,6 +7,7 @@ namespace bbn\Db2\Languages;
 use bbn;
 use bbn\Str;
 use bbn\X;
+use PHPSQLParser\PHPSQLParser;
 
 /**
  * Database Class
@@ -21,6 +22,8 @@ use bbn\X;
  */
 class Mysql implements bbn\Db2\Engines
 {
+  use bbn\Models\Tts\Cache;
+
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
 
@@ -144,6 +147,50 @@ class Mysql implements bbn\Db2\Engines
    */
   protected $cfgs = [];
 
+  /**
+   * A PHPSQLParser object
+   * @var PHPSQLParser
+   */
+  private $_parser;
+
+  /** @var array The 'kinds' of writing statement */
+  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
+
+  /** @var array The 'kinds' of structure alteration statement */
+  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
+
+  /**
+   * @var mixed $id_just_inserted
+   */
+  protected $id_just_inserted;
+
+  /**
+   * @var mixed $last_insert_id
+   */
+  protected $last_insert_id;
+
+  /**
+   * The information that will be accessed by Db\Query as the current statement's options
+   * @var array $last_params
+   */
+  protected $last_params = ['sequences' => false, 'values' => false];
+
+  /**
+   * @var string \$last_query
+   */
+  protected $last_query;
+
+
+  /**
+   * @var string \$last_query
+   */
+  protected $last_real_query;
+
+  /**
+   * @var array $last_real_params
+   */
+  protected $last_real_params = ['sequences' => false, 'values' => false];
+
 
   /**
    * Returns true if the column name is an aggregate function
@@ -261,254 +308,6 @@ class Mysql implements bbn\Db2\Engines
     $this->db->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
     return $this->db;
   }
-
-
-  /**
-   * @return null|array
-   */
-  public function getDatabases(): ?array
-  {
-    if (!$this->db->check()) {
-      return null;
-    }
-
-    $x = [];
-    if ($r = $this->db->rawQuery('SHOW DATABASES')) {
-      $x = array_map(
-        function ($a) {
-          return $a['Database'];
-        }, array_filter(
-          $r->fetchAll(\PDO::FETCH_ASSOC), function ($a) {
-            return ($a['Database'] === 'information_schema') || ($a['Database'] === 'mysql') ? false : 1;
-          }
-        )
-      );
-      sort($x);
-    }
-
-    return $x;
-  }
-
-
-  /**
-   * @param string $database Database name
-   * @return null|array
-   */
-  public function getTables(string $database = ''): ?array
-  {
-    if (!$this->db->check()) {
-      return null;
-    }
-
-    if (empty($database) || !bbn\Str::checkName($database)) {
-      $database = $this->db->getCurrent();
-    }
-
-    $t2 = [];
-    if (($r = $this->db->rawQuery("SHOW TABLES FROM `$database`"))
-        && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
-    ) {
-      foreach ($t1 as $t) {
-        $t2[] = $t[0];
-      }
-    }
-
-    return $t2;
-  }
-
-
-  /**
-   * Returns the columns' configuration of the given table.
-   * @param null|string $table The table's name
-   * @return null|array
-   */
-  public function getColumns(string $table): ?array
-  {
-    if (!$this->db->check()) {
-      return null;
-    }
-
-    $r = [];
-    if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
-      [$db, $table] = $t;
-      $sql          = <<<MYSQL
-        SELECT *
-        FROM `information_schema`.`COLUMNS`
-        WHERE `TABLE_NAME` LIKE ?
-        AND `TABLE_SCHEMA` LIKE ?
-        ORDER BY `ORDINAL_POSITION` ASC
-MYSQL;
-      if ($rows = $this->db->getRows($sql, $table, $db)) {
-        $p = 1;
-        foreach ($rows as $row) {
-          $f          = $row['COLUMN_NAME'];
-          $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
-            && (stripos($row['DATA_TYPE'], 'blob') === false)
-            && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
-          $r[$f]      = [
-            'position' => $p++,
-            'type' => $row['DATA_TYPE'],
-            'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
-            'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
-            'extra' => $row['EXTRA'],
-            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
-            'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
-            'generation' => $row['GENERATION_EXPRESSION'],
-          ];
-          if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
-            $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
-          }
-
-          if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
-            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
-                && !empty($matches[1])
-                && \is_string($matches[1][0])
-                && ($matches[1][0][0] === "'")
-            ) {
-              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
-              $r[$f]['extra']  = $matches[1][0];
-            } else {
-              $r[$f]['values'] = [];
-            }
-          } elseif (preg_match_all('/\((\d+)?(?:,)|(\d+)\)/', $row['COLUMN_TYPE'], $matches)) {
-            if (empty($matches[1][0])) {
-              if (!empty($matches[2][0])) {
-                $r[$f]['maxlength'] = (int)$matches[2][0];
-              }
-            } else {
-              $r[$f]['maxlength'] = (int)$matches[1][0];
-              $r[$f]['decimals']  = (int)$matches[2][1];
-            }
-          }
-        }
-
-        /*
-        else{
-        preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
-        if ( strpos($row['Type'],'text') !== false ){
-        $r[$f]['type'] = 'text';
-        }
-        else if ( strpos($row['Type'],'blob') !== false ){
-        $r[$f]['type'] = 'blob';
-        }
-        else if ( strpos($row['Type'],'int(') !== false ){
-        $r[$f]['type'] = 'int';
-        }
-        else if ( strpos($row['Type'],'char(') !== false ){
-        $r[$f]['type'] = 'varchar';
-        }
-        if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
-        $r[$f]['maxlength'] = (int)$matches[1][0];
-        }
-        if ( !isset($r[$f]['type']) ){
-        $r[$f]['type'] = strpos($row['Type'], '(') ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
-        }
-        }
-        */
-      }
-    }
-
-    return $r;
-  }
-
-
-  /**
-   * Returns the keys of the given table.
-   * @param string $table The table's name
-   * @return null|array
-   */
-  public function getKeys(string $table): ?array
-  {
-    if (!$this->db->check()) {
-      return null;
-    }
-
-    $r = [];
-    if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
-      [$db, $table] = $t;
-      $r            = [];
-      $indexes      = $this->db->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
-      $keys         = [];
-      $cols         = [];
-      foreach ($indexes as $i => $index) {
-        $a = $this->db->getRow(
-          <<<MYSQL
-SELECT `CONSTRAINT_NAME` AS `name`,
-`ORDINAL_POSITION` AS `position`,
-`REFERENCED_TABLE_SCHEMA` AS `ref_db`,
-`REFERENCED_TABLE_NAME` AS `ref_table`,
-`REFERENCED_COLUMN_NAME` AS `ref_column`
-FROM `information_schema`.`KEY_COLUMN_USAGE`
-WHERE `TABLE_SCHEMA` LIKE ?
-AND `TABLE_NAME` LIKE ?
-AND `COLUMN_NAME` LIKE ?
-AND (
-  `CONSTRAINT_NAME` LIKE ? OR
-  (`REFERENCED_TABLE_NAME` IS NOT NULL OR `ORDINAL_POSITION` = ?)
-)
-ORDER BY `KEY_COLUMN_USAGE`.`REFERENCED_TABLE_NAME` DESC
-LIMIT 1
-MYSQL
-          ,
-          $db,
-          $table,
-          $index['Column_name'],
-          $index['Key_name'],
-          $index['Seq_in_index']
-        );
-        if ($a) {
-          $b = $this->db->getRow(
-            <<<MYSQL
-          SELECT `CONSTRAINT_NAME` AS `name`,
-          `UPDATE_RULE` AS `update`,
-          `DELETE_RULE` AS `delete`
-          FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
-          WHERE `CONSTRAINT_NAME` LIKE ?
-          AND `CONSTRAINT_SCHEMA` LIKE ?
-          AND `TABLE_NAME` LIKE ?
-          LIMIT 1
-MYSQL
-            ,
-            $a['name'],
-            $db,
-            $table
-          );
-        } elseif (isset($b)) {
-          unset($b);
-        }
-
-        if (!isset($keys[$index['Key_name']])) {
-          $keys[$index['Key_name']] = [
-            'columns' => [$index['Column_name']],
-            'ref_db' => isset($a, $a['ref_db']) ? $a['ref_db'] : null,
-            'ref_table' => isset($a, $a['ref_table']) ? $a['ref_table'] : null,
-            'ref_column' => isset($a, $a['ref_column']) ? $a['ref_column'] : null,
-            'constraint' => isset($b, $b['name']) ? $b['name'] : null,
-            'update' => isset($b, $b['update']) ? $b['update'] : null,
-            'delete' => isset($b, $b['delete']) ? $b['delete'] : null,
-            'unique' => $index['Non_unique'] ? 0 : 1,
-          ];
-        } else {
-          $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
-          $keys[$index['Key_name']]['ref_db']    = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
-        }
-
-        if (!isset($cols[$index['Column_name']])) {
-          $cols[$index['Column_name']] = [$index['Key_name']];
-        } else {
-          $cols[$index['Column_name']][] = $index['Key_name'];
-        }
-      }
-
-      $r['keys'] = $keys;
-      $r['cols'] = $cols;
-    }
-
-    return $r;
-  }
-
 
   /**
    * Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise
@@ -1180,13 +979,19 @@ MYSQL
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateTable(string $table, array $model = null): string
   {
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
-    $st   = 'CREATE TABLE ' . $this->db->escape($table) . ' (' . PHP_EOL;
+    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
     $done = false;
     foreach ($model['fields'] as $name => $col) {
       if (!$done) {
@@ -1196,7 +1001,7 @@ MYSQL
         $st .= ',' . PHP_EOL;
       }
 
-      $st .= '  ' . $this->db->escape($name) . ' ';
+      $st .= '  ' . $this->escape($name) . ' ';
       if (!in_array($col['type'], self::$types)) {
         if (isset(self::$interoperability[$col['type']])) {
           $st .= self::$interoperability[$col['type']];
@@ -1987,7 +1792,7 @@ MYSQL
           $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
           $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
         }
-        elseif (($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
+        elseif (($this->db->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
           $params['kind'] = 'PRAGMA';
         }
         else{
@@ -2024,7 +1829,7 @@ MYSQL
 
       /* The number of values must match the number of placeholders to bind */
       if ($num_values !== $q['placeholders']) {
-        $this->error(
+        $this->db->error(
           'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
           .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
           .print_r(\func_get_args(), true)
@@ -2056,20 +1861,20 @@ MYSQL
         // This is a writing statement, it will execute the statement and return the number of affected rows
         if ($q['write']) {
           // A prepared query already exists for the writing
-          /** @var Db\Query */
+          /** @var \bbn\Db2\Query */
           if ($q['prepared']) {
             $r = $q['prepared']->init($params['values'])->execute();
           }
           // If there are no values we can assume the statement doesn't need to be prepared and is just executed
           elseif ($num_values === 0) {
             // Native PDO function which returns the number of affected rows
-            $r = $this->exec($q['sql']);
+            $r = $this->pdo->exec($q['sql']);
           }
           // Preparing the query
           else{
             // Native PDO function which will use Db\Query as base class
-            /** @var Db\Query */
-            $q['prepared'] = $this->prepare($q['sql'], $q['options']);
+            /** @var \bbn\Db\Query */
+            $q['prepared'] = $this->pdo->prepare($q['sql'], $q['options']);
             $r             = $q['prepared']->execute();
           }
         }
@@ -2077,7 +1882,7 @@ MYSQL
         else{
           if (!$q['prepared']) {
             // Native PDO function which will use Db\Query as base class
-            $q['prepared'] = $this->prepare($q['sql'], $driver_options);
+            $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
           }
           else{
             // Returns the same Db\Query object
@@ -2090,10 +1895,10 @@ MYSQL
         }
       }
       catch (\PDOException $e){
-        $this->error($e);
+        $this->db->error($e);
       }
 
-      if ($this->check()) {
+      if ($this->db->check()) {
         // So if read statement returns the query object
         if (!$q['write']) {
           return $q['prepared'];
@@ -2112,6 +1917,48 @@ MYSQL
         return $r ?? false;
       }
     }
+  }
+
+  /**
+   * Changes the value of last_insert_id (used by history).
+   *
+   * @param string $id
+   * @return $this
+   */
+  public function setLastInsertId($id=''): self
+  {
+    if ($id === '') {
+      if ($this->id_just_inserted) {
+        $id                     = $this->id_just_inserted;
+        $this->id_just_inserted = null;
+      }
+      else{
+        $id = $this->pdo->lastInsertId();
+        if (\is_string($id) && Str::isInteger($id) && ((int)$id != PHP_INT_MAX)) {
+          $id = (int)$id;
+        }
+      }
+    }
+    else{
+      $this->id_just_inserted = $id;
+    }
+
+    $this->last_insert_id = $id;
+    return $this;
+  }
+
+  /**
+   * Return the last inserted ID.
+   *
+   * @return false|mixed|string
+   */
+  public function lastId()
+  {
+    if ($this->last_insert_id) {
+      return Str::isBuid($this->last_insert_id) ? bin2hex($this->last_insert_id) : $this->last_insert_id;
+    }
+
+    return false;
   }
 
   /**
@@ -2183,10 +2030,11 @@ MYSQL
   /**
    *
    * @param array $args
+   * @param bool $force
    * @return array|null
    * @throws \Exception
    */
-  public function processCfg(array $args, $force = false): ?array
+  public function processCfg(array $args, bool $force = false): ?array
   {
     // Avoid confusion when
     while (\is_array($args) && isset($args[0]) && \is_array($args[0])){
@@ -2260,7 +2108,7 @@ MYSQL
         $res['primary_type']   = $p['type'];
         if (($res['kind'] === 'INSERT')
           && !$res['auto_increment']
-          && !\in_array($this->csn($res['primary']), $res['fields'], true)
+          && !\in_array($this->colSimpleName($res['primary']), $res['fields'], true)
         ) {
           $res['generate_id'] = true;
           $res['fields'][]    = $res['primary'];
@@ -2269,7 +2117,7 @@ MYSQL
 
       foreach ($args['join'] as $key => $join){
         if (!empty($join['table']) && !empty($join['on'])) {
-          $tfn = $this->tfn($join['table']);
+          $tfn = $this->tableFullName($join['table']);
           if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
             $models[$tfn] = $model;
           }
@@ -2278,14 +2126,14 @@ MYSQL
           $tables_full[$idx] = $tfn;
         }
         else{
-          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
+          $this->db->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
         }
       }
 
       foreach ($tables_full as $idx => $tfn){
         foreach ($models[$tfn]['fields'] as $col => $cfg){
-          $res['available_fields'][$this->cfn($col, $idx)] = $idx;
-          $csn                                             = $this->csn($col);
+          $res['available_fields'][$this->colFullName($col, $idx)] = $idx;
+          $csn                                             = $this->colSimpleName($col);
           if (!isset($res['available_fields'][$csn])) {
             /*
             $res['available_fields'][$csn] = false;
@@ -2318,8 +2166,8 @@ MYSQL
         if (\is_string($idx)) {
           if (!isset($res['available_fields'][$col])) {
             //$this->log($res);
-            $this->error("Impossible to find the column $col");
-            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
+            $this->db->error("Impossible to find the column $col");
+            $this->db->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
             return null;
           }
 
@@ -2346,13 +2194,13 @@ MYSQL
           }
 
           //X::log($res, 'sql');
-          if ($res['select_st'] = $this->language->getSelect($res)) {
+          if ($res['select_st'] = $this->getSelect($res)) {
             $res['sql'] = $res['select_st'];
           }
           break;
         case 'INSERT':
           $res = $this->removeVirtual($res);
-          if ($res['insert_st'] = $this->language->getInsert($res)) {
+          if ($res['insert_st'] = $this->getInsert($res)) {
             $res['sql'] = $res['insert_st'];
           }
 
@@ -2371,21 +2219,21 @@ MYSQL
           break;
       }
 
-      $res['join_st']   = $this->language->getJoin($res);
-      $res['where_st']  = $this->language->getWhere($res);
-      $res['group_st']  = $this->language->getGroupBy($res);
-      $res['having_st'] = $this->language->getHaving($res);
-      $cls              = '\\bbn\\Db2\\languages\\'.$this->engine;
+      $res['join_st']   = $this->getJoin($res);
+      $res['where_st']  = $this->getWhere($res);
+      $res['group_st']  = $this->getGroupBy($res);
+      $res['having_st'] = $this->getHaving($res);
+
       if (empty($res['count'])
         && (count($res['fields']) === 1)
-        && ($cls::isAggregateFunction(reset($res['fields'])))
+        && (self::isAggregateFunction(reset($res['fields'])))
       ) {
         $res['order_st'] = '';
         $res['limit_st'] = '';
       }
       else {
-        $res['order_st'] = $res['count'] ? '' : $this->language->getOrder($res);
-        $res['limit_st'] = $res['count'] ? '' : $this->language->getLimit($res);
+        $res['order_st'] = $res['count'] ? '' : $this->getOrder($res);
+        $res['limit_st'] = $res['count'] ? '' : $this->getLimit($res);
       }
 
       if (!empty($res['sql'])) {
@@ -2395,7 +2243,7 @@ MYSQL
         }
 
         $res['sql']           .= $res['having_st'].$res['order_st'].$res['limit_st'];
-        $res['statement_hash'] = $this->_make_hash($res['sql']);
+        $res['statement_hash'] = $this->makeHash($res['sql']);
 
         foreach ($res['join'] as $r){
           $this->getValuesDesc($r['on'], $res, $res['values_desc']);
@@ -2408,7 +2256,7 @@ MYSQL
               $t = $res['available_fields'][$name];
               if (isset($tables_full[$t])
                 && ($model = $res['models'][$tables_full[$t]]['fields'])
-                && ($fname = $this->csn($name))
+                && ($fname = $this->colSimpleName($name))
                 && !empty($model[$fname]['type'])
               ) {
                 $desc['type']      = $model[$fname]['type'];
@@ -2428,8 +2276,28 @@ MYSQL
       return $res;
     }
 
-    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
+    $this->db->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
     return null;
+  }
+
+  /**
+   * @param array $cfg
+   * @return array|null
+   * @throws \Exception
+   */
+  public function reprocessCfg(array $cfg): ?array
+  {
+    unset($cfg['bbn_db_processed']);
+    unset($cfg['bbn_db_treated']);
+    unset($this->cfgs[$cfg['hash']]);
+
+    $tmp = $this->processCfg($cfg, true);
+
+    if (!empty($cfg['values']) && (count($cfg['values']) === count($tmp['values']))) {
+      $tmp = array_merge($tmp, ['values' => $cfg['values']]);
+    }
+
+    return $tmp;
   }
 
   /**
@@ -2682,5 +2550,1132 @@ MYSQL
         $res['start'] ?? 0
       );
     return $res;
+  }
+
+  /**
+   * Parses a SQL query and return an array.
+   *
+   * @param string $statement
+   * @return null|array
+   */
+  public function parseQuery(string $statement): ?array
+  {
+    if ($this->_parser === null) {
+      $this->_parser = new PHPSQLParser();
+    }
+
+    $done = false;
+    try {
+      $r    = $this->_parser->parse($statement);
+      $done = 1;
+    }
+    catch (\Exception $e){
+      $this->db->log('Error while parsing the query '.$statement);
+    }
+
+    if ($done) {
+      if (!$r || !count($r)) {
+        $this->db->log('Impossible to parse the query '.$statement);
+        return null;
+      }
+
+      if (isset($r['BRACKET']) && (\count($r) === 1)) {
+        /** @todo Is it impossible to parse queries with brackets ? */
+        //throw new \Exception('Bracket in the query '.$statement);
+        return null;
+      }
+
+      return $r;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the table's structure's array, either from the cache or from _modelize().
+   *
+   * @param string $item The item to get
+   * @param string $mode The type of item to get (columns, rables, Databases)
+   * @param bool $force If true the cache is recreated even if it exists
+   * @return array|null
+   * @throws \Exception
+   */
+  private function _get_cache($item, $mode = 'columns', $force = false): ?array
+  {
+    $cache_name = $this->_db_cache_name($item, $mode);
+
+    if ($force && isset($this->cache[$cache_name])) {
+      unset($this->cache[$cache_name]);
+    }
+
+    if (!isset($this->cache[$cache_name])) {
+      if ($force || !($tmp = $this->cacheGet($cache_name))) {
+        switch ($mode){
+          case 'columns':
+            $keys = $this->getKeys($item);
+            $cols = $this->getColumns($item);
+            if (\is_array($keys) && \is_array($cols)) {
+              $tmp = [
+                'keys' => $keys['keys'],
+                'cols' => $keys['cols'],
+                'fields' => $cols
+              ];
+            }
+            break;
+          case 'tables':
+            $tmp = $this->getTables($item);
+            break;
+          case 'databases':
+            $tmp = $this->getDatabases();
+            break;
+        }
+
+        if (!isset($tmp) || !\is_array($tmp)) {
+          $st = "Error while creating the cache for the table $item in mode $mode";
+          $this->db->log($st);
+          throw new \Exception($st);
+        }
+
+        $this->cacheSet($cache_name, '', $tmp, $this->db->getCacheRenewal());
+      }
+
+      if ($tmp) {
+        $this->cache[$cache_name] = $tmp;
+      }
+    }
+
+    return $this->cache[$cache_name] ?? null;
+  }
+
+  /**
+   * Gets the cache name of a database structure or part.
+   *
+   * @param string $item 'db_name' or 'table'
+   * @param string $mode 'columns','tables' or 'databases'
+   *
+   * @return bool|string
+   */
+  private function _db_cache_name(string $item, string $mode)
+  {
+    $r = false;
+    if ($this->db->getEngine() === 'sqlite') {
+      $h = md5($this->db->getHost().dirname($this->db->getCurrent()));
+    }
+    else {
+      $h = str_replace('/', '-', $this->db->getConnectionCode());
+    }
+
+    switch ($mode){
+      case 'columns':
+        $r = $this->db->getEngine().'/'.$h.'/'.str_replace('.', '/', $this->tableFullName($item));
+        break;
+      case 'tables':
+        $r = $this->db->getEngine().'/'.$h.'/'.($item ?: $this->db->getCurrent());
+        break;
+      case 'databases':
+        $r = $this->db->getEngine().'/'.$h.'/_bbn-database';
+        break;
+    }
+
+    return $r;
+  }
+
+  /**
+   * @param array $conditions
+   * @param array $cfg
+   */
+  public function arrangeConditions(array &$conditions, array $cfg): void
+  {
+    if (!empty($cfg['available_fields']) && isset($conditions['conditions'])) {
+      foreach ($conditions['conditions'] as &$c){
+        if (array_key_exists('conditions', $c) && \is_array($c['conditions'])) {
+          $this->arrangeConditions($c, $cfg);
+        }
+        elseif (isset($c['field']) && empty($cfg['available_fields'][$c['field']]) && !$this->isColFullName($c['field'])) {
+          foreach ($cfg['tables'] as $t => $o){
+            if (isset($cfg['available_fields'][$this->colFullName($c['field'], $t)])) {
+              $c['field'] = $this->colFullName($c['field'], $t);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * @param array $res
+   * @return array
+   */
+  public function removeVirtual(array $res): array
+  {
+    if (isset($res['fields'])) {
+      $to_remove = [];
+      foreach ($res['fields'] as $i => $f){
+        if (!empty($res['available_fields'][$f])
+          && isset($res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)])
+          && $res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)]['virtual']
+        ) {
+          array_unshift($to_remove, $i);
+        }
+      }
+
+      foreach ($to_remove as $i) {
+        array_splice($res['fields'], $i, 1);
+        array_splice($res['values'], $i, 1);
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * @param array $where
+   * @param array $cfg
+   * @return array
+   */
+  public function getValuesDesc(array $where, array $cfg, &$others = []): array
+  {
+    if (!empty($where['conditions'])) {
+      foreach ($where['conditions'] as &$f){
+        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
+          $this->getValuesDesc($f, $cfg, $others);
+        }
+        elseif (array_key_exists('value', $f)) {
+          $desc = [
+            'primary' => false,
+            'type' => null,
+            'maxlength' => null,
+            'operator' => $f['operator'] ?? null
+          ];
+          if (isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']])) {
+            $t = $cfg['available_fields'][$f['field']];
+            if (isset($cfg['models'], $f['field'], $cfg['tables_full'][$t], $cfg['models'][$cfg['tables_full'][$t]])
+              && ($model = $cfg['models'][$cfg['tables_full'][$t]])
+              && ($fname = $this->colSimpleName($f['field']))
+            ) {
+              if (!empty($model['fields'][$fname]['type'])) {
+                $desc = [
+                  'type' => $model['fields'][$fname]['type'],
+                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
+                  'operator' => $f['operator'] ?? null
+                ];
+              }
+              // Fixing filters using alias
+              elseif (isset($cfg['fields'][$f['field']])
+                && ($fname = $this->colSimpleName($cfg['fields'][$f['field']]))
+                && !empty($model['fields'][$fname]['type'])
+              ) {
+                $desc = [
+                  'type' => $model[$fname]['type'],
+                  'maxlength' => $model[$fname]['maxlength'] ?? null,
+                  'operator' => $f['operator'] ?? null
+                ];
+              }
+
+              if (!empty($desc['type'])
+                && isset($model['keys']['PRIMARY'])
+                && (count($model['keys']['PRIMARY']['columns']) === 1)
+                && ($model['keys']['PRIMARY']['columns'][0] === $fname)
+              ) {
+                $desc['primary'] = true;
+              }
+            }
+          }
+
+          $others[] = $desc;
+        }
+      }
+    }
+
+    return $others;
+  }
+
+  public function getRealLastParams(): array
+  {
+    return $this->last_real_params;
+  }
+
+  public function getLastValues(): ?array
+  {
+    return $this->last_params ? $this->last_params['values'] : null;
+  }
+
+  public function getLastParams(): ?array
+  {
+    return $this->last_params;
+  }
+
+  public function getQueryValues(array $cfg): array
+  {
+    $res = [];
+    if (!empty($cfg['values'])) {
+      foreach ($cfg['values'] as $i => $v) {
+        // Transforming the values if needed
+        if (($cfg['values_desc'][$i]['type'] === 'binary')
+          && ($cfg['values_desc'][$i]['maxlength'] === 16)
+          && Str::isUid($v)
+        ) {
+          $res[] = hex2bin($v);
+        }
+        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
+              && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
+              && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
+              && (\strlen($v) < 19))            )
+        ) {
+          $res[] = $v.'%';
+        }
+        elseif (!empty($cfg['values_desc'][$i]['operator'])) {
+          switch ($cfg['values_desc'][$i]['operator']){
+            case 'contains':
+            case 'doesnotcontain':
+              $res[] = '%'.$v.'%';
+              break;
+            case 'startswith':
+              $res[] = $v.'%';
+              break;
+            case 'endswith':
+              $res[] = '%'.$v;
+              break;
+            default:
+              $res[] = $v;
+          }
+        }
+        else{
+          $res[] = $v;
+        }
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * @param array $where
+   * @param bool  $full
+   * @return array|bool
+   */
+  public function treatConditions(array $where, bool $full = true)
+  {
+    if (!isset($where['conditions'])) {
+      $where['conditions'] = $where;
+    }
+
+    if (isset($where['conditions']) && \is_array($where['conditions'])) {
+      if (!isset($where['logic']) || (strtoupper($where['logic']) !== 'OR')) {
+        $where['logic'] = 'AND';
+      }
+
+      $res = [
+        'conditions' => [],
+        'logic' => $where['logic']
+      ];
+      foreach ($where['conditions'] as $key => $f){
+        $is_array = \is_array($f);
+        if ($is_array
+          && array_key_exists('conditions', $f)
+          && \is_array($f['conditions'])
+        ) {
+          $res['conditions'][] = $this->treatConditions($f, false);
+        }
+        else {
+          if (\is_string($key)) {
+            // 'id_user' => [1, 2] Will do OR
+            if (!$is_array) {
+              if (null === $f) {
+                $f = [
+                  'field' => $key,
+                  'operator' => 'isnull'
+                ];
+              }
+              else{
+                $f = [
+                  'field' => $key,
+                  'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                  'value' => $f
+                ];
+              }
+            }
+            elseif (isset($f[0])) {
+              $tmp = [
+                'conditions' => [],
+                'logic' => 'OR'
+              ];
+              foreach ($f as $v){
+                if (null === $v) {
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => 'isnull'
+                  ];
+                }
+                else{
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                    'value' => $v
+                  ];
+                }
+              }
+
+              $res['conditions'][] = $tmp;
+            }
+          }
+          elseif ($is_array && !X::isAssoc($f) && count($f) >= 2) {
+            $tmp = [
+              'field' => $f[0],
+              'operator' => $f[1]
+            ];
+            if (isset($f[3])) {
+              $tmp['exp'] = $f[3];
+            }
+            elseif (array_key_exists(2, $f)) {
+              if (is_array($f[2])) {
+                $tmp = [
+                  'conditions' => [],
+                  'logic' => 'AND'
+                ];
+                foreach ($f[2] as $v){
+                  if (null === $v) {
+                    $tmp['conditions'][] = [
+                      'field' => $f[0],
+                      'operator' => 'isnotnull'
+                    ];
+                  }
+                  else{
+                    $tmp['conditions'][] = [
+                      'field' => $f[0],
+                      'operator' => $f[1],
+                      'value' => $v
+                    ];
+                  }
+                }
+
+                $res['conditions'][] = $tmp;
+              }
+              elseif ($f[2] === null) {
+                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
+              }
+              else{
+                $tmp['value'] = $f[2];
+              }
+            }
+
+            $f = $tmp;
+          }
+
+          if (isset($f['field'])) {
+            if (!isset($f['operator'])) {
+              $f['operator'] = 'eq';
+            }
+
+            $res['conditions'][] = $f;
+          }
+        }
+      }
+
+      if ($full) {
+        $tmp = $this->_remove_conditions_value($res);
+        $res = [
+          'hashed' => $tmp['hashed'],
+          'values' => $tmp['values'],
+          'where' => $res
+        ];
+      }
+
+      return $res;
+    }
+
+    return false;
+  }
+
+  /**
+   * Removes values from the given conditions array and returns an array with values and hashed.
+   *
+   * @param array $where  Conditions
+   * @param array $values Values
+   * @return array
+   */
+  private function _remove_conditions_value(array $where, array &$values = []): array
+  {
+    if (isset($where['conditions'])) {
+      foreach ($where['conditions'] as &$f){
+        ksort($f);
+        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
+          $tmp = $this->_remove_conditions_value($f, $values);
+          $f   = $tmp['hashed'];
+        }
+        elseif (array_key_exists('value', $f)) {
+          $values[] = $f['value'];
+          unset($f['value']);
+        }
+      }
+    }
+
+    return [
+      'hashed' => $where,
+      'values' => $values
+    ];
+  }
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                       STRUCTURE HELPERS                      *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+  /**
+   * Return databases' names as an array.
+   *
+   * ```php
+   * X::dump($db->getDatabases());
+   * /*
+   * (array)[
+   *      "db_customers",
+   *      "db_clients",
+   *      "db_empty",
+   *      "db_example",
+   *      "db_mail"
+   *      ]
+   * ```
+   *
+   * @return null|array
+   */
+  public function getDatabases(): ?array
+  {
+    if (!$this->db->check()) {
+      return null;
+    }
+
+    $x = [];
+    if ($r = $this->rawQuery('SHOW DATABASES')) {
+      $x = array_map(
+        function ($a) {
+          return $a['Database'];
+        }, array_filter(
+          $r->fetchAll(\PDO::FETCH_ASSOC), function ($a) {
+          return ($a['Database'] === 'information_schema') || ($a['Database'] === 'mysql') ? false : 1;
+        }
+        )
+      );
+      sort($x);
+    }
+
+    return $x;
+  }
+
+
+  /**
+   * Return tables' names of a database as an array.
+   *
+   * ```php
+   * X::dump($db->getTables('db_example'));
+   * /*
+   * (array) [
+   *        "clients",
+   *        "columns",
+   *        "cron",
+   *        "journal",
+   *        "dbs",
+   *        "examples",
+   *        "history",
+   *        "hosts",
+   *        "keys",
+   *        "mails",
+   *        "medias",
+   *        "notes",
+   *        "medias",
+   *        "versions"
+   *        ]
+   * ```
+   *
+   * @param string $database Database name
+   * @return null|array
+   */
+  public function getTables(string $database = ''): ?array
+  {
+    if (!$this->db->check()) {
+      return null;
+    }
+
+    if (empty($database) || !bbn\Str::checkName($database)) {
+      $database = $this->db->getCurrent();
+    }
+
+    $t2 = [];
+    if (($r = $this->db->rawQuery("SHOW TABLES FROM `$database`"))
+      && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
+    ) {
+      foreach ($t1 as $t) {
+        $t2[] = $t[0];
+      }
+    }
+
+    return $t2;
+  }
+
+
+  /**
+   * Returns the columns' configuration of the given table.
+   *
+   * ``php
+   * X::dump($db->getColumns('table_users'));
+   * /* (array)[
+   *            "id" => [
+   *              "position" => 1,
+   *              "null" => 0,
+   *              "key" => "PRI",
+   *              "default" => null,
+   *              "extra" => "auto_increment",
+   *              "signed" => 0,
+   *              "maxlength" => "8",
+   *              "type" => "int",
+   *            ],
+   *           "name" => [
+   *              "position" => 2,
+   *              "null" => 0,
+   *              "key" => null,
+   *              "default" => null,
+   *              "extra" => "",
+   *              "signed" => 0,
+   *              "maxlength" => "30",
+   *              "type" => "varchar",
+   *            ],
+   *            "surname" => [
+   *              "position" => 3,
+   *              "null" => 0,
+   *              "key" => null,
+   *              "default" => null,
+   *              "extra" => "",
+   *              "signed" => 0,
+   *              "maxlength" => "30",
+   *              "type" => "varchar",
+   *            ],
+   *            "address" => [
+   *              "position" => 4,
+   *              "null" => 0,
+   *              "key" => "UNI",
+   *              "default" => null,
+   *              "extra" => "",
+   *              "signed" => 0,
+   *              "maxlength" => "30",
+   *              "type" => "varchar",
+   *            ],
+   *          ]
+   * ```
+   *
+   * @param null|string $table The table's name
+   * @return null|array
+   */
+  public function getColumns(string $table): ?array
+  {
+    if (!$this->db->check()) {
+      return null;
+    }
+
+    $r = [];
+    if ($full = $this->tableFullName($table)) {
+      $t            = explode('.', $full);
+      [$db, $table] = $t;
+      $sql          = <<<MYSQL
+        SELECT *
+        FROM `information_schema`.`COLUMNS`
+        WHERE `TABLE_NAME` LIKE ?
+        AND `TABLE_SCHEMA` LIKE ?
+        ORDER BY `ORDINAL_POSITION` ASC
+MYSQL;
+      if ($rows = $this->getRows($sql, $table, $db)) {
+        $p = 1;
+        foreach ($rows as $row) {
+          $f          = $row['COLUMN_NAME'];
+          $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
+            && (stripos($row['DATA_TYPE'], 'blob') === false)
+            && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
+          $r[$f]      = [
+            'position' => $p++,
+            'type' => $row['DATA_TYPE'],
+            'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
+            'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
+            'extra' => $row['EXTRA'],
+            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
+            'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
+            'generation' => $row['GENERATION_EXPRESSION'],
+          ];
+          if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
+            $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
+          }
+
+          if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
+            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
+              && !empty($matches[1])
+              && \is_string($matches[1][0])
+              && ($matches[1][0][0] === "'")
+            ) {
+              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
+              $r[$f]['extra']  = $matches[1][0];
+            } else {
+              $r[$f]['values'] = [];
+            }
+          } elseif (preg_match_all('/\((\d+)?(?:,)|(\d+)\)/', $row['COLUMN_TYPE'], $matches)) {
+            if (empty($matches[1][0])) {
+              if (!empty($matches[2][0])) {
+                $r[$f]['maxlength'] = (int)$matches[2][0];
+              }
+            } else {
+              $r[$f]['maxlength'] = (int)$matches[1][0];
+              $r[$f]['decimals']  = (int)$matches[2][1];
+            }
+          }
+        }
+
+        /*
+        else{
+        preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
+        if ( strpos($row['Type'],'text') !== false ){
+        $r[$f]['type'] = 'text';
+        }
+        else if ( strpos($row['Type'],'blob') !== false ){
+        $r[$f]['type'] = 'blob';
+        }
+        else if ( strpos($row['Type'],'int(') !== false ){
+        $r[$f]['type'] = 'int';
+        }
+        else if ( strpos($row['Type'],'char(') !== false ){
+        $r[$f]['type'] = 'varchar';
+        }
+        if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
+        $r[$f]['maxlength'] = (int)$matches[1][0];
+        }
+        if ( !isset($r[$f]['type']) ){
+        $r[$f]['type'] = strpos($row['Type'], '(') ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
+        }
+        }
+        */
+      }
+    }
+
+    return $r;
+  }
+
+  /**
+   * Return an array that includes indexed arrays for every row resultant from the query.
+   *
+   * ```php
+   * X::dump($db->getRows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2));
+   * /* (array)[
+   *            [
+   *            "id" => 3,
+   *            "name" => "john",
+   *            ],
+   *            [
+   *            "id" => 4,
+   *            "name" => "barbara",
+   *            ],
+   *          ]
+   * ```
+   *
+   * @param string
+   * @param int The var ? value
+   * @return array | false
+   */
+  public function getRows(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getRows();
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the keys of the given table.
+   * @param string $table The table's name
+   * @return null|array
+   */
+  public function getKeys(string $table): ?array
+  {
+    if (!$this->db->check()) {
+      return null;
+    }
+
+    $r = [];
+    if ($full = $this->tableFullName($table)) {
+      $t            = explode('.', $full);
+      [$db, $table] = $t;
+      $r            = [];
+      $indexes      = $this->db->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
+      $keys         = [];
+      $cols         = [];
+      foreach ($indexes as $i => $index) {
+        $a = $this->db->getRow(
+          <<<MYSQL
+SELECT `CONSTRAINT_NAME` AS `name`,
+`ORDINAL_POSITION` AS `position`,
+`REFERENCED_TABLE_SCHEMA` AS `ref_db`,
+`REFERENCED_TABLE_NAME` AS `ref_table`,
+`REFERENCED_COLUMN_NAME` AS `ref_column`
+FROM `information_schema`.`KEY_COLUMN_USAGE`
+WHERE `TABLE_SCHEMA` LIKE ?
+AND `TABLE_NAME` LIKE ?
+AND `COLUMN_NAME` LIKE ?
+AND (
+  `CONSTRAINT_NAME` LIKE ? OR
+  (`REFERENCED_TABLE_NAME` IS NOT NULL OR `ORDINAL_POSITION` = ?)
+)
+ORDER BY `KEY_COLUMN_USAGE`.`REFERENCED_TABLE_NAME` DESC
+LIMIT 1
+MYSQL
+          ,
+          $db,
+          $table,
+          $index['Column_name'],
+          $index['Key_name'],
+          $index['Seq_in_index']
+        );
+        if ($a) {
+          $b = $this->db->getRow(
+            <<<MYSQL
+          SELECT `CONSTRAINT_NAME` AS `name`,
+          `UPDATE_RULE` AS `update`,
+          `DELETE_RULE` AS `delete`
+          FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
+          WHERE `CONSTRAINT_NAME` LIKE ?
+          AND `CONSTRAINT_SCHEMA` LIKE ?
+          AND `TABLE_NAME` LIKE ?
+          LIMIT 1
+MYSQL
+            ,
+            $a['name'],
+            $db,
+            $table
+          );
+        } elseif (isset($b)) {
+          unset($b);
+        }
+
+        if (!isset($keys[$index['Key_name']])) {
+          $keys[$index['Key_name']] = [
+            'columns' => [$index['Column_name']],
+            'ref_db' => isset($a, $a['ref_db']) ? $a['ref_db'] : null,
+            'ref_table' => isset($a, $a['ref_table']) ? $a['ref_table'] : null,
+            'ref_column' => isset($a, $a['ref_column']) ? $a['ref_column'] : null,
+            'constraint' => isset($b, $b['name']) ? $b['name'] : null,
+            'update' => isset($b, $b['update']) ? $b['update'] : null,
+            'delete' => isset($b, $b['delete']) ? $b['delete'] : null,
+            'unique' => $index['Non_unique'] ? 0 : 1,
+          ];
+        } else {
+          $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
+          $keys[$index['Key_name']]['ref_db']    = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
+        }
+
+        if (!isset($cols[$index['Column_name']])) {
+          $cols[$index['Column_name']] = [$index['Key_name']];
+        } else {
+          $cols[$index['Column_name']][] = $index['Key_name'];
+        }
+      }
+
+      $r['keys'] = $keys;
+      $r['cols'] = $cols;
+    }
+
+    return $r;
+  }
+
+  /**
+   * @param $tables
+   * @return array
+   * @throws \Exception
+   */
+  public function getFieldsList($tables): array
+  {
+    $res = [];
+    if (!\is_array($tables)) {
+      $tables = [$tables];
+    }
+
+    foreach ($tables as $t){
+      if (!($model = $this->getColumns($t))) {
+        $this->db->error('Impossible to find the table '.$t);
+        throw new \Exception(X::_('Impossible to find the table ').$t);
+      }
+
+      foreach (array_keys($model) as $f){
+        $res[] = $this->colFullName($f, $t);
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Return an array with tables and fields related to the searched foreign key.
+   *
+   * ```php
+   * X::dump($db->getForeignKeys('id', 'table_users', 'db_example'));
+   * // (Array)
+   * ```
+   *
+   * @param string $col The column's name
+   * @param string $table The table's name
+   * @param string|null $db The database name if different from the current one
+   * @return array with tables and fields related to the searched foreign key
+   */
+  public function getForeignKeys(string $col, string $table, string $db = null): array
+  {
+    if (!$db) {
+      $db = $this->db->getCurrent();
+    }
+
+    $res   = [];
+    $model = $this->modelize();
+    foreach ($model as $tn => $m){
+      foreach ($m['keys'] as $k => $t){
+        if (($t['ref_table'] === $table)
+          && ($t['ref_column'] === $col)
+          && ($t['ref_db'] === $db)
+          && (\count($t['columns']) === 1)
+        ) {
+          if (!isset($res[$tn])) {
+            $res[$tn] = [$t['columns'][0]];
+          }
+          else{
+            $res[$tn][] = $t['columns'][0];
+          }
+        }
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Return true if in the table there are fields with auto-increment.
+   * Working only on mysql.
+   *
+   * ```php
+   * X::dump($db->hasIdIncrement('table_users'));
+   * // (bool) 1
+   * ```
+   *
+   * @param string $table The table's name
+   * @return bool
+   */
+  public function hasIdIncrement(string $table): bool
+  {
+    return ($model = $this->modelize($table)) &&
+      isset($model['keys']['PRIMARY']) &&
+      (\count($model['keys']['PRIMARY']['columns']) === 1) &&
+      ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment');
+  }
+
+  /**
+   * Return the table's structure as an indexed array.
+   *
+   * ```php
+   * X::dump($db->modelize("table_users"));
+   * // (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )
+   * ```
+   *
+   * @param null|array|string $table The table's name
+   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
+   * @return null|array
+   */
+  public function modelize($table = null, bool $force = false): ?array
+  {
+    $r      = [];
+    $tables = false;
+    if (empty($table) || ($table === '*')) {
+      $tables = $this->getTables();
+    }
+    elseif (\is_string($table)) {
+      $tables = [$table];
+    }
+    elseif (\is_array($table)) {
+      $tables = $table;
+    }
+
+    if (\is_array($tables)) {
+      foreach ($tables as $t) {
+        if ($full = $this->tableFullName($t)) {
+          $r[$full] = $this->_get_cache($full, 'columns', $force);
+        }
+      }
+
+      if (\count($r) === 1) {
+        return end($r);
+      }
+
+      return $r;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @param string $table
+   * @param bool   $force
+   * @return null|array
+   */
+  public function fmodelize(string $table = '', bool $force = false): ?array
+  {
+    if ($res = $this->modelize(...\func_get_args())) {
+      foreach ($res['fields'] as $n => $f){
+        $res['fields'][$n]['name'] = $n;
+        $res['fields'][$n]['keys'] = [];
+        if (isset($res['cols'][$n])) {
+          foreach ($res['cols'][$n] as $key){
+            $res['fields'][$n]['keys'][$key] = $res['keys'][$key];
+          }
+        }
+      }
+
+      return $res['fields'];
+    }
+
+    return null;
+  }
+
+  /**
+   * find_references
+   *
+   * @param $column
+   * @param string $db
+   * @return array|bool
+   *
+   */
+  public function findReferences($column, string $db = ''): array
+  {
+    $changed = false;
+    if ($db && ($db !== $this->db->getCurrent())) {
+      $changed = $this->db->getCurrent();
+      $this->change($db);
+    }
+
+    $column = $this->colFullName($column);
+    $bits   = explode('.', $column);
+    if (\count($bits) === 2) {
+      array_unshift($bits, $this->db->getCurrent());
+    }
+
+    if (\count($bits) !== 3) {
+      return false;
+    }
+
+    $refs   = [];
+    $schema = $this->modelize();
+    $test   = function ($key) use ($bits) {
+      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+    };
+    foreach ($schema as $table => $cfg){
+      foreach ($cfg['keys'] as $k){
+        if ($test($k)) {
+          $refs[] = $table.'.'.$k['columns'][0];
+        }
+      }
+    }
+
+    if ($changed) {
+      $this->change($changed);
+    }
+
+    return $refs;
+  }
+
+  /**
+   * find_relations
+   *
+   * @param $column
+   * @param string $db
+   * @return array|bool
+   */
+  public function findRelations($column, string $db = ''): ?array
+  {
+    $changed = false;
+    if ($db && ($db !== $this->db->getCurrent())) {
+      $changed = $this->db->getCurrent();
+      $this->change($db);
+    }
+
+    $column = $this->colFullName($column);
+    $bits   = explode('.', $column);
+    if (\count($bits) === 2) {
+      array_unshift($bits, $db ?: $this->current);
+    }
+
+    if (\count($bits) !== 3) {
+      return null;
+    }
+
+    $table = $bits[1];
+    if ($schema = $this->modelize()) {
+      $refs = [];
+      $test = function ($key) use ($bits) {
+        return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+      };
+      foreach ($schema as $tf => $cfg) {
+        $t = $this->tableSimpleName($tf);
+        if ($t !== $table) {
+          foreach ($cfg['keys'] as $k) {
+            if ($test($k)) {
+              foreach ($cfg['keys'] as $k2) {
+                // Is not the same table
+                if (!$test($k2)
+                  // Has a reference
+                  && !empty($k2['ref_column'])
+                  // and refers to a single column
+                  && (\count($k['columns']) === 1)
+                  // A unique reference
+                  && (\count($k2['columns']) === 1)
+                  // To a table with a primary
+                  && isset($schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']])
+                  // which is a sole column
+                  && (\count($schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1)
+                  // We retrieve the key name
+                  && ($key_name = $schema[$this->tableFullName($k2['ref_table'])]['cols'][$k2['ref_column']][0])
+                  // which is unique
+                  && !empty($schema[$this->tableFullName($k2['ref_table'])]['keys'][$key_name]['unique'])
+                ) {
+                  if (!isset($refs[$t])) {
+                    $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
+                  }
+
+                  $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if ($changed) {
+        $this->change($changed);
+      }
+
+      return $refs;
+    }
+  }
+
+  /**
+   * Return primary keys of a table as a numeric array.
+   *
+   * ```php
+   * X::dump($db-> get_primary('table_users'));
+   * // (array) ["id"]
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function getPrimary(string $table): array
+  {
+    if (($keys = $this->getKeys($table)) && isset($keys['keys']['PRIMARY'])) {
+      return $keys['keys']['PRIMARY']['columns'];
+    }
+
+    return [];
   }
 }

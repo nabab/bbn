@@ -139,9 +139,10 @@ interface Engines
   /**
    * Fetches the database and returns an object of a single row, alias of get_object
    *
+   * @param string $database
    * @return null|array
    */
-  public function getTables(): ?array;
+  public function getTables(string $database = ''): ?array;
 
 
   /**
@@ -151,6 +152,14 @@ interface Engines
    * @return null|array
    */
   public function getColumns(string $table): ?array;
+
+
+  /**
+   * Return an array that includes indexed arrays for every row resultant from the query.
+   *
+   * @return array|null
+   */
+  public function getRows(): ?array;
 
 
   /**
@@ -400,4 +409,85 @@ interface Engines
    * @return string
    */
   public function getHash(): string;
+
+  /**
+   * @param array $args
+   * @param bool $force
+   * @return array|null
+   */
+  public function processCfg(array $args, bool $force = false): ?array;
+
+  /**
+   * @param array $cfg
+   * @return array|null
+   */
+  public function reprocessCfg(array $cfg): ?array;
+
+  /**
+   * Changes the value of last inserted id.
+   *
+   * @param string $id
+   * @return $this
+   */
+  public function setLastInsertId($id = ''): self;
+
+  /**
+   * Return the last inserted ID.
+   *
+   * @return mixed
+   */
+  public function lastId();
+
+  /**
+   * Return the table's structure as an indexed array.
+   *
+   * @param null $table
+   * @param bool $force
+   * @return array|null
+   */
+  public function modelize($table = null, bool $force = false): ?array;
+
+  /**
+   * @param array $cfg
+   * @return array
+   */
+  public function getQueryValues(array $cfg): array;
+
+  /**
+   * @param array $where
+   * @param bool  $full
+   * @return array|bool
+   */
+  public function treatConditions(array $where, bool $full = true);
+
+  /**
+   * @param $tables
+   * @return array
+   */
+  public function getFieldsList($tables): array;
+
+  /**
+   * @param string $col
+   * @param string $table
+   * @param string|null $db
+   * @return array
+   */
+  public function getForeignKeys(string $col, string $table, string $db = null): array;
+
+  /**
+   * find_relations
+   *
+   * @param $column
+   * @param string $db
+   * @return array|bool
+   */
+  public function findRelations($column, string $db = ''): ?array;
+
+  /**
+   * Return primary keys of a table as a numeric array.
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function getPrimary(string $table): array;
 }
