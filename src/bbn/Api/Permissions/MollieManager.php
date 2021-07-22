@@ -130,14 +130,15 @@ class MollieManager
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPayment(array $data, ?string $customer_id = null): array
+  public function createPayment(array $data, ?string $customer_id = null, ?string $mandate_id = null): array
   {
     if ($customer_id) {
       $data = array_merge($data, ['customerId' => $customer_id]);
     }
-
+    if ($mandate_id) {
+      $data = array_merge($data, ['mandateId' => $mandate_id]);
+    }
     $payment = $this->mollie->payments->create($data);
-
     return X::toArray($payment);
   }
 
@@ -152,23 +153,15 @@ class MollieManager
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPaymentFirstTime($customer_data, array $payment_data): array
+  public function createPaymentFirstTime($customer, array $payment_data): array
   {
-    if (\is_array($customer_data)) {
-      $customer = $this->mollie->customers->create($customer_data);  
-    }
-    else {
-      $customer = new \stdClass();
-      $customer->id = $customer_data;
-    }
-
+    $customer = \is_array($customer) ? $this->mollie->customers->create($customer)->id : $customer;
     $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);
-
     try {
-      return $this->createPayment($payment_data, $customer->id);
+      return $this->createPayment($payment_data, $customer);
     }
     catch (\Exception $e) {
-      $this->mollie->customers->delete($customer->id);
+      $this->mollie->customers->delete($customer);
       throw new \Exception($e->getMessage());
     }
   }
@@ -196,10 +189,8 @@ class MollieManager
       // Then update the new customer and mandate id in database.
       return null;
     }
-
     $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);
-
-    return $this->createPayment($payment_data, $customer_id);
+    return $this->createPayment($payment_data, null, $mandate_id);
   }
 
   /**
