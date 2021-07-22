@@ -152,9 +152,15 @@ class MollieManager
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPaymentFirstTime(array $customer_data, array $payment_data): array
+  public function createPaymentFirstTime($customer_data, array $payment_data): array
   {
-    $customer = $this->mollie->customers->create($customer_data);
+    if (\is_array($customer_data)) {
+      $customer = $this->mollie->customers->create($customer_data);  
+    }
+    else {
+      $customer = new \stdClass();
+      $customer->id = $customer_data;
+    }
 
     $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);
 
