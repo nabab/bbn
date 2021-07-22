@@ -169,7 +169,10 @@ class MollieManager
     }
     catch (\Exception $e) {
       if (\is_array($customer_data)) {
-        $this->mollie->customers->delete($customer->id);
+        $this->mollie->customers->delete(
+          $customer->id,
+          array_key_exists('testmode', $payment_data) ? ['test_mode' => $payment_data['testmode']] : []
+        );
       }
       throw new \Exception($e->getMessage());
     }
