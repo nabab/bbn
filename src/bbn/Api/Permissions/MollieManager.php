@@ -126,14 +126,14 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/payments-api/create-payment
    *
    * @param array $data
-   * @param string|null $customer_id
+   * @param string|null $mandate_id
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPayment(array $data, ?string $customer_id = null): array
+  public function createPayment(array $data, ?string $mandate_id = null): array
   {
-    if ($customer_id) {
-      $data = array_merge($data, ['customerId' => $customer_id]);
+    if ($mandate_id) {
+      $data = array_merge($data, ['mandateId' => $mandate_id]);
     }
 
     $payment = $this->mollie->payments->create($data);
@@ -162,10 +162,13 @@ class MollieManager
       $customer->id = $customer_data;
     }
 
-    $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);
+    $payment_data = array_merge(
+      $payment_data,
+      ['sequenceType' => 'first', 'customerId' => $customer->id]
+    );
 
     try {
-      return $this->createPayment($payment_data, $customer->id);
+      return $this->createPayment($payment_data);
     }
     catch (\Exception $e) {
       if (\is_array($customer_data)) {
@@ -204,7 +207,7 @@ class MollieManager
 
     $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);
 
-    return $this->createPayment($payment_data, $customer_id);
+    return $this->createPayment($payment_data, $mandate_id);
   }
 
   /**
