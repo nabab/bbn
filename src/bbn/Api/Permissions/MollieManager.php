@@ -168,7 +168,9 @@ class MollieManager
       return $this->createPayment($payment_data, $customer->id);
     }
     catch (\Exception $e) {
-      $this->mollie->customers->delete($customer->id);
+      if (\is_array($customer_data)) {
+        $this->mollie->customers->delete($customer->id);
+      }
       throw new \Exception($e->getMessage());
     }
   }
