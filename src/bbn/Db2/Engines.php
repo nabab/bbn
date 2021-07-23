@@ -163,6 +163,49 @@ interface Engines
 
 
   /**
+   * Return the first row resulting from the query as an array indexed with the fields' name.
+   *
+   * @return array|null
+   */
+  public function getRow(): ?array;
+
+  /**
+   * Return a row as a numeric indexed array.
+   *
+   * @return array|null
+   */
+  public function getIrow(): ?array;
+
+
+  /**
+   * Return an array of numeric indexed rows.
+   *
+   * @return array|null
+   */
+  public function getIrows(): ?array;
+
+
+  /**
+   * Return an array indexed on the searched field's in which there are all the values of the column.
+   *
+   * @return array|null
+   */
+  public function getByColumns(): ?array;
+
+  /**
+   * @return \stdClass|null
+   */
+  public function getObject(): ?\stdClass;
+
+
+  /**
+   * Return an array of stdClass objects.
+   *
+   * @return array|null
+   */
+  public function getObjects(): ?array;
+
+  /**
    * Fetches the database and returns an array of objects.
    *
    * @param string $table
@@ -176,7 +219,8 @@ interface Engines
    *
    * @param array $conditions
    * @param array $cfg
-   * @param bool  $is_having
+   * @param bool $is_having
+   * @param int $indent
    * @return string
    */
   public function getConditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string;
@@ -276,10 +320,71 @@ interface Engines
    * Fetches the database and returns an array of objects
    *
    * @param string $table The table for which to create the statement
+   * @param array|null $model
    * @return string
    */
   public function getCreate(string $table, array $model = null): string;
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   */
+  public function getCreateTable(string $table, array $model = null): string;
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   */
+  public function getCreateKeys(string $table, array $model = null): string;
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   */
+  public function getCreateConstraints(string $table, array $model = null): string;
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlter(string $table, array $cfg): string;
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterTable(string $table, array $cfg): string;
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterColumn(string $table, array $cfg): string;
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterKey(string $table, array $cfg): string;
+
+
+  /**
+   * @param $table
+   * @param $cfg
+   * @return int
+   */
+  public function alter($table, $cfg): int;
 
   /**
    * Creates an index
@@ -384,9 +489,9 @@ interface Engines
   /**
    * Returns a UUID
    *
-   * @return string
+   * @return string|null
    */
-  public function getUid(): string;
+  public function getUid(): ?string;
 
 
   /**
@@ -437,6 +542,13 @@ interface Engines
    * @return mixed
    */
   public function lastId();
+
+  /**
+   * Return the last query for this connection.
+   *
+   * @return string|null
+   */
+  public function last(): ?string;
 
   /**
    * Return the table's structure as an indexed array.
@@ -490,4 +602,106 @@ interface Engines
    * @return array
    */
   public function getPrimary(string $table): array;
+
+  /**
+   * Deletes all the queries recorded and returns their (ex) number.
+   *
+   * @return int
+   */
+  public function flush(): int;
+
+  /**
+   * @return int
+   */
+  public function countQueries(): int;
+
+  /**
+   * @param $statement
+   * @return mixed
+   */
+  public function query($statement);
+
+  /**
+   * Executes the given query with given vars, and extracts the first cell's result.
+   *
+   * @return mixed
+   */
+  public function getOne();
+
+  /**
+   * Return an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields.
+   *
+   * @return array|null
+   */
+  public function getKeyVal(): ?array;
+
+  /**
+   * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.
+   *
+   * @param $table
+   * @param string|null $field
+   * @param array $where
+   * @param array $order
+   * @return array|null
+   */
+  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array;
+
+  /**
+   * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
+   *
+   * ```php
+   * X::dump($db->getColumnValues('table_users','surname',['id','>',1]));
+   * /*
+   * array [
+   *    "Smith",
+   *    "Jones",
+   *    "Williams",
+   *    "Taylor"
+   * ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @param int $limit
+   * @param int $start
+   * @return array
+   */
+  public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+
+  /**
+   * Return an indexed array with the first result of the query or false if there are no results.
+   *
+   * @param string $query
+   * @return array|false
+   */
+  public function fetch(string $query);
+
+  /**
+   * Return an array of indexed array with all results of the query or false if there are no results.
+   *
+   * @param string $query
+   * @return array|false
+   */
+  public function fetchAll(string $query);
+
+  /**
+   * @param $query
+   * @param int $num
+   * @return mixed
+   */
+  public function fetchColumn($query, int $num = 0);
+
+  /**
+   * @param $query
+   * @return bool|\stdClass
+   */
+  public function fetchObject($query);
+
+  /**
+   * @return array|null
+   */
+  public function getRealLastParams(): ?array;
 }

@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use bbn\Db2\Engines;
+
 /**
  * Half ORM half DB management, the simplest class for data queries.
  *
@@ -63,33 +65,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   private $_has_error = false;
 
-  /**
-   * An array of functions for launching triggers on actions
-   * @var array
-   */
-  private $_triggers = [
-    'SELECT' => [
-      'before' => [],
-      'after' => []
-    ],
-    'INSERT' => [
-      'before' => [],
-      'after' => []
-    ],
-    'UPDATE' => [
-      'before' => [],
-      'after' => []
-    ],
-    'DELETE' => [
-      'before' => [],
-      'after' => []
-    ]
-  ];
-
-  /**
-   * @var bool
-   */
-  private $_triggers_disabled = false;
 
   /** @var string The connection code as it would be stored in option */
   protected $connection_code;
@@ -133,7 +108,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   /**
    * @var string $last_error
    */
-  protected $last_error = false;
+  protected $last_error = null;
 
   /**
    * The ODBC engine of this connection
@@ -207,16 +182,22 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     }
 
     if (isset($cfg['engine'])) {
-      $engine = $cfg['engine'];
-      $cls    = '\\bbn\\Db2\\Languages\\'.ucwords($engine);
+      if ($cfg['engine'] instanceof Engines) {
+        $this->language = $cfg['engine'];
+      }
+      else {
+        $engine = $cfg['engine'];
+        $cls    = '\\bbn\\Db2\\Languages\\'.ucwords($engine);
 
-      if (!class_exists($cls)) {
-        throw new \Exception(X::_("The database engine %s is not recognized", $engine));
+        if (!class_exists($cls)) {
+          throw new \Exception(X::_("The database engine %s is not recognized", $engine));
+        }
+
+        $this->language = new $cls($cfg, $this);
       }
 
       self::retrieverInit($this);
       $this->cacheInit();
-      $this->language = new $cls($cfg, $this);
 
       if (isset($cfg['on_error'])) {
         $this->on_error = $cfg['on_error'];
@@ -227,7 +208,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
         $this->qte = $this->language->qte;
         $this->language->postCreation();
         $this->current  = $cfg['db'] ?? null;
-        $this->engine   = $cfg['engine'];
+        $this->engine   = (string)$cfg['engine'];
         $this->host     = $cfg['host'] ?? '127.0.0.1';
         $this->username = $cfg['user'] ?? null;
         $this->connection_code = $cfg['code_host'];
@@ -277,26 +258,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   {
     return self::$engines[$engine] ?? null;
   }
-
-
-  /**
-   * test
-   */
-  public static function createDatabaseSqlite(string $database)
-  {
-    if (!is_file($database)) {
-      file_put_contents($database,'');
-      if (is_file($database)) {
-        return [
-          'engine' => 'sqlite',
-          'db' => $database
-        ];
-      }
-    }
-
-    return false;
-  }
-
 
   /**
    * Returns a string with the given text in the middle of a "line" of logs.
@@ -381,7 +342,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Makes that echoing the connection shows its engin and host.
+   * Makes that echoing the connection shows its engine and host.
    *
    * @return string
    */
@@ -391,6 +352,9 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   }
 
 
+  /**
+   * @return mixed|string
+   */
   public function getConnectionCode()
   {
     return $this->connection_code;
@@ -1043,13 +1007,10 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param string $table The table's name
    * @return null|string
    */
-  public function getUniquePrimary($table): ?string
+  public function getUniquePrimary(string $table): ?string
   {
-    if (($keys = $this->getKeys($table))
-        && isset($keys['keys']['PRIMARY'])
-        && (\count($keys['keys']['PRIMARY']['columns']) === 1)
-    ) {
-      return $keys['keys']['PRIMARY']['columns'][0];
+    if (method_exists($this->language, 'getUniquePrimary')) {
+      return $this->language->getUniquePrimary($table);
     }
 
     return null;
@@ -1067,15 +1028,10 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param string $table The table's name
    * @return array
    */
-  public function getUniqueKeys($table): array
+  public function getUniqueKeys(string $table): array
   {
-    $fields = [[]];
-    if ($ks = $this->getKeys($table)) {
-      foreach ($ks['keys'] as $k){
-        if ($k['unique']) {
-          return $k['columns'];
-        }
-      }
+    if (method_exists($this->language, 'getUniqueKeys')) {
+      return $this->getUniqueKeys($table);
     }
 
     return [];
@@ -1140,25 +1096,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function last(): ?string
   {
-    return $this->last_query;
+    return $this->language->last();
   }
-
-
-  /**
-   * Return the last config for this connection.
-   *
-   * ```php
-   * X::dump($db->getLastCfg());
-   * // (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)
-   * ```
-   *
-   * @return string
-   */
-  public function getLastCfg(): ?array
-  {
-    return $this->last_cfg;
-  }
-
 
   /**
    * Return the last inserted ID.
@@ -1183,27 +1122,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function flush(): int
   {
-    $num                = \count($this->queries);
-    $this->queries      = [];
-    $this->list_queries = [];
-    return $num;
+    return $this->language->flush();
   }
-
-
-  /**
-   * Executes the original PDO query function
-   *
-   * ```php
-   * X::dump($db->rawQuery());
-   * // (bool)
-   * ```
-   * @return false|\PDOStatement
-   */
-  public function rawQuery()
-  {
-    return $this->language->rawQuery(...\func_get_args());
-  }
-
 
   /**
    * Generate a new casual id based on the max number of characters of id's column structure in the given table
@@ -1214,6 +1134,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    *
    * @todo Either get rid of th efunction or include the UID types
+   * TODO is this needed?
    * @param null|string $table The table's name.
    * @param int         $min
    * @return mixed
@@ -1267,7 +1188,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     return null;
   }
 
-
+  // TODO is this needed?
   public function selectRandom($table, array $fields = [], array $where = []):? \stdClass
   {
     if ($this->check() && ($num = $this->count($table, $where))) {
@@ -1285,6 +1206,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * Returns a random value fitting the requested column's type
    *
    * @todo This great function has to be done properly
+   * TODO is this needed?
    * @param $col
    * @param $table
    * @return mixed
@@ -1366,7 +1288,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function countQueries(): int
   {
-    return \count($this->queries);
+    return $this->language->countQueries();
   }
 
 
@@ -1393,12 +1315,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getOne()
   {
-    /** @var Db2\Query $r */
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchColumn(0);
-    }
-
-    return false;
+   return $this->language->getOne();
   }
 
 
@@ -1454,15 +1371,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getKeyVal(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      if ($rows = $r->getRows()) {
-        return X::indexByFirstVal($rows);
-      }
-
-      return [];
-    }
-
-    return null;
+    return $this->language->getKeyVal(...\func_get_args());
   }
 
 
@@ -1519,17 +1428,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
   {
-    $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
-    if ($r = $this->_exec(...$args)) {
-      if (!is_object($r)) {
-        $this->log([$args, $this->processCfg($args)]);
-      }
-      else{
-        return $r->getObject();
-      }
-    }
-
-    return null;
+    return $this->language->select($table, $fields, $where, $order, $start);
   }
 
 
@@ -1563,11 +1462,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      return $r->getObjects();
-    }
-
-    return null;
+    return $this->language->selectAll($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -1593,11 +1488,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      return $r->getIrow();
-    }
-
-    return null;
+    return $this->language->iselect($table, $fields, $where, $order, $start);
   }
 
 
@@ -1631,11 +1522,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      return $r->getIrows();
-    }
-
-    return null;
+    return $this->language->iselectAll($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -1661,11 +1548,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      return $r->getRow();
-    }
-
-    return null;
+    return $this->language->rselect($table, $fields, $where, $order, $start);
   }
 
 
@@ -1699,15 +1582,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      if (method_exists($r, 'getRows')) {
-        return $r->getRows();
-      }
-
-      $this->log('ERROR IN RSELECT_ALL', $r);
-    }
-
-    return [];
+    return $this->language->rselectAll($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -1728,18 +1603,10 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      if (method_exists($r, 'getIrow')) {
-        return ($a = $r->getIrow()) ? $a[0] : false;
-      }
-
-      $this->log('ERROR IN SELECT_ONE', $this->getLastCfg(), $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
-    }
-
-    return false;
+    return $this->language->selectOne($table, $field, $where, $order, $start);
   }
 
-
+  // TODO: is this used??
   public function selectUnion(array $union, array $fields = [], array $where = [], array $order = [], int $start = 0):? array
   {
     $cfgs = [];
@@ -1814,21 +1681,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function count($table, array $where = []): ?int
   {
-    $args          = \is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [
-      'tables' => [$table],
-      'where' => $where
-    ];
-    $args['count'] = true;
-    if (!empty($args['bbn_db_processed'])) {
-      unset($args['bbn_db_processed']);
-    }
-
-    if (\is_object($r = $this->_exec($args))) {
-      $a = $r->getIrow();
-      return $a ? (int)$a[0] : null;
-    }
-
-    return null;
+    return $this->language->count($table, $where);
   }
 
 
@@ -1862,11 +1715,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($rows = $this->rselectAll($table, $fields, $where, $order, $limit, $start)) {
-      return X::indexByFirstVal($rows);
-    }
-
-    return $this->check() ? [] : null;
+    return $this->language->selectAllByKeys($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -1895,22 +1744,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
-    if ($this->check()) {
-      return $this->rselectAll(
-        [
-        'tables' => [$table],
-        'fields' => [
-          $column,
-          'num' => 'COUNT(*)'
-        ],
-        'where' => $where,
-        'order' => $order,
-        'group_by' => [$column]
-        ]
-      );
-    }
-
-    return null;
+    return $this->language->stat($table, $column, $where, $order);
   }
 
 
@@ -1946,33 +1780,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param null|string  $field The field's name
    * @param array        $where The "where" condition
    * @param array        $order The "order" condition
-   * @return array | false
+   * @return array|null
    */
-  public function countFieldValues($table, string $field = null,  array $where = [], array $order = [])
+  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array
   {
-    if (\is_array($table) && \is_array($table['fields']) && count($table['fields'])) {
-      $args  = $table;
-      $field = array_values($table['fields'])[0];
-    }
-    else{
-      $args = [
-        'tables' => [$table],
-        'where' => $where,
-        'order' => $order
-      ];
-    }
-
-    $args = array_merge(
-      $args, [
-      'kind' => 'SELECT',
-      'fields' => [
-        'val' => $field,
-        'num' => 'COUNT(*)'
-      ],
-      'group_by' => [$field]
-      ]
-    );
-    return $this->rselectAll($args);
+    return $this->language->countFieldValues($table, $field, $where, $order);
   }
 
 
@@ -1991,31 +1803,16 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string       $field The field's name
-   * @param array        $where The "where" condition
-   * @param array        $order The "order" condition
+   * @param string|null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @param int $limit
+   * @param int $start
    * @return array
    */
   public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    $res = null;
-    if ($this->check()) {
-      $res = [];
-      if (\is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0])) {
-        array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
-      }
-      elseif (\is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0)) {
-        $field = 'DISTINCT '.$field;
-      }
-
-      if ($rows = $this->iselectAll($table, $field, $where, $order, $limit, $start)) {
-        foreach ($rows as $row){
-          $res[] = $row[0];
-        }
-      }
-    }
-
-    return $res;
+    return $this->language->getColumnValues($table, $field, $where, $order, $limit, $start);
   }
 
 
@@ -2032,12 +1829,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string       $field The field's name
-   * @param array        $where The "where" condition
-   * @param array        $order The "order" condition
+   * @param string|null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
    * @return array
    */
-  public function getValuesCount($table, string $field = null, array $where = [], $order): array
+  public function getValuesCount($table, string $field = null, array $where = [], array $order = []): array
   {
     return $this->countFieldValues($table, $field, $where, $order);
   }
@@ -2075,40 +1872,15 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *  ]);
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The values to insert.
-   * @param bool         $ignore If true, controls if the row is already existing and ignores it.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The values to insert.
+   * @param bool $ignore If true, controls if the row is already existing and ignores it.
    *
    * @return int Number affected rows.
    */
   public function insert($table, array $values = null, $ignore = false): ?int
   {
-    if (\is_array($table) && isset($table['values'])) {
-      $values = $table['values'];
-    }
-
-    // Array of arrays
-    if (\is_array($values)
-        && count($values)
-        && !X::isAssoc($values)
-        && \is_array($values[0])
-    ) {
-      $res = 0;
-
-      foreach ($values as $v){
-        $res += $this->insert($table, $v, $ignore);
-      }
-
-      return $res;
-    }
-
-    $cfg         = \is_array($table) ? $table : [
-      'tables' => [$table],
-      'fields' => $values,
-      'ignore' => $ignore
-    ];
-    $cfg['kind'] = 'INSERT';
-    return $this->_exec($cfg);
+    return $this->language->insert($table, $values, $ignore);
   }
 
 
@@ -2125,57 +1897,14 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The values to insert.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The values to insert.
    *
    * @return int The number of rows inserted or updated.
    */
   public function insertUpdate($table, array $values = null): ?int
   {
-    // Twice the arguments
-    if (\is_array($table) && isset($table['values'])) {
-      $values = $table['values'];
-    }
-
-    if (!X::isAssoc($values)) {
-      $res = 0;
-      foreach ($values as $v){
-        $res += $this->insertUpdate($table, $v);
-      }
-
-      return $res;
-    }
-
-    $keys   = $this->getKeys($table);
-    $unique = [];
-    foreach ($keys['keys'] as $k){
-      // Checking each unique key
-      if ($k['unique']) {
-        $i = 0;
-        foreach ($k['columns'] as $c){
-          if (isset($values[$c])) {
-            $unique[$c] = $values[$c];
-            $i++;
-          }
-        }
-
-        // Only if the number of known field values matches the number of columns
-        // which are parts of the unique key
-        // If a value is null it won't pass isset and so won't be used
-        if (($i === \count($k['columns'])) && $this->count($table, $unique)) {
-          // Removing unique matching fields from the values (as it is the where)
-          foreach ($unique as $f => $v){
-            unset($values[$f]);
-          }
-
-          // For updating
-          return $this->update($table, $values, $unique);
-        }
-      }
-    }
-
-    // No need to update, inserting
-    return $this->insert($table, $values);
+    return $this->language->insertUpdate($table, $values);
   }
 
 
@@ -2193,23 +1922,16 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The new value(s).
-   * @param array        $where  The "where" condition.
-   * @param boolean      $ignore If IGNORE should be added to the statement
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The new value(s).
+   * @param array|null $where The "where" condition.
+   * @param boolean $ignore If IGNORE should be added to the statement
    *
    * @return int The number of rows updated.
    */
   public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
   {
-    $cfg         = \is_array($table) ? $table : [
-      'tables' => [$table],
-      'where' => $where,
-      'fields' => $values,
-      'ignore' => $ignore
-    ];
-    $cfg['kind'] = 'UPDATE';
-    return $this->_exec($cfg);
+    return $this->language->update($table, $values, $where, $ignore);
   }
 
 
@@ -2227,15 +1949,15 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values
-   * @param array        $where  The "where" condition.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values
+   * @param array|null $where The "where" condition.
    *
    * @return int The number of rows deleted.
    */
   public function updateIgnore($table, array $values = null, array $where = null): ?int
   {
-    return $this->update($table, $values, $where, true);
+    return $this->language->updateIgnore($table, $values, $where);
   }
 
 
@@ -2246,21 +1968,15 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * $db->delete("table_users", ['id' => '32']);
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $where  The "where" condition.
-   * @param bool         $ignore default: false.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $where The "where" condition.
+   * @param bool $ignore default: false.
    *
    * @return int The number of rows deleted.
    */
   public function delete($table, array $where = null, bool $ignore = false): ?int
   {
-    $cfg         = \is_array($table) ? $table : [
-      'tables' => [$table],
-      'where' => $where,
-      'ignore' => $ignore
-    ];
-    $cfg['kind'] = 'DELETE';
-    return $this->_exec($cfg);
+    return $this->language->delete($table, $where, $ignore);
   }
 
 
@@ -2275,13 +1991,13 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * </code>
    *
    * @param string|array $table The table name or the configuration array.
-   * @param array        $where The "where" condition.
+   * @param array|null $where The "where" condition.
    *
    * @return int The number of rows deleted.
    */
   public function deleteIgnore($table, array $where = null): ?int
   {
-    return $this->delete(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);
+    return $this->language->deleteIgnore($table, $where);
   }
 
 
@@ -2298,14 +2014,14 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The row(s) values.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The row(s) values.
    *
    * @return int The number of rows inserted.
    */
   public function insertIgnore($table, array $values = null): ?int
   {
-    return $this->insert(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);
+    return $this->language->insertIgnore($table, $values);
   }
 
 
@@ -2341,15 +2057,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    *
    * @param string $query
-   * @return array | false
+   * @return array|false
    */
-  public function fetch($query)
+  public function fetch(string $query)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetch();
-    }
-
-    return false;
+    return $this->language->fetch(...\func_get_args());
   }
 
 
@@ -2380,15 +2092,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    *
    * @param string $query
-   * @return array | false
+   * @return array|false
    */
-  public function fetchAll($query)
+  public function fetchAll(string $query)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchAll();
-    }
-
-    return false;
+    return $this->language->fetchAll(...\func_get_args());
   }
 
 
@@ -2402,11 +2110,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function fetchColumn($query, int $num = 0)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchColumn($num);
-    }
-
-    return false;
+    return $this->language->fetchColumn(...\func_get_args());
   }
 
 
@@ -2427,11 +2131,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function fetchObject($query)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchObject();
-    }
-
-    return false;
+    return $this->language->fetchObject(...\func_get_args());
   }
 
 
@@ -2454,7 +2154,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     if ($this->check()) {
       return $this->language->query(...\func_get_args());
     }
-
   }
 
 
@@ -2521,11 +2220,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    *
    * @param string $col     The column's name (escaped or not).
-   * @param string $table   The table's name (escaped or not).
+   * @param string|null $table   The table's name (escaped or not).
    * @param bool   $escaped If set to true the returned string will be escaped.
    * @return null|string
    */
-  public function cfn(string $col, $table = null, bool $escaped = false): ?string
+  public function cfn(string $col, string $table = null, bool $escaped = false): ?string
   {
     return $this->colFullName($col, $table, $escaped);
   }
@@ -2560,21 +2259,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *                                                              *
    ****************************************************************/
 
-
-  /**
-   * @param array $cfg The user's options
-   * @return array|null The final configuration
-   */
-  public function getConnection(array $cfg = []): ?array
-  {
-    if ($this->language) {
-      return $this->language->getConnection($cfg);
-    }
-
-    return null;
-  }
-
-
   /**
    * Actions to do once the PDO object has been created
    *
@@ -2586,8 +2270,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     if ($this->language && !$this->engine) {
       $this->language->postCreation();
     }
-
-    return;
   }
 
 
@@ -2749,7 +2431,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * // (db)
    * ```
    *
-   * @return db
+   * @return self
    */
   public function disableKeys(): self
   {
@@ -2766,7 +2448,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * // (db)
    * ```
    *
-   * @return db
+   * @return self
    */
   public function enableKeys(): self
   {
@@ -2799,7 +2481,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Return colums' structure of a table as an array indexed with the fields names.
+   * Return columns' structure of a table as an array indexed with the fields names.
    *
    * @param string $table The table's name
    * @return null|array
@@ -2860,7 +2542,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   /**
    * @param array $conditions
    * @param array $cfg
-   * @param bool  $is_having
+   * @param bool $is_having
+   * @param int $indent
    * @return string
    */
   public function getConditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string
@@ -2886,7 +2569,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getSelect(array $cfg): string
   {
-    return $this->language->getSelect(...$this->_add_kind(\func_get_args()));
+    return $this->language->getSelect($cfg);
   }
 
 
@@ -3087,13 +2770,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     return $this->language->getCreateConstraints($table, $model);
   }
 
-
-  public function createConstraintsSqlite(string $table, array $model = null)
-  {
-    return $this->language->createConstraintsSqlite(...\func_get_args());
-  }
-
-
   /**
    * Creates an index on one or more column(s) of the table
    *
@@ -3175,9 +2851,9 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * // (void)
    * ```
    *
-   * @param string $user
-   * @param string $pass
-   * @param string $db
+   * @param string|null $user
+   * @param string|null $pass
+   * @param string|null $db
    * @return bool
    */
   public function createUser(string $user = null, string $pass = null, string $db = null): bool
@@ -3196,7 +2872,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * // (void)
    * ```
    *
-   * @param string $user
+   * @param string|null $user
    * @return bool
    */
   public function deleteUser(string $user = null): bool
@@ -3261,11 +2937,10 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * @return string
+   * @return string|null
    */
-  public function getUid(): string
+  public function getUid(): ?string
   {
-    //return hex2bin(str_replace('-', '', X::makeUid()));
     return $this->language->getUid();
   }
 
@@ -3293,16 +2968,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param string query.
    * @param int The var ? value.
-   * @return array | false
+   * @return array|false
    *
    */
   public function getRow(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getRow();
-    }
-
-    return null;
+    return $this->language->getRow(...\func_get_args());
   }
 
 
@@ -3311,14 +2982,10 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param string
    * @param int The var ? value
-   * @return array | false
+   * @return array|false
    */
   public function getRows(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getRows();
-    }
-
     return $this->language->getRows(...\func_get_args());
   }
 
@@ -3341,11 +3008,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getIrow(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getIrow();
-    }
-
-    return null;
+    return $this->language->getIrow(...\func_get_args());
   }
 
 
@@ -3371,11 +3034,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getIrows(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getIrows();
-    }
-
-    return null;
+    return $this->language->getIrows(...\func_get_args());
   }
 
 
@@ -3402,11 +3061,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getByColumns(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getByColumns();
-    }
-
-    return null;
+    return $this->language->getByColumns(...\func_get_args());
   }
 
 
@@ -3445,11 +3100,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getObject(): ?\stdClass
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getObject();
-    }
-
-    return null;
+    return $this->language->getObject(...\func_get_args());
   }
 
 
@@ -3483,26 +3134,14 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getObjects(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getObjects();
-    }
-
-    return [];
+    return $this->language->getObjects(...\func_get_args());
   }
 
 
-  public function createTable()
-  {
-    return $this->language->createTable(...\func_get_args());
-  }
-
-
-  public function createTableSqlite()
-  {
-    return $this->language->createTableSqlite(...\func_get_args());
-  }
-
-
+  /**
+   * @param string $database
+   * @return bool
+   */
   public function createDatabase(string $database): bool
   {
     return $this->language->createDatabase(...\func_get_args());
@@ -3532,14 +3171,15 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     $this->_last_enabled = false;
   }
 
+  public function lastEnabled(): bool
+  {
+    return $this->_last_enabled;
+  }
+
 
   public function getRealLastParams(): ?array
   {
-    if (method_exists($this->language, 'getRealLastParams')) {
-      return $this->language->getRealLastParams();
-    }
-
-    return null;
+    return $this->language->getRealLastParams();
   }
 
 
@@ -3592,459 +3232,4 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   {
     self::$_has_error_all = true;
   }
-
-
-
-
-
-
-  /**
-   * Adds the specs of a query to the $queries object.
-   *
-   * @param string $hash         The hash of the statement.
-   * @param string $statement    The SQL full statement.
-   * @param string $kind         The type of statement.
-   * @param int    $placeholders The number of placeholders.
-   * @param array  $options      The driver options.
-   */
-  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
-  {
-    $now                  = microtime(true);
-    $this->queries[$hash] = [
-      'sql' => $statement,
-      'kind' => $kind,
-      'write' => \in_array($kind, self::$write_kinds, true),
-      'structure' => \in_array($kind, self::$structure_kinds, true),
-      'placeholders' => $placeholders,
-      'options' => $options,
-      'num' => 0,
-      'exe_time' => 0,
-      'first' => $now,
-      'last' => 0,
-      'prepared' => false
-    ];
-    $this->list_queries[] = [
-      'hash' => $hash,
-      'last' => $now
-    ];
-    $num                  = count($this->list_queries);
-    while ($num > $this->max_queries) {
-      $num--;
-      $this->_remove_query($this->list_queries[0]['hash']);
-      array_shift($this->list_queries);
-    }
-  }
-
-
-  private function _remove_query(string $hash): void
-  {
-    if (X::hasProp($this->queries, $hash)) {
-      unset($this->queries[$hash]);
-      while ($idx = \array_search($hash, $this->queries, true)) {
-        unset($this->queries[$idx]);
-      }
-    }
-  }
-
-
-  private function _update_query($hash)
-  {
-    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
-      $last_index                   = count($this->list_queries) - 1;
-      $now                          = \microtime(true);
-      $this->queries[$hash]['last'] = $now;
-      $this->queries[$hash]['num']++;
-      if ($this->list_queries[$last_index]['hash'] !== $hash) {
-        if (($idx = X::find($this->list_queries, ['hash' => $hash])) !== null) {
-          $this->list_queries[$idx]['last'] = $now;
-          X::move($this->list_queries, $idx, $last_index);
-        }
-        else {
-          throw new \Exception(X::_("Impossible to find the corresponding hash"));
-        }
-      }
-      else {
-        $this->list_queries[$last_index]['last'] = $now;
-      }
-
-      $num = count($this->list_queries) - 1;
-      while (($num > 0)
-          && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
-      ) {
-        $num--;
-        if (!is_string($this->list_queries[0]['hash'])) {
-          X::log($this->list_queries);
-          X::log(count($this->list_queries));
-        }
-
-        $this->_remove_query($this->list_queries[0]['hash']);
-        array_shift($this->list_queries);
-      }
-
-      if (empty($this->queries)) {
-        $debug = debug_backtrace();
-        X::log($debug, 'db_explained');
-        throw new \Exception(X::_("The queries object is empty!"));
-      }
-    }
-    else {
-      throw new \Exception(X::_("Impossible to find the query corresponding to this hash"));
-    }
-
-  }
-
-
-  /**
-   * Makes a string that will be the id of the request.
-   *
-   * @return string
-   *
-   */
-  private function _make_hash(): string
-  {
-    return $this->language->makeHash(\func_get_args());
-  }
-
-
-  /**
-   * Launches a function before or after
-   *
-   * @param array $cfg
-   * @return array
-   */
-  private function _trigger(array $cfg): array
-  {
-    if ($this->_triggers_disabled) {
-      if ($cfg['moment'] === 'after') {
-        return $cfg;
-      }
-
-      $cfg['run']  = 1;
-      $cfg['trig'] = 1;
-      return $cfg;
-    }
-
-    if (!isset($cfg['trig'])) {
-      $cfg['trig'] = 1;
-    }
-
-    if (!isset($cfg['run'])) {
-      $cfg['run'] = 1;
-    }
-
-    if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
-      $table = $this->tfn(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
-      // Specific to a table
-      if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
-        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
-          if ($f && \is_callable($f)) {
-            if (!($tmp = $f($cfg))) {
-              $cfg['run']  = false;
-              $cfg['trig'] = false;
-            }
-            else{
-              $cfg = $tmp;
-            }
-          }
-        }
-
-        //echo X::makeTree($trig);
-        //echo X::makeTree($cfg);
-      }
-    }
-
-    return $cfg;
-  }
-
-
-  /**
-   * @param array  $args
-   * @param string $kind
-   * @return array
-   */
-  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
-  {
-    $kind = strtoupper($kind);
-    if (!isset($args[0])) {
-      return null;
-    }
-
-    if (!\is_array($args[0])) {
-      array_unshift($args, $kind);
-    }
-    else {
-      $args[0]['kind'] = $kind;
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * Adds a random primary value when it is absent from the set and present in the fields
-   * @param array $cfg
-   */
-  private function _add_primary(array &$cfg): void
-  {
-    // Inserting a row without primary when primary is needed and no auto-increment
-    if (!empty($cfg['primary'])
-        && empty($cfg['auto_increment'])
-        && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1)
-        && (count($cfg['values']) === (count($cfg['fields']) - 1))
-    ) {
-      $val = false;
-      switch ($cfg['primary_type']){
-        case 'int':
-          $val = random_int(
-            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] - 3 : 1) / 2),
-            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
-          );
-          break;
-        case 'binary':
-          if ($cfg['primary_length'] === 16) {
-            $val = $this->getUid();
-          }
-          break;
-      }
-
-      if ($val) {
-        array_splice($cfg['values'], $idx, 0, $val);
-        $this->setLastInsertId($val);
-      }
-    }
-  }
-
-
-  /**
-   * @returns null|Db2\Query|int A selection query or the number of affected rows by a writing query
-   */
-  private function _exec()
-  {
-    if ($this->check()
-        && ($cfg = $this->processCfg(\func_get_args()))
-        && !empty($cfg['sql'])
-    ) {
-      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
-      $cfg['moment'] = 'before';
-      $cfg['trig']   = null;
-      if ($cfg['kind'] === 'INSERT') {
-        // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
-        $this->_add_primary($cfg);
-      }
-
-      if (count($cfg['values']) !== count($cfg['values_desc'])) {
-        X::dump($cfg);
-        die('Database error in values count');
-      }
-
-      // Launching the trigger BEFORE execution
-      if ($cfg = $this->_trigger($cfg)) {
-        if (!empty($cfg['run'])) {
-          //$this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
-          // Executing the query
-          /** @todo Put hash back! */
-          //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
-          /** @var \bbn\Db2\Query */
-          $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
-        }
-
-        if (!empty($cfg['force'])) {
-          $cfg['trig'] = 1;
-        }
-        elseif (null === $cfg['trig']) {
-          $cfg['trig'] = (bool)$cfg['run'];
-        }
-
-        if ($cfg['trig']) {
-          $cfg['moment'] = 'after';
-          $cfg           = $this->_trigger($cfg);
-        }
-
-        $this->last_cfg = $cfg;
-        if (!\in_array($cfg['kind'], self::$write_kinds, true)) {
-          return $cfg['run'] ?? null;
-        }
-
-        if (isset($cfg['value'])) {
-          return $cfg['value'];
-        }
-
-        if (isset($cfg['run'])) {
-          return $cfg['run'];
-        }
-      }
-    }
-
-    return null;
-  }
-
-
-
-
-
-  private function _adapt_filters(&$cfg): void
-  {
-    if (!empty($cfg['filters'])) {
-      [$cfg['filters'], $having] = $this->_adapt_bit($cfg, $cfg['filters']);
-      if (empty($cfg['having']['conditions'])) {
-        $cfg['having'] = $having;
-      }
-      else {
-        $cfg['having'] = [
-          'logic' => 'AND',
-          'conditions' => [
-            $cfg['having'],
-            $having
-          ]
-        ];
-      }
-    }
-  }
-
-
-  private function _adapt_bit($cfg, $where, $having = [])
-  {
-    if (X::hasProps($where, ['logic', 'conditions'])) {
-      $new = [
-        'logic' => $where['logic'],
-        'conditions' => []
-      ];
-      foreach ($where['conditions'] as $c) {
-        $is_aggregate = false;
-        if (isset($c['field'])) {
-          $is_aggregate = $this->isAggregateFunction($c['field']);
-          if (!$is_aggregate && isset($cfg['fields'][$c['field']])) {
-            $is_aggregate = $this->isAggregateFunction($cfg['fields'][$c['field']]);
-          }
-        }
-
-        if (!$is_aggregate && isset($c['exp'])) {
-          $is_aggregate = $this->isAggregateFunction($c['exp']);
-          if (!$is_aggregate && isset($cfg['fields'][$c['exp']])) {
-            $is_aggregate = $this->isAggregateFunction($cfg['fields'][$c['exp']]);
-          }
-        }
-
-        if (!$is_aggregate) {
-          if (X::hasProps($c, ['conditions', 'logic'])) {
-            $tmp = $this->_adapt_bit($cfg, $c, $having);
-            if (!empty($tmp[0]['conditions'])) {
-              $new['conditions'][] = $c;
-            }
-
-            if (!empty($tmp[1]['conditions'])) {
-              $having = $tmp[1];
-            }
-          }
-          else {
-            $new['conditions'][] = $c;
-          }
-        }
-        else {
-          if (!isset($having['conditions'])) {
-            $having = [
-              'logic' => $where['logic'],
-              'conditions' => []
-            ];
-          }
-
-          if (isset($cfg['aliases'][$c['field']])) {
-            $c['field'] = $cfg['aliases'][$c['field']];
-          }
-          elseif (isset($c['exp'], $cfg['aliases'][$c['exp']])) {
-            $c['exp'] = $cfg['aliases'][$c['exp']];
-          }
-
-          $having['conditions'][] = $c;
-        }
-      }
-
-      return [$new, $having];
-    }
-  }
-
-
-  /**
-   * @param array $args
-   * @return array
-   */
-  private function _set_limit_1(array $args): array
-  {
-    if (\is_array($args[0])
-        && (isset($args[0]['tables']) || isset($args[0]['table']))
-    ) {
-      $args[0]['limit'] = 1;
-    }
-    else {
-      $start = $args[4] ?? 0;
-      $num   = count($args);
-      // Adding fields
-      if ($num === 1) {
-        $args[] = [];
-        $num++;
-      }
-
-      // Adding where
-      if ($num === 2) {
-        $args[] = [];
-        $num++;
-      }
-
-      // Adding order
-      if ($num === 3) {
-        $args[] = [];
-        $num++;
-      }
-
-      if ($num === 4) {
-        $args[] = 1;
-        $num++;
-      }
-
-      $args   = array_slice($args, 0, 5);
-      $args[] = $start;
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * @param array $args
-   * @return array
-   */
-  private function _set_start(array $args, int $start): array
-  {
-    if (\is_array($args[0])
-        && (isset($args[0]['tables']) || isset($args[0]['table']))
-    ) {
-      $args[0]['start'] = $start;
-    }
-    else {
-      if (isset($args[5])) {
-        $args[5] = $start;
-      }
-      else{
-        while (count($args) < 6){
-          switch (count($args)){
-            case 1:
-            case 2:
-            case 3:
-              $args[] = [];
-              break;
-            case 4:
-              $args[] = 1;
-              break;
-            case 5:
-              $args[] = $start;
-              break;
-          }
-        }
-      }
-    }
-
-    return $args;
-  }
-
-
 }

@@ -5,6 +5,7 @@
 namespace bbn\Db2\Languages;
 
 use bbn;
+use bbn\Db;
 use bbn\Str;
 use bbn\X;
 use PHPSQLParser\PHPSQLParser;
@@ -20,7 +21,7 @@ use PHPSQLParser\PHPSQLParser;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
-class Mysql implements bbn\Db2\Engines
+class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
 {
   use bbn\Models\Tts\Cache;
 
@@ -98,6 +99,30 @@ class Mysql implements bbn\Db2\Engines
     'VARIANCE',
   ];
 
+  /**
+   * An array of functions for launching triggers on actions
+   * @var array
+   */
+  private $_triggers = [
+    'SELECT' => [
+      'before' => [],
+      'after' => []
+    ],
+    'INSERT' => [
+      'before' => [],
+      'after' => []
+    ],
+    'UPDATE' => [
+      'before' => [],
+      'after' => []
+    ],
+    'DELETE' => [
+      'before' => [],
+      'after' => []
+    ]
+  ];
+
+
   /** @var string The quote character */
   public $qte = '`';
 
@@ -128,6 +153,31 @@ class Mysql implements bbn\Db2\Engines
    * @var array $queries
    */
   protected $queries = [];
+
+  /**
+   * @var array $list_queries
+   */
+  protected $list_queries = [];
+
+  /**
+   * @var int $max_queries
+   */
+  protected $max_queries = 50;
+
+  /**
+   * @var int $length_queries
+   */
+  protected $length_queries = 60;
+
+  /**
+   * @var bool
+   */
+  private $_triggers_disabled = false;
+
+  /**
+   * @var array $last_cfg
+   */
+  protected $last_cfg;
 
   /**
    * @var mixed $hash_contour
@@ -293,7 +343,7 @@ class Mysql implements bbn\Db2\Engines
    */
   public function disableKeys(): bbn\Db2
   {
-    $this->db->rawQuery('SET FOREIGN_KEY_CHECKS=0;');
+    $this->rawQuery('SET FOREIGN_KEY_CHECKS=0;');
     return $this->db;
   }
 
@@ -305,7 +355,7 @@ class Mysql implements bbn\Db2\Engines
    */
   public function enableKeys(): bbn\Db2
   {
-    $this->db->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
+    $this->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
     return $this->db;
   }
 
@@ -314,7 +364,8 @@ class Mysql implements bbn\Db2\Engines
    *
    * @param array $conditions
    * @param array $cfg
-   * @param bool  $is_having
+   * @param bool $is_having
+   * @param int $indent
    * @return string
    */
   public function getConditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string
@@ -549,6 +600,7 @@ class Mysql implements bbn\Db2\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getSelect(array $cfg): string
   {
@@ -970,7 +1022,7 @@ class Mysql implements bbn\Db2\Engines
   public function getRawCreate(string $table): string
   {
     if (($table = $this->tableFullName($table, true))
-        && ($r = $this->db->rawQuery("SHOW CREATE TABLE $table"))
+        && ($r = $this->rawQuery("SHOW CREATE TABLE $table"))
     ) {
       return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
     }
@@ -1057,7 +1109,12 @@ class Mysql implements bbn\Db2\Engines
   }
 
 
-  public function getCreateKeys(string $table, array $model = null)
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   */
+  public function getCreateKeys(string $table, array $model = null): string
   {
     $st = '';
     if (!$model) {
@@ -1185,11 +1242,12 @@ class Mysql implements bbn\Db2\Engines
   /**
    * Creates an index
    *
-   * @param null|string  $table
+   * @param null|string $table
    * @param string|array $column
-   * @param bool         $unique
-   * @param null         $length
+   * @param bool $unique
+   * @param null $length
    * @return bool
+   * @throws \Exception
    */
   public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
   {
@@ -1248,6 +1306,57 @@ MYSQL
 
 
   /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlter(string $table, array $cfg): string
+  {
+    return '';
+  }
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterTable(string $table, array $cfg): string
+  {
+    return '';
+  }
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterColumn(string $table, array $cfg): string
+  {
+    return '';
+  }
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterKey(string $table, array $cfg): string
+  {
+    // TODO: Implement getAlterKey() method.
+    return '';
+  }
+
+  /**
+   * @param $table
+   * @param $cfg
+   * @return int
+   */
+  public function alter($table, $cfg): int
+  {
+    return 0;
+  }
+
+  /**
    * Creates a database
    *
    * @param string $database
@@ -1258,7 +1367,7 @@ MYSQL
   public function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
     if (bbn\Str::checkName($database, $enc, $collation)) {
-      return (bool)$this->db->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
+      return (bool)$this->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
     }
 
     return false;
@@ -1269,8 +1378,6 @@ MYSQL
    * Creates a database
    *
    * @param string $database
-   * @param string $enc
-   * @param string $collation
    * @return bool
    */
   public function createDatabase(string $database): bool
@@ -1293,7 +1400,7 @@ MYSQL
       }
 
       try {
-        $this->db->rawQuery("DROP DATABASE `$database`");
+        $this->rawQuery("DROP DATABASE `$database`");
       }
       catch (\Exception $e) {
         return false;
@@ -1322,7 +1429,7 @@ MYSQL
         && bbn\Str::checkName($user, $db)
         && (strpos($pass, "'") === false)
     ) {
-      return (bool)$this->db->rawQuery(
+      return (bool)$this->rawQuery(
         <<<MYSQL
 GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 ON $db . *
@@ -1347,7 +1454,7 @@ MYSQL
   public function deleteUser(string $user): bool
   {
     if (bbn\Str::checkName($user)) {
-      $this->db->rawQuery(
+      $this->rawQuery(
         "
 			REVOKE ALL PRIVILEGES ON *.*
       FROM $user"
@@ -1399,15 +1506,20 @@ MYSQL
   }
 
 
+  /**
+   * @param string $database
+   * @param string $type
+   * @return int
+   */
   public function dbSize(string $database = '', string $type = ''): int
   {
     $cur = null;
     if ($database && ($this->db->getCurrent() !== $database)) {
       $cur = $this->db->getCurrent();
-      $this->db->change($database);
+      $this->change($database);
     }
 
-    $q    = $this->db->query('SHOW TABLE STATUS');
+    $q    = $this->query('SHOW TABLE STATUS');
     $size = 0;
     while ($row = $q->getRow()) {
       if (!$type || ($type === 'data')) {
@@ -1420,7 +1532,7 @@ MYSQL
     }
 
     if ($cur !== null) {
-      $this->db->change($cur);
+      $this->change($cur);
     }
 
     return $size;
@@ -1462,9 +1574,11 @@ MYSQL
   }
 
 
-  public function getUid(): string
+  /**
+   * @return string|null
+   */
+  public function getUid(): ?string
   {
-    //return $this->db->getOne("SELECT replace(uuid(),'-','')");
     $uid = null;
     while (!bbn\Str::isBuid(hex2bin($uid))) {
       $uid = $this->db->getOne("SELECT replace(uuid(),'-','')");
@@ -1474,7 +1588,16 @@ MYSQL
   }
 
 
-  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', $engine = 'InnoDB')
+  /**
+   * @param $table_name
+   * @param array $columns
+   * @param array|null $keys
+   * @param bool $with_constraints
+   * @param string $charset
+   * @param string $engine
+   * @return string
+   */
+  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
   {
     $lines = [];
     $sql   = '';
@@ -1539,7 +1662,7 @@ MYSQL
   public function change(string $db)
   {
     if (($this->db->getCurrent() !== $db) && bbn\Str::checkName($db)) {
-      $this->db->rawQuery("USE `$db`");
+      $this->rawQuery("USE `$db`");
       return true;
     }
 
@@ -1917,48 +2040,6 @@ MYSQL
         return $r ?? false;
       }
     }
-  }
-
-  /**
-   * Changes the value of last_insert_id (used by history).
-   *
-   * @param string $id
-   * @return $this
-   */
-  public function setLastInsertId($id=''): self
-  {
-    if ($id === '') {
-      if ($this->id_just_inserted) {
-        $id                     = $this->id_just_inserted;
-        $this->id_just_inserted = null;
-      }
-      else{
-        $id = $this->pdo->lastInsertId();
-        if (\is_string($id) && Str::isInteger($id) && ((int)$id != PHP_INT_MAX)) {
-          $id = (int)$id;
-        }
-      }
-    }
-    else{
-      $this->id_just_inserted = $id;
-    }
-
-    $this->last_insert_id = $id;
-    return $this;
-  }
-
-  /**
-   * Return the last inserted ID.
-   *
-   * @return false|mixed|string
-   */
-  public function lastId()
-  {
-    if ($this->last_insert_id) {
-      return Str::isBuid($this->last_insert_id) ? bin2hex($this->last_insert_id) : $this->last_insert_id;
-    }
-
-    return false;
   }
 
   /**
@@ -2806,6 +2887,10 @@ MYSQL
     return $this->last_params;
   }
 
+  /**
+   * @param array $cfg
+   * @return array
+   */
   public function getQueryValues(array $cfg): array
   {
     $res = [];
@@ -3104,7 +3189,7 @@ MYSQL
     }
 
     $t2 = [];
-    if (($r = $this->db->rawQuery("SHOW TABLES FROM `$database`"))
+    if (($r = $this->rawQuery("SHOW TABLES FROM `$database`"))
       && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
@@ -3277,7 +3362,7 @@ MYSQL;
    *
    * @param string
    * @param int The var ? value
-   * @return array | false
+   * @return array|false
    */
   public function getRows(): ?array
   {
@@ -3286,6 +3371,177 @@ MYSQL;
     }
 
     return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as an array indexed with the fields' name.
+   *
+   * ```php
+   * X::dump($db->getRow("SELECT id, name FROM table_users WHERE id > ? ", 2));;
+   *
+   * /* (array)[
+   *        "id" => 3,
+   *        "name" => "thomas",
+   *        ]
+   * ```
+   *
+   * @param string query.
+   * @param int The var ? value.
+   * @return array|false
+   *
+   */
+  public function getRow(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getRow();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return a row as a numeric indexed array.
+   *
+   * ```php
+   * X::dump($db->getIrow("SELECT id, name, surname FROM table_users WHERE id > ?", 2));
+   * /* (array) [
+   *              3,
+   *              "john",
+   *              "brown",
+   *             ]
+   * ```
+   *
+   * @param string query
+   * @param int The var ? value
+   * @return array|false
+   */
+  public function getIrow(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getIrow();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return an array of numeric indexed rows.
+   *
+   * ```php
+   * X::dump($db->getIrows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2, 2));
+   * /*
+   * (array)[
+   *         [
+   *          3,
+   *         "john"
+   *         ],
+   *         [
+   *         4,
+   *         "barbara"
+   *        ]
+   *       ]
+   * ```
+   *
+   * @return null|array
+   */
+  public function getIrows(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getIrows();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return an array indexed on the searched field's in which there are all the values of the column.
+   *
+   * ```php
+   * X::dump($db->getByColumns("SELECT name, surname FROM table_users WHERE id > 2"));
+   * /*
+   * (array) [
+   *      "name" => [
+   *       "John",
+   *       "Michael"
+   *      ],
+   *      "surname" => [
+   *        "Brown",
+   *        "Smith"
+   *      ]
+   *     ]
+   * ```
+   *
+   * @param string query
+   * @return null|array
+   */
+  public function getByColumns(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getByColumns();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as an object.
+   * Synonym of get_obj.
+   *
+   * ```php
+   * X::dump($db->getObject("SELECT name FROM table_users"));
+   * /*
+   * (obj){
+   *       "name" => "John"
+   *       }
+   * ```
+   *
+   * @return null|\stdClass
+   */
+  public function getObject(): ?\stdClass
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getObject();
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Return an array of stdClass objects.
+   *
+   * ```php
+   * X::dump($db->getObjects("SELECT name FROM table_users"));
+   *
+   * /*
+   * (array) [
+   *          Object stdClass: df {
+   *            "name" => "John",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "Michael",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "Thomas",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "William",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "Jake",
+   *          },
+   *         ]
+   * ```
+   *
+   * @return null|array
+   */
+  public function getObjects(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->getObjects();
+    }
+
+    return [];
   }
 
   /**
@@ -3678,4 +3934,1490 @@ MYSQL
 
     return [];
   }
+
+  /**
+   * Return the unique primary key of the given table.
+   *
+   * ```php
+   * X::dump($db->getUniquePrimary('table_users'));
+   * // (string) id
+   * ```
+   *
+   * @param string $table The table's name
+   * @return null|string
+   */
+  public function getUniquePrimary(string $table): ?string
+  {
+    if (($keys = $this->getKeys($table))
+      && isset($keys['keys']['PRIMARY'])
+      && (\count($keys['keys']['PRIMARY']['columns']) === 1)
+    ) {
+      return $keys['keys']['PRIMARY']['columns'][0];
+    }
+
+    return null;
+  }
+
+  /**
+   * Return the unique keys of a table as a numeric array.
+   *
+   * ```php
+   * X::dump($db->getUniqueKeys('table_users'));
+   * // (array) ["userid", "userdataid"]
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function getUniqueKeys(string $table): array
+  {
+    if ($ks = $this->getKeys($table)) {
+      foreach ($ks['keys'] as $k){
+        if ($k['unique']) {
+          return $k['columns'];
+        }
+      }
+    }
+
+    return [];
+  }
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                           UTILITIES                          *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+  /**
+   * Changes the value of last_insert_id (used by history).
+   *
+   * @param string $id
+   * @return $this
+   */
+  public function setLastInsertId($id=''): self
+  {
+    if ($id === '') {
+      if ($this->id_just_inserted) {
+        $id                     = $this->id_just_inserted;
+        $this->id_just_inserted = null;
+      }
+      else{
+        $id = $this->pdo->lastInsertId();
+        if (\is_string($id) && Str::isInteger($id) && ((int)$id != PHP_INT_MAX)) {
+          $id = (int)$id;
+        }
+      }
+    }
+    else{
+      $this->id_just_inserted = $id;
+    }
+
+    $this->last_insert_id = $id;
+    return $this;
+  }
+
+  /**
+   * Return the last inserted ID.
+   *
+   * @return false|mixed|string
+   */
+  public function lastId()
+  {
+    if ($this->last_insert_id) {
+      return Str::isBuid($this->last_insert_id) ? bin2hex($this->last_insert_id) : $this->last_insert_id;
+    }
+
+    return false;
+  }
+
+  /**
+   * Return the last query for this connection.
+   *
+   * ```php
+   * X::dump($db->last());
+   * // (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)
+   * ```
+   *
+   * @return string
+   */
+  public function last(): ?string
+  {
+    return $this->last_query;
+  }
+
+  /**
+   * @return int
+   */
+  public function countQueries(): int
+  {
+    return \count($this->queries);
+  }
+
+  /**
+   * Deletes all the queries recorded and returns their (ex) number.
+   *
+   * @return int
+   */
+  public function flush(): int
+  {
+    $num                = \count($this->queries);
+    $this->queries      = [];
+    $this->list_queries = [];
+    return $num;
+  }
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                       QUERY HELPERS                          *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+  /**
+   * Executes the given query with given vars, and extracts the first cell's result.
+   *
+   * ```php
+   * X::dump($db->getOne("SELECT name FROM table_users WHERE id>?", 138));
+   * // (string) John
+   * ```
+   *
+   * @param string query
+   * @param mixed values
+   * @return mixed
+   */
+  public function getOne()
+  {
+    /** @var \bbn\Db2\Query $r */
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->fetchColumn(0);
+    }
+
+    return false;
+  }
+
+  /**
+   * Return an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields.
+   *
+   * ```php
+   * X::dump($db->getKeyVal("SELECT name,id_group FROM table_users"));
+   * /*
+   * (array)[
+   *      "John" => 1,
+   *      "Michael" => 1,
+   *      "Barbara" => 1
+   *        ]
+   *
+   * X::dump($db->getKeyVal("SELECT name, surname, id FROM table_users WHERE id > 2 "));
+   * /*
+   * (array)[
+   *         "John" => [
+   *          "surname" => "Brown",
+   *          "id" => 3
+   *         ],
+   *         "Michael" => [
+   *          "surname" => "Smith",
+   *          "id" => 4
+   *         ]
+   *        ]
+   * ```
+   *
+   * @param string query
+   * @param mixed values
+   * @return null|array
+   */
+  public function getKeyVal(): ?array
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      if ($rows = $r->getRows()) {
+        return X::indexByFirstVal($rows);
+      }
+
+      return [];
+    }
+
+    return null;
+  }
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                 READ HELPERS WITH TRIGGERS                   *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+  /**
+   * Returns the first row resulting from the query as an object.
+   *
+   * ```php
+   * X::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));
+   * /*
+   * (object){
+   *   "name": "John",
+   *   "surname": "Smith",
+   * }
+   * ```
+   *
+   * @param string|array    $table  The table's name or a configuration array
+   * @param string|array    $fields The fields' name
+   * @param array           $where  The "where" condition
+   * @param array | boolean $order  The "order" condition, default: false
+   * @param int             $start  The "start" condition, default: 0
+   * @return null|\stdClass
+   */
+  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
+  {
+    $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
+    if ($r = $this->_exec(...$args)) {
+      if (!is_object($r)) {
+        $this->db->log([$args, $this->processCfg($args)]);
+      }
+      else{
+        return $r->getObject();
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Return table's rows resulting from the query as an array of objects.
+   *
+   * ```php
+   * X::dump($db->selectAll("tab_users", ["id", "name", "surname"],[["id", ">", 1]], ["id" => "ASC"], 2));
+   * /*
+   * (array)[
+   *        Object stdClass: df {
+   *          "id" => 2,
+   *          "name" => "John",
+   *          "surname" => "Smith",
+   *          },
+   *        Object stdClass: df {
+   *          "id" => 3,
+   *          "name" => "Thomas",
+   *          "surname" => "Jones",
+   *         }
+   *        ]
+   * ```
+   *
+   * @param string|array    $table  The table's name or a configuration array
+   * @param string|array    $fields The fields' name
+   * @param array           $where  The "where" condition
+   * @param array | boolean $order  The "order" condition, default: false
+   * @param int             $limit  The "limit" condition, default: 0
+   * @param int             $start  The "start" condition, default: 0
+   * @return null|array
+   */
+  public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
+      return $r->getObjects();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as a numeric array.
+   *
+   * ```php
+   * X::dump($db->iselect("tab_users", ["id", "name", "surname"], [["id", ">", 1]], ["id" => "ASC"], 2));
+   * /*
+   * (array)[
+   *          4,
+   *         "Jack",
+   *          "Stewart"
+   *        ]
+   * ```
+   *
+   * @param string|array    $table  The table's name or a configuration array
+   * @param string|array    $fields The fields' name
+   * @param array           $where  The "where" condition
+   * @param array | boolean $order  The "order" condition, default: false
+   * @param int             $start  The "start" condition, default: 0
+   * @return array
+   */
+  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  {
+    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
+      return $r->getIrow();
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Return the searched rows as an array of numeric arrays.
+   *
+   * ```php
+   * X::dump($db->iselectAll("tab_users", ["id", "name", "surname"], [["id", ">", 1]],["id" => "ASC"],2));
+   * /*
+   * (array)[
+   *          [
+   *            2,
+   *            "John",
+   *            "Smith",
+   *          ],
+   *          [
+   *            3,
+   *            "Thomas",
+   *            "Jones",
+   *          ]
+   *        ]
+   * ```
+   *
+   * @param string|array                                          $table  The table's name or a configuration array
+   * @param string|array                                          $fields The fields's name
+   * @param array                                                 $where  The "where" condition
+   * @param array | boolean The "order" condition, default: false
+   * @param int                                                   $limit  The "limit" condition, default: 0
+   * @param int                                                   $start  The "start" condition, default: 0
+   * @return array
+   */
+  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
+      return $r->getIrows();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as an indexed array.
+   *
+   * ```php
+   * X::dump($db->rselect("tab_users", ["id", "name", "surname"], ["id", ">", 1], ["id" => "ASC"], 2));
+   * /*
+   * (array) [
+   *          "id" => 4,
+   *          "name" => "John",
+   *          "surname" => "Smith"
+   *         ]
+   * ```
+   *
+   * @param string|array  $table  The table's name or a configuration array
+   * @param string|array  $fields The fields' name
+   * @param array         $where  The "where" condition
+   * @param array|boolean $order  The "order" condition, default: false
+   * @param int           $start  The "start" condition, default: 0
+   * @return null|array
+   */
+  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  {
+    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
+      return $r->getRow();
+    }
+
+    return null;
+  }
+
+  /**
+   * Return table's rows as an array of indexed arrays.
+   *
+   * ```php
+   * X::dump($db->rselectAll("tab_users", ["id", "name", "surname"], [["id", ">", 1]], ["id" => "ASC"], 2));
+   * /*
+   * (array) [
+   *          [
+   *          "id" => 2,
+   *          "name" => "John",
+   *          "surname" => "Smith",
+   *          ],
+   *          [
+   *          "id" => 3,
+   *          "name" => "Thomas",
+   *          "surname" => "Jones",
+   *          ]
+   *        ]
+   * ```
+   *
+   * @param string|array    $table  The table's name or a configuration array
+   * @param string|array    $fields The fields' name
+   * @param array           $where  The "where" condition
+   * @param array | boolean $order  condition, default: false
+   * @param int             $limit  The "limit" condition, default: 0
+   * @param int             $start  The "start" condition, default: 0
+   * @return null|array
+   */
+  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
+      if (method_exists($r, 'getRows')) {
+        return $r->getRows();
+      }
+
+      $this->log('ERROR IN RSELECT_ALL', $r);
+    }
+
+    return [];
+  }
+
+
+  /**
+   * Return a single value
+   *
+   * ```php
+   * X::dump($db->selectOne("tab_users", "name", [["id", ">", 1]], ["id" => "DESC"], 2));
+   *  (string) 'Michael'
+   * ```
+   *
+   * @param string|array    $table The table's name or a configuration array
+   * @param string          $field The field's name
+   * @param array           $where The "where" condition
+   * @param array | boolean $order The "order" condition, default: false
+   * @param int             $start The "start" condition, default: 0
+   * @return mixed
+   */
+  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
+  {
+    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
+      if (method_exists($r, 'getIrow')) {
+        return ($a = $r->getIrow()) ? $a[0] : false;
+      }
+
+      $this->db->log('ERROR IN SELECT_ONE', $this->last_cfg, $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Return the number of records in the table corresponding to the $where condition (non mandatory).
+   *
+   * ```php
+   * X::dump($db->count('table_users', ['name' => 'John']));
+   * // (int) 2
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param array        $where The "where" condition
+   * @return int
+   */
+  public function count($table, array $where = []): ?int
+  {
+    $args          = \is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [
+      'tables' => [$table],
+      'where' => $where
+    ];
+    $args['count'] = true;
+    if (!empty($args['bbn_db_processed'])) {
+      unset($args['bbn_db_processed']);
+    }
+
+    if (\is_object($r = $this->_exec($args))) {
+      $a = $r->getIrow();
+      return $a ? (int)$a[0] : null;
+    }
+
+    return null;
+  }
+
+  /**
+   * Return an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields.
+   * Return the same value as "get_key_val".
+   *
+   * ```php
+   * X::dump($db->selectAllByKeys("table_users", ["name","id","surname"], [["id", ">", "1"]], ["id" => "ASC"]);
+   * /*
+   * (array)[
+   *        "John" => [
+   *          "surname" => "Brown",
+   *          "id" => 3
+   *          ],
+   *        "Michael" => [
+   *          "surname" => "Smith",
+   *          "id" => 4
+   *        ]
+   *      ]
+   * ```
+   *
+   * @param string|array  $table  The table's name or a configuration array
+   * @param array         $fields The fields's name
+   * @param array         $where  The "where" condition
+   * @param array|boolean $order  The "order" condition
+   * @param int           $limit  The $limit condition, default: 0
+   * @param int           $start  The $limit condition, default: 0
+   * @return array|false
+   */
+  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    if ($rows = $this->rselectAll($table, $fields, $where, $order, $limit, $start)) {
+      return X::indexByFirstVal($rows);
+    }
+
+    return $this->db->check() ? [] : null;
+  }
+
+
+  /**
+   * Return an array with the count of values corresponding to the where conditions.
+   *
+   * ```php
+   * X::dump($db->stat('table_user', 'name', ['name' => '%n']));
+   * /* (array)
+   * [
+   *  [
+   *      "num" => 1,
+   *      "name" => "alan",
+   *  ], [
+   *      "num" => 1,
+   *      "name" => "karen",
+   *  ],
+   * ]
+   * ```
+   *
+   * @param string|array $table  The table's name or a configuration array.
+   * @param string       $column The field's name.
+   * @param array        $where  The "where" condition.
+   * @param array        $order  The "order" condition.
+   * @return array
+   */
+  public function stat(string $table, string $column, array $where = [], array $order = []): ?array
+  {
+    if ($this->db->check()) {
+      return $this->rselectAll(
+        [
+          'tables' => [$table],
+          'fields' => [
+            $column,
+            'num' => 'COUNT(*)'
+          ],
+          'where' => $where,
+          'order' => $order,
+          'group_by' => [$column]
+        ]
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.
+   *
+   * ```php
+   * X::dump($db->countFieldValues('table_users','surname',[['name','=','John']]));
+   * // (array) ["num" => 2, "val" => "John"]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param null|string  $field The field's name
+   * @param array        $where The "where" condition
+   * @param array        $order The "order" condition
+   * @return array|null
+   */
+  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array
+  {
+    if (\is_array($table) && \is_array($table['fields']) && count($table['fields'])) {
+      $args  = $table;
+      $field = array_values($table['fields'])[0];
+    }
+    else{
+      $args = [
+        'tables' => [$table],
+        'where' => $where,
+        'order' => $order
+      ];
+    }
+
+    $args = array_merge(
+      $args, [
+        'kind' => 'SELECT',
+        'fields' => [
+          'val' => $field,
+          'num' => 'COUNT(*)'
+        ],
+        'group_by' => [$field]
+      ]
+    );
+    return $this->rselectAll($args);
+  }
+
+  /**
+   * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
+   *
+   * ```php
+   * X::dump($db->getColumnValues('table_users','surname',['id','>',1]));
+   * /*
+   * array [
+   *    "Smith",
+   *    "Jones",
+   *    "Williams",
+   *    "Taylor"
+   * ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @param int $limit
+   * @param int $start
+   * @return array
+   */
+  public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    $res = null;
+    if ($this->db->check()) {
+      $res = [];
+      if (\is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0])) {
+        array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
+      }
+      elseif (\is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0)) {
+        $field = 'DISTINCT '.$field;
+      }
+
+      if ($rows = $this->iselectAll($table, $field, $where, $order, $limit, $start)) {
+        foreach ($rows as $row){
+          $res[] = $row[0];
+        }
+      }
+    }
+
+    return $res;
+  }
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                 WRITE HELPERS WITH TRIGGERS                  *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+
+  /**
+   * Inserts row(s) in a table.
+   *
+   * <code>
+   * $db->insert("table_users", [
+   *    ["name" => "Ted"],
+   *    ["surname" => "McLow"]
+   *  ]);
+   * </code>
+   *
+   * <code>
+   * $db->insert("table_users", [
+   *    ["name" => "July"],
+   *    ["surname" => "O'neill"]
+   *  ], [
+   *    ["name" => "Peter"],
+   *    ["surname" => "Griffin"]
+   *  ], [
+   *    ["name" => "Marge"],
+   *    ["surname" => "Simpson"]
+   *  ]);
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The values to insert.
+   * @param bool $ignore If true, controls if the row is already existing and ignores it.
+   *
+   * @return int Number affected rows.
+   */
+  public function insert($table, array $values = null, $ignore = false): ?int
+  {
+    if (\is_array($table) && isset($table['values'])) {
+      $values = $table['values'];
+    }
+
+    // Array of arrays
+    if (\is_array($values)
+      && count($values)
+      && !X::isAssoc($values)
+      && \is_array($values[0])
+    ) {
+      $res = 0;
+
+      foreach ($values as $v){
+        $res += $this->insert($table, $v, $ignore);
+      }
+
+      return $res;
+    }
+
+    $cfg         = \is_array($table) ? $table : [
+      'tables' => [$table],
+      'fields' => $values,
+      'ignore' => $ignore
+    ];
+    $cfg['kind'] = 'INSERT';
+    return $this->_exec($cfg);
+  }
+
+
+  /**
+   * If not exist inserts row(s) in a table, else update.
+   *
+   * <code>
+   * $db->insertUpdate(
+   *  "table_users",
+   *  [
+   *    'id' => '12',
+   *    'name' => 'Frank'
+   *  ]
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The values to insert.
+   *
+   * @return int The number of rows inserted or updated.
+   */
+  public function insertUpdate($table, array $values = null): ?int
+  {
+    // Twice the arguments
+    if (\is_array($table) && isset($table['values'])) {
+      $values = $table['values'];
+    }
+
+    if (!X::isAssoc($values)) {
+      $res = 0;
+      foreach ($values as $v){
+        $res += $this->insertUpdate($table, $v);
+      }
+
+      return $res;
+    }
+
+    $keys   = $this->getKeys($table);
+    $unique = [];
+    foreach ($keys['keys'] as $k){
+      // Checking each unique key
+      if ($k['unique']) {
+        $i = 0;
+        foreach ($k['columns'] as $c){
+          if (isset($values[$c])) {
+            $unique[$c] = $values[$c];
+            $i++;
+          }
+        }
+
+        // Only if the number of known field values matches the number of columns
+        // which are parts of the unique key
+        // If a value is null it won't pass isset and so won't be used
+        if (($i === \count($k['columns'])) && $this->count($table, $unique)) {
+          // Removing unique matching fields from the values (as it is the where)
+          foreach ($unique as $f => $v){
+            unset($values[$f]);
+          }
+
+          // For updating
+          return $this->update($table, $values, $unique);
+        }
+      }
+    }
+
+    // No need to update, inserting
+    return $this->insert($table, $values);
+  }
+
+  /**
+   * Updates row(s) in a table.
+   *
+   * <code>
+   * $db->update(
+   *  "table_users",
+   *  [
+   *    ['name' => 'Frank'],
+   *    ['surname' => 'Red']
+   *  ],
+   *  ['id' => '127']
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The new value(s).
+   * @param array|null $where The "where" condition.
+   * @param boolean $ignore If IGNORE should be added to the statement
+   *
+   * @return int The number of rows updated.
+   */
+  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
+  {
+    $cfg         = \is_array($table) ? $table : [
+      'tables' => [$table],
+      'where' => $where,
+      'fields' => $values,
+      'ignore' => $ignore
+    ];
+    $cfg['kind'] = 'UPDATE';
+    return $this->_exec($cfg);
+  }
+
+  /**
+   * If exist updates row(s) in a table, else ignore.
+   *
+   * <code>
+   * $db->updateIgnore(
+   *   "table_users",
+   *   [
+   *     ['name' => 'Frank'],
+   *     ['surname' => 'Red']
+   *   ],
+   *   ['id' => '20']
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values
+   * @param array|null $where The "where" condition.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function updateIgnore($table, array $values = null, array $where = null): ?int
+  {
+    return $this->update($table, $values, $where, true);
+  }
+
+  /**
+   * Deletes row(s) in a table.
+   *
+   * <code>
+   * $db->delete("table_users", ['id' => '32']);
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $where The "where" condition.
+   * @param bool $ignore default: false.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function delete($table, array $where = null, bool $ignore = false): ?int
+  {
+    $cfg         = \is_array($table) ? $table : [
+      'tables' => [$table],
+      'where' => $where,
+      'ignore' => $ignore
+    ];
+    $cfg['kind'] = 'DELETE';
+    return $this->_exec($cfg);
+  }
+
+  /**
+   * If exist deletess row(s) in a table, else ignore.
+   *
+   * <code>
+   * $db->deleteIgnore(
+   *  "table_users",
+   *  ['id' => '20']
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $where The "where" condition.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function deleteIgnore($table, array $where = null): ?int
+  {
+    return $this->delete(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);
+  }
+
+  /**
+   * If not exist inserts row(s) in a table, else ignore.
+   *
+   * <code>
+   * $db->insertIgnore(
+   *  "table_users",
+   *  [
+   *    ['id' => '19', 'name' => 'Frank'],
+   *    ['id' => '20', 'name' => 'Ted'],
+   *  ]
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The row(s) values.
+   *
+   * @return int The number of rows inserted.
+   */
+  public function insertIgnore($table, array $values = null): ?int
+  {
+    return $this->insert(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);
+  }
+
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                      NATIVE FUNCTIONS                        *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+  /**
+   * Return an indexed array with the first result of the query or false if there are no results.
+   *
+   * ```php
+   * X::dump($db->fetch("SELECT name FROM users WHERE id = 10"));
+   * /* (array)
+   * [
+   *  "name" => "john",
+   *  0 => "john",
+   * ]
+   * ```
+   *
+   * @param string $query
+   * @return array|false
+   */
+  public function fetch(string $query)
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->fetch();
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Return an array of indexed array with all results of the query or false if there are no results.
+   *
+   * ```php
+   * X::dump($db->fetchAll("SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'"));
+   * /* (array)
+   *  [
+   *    [
+   *    "surname" => "White",
+   *    0 => "White",
+   *    "name" => "Michael",
+   *    1 => "Michael",
+   *    "id"  => 1,
+   *    2 => 1,
+   *    ],
+   *    [
+   *    "surname" => "Smith",
+   *    0 => "Smith",
+   *    "name" => "John",
+   *    1  =>  "John",
+   *    "id" => 2,
+   *    2 => 2,
+   *    ],
+   *  ]
+   * ```
+   *
+   * @param string $query
+   * @return array|false
+   */
+  public function fetchAll(string $query)
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->fetchAll();
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Transposition of the original fetchColumn method, but with the query included. Return an arra or false if no result
+   * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work
+   *
+   * @param $query
+   * @param int   $num
+   * @return mixed
+   */
+  public function fetchColumn($query, int $num = 0)
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->fetchColumn($num);
+    }
+
+    return false;
+  }
+
+  /**
+   * Return an array with stdClass object or false if no result.
+   *
+   * ```php
+   * X::dump($db->fetchObject("SELECT * FROM table_users WHERE name = 'john'"));
+   * // stdClass Object {
+   *                    "id"  =>  1,
+   *                    "name"  =>  "John",
+   *                    "surname"  =>  "Smith",
+   *                    }
+   * ```
+   *
+   * @param string $query
+   * @return bool|\stdClass
+   */
+  public function fetchObject($query)
+  {
+    if ($r = $this->query(...\func_get_args())) {
+      return $r->fetchObject();
+    }
+
+    return false;
+  }
+
+
+
+
+
+  /**
+   * Adds the specs of a query to the $queries object.
+   *
+   * @param string $hash         The hash of the statement.
+   * @param string $statement    The SQL full statement.
+   * @param string $kind         The type of statement.
+   * @param int    $placeholders The number of placeholders.
+   * @param array  $options      The driver options.
+   */
+  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
+  {
+    $now                  = microtime(true);
+    $this->queries[$hash] = [
+      'sql' => $statement,
+      'kind' => $kind,
+      'write' => \in_array($kind, self::$write_kinds, true),
+      'structure' => \in_array($kind, self::$structure_kinds, true),
+      'placeholders' => $placeholders,
+      'options' => $options,
+      'num' => 0,
+      'exe_time' => 0,
+      'first' => $now,
+      'last' => 0,
+      'prepared' => false
+    ];
+    $this->list_queries[] = [
+      'hash' => $hash,
+      'last' => $now
+    ];
+    $num                  = count($this->list_queries);
+    while ($num > $this->max_queries) {
+      $num--;
+      $this->_remove_query($this->list_queries[0]['hash']);
+      array_shift($this->list_queries);
+    }
+  }
+
+
+  private function _remove_query(string $hash): void
+  {
+    if (X::hasProp($this->queries, $hash)) {
+      unset($this->queries[$hash]);
+      while ($idx = \array_search($hash, $this->queries, true)) {
+        unset($this->queries[$idx]);
+      }
+    }
+  }
+
+
+  private function _update_query($hash)
+  {
+    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
+      $last_index                   = count($this->list_queries) - 1;
+      $now                          = \microtime(true);
+      $this->queries[$hash]['last'] = $now;
+      $this->queries[$hash]['num']++;
+      if ($this->list_queries[$last_index]['hash'] !== $hash) {
+        if (($idx = X::find($this->list_queries, ['hash' => $hash])) !== null) {
+          $this->list_queries[$idx]['last'] = $now;
+          X::move($this->list_queries, $idx, $last_index);
+        }
+        else {
+          throw new \Exception(X::_("Impossible to find the corresponding hash"));
+        }
+      }
+      else {
+        $this->list_queries[$last_index]['last'] = $now;
+      }
+
+      $num = count($this->list_queries) - 1;
+      while (($num > 0)
+        && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
+      ) {
+        $num--;
+        if (!is_string($this->list_queries[0]['hash'])) {
+          X::log($this->list_queries);
+          X::log(count($this->list_queries));
+        }
+
+        $this->_remove_query($this->list_queries[0]['hash']);
+        array_shift($this->list_queries);
+      }
+
+      if (empty($this->queries)) {
+        $debug = debug_backtrace();
+        X::log($debug, 'db_explained');
+        throw new \Exception(X::_("The queries object is empty!"));
+      }
+    }
+    else {
+      throw new \Exception(X::_("Impossible to find the query corresponding to this hash"));
+    }
+  }
+
+
+  /**
+   * Launches a function before or after
+   *
+   * @param array $cfg
+   * @return array
+   */
+  private function _trigger(array $cfg): array
+  {
+    if ($this->_triggers_disabled) {
+      if ($cfg['moment'] === 'after') {
+        return $cfg;
+      }
+
+      $cfg['run']  = 1;
+      $cfg['trig'] = 1;
+      return $cfg;
+    }
+
+    if (!isset($cfg['trig'])) {
+      $cfg['trig'] = 1;
+    }
+
+    if (!isset($cfg['run'])) {
+      $cfg['run'] = 1;
+    }
+
+    if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
+      $table = $this->tableFullName(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
+      // Specific to a table
+      if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
+        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
+          if ($f && \is_callable($f)) {
+            if (!($tmp = $f($cfg))) {
+              $cfg['run']  = false;
+              $cfg['trig'] = false;
+            }
+            else{
+              $cfg = $tmp;
+            }
+          }
+        }
+      }
+    }
+
+    return $cfg;
+  }
+
+
+  /**
+   * @param array  $args
+   * @param string $kind
+   * @return array
+   */
+  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
+  {
+    $kind = strtoupper($kind);
+    if (!isset($args[0])) {
+      return null;
+    }
+
+    if (!\is_array($args[0])) {
+      array_unshift($args, $kind);
+    }
+    else {
+      $args[0]['kind'] = $kind;
+    }
+
+    return $args;
+  }
+
+
+  /**
+   * Adds a random primary value when it is absent from the set and present in the fields
+   * @param array $cfg
+   */
+  private function _add_primary(array &$cfg): void
+  {
+    // Inserting a row without primary when primary is needed and no auto-increment
+    if (!empty($cfg['primary'])
+      && empty($cfg['auto_increment'])
+      && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1)
+      && (count($cfg['values']) === (count($cfg['fields']) - 1))
+    ) {
+      $val = false;
+      switch ($cfg['primary_type']){
+        case 'int':
+          $val = random_int(
+            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] - 3 : 1) / 2),
+            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
+          );
+          break;
+        case 'binary':
+          if ($cfg['primary_length'] === 16) {
+            $val = $this->getUid();
+          }
+          break;
+      }
+
+      if ($val) {
+        array_splice($cfg['values'], $idx, 0, $val);
+        $this->setLastInsertId($val);
+      }
+    }
+  }
+
+
+  /**
+   * @returns null|\bbn\Db2\Query|int A selection query or the number of affected rows by a writing query
+   */
+  private function _exec()
+  {
+    if ($this->db->check()
+      && ($cfg = $this->processCfg(\func_get_args()))
+      && !empty($cfg['sql'])
+    ) {
+      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
+      $cfg['moment'] = 'before';
+      $cfg['trig']   = null;
+      if ($cfg['kind'] === 'INSERT') {
+        // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
+        $this->_add_primary($cfg);
+      }
+
+      if (count($cfg['values']) !== count($cfg['values_desc'])) {
+        X::dump($cfg);
+        die('Database error in values count');
+      }
+
+      // Launching the trigger BEFORE execution
+      if ($cfg = $this->_trigger($cfg)) {
+        if (!empty($cfg['run'])) {
+          //$this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
+          // Executing the query
+          /** @todo Put hash back! */
+          //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
+          /** @var \bbn\Db2\Query */
+          $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
+        }
+
+        if (!empty($cfg['force'])) {
+          $cfg['trig'] = 1;
+        }
+        elseif (null === $cfg['trig']) {
+          $cfg['trig'] = (bool)$cfg['run'];
+        }
+
+        if ($cfg['trig']) {
+          $cfg['moment'] = 'after';
+          $cfg           = $this->_trigger($cfg);
+        }
+
+        $this->last_cfg = $cfg;
+        if (!\in_array($cfg['kind'], self::$write_kinds, true)) {
+          return $cfg['run'] ?? null;
+        }
+
+        if (isset($cfg['value'])) {
+          return $cfg['value'];
+        }
+
+        if (isset($cfg['run'])) {
+          return $cfg['run'];
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  private function _adapt_filters(&$cfg): void
+  {
+    if (!empty($cfg['filters'])) {
+      [$cfg['filters'], $having] = $this->_adapt_bit($cfg, $cfg['filters']);
+      if (empty($cfg['having']['conditions'])) {
+        $cfg['having'] = $having;
+      }
+      else {
+        $cfg['having'] = [
+          'logic' => 'AND',
+          'conditions' => [
+            $cfg['having'],
+            $having
+          ]
+        ];
+      }
+    }
+  }
+
+  private function _adapt_bit($cfg, $where, $having = [])
+  {
+    if (X::hasProps($where, ['logic', 'conditions'])) {
+      $new = [
+        'logic' => $where['logic'],
+        'conditions' => []
+      ];
+      foreach ($where['conditions'] as $c) {
+        $is_aggregate = false;
+        if (isset($c['field'])) {
+          $is_aggregate = self::isAggregateFunction($c['field']);
+          if (!$is_aggregate && isset($cfg['fields'][$c['field']])) {
+            $is_aggregate = self::isAggregateFunction($cfg['fields'][$c['field']]);
+          }
+        }
+
+        if (!$is_aggregate && isset($c['exp'])) {
+          $is_aggregate = self::isAggregateFunction($c['exp']);
+          if (!$is_aggregate && isset($cfg['fields'][$c['exp']])) {
+            $is_aggregate = self::isAggregateFunction($cfg['fields'][$c['exp']]);
+          }
+        }
+
+        if (!$is_aggregate) {
+          if (X::hasProps($c, ['conditions', 'logic'])) {
+            $tmp = $this->_adapt_bit($cfg, $c, $having);
+            if (!empty($tmp[0]['conditions'])) {
+              $new['conditions'][] = $c;
+            }
+
+            if (!empty($tmp[1]['conditions'])) {
+              $having = $tmp[1];
+            }
+          }
+          else {
+            $new['conditions'][] = $c;
+          }
+        }
+        else {
+          if (!isset($having['conditions'])) {
+            $having = [
+              'logic' => $where['logic'],
+              'conditions' => []
+            ];
+          }
+
+          if (isset($cfg['aliases'][$c['field']])) {
+            $c['field'] = $cfg['aliases'][$c['field']];
+          }
+          elseif (isset($c['exp'], $cfg['aliases'][$c['exp']])) {
+            $c['exp'] = $cfg['aliases'][$c['exp']];
+          }
+
+          $having['conditions'][] = $c;
+        }
+      }
+
+      return [$new, $having];
+    }
+  }
+
+  /**
+   * @param array $args
+   * @return array
+   */
+  private function _set_limit_1(array $args): array
+  {
+    if (\is_array($args[0])
+      && (isset($args[0]['tables']) || isset($args[0]['table']))
+    ) {
+      $args[0]['limit'] = 1;
+    }
+    else {
+      $start = $args[4] ?? 0;
+      $num   = count($args);
+      // Adding fields
+      if ($num === 1) {
+        $args[] = [];
+        $num++;
+      }
+
+      // Adding where
+      if ($num === 2) {
+        $args[] = [];
+        $num++;
+      }
+
+      // Adding order
+      if ($num === 3) {
+        $args[] = [];
+        $num++;
+      }
+
+      if ($num === 4) {
+        $args[] = 1;
+        $num++;
+      }
+
+      $args   = array_slice($args, 0, 5);
+      $args[] = $start;
+    }
+
+    return $args;
+  }
+
+
+  /**
+   * @param array $args
+   * @return array
+   */
+  private function _set_start(array $args, int $start): array
+  {
+    if (\is_array($args[0])
+      && (isset($args[0]['tables']) || isset($args[0]['table']))
+    ) {
+      $args[0]['start'] = $start;
+    }
+    else {
+      if (isset($args[5])) {
+        $args[5] = $start;
+      }
+      else{
+        while (count($args) < 6){
+          switch (count($args)){
+            case 1:
+            case 2:
+            case 3:
+              $args[] = [];
+              break;
+            case 4:
+              $args[] = 1;
+              break;
+            case 5:
+              $args[] = $start;
+              break;
+          }
+        }
+      }
+    }
+
+    return $args;
+  }
+
+  /**
+   * Return an object with all the properties of the statement and where it is carried out.
+   *
+   * ```php
+   * X::dump($db->addStatement('SELECT name FROM table_users'));
+   * // (db)
+   * ```
+   *
+   * @param string $statement
+   * @return self
+   */
+  protected function addStatement(string $statement, $params): self
+  {
+    $this->last_real_query  = $statement;
+    $this->last_real_params = $params;
+
+    if ($this->db->lastEnabled()) {
+      $this->last_query  = $statement;
+      $this->last_params = $params;
+    }
+
+    return $this;
+  }
+
+  public function __toString()
+  {
+    return 'mysql';
+  }
+
+
 }
