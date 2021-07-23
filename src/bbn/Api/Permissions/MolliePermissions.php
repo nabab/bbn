@@ -70,32 +70,36 @@ class MolliePermissions implements ApiPermissionsContract
    */
   public function getTokens(string $authorization_code): array
   {
-    try
-    {
+    try {
       // Try to get an access token using the authorization code grant.
       $tokens = $this->provider->getAccessToken('authorization_code', [
         'code' => $authorization_code
       ]);
-
       return [
         'access_token'  => $tokens->getToken(),
         'refresh_token' => $tokens->getRefreshToken(),
         'expires_in'    => $tokens->getExpires()
       ];
     }
-    catch (IdentityProviderException $e)
-    {
+    catch (IdentityProviderException $e) {
       // Failed to get the access token or user details.
       exit($e->getMessage());
     }
   }
 
-  public function refreshAccessToken(string $refresh_token): string
+  public function refreshAccessToken(string $refresh_token): array
   {
     try {
-      return $this->provider->getAccessToken(new RefreshToken(), ['refresh_token' => $refresh_token]);
-
-    } catch (IdentityProviderException $e) {
+      $tokens = $this->provider->getAccessToken(new RefreshToken(), [
+        'refresh_token' => $refresh_token
+      ]);
+      return [
+        'access_token'  => $tokens->getToken(),
+        'refresh_token' => $tokens->getRefreshToken(),
+        'expires_in'    => $tokens->getExpires()
+      ];
+    }
+    catch (IdentityProviderException $e) {
       exit($e->getMessage());
     }
   }
