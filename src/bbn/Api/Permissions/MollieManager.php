@@ -371,6 +371,25 @@ class MollieManager
     return X::toArray($profile);
   }
 
+  /**
+   * Update a profile
+   * 
+   * https://docs.mollie.com/reference/v2/profiles-api/update-profile
+   * 
+   * @param string $idProfile
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function updateProfile(string $idProfile, array $data): array
+  {
+    $profile = $this->mollie->profiles->get($idProfile);
+    foreach ($data as $k => $d) {
+      $profile->{$k} = $d;
+    }
+    $updatedProfile = $profile->update();
+    return X::toArray($updatedProfile);
+  }
+
 
   /**
    * Retrieve all profiles available on the account.
