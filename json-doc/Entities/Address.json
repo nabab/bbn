@@ -1,0 +1,634 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Entities\\Address",
+    "namespace": true,
+    "traits": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Address.php",
+    "startLine": 7,
+    "endLine": 197,
+    "contentConstructor": {
+        "file": "bbn\\Entities\\Address",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\Db $db, array $cfg = NULL)\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n  }",
+            "startLine": 41,
+            "endLine": 48,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\Db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "search": {
+            "name": "search",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($fn, $cp = NULL)\n  {\n\t\t\t$fn = ['adresse' => $fn, 'cp' => $cp];\n\t\t}\n\t\telse if ( !is_array($fn) ){\n\t\t\t$fn = $this->set_adresse($fn);\n\t\t}\n\t\tif ( !empty($fn['adresse']) && !empty($fn['cp']) ){\n\t\t\treturn $this->db->selectOne('bbn_addresses', 'id', [\n\t\t\t  'cp' => $fn['cp'],\n\t\t\t  'adresse' => $fn['adresse']\n      ]);\n\t\t}\n\t\treturn false;\n  }",
+            "startLine": 50,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cp",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "seek": {
+            "name": "seek",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($p, $start = 0, $limit = 100)\n  {\n        !empty($p['email']) ||\n        !empty($p['tel']) ||\n        !empty($p['fax']) )\n    ){\n      $cond = [];\n      \n      if ( !empty($p['email']) && \\bbn\\Str::isEmail($p['email']) ){\n        array_push($cond, ['email', 'LIKE', $p['email']]);\n      }\n      if ( !empty($p['adresse']) && strlen($p['adresse']) > 7 ){\n        array_push($cond, ['adresse', 'LIKE', '%'.$p['adresse'].'%']);\n      }\n      if ( !empty($p['tel']) && (strlen($p['tel']) >= 6) ){\n        if ( strlen($p['tel']) !== 10 ){\n          array_push($cond, ['tel', 'LIKE', $p['tel'].'%']);\n        }\n        else{\n          array_push($cond, ['tel', 'LIKE', $p['tel']]);\n        }\n      }\n      if ( !empty($p['fax']) && (strlen($p['fax']) >= 6) ){\n        if ( strlen($p['fax']) !== 10 ){\n          array_push($cond, ['fax', 'LIKE', $p['fax'].'%']);\n        }\n        else{\n          array_push($cond, ['fax', 'LIKE', $p['fax']]);\n        }\n      }\n      if ( !empty($p['ville']) ){\n        array_push($cond, ['ville', 'LIKE', $p['ville']]);\n      }\n      if ( !empty($p['cp']) ){\n        array_push($cond, ['cp', 'LIKE', $p['cp']]);\n      }\n      return $this->db->getColumnValues(\"bbn_addresses\", 'id', $cond, ['adresse', 'ville'], $limit, $start);\n    }\n\t\treturn false;\n  }",
+            "startLine": 67,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "p",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 100,
+                    "default_name": ""
+                }
+            ]
+        },
+        "fullSearch": {
+            "name": "fullSearch",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($p, $start = 0, $limit = 0)\n  {\n    $res = \\bbn\\Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);\n    return $r;\n  }",
+            "startLine": 109,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "p",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "relations": {
+            "name": "relations",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n\n\n\n  \/*\n   * Fusionne l'historique de diff\u00e9rents lieux et les supprime tous sauf le premier\n   *\n   * @var mixed $ids Un tableau d'IDs ou une liste d'arguments\n   *\/\n  public function fusion($ids){\n    $args = is_array($ids) ? $ids : func_get_args();\n    if ( count($args) > 1 ){\n      $id = array_shift($args);\n      $creation = [$this->db->selectOne('bbn_history', 'tst', [\n        'uid' => $id,\n        'opr' => 'INSERT'\n      ])];\n      foreach ( $args as $a ){\n        if ( $fn = $this->get_info($a) ){\n          $creation[] = $this->db->selectOne('bbn_history', 'tst', [\n            'uid' => $a\n          ]);\n          $cols = $this->db->getFieldsList('apst_liens');\n          $cols['creation'] = 'tst';\n          $links = $this->db->rselectAll([\n            'tables' => ['apst_liens'],\n            'fields' => $cols,\n            'join' => [\n              [\n                'table' => 'bbn_history',\n                'on' => [\n                  'conditions' => [\n                    [\n                      'field' => 'bbn_history.uid',\n                      'operator' => 'eq',\n                      'exp' => 'apst_liens.id'\n                    ]\n                  ],\n                  'logic' => 'AND'\n                ]\n              ]\n            ],\n            'where' => [\n              'id_lieu' => $a\n            ]\n          ]);\n          foreach ( $links as $link ){\n            $this->db->update('apst_liens', ['id_lieu' => $id], ['id' => $link['id']]);\n          }\n          $this->db->query(\"\n            UPDATE bbn_history\n            SET uid = ?\n            WHERE uid = ?\n            AND opr LIKE 'UPDATE'\",\n            hex2bin($id),\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_history\n            WHERE uid = ?\",\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_addresses\n            WHERE id = ?\",\n            hex2bin($a)\n          );\n        }\n      }\n      $this->db->query(\"\n        UPDATE bbn_history\n        SET tst = ?\n        WHERE uid = ?\n        AND opr LIKE 'INSERT'\",\n        min($creation),\n        hex2bin($id)\n      );\n    }\n    return 1;\n  }\n  }",
+            "startLine": 116,
+            "endLine": 117,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fusion": {
+            "name": "fusion",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($ids)\n  {\n    if ( count($args) > 1 ){\n      $id = array_shift($args);\n      $creation = [$this->db->selectOne('bbn_history', 'tst', [\n        'uid' => $id,\n        'opr' => 'INSERT'\n      ])];\n      foreach ( $args as $a ){\n        if ( $fn = $this->get_info($a) ){\n          $creation[] = $this->db->selectOne('bbn_history', 'tst', [\n            'uid' => $a\n          ]);\n          $cols = $this->db->getFieldsList('apst_liens');\n          $cols['creation'] = 'tst';\n          $links = $this->db->rselectAll([\n            'tables' => ['apst_liens'],\n            'fields' => $cols,\n            'join' => [\n              [\n                'table' => 'bbn_history',\n                'on' => [\n                  'conditions' => [\n                    [\n                      'field' => 'bbn_history.uid',\n                      'operator' => 'eq',\n                      'exp' => 'apst_liens.id'\n                    ]\n                  ],\n                  'logic' => 'AND'\n                ]\n              ]\n            ],\n            'where' => [\n              'id_lieu' => $a\n            ]\n          ]);\n          foreach ( $links as $link ){\n            $this->db->update('apst_liens', ['id_lieu' => $id], ['id' => $link['id']]);\n          }\n          $this->db->query(\"\n            UPDATE bbn_history\n            SET uid = ?\n            WHERE uid = ?\n            AND opr LIKE 'UPDATE'\",\n            hex2bin($id),\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_history\n            WHERE uid = ?\",\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_addresses\n            WHERE id = ?\",\n            hex2bin($a)\n          );\n        }\n      }\n      $this->db->query(\"\n        UPDATE bbn_history\n        SET tst = ?\n        WHERE uid = ?\n        AND opr LIKE 'INSERT'\",\n        min($creation),\n        hex2bin($id)\n      );\n    }\n    return 1;\n  }",
+            "startLine": 126,
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ids",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if (!$this->class_table_index) {\n      throw new \\Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $res = $this->db->count(\n      $this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n      ]\n    );\n    return (bool)$res;\n  }",
+            "startLine": 33,
+            "endLine": 45,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getClassCfg": {
+            "name": "getClassCfg",
+            "summary": "Returns the class configuration.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "startLine": 53,
+            "endLine": 56,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getFields": {
+            "name": "getFields",
+            "summary": "Returns the fields of the main table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->fields;\n  }",
+            "startLine": 64,
+            "endLine": 67,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "insert": {
+            "name": "insert",
+            "summary": "Inserts a new row in the table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if ($this->db->insert($ccfg['table'], $data)) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 77,
+            "endLine": 87,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes a single row from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return !!$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "startLine": 97,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update": {
+            "name": "update",
+            "summary": "Updates a single row in the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, array $data, $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new \\Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->select($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return !!$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "startLine": 117,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "addCfg",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "select": {
+            "name": "select",
+            "summary": "Retrieves a row from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ($this->exists($id)) {\n      $f = $this->class_cfg['arch'][$this->class_table_index];\n      if ($arr = $this->db->rselect(\n        $this->class_table, array_values($f), [\n          $f['id'] => $id\n        ]\n      )) {\n        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {\n          $cfg = json_decode($arr[$f['cfg']], true);\n          $arr = array_merge($cfg, $arr);\n          unset($arr[$f['cfg']]);\n        }\n\n        return $arr;\n      }\n    }\n\n    return null;\n\n  }",
+            "startLine": 144,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectAll": {
+            "name": "selectAll",
+            "summary": "Returns an array of rows from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Address",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cond)\n  {\n    if (!$this->class_table_index) {\n      throw new \\Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if ($arrs = $this->db->rselectAll($this->class_table, array_values($f), $cond)) {\n      foreach ($arrs as &$arr) {\n        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {\n          $cfg = json_decode($arr[$f['cfg']], true);\n          $arr = array_merge($cfg, $arr);\n          unset($arr[$f['cfg']]);\n        }\n      }\n      unset($arr);\n\n      return $arrs;\n    }\n\n    return [];\n  }",
+            "startLine": 175,
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cond",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": {
+        "default_class_cfg": {
+            "table": "bbn_addresses",
+            "tables": {
+                "addresses": "bbn_addresses"
+            },
+            "arch": {
+                "addresses": {
+                    "id": "id",
+                    "address": "address",
+                    "postcode": "postcode",
+                    "city": "city",
+                    "country": "country",
+                    "phone": "phone",
+                    "email": "email",
+                    "fulladdress": "fulladdress",
+                    "cfg": "cfg"
+                }
+            },
+            "country": ""
+        }
+    },
+    "constants": null,
+    "numMethods": 14,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_addresses",
+            "tables": {
+                "addresses": "bbn_addresses"
+            },
+            "arch": {
+                "addresses": {
+                    "id": "id",
+                    "address": "address",
+                    "postcode": "postcode",
+                    "city": "city",
+                    "country": "country",
+                    "phone": "phone",
+                    "email": "email",
+                    "fulladdress": "fulladdress",
+                    "cfg": "cfg"
+                }
+            },
+            "country": ""
+        },
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Entities",
+    "shortName": "Address",
+    "summary": ""
+}

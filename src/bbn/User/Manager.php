@@ -469,7 +469,7 @@ You can click the following link to access directly your account:<br>
           ) {
             $cfg[$u['id']] = $this->db->lastId();
             // Envoi d'un lien
-            if ($this->class_cfg['hotlinks']) {
+            if (!empty($this->class_cfg['arch']['hotlinks'])) {
               $this->makeHotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
             }
 
@@ -702,7 +702,7 @@ You can click the following link to access directly your account:<br>
       }
 
       if (empty($this->messages[$message]['link'])) {
-        die("Impossible to make hotlinks without a link configured");
+        throw new \Exception(X::_("Impossible to make hotlinks without a link configured"));
       }
     }
 

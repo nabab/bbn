@@ -1,0 +1,207 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\Permissions\\MolliePermissions",
+    "namespace": true,
+    "traits": [],
+    "interfaces": {
+        "bbn\\Api\\Permissions\\ApiPermissionsContract": {
+            "name": "bbn\\Api\\Permissions\\ApiPermissionsContract"
+        }
+    },
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissions.php",
+    "startLine": 10,
+    "endLine": 111,
+    "contentConstructor": {
+        "file": "bbn\\Api\\Permissions\\MolliePermissions",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MolliePermissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $this->cfg      = $cfg;\n    $this->provider = new Mollie($this->cfg);\n  }",
+            "startLine": 23,
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAuthorizationUrl": {
+            "name": "getAuthorizationUrl",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MolliePermissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    \/\/ Fetch the authorization URL from the provider; this returns the\n    \/\/ urlAuthorize option and generates and applies any necessary parameters\n    \/\/ (e.g. state).\n    $authorizationUrl = $this->provider->getAuthorizationUrl([\n      \/\/ Optional, only use this if you want to ask for scopes the user previously denied.\n      'approval_prompt' => 'force',\n      \/\/ Optional, a list of scopes. Defaults to only 'organizations.read'.\n      'scope' => [\n        Mollie::SCOPE_PAYMENTS_READ,\n        Mollie::SCOPE_PAYMENTS_WRITE,\n        Mollie::SCOPE_REFUNDS_READ,\n        Mollie::SCOPE_REFUNDS_WRITE,\n        Mollie::SCOPE_CUSTOMERS_READ,\n        Mollie::SCOPE_CUSTOMERS_WRITE,\n        Mollie::SCOPE_MANDATES_READ,\n        Mollie::SCOPE_MANDATES_WRITE,\n        Mollie::SCOPE_SUBSCRIPTIONS_READ,\n        Mollie::SCOPE_SUBSCRIPTIONS_WRITE,\n        Mollie::SCOPE_PROFILES_READ,\n        Mollie::SCOPE_PROFILES_WRITE,\n        Mollie::SCOPE_INVOICES_READ,\n        Mollie::SCOPE_SETTLEMENTS_READ,\n        Mollie::SCOPE_ORDERS_READ,\n        Mollie::SCOPE_ORDERS_WRITE,\n        Mollie::SCOPE_SHIPMENTS_READ,\n        Mollie::SCOPE_SHIPMENTS_WRITE,\n        Mollie::SCOPE_ORGANIZATIONS_READ,\n        Mollie::SCOPE_ORGANIZATIONS_WRITE,\n        Mollie::SCOPE_ONBOARDING_READ,\n        Mollie::SCOPE_ONBOARDING_WRITE,\n      ],\n    ]);\n\n    return $authorizationUrl;\n  }",
+            "startLine": 29,
+            "endLine": 65,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getTokens": {
+            "name": "getTokens",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MolliePermissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($authorization_code)\n  {\n    try {\n      \/\/ Try to get an access token using the authorization code grant.\n      $tokens = $this->provider->getAccessToken('authorization_code', [\n        'code' => $authorization_code\n      ]);\n      return [\n        'access_token'  => $tokens->getToken(),\n        'refresh_token' => $tokens->getRefreshToken(),\n        'expires_in'    => $tokens->getExpires()\n      ];\n    }\n    catch (IdentityProviderException $e) {\n      \/\/ Failed to get the access token or user details.\n      exit($e->getMessage());\n    }\n  }",
+            "startLine": 71,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "authorization_code",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "code"
+                }
+            ]
+        },
+        "refreshAccessToken": {
+            "name": "refreshAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MolliePermissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($refresh_token)\n  {\n    try {\n      $tokens = $this->provider->getAccessToken(new RefreshToken(), [\n        'refresh_token' => $refresh_token\n      ]);\n      return [\n        'access_token'  => $tokens->getToken(),\n        'refresh_token' => $tokens->getRefreshToken(),\n        'expires_in'    => $tokens->getExpires()\n      ];\n    }\n    catch (IdentityProviderException $e) {\n      exit($e->getMessage());\n    }\n  }",
+            "startLine": 90,
+            "endLine": 105,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "refresh_token",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProvider": {
+            "name": "getProvider",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MolliePermissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->provider;\n  }",
+            "startLine": 107,
+            "endLine": 110,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 5,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [
+        "bbn\\Api\\Permissions\\ApiPermissionsContract"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "cfg": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\Permissions",
+    "shortName": "MolliePermissions",
+    "summary": ""
+}

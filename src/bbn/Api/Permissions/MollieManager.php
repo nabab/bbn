@@ -126,7 +126,7 @@ class MollieManager
    * https://docs.mollie.com/reference/v2/payments-api/create-payment
    *
    * @param array $data
-   * @param string|null $customer_id
+   * @param string|null $mandate_id
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
@@ -135,9 +135,11 @@ class MollieManager
     if ($customer_id) {
       $data = array_merge($data, ['customerId' => $customer_id]);
     }
+
     if ($mandate_id) {
       $data = array_merge($data, ['mandateId' => $mandate_id]);
     }
+
     $payment = $this->mollie->payments->create($data);
     return X::toArray($payment);
   }
