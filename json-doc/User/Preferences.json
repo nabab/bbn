@@ -3327,9 +3327,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    $res = $this->db->count(\n      $this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n      ]\n    );\n    return (bool)$res;\n  }",
-            "startLine": 61,
-            "endLine": 69,
+            "code": "function($id)\n  {\n    if (!$this->class_table_index) {\n      throw new \\Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $res = $this->db->count(\n      $this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n      ]\n    );\n    return (bool)$res;\n  }",
+            "startLine": 33,
+            "endLine": 45,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3356,7 +3356,7 @@
         },
         "getFields": {
             "name": "getFields",
-            "summary": "",
+            "summary": "Returns the fields of the main table.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Preferences",
@@ -3364,8 +3364,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->fields;\n  }",
-            "startLine": 80,
-            "endLine": 83,
+            "startLine": 64,
+            "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3377,6 +3377,116 @@
             "returns": null,
             "parent": false,
             "arguments": []
+        },
+        "insert": {
+            "name": "insert",
+            "summary": "Inserts a new row in the table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if ($this->db->insert($ccfg['table'], $data)) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 77,
+            "endLine": 87,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "select": {
+            "name": "select",
+            "summary": "Retrieves a row from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ($this->exists($id)) {\n      $f = $this->class_cfg['arch'][$this->class_table_index];\n      if ($arr = $this->db->rselect(\n        $this->class_table, array_values($f), [\n          $f['id'] => $id\n        ]\n      )) {\n        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {\n          $cfg = json_decode($arr[$f['cfg']], true);\n          $arr = array_merge($cfg, $arr);\n          unset($arr[$f['cfg']]);\n        }\n\n        return $arr;\n      }\n    }\n\n    return null;\n\n  }",
+            "startLine": 144,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectAll": {
+            "name": "selectAll",
+            "summary": "Returns an array of rows from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cond)\n  {\n    if (!$this->class_table_index) {\n      throw new \\Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if ($arrs = $this->db->rselectAll($this->class_table, array_values($f), $cond)) {\n      foreach ($arrs as &$arr) {\n        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {\n          $cfg = json_decode($arr[$f['cfg']], true);\n          $arr = array_merge($cfg, $arr);\n          unset($arr[$f['cfg']]);\n        }\n      }\n      unset($arr);\n\n      return $arrs;\n    }\n\n    return [];\n  }",
+            "startLine": 175,
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cond",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
@@ -3850,7 +3960,38 @@
                 }
             }
         },
-        "retriever_instance": {},
+        "retriever_instance": {
+            "class_cfg": {
+                "table": "bbn_users_options",
+                "tables": {
+                    "user_options": "bbn_users_options",
+                    "user_options_bits": "bbn_users_options_bits"
+                },
+                "arch": {
+                    "user_options": {
+                        "id": "id",
+                        "id_option": "id_option",
+                        "num": "num",
+                        "id_user": "id_user",
+                        "id_group": "id_group",
+                        "id_alias": "id_alias",
+                        "public": "public",
+                        "id_link": "id_link",
+                        "text": "text",
+                        "cfg": "cfg"
+                    },
+                    "user_options_bits": {
+                        "id": "id",
+                        "id_user_option": "id_user_option",
+                        "id_parent": "id_parent",
+                        "id_option": "id_option",
+                        "num": "num",
+                        "text": "text",
+                        "cfg": "cfg"
+                    }
+                }
+            }
+        },
         "retriever_exists": true,
         "optional_is_init": false,
         "option_root_id": null,
@@ -3858,7 +3999,7 @@
         "current": null
     },
     "constants": null,
-    "numMethods": 93,
+    "numMethods": 96,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 7,
@@ -3908,7 +4049,38 @@
                 }
             }
         },
-        "retriever_instance": {},
+        "retriever_instance": {
+            "class_cfg": {
+                "table": "bbn_users_options",
+                "tables": {
+                    "user_options": "bbn_users_options",
+                    "user_options_bits": "bbn_users_options_bits"
+                },
+                "arch": {
+                    "user_options": {
+                        "id": "id",
+                        "id_option": "id_option",
+                        "num": "num",
+                        "id_user": "id_user",
+                        "id_group": "id_group",
+                        "id_alias": "id_alias",
+                        "public": "public",
+                        "id_link": "id_link",
+                        "text": "text",
+                        "cfg": "cfg"
+                    },
+                    "user_options_bits": {
+                        "id": "id",
+                        "id_user_option": "id_user_option",
+                        "id_parent": "id_parent",
+                        "id_option": "id_option",
+                        "num": "num",
+                        "text": "text",
+                        "cfg": "cfg"
+                    }
+                }
+            }
+        },
         "retriever_exists": true,
         "optional_is_init": false,
         "option_root_id": null,
@@ -3923,7 +4095,7 @@
         "error": false,
         "debug": false,
         "log": [],
-        "class_cfg": null,
+        "_is_init_class_cfg": false,
         "fields": null,
         "class_table": null,
         "class_table_index": null,

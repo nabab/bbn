@@ -921,7 +921,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/__construct",
-                        "desc": ""
+                        "desc": "Cms constructor."
                     },
                     {
                         "type": "method",
@@ -961,7 +961,7 @@
                         "text": "getEnd",
                         "value": "getEnd",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getEnd",
-                        "desc": "If it exists an event linked to the note it returns the end date."
+                        "desc": "If  an event linked to the note exists it returns the end date."
                     },
                     {
                         "type": "method",
@@ -993,7 +993,7 @@
                         "text": "getStart",
                         "value": "getStart",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getStart",
-                        "desc": "If it exists an event linked to the note it returns the start date."
+                        "desc": "If an event linked to the note exists it returns the start date."
                     },
                     {
                         "type": "method",
@@ -1001,7 +1001,7 @@
                         "text": "getUrl",
                         "value": "getUrl",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getUrl",
-                        "desc": "Returns the url of the note."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -1009,7 +1009,7 @@
                         "text": "hasUrl",
                         "value": "hasUrl",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/hasUrl",
-                        "desc": "Returns true if the note is linked to an url."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -1017,7 +1017,7 @@
                         "text": "isPublished",
                         "value": "isPublished",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/isPublished",
-                        "desc": "If the note has a corresponding event in bbn_events and the date of start is before now, and the date of end if isset is after now and the note has an url it returns true"
+                        "desc": "If the note has a corresponding event in bbn_events and the date of start is before now,"
                     },
                     {
                         "type": "method",
@@ -1041,7 +1041,7 @@
                         "text": "setEvent",
                         "value": "setEvent",
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setEvent",
-                        "desc": "Inserts in bbn_events and bbn_notes_events the informations relative to the publication of the given note."
+                        "desc": "Inserts in bbn_events and bbn_notes_events the information relative to the publication of the given note."
                     },
                     {
                         "type": "method",
@@ -4264,7 +4264,7 @@
                         "text": "removeThumbs",
                         "value": "removeThumbs",
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/removeThumbs",
-                        "desc": "Remove the thums files"
+                        "desc": "Remove the thumbs files"
                     },
                     {
                         "type": "method",
@@ -4522,7 +4522,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/__construct",
-                        "desc": ""
+                        "desc": "Note constructor."
                     },
                     {
                         "type": "method",
@@ -4634,7 +4634,7 @@
                         "text": "getMediasNotes",
                         "value": "getMediasNotes",
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediasNotes",
-                        "desc": "Selects from db all medias that have the property content not null and a correspondant existing file."
+                        "desc": "Selects from db all medias that have the property content not null and a correspondent existing file."
                     },
                     {
                         "type": "method",
@@ -6114,7 +6114,7 @@
                         "text": "getCdnPath",
                         "value": "getCdnPath",
                         "url": "bbn-php\/doc\/method\/Appui\/Project\/getCdnPath",
-                        "desc": "Gets the app path"
+                        "desc": "Gets the CDN path"
                     },
                     {
                         "type": "method",
@@ -11990,7 +11990,7 @@
                                 "text": "getClassCfg",
                                 "value": "getClassCfg",
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Dbconfig\/getClassCfg",
-                                "desc": "Return the"
+                                "desc": "Returns the class configuration."
                             },
                             {
                                 "type": "method",
@@ -11998,7 +11998,7 @@
                                 "text": "getFields",
                                 "value": "getFields",
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Dbconfig\/getFields",
-                                "desc": ""
+                                "desc": "Returns the fields of the main table."
                             }
                         ]
                     },
@@ -12228,7 +12228,7 @@
                 "value": "Controller",
                 "text": "Controller",
                 "url": "bbn-php\/doc\/class\/Mvc\/Controller",
-                "desc": "When reroute is used $reroutes will be used to check we're not in an infinite reroute loop",
+                "desc": "The MVC class from which the controller is called",
                 "items": [
                     {
                         "type": "method",
@@ -12236,7 +12236,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/__construct",
-                        "desc": "This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path)."
+                        "desc": "This will call the initial build a new instance."
                     },
                     {
                         "type": "method",
@@ -12244,7 +12244,7 @@
                         "text": "action",
                         "value": "action",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/action",
-                        "desc": ""
+                        "desc": "Merges post data and result array witt the current data"
                     },
                     {
                         "type": "method",
@@ -12252,7 +12252,7 @@
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/add",
-                        "desc": "Merges the existing data if there is with this one. Chainable."
+                        "desc": "Returns a new Controller instance with the given arguments."
                     },
                     {
                         "type": "method",
@@ -12260,7 +12260,7 @@
                         "text": "addAuthorizedRoute",
                         "value": "addAuthorizedRoute",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addAuthorizedRoute",
-                        "desc": ""
+                        "desc": "Add a route to authorized routes list if not already exists."
                     },
                     {
                         "type": "method",
@@ -12268,7 +12268,7 @@
                         "text": "addCss",
                         "value": "addCss",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addCss",
-                        "desc": "This will get a CSS view encapsulated in a scoped style tag."
+                        "desc": "This will get a CSS view encapsulated in a scoped style tag and add it to the output object."
                     },
                     {
                         "type": "method",
@@ -12292,7 +12292,7 @@
                         "text": "addJs",
                         "value": "addJs",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addJs",
-                        "desc": "This will add a javascript view to $this->obj->script"
+                        "desc": "This will add a javascript view from a file path to $this->obj->script"
                     },
                     {
                         "type": "method",
@@ -12300,7 +12300,7 @@
                         "text": "addJsGroup",
                         "value": "addJsGroup",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addJsGroup",
-                        "desc": "This will add a javascript view to $this->obj->script"
+                        "desc": "This will add a javascript view from a directory path or an array of files to $this->obj->script"
                     },
                     {
                         "type": "method",
@@ -12308,7 +12308,7 @@
                         "text": "addLess",
                         "value": "addLess",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addLess",
-                        "desc": "This will get and compile a LESS view encapsulated in a scoped style tag."
+                        "desc": "This will get and compile a LESS view encapsulated in a scoped style tag and add it to the output object."
                     },
                     {
                         "type": "method",
@@ -12324,7 +12324,7 @@
                         "text": "addToObj",
                         "value": "addToObj",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addToObj",
-                        "desc": "Merges the existing data if there is with this one. Chainable."
+                        "desc": "Creates a new Controller instance and merges it's object with the existing one."
                     },
                     {
                         "type": "method",
@@ -12332,7 +12332,7 @@
                         "text": "cachedAction",
                         "value": "cachedAction",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/cachedAction",
-                        "desc": ""
+                        "desc": "Merges post data and result array witt the current data"
                     },
                     {
                         "type": "method",
@@ -12348,7 +12348,7 @@
                         "text": "customPluginView",
                         "value": "customPluginView",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/customPluginView",
-                        "desc": ""
+                        "desc": "Retrieves a view of a custom plugin."
                     },
                     {
                         "type": "method",
@@ -12364,7 +12364,7 @@
                         "text": "exists",
                         "value": "exists",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/exists",
-                        "desc": ""
+                        "desc": "Checks if the internal path to the controller exists."
                     },
                     {
                         "type": "method",
@@ -12388,7 +12388,7 @@
                         "text": "getCachedModel",
                         "value": "getCachedModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getCachedModel",
-                        "desc": "This will get the model. There is no order for the arguments."
+                        "desc": "This will get the cached model. There is no order for the arguments."
                     },
                     {
                         "type": "method",
@@ -12396,7 +12396,7 @@
                         "text": "getComponent",
                         "value": "getComponent",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getComponent",
-                        "desc": ""
+                        "desc": "Returns a component with it's content from the given name if exists and null otherwise."
                     },
                     {
                         "type": "method",
@@ -12436,7 +12436,7 @@
                         "text": "getCurrentDir",
                         "value": "getCurrentDir",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getCurrentDir",
-                        "desc": "Returns the current controller's file's name."
+                        "desc": "Returns the current controller's directory name."
                     },
                     {
                         "type": "method",
@@ -12452,7 +12452,7 @@
                         "text": "getExternalView",
                         "value": "getExternalView",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getExternalView",
-                        "desc": ""
+                        "desc": "This will get a view from a different root."
                     },
                     {
                         "type": "method",
@@ -12460,7 +12460,7 @@
                         "text": "getJs",
                         "value": "getJs",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getJs",
-                        "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML."
+                        "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML"
                     },
                     {
                         "type": "method",
@@ -12468,7 +12468,7 @@
                         "text": "getJsGroup",
                         "value": "getJsGroup",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getJsGroup",
-                        "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML."
+                        "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML"
                     },
                     {
                         "type": "method",
@@ -12492,7 +12492,7 @@
                         "text": "getLocalRoute",
                         "value": "getLocalRoute",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getLocalRoute",
-                        "desc": "Returns the current controller's path."
+                        "desc": "Returns the current controller's route."
                     },
                     {
                         "type": "method",
@@ -12524,7 +12524,7 @@
                         "text": "getPath",
                         "value": "getPath",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPath",
-                        "desc": ""
+                        "desc": "Returns the internal path to the controller."
                     },
                     {
                         "type": "method",
@@ -12532,7 +12532,7 @@
                         "text": "getPlugin",
                         "value": "getPlugin",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPlugin",
-                        "desc": ""
+                        "desc": "If the controller is inside a plugin it will its name and null otherwise."
                     },
                     {
                         "type": "method",
@@ -12548,7 +12548,7 @@
                         "text": "getPluginModel",
                         "value": "getPluginModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginModel",
-                        "desc": ""
+                        "desc": "Retrieves a model of a the plugin."
                     },
                     {
                         "type": "method",
@@ -12556,7 +12556,7 @@
                         "text": "getPluginView",
                         "value": "getPluginView",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginView",
-                        "desc": ""
+                        "desc": "This will get a view."
                     },
                     {
                         "type": "method",
@@ -12564,7 +12564,7 @@
                         "text": "getPluginViews",
                         "value": "getPluginViews",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginViews",
-                        "desc": ""
+                        "desc": "Gets views for html, css and js."
                     },
                     {
                         "type": "method",
@@ -12580,7 +12580,7 @@
                         "text": "getRendered",
                         "value": "getRendered",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getRendered",
-                        "desc": "Returns the rendered result from the current mvc if successufully processed"
+                        "desc": "Returns the rendered result from the current mvc if successfully processed"
                     },
                     {
                         "type": "method",
@@ -12604,7 +12604,7 @@
                         "text": "getRoot",
                         "value": "getRoot",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getRoot",
-                        "desc": ""
+                        "desc": "Returns the root of the application in the URL (base href)."
                     },
                     {
                         "type": "method",
@@ -12612,7 +12612,7 @@
                         "text": "getScript",
                         "value": "getScript",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getScript",
-                        "desc": "Returns the rendered result from the current mvc if successufully processed"
+                        "desc": "Returns the rendered script result from the current mvc if successfully processed"
                     },
                     {
                         "type": "method",
@@ -12620,7 +12620,7 @@
                         "text": "getSubpluginModel",
                         "value": "getSubpluginModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getSubpluginModel",
-                        "desc": ""
+                        "desc": "Get a sub plugin model (a plugin inside the plugin directory of another plugin)."
                     },
                     {
                         "type": "method",
@@ -12628,7 +12628,7 @@
                         "text": "getUrl",
                         "value": "getUrl",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getUrl",
-                        "desc": ""
+                        "desc": "Get the request url."
                     },
                     {
                         "type": "method",
@@ -12644,7 +12644,7 @@
                         "text": "getViewGroup",
                         "value": "getViewGroup",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getViewGroup",
-                        "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML."
+                        "desc": "This will get a view for embedding in HTML."
                     },
                     {
                         "type": "method",
@@ -12660,7 +12660,7 @@
                         "text": "hasBeenRerouted",
                         "value": "hasBeenRerouted",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasBeenRerouted",
-                        "desc": ""
+                        "desc": "Checks if the controller has been rerouted"
                     },
                     {
                         "type": "method",
@@ -12668,7 +12668,7 @@
                         "text": "hasContent",
                         "value": "hasContent",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasContent",
-                        "desc": "Checks if there is ny HTML content in the object"
+                        "desc": "Checks if there is any HTML content in the object"
                     },
                     {
                         "type": "method",
@@ -12684,7 +12684,7 @@
                         "text": "hasSubpluginModel",
                         "value": "hasSubpluginModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasSubpluginModel",
-                        "desc": ""
+                        "desc": "Returns true if the subplugin model exists."
                     },
                     {
                         "type": "method",
@@ -12700,7 +12700,7 @@
                         "text": "isAuthorizedRoute",
                         "value": "isAuthorizedRoute",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/isAuthorizedRoute",
-                        "desc": ""
+                        "desc": "Checks if a route is authorized."
                     },
                     {
                         "type": "method",
@@ -12716,7 +12716,7 @@
                         "text": "jsData",
                         "value": "jsData",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/jsData",
-                        "desc": ""
+                        "desc": "Sets or add to the output object data property from an array."
                     },
                     {
                         "type": "method",
@@ -12740,7 +12740,7 @@
                         "text": "registerPluginClasses",
                         "value": "registerPluginClasses",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/registerPluginClasses",
-                        "desc": ""
+                        "desc": "Register a plugin class using spl_autoload."
                     },
                     {
                         "type": "method",
@@ -12756,7 +12756,7 @@
                         "text": "reroute",
                         "value": "reroute",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/reroute",
-                        "desc": "This will reroute a controller to another one seemlessly. Chainable"
+                        "desc": "This will reroute a controller to another one seamlessly."
                     },
                     {
                         "type": "method",
@@ -12772,7 +12772,7 @@
                         "text": "routeComponent",
                         "value": "routeComponent",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/routeComponent",
-                        "desc": ""
+                        "desc": "Returns a component from the given name if exists and null otherwise."
                     },
                     {
                         "type": "method",
@@ -12780,7 +12780,7 @@
                         "text": "sayRoot",
                         "value": "sayRoot",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/sayRoot",
-                        "desc": "Returns the current controller's root drrectory."
+                        "desc": "Returns the current controller's root directory."
                     },
                     {
                         "type": "method",
@@ -12788,7 +12788,7 @@
                         "text": "setCachedModel",
                         "value": "setCachedModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setCachedModel",
-                        "desc": "This will get the model. There is no order for the arguments."
+                        "desc": "This will set the cached model. There is no order for the arguments."
                     },
                     {
                         "type": "method",
@@ -12796,7 +12796,7 @@
                         "text": "setColor",
                         "value": "setColor",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setColor",
-                        "desc": ""
+                        "desc": "Sets background and font colors on the output object."
                     },
                     {
                         "type": "method",
@@ -12812,7 +12812,7 @@
                         "text": "setIcon",
                         "value": "setIcon",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setIcon",
-                        "desc": ""
+                        "desc": "Sets the icon on the output object."
                     },
                     {
                         "type": "method",
@@ -12828,7 +12828,7 @@
                         "text": "setObj",
                         "value": "setObj",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setObj",
-                        "desc": ""
+                        "desc": "Adds to the output object from an array."
                     },
                     {
                         "type": "method",
@@ -12844,7 +12844,7 @@
                         "text": "setRoot",
                         "value": "setRoot",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setRoot",
-                        "desc": ""
+                        "desc": "Sets the root of the application in the URL (base href)."
                     },
                     {
                         "type": "method",
@@ -12852,7 +12852,7 @@
                         "text": "setTitle",
                         "value": "setTitle",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setTitle",
-                        "desc": ""
+                        "desc": "Sets the title on the output object."
                     },
                     {
                         "type": "method",
@@ -12860,7 +12860,7 @@
                         "text": "setUrl",
                         "value": "setUrl",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setUrl",
-                        "desc": ""
+                        "desc": "Sets the url on the output object."
                     },
                     {
                         "type": "method",
@@ -12868,7 +12868,7 @@
                         "text": "transform",
                         "value": "transform",
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/transform",
-                        "desc": ""
+                        "desc": "Transform the output object using a callback"
                     },
                     {
                         "type": "method",
@@ -12893,7 +12893,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Mvc\/Environment\/__construct",
-                        "desc": ""
+                        "desc": "Environment constructor."
                     },
                     {
                         "type": "method",
@@ -12973,7 +12973,7 @@
                         "text": "getUrl",
                         "value": "getUrl",
                         "url": "bbn-php\/doc\/method\/Mvc\/Environment\/getUrl",
-                        "desc": ""
+                        "desc": "Get the request url."
                     },
                     {
                         "type": "method",
@@ -13062,7 +13062,7 @@
                         "text": "deleteCache",
                         "value": "deleteCache",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/deleteCache",
-                        "desc": ""
+                        "desc": "Deletes a cache with the given data."
                     },
                     {
                         "type": "method",
@@ -13078,7 +13078,7 @@
                         "text": "getCachedModel",
                         "value": "getCachedModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getCachedModel",
-                        "desc": ""
+                        "desc": "This will get the cached model. There is no order for the arguments."
                     },
                     {
                         "type": "method",
@@ -13086,7 +13086,7 @@
                         "text": "getContent",
                         "value": "getContent",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getContent",
-                        "desc": ""
+                        "desc": "This will get a the content of a file located within the controller data path."
                     },
                     {
                         "type": "method",
@@ -13102,7 +13102,7 @@
                         "text": "getFromCache",
                         "value": "getFromCache",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getFromCache",
-                        "desc": ""
+                        "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the closure."
                     },
                     {
                         "type": "method",
@@ -13110,7 +13110,7 @@
                         "text": "getModel",
                         "value": "getModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getModel",
-                        "desc": ""
+                        "desc": "This will get the model. There is no order for the arguments."
                     },
                     {
                         "type": "method",
@@ -13118,7 +13118,7 @@
                         "text": "getPluginModel",
                         "value": "getPluginModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getPluginModel",
-                        "desc": ""
+                        "desc": "Retrieves a model of a the plugin."
                     },
                     {
                         "type": "method",
@@ -13126,7 +13126,7 @@
                         "text": "getSetFromCache",
                         "value": "getSetFromCache",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getSetFromCache",
-                        "desc": ""
+                        "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function."
                     },
                     {
                         "type": "method",
@@ -13134,7 +13134,7 @@
                         "text": "getSubpluginModel",
                         "value": "getSubpluginModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getSubpluginModel",
-                        "desc": ""
+                        "desc": "Get a sub plugin model (a plugin inside the plugin directory of another plugin)."
                     },
                     {
                         "type": "method",
@@ -13150,7 +13150,7 @@
                         "text": "hasPlugin",
                         "value": "hasPlugin",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasPlugin",
-                        "desc": ""
+                        "desc": "Returns true if plugin exists and false otherwise."
                     },
                     {
                         "type": "method",
@@ -13158,7 +13158,7 @@
                         "text": "hasSubpluginModel",
                         "value": "hasSubpluginModel",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasSubpluginModel",
-                        "desc": ""
+                        "desc": "Returns true if the subplugin model exists."
                     },
                     {
                         "type": "method",
@@ -13190,7 +13190,7 @@
                         "text": "isPlugin",
                         "value": "isPlugin",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/isPlugin",
-                        "desc": ""
+                        "desc": "Returns true if plugin exists and false otherwise."
                     },
                     {
                         "type": "method",
@@ -13198,7 +13198,7 @@
                         "text": "pluginPath",
                         "value": "pluginPath",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/pluginPath",
-                        "desc": ""
+                        "desc": "Returns the path of the given plugin."
                     },
                     {
                         "type": "method",
@@ -13206,7 +13206,7 @@
                         "text": "pluginUrl",
                         "value": "pluginUrl",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/pluginUrl",
-                        "desc": ""
+                        "desc": "Returns the URL part of the given plugin."
                     },
                     {
                         "type": "method",
@@ -13222,7 +13222,7 @@
                         "text": "setCache",
                         "value": "setCache",
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/setCache",
-                        "desc": ""
+                        "desc": "Sets a cache from the given data."
                     },
                     {
                         "type": "method",
@@ -13272,7 +13272,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/__construct",
-                        "desc": "This will fetch the route to the controller for a given path. Chainable."
+                        "desc": "Router constructor."
                     },
                     {
                         "type": "method",
@@ -13296,7 +13296,7 @@
                         "text": "getPluginFromComponent",
                         "value": "getPluginFromComponent",
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/getPluginFromComponent",
-                        "desc": ""
+                        "desc": "Retrieves the plugin's name from the component's name if any."
                     },
                     {
                         "type": "method",
@@ -13320,7 +13320,7 @@
                         "text": "isMode",
                         "value": "isMode",
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/isMode",
-                        "desc": "Checks whether Yhe given string is a valid mode."
+                        "desc": "Checks whether The given string is a valid mode."
                     },
                     {
                         "type": "method",
@@ -13336,7 +13336,7 @@
                         "text": "reset",
                         "value": "reset",
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/reset",
-                        "desc": ""
+                        "desc": "Resets the full path in the mvc\/mode of an external app (plugin)."
                     },
                     {
                         "type": "method",
@@ -18038,7 +18038,7 @@
                 "text": "addAuthorizedRoute",
                 "value": "addAuthorizedRoute",
                 "url": "bbn-php\/doc\/method\/Mvc\/addAuthorizedRoute",
-                "desc": ""
+                "desc": "Add a route to authorized routes list if not already exists."
             },
             {
                 "type": "method",
@@ -18078,7 +18078,7 @@
                 "text": "customPluginModel",
                 "value": "customPluginModel",
                 "url": "bbn-php\/doc\/method\/Mvc\/customPluginModel",
-                "desc": "Undocumented function"
+                "desc": "Retrieves a model of a custom plugin."
             },
             {
                 "type": "method",
@@ -18086,7 +18086,7 @@
                 "text": "customPluginView",
                 "value": "customPluginView",
                 "url": "bbn-php\/doc\/method\/Mvc\/customPluginView",
-                "desc": "Undocumented function"
+                "desc": "Retrieves a view of a custom plugin."
             },
             {
                 "type": "method",
@@ -18278,7 +18278,7 @@
                 "text": "getPluginFromComponent",
                 "value": "getPluginFromComponent",
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginFromComponent",
-                "desc": "Undocumented function"
+                "desc": "Retrieves the plugin's name from the component's name if any."
             },
             {
                 "type": "method",
@@ -18286,7 +18286,7 @@
                 "text": "getPluginModel",
                 "value": "getPluginModel",
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginModel",
-                "desc": ""
+                "desc": "An alias for customPluginModel()"
             },
             {
                 "type": "method",
@@ -18294,7 +18294,7 @@
                 "text": "getPluginPath",
                 "value": "getPluginPath",
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginPath",
-                "desc": "Returns the URL part of the given plugin."
+                "desc": "Returns the path of the given plugin."
             },
             {
                 "type": "method",
@@ -18350,7 +18350,7 @@
                 "text": "getRoot",
                 "value": "getRoot",
                 "url": "bbn-php\/doc\/method\/Mvc\/getRoot",
-                "desc": ""
+                "desc": "Returns the root of the application in the URL (base href)."
             },
             {
                 "type": "method",
@@ -18374,7 +18374,7 @@
                 "text": "getSubpluginModel",
                 "value": "getSubpluginModel",
                 "url": "bbn-php\/doc\/method\/Mvc\/getSubpluginModel",
-                "desc": ""
+                "desc": "An alias for subpluginModel()"
             },
             {
                 "type": "method",
@@ -18390,7 +18390,7 @@
                 "text": "getUrl",
                 "value": "getUrl",
                 "url": "bbn-php\/doc\/method\/Mvc\/getUrl",
-                "desc": ""
+                "desc": "Get the request url."
             },
             {
                 "type": "method",
@@ -18398,7 +18398,7 @@
                 "text": "getUserDataPath",
                 "value": "getUserDataPath",
                 "url": "bbn-php\/doc\/method\/Mvc\/getUserDataPath",
-                "desc": ""
+                "desc": "Returns path for the user's dir"
             },
             {
                 "type": "method",
@@ -18406,7 +18406,7 @@
                 "text": "getUserTmpPath",
                 "value": "getUserTmpPath",
                 "url": "bbn-php\/doc\/method\/Mvc\/getUserTmpPath",
-                "desc": "Returns"
+                "desc": "Returns path for the user's temp dir"
             },
             {
                 "type": "method",
@@ -18422,7 +18422,7 @@
                 "text": "hasContent",
                 "value": "hasContent",
                 "url": "bbn-php\/doc\/method\/Mvc\/hasContent",
-                "desc": ""
+                "desc": "Checks if the controller has content."
             },
             {
                 "type": "method",
@@ -18486,7 +18486,7 @@
                 "text": "isAuthorizedRoute",
                 "value": "isAuthorizedRoute",
                 "url": "bbn-php\/doc\/method\/Mvc\/isAuthorizedRoute",
-                "desc": ""
+                "desc": "Checks if a route is authorized."
             },
             {
                 "type": "method",
@@ -18550,7 +18550,7 @@
                 "text": "process",
                 "value": "process",
                 "url": "bbn-php\/doc\/method\/Mvc\/process",
-                "desc": "Returns the rendered result from the current mvc if successufully processed"
+                "desc": "Returns the rendered result from the current mvc if successfully processed"
             },
             {
                 "type": "method",
@@ -18566,7 +18566,7 @@
                 "text": "routeComponent",
                 "value": "routeComponent",
                 "url": "bbn-php\/doc\/method\/Mvc\/routeComponent",
-                "desc": "Undocumented function"
+                "desc": "Retrieves component's data from the given plugin name if exists."
             },
             {
                 "type": "method",
@@ -18582,7 +18582,7 @@
                 "text": "setDbInController",
                 "value": "setDbInController",
                 "url": "bbn-php\/doc\/method\/Mvc\/setDbInController",
-                "desc": "This function gets the content of a view file and adds it to the loaded_views array."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -18606,7 +18606,7 @@
                 "text": "setRoot",
                 "value": "setRoot",
                 "url": "bbn-php\/doc\/method\/Mvc\/setRoot",
-                "desc": ""
+                "desc": "Sets the root of the application in the URL (base href)."
             },
             {
                 "type": "method",
@@ -18622,7 +18622,7 @@
                 "text": "transform",
                 "value": "transform",
                 "url": "bbn-php\/doc\/method\/Mvc\/transform",
-                "desc": ""
+                "desc": "Transform the output object on Controller instance given a callback"
             },
             {
                 "type": "method",
@@ -18647,7 +18647,7 @@
                 "text": "asVar",
                 "value": "asVar",
                 "url": "bbn-php\/doc\/method\/Str\/asVar",
-                "desc": ""
+                "desc": "Places quotes around a string"
             },
             {
                 "type": "method",
@@ -18695,7 +18695,7 @@
                 "text": "checkPath",
                 "value": "checkPath",
                 "url": "bbn-php\/doc\/method\/Str\/checkPath",
-                "desc": "Checks if a string doesn't contain a filesystem path."
+                "desc": "Checks if every bit of a string doesn't contain a filesystem path."
             },
             {
                 "type": "method",
@@ -18703,7 +18703,7 @@
                 "text": "clean",
                 "value": "clean",
                 "url": "bbn-php\/doc\/method\/Str\/clean",
-                "desc": "Returns an expunged string of several types of character(s) depending on the configuration."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -18711,7 +18711,7 @@
                 "text": "convertSize",
                 "value": "convertSize",
                 "url": "bbn-php\/doc\/method\/Str\/convertSize",
-                "desc": ""
+                "desc": "Converts size from one unit to another."
             },
             {
                 "type": "method",
@@ -18855,7 +18855,7 @@
                 "text": "hasSlash",
                 "value": "hasSlash",
                 "url": "bbn-php\/doc\/method\/Str\/hasSlash",
-                "desc": "Checks if a string complies with SQL naming convention."
+                "desc": "Returns \"true\" if slash or backslash are present."
             },
             {
                 "type": "method",
@@ -18927,7 +18927,7 @@
                 "text": "isIp",
                 "value": "isIp",
                 "url": "bbn-php\/doc\/method\/Str\/isIp",
-                "desc": ""
+                "desc": "Checks if the argument is a valid ip address."
             },
             {
                 "type": "method",
@@ -19023,7 +19023,7 @@
                 "text": "sanitize",
                 "value": "sanitize",
                 "url": "bbn-php\/doc\/method\/Str\/sanitize",
-                "desc": ""
+                "desc": "Strip special characters except the below:"
             },
             {
                 "type": "method",
@@ -19169,7 +19169,7 @@
         "value": "Tpl",
         "text": "Tpl",
         "url": "bbn-php\/doc\/class\/Tpl",
-        "desc": "",
+        "desc": "Generates a Mustache template function ready to receive parameters and returns it.",
         "items": [
             {
                 "type": "method",
@@ -19185,7 +19185,7 @@
                 "text": "renderer",
                 "value": "renderer",
                 "url": "bbn-php\/doc\/method\/Tpl\/renderer",
-                "desc": ""
+                "desc": "Generates a Mustache template function ready to receive parameters and returns it."
             }
         ]
     },
@@ -19210,7 +19210,7 @@
                 "text": "addToken",
                 "value": "addToken",
                 "url": "bbn-php\/doc\/method\/User\/addToken",
-                "desc": ""
+                "desc": "Generates and insert a token in database."
             },
             {
                 "type": "method",
@@ -19266,7 +19266,7 @@
                 "text": "crypt",
                 "value": "crypt",
                 "url": "bbn-php\/doc\/method\/User\/crypt",
-                "desc": ""
+                "desc": "Encrypts the given string."
             },
             {
                 "type": "method",
@@ -19274,7 +19274,7 @@
                 "text": "decrypt",
                 "value": "decrypt",
                 "url": "bbn-php\/doc\/method\/User\/decrypt",
-                "desc": ""
+                "desc": "Decrypts the given string."
             },
             {
                 "type": "method",
@@ -19386,7 +19386,7 @@
                 "text": "getOsession",
                 "value": "getOsession",
                 "url": "bbn-php\/doc\/method\/User\/getOsession",
-                "desc": ""
+                "desc": "Gets an attribute or the whole the \"session\" part of the session  (sessIndex)."
             },
             {
                 "type": "method",
@@ -19418,7 +19418,7 @@
                 "text": "getSession",
                 "value": "getSession",
                 "url": "bbn-php\/doc\/method\/User\/getSession",
-                "desc": "Returns session property from the session's user array."
+                "desc": "Returns session property from the session's user array (userIndex)."
             },
             {
                 "type": "method",
@@ -19474,7 +19474,7 @@
                 "text": "isDev",
                 "value": "isDev",
                 "url": "bbn-php\/doc\/method\/User\/isDev",
-                "desc": "Checks whether the user is an dev(eloper) or not."
+                "desc": "Checks whether the user is an (admin or developer) or not."
             },
             {
                 "type": "method",
@@ -19530,7 +19530,7 @@
                 "text": "refreshInfo",
                 "value": "refreshInfo",
                 "url": "bbn-php\/doc\/method\/User\/refreshInfo",
-                "desc": "Regathers informations from the database."
+                "desc": "Regathers information from the database."
             },
             {
                 "type": "method",
@@ -19562,7 +19562,7 @@
                 "text": "setOsession",
                 "value": "setOsession",
                 "url": "bbn-php\/doc\/method\/User\/setOsession",
-                "desc": ""
+                "desc": "Sets an attribute the \"session\" part of the session (sessIndex)."
             },
             {
                 "type": "method",
@@ -19594,7 +19594,7 @@
                 "text": "unsetSession",
                 "value": "unsetSession",
                 "url": "bbn-php\/doc\/method\/User\/unsetSession",
-                "desc": "Sets the given attribute(s) in the user's session."
+                "desc": "Unsets the given attribute(s) in the user's session if exists."
             },
             {
                 "type": "method",
@@ -19602,7 +19602,7 @@
                 "text": "updateActivity",
                 "value": "updateActivity",
                 "url": "bbn-php\/doc\/method\/User\/updateActivity",
-                "desc": ""
+                "desc": "Updates last activity value for the session in database."
             },
             {
                 "type": "method",
@@ -19643,7 +19643,7 @@
                 "text": "adump",
                 "value": "adump",
                 "url": "bbn-php\/doc\/method\/X\/adump",
-                "desc": "Adaptative dump, i.e. dunps in text if CLI, HTML otherwise."
+                "desc": "Adaptive dump, i.e. dumps in text if CLI, HTML otherwise."
             },
             {
                 "type": "method",
@@ -19659,7 +19659,7 @@
                 "text": "cleanStoragePath",
                 "value": "cleanStoragePath",
                 "url": "bbn-php\/doc\/method\/X\/cleanStoragePath",
-                "desc": ""
+                "desc": "Deletes the for form the given path and date format if it's empty."
             },
             {
                 "type": "method",
@@ -19675,7 +19675,7 @@
                 "text": "concat",
                 "value": "concat",
                 "url": "bbn-php\/doc\/method\/X\/concat",
-                "desc": ""
+                "desc": "Split a string by a string"
             },
             {
                 "type": "method",
@@ -19747,7 +19747,7 @@
                 "text": "filter",
                 "value": "filter",
                 "url": "bbn-php\/doc\/method\/X\/filter",
-                "desc": ""
+                "desc": "Filters the given array which satisfies the 'where' condition."
             },
             {
                 "type": "method",
@@ -19771,7 +19771,7 @@
                 "text": "flatten",
                 "value": "flatten",
                 "url": "bbn-php\/doc\/method\/X\/flatten",
-                "desc": ""
+                "desc": "Flattens a multi-dimensional array for the given children index name."
             },
             {
                 "type": "method",
@@ -19795,7 +19795,7 @@
                 "text": "getField",
                 "value": "getField",
                 "url": "bbn-php\/doc\/method\/X\/getField",
-                "desc": "Returns the first value of a specific field of an array."
+                "desc": "Returns the first value of a specific field of an array that satisfies the where condition."
             },
             {
                 "type": "method",
@@ -19811,7 +19811,7 @@
                 "text": "getRow",
                 "value": "getRow",
                 "url": "bbn-php\/doc\/method\/X\/getRow",
-                "desc": "Returns the first row of an array to satisfy the where parameters ({@link find())."
+                "desc": "Returns the first row of an array that satisfies the where parameters ({@link find())."
             },
             {
                 "type": "method",
@@ -19819,7 +19819,7 @@
                 "text": "getRows",
                 "value": "getRows",
                 "url": "bbn-php\/doc\/method\/X\/getRows",
-                "desc": ""
+                "desc": "Filters the given array which satisfies the 'where' condition."
             },
             {
                 "type": "method",
@@ -19891,7 +19891,7 @@
                 "text": "indexOf",
                 "value": "indexOf",
                 "url": "bbn-php\/doc\/method\/X\/indexOf",
-                "desc": "Searches from start to end"
+                "desc": "Searches from start to end."
             },
             {
                 "type": "method",
@@ -19931,7 +19931,7 @@
                 "text": "join",
                 "value": "join",
                 "url": "bbn-php\/doc\/method\/X\/join",
-                "desc": ""
+                "desc": "Join array elements with a string"
             },
             {
                 "type": "method",
@@ -19939,7 +19939,7 @@
                 "text": "jsObject",
                 "value": "jsObject",
                 "url": "bbn-php\/doc\/method\/X\/jsObject",
-                "desc": ""
+                "desc": "*"
             },
             {
                 "type": "method",
@@ -20011,7 +20011,7 @@
                 "text": "makeStoragePath",
                 "value": "makeStoragePath",
                 "url": "bbn-php\/doc\/method\/X\/makeStoragePath",
-                "desc": ""
+                "desc": "*"
             },
             {
                 "type": "method",
@@ -20051,7 +20051,7 @@
                 "text": "mergeArrays",
                 "value": "mergeArrays",
                 "url": "bbn-php\/doc\/method\/X\/mergeArrays",
-                "desc": "Returns to a merged array from two or more arrays."
+                "desc": "Merges two or more arrays into one."
             },
             {
                 "type": "method",
@@ -20059,7 +20059,7 @@
                 "text": "mergeObjects",
                 "value": "mergeObjects",
                 "url": "bbn-php\/doc\/method\/X\/mergeObjects",
-                "desc": "Returns to a merged object from two objects."
+                "desc": "Returns to a merged object from two or more objects."
             },
             {
                 "type": "method",
@@ -20067,7 +20067,7 @@
                 "text": "microtime",
                 "value": "microtime",
                 "url": "bbn-php\/doc\/method\/X\/microtime",
-                "desc": "Returns a microtime with 4 digit after the coma"
+                "desc": "Returns a microtime with 4 digit after the dot"
             },
             {
                 "type": "method",
@@ -20083,7 +20083,7 @@
                 "text": "move",
                 "value": "move",
                 "url": "bbn-php\/doc\/method\/X\/move",
-                "desc": ""
+                "desc": "Moves an index in the given array to a new index."
             },
             {
                 "type": "method",
@@ -20091,7 +20091,7 @@
                 "text": "output",
                 "value": "output",
                 "url": "bbn-php\/doc\/method\/X\/output",
-                "desc": ""
+                "desc": "```php"
             },
             {
                 "type": "method",
@@ -20115,7 +20115,7 @@
                 "text": "retrieveArrayVar",
                 "value": "retrieveArrayVar",
                 "url": "bbn-php\/doc\/method\/X\/retrieveArrayVar",
-                "desc": ""
+                "desc": "Retrieves values from the given array based on the given keys."
             },
             {
                 "type": "method",
@@ -20123,7 +20123,7 @@
                 "text": "retrieveObjectVar",
                 "value": "retrieveObjectVar",
                 "url": "bbn-php\/doc\/method\/X\/retrieveObjectVar",
-                "desc": ""
+                "desc": "Retrieves values from the given object based on the given properties."
             },
             {
                 "type": "method",
@@ -20155,7 +20155,7 @@
                 "text": "split",
                 "value": "split",
                 "url": "bbn-php\/doc\/method\/X\/split",
-                "desc": ""
+                "desc": "Split a string by a string"
             },
             {
                 "type": "method",
@@ -20163,7 +20163,7 @@
                 "text": "sum",
                 "value": "sum",
                 "url": "bbn-php\/doc\/method\/X\/sum",
-                "desc": ""
+                "desc": "Returns the sum of all values of the given field in the given array"
             },
             {
                 "type": "method",
