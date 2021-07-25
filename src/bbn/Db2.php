@@ -69,6 +69,17 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   /** @var string The connection code as it would be stored in option */
   protected $connection_code;
 
+  /**
+   * @var mixed $hash_contour
+   */
+  protected $hash_contour = '__BBN__';
+
+  /**
+   * Unique string identifier for current connection
+   * @var string
+   */
+  protected $hash;
+
 
   /**
    * @var Db2\Engines Can be other driver
@@ -203,7 +214,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
         $this->on_error = $cfg['on_error'];
       }
 
-      if ($cfg = $this->language->getCfg()) {
+      if ($cfg = $this->getCfg()) {
         $this->cfg = $cfg;
         $this->qte = $this->language->qte;
         $this->language->postCreation();
@@ -276,6 +287,10 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
   }
 
+  public function getCfg(): array
+  {
+    return $this->language->getCfg();
+  }
 
   /**
    * Returns the engine used by the current connection.
@@ -369,6 +384,36 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *                                                              *
    ****************************************************************/
 
+  /**
+   * Makes a string that will be the id of the request.
+   *
+   * @return string
+   *
+   */
+  public function makeHash(): string
+  {
+    $args = \func_get_args();
+    if ((\count($args) === 1) && \is_array($args[0])) {
+      $args = $args[0];
+    }
+
+    $st = '';
+    foreach ($args as $a){
+      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+    }
+
+    return $this->hash_contour.md5($st).$this->hash_contour;
+  }
+
+  /**
+   * Makes and sets the hash.
+   *
+   * @return void
+   */
+  public function setHash()
+  {
+    $this->hash = $this->makeHash(...\func_get_args());
+  }
 
   /**
    * Gets the created hash.
@@ -381,7 +426,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getHash(): string
   {
-    return $this->language->getHash();
+    return $this->hash;
   }
 
 
@@ -391,7 +436,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param $new_name
    * @return array
    */
-  public function replaceTableInConditions(array $conditions, $old_name, $new_name)
+  public function replaceTableInConditions(array $conditions, $old_name, $new_name): array
   {
     return X::map(
       function ($a) use ($old_name, $new_name) {
@@ -410,25 +455,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Retrieves a query array based on its hash.
-   * @param string $hash
-   * @return array|null
-   */
-  public function retrieveQuery(string $hash): ?array
-  {
-    if (isset($this->queries[$hash])) {
-      if (\is_string($this->queries[$hash])) {
-        $hash = $this->queries[$hash];
-      }
-
-      return $this->queries[$hash];
-    }
-
-    return null;
-  }
-
-
-  /**
    * @param array $where
    * @param bool  $full
    * @return array|bool
@@ -436,65 +462,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   public function treatConditions(array $where, bool $full = true)
   {
     return $this->language->treatConditions($where, $full);
-  }
-
-
-  public function extractFields(array $cfg, array $conditions, array &$res = null)
-  {
-    if (null === $res) {
-      $res = [];
-    }
-
-    if (isset($conditions['conditions'])) {
-      $conditions = $conditions['conditions'];
-    }
-
-    foreach ($conditions as $c) {
-      if (isset($c['conditions'])) {
-        $this->extractFields($cfg, $c['conditions'], $res);
-      }
-      else {
-        if (isset($c['field'], $cfg['available_fields'][$c['field']])) {
-          $res[] = $cfg['available_fields'][$c['field']] ? $this->cfn($c['field'], $cfg['available_fields'][$c['field']]) : $c['field'];
-        }
-
-        if (isset($c['exp'])) {
-          $res[] = $cfg['available_fields'][$c['exp']] ? $this->cfn($c['exp'], $cfg['available_fields'][$c['exp']]) : $c['exp'];
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Retrieve an array of specific filters among the existing ones.
-   *
-   * @param array $cfg
-   * @param $field
-   * @param null  $operator
-   * @return array|null
-   */
-  public function filterFilters(array $cfg, $field, $operator = null): ?array
-  {
-    if (isset($cfg['filters'])) {
-      $f = function ($cond, &$res = []) use (&$f, $field, $operator) {
-        foreach ($cond as $c){
-          if (isset($c['conditions'])) {
-            $f($c['conditions'], $res);
-          }
-          elseif (($c['field'] === $field) && (!$operator || ($operator === $c['operator']))) {
-            $res[] = $c;
-          }
-        }
-
-        return $res;
-      };
-      return isset($cfg['filters']['conditions']) ? $f($cfg['filters']['conditions']) : [];
-    }
-
-    return null;
   }
 
   /**
@@ -505,7 +472,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   {
     return $this->language->reprocessCfg($cfg);
   }
-
 
   /**
    *
@@ -574,7 +540,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     );
     $this->log(implode(PHP_EOL, $msg));
     if ($this->on_error === self::E_DIE) {
-      die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'</pre>' : 'Database error');
+      throw new \Exception(
+        \defined('BBN_IS_DEV') && BBN_IS_DEV
+          ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'</pre>'
+          : 'Database error'
+      );
     }
   }
 
@@ -597,12 +567,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
       }
 
       // If any connection has an error with mode E_STOP_ALL
-      if (self::$_has_error_all && ($this->on_error !== self::E_STOP_ALL)) {
+      if (self::$_has_error_all && ($this->on_error === self::E_STOP_ALL)) {
         return false;
       }
 
-      // If this connection has an error with mode E_STOP
-      if ($this->_has_error && ($this->on_error !== self::E_STOP)) {
+      // If this connection has an error with mode E_STOP or E_STOP_ALL
+      if ($this->_has_error && ($this->on_error === self::E_STOP || $this->on_error === self::E_STOP_ALL)) {
         return false;
       }
 
@@ -620,7 +590,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * $db->$db->log('test');
    * ```
    * @param mixed $st
-   * @return db
+   * @return self
    */
   public function log($st): self
   {
@@ -638,7 +608,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * ```php
    * $db->setErrorMode('continue'|'die'|'stop_all|'stop');
-   * // (void)
+   * // (self)
    * ```
    *
    * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
@@ -680,9 +650,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function clearCache(string $item, string $mode): self
   {
-    $cache_name = $this->_cache_name($item, $mode);
-    if ($this->cacheHas($cache_name)) {
-      $this->cacheDelete($cache_name);
+    if ($this->cacheHas($item, $mode)) {
+      $this->cacheDelete($item, $mode);
     }
 
     return $this;
@@ -761,7 +730,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function enableTrigger(): self
   {
-    $this->_triggers_disabled = false;
+    $this->language->enableTrigger();
     return $this;
   }
 
@@ -773,78 +742,35 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function disableTrigger(): self
   {
-    $this->_triggers_disabled = true;
+    $this->language->disableTrigger();
     return $this;
   }
 
 
   public function isTriggerEnabled(): bool
   {
-    return !$this->_triggers_disabled;
+    return $this->language->isTriggerEnabled();
   }
 
 
   public function isTriggerDisabled(): bool
   {
-    return $this->_triggers_disabled;
+    return $this->language->isTriggerDisabled();
   }
 
 
   /**
    * Apply a function each time the methods $kind are used
    *
-   * @param callable          $function
-   * @param array|string      $kind     select|insert|update|delete
-   * @param array|string      $moment   before|after
-   * @param null|string|array $tables   database's table(s) name(s)
+   * @param callable            $function
+   * @param array|string|null   $kind     select|insert|update|delete
+   * @param array|string|null   $moment   before|after
+   * @param null|string|array   $tables   database's table(s) name(s)
    * @return self
    */
   public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self
   {
-    $kinds   = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
-    $moments = ['before', 'after'];
-    if (empty($kind)) {
-      $kind = $kinds;
-    }
-    elseif (!\is_array($kind)) {
-      $kind = (array)strtoupper($kind);
-    }
-    else{
-      $kind = array_map('strtoupper', $kind);
-    }
-
-    if (empty($moment)) {
-      $moment = $moments;
-    }
-    else {
-      $moment = !\is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);
-    }
-
-    foreach ($kind as $k){
-      if (\in_array($k, $kinds, true)) {
-        foreach ($moment as $m){
-          if (array_key_exists($m, $this->_triggers[$k]) && \in_array($m, $moments, true)) {
-            if ($tables === '*') {
-              $tables = $this->getTables();
-            }
-            elseif (Str::checkName($tables)) {
-              $tables = [$tables];
-            }
-
-            if (\is_array($tables)) {
-              foreach ($tables as $table){
-                $t = $this->tfn($table);
-                if (!isset($this->_triggers[$k][$m][$t])) {
-                  $this->_triggers[$k][$m][$t] = [];
-                }
-
-                $this->_triggers[$k][$m][$t][] = $function;
-              }
-            }
-          }
-        }
-      }
-    }
+    $this->language->setTrigger($function, $kind, $moment, $tables);
 
     return $this;
   }
@@ -855,7 +781,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getTriggers(): array
   {
-    return $this->_triggers;
+    return $this->language->getTriggers();
   }
 
 
@@ -1031,7 +957,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   public function getUniqueKeys(string $table): array
   {
     if (method_exists($this->language, 'getUniqueKeys')) {
-      return $this->getUniqueKeys($table);
+      return $this->language->getUniqueKeys($table);
     }
 
     return [];
@@ -1079,9 +1005,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param mixed $id The last inserted id
    * @return self
    */
-  public function setLastInsertId($id=''): self
+  public function setLastInsertId($id = ''): self
   {
     $this->language->setLastInsertId($id);
+
+    return $this;
   }
 
   /**
@@ -1175,7 +1103,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
     return null;
   }
 
-
+// TODO is this needed?
   public function rselectRandom($table, array $fields = [], array $where = []):? array
   {
     if ($this->check() && ($num = $this->count($table, $where))) {
@@ -1315,7 +1243,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getOne()
   {
-   return $this->language->getOne();
+   return $this->language->getOne(...\func_get_args());
   }
 
 
@@ -1512,12 +1440,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *        ]
    * ```
    *
-   * @param string|array                                          $table  The table's name or a configuration array
-   * @param string|array                                          $fields The fields's name
-   * @param array                                                 $where  The "where" condition
-   * @param array | boolean The "order" condition, default: false
-   * @param int                                                   $limit  The "limit" condition, default: 0
-   * @param int                                                   $start  The "start" condition, default: 0
+   * @param string|array  $table  The table's name or a configuration array
+   * @param string|array  $fields The fields's name
+   * @param array         $where  The "where" condition
+   * @param array|boolean $order The "order" condition, default: false
+   * @param int           $limit  The "limit" condition, default: 0
+   * @param int           $start  The "start" condition, default: 0
    * @return array
    */
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
@@ -1752,17 +1680,17 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * Return the unique values of a column of a table as a numeric indexed array.
    *
    * ```php
-   * X::dump($db->getFieldValues("table_users", "surname", [['id', '>', '2']], 1, 1));
+   * X::dump($db->getFieldValues("table_users", "surname", [['id', '>', '2']]));
    * // (array) ["Smiths", "White"]
    * ```
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string       $field The field's name
+   * @param string|null  $field The field's name
    * @param array        $where The "where" condition
    * @param array        $order The "order" condition
    * @return array | false
    */
-  public function getFieldValues($table, $field = null,  array $where = [], array $order = []): ?array
+  public function getFieldValues($table, string $field = null, array $where = [], array $order = []): ?array
   {
     return $this->getColumnValues($table, $field, $where, $order);
   }

@@ -509,13 +509,6 @@ interface Engines
   public function stopFancyStuff(): self;
 
   /**
-   * Gets the created hash.
-   *
-   * @return string
-   */
-  public function getHash(): string;
-
-  /**
    * @param array $args
    * @param bool $force
    * @return array|null
@@ -571,6 +564,44 @@ interface Engines
    * @return array|bool
    */
   public function treatConditions(array $where, bool $full = true);
+
+  /**
+   * Enable the triggers' functions
+   *
+   * @return self
+   */
+  public function enableTrigger(): self;
+
+  /**
+   * Disable the triggers' functions
+   *
+   * @return $this
+   */
+  public function disableTrigger(): self;
+
+  /**
+   * @return bool
+   */
+  public function isTriggerEnabled(): bool;
+
+  /**
+   * @return bool
+   */
+  public function isTriggerDisabled(): bool;
+
+  /**
+   * @param callable $function
+   * @param array|string|null $kind
+   * @param array|string|null $moment
+   * @param null|string|array $tables
+   * @return self
+   */
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self;
+
+  /**
+   * @return array
+   */
+  public function getTriggers(): array;
 
   /**
    * @param $tables
@@ -704,4 +735,9 @@ interface Engines
    * @return array|null
    */
   public function getRealLastParams(): ?array;
+
+  /**
+   * @return array
+   */
+  public function getCfg(): array;
 }

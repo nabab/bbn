@@ -180,19 +180,6 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
   protected $last_cfg;
 
   /**
-   * @var mixed $hash_contour
-   */
-  protected $hash_contour = '__BBN__';
-
-  /**
-   * Unique string identifier for current connection
-   *
-   * @var string
-   */
-  protected $hash;
-
-
-  /**
    * @var array $cfgs The configs recorded for helpers functions
    */
   protected $cfgs = [];
@@ -321,6 +308,7 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
       $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
       $this->cfg = $cfg;
       $this->db  = $db;
+      $this->db->setHash($params);
 
       unset($cfg['pass']);
     }
@@ -1863,7 +1851,7 @@ MYSQL
         $hash_sent = array_shift($args);
       }
       else {
-        $hash = $this->makeHash($statement);
+        $hash = $this->db->makeHash($statement);
       }
 
       $driver_options = [];
@@ -2075,37 +2063,6 @@ MYSQL
     $this->_fancy = false;
 
     return $this;
-  }
-
-  /**
-   * Makes a string that will be the id of the request.
-   *
-   * @return string
-   *
-   */
-  public function makeHash(): string
-  {
-    $args = \func_get_args();
-    if ((\count($args) === 1) && \is_array($args[0])) {
-      $args = $args[0];
-    }
-
-    $st = '';
-    foreach ($args as $a){
-      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
-    }
-
-    return $this->hash_contour.md5($st).$this->hash_contour;
-  }
-
-  /**
-   * Gets the created hash
-   *
-   * @return string
-   */
-  public function getHash(): string
-  {
-    return $this->hash;
   }
 
   /**
@@ -2324,7 +2281,7 @@ MYSQL
         }
 
         $res['sql']           .= $res['having_st'].$res['order_st'].$res['limit_st'];
-        $res['statement_hash'] = $this->makeHash($res['sql']);
+        $res['statement_hash'] = $this->db->makeHash($res['sql']);
 
         foreach ($res['join'] as $r){
           $this->getValuesDesc($r['on'], $res, $res['values_desc']);
@@ -3100,6 +3057,120 @@ MYSQL
       'hashed' => $where,
       'values' => $values
     ];
+  }
+
+
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                          TRIGGERS                            *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+
+  /**
+   * Enable the triggers' functions
+   *
+   * @return self
+   */
+  public function enableTrigger(): self
+  {
+    $this->_triggers_disabled = false;
+    return $this;
+  }
+
+
+  /**
+   * Disable the triggers' functions
+   *
+   * @return self
+   */
+  public function disableTrigger(): self
+  {
+    $this->_triggers_disabled = true;
+    return $this;
+  }
+
+
+  public function isTriggerEnabled(): bool
+  {
+    return !$this->_triggers_disabled;
+  }
+
+
+  public function isTriggerDisabled(): bool
+  {
+    return $this->_triggers_disabled;
+  }
+
+
+  /**
+   * Apply a function each time the methods $kind are used
+   *
+   * @param callable            $function
+   * @param array|string|null   $kind     select|insert|update|delete
+   * @param array|string|null   $moment   before|after
+   * @param null|string|array   $tables   database's table(s) name(s)
+   * @return self
+   */
+  public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self
+  {
+    $kinds   = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+    $moments = ['before', 'after'];
+    if (empty($kind)) {
+      $kind = $kinds;
+    }
+    elseif (!\is_array($kind)) {
+      $kind = (array)strtoupper($kind);
+    }
+    else{
+      $kind = array_map('strtoupper', $kind);
+    }
+
+    if (empty($moment)) {
+      $moment = $moments;
+    }
+    else {
+      $moment = !\is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);
+    }
+
+    foreach ($kind as $k){
+      if (\in_array($k, $kinds, true)) {
+        foreach ($moment as $m){
+          if (array_key_exists($m, $this->_triggers[$k]) && \in_array($m, $moments, true)) {
+            if ($tables === '*') {
+              $tables = $this->getTables();
+            }
+            elseif (Str::checkName($tables)) {
+              $tables = [$tables];
+            }
+
+            if (\is_array($tables)) {
+              foreach ($tables as $table){
+                $t = $this->tableFullName($table);
+                if (!isset($this->_triggers[$k][$m][$t])) {
+                  $this->_triggers[$k][$m][$t] = [];
+                }
+
+                $this->_triggers[$k][$m][$t][] = $function;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * @return array
+   */
+  public function getTriggers(): array
+  {
+    return $this->_triggers;
   }
 
   /****************************************************************
@@ -5412,6 +5483,88 @@ MYSQL
     }
 
     return $this;
+  }
+
+  /**
+   * Retrieves a query array based on its hash.
+   *
+   * @param string $hash
+   * @return array|null
+   */
+  public function retrieveQuery(string $hash): ?array
+  {
+    if (isset($this->queries[$hash])) {
+      if (\is_string($this->queries[$hash])) {
+        $hash = $this->queries[$hash];
+      }
+
+      return $this->queries[$hash];
+    }
+
+    return null;
+  }
+
+  /**
+   * @param array $cfg
+   * @param array $conditions
+   * @param array|null $res
+   * @return array
+   */
+  public function extractFields(array $cfg, array $conditions, array &$res = null)
+  {
+    if (null === $res) {
+      $res = [];
+    }
+
+    if (isset($conditions['conditions'])) {
+      $conditions = $conditions['conditions'];
+    }
+
+    foreach ($conditions as $c) {
+      if (isset($c['conditions'])) {
+        $this->extractFields($cfg, $c['conditions'], $res);
+      }
+      else {
+        if (isset($c['field'], $cfg['available_fields'][$c['field']])) {
+          $res[] = $cfg['available_fields'][$c['field']] ? $this->cfn($c['field'], $cfg['available_fields'][$c['field']]) : $c['field'];
+        }
+
+        if (isset($c['exp'])) {
+          $res[] = $cfg['available_fields'][$c['exp']] ? $this->cfn($c['exp'], $cfg['available_fields'][$c['exp']]) : $c['exp'];
+        }
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Retrieve an array of specific filters among the existing ones.
+   *
+   * @param array $cfg
+   * @param $field
+   * @param null  $operator
+   * @return array|null
+   */
+  public function filterFilters(array $cfg, $field, $operator = null): ?array
+  {
+    if (isset($cfg['filters'])) {
+      $f = function ($cond, &$res = []) use (&$f, $field, $operator) {
+        foreach ($cond as $c){
+          if (isset($c['conditions'])) {
+            $f($c['conditions'], $res);
+          }
+          elseif (($c['field'] === $field) && (!$operator || ($operator === $c['operator']))) {
+            $res[] = $c;
+          }
+        }
+
+        return $res;
+      };
+      return isset($cfg['filters']['conditions']) ? $f($cfg['filters']['conditions']) : [];
+    }
+
+    return null;
   }
 
   public function __toString()
