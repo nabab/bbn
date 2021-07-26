@@ -502,11 +502,31 @@ You can click the following link to access directly your account:<br>
     $u                 =& $this->class_cfg['arch']['users'];
     $fields            = array_unique(array_values($this->class_cfg['arch']['users']));
     $cfg[$u['active']] = 1;
-    foreach ($cfg as $k => $v){
-      if (!\in_array($k, $fields)) {
-        unset($cfg[$k]);
+    if (!empty($this->class_cfg['arch']['users']['cfg'])) {
+      if (empty($cfg[$this->class_cfg['arch']['users']['cfg']])) {
+        $cfg[$this->class_cfg['arch']['users']['cfg']] = [];
+      }
+      elseif (is_string($cfg[$this->class_cfg['arch']['users']['cfg']])) {
+        $cfg[$this->class_cfg['arch']['users']['cfg']] = json_decode($cfg[$this->class_cfg['arch']['users']['cfg']], true);
+      }
+
+      foreach ($cfg as $k => $v){
+        if (!\in_array($k, $fields)) {
+          $cfg[$this->class_cfg['arch']['users']['cfg']][$k] = $v;
+          unset($cfg[$k]);
+        }
+      }
+
+      $cfg[$this->class_cfg['arch']['users']['cfg']] = json_encode($cfg[$this->class_cfg['arch']['users']['cfg']]);
+    }
+    else {
+      foreach ($cfg as $k => $v){
+        if (!\in_array($k, $fields)) {
+          unset($cfg[$k]);
+        }
       }
     }
+
 
     if (!$id_user && isset($cfg[$u['id']])) {
       $id_user = $cfg[$u['id']];
