@@ -163,7 +163,6 @@ class MollieManager
       return $this->createPayment($payment_data, $customer);
     }
     catch (\Exception $e) {
-      $this->mollie->customers->delete($customer);
       throw new \Exception($e->getMessage());
     }
   }
