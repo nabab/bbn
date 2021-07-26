@@ -1356,7 +1356,7 @@ class Mvc implements Mvc\Api
         }
 
         if ((\gettype($obj) !== 'object') || (\get_class($obj) !== 'stdClass')) {
-            throw new \Exception(X::__("Unexpected output: ".\gettype($obj)));
+            throw new \Exception(X::_("Unexpected output: ".\gettype($obj)));
         }
 
         if ($this->obj && X::countProperties($this->obj)) {
