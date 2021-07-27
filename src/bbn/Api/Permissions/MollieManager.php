@@ -191,7 +191,7 @@ class MollieManager
       return null;
     }
     $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);
-    return $this->createPayment($payment_data, null, $mandate_id);
+    return $this->createPayment($payment_data, $customer_id, $mandate_id);
   }
 
   /**
