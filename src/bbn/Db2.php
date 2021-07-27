@@ -17,7 +17,7 @@ use bbn\Db2\Engines;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @todo Check for the tables and column names legality in _treat_arguments
  */
-class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
+class Db2 implements Db2\Actions
 {
   use Models\Tts\Cache;
   use Models\Tts\Retriever;
@@ -46,12 +46,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * An elegant separator
    */
   protected const LINE = '---------------------------------------------------------------------------------';
-
-  /**
-   * When set to true last_query will be filled with the latest statement.
-   * @var bool
-   */
-  private $_last_enabled = true;
 
   /**
    * @var mixed $cache
@@ -217,7 +211,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
       if ($cfg = $this->getCfg()) {
         $this->cfg = $cfg;
         $this->qte = $this->language->qte;
-        $this->language->postCreation();
+        $this->postCreation();
         $this->current  = $cfg['db'] ?? null;
         $this->engine   = (string)$cfg['engine'];
         $this->host     = $cfg['host'] ?? '127.0.0.1';
@@ -1761,6 +1755,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param array $where The "where" condition
    * @param array $order The "order" condition
    * @return array
+   * // TODO: this method stated that it will return string but actually it returns an array!
    */
   public function getValuesCount($table, string $field = null, array $where = [], array $order = []): array
   {
@@ -1806,7 +1801,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @return int Number affected rows.
    */
-  public function insert($table, array $values = null, $ignore = false): ?int
+  public function insert($table, array $values = null, bool $ignore = false): ?int
   {
     return $this->language->insert($table, $values, $ignore);
   }
@@ -1885,7 +1880,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function updateIgnore($table, array $values = null, array $where = null): ?int
   {
-    return $this->language->updateIgnore($table, $values, $where);
+    return $this->update($table, $values, $where, true);
   }
 
 
@@ -1909,7 +1904,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * If exist deletess row(s) in a table, else ignore.
+   * If exist deletes row(s) in a table, else ignore.
    *
    * <code>
    * $db->deleteIgnore(
@@ -1925,7 +1920,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function deleteIgnore($table, array $where = null): ?int
   {
-    return $this->language->deleteIgnore($table, $where);
+    return $this->delete(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);
   }
 
 
@@ -1949,7 +1944,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function insertIgnore($table, array $values = null): ?int
   {
-    return $this->language->insertIgnore($table, $values);
+    return $this->insert(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);
   }
 
 
@@ -2029,7 +2024,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Transposition of the original fetchColumn method, but with the query included. Return an arra or false if no result
+   * Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result
    * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work
    *
    * @param $query
@@ -2043,7 +2038,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Return an array with stdClass object or false if no result.
+   * Return stdClass object or false if no result.
    *
    * ```php
    * X::dump($db->fetchObject("SELECT * FROM table_users WHERE name = 'john'"));
@@ -2095,14 +2090,14 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Return table's simple name.
-   * (similar to {@link table_simple_name()})
+   * Return table's full name.
+   * (similar to {@link table_full_name()})
    *
    * ```php
-   * X::dump($db->tsn("work_db.table_users"));
-   * // (string) table_users
-   * X::dump($db->tsn("work_db.table_users", true));
-   * // (string) `table_users`
+   * X::dump($db->tfn("table_users"));
+   * // (string) work_db.table_users
+   * X::dump($db->tfn("table_users", true));
+   * // (string) `work_db`.`table_users`
    * ```
    *
    * @param string $table   The table's name
@@ -2152,7 +2147,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @param bool   $escaped If set to true the returned string will be escaped.
    * @return null|string
    */
-  public function cfn(string $col, string $table = null, bool $escaped = false): ?string
+  public function cfn(string $col, ?string $table = null, bool $escaped = false): ?string
   {
     return $this->colFullName($col, $table, $escaped);
   }
@@ -2194,7 +2189,6 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function postCreation()
   {
-    // Obliged to do that  if we want to use foreign keys with SQLite
     if ($this->language && !$this->engine) {
       $this->language->postCreation();
     }
@@ -2261,15 +2255,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Returns true if the string corresponds to the tipology of a table full name.
-   * (similar to {@link table_full_name()})
-   *
-   * ```php
-   * X::dump($db->tfn("table_users"));
-   * // (String) db_example.table_users
-   * X::dump($db->tfn("table_users", true));
-   * // (String) `db_example`.`table_users`
-   * ```
+   * Returns true if the given string is the full name of a table ('database.table').
    *
    * @param string $table The table's name
    * @return bool
@@ -2281,6 +2267,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * Returns true if the given string is the full name of a column ('table.column').
+   *
    * @param string $col
    * @return bool
    */
@@ -2320,12 +2308,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * // (string) \`table_users\`.\`name\`
    * ```
    *
-   * @param string $col     The column's name (escaped or not)
-   * @param string $table   The table's name (escaped or not)
-   * @param bool   $escaped If set to true the returned string will be escaped
+   * @param string $col The column's name (escaped or not)
+   * @param string|null $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
    * @return string | false
    */
-  public function colFullName(string $col, $table = '', $escaped = false): ?string
+  public function colFullName(string $col, ?string $table = null, bool $escaped = false): ?string
   {
     return $this->language->colFullName($col, $table, $escaped);
   }
@@ -2356,7 +2344,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * ```php
    * X::dump($db->disableKeys());
-   * // (db)
+   * // (self)
    * ```
    *
    * @return self
@@ -2388,6 +2376,17 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   /**
    * Return databases' names as an array.
    *
+   * ```php
+   * X::dump($db->getDatabases());
+   * /*
+   * (array)[
+   *      "db_customers",
+   *      "db_clients",
+   *      "db_empty",
+   *      "db_example",
+   *      "db_mail"
+   *      ]
+   * ```
    * @return null|array
    */
   public function getDatabases(): ?array
@@ -2399,10 +2398,31 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   /**
    * Return tables' names of a database as an array.
    *
+   * ```php
+   * X::dump($db->getTables('db_example'));
+   * /*
+   * (array) [
+   *        "clients",
+   *        "columns",
+   *        "cron",
+   *        "journal",
+   *        "dbs",
+   *        "examples",
+   *        "history",
+   *        "hosts",
+   *        "keys",
+   *        "mails",
+   *        "medias",
+   *        "notes",
+   *        "medias",
+   *        "versions"
+   *        ]
+   * ```
+   *
    * @param string $database Database name
    * @return null|array
    */
-  public function getTables(string $database=''): ?array
+  public function getTables(string $database = ''): ?array
   {
     return $this->language->getTables($database);
   }
@@ -2410,6 +2430,52 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
   /**
    * Return columns' structure of a table as an array indexed with the fields names.
+   *
+   * * ```php
+   * X::dump($db->getColumns('table_users'));
+   * /* (array)[
+   *            "id" => [
+   *              "position" => 1,
+   *              "null" => 0,
+   *              "key" => "PRI",
+   *              "default" => null,
+   *              "extra" => "auto_increment",
+   *              "signed" => 0,
+   *              "maxlength" => "8",
+   *              "type" => "int",
+   *            ],
+   *           "name" => [
+   *              "position" => 2,
+   *              "null" => 0,
+   *              "key" => null,
+   *              "default" => null,
+   *              "extra" => "",
+   *              "signed" => 0,
+   *              "maxlength" => "30",
+   *              "type" => "varchar",
+   *            ],
+   *            "surname" => [
+   *              "position" => 3,
+   *              "null" => 0,
+   *              "key" => null,
+   *              "default" => null,
+   *              "extra" => "",
+   *              "signed" => 0,
+   *              "maxlength" => "30",
+   *              "type" => "varchar",
+   *            ],
+   *            "address" => [
+   *              "position" => 4,
+   *              "null" => 0,
+   *              "key" => "UNI",
+   *              "default" => null,
+   *              "extra" => "",
+   *              "signed" => 0,
+   *              "maxlength" => "30",
+   *              "type" => "varchar",
+   *            ],
+   *          ]
+   * ```
    *
    * @param string $table The table's name
    * @return null|array
@@ -2468,6 +2534,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * Returns a string with the conditions for any filter clause.
+   *
    * @param array $conditions
    * @param array $cfg
    * @param bool $is_having
@@ -2484,7 +2552,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * Return SQL code for row(s) SELECT.
    *
    * ```php
-   * X::dump($db->getSelect('table_users',['name','surname']));
+   * X::dump($db->getSelect(['tables' => ['users'],'fields' => ['id', 'name']]));
    * /*
    * (string)
    *   SELECT
@@ -2494,9 +2562,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getSelect(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getSelect($cfg);
   }
 
@@ -2518,9 +2589,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getInsert(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     $cfg['kind'] = 'INSERT';
     return $this->language->getInsert($this->processCfg($cfg));
   }
@@ -2543,9 +2617,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getUpdate(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     $cfg['kind'] = 'UPDATE';
     return $this->language->getUpdate($this->processCfg($cfg));
   }
@@ -2561,9 +2638,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getDelete(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     $cfg['kind'] = 'DELETE';
     return $this->language->getDelete($this->processCfg($cfg));
   }
@@ -2574,9 +2654,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getJoin(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getJoin($cfg);
   }
 
@@ -2591,9 +2674,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getWhere(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getWhere($cfg);
   }
 
@@ -2603,9 +2689,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getGroupBy(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getGroupBy($cfg);
   }
 
@@ -2615,9 +2704,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getHaving(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getHaving($cfg);
   }
 
@@ -2632,9 +2724,12 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getOrder(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getOrder($cfg);
   }
 
@@ -2643,15 +2738,18 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * Get a string starting with LIMIT with corresponding parameters to $limit.
    *
    * ```php
-   * X::dump($db->getLimit(3,1));
+   * X::dump($db->getLimit(['limit' => 3, 'start'  => 1]));
    * // (string) LIMIT 1, 3
    * ```
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getLimit(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getLimit($cfg);
   }
 
@@ -2674,96 +2772,166 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * ```
    * @param string $table The table's name
    * @return string | false
+   * @throws \Exception
    */
   public function getCreate(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreate($table, $model);
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateTable(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreateTable($table, $model);
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateKeys(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreateKeys($table, $model);
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateConstraints(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreateConstraints($table, $model);
   }
 
   /**
    * Creates an index on one or more column(s) of the table
    *
+   * @param string $table
+   * @param string|array $column
+   * @param bool $unique
+   * @param null $length
+   * @return bool
+   * @throws \Exception
    * @todo return data
    *
    * ```php
-   * X::dump($db->create_db_index('table_users','id_group'));
-   * // (void)
+   * X::dump($db->createIndex('table_users','id_group'));
+   * // (bool) true
    * ```
    *
-   * @param string       $table
-   * @param string|array $column
-   * @param bool         $unique
-   * @param null         $length
-   * @return bool
    */
   public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
   {
-    return $this->language->createIndex($table, $column, $unique);
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
+    return $this->language->createIndex($table, $column, $unique, $length);
   }
 
 
   /**
    * Deletes index on a column of the table.
    *
+   * @param string $table The table's name.
+   * @param string $key The key's name.
+   * @return bool
+   * @throws \Exception
    * @todo far vedere a thomas perchè non funziona/return data
    *
    * ```php
-   * X::dump($db->delete_db_index('table_users','id_group'));
-   * // (void)
+   * X::dump($db->deleteIndex('table_users','id_group'));
+   * // (bool) true
    * ```
    *
-   * @param string $table The table's name.
-   * @param string $key   The key's name.
-   * @return bool
    */
   public function deleteIndex(string $table, string $key): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->deleteIndex($table, $key);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlter(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlter($table, $cfg);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlterTable(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlterTable($table, $cfg);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlterColumn(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlterColumn($table, $cfg);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlterKey(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlterKey($table, $cfg);
   }
 
 
+  /**
+   * @param $table
+   * @param $cfg
+   * @return int
+   */
   public function alter($table, $cfg): int
   {
     return $this->language->alter($table, $cfg);
@@ -2775,17 +2943,20 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @todo return data
    *
    * ```php
-   * X::dump($db->create_db_user('Michael','22101980','db_example'));
-   * // (void)
+   * X::dump($db->createUser('Michael','22101980','db_example'));
+   * // (bool) true
    * ```
    *
    * @param string|null $user
    * @param string|null $pass
    * @param string|null $db
    * @return bool
+   * @throws \Exception
    */
   public function createUser(string $user = null, string $pass = null, string $db = null): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->createUser($user, $pass, $db);
   }
 
@@ -2796,21 +2967,28 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    * @todo non mi funziona ma forse per una questione di permessi/ return data
    *
    * ```php
-   * X::dump($db->delete_db_user('Michael'));
-   * // (void)
+   * X::dump($db->deleteUser('Michael'));
+   * // (bool) true
    * ```
    *
-   * @param string|null $user
+   * @param string $user
    * @return bool
+   * @throws \Exception
    */
-  public function deleteUser(string $user = null): bool
+  public function deleteUser(string $user): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->deleteUser($user);
   }
 
 
   /**
    * Return an array including privileges of a specific db_user or all db_users.
+   * @param string $user . The user's name, without params will return all privileges of all db_users
+   * @param string $host . The host
+   * @return array
+   * @throws \Exception
    * @todo far vedere  a th la descrizione
    *
    * ```php
@@ -2821,17 +2999,18 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    *    ]
    * ```
    *
-   * @param string $user. The user's name, without params will return all privileges of all db_users
-   * @param string $host. The host
-   * @return array
    */
   public function getUsers(string $user = '', string $host = ''): ?array
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getUsers($user, $host);
   }
 
 
   /**
+   * Gets the size of a database
+   *
    * @param string $database
    * @param string $type
    * @return int
@@ -2843,6 +3022,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * Gets the size of a table
+   *
    * @param string $table
    * @param string $type
    * @return int
@@ -2854,9 +3035,11 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * Gets the status of a table
+   *
    * @param string $table
    * @param string $database
-   * @return array|false|mixed
+   * @return mixed
    */
   public function status(string $table = '', string $database = '')
   {
@@ -2865,6 +3048,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * Returns a UUID
+   *
    * @return string|null
    */
   public function getUid(): ?string
@@ -2994,7 +3179,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
-   * Return the first row resulting from the query as an object (similar to {@link get_object()}).
+   * Return the first row resulting from the query as an object (similar to {@link getObject()}).
    *
    * ```php
    * X::dump($db->getObj("SELECT surname FROM table_users"));
@@ -3008,7 +3193,7 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
    */
   public function getObj(): ?\stdClass
   {
-    return $this->getObject(\func_get_args());
+    return $this->getObject(...\func_get_args());
   }
 
 
@@ -3067,6 +3252,8 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
 
 
   /**
+   * Creates a database
+   *
    * @param string $database
    * @return bool
    */
@@ -3088,65 +3275,84 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   }
 
 
+  /**
+   * @return void
+   */
   public function enableLast()
   {
-    $this->_last_enabled = true;
+    if (method_exists($this->language, __FUNCTION__)) {
+      $this->language->enableLast();
+    }
   }
 
 
+  /**
+   * @return void
+   */
   public function disableLast()
   {
-    $this->_last_enabled = false;
+    if (method_exists($this->language, __FUNCTION__)) {
+      $this->language->disableLast();
+    }
   }
 
-  public function lastEnabled(): bool
-  {
-    return $this->_last_enabled;
-  }
-
-
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function getRealLastParams(): ?array
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getRealLastParams();
   }
 
 
+  /**
+   * @return string|null
+   * @throws \Exception
+   */
   public function realLast(): ?string
   {
-    if (method_exists($this->language, 'realLast')) {
-      return $this->language->realLast();
-    }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    return null;
+    return $this->language->realLast();
   }
 
 
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function getLastParams(): ?array
   {
-    if (method_exists($this->language, 'getLastParams')) {
-      return $this->language->getLastParams();
-    }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    return null;
+    return $this->language->getLastParams();
   }
 
 
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function getLastValues(): ?array
   {
-    if (method_exists($this->language, 'getLastValues')) {
-      return $this->language->getLastValues();
-    }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    return null;
+    return $this->language->getLastValues();
   }
 
 
   /**
    * @param array $cfg
    * @return array
+   * @throws \Exception
    */
   public function getQueryValues(array $cfg): array
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getQueryValues($cfg);
   }
 
@@ -3159,5 +3365,18 @@ class Db2 implements Db2\Actions, Db2\Api, Db2\Engines
   private static function _set_has_error_all(): void
   {
     self::$_has_error_all = true;
+  }
+
+  /**
+   * Throws ans exception if language class method does not exist.
+   *
+   * @param string $method
+   * @throws \Exception
+   */
+  private function ensureLanguageMethodExists(string $method)
+  {
+    if (!method_exists($this->language, $method)) {
+      throw new \Exception(X::_('Method not found on the language class!'));
+    }
   }
 }

@@ -5,7 +5,6 @@
 namespace bbn\Db2\Languages;
 
 use bbn;
-use bbn\Db;
 use bbn\Str;
 use bbn\X;
 use PHPSQLParser\PHPSQLParser;
@@ -21,7 +20,7 @@ use PHPSQLParser\PHPSQLParser;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
-class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
+class Mysql implements bbn\Db2\SqlEngines, bbn\Db2\Engines, bbn\Db2\EnginesApi, bbn\Db2\SqlFormatters
 {
   use bbn\Models\Tts\Cache;
 
@@ -228,6 +227,11 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
    */
   protected $last_real_params = ['sequences' => false, 'values' => false];
 
+  /**
+   * When set to true last_query will be filled with the latest statement.
+   * @var bool
+   */
+  private $_last_enabled = true;
 
   /**
    * Returns true if the column name is an aggregate function
@@ -348,7 +352,7 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
   }
 
   /**
-   * Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise
+   * Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise.
    *
    * @param array $conditions
    * @param array $cfg
@@ -622,7 +626,7 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
             if (count($indexes) === count($cfg['group_by'])) {
               $res .= 'COUNT(*) FROM ( SELECT ';
               $tmp  = [];
-              if ($extracted_fields = $this->db->extractFields($cfg, $cfg['having']['conditions'])) {
+              if ($extracted_fields = $this->extractFields($cfg, $cfg['having']['conditions'])) {
                 //die(var_dump($extracted_fields));
                 foreach ($extracted_fields as $ef) {
                   if (!in_array($ef, $indexes)) {
@@ -840,6 +844,7 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
    *
    * @param array $cfg The configuration array
    * @return string
+   * TODO: this method does not considering the WHERE clause
    */
   public function getDelete(array $cfg): string
   {
@@ -859,13 +864,14 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getJoin(array $cfg): string
   {
     $res = '';
     if (!empty($cfg['join'])) {
       foreach ($cfg['join'] as $join) {
-        if (isset($join['table'], $join['on']) && ($cond = $this->db->getConditions($join['on'], $cfg, false, 4))) {
+        if (isset($join['table'], $join['on']) && ($cond = $this->getConditions($join['on'], $cfg, false, 4))) {
           $res .= '  ' .
           (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '') .
           'JOIN ' . $this->tableFullName($join['table'], true) .
@@ -901,6 +907,7 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getGroupBy(array $cfg): string
   {
@@ -950,6 +957,8 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
 
 
   /**
+   * Get a string starting with ORDER BY with corresponding parameters to $order.
+   *
    * @param array $cfg
    * @return string
    */
@@ -1143,6 +1152,11 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   */
   public function getCreateConstraints(string $table, array $model = null): string
   {
     $st = '';
@@ -1175,6 +1189,12 @@ class Mysql implements bbn\Db2\Engines, bbn\Db2\Api
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreate(string $table, array $model = null): string
   {
     $st = '';
@@ -1379,6 +1399,7 @@ MYSQL
    *
    * @param string $database
    * @return bool
+   * @throws \Exception
    */
   public function dropDatabase(string $database): bool
   {
@@ -1404,8 +1425,9 @@ MYSQL
    *
    * @param string $user
    * @param string $pass
-   * @param string $db
+   * @param string|null $db
    * @return bool
+   * @throws \Exception
    */
   public function createUser(string $user, string $pass, string $db = null): bool
   {
@@ -1438,6 +1460,7 @@ MYSQL
    *
    * @param string $user
    * @return bool
+   * @throws \Exception
    */
   public function deleteUser(string $user): bool
   {
@@ -1447,7 +1470,7 @@ MYSQL
 			REVOKE ALL PRIVILEGES ON *.*
       FROM $user"
       );
-      return (bool)$this->db->query("DROP USER $user");
+      return (bool)$this->query("DROP USER $user");
     }
 
     return false;
@@ -1495,9 +1518,12 @@ MYSQL
 
 
   /**
+   * Gets the size of a database
+   *
    * @param string $database
    * @param string $type
    * @return int
+   * @throws \Exception
    */
   public function dbSize(string $database = '', string $type = ''): int
   {
@@ -1527,6 +1553,13 @@ MYSQL
   }
 
 
+  /**
+   * Gets the size of a table
+   *
+   * @param string $table
+   * @param string $type
+   * @return int
+   */
   public function tableSize(string $table, string $type = ''): int
   {
     $size = 0;
@@ -1545,6 +1578,13 @@ MYSQL
   }
 
 
+  /**
+   * Gets the status of a table
+   *
+   * @param string $table
+   * @param string $database
+   * @return mixed
+   */
   public function status(string $table = '', string $database = '')
   {
     $cur = null;
@@ -1563,13 +1603,15 @@ MYSQL
 
 
   /**
+   * Returns a UUID
+   *
    * @return string|null
    */
   public function getUid(): ?string
   {
     $uid = null;
     while (!bbn\Str::isBuid(hex2bin($uid))) {
-      $uid = $this->db->getOne("SELECT replace(uuid(),'-','')");
+      $uid = $this->getOne("SELECT replace(uuid(),'-','')");
     }
 
     return $uid;
@@ -1647,7 +1689,7 @@ MYSQL
    * @param string $db The database name or file
    * @return bool
    */
-  public function change(string $db)
+  public function change(string $db): bool
   {
     if (($this->db->getCurrent() !== $db) && bbn\Str::checkName($db)) {
       $this->rawQuery("USE `$db`");
@@ -1742,12 +1784,12 @@ MYSQL
   /**
    * Returns a column's full name i.e. table.column
    *
-   * @param string $col     The column's name (escaped or not)
-   * @param null $table     The table's name (escaped or not)
-   * @param false $escaped  If set to true the returned string will be escaped
+   * @param string $col The column's name (escaped or not)
+   * @param string|null $table The table's name (escaped or not)
+   * @param false $escaped If set to true the returned string will be escaped
    * @return string|null
    */
-  public function colFullName(string $col, $table = null, $escaped = false): ?string
+  public function colFullName(string $col, ?string $table = null, bool $escaped = false): ?string
   {
     if ($col = trim($col)) {
       $bits = explode('.', $col);
@@ -1817,217 +1859,6 @@ MYSQL
   public function rawQuery()
   {
     return $this->pdo->query(...\func_get_args());
-  }
-
-  /**
-   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
-   *
-   * @param $statement
-   * @return false|\PDOStatement
-   */
-  public function query($statement)
-  {
-    $args = \func_get_args();
-    // If fancy is false we just use the regular PDO query function
-    if (!$this->_fancy) {
-      return $this->pdo->query(...$args);
-    }
-
-    // The function can be called directly with func_get_args()
-    while ((\count($args) === 1) && \is_array($args[0])){
-      $args = $args[0];
-    }
-
-    if (!empty($args[0]) && \is_string($args[0])) {
-      // The first argument is the statement
-      $statement = trim(array_shift($args));
-
-      // Sending a hash as second argument from helper functions will bind it to the saved statement
-      if (count($args)
-        && \is_string($args[0])
-        && isset($this->queries[$args[0]])
-      ) {
-        $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
-        $hash_sent = array_shift($args);
-      }
-      else {
-        $hash = $this->db->makeHash($statement);
-      }
-
-      $driver_options = [];
-      if (count($args)
-        && \is_array($args[0])
-      ) {
-        // Case where drivers are arguments
-        if (!array_key_exists(0, $args[0])) {
-          $driver_options = array_shift($args);
-        }
-        // Case where values are in a single argument
-        elseif (\count($args) === 1) {
-          $args = $args[0];
-        }
-      }
-
-      /** @var array $params Will become the property last_params each time a query is executed */
-      $params     = [
-        'statement' => $statement,
-        'values' => [],
-        'last' => microtime(true)
-      ];
-      $num_values = 0;
-      foreach ($args as $i => $arg){
-        if (!\is_array($arg)) {
-          $params['values'][] = $arg;
-          $num_values++;
-        }
-        elseif (isset($arg[2])) {
-          $params['values'][] = $arg[2];
-          $num_values++;
-        }
-      }
-
-      if (!isset($this->queries[$hash])) {
-        /** @var int $placeholders The number of placeholders in the statement */
-        $placeholders = 0;
-        if ($sequences = $this->parseQuery($statement)) {
-          /* Or looking for question marks */
-          $sequences = array_keys($sequences);
-          preg_match_all('/(\?)/', $statement, $exp);
-          $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
-          while ($sequences[0] === 'OPTIONS'){
-            array_shift($sequences);
-          }
-
-          $params['kind']      = $sequences[0];
-          $params['union']     = isset($sequences['UNION']);
-          $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
-          $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
-        }
-        elseif (($this->db->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
-          $params['kind'] = 'PRAGMA';
-        }
-        else{
-          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
-        }
-
-        // This will add to the queries array
-        $this->_add_query(
-          $hash,
-          $statement,
-          $params['kind'],
-          $placeholders,
-          $driver_options
-        );
-        if (!empty($hash_sent)) {
-          $this->queries[$hash_sent] = $hash;
-        }
-      }
-      // The hash of the hash for retrieving a query based on the helper's config's hash
-      elseif (\is_string($this->queries[$hash])) {
-        $hash = $this->queries[$hash];
-      }
-
-      $this->_update_query($hash);
-      $q =& $this->queries[$hash];
-      /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
-      if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
-        $params['values'] = array_merge(
-          $params['values'],
-          array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
-        );
-        $num_values       = \count($params['values']);
-      }
-
-      /* The number of values must match the number of placeholders to bind */
-      if ($num_values !== $q['placeholders']) {
-        $this->db->error(
-          'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
-          .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
-          .print_r(\func_get_args(), true)
-          .print_r($q, true)
-        );
-        exit;
-      }
-
-      if ($q['exe_time'] === 0) {
-        $time = $q['last'];
-      }
-
-      // That will always contains the parameters of the last query done
-
-      $this->addStatement($q['sql'], $params);
-      // If the statement is a structure modifier we need to clear the cache
-      if ($q['structure']) {
-        $tmp                = $q;
-        $this->queries      = [$hash => $tmp];
-        $this->list_queries = [[
-          'hash' => $hash,
-          'last' => $tmp['last']
-        ]];
-        unset($tmp);
-        /** @todo Clear the cache */
-      }
-
-      try{
-        // This is a writing statement, it will execute the statement and return the number of affected rows
-        if ($q['write']) {
-          // A prepared query already exists for the writing
-          /** @var \bbn\Db2\Query */
-          if ($q['prepared']) {
-            $r = $q['prepared']->init($params['values'])->execute();
-          }
-          // If there are no values we can assume the statement doesn't need to be prepared and is just executed
-          elseif ($num_values === 0) {
-            // Native PDO function which returns the number of affected rows
-            $r = $this->pdo->exec($q['sql']);
-          }
-          // Preparing the query
-          else{
-            // Native PDO function which will use Db\Query as base class
-            /** @var \bbn\Db\Query */
-            $q['prepared'] = $this->pdo->prepare($q['sql'], $q['options']);
-            $r             = $q['prepared']->execute();
-          }
-        }
-        // This is a reading statement, it will prepare the statement and return a query object
-        else{
-          if (!$q['prepared']) {
-            // Native PDO function which will use Db\Query as base class
-            $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
-          }
-          else{
-            // Returns the same Db\Query object
-            $q['prepared']->init($params['values']);
-          }
-        }
-
-        if (!empty($time) && ($q['exe_time'] === 0)) {
-          $q['exe_time'] = microtime(true) - $time;
-        }
-      }
-      catch (\PDOException $e){
-        $this->db->error($e);
-      }
-
-      if ($this->db->check()) {
-        // So if read statement returns the query object
-        if (!$q['write']) {
-          return $q['prepared'];
-        }
-
-        // If it is a write statement returns the number of affected rows
-        if ($q['prepared'] && $q['write']) {
-          $r = $q['prepared']->rowCount();
-        }
-
-        // If it is an insert statement we (try to) set the last inserted ID
-        if (($q['kind'] === 'INSERT') && $r) {
-          $this->setLastInsertId();
-        }
-
-        return $r ?? false;
-      }
-    }
   }
 
   /**
@@ -2834,6 +2665,14 @@ MYSQL
     return $this->last_real_params;
   }
 
+  /**
+   * @return string|null
+   */
+  public function realLast(): ?string
+  {
+    return $this->last_real_query;
+  }
+
   public function getLastValues(): ?array
   {
     return $this->last_params ? $this->last_params['values'] : null;
@@ -3434,6 +3273,7 @@ MYSQL;
    * @param string
    * @param int The var ? value
    * @return array|false
+   * @throws \Exception
    */
   public function getRows(): ?array
   {
@@ -3459,7 +3299,7 @@ MYSQL;
    * @param string query.
    * @param int The var ? value.
    * @return array|false
-   *
+   * @throws \Exception
    */
   public function getRow(): ?array
   {
@@ -3485,6 +3325,7 @@ MYSQL;
    * @param string query
    * @param int The var ? value
    * @return array|false
+   * @throws \Exception
    */
   public function getIrow(): ?array
   {
@@ -3514,6 +3355,7 @@ MYSQL;
    * ```
    *
    * @return null|array
+   * @throws \Exception
    */
   public function getIrows(): ?array
   {
@@ -3544,6 +3386,7 @@ MYSQL;
    *
    * @param string query
    * @return null|array
+   * @throws \Exception
    */
   public function getByColumns(): ?array
   {
@@ -3567,6 +3410,7 @@ MYSQL;
    * ```
    *
    * @return null|\stdClass
+   * @throws \Exception
    */
   public function getObject(): ?\stdClass
   {
@@ -3605,6 +3449,7 @@ MYSQL;
    * ```
    *
    * @return null|array
+   * @throws \Exception
    */
   public function getObjects(): ?array
   {
@@ -4694,7 +4539,7 @@ MYSQL
    *
    * @return int Number affected rows.
    */
-  public function insert($table, array $values = null, $ignore = false): ?int
+  public function insert($table, array $values = null, bool $ignore = false): ?int
   {
     if (\is_array($table) && isset($table['values'])) {
       $values = $table['values'];
@@ -4825,31 +4670,6 @@ MYSQL
   }
 
   /**
-   * If exist updates row(s) in a table, else ignore.
-   *
-   * <code>
-   * $db->updateIgnore(
-   *   "table_users",
-   *   [
-   *     ['name' => 'Frank'],
-   *     ['surname' => 'Red']
-   *   ],
-   *   ['id' => '20']
-   * );
-   * </code>
-   *
-   * @param string|array $table The table name or the configuration array.
-   * @param array|null $values
-   * @param array|null $where The "where" condition.
-   *
-   * @return int The number of rows deleted.
-   */
-  public function updateIgnore($table, array $values = null, array $where = null): ?int
-  {
-    return $this->update($table, $values, $where, true);
-  }
-
-  /**
    * Deletes row(s) in a table.
    *
    * <code>
@@ -4871,49 +4691,6 @@ MYSQL
     ];
     $cfg['kind'] = 'DELETE';
     return $this->_exec($cfg);
-  }
-
-  /**
-   * If exist deletess row(s) in a table, else ignore.
-   *
-   * <code>
-   * $db->deleteIgnore(
-   *  "table_users",
-   *  ['id' => '20']
-   * );
-   * </code>
-   *
-   * @param string|array $table The table name or the configuration array.
-   * @param array|null $where The "where" condition.
-   *
-   * @return int The number of rows deleted.
-   */
-  public function deleteIgnore($table, array $where = null): ?int
-  {
-    return $this->delete(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);
-  }
-
-  /**
-   * If not exist inserts row(s) in a table, else ignore.
-   *
-   * <code>
-   * $db->insertIgnore(
-   *  "table_users",
-   *  [
-   *    ['id' => '19', 'name' => 'Frank'],
-   *    ['id' => '20', 'name' => 'Ted'],
-   *  ]
-   * );
-   * </code>
-   *
-   * @param string|array $table The table name or the configuration array.
-   * @param array|null $values The row(s) values.
-   *
-   * @return int The number of rows inserted.
-   */
-  public function insertIgnore($table, array $values = null): ?int
-  {
-    return $this->insert(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);
   }
 
 
@@ -4990,7 +4767,7 @@ MYSQL
 
 
   /**
-   * Transposition of the original fetchColumn method, but with the query included. Return an arra or false if no result
+   * Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result
    * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work
    *
    * @param $query
@@ -5007,7 +4784,7 @@ MYSQL
   }
 
   /**
-   * Return an array with stdClass object or false if no result.
+   * Return stdClass object or false if no result.
    *
    * ```php
    * X::dump($db->fetchObject("SELECT * FROM table_users WHERE name = 'john'"));
@@ -5031,7 +4808,217 @@ MYSQL
   }
 
 
+  /**
+   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
+   *
+   * @param $statement
+   * @return false|\PDOStatement
+   * @throws \Exception
+   */
+  public function query($statement)
+  {
+    $args = \func_get_args();
+    // If fancy is false we just use the regular PDO query function
+    if (!$this->_fancy) {
+      return $this->pdo->query(...$args);
+    }
 
+    // The function can be called directly with func_get_args()
+    while ((\count($args) === 1) && \is_array($args[0])){
+      $args = $args[0];
+    }
+
+    if (!empty($args[0]) && \is_string($args[0])) {
+      // The first argument is the statement
+      $statement = trim(array_shift($args));
+
+      // Sending a hash as second argument from helper functions will bind it to the saved statement
+      if (count($args)
+        && \is_string($args[0])
+        && isset($this->queries[$args[0]])
+      ) {
+        $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
+        $hash_sent = array_shift($args);
+      }
+      else {
+        $hash = $this->db->makeHash($statement);
+      }
+
+      $driver_options = [];
+      if (count($args)
+        && \is_array($args[0])
+      ) {
+        // Case where drivers are arguments
+        if (!array_key_exists(0, $args[0])) {
+          $driver_options = array_shift($args);
+        }
+        // Case where values are in a single argument
+        elseif (\count($args) === 1) {
+          $args = $args[0];
+        }
+      }
+
+      /** @var array $params Will become the property last_params each time a query is executed */
+      $params     = [
+        'statement' => $statement,
+        'values' => [],
+        'last' => microtime(true)
+      ];
+      $num_values = 0;
+      foreach ($args as $i => $arg){
+        if (!\is_array($arg)) {
+          $params['values'][] = $arg;
+          $num_values++;
+        }
+        elseif (isset($arg[2])) {
+          $params['values'][] = $arg[2];
+          $num_values++;
+        }
+      }
+
+      if (!isset($this->queries[$hash])) {
+        /** @var int $placeholders The number of placeholders in the statement */
+        $placeholders = 0;
+        if ($sequences = $this->parseQuery($statement)) {
+          /* Or looking for question marks */
+          $sequences = array_keys($sequences);
+          preg_match_all('/(\?)/', $statement, $exp);
+          $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
+          while ($sequences[0] === 'OPTIONS'){
+            array_shift($sequences);
+          }
+
+          $params['kind']      = $sequences[0];
+          $params['union']     = isset($sequences['UNION']);
+          $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
+          $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
+        }
+        elseif (($this->db->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
+          $params['kind'] = 'PRAGMA';
+        }
+        else{
+          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
+        }
+
+        // This will add to the queries array
+        $this->_add_query(
+          $hash,
+          $statement,
+          $params['kind'],
+          $placeholders,
+          $driver_options
+        );
+        if (!empty($hash_sent)) {
+          $this->queries[$hash_sent] = $hash;
+        }
+      }
+      // The hash of the hash for retrieving a query based on the helper's config's hash
+      elseif (\is_string($this->queries[$hash])) {
+        $hash = $this->queries[$hash];
+      }
+
+      $this->_update_query($hash);
+      $q =& $this->queries[$hash];
+      /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
+      if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
+        $params['values'] = array_merge(
+          $params['values'],
+          array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
+        );
+        $num_values       = \count($params['values']);
+      }
+
+      /* The number of values must match the number of placeholders to bind */
+      if ($num_values !== $q['placeholders']) {
+        $this->db->error(
+          'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
+          .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
+          .print_r(\func_get_args(), true)
+          .print_r($q, true)
+        );
+        exit;
+      }
+
+      if ($q['exe_time'] === 0) {
+        $time = $q['last'];
+      }
+
+      // That will always contains the parameters of the last query done
+
+      $this->addStatement($q['sql'], $params);
+      // If the statement is a structure modifier we need to clear the cache
+      if ($q['structure']) {
+        $tmp                = $q;
+        $this->queries      = [$hash => $tmp];
+        $this->list_queries = [[
+          'hash' => $hash,
+          'last' => $tmp['last']
+        ]];
+        unset($tmp);
+        /** @todo Clear the cache */
+      }
+
+      try{
+        // This is a writing statement, it will execute the statement and return the number of affected rows
+        if ($q['write']) {
+          // A prepared query already exists for the writing
+          /** @var \bbn\Db2\Query */
+          if ($q['prepared']) {
+            $r = $q['prepared']->init($params['values'])->execute();
+          }
+          // If there are no values we can assume the statement doesn't need to be prepared and is just executed
+          elseif ($num_values === 0) {
+            // Native PDO function which returns the number of affected rows
+            $r = $this->pdo->exec($q['sql']);
+          }
+          // Preparing the query
+          else{
+            // Native PDO function which will use Db\Query as base class
+            /** @var \bbn\Db\Query */
+            $q['prepared'] = $this->pdo->prepare($q['sql'], $q['options']);
+            $r             = $q['prepared']->execute();
+          }
+        }
+        // This is a reading statement, it will prepare the statement and return a query object
+        else{
+          if (!$q['prepared']) {
+            // Native PDO function which will use Db\Query as base class
+            $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
+          }
+          else{
+            // Returns the same Db\Query object
+            $q['prepared']->init($params['values']);
+          }
+        }
+
+        if (!empty($time) && ($q['exe_time'] === 0)) {
+          $q['exe_time'] = microtime(true) - $time;
+        }
+      }
+      catch (\PDOException $e){
+        $this->db->error($e);
+      }
+
+      if ($this->db->check()) {
+        // So if read statement returns the query object
+        if (!$q['write']) {
+          return $q['prepared'];
+        }
+
+        // If it is a write statement returns the number of affected rows
+        if ($q['prepared'] && $q['write']) {
+          $r = $q['prepared']->rowCount();
+        }
+
+        // If it is an insert statement we (try to) set the last inserted ID
+        if (($q['kind'] === 'INSERT') && $r) {
+          $this->setLastInsertId();
+        }
+
+        return $r ?? false;
+      }
+    }
+  }
 
 
   /**
@@ -5477,7 +5464,7 @@ MYSQL
     $this->last_real_query  = $statement;
     $this->last_real_params = $params;
 
-    if ($this->db->lastEnabled()) {
+    if ($this->_last_enabled) {
       $this->last_query  = $statement;
       $this->last_params = $params;
     }
@@ -5526,11 +5513,11 @@ MYSQL
       }
       else {
         if (isset($c['field'], $cfg['available_fields'][$c['field']])) {
-          $res[] = $cfg['available_fields'][$c['field']] ? $this->cfn($c['field'], $cfg['available_fields'][$c['field']]) : $c['field'];
+          $res[] = $cfg['available_fields'][$c['field']] ? $this->colFullName($c['field'], $cfg['available_fields'][$c['field']]) : $c['field'];
         }
 
         if (isset($c['exp'])) {
-          $res[] = $cfg['available_fields'][$c['exp']] ? $this->cfn($c['exp'], $cfg['available_fields'][$c['exp']]) : $c['exp'];
+          $res[] = $cfg['available_fields'][$c['exp']] ? $this->colFullName($c['exp'], $cfg['available_fields'][$c['exp']]) : $c['exp'];
         }
       }
     }
@@ -5566,6 +5553,24 @@ MYSQL
 
     return null;
   }
+
+  /**
+   * @return void
+   */
+  public function enableLast()
+  {
+    $this->_last_enabled = true;
+  }
+
+
+  /**
+   * @return void
+   */
+  public function disableLast()
+  {
+    $this->_last_enabled = false;
+  }
+
 
   public function __toString()
   {

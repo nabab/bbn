@@ -85,7 +85,7 @@ interface Engines
    * @param bool        $escaped If set to true the returned string will be escaped
    * @return string | false
    */
-  public function colFullName(string $col, $table = null, $escaped = false);
+  public function colFullName(string $col, ?string $table = null, bool $escaped = false);
 
 
   /**
@@ -113,23 +113,23 @@ interface Engines
 
 
   /**
-   * Fetches the database and returns an array of a single row num-indexed
+   * Disables foreign keys check.
    *
-   * @return false|array
+   * @return bbn\Db2
    */
-  public function disableKeys();
+  public function disableKeys(): bbn\Db2;
 
 
   /**
-   * Fetches the database and returns an array of several arrays of rows num-indexed
+   * Enables foreign keys check.
    *
-   * @return false|array
+   * @return bbn\Db2
    */
-  public function enableKeys();
+  public function enableKeys(): bbn\Db2;
 
 
   /**
-   * Fetches the database and returns an array of arrays, one per column, each having each column's values
+   * Return databases' names as an array.
    *
    * @return false|array
    */
@@ -137,7 +137,7 @@ interface Engines
 
 
   /**
-   * Fetches the database and returns an object of a single row, alias of get_object
+   * Return tables' names of a database as an array.
    *
    * @param string $database
    * @return null|array
@@ -146,7 +146,7 @@ interface Engines
 
 
   /**
-   * Fetches the database and returns an object of a single row
+   * Return columns' structure of a table as an array indexed with the fields names.
    *
    * @param string $table
    * @return null|array
@@ -206,7 +206,7 @@ interface Engines
   public function getObjects(): ?array;
 
   /**
-   * Fetches the database and returns an array of objects.
+   * Return the table's keys as an array indexed with the fields names.
    *
    * @param string $table
    * @return null|array
@@ -227,197 +227,11 @@ interface Engines
 
 
   /**
-   * Generates a string starting with SELECT ... FROM with corresponding parameters
-   *
-   * @param array $cfg The configuration array
-   * @return string
-   */
-  public function getSelect(array $cfg): string;
-
-
-  /**
-   * Fetches the database and returns an array of objects
-   *
-   * @param array $cfg The configuration array
-   * @return false|array
-   */
-  public function getInsert(array $cfg): string;
-
-
-  /**
-   * Fetches the database and returns an array of objects
-   *
-   * @param array $cfg The configuration array
-   * @return false|array
-   */
-  public function getUpdate(array $cfg): string;
-
-
-  /**
-   * Returns the SQL code for a DELETE statement.
-   *
-   * @param array $cfg The configuration array
-   * @return string
-   */
-  public function getDelete(array $cfg): string;
-
-
-  /**
-   * Returns a string with the JOIN part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getJoin(array $cfg): string;
-
-
-  /**
-   * Returns a string with the JOIN part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getWhere(array $cfg): string;
-
-
-  /**
-   * Returns a string with the GROUP BY part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getGroupBy(array $cfg): string;
-
-
-  /**
-   * Returns a string with the HAVING part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getHaving(array $cfg): string;
-
-
-  /**
-   * Get a string starting with ORDER BY with corresponding parameters to $order
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getOrder(array $cfg): string;
-
-
-  /**
-   * Get a string starting with LIMIT with corresponding parameters to $where
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getLimit(array $cfg): string;
-
-
-  /**
-   * Fetches the database and returns an array of objects
-   *
-   * @param string $table The table for which to create the statement
-   * @param array|null $model
-   * @return string
-   */
-  public function getCreate(string $table, array $model = null): string;
-
-  /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   */
-  public function getCreateTable(string $table, array $model = null): string;
-
-  /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   */
-  public function getCreateKeys(string $table, array $model = null): string;
-
-  /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   */
-  public function getCreateConstraints(string $table, array $model = null): string;
-
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlter(string $table, array $cfg): string;
-
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlterTable(string $table, array $cfg): string;
-
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlterColumn(string $table, array $cfg): string;
-
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlterKey(string $table, array $cfg): string;
-
-
-  /**
    * @param $table
    * @param $cfg
    * @return int
    */
   public function alter($table, $cfg): int;
-
-  /**
-   * Creates an index
-   *
-   * @param string       $table
-   * @param string|array $column
-   * @param bool         $unique
-   * @param null         $length
-   * @return bool
-   */
-  public function createIndex(string $table, $column, bool $unique = false, $length = null): bool;
-
-
-  /**
-   * Deletes an index
-   *
-   * @param string $table
-   * @param string $key
-   * @return bool
-   */
-  public function deleteIndex(string $table, string $key): bool;
-
-
-  /**
-   * Creates a database user
-   *
-   * @param string $user
-   * @param string $pass
-   * @param string $db
-   * @return bool
-   */
-  public function createUser(string $user, string $pass, string $db = null): bool;
-
 
   /**
    * Creates a database
@@ -435,26 +249,6 @@ interface Engines
    * @return bool
    */
   public function dropDatabase(string $database): bool;
-
-
-  /**
-   * Deletes a database user
-   *
-   * @param string $user
-   * @return bool
-   */
-  public function deleteUser(string $user): bool;
-
-
-  /**
-   * Returns an array of queries to recreate the user(s)
-   *
-   * @param string $user
-   * @param string $host
-   * @return array
-   */
-  public function getUsers(string $user = '', string $host = ''): ?array;
-
 
   /**
    * Gets the size of a database
@@ -731,10 +525,6 @@ interface Engines
    */
   public function fetchObject($query);
 
-  /**
-   * @return array|null
-   */
-  public function getRealLastParams(): ?array;
 
   /**
    * @return array
