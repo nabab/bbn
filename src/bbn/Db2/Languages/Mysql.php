@@ -20,9 +20,9 @@ use PHPSQLParser\PHPSQLParser;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
-class Mysql implements bbn\Db2\SqlEngines, bbn\Db2\Engines, bbn\Db2\EnginesApi, bbn\Db2\SqlFormatters
+class Mysql extends Sql
 {
-  use bbn\Models\Tts\Cache;
+  use bbn\Models\Tts\Cache, bbn\Db2\HasError;
 
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
@@ -146,7 +146,7 @@ class Mysql implements bbn\Db2\SqlEngines, bbn\Db2\Engines, bbn\Db2\EnginesApi, 
    * And use startFancyStuff to set it back to true
    * @var int $fancy
    */
-  private $_fancy = 1;
+  protected $_fancy = 1;
 
   /**
    * @var array $queries
@@ -234,6 +234,43 @@ class Mysql implements bbn\Db2\SqlEngines, bbn\Db2\Engines, bbn\Db2\EnginesApi, 
   private $_last_enabled = true;
 
   /**
+   * @var mixed $hash_contour
+   */
+  protected $hash_contour = '__BBN__';
+
+  /**
+   * Unique string identifier for current connection
+   * @var string
+   */
+  protected $hash;
+
+  /** @var string The connection code as it would be stored in option */
+  protected $connection_code;
+
+  /**
+   * @var integer $cache_renewal
+   */
+  protected $cache_renewal = 3600;
+
+  /**
+   * The host of this connection
+   * @var string $host
+   */
+  protected $host;
+
+  /**
+   * The host of this connection
+   * @var string $host
+   */
+  protected $username;
+
+  /**
+   * The currently selected database
+   * @var mixed $current
+   */
+  protected $current;
+
+  /**
    * Returns true if the column name is an aggregate function
    *
    * @param string $f The string to check
@@ -312,7 +349,20 @@ class Mysql implements bbn\Db2\SqlEngines, bbn\Db2\Engines, bbn\Db2\EnginesApi, 
       $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
       $this->cfg = $cfg;
       $this->db  = $db;
-      $this->db->setHash($params);
+      $this->setHash($params);
+
+      $this->current  = $cfg['db'] ?? null;
+      $this->host     = $cfg['host'] ?? '127.0.0.1';
+      $this->username = $cfg['user'] ?? null;
+      $this->connection_code = $cfg['code_host'];
+
+      if (!empty($cfg['cache_length'])) {
+        $this->cache_renewal = (int)$cfg['cache_length'];
+      }
+
+      if (isset($cfg['on_error'])) {
+        $this->on_error = $cfg['on_error'];
+      }
 
       unset($cfg['pass']);
     }
@@ -321,6 +371,34 @@ class Mysql implements bbn\Db2\SqlEngines, bbn\Db2\Engines, bbn\Db2\EnginesApi, 
              .X::_("with the following error").$e->getMessage();
       throw new \Exception($err);
     }
+  }
+
+  /**
+   * Returns the current database selected by the current connection.
+   *
+   * @return string|null
+   */
+  public function getCurrent(): ?string
+  {
+    return $this->current;
+  }
+
+  /**
+   * Returns the host of the current connection.
+   *
+   * @return string|null
+   */
+  public function getHost(): ?string
+  {
+    return $this->host;
+  }
+
+  /**
+   * @return string
+   */
+  public function getConnectionCode()
+  {
+    return $this->connection_code;
   }
 
   public function getCfg(): array
@@ -1403,7 +1481,7 @@ MYSQL
    */
   public function dropDatabase(string $database): bool
   {
-    if ($this->db->check()) {
+    if ($this->check()) {
       if (!Str::checkName($database)) {
         throw new \Exception(X::_("Wrong database name")." $database");
       }
@@ -1416,7 +1494,7 @@ MYSQL
       }
     }
 
-    return $this->db->check();
+    return $this->check();
   }
 
 
@@ -1691,8 +1769,9 @@ MYSQL
    */
   public function change(string $db): bool
   {
-    if (($this->db->getCurrent() !== $db) && bbn\Str::checkName($db)) {
+    if (($this->getCurrent() !== $db) && bbn\Str::checkName($db)) {
       $this->rawQuery("USE `$db`");
+      $this->current = $db;
       return true;
     }
 
@@ -1741,7 +1820,7 @@ MYSQL
       $db    = trim($bits[0], ' ' . $this->qte);
       $table = trim($bits[1], ' ' . $this->qte);
     } else {
-      $db    = $this->db->getCurrent();
+      $db    = $this->getCurrent();
       $table = trim($bits[0], ' ' . $this->qte);
     }
 
@@ -1944,7 +2023,7 @@ MYSQL
 
       foreach ($args['tables'] as $key => $tab) {
         if (empty($tab)) {
-          $this->db->log(\debug_backtrace());
+          $this->log(\debug_backtrace());
           throw new \Exception("$key is not defined");
         }
 
@@ -1954,7 +2033,7 @@ MYSQL
         $idx = \is_string($key) ? $key : $tfn;
         // Error if they do
         if (isset($tables_full[$idx])) {
-          $this->db->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']));
+          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']));
           return null;
         }
 
@@ -1995,7 +2074,7 @@ MYSQL
           $tables_full[$idx] = $tfn;
         }
         else{
-          $this->db->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
+          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
         }
       }
 
@@ -2035,8 +2114,8 @@ MYSQL
         if (\is_string($idx)) {
           if (!isset($res['available_fields'][$col])) {
             //$this->log($res);
-            $this->db->error("Impossible to find the column $col");
-            $this->db->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
+            $this->error("Impossible to find the column $col");
+            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
             return null;
           }
 
@@ -2112,7 +2191,7 @@ MYSQL
         }
 
         $res['sql']           .= $res['having_st'].$res['order_st'].$res['limit_st'];
-        $res['statement_hash'] = $this->db->makeHash($res['sql']);
+        $res['statement_hash'] = $this->makeHash($res['sql']);
 
         foreach ($res['join'] as $r){
           $this->getValuesDesc($r['on'], $res, $res['values_desc']);
@@ -2145,7 +2224,7 @@ MYSQL
       return $res;
     }
 
-    $this->db->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
+    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
     return null;
   }
 
@@ -2439,12 +2518,12 @@ MYSQL
       $done = 1;
     }
     catch (\Exception $e){
-      $this->db->log('Error while parsing the query '.$statement);
+      $this->log('Error while parsing the query '.$statement);
     }
 
     if ($done) {
       if (!$r || !count($r)) {
-        $this->db->log('Impossible to parse the query '.$statement);
+        $this->log('Impossible to parse the query '.$statement);
         return null;
       }
 
@@ -2458,95 +2537,6 @@ MYSQL
     }
 
     return null;
-  }
-
-  /**
-   * Returns the table's structure's array, either from the cache or from _modelize().
-   *
-   * @param string $item The item to get
-   * @param string $mode The type of item to get (columns, rables, Databases)
-   * @param bool $force If true the cache is recreated even if it exists
-   * @return array|null
-   * @throws \Exception
-   */
-  private function _get_cache($item, $mode = 'columns', $force = false): ?array
-  {
-    $cache_name = $this->_db_cache_name($item, $mode);
-
-    if ($force && isset($this->cache[$cache_name])) {
-      unset($this->cache[$cache_name]);
-    }
-
-    if (!isset($this->cache[$cache_name])) {
-      if ($force || !($tmp = $this->cacheGet($cache_name))) {
-        switch ($mode){
-          case 'columns':
-            $keys = $this->getKeys($item);
-            $cols = $this->getColumns($item);
-            if (\is_array($keys) && \is_array($cols)) {
-              $tmp = [
-                'keys' => $keys['keys'],
-                'cols' => $keys['cols'],
-                'fields' => $cols
-              ];
-            }
-            break;
-          case 'tables':
-            $tmp = $this->getTables($item);
-            break;
-          case 'databases':
-            $tmp = $this->getDatabases();
-            break;
-        }
-
-        if (!isset($tmp) || !\is_array($tmp)) {
-          $st = "Error while creating the cache for the table $item in mode $mode";
-          $this->db->log($st);
-          throw new \Exception($st);
-        }
-
-        $this->cacheSet($cache_name, '', $tmp, $this->db->getCacheRenewal());
-      }
-
-      if ($tmp) {
-        $this->cache[$cache_name] = $tmp;
-      }
-    }
-
-    return $this->cache[$cache_name] ?? null;
-  }
-
-  /**
-   * Gets the cache name of a database structure or part.
-   *
-   * @param string $item 'db_name' or 'table'
-   * @param string $mode 'columns','tables' or 'databases'
-   *
-   * @return bool|string
-   */
-  private function _db_cache_name(string $item, string $mode)
-  {
-    $r = false;
-    if ($this->db->getEngine() === 'sqlite') {
-      $h = md5($this->db->getHost().dirname($this->db->getCurrent()));
-    }
-    else {
-      $h = str_replace('/', '-', $this->db->getConnectionCode());
-    }
-
-    switch ($mode){
-      case 'columns':
-        $r = $this->db->getEngine().'/'.$h.'/'.str_replace('.', '/', $this->tableFullName($item));
-        break;
-      case 'tables':
-        $r = $this->db->getEngine().'/'.$h.'/'.($item ?: $this->db->getCurrent());
-        break;
-      case 'databases':
-        $r = $this->db->getEngine().'/'.$h.'/_bbn-database';
-        break;
-    }
-
-    return $r;
   }
 
   /**
@@ -4807,315 +4797,6 @@ MYSQL
     return false;
   }
 
-
-  /**
-   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
-   *
-   * @param $statement
-   * @return false|\PDOStatement
-   * @throws \Exception
-   */
-  public function query($statement)
-  {
-    $args = \func_get_args();
-    // If fancy is false we just use the regular PDO query function
-    if (!$this->_fancy) {
-      return $this->pdo->query(...$args);
-    }
-
-    // The function can be called directly with func_get_args()
-    while ((\count($args) === 1) && \is_array($args[0])){
-      $args = $args[0];
-    }
-
-    if (!empty($args[0]) && \is_string($args[0])) {
-      // The first argument is the statement
-      $statement = trim(array_shift($args));
-
-      // Sending a hash as second argument from helper functions will bind it to the saved statement
-      if (count($args)
-        && \is_string($args[0])
-        && isset($this->queries[$args[0]])
-      ) {
-        $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
-        $hash_sent = array_shift($args);
-      }
-      else {
-        $hash = $this->db->makeHash($statement);
-      }
-
-      $driver_options = [];
-      if (count($args)
-        && \is_array($args[0])
-      ) {
-        // Case where drivers are arguments
-        if (!array_key_exists(0, $args[0])) {
-          $driver_options = array_shift($args);
-        }
-        // Case where values are in a single argument
-        elseif (\count($args) === 1) {
-          $args = $args[0];
-        }
-      }
-
-      /** @var array $params Will become the property last_params each time a query is executed */
-      $params     = [
-        'statement' => $statement,
-        'values' => [],
-        'last' => microtime(true)
-      ];
-      $num_values = 0;
-      foreach ($args as $i => $arg){
-        if (!\is_array($arg)) {
-          $params['values'][] = $arg;
-          $num_values++;
-        }
-        elseif (isset($arg[2])) {
-          $params['values'][] = $arg[2];
-          $num_values++;
-        }
-      }
-
-      if (!isset($this->queries[$hash])) {
-        /** @var int $placeholders The number of placeholders in the statement */
-        $placeholders = 0;
-        if ($sequences = $this->parseQuery($statement)) {
-          /* Or looking for question marks */
-          $sequences = array_keys($sequences);
-          preg_match_all('/(\?)/', $statement, $exp);
-          $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
-          while ($sequences[0] === 'OPTIONS'){
-            array_shift($sequences);
-          }
-
-          $params['kind']      = $sequences[0];
-          $params['union']     = isset($sequences['UNION']);
-          $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
-          $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
-        }
-        elseif (($this->db->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
-          $params['kind'] = 'PRAGMA';
-        }
-        else{
-          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
-        }
-
-        // This will add to the queries array
-        $this->_add_query(
-          $hash,
-          $statement,
-          $params['kind'],
-          $placeholders,
-          $driver_options
-        );
-        if (!empty($hash_sent)) {
-          $this->queries[$hash_sent] = $hash;
-        }
-      }
-      // The hash of the hash for retrieving a query based on the helper's config's hash
-      elseif (\is_string($this->queries[$hash])) {
-        $hash = $this->queries[$hash];
-      }
-
-      $this->_update_query($hash);
-      $q =& $this->queries[$hash];
-      /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
-      if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
-        $params['values'] = array_merge(
-          $params['values'],
-          array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
-        );
-        $num_values       = \count($params['values']);
-      }
-
-      /* The number of values must match the number of placeholders to bind */
-      if ($num_values !== $q['placeholders']) {
-        $this->db->error(
-          'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
-          .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
-          .print_r(\func_get_args(), true)
-          .print_r($q, true)
-        );
-        exit;
-      }
-
-      if ($q['exe_time'] === 0) {
-        $time = $q['last'];
-      }
-
-      // That will always contains the parameters of the last query done
-
-      $this->addStatement($q['sql'], $params);
-      // If the statement is a structure modifier we need to clear the cache
-      if ($q['structure']) {
-        $tmp                = $q;
-        $this->queries      = [$hash => $tmp];
-        $this->list_queries = [[
-          'hash' => $hash,
-          'last' => $tmp['last']
-        ]];
-        unset($tmp);
-        /** @todo Clear the cache */
-      }
-
-      try{
-        // This is a writing statement, it will execute the statement and return the number of affected rows
-        if ($q['write']) {
-          // A prepared query already exists for the writing
-          /** @var \bbn\Db2\Query */
-          if ($q['prepared']) {
-            $r = $q['prepared']->init($params['values'])->execute();
-          }
-          // If there are no values we can assume the statement doesn't need to be prepared and is just executed
-          elseif ($num_values === 0) {
-            // Native PDO function which returns the number of affected rows
-            $r = $this->pdo->exec($q['sql']);
-          }
-          // Preparing the query
-          else{
-            // Native PDO function which will use Db\Query as base class
-            /** @var \bbn\Db\Query */
-            $q['prepared'] = $this->pdo->prepare($q['sql'], $q['options']);
-            $r             = $q['prepared']->execute();
-          }
-        }
-        // This is a reading statement, it will prepare the statement and return a query object
-        else{
-          if (!$q['prepared']) {
-            // Native PDO function which will use Db\Query as base class
-            $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
-          }
-          else{
-            // Returns the same Db\Query object
-            $q['prepared']->init($params['values']);
-          }
-        }
-
-        if (!empty($time) && ($q['exe_time'] === 0)) {
-          $q['exe_time'] = microtime(true) - $time;
-        }
-      }
-      catch (\PDOException $e){
-        $this->db->error($e);
-      }
-
-      if ($this->db->check()) {
-        // So if read statement returns the query object
-        if (!$q['write']) {
-          return $q['prepared'];
-        }
-
-        // If it is a write statement returns the number of affected rows
-        if ($q['prepared'] && $q['write']) {
-          $r = $q['prepared']->rowCount();
-        }
-
-        // If it is an insert statement we (try to) set the last inserted ID
-        if (($q['kind'] === 'INSERT') && $r) {
-          $this->setLastInsertId();
-        }
-
-        return $r ?? false;
-      }
-    }
-  }
-
-
-  /**
-   * Adds the specs of a query to the $queries object.
-   *
-   * @param string $hash         The hash of the statement.
-   * @param string $statement    The SQL full statement.
-   * @param string $kind         The type of statement.
-   * @param int    $placeholders The number of placeholders.
-   * @param array  $options      The driver options.
-   */
-  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
-  {
-    $now                  = microtime(true);
-    $this->queries[$hash] = [
-      'sql' => $statement,
-      'kind' => $kind,
-      'write' => \in_array($kind, self::$write_kinds, true),
-      'structure' => \in_array($kind, self::$structure_kinds, true),
-      'placeholders' => $placeholders,
-      'options' => $options,
-      'num' => 0,
-      'exe_time' => 0,
-      'first' => $now,
-      'last' => 0,
-      'prepared' => false
-    ];
-    $this->list_queries[] = [
-      'hash' => $hash,
-      'last' => $now
-    ];
-    $num                  = count($this->list_queries);
-    while ($num > $this->max_queries) {
-      $num--;
-      $this->_remove_query($this->list_queries[0]['hash']);
-      array_shift($this->list_queries);
-    }
-  }
-
-
-  private function _remove_query(string $hash): void
-  {
-    if (X::hasProp($this->queries, $hash)) {
-      unset($this->queries[$hash]);
-      while ($idx = \array_search($hash, $this->queries, true)) {
-        unset($this->queries[$idx]);
-      }
-    }
-  }
-
-
-  private function _update_query($hash)
-  {
-    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
-      $last_index                   = count($this->list_queries) - 1;
-      $now                          = \microtime(true);
-      $this->queries[$hash]['last'] = $now;
-      $this->queries[$hash]['num']++;
-      if ($this->list_queries[$last_index]['hash'] !== $hash) {
-        if (($idx = X::find($this->list_queries, ['hash' => $hash])) !== null) {
-          $this->list_queries[$idx]['last'] = $now;
-          X::move($this->list_queries, $idx, $last_index);
-        }
-        else {
-          throw new \Exception(X::_("Impossible to find the corresponding hash"));
-        }
-      }
-      else {
-        $this->list_queries[$last_index]['last'] = $now;
-      }
-
-      $num = count($this->list_queries) - 1;
-      while (($num > 0)
-        && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
-      ) {
-        $num--;
-        if (!is_string($this->list_queries[0]['hash'])) {
-          X::log($this->list_queries);
-          X::log(count($this->list_queries));
-        }
-
-        $this->_remove_query($this->list_queries[0]['hash']);
-        array_shift($this->list_queries);
-      }
-
-      if (empty($this->queries)) {
-        $debug = debug_backtrace();
-        X::log($debug, 'db_explained');
-        throw new \Exception(X::_("The queries object is empty!"));
-      }
-    }
-    else {
-      throw new \Exception(X::_("Impossible to find the query corresponding to this hash"));
-    }
-  }
-
-
   /**
    * Launches a function before or after
    *
@@ -5571,6 +5252,58 @@ MYSQL
     $this->_last_enabled = false;
   }
 
+  /****************************************************************
+   *                                                              *
+   *                                                              *
+   *                      INTERNAL METHODS                        *
+   *                                                              *
+   *                                                              *
+   ****************************************************************/
+
+  /**
+   * Makes a string that will be the id of the request.
+   *
+   * @return string
+   *
+   */
+  protected function makeHash(): string
+  {
+    $args = \func_get_args();
+    if ((\count($args) === 1) && \is_array($args[0])) {
+      $args = $args[0];
+    }
+
+    $st = '';
+    foreach ($args as $a){
+      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+    }
+
+    return $this->hash_contour.md5($st).$this->hash_contour;
+  }
+
+  /**
+   * Makes and sets the hash.
+   *
+   * @return void
+   */
+  private function setHash()
+  {
+    $this->hash = $this->makeHash(...\func_get_args());
+  }
+
+  /**
+   * Gets the created hash.
+   *
+   * ```php
+   * X::dump($db->getHash());
+   * // (string) 3819056v431b210daf45f9b5dc2
+   * ```
+   * @return string
+   */
+  public function getHash(): string
+  {
+    return $this->hash;
+  }
 
   public function __toString()
   {

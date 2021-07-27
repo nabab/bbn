@@ -4,14 +4,14 @@ namespace Db;
 
 use bbn\Cache;
 use bbn\Db2;
+use bbn\Db2\Enums\Errors;
 use bbn\Db2\Languages\Mysql;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
 use tests\Reflectable;
 
 class Db2Test extends TestCase
 {
-  use Reflectable, Files;
+  use Reflectable;
 
   protected Db2 $db;
 
@@ -45,17 +45,12 @@ class Db2Test extends TestCase
 
     $this->db = new Db2($this->getDbConfig());
 
-    $this->setNonPublicPropertyValue('_has_error_all', false);
-
     $this->setNonPublicPropertyValue('cache_engine', $this->cache_mock);
-
-    $this->cleanTestingDir();
   }
 
   protected function tearDown(): void
   {
     \Mockery::close();
-    $this->cleanTestingDir();
   }
 
   public function getInstance()
@@ -70,10 +65,7 @@ class Db2Test extends TestCase
       'engine'        => $this->mysql_mock,
       'host'          => 'localhost',
       'user'          => 'root',
-      'pass'          => getenv('db_pass'),
-      'db'            => 'bbn_test',
-      'cache_length'  => 3000,
-      'error_mode'    => 'stop'
+      'db'            => 'bbn_test'
     ];
   }
 
@@ -83,13 +75,6 @@ class Db2Test extends TestCase
   {
     $db_cfg = $this->getDbConfig();
 
-    $this->assertSame(
-      array_merge($db_cfg, [
-        'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}"
-      ]),
-      $this->getNonPublicProperty('cfg')
-    );
-
     $this->assertInstanceOf(
       Db2::class,
       $this->getNonPublicProperty('retriever_instance', Db2::class)
@@ -98,22 +83,7 @@ class Db2Test extends TestCase
     $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
     $this->assertInstanceOf(Mysql::class, $this->getNonPublicProperty('language'));
 
-    $this->assertSame(
-      $this->getNonPublicProperty('qte', $this->getNonPublicProperty('language')),
-      $this->getNonPublicProperty('qte')
-    );
-
-    $this->assertSame('bbn_test', $this->getNonPublicProperty('current'));
     $this->assertSame('mysql', (string)$this->getNonPublicProperty('engine'));
-    $this->assertSame('localhost', $this->getNonPublicProperty('host'));
-    $this->assertSame('root', $this->getNonPublicProperty('username'));
-    $this->assertSame(
-      "{$db_cfg['user']}@{$db_cfg['host']}",
-      $this->getNonPublicProperty('connection_code')
-    );
-
-    $this->assertSame(3000, $this->getNonPublicProperty('cache_renewal'));
-    $this->assertSame('stop', $this->getNonPublicProperty('on_error'));
   }
 
   /** @test */
@@ -148,20 +118,6 @@ class Db2Test extends TestCase
   }
 
   /** @test */
-  public function getLogLine_method_returns_a_string_with_given_text_in_the_middle_of_a_line_of_logs()
-  {
-    $this->assertSame(
-      '-------------------------------------- foo --------------------------------------',
-      Db2::getLogLine('foo')
-    );
-
-    $this->assertSame(
-      '--------------------------------- I\'m an error ----------------------------------',
-      Db2::getLogLine('I\'m an error')
-    );
-  }
-
-  /** @test */
   public function getCfg_method_returns_the_config()
   {
     $this->mysql_mock->shouldReceive('getCfg')
@@ -181,35 +137,45 @@ class Db2Test extends TestCase
   /** @test */
   public function getHost_method_returns_the_host_of_the_current_connection()
   {
+    $this->mysql_mock->shouldReceive('getHost')
+      ->once()
+      ->withNoArgs()
+      ->andReturn($this->getDbConfig()['host']);
+
     $this->assertSame($this->getDbConfig()['host'], $this->db->getHost());
   }
 
   /** @test */
   public function getCurrent_method_returns_the_current_database_of_the_current_connection()
   {
+    $this->mysql_mock->shouldReceive('getCurrent')
+      ->once()
+      ->withNoArgs()
+      ->andReturn($this->getDbConfig()['db']);
+
     $this->assertSame($this->getDbConfig()['db'], $this->db->getCurrent());
   }
 
   /** @test */
   public function getLastError_method_returns_the_last_error()
   {
-    $this->assertNull($this->db->getLastError());
-
-    $this->setNonPublicPropertyValue('last_error', 'Error');
+    $this->mysql_mock->shouldReceive('getLastError')
+      ->once()
+      ->withNoArgs()
+      ->andReturn('Error');
 
     $this->assertSame('Error', $this->db->getLastError());
-  }
-
-  /** @test */
-  public function getCacheRenewal_method_returns_cache_renewal_time()
-  {
-    $this->assertSame($this->getDbConfig()['cache_length'], $this->db->getCacheRenewal());
   }
 
   /** @test */
   public function to_string_method_returns_a_string_when_the_object_is_used_as_a_string()
   {
     $db_config = $this->getDbConfig();
+
+    $this->mysql_mock->shouldReceive('getHost')
+      ->once()
+      ->withNoArgs()
+      ->andReturn($db_config['host']);
 
     $this->assertSame(
       "Connection {$db_config['engine']} to {$db_config['host']}",
@@ -222,6 +188,11 @@ class Db2Test extends TestCase
   {
     $db_cfg = $this->getDbConfig();
 
+    $this->mysql_mock->shouldReceive('getConnectionCode')
+      ->once()
+      ->withNoArgs()
+      ->andReturn("{$db_cfg['user']}@{$db_cfg['host']}");
+
     $this->assertSame(
       "{$db_cfg['user']}@{$db_cfg['host']}",
       $this->db->getConnectionCode()
@@ -229,62 +200,15 @@ class Db2Test extends TestCase
   }
 
   /** @test */
-  public function makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request()
-  {
-    $hash_contour    = $this->getNonPublicProperty('hash_contour');
-    $expected_string = "{$hash_contour}%s{$hash_contour}";
-
-    $expected = sprintf($expected_string, md5('--bar----bar2--'));
-    $this->assertSame($expected, $this->db->makeHash(['foo' => 'bar', 'foo2' => 'bar2']));
-
-    $expected = sprintf($expected_string, md5('--foo----bar----baz--'));
-    $this->assertSame($expected, $this->db->makeHash('foo', 'bar', 'baz'));
-
-    $expected = sprintf($expected_string, md5('--foo--' . serialize(['bar', 'bar2'])));
-    $this->assertSame($expected, $this->db->makeHash([
-      'foo',
-      'foo2' => ['bar', 'bar2']
-    ]));
-  }
-
-  /**
-   * @test
-   * @depends makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request
-   */
-  public function setHash_method_makes_and_sets_hash()
-  {
-    $this->db->setHash($args = ['foo' => 'bar', 'foo2' => 'bar2']);
-    $this->assertSame(
-      $this->db->makeHash($args),
-      $this->getNonPublicProperty('hash')
-    );
-
-    $this->db->setHash('foo', 'bar', 'baz');
-    $this->assertSame(
-      $this->db->makeHash('foo', 'bar', 'baz'),
-      $this->getNonPublicProperty('hash')
-    );
-
-    $this->db->setHash($args = [
-      'foo',
-      'foo2' => ['bar', 'bar2']
-    ]);
-    $this->assertSame(
-      $this->db->makeHash($args),
-      $this->getNonPublicProperty('hash')
-    );
-
-  }
-
-  /**
-   * @test
-   * @depends setHash_method_makes_and_sets_hash
-   */
   public function getHash_method_returns_the_created_hash()
   {
-    $this->db->setHash('foo', 'bar');
+    $this->mysql_mock->shouldReceive('getHash')
+      ->withNoArgs()
+      ->once()
+      ->andReturn('3819056v431b210daf45f9b5dc2');
+
     $this->assertSame(
-      $this->db->makeHash('foo', 'bar'),
+      '3819056v431b210daf45f9b5dc2',
       $this->db->getHash()
     );
   }
@@ -363,165 +287,25 @@ class Db2Test extends TestCase
   }
 
   /** @test */
-  public function error_method_sets_an_error_and_acts_based_on_the_error_mode_when_the_given_error_is_string()
-  {
-    $this->assertFalse($this->getNonPublicProperty('_has_error'));
-    $this->assertFalse($this->getNonPublicProperty('_has_error_all'));
-    $this->assertNull($this->getNonPublicProperty('last_error'));
-
-    $this->mysql_mock->shouldReceive('last')
-      ->once()
-      ->withNoArgs()
-      ->andReturnNull();
-
-    $this->mysql_mock->shouldReceive('getRealLastParams')
-      ->once()
-      ->withNoArgs()
-      ->andReturn([]);
-
-    $this->createDir('logs');
-
-    $this->db->error('An error');
-
-    $this->assertTrue($this->getNonPublicProperty('_has_error'));
-    $this->assertTrue($this->getNonPublicProperty('_has_error_all'));
-    $this->assertSame('An error', $this->getNonPublicProperty('last_error'));
-    $this->assertFileExists($log_file = $this->getTestingDirName() . 'logs/db.log');
-    $this->assertStringContainsString('An error', file_get_contents($log_file));
-  }
-
-  /** @test */
-  public function error_method_sets_an_error_and_acts_based_on_the_error_mode_when_the_given_error_an_exception()
-  {
-    $this->assertFalse($this->getNonPublicProperty('_has_error'));
-    $this->assertFalse($this->getNonPublicProperty('_has_error_all'));
-    $this->assertNull($this->getNonPublicProperty('last_error'));
-
-    $this->mysql_mock->shouldReceive('last')
-      ->once()
-      ->withNoArgs()
-      ->andReturnNull();
-
-    $this->mysql_mock->shouldReceive('getRealLastParams')
-      ->once()
-      ->withNoArgs()
-      ->andReturn([
-        'values' => [
-          true,
-          'An error in params',
-          false
-        ]
-      ]);
-
-    $this->createDir('logs');
-
-    $this->db->error(new \Exception('An error'));
-
-    $this->assertTrue($this->getNonPublicProperty('_has_error'));
-    $this->assertTrue($this->getNonPublicProperty('_has_error_all'));
-    $this->assertSame(
-      'An error',
-      $this->getNonPublicProperty('last_error')
-    );
-    $this->assertFileExists($log_file = $this->getTestingDirName() . 'logs/db.log');
-    $this->assertStringContainsString(
-      'An error',
-      $log_file_contents = file_get_contents($log_file)
-    );
-    $this->assertStringContainsString('VALUES', $log_file_contents);
-    $this->assertStringContainsString('An error in params', $log_file_contents);
-    $this->assertStringContainsString('TRUE', $log_file_contents);
-    $this->assertStringContainsString('FALSE', $log_file_contents);
-  }
-
-  /** @test */
-  public function error_method_should_throw_an_exception_when_mode_is_to_die()
-  {
-    $this->expectException(\Exception::class);
-    $this->setNonPublicPropertyValue('on_error', 'die');
-
-    $this->mysql_mock->shouldReceive('last')
-      ->once()
-      ->withNoArgs()
-      ->andReturnNull();
-
-    $this->mysql_mock->shouldReceive('getRealLastParams')
-      ->once()
-      ->withNoArgs()
-      ->andReturn([]);
-
-    $this->db->error('An error');
-  }
-
-  /** @test */
   public function check_method_checks_if_the_database_is_ready_to_process_a_query()
   {
-    $this->assertTrue($this->db->check());
-  }
-
-  /** @test */
-  public function check_method_returns_true_if_there_is_an_error_the_error_mode_is_continue()
-  {
-    $this->setNonPublicPropertyValue('on_error', 'continue');
-    $this->setNonPublicPropertyValue('_has_error', true);
-    $this->setNonPublicPropertyValue('_has_error_all', true);
+    $this->mysql_mock->shouldReceive('check')
+      ->once()
+      ->withNoArgs()
+      ->andReturnTrue();
 
     $this->assertTrue($this->db->check());
-  }
-
-  /** @test */
-  public function check_method_returns_false_if_there_is_are_error_for_all_connection_and_mode_is_stop_all()
-  {
-    $this->setNonPublicPropertyValue('_has_error_all', true);
-    $this->setNonPublicPropertyValue('on_error', 'stop_all');
-
-    $this->assertFalse($this->db->check());
-  }
-
-  /** @test */
-  public function check_method_returns_true_if_there_is_are_error_for_all_connection_and_mode_is_not_stop_all()
-  {
-    $this->setNonPublicPropertyValue('_has_error_all', true);
-    $this->setNonPublicPropertyValue('on_error', 'stop');
-
-    $this->assertTrue($this->db->check());
-  }
-
-  /** @test */
-  public function check_method_returns_false_if_there_is_error_for_the_current_connection_and_mode_is_stop()
-  {
-    $this->setNonPublicPropertyValue('_has_error', true);
-    $this->setNonPublicPropertyValue('on_error', 'stop');
-
-    $this->assertFalse($this->db->check());
-  }
-
-  /** @test */
-  public function check_method_returns_false_if_there_is_error_for_the_current_connection_and_mode_is_stop_all()
-  {
-    $this->setNonPublicPropertyValue('_has_error', true);
-    $this->setNonPublicPropertyValue('on_error', 'stop_all');
-
-    $this->assertFalse($this->db->check());
-  }
-
-  /** @test */
-  public function check_method_returns_false_when_the_current_connection_is_null()
-  {
-    $this->setNonPublicPropertyValue('current', null);
-
-    $this->assertFalse($this->db->check());
   }
 
   /** @test */
   public function setErrorMode_method_sets_the_error_mode()
   {
-    $result = $this->db->setErrorMode('stop_all');
+    $this->mysql_mock->shouldReceive('setErrorMode')
+      ->once()
+      ->with(Errors::E_STOP_ALL)
+      ->andReturnSelf();
 
-    $this->assertSame(
-      'stop_all',
-      $this->getNonPublicProperty('on_error')
-    );
+    $result = $this->db->setErrorMode(Errors::E_STOP_ALL);
 
     $this->assertInstanceOf(Db2::class, $result);
   }
@@ -529,9 +313,12 @@ class Db2Test extends TestCase
   /** @test */
   public function getErrorMode_method_returns_the_current_error_mode()
   {
-    $this->setNonPublicPropertyValue('on_error', 'stop');
+    $this->mysql_mock->shouldReceive('getErrorMode')
+      ->once()
+      ->withNoArgs()
+      ->andReturn(Errors::E_STOP);
 
-    $this->assertSame('stop', $this->db->getErrorMode());
+    $this->assertSame(Errors::E_STOP, $this->db->getErrorMode());
   }
 
   /** @test */
@@ -552,6 +339,7 @@ class Db2Test extends TestCase
     $this->assertInstanceOf(Db2::class, $result);
   }
 
+  /** @test */
   public function clearCache_method_does_noe_delete_a_specific_item_from_cache_when_not_exists()
   {
     $this->cache_mock->shouldReceive('get')
@@ -1326,7 +1114,27 @@ class Db2Test extends TestCase
       ->with($query = "DELETE FROM users WHERE id = '12'")
       ->andReturn($result = 1);
 
+    $this->mysql_mock->shouldReceive('check')
+      ->once()
+      ->withNoArgs()
+      ->andReturnTrue();
+
     $this->assertSame($result, $this->db->query($query));
+  }
+
+  /** @test */
+  public function query_method_does_executes_a_writing_stmt_when_check_returns_false()
+  {
+    $this->mysql_mock->shouldNotReceive('query');
+
+    $this->mysql_mock->shouldReceive('check')
+      ->once()
+      ->withNoArgs()
+      ->andReturn();
+
+    $this->db->query("DELETE FROM users WHERE id = '12'");
+
+    $this->assertTrue(true);
   }
 
   /** @test */
@@ -1398,8 +1206,6 @@ class Db2Test extends TestCase
   /** @test */
   public function change_method_changes_the_database_to_the_given_one()
   {
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
-
     $this->mysql_mock->shouldNotReceive('change')
       ->once()
       ->with('bbn_test_2')
@@ -1407,25 +1213,9 @@ class Db2Test extends TestCase
 
     $result = $this->db->change('bbn_test_2');
 
-    $this->assertSame('bbn_test_2', $this->getNonPublicProperty('current'));
     $this->assertInstanceOf(Db2::class, $result);
   }
 
-  /** @test */
-  public function change_method_does_not_change_the_database_if_language_object_fails_to_change()
-  {
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
-
-    $this->mysql_mock->shouldNotReceive('change')
-      ->once()
-      ->with('bbn_test_2')
-      ->andReturnFalse();
-
-    $result = $this->db->change('bbn_test_2');
-
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
-    $this->assertInstanceOf(Db2::class, $result);
-  }
 
   /** @test */
   public function escape_method_escapes_names_with_appropriate_quotes()
@@ -2544,16 +2334,5 @@ class Db2Test extends TestCase
     $this->setNonPublicPropertyValue('language', new class {});
 
     $this->db->getQueryValues([]);
-  }
-
-  /** @test */
-  public function set_has_error_all_sets_errors_on_all_connections_to_true()
-  {
-    $this->setNonPublicPropertyValue('_has_error_all', false);
-
-    $method = $this->getNonPublicMethod('_set_has_error_all');
-    $method->invoke($this->db);
-
-    $this->assertTrue($this->getNonPublicProperty('_has_error_all'));
   }
 }

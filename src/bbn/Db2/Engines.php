@@ -530,4 +530,55 @@ interface Engines
    * @return array
    */
   public function getCfg(): array;
+
+  /**
+   * Gets the created hash.
+   *
+   * @return string
+   */
+  public function getHash(): string;
+
+  /**
+   * Checks if the database is ready to process a query.
+   * @return bool
+   */
+  public function check(): bool;
+
+  /**
+   * Sets the error mode.
+   *
+   * @param string $mode
+   */
+  public function setErrorMode(string $mode);
+
+  /**
+   * @return string
+   */
+  public function getErrorMode(): string;
+
+  /**
+   * Returns the last error.
+   *
+   * @return string|null
+   */
+  public function getLastError(): ?string;
+
+  /**
+   * Returns the current database selected by the current connection.
+   *
+   * @return string|null
+   */
+  public function getCurrent(): ?string;
+
+  /**
+   * Returns the host of the current connection.
+   *
+   * @return string|null
+   */
+  public function getHost(): ?string;
+
+  /**
+   * @return string
+   */
+  public function getConnectionCode();
 }

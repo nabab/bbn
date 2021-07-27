@@ -23,97 +23,9 @@ class Db2 implements Db2\Actions
   use Models\Tts\Retriever;
 
   /**
-   * The error configuration for continuing after an error occurred
-   */
-  protected const E_CONTINUE = 'continue';
-
-  /**
-   * The error configuration for dying after an error occurred
-   */
-  protected const E_DIE = 'die';
-
-  /**
-   * The error configuration for stopping all requests on all connections after an error occurred
-   */
-  protected const E_STOP_ALL = 'stop_all';
-
-  /**
-   * The error configuration for stopping requests on the current connection after an error occurred
-   */
-  protected const E_STOP = 'stop';
-
-  /**
-   * An elegant separator
-   */
-  protected const LINE = '---------------------------------------------------------------------------------';
-
-  /**
-   * @var mixed $cache
-   */
-  private $_cache = [];
-
-
-  /**
-   * Error state of the current connection
-   * @var bool $has_error
-   */
-  private $_has_error = false;
-
-
-  /** @var string The connection code as it would be stored in option */
-  protected $connection_code;
-
-  /**
-   * @var mixed $hash_contour
-   */
-  protected $hash_contour = '__BBN__';
-
-  /**
-   * Unique string identifier for current connection
-   * @var string
-   */
-  protected $hash;
-
-
-  /**
    * @var Db2\Engines Can be other driver
    */
   protected $language = false;
-
-  /**
-   * @var integer $cache_renewal
-   */
-  protected $cache_renewal = 3600;
-
-  /**
-   * @var mixed $last_insert_id
-   */
-  protected $last_insert_id;
-
-  /**
-   * @var mixed $id_just_inserted
-   */
-  protected $id_just_inserted;
-
-  /**
-   * @var array $last_cfg
-   */
-  protected $last_cfg;
-
-  /**
-   * @var array $cfgs The configs recorded for helpers functions
-   */
-  protected $cfgs = [];
-
-  /**
-   * @var string $qte The quote character for table and column names.
-   */
-  protected $qte;
-
-  /**
-   * @var string $last_error
-   */
-  protected $last_error = null;
 
   /**
    * The ODBC engine of this connection
@@ -121,32 +33,7 @@ class Db2 implements Db2\Actions
    */
   protected $engine;
 
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $host;
 
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $username;
-
-  /**
-   * The currently selected database
-   * @var mixed $current
-   */
-  protected $current;
-
-  /**
-   * @var string $on_error
-   * Possible values:
-   * *    stop: the script will go on but no further database query will be executed
-   * *    die: the script will die with the error
-   * *    continue: the script and further queries will be executed
-   */
-  protected $on_error = self::E_STOP_ALL;
 
 
 
@@ -156,19 +43,6 @@ class Db2 implements Db2\Actions
     'pgsql' => 'nf nf-dev-postgresql',
     'sqlite' => 'nf nf-dev-sqllite'
   ];
-
-  /**
-   * Error state of the current connection
-   * @var bool
-   */
-  private static $_has_error_all = false;
-
-
-  /**
-   * @var array
-   */
-  protected $cfg;
-
 
   /**
    * Constructor
@@ -204,29 +78,10 @@ class Db2 implements Db2\Actions
       self::retrieverInit($this);
       $this->cacheInit();
 
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
       if ($cfg = $this->getCfg()) {
-        $this->cfg = $cfg;
-        $this->qte = $this->language->qte;
         $this->postCreation();
-        $this->current  = $cfg['db'] ?? null;
-        $this->engine   = (string)$cfg['engine'];
-        $this->host     = $cfg['host'] ?? '127.0.0.1';
-        $this->username = $cfg['user'] ?? null;
-        $this->connection_code = $cfg['code_host'];
-
-        if (!empty($cfg['cache_length'])) {
-          $this->cache_renewal = (int)$cfg['cache_length'];
-        }
-
+        $this->engine = (string)$cfg['engine'];
         $this->startFancyStuff();
-
-        if (!empty($cfg['error_mode'])) {
-          $this->setErrorMode($cfg['error_mode']);
-        }
       }
     }
 
@@ -264,23 +119,6 @@ class Db2 implements Db2\Actions
     return self::$engines[$engine] ?? null;
   }
 
-  /**
-   * Returns a string with the given text in the middle of a "line" of logs.
-   *
-   * @param string $text The text to write
-   * @return string
-   */
-  public static function getLogLine(string $text = '')
-  {
-    if ($text) {
-      $text = ' '.$text.' ';
-    }
-
-    $tot  = \strlen(self::LINE) - \strlen($text);
-    $char = \substr(self::LINE, 0, 1);
-    return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
-  }
-
   public function getCfg(): array
   {
     return $this->language->getCfg();
@@ -304,7 +142,7 @@ class Db2 implements Db2\Actions
    */
   public function getHost(): ?string
   {
-    return $this->host;
+    return $this->language->getHost();
   }
 
 
@@ -315,7 +153,7 @@ class Db2 implements Db2\Actions
    */
   public function getCurrent(): ?string
   {
-    return $this->current;
+    return $this->language->getCurrent();
   }
 
 
@@ -326,15 +164,7 @@ class Db2 implements Db2\Actions
    */
   public function getLastError(): ?string
   {
-    return $this->last_error;
-  }
-
-  /**
-   * @return int
-   */
-  public function getCacheRenewal(): int
-  {
-    return $this->cache_renewal;
+    return $this->language->getLastError();
   }
 
   /**
@@ -357,16 +187,16 @@ class Db2 implements Db2\Actions
    */
   public function __toString()
   {
-    return "Connection {$this->engine} to {$this->host}";
+    return "Connection {$this->engine} to " . $this->getHost();
   }
 
 
   /**
-   * @return mixed|string
+   * @return string
    */
   public function getConnectionCode()
   {
-    return $this->connection_code;
+    return $this->language->getConnectionCode();
   }
 
 
@@ -379,37 +209,6 @@ class Db2 implements Db2\Actions
    ****************************************************************/
 
   /**
-   * Makes a string that will be the id of the request.
-   *
-   * @return string
-   *
-   */
-  public function makeHash(): string
-  {
-    $args = \func_get_args();
-    if ((\count($args) === 1) && \is_array($args[0])) {
-      $args = $args[0];
-    }
-
-    $st = '';
-    foreach ($args as $a){
-      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
-    }
-
-    return $this->hash_contour.md5($st).$this->hash_contour;
-  }
-
-  /**
-   * Makes and sets the hash.
-   *
-   * @return void
-   */
-  public function setHash()
-  {
-    $this->hash = $this->makeHash(...\func_get_args());
-  }
-
-  /**
    * Gets the created hash.
    *
    * ```php
@@ -420,7 +219,7 @@ class Db2 implements Db2\Actions
    */
   public function getHash(): string
   {
-    return $this->hash;
+    return $this->language->getHash();
   }
 
 
@@ -478,71 +277,6 @@ class Db2 implements Db2\Actions
     return $this->language->processCfg($args, $force);
   }
 
-
-  /**
-   * Set an error and acts appropriately based oon the error mode
-   *
-   * @param $e
-   * @return void
-   */
-  public function error($e): void
-  {
-    $this->_has_error = true;
-    self::_set_has_error_all();
-    $msg = [
-      self::LINE,
-      self::getLogLine('ERROR DB!'),
-      self::LINE
-    ];
-    if (\is_string($e)) {
-      $msg[] = self::getLogLine('USER MESSAGE');
-      $msg[] = $e;
-    }
-    elseif (method_exists($e, 'getMessage')) {
-      $msg[] = self::getLogLine('DB MESSAGE');
-      $msg[] = $e->getMessage();
-    }
-
-    $this->last_error = end($msg);
-    $msg[]            = self::getLogLine('QUERY');
-    $msg[]            = $this->last();
-
-    if (($last_real_params = $this->getRealLastParams()) && !empty($last_real_params['values'])) {
-      $msg[] = self::getLogLine('VALUES');
-      foreach ($last_real_params['values'] as $v){
-        if ($v === null) {
-          $msg[] = 'NULL';
-        }
-        elseif (\is_bool($v)) {
-          $msg[] = $v ? 'TRUE' : 'FALSE';
-        }
-        elseif (\is_string($v)) {
-          $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);
-        }
-        else{
-          $msg[] = $v;
-        }
-      }
-    }
-
-    $msg[] = self::getLogLine('BACKTRACE');
-    $dbt   = array_reverse(debug_backtrace());
-    array_walk(
-      $dbt, function ($a, $i) use (&$msg) {
-        $msg[] = str_repeat(' ', $i).($i ? '->' : '')."{$a['function']}  (".basename(dirname($a['file'])).'/'.basename($a['file']).":{$a['line']})";
-      }
-    );
-    $this->log(implode(PHP_EOL, $msg));
-    if ($this->on_error === self::E_DIE) {
-      throw new \Exception(
-        \defined('BBN_IS_DEV') && BBN_IS_DEV
-          ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'</pre>'
-          : 'Database error'
-      );
-    }
-  }
-
-
   /**
    * Checks if the database is ready to process a query.
    *
@@ -554,26 +288,7 @@ class Db2 implements Db2\Actions
    */
   public function check(): bool
   {
-    if ($this->current !== null) {
-      // if $on_error is set to E_CONTINUE returns true
-      if ($this->on_error === self::E_CONTINUE) {
-        return true;
-      }
-
-      // If any connection has an error with mode E_STOP_ALL
-      if (self::$_has_error_all && ($this->on_error === self::E_STOP_ALL)) {
-        return false;
-      }
-
-      // If this connection has an error with mode E_STOP or E_STOP_ALL
-      if ($this->_has_error && ($this->on_error === self::E_STOP || $this->on_error === self::E_STOP_ALL)) {
-        return false;
-      }
-
-      return true;
-    }
-
-    return false;
+    return $this->language->check();
   }
 
 
@@ -610,7 +325,7 @@ class Db2 implements Db2\Actions
    */
   public function setErrorMode(string $mode): self
   {
-    $this->on_error = $mode;
+    $this->language->setErrorMode($mode);
     return $this;
   }
 
@@ -626,7 +341,7 @@ class Db2 implements Db2\Actions
    */
   public function getErrorMode(): string
   {
-    return $this->on_error;
+    return $this->language->getErrorMode();
   }
 
 
@@ -2209,9 +1924,7 @@ class Db2 implements Db2\Actions
    */
   public function change(string $db): self
   {
-    if ($this->language->change($db)) {
-      $this->current = $db;
-    }
+    $this->language->change($db);
 
     return $this;
   }
@@ -3356,16 +3069,6 @@ class Db2 implements Db2\Actions
     return $this->language->getQueryValues($cfg);
   }
 
-
-  /**
-   * Sets the has_error_all variable to true.
-   *
-   * @return void
-   */
-  private static function _set_has_error_all(): void
-  {
-    self::$_has_error_all = true;
-  }
 
   /**
    * Throws ans exception if language class method does not exist.
