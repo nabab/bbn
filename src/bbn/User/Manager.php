@@ -469,7 +469,7 @@ You can click the following link to access directly your account:<br>
           ) {
             $cfg[$u['id']] = $this->db->lastId();
             // Envoi d'un lien
-            if ($this->class_cfg['hotlinks']) {
+            if (!empty($this->class_cfg['arch']['hotlinks'])) {
               $this->makeHotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
             }
 
@@ -502,11 +502,31 @@ You can click the following link to access directly your account:<br>
     $u                 =& $this->class_cfg['arch']['users'];
     $fields            = array_unique(array_values($this->class_cfg['arch']['users']));
     $cfg[$u['active']] = 1;
-    foreach ($cfg as $k => $v){
-      if (!\in_array($k, $fields)) {
-        unset($cfg[$k]);
+    if (!empty($this->class_cfg['arch']['users']['cfg'])) {
+      if (empty($cfg[$this->class_cfg['arch']['users']['cfg']])) {
+        $cfg[$this->class_cfg['arch']['users']['cfg']] = [];
+      }
+      elseif (is_string($cfg[$this->class_cfg['arch']['users']['cfg']])) {
+        $cfg[$this->class_cfg['arch']['users']['cfg']] = json_decode($cfg[$this->class_cfg['arch']['users']['cfg']], true);
+      }
+
+      foreach ($cfg as $k => $v){
+        if (!\in_array($k, $fields)) {
+          $cfg[$this->class_cfg['arch']['users']['cfg']][$k] = $v;
+          unset($cfg[$k]);
+        }
+      }
+
+      $cfg[$this->class_cfg['arch']['users']['cfg']] = json_encode($cfg[$this->class_cfg['arch']['users']['cfg']]);
+    }
+    else {
+      foreach ($cfg as $k => $v){
+        if (!\in_array($k, $fields)) {
+          unset($cfg[$k]);
+        }
       }
     }
+
 
     if (!$id_user && isset($cfg[$u['id']])) {
       $id_user = $cfg[$u['id']];
@@ -702,7 +722,7 @@ You can click the following link to access directly your account:<br>
       }
 
       if (empty($this->messages[$message]['link'])) {
-        die("Impossible to make hotlinks without a link configured");
+        throw new \Exception(X::_("Impossible to make hotlinks without a link configured"));
       }
     }
 

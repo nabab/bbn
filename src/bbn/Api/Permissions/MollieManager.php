@@ -130,14 +130,17 @@ class MollieManager
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPayment(array $data, ?string $mandate_id = null): array
+  public function createPayment(array $data, ?string $customer_id = null, ?string $mandate_id = null): array
   {
+    if ($customer_id) {
+      $data = array_merge($data, ['customerId' => $customer_id]);
+    }
+
     if ($mandate_id) {
       $data = array_merge($data, ['mandateId' => $mandate_id]);
     }
 
     $payment = $this->mollie->payments->create($data);
-
     return X::toArray($payment);
   }
 
@@ -152,31 +155,14 @@ class MollieManager
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function createPaymentFirstTime($customer_data, array $payment_data): array
+  public function createPaymentFirstTime($customer, array $payment_data): array
   {
-    if (\is_array($customer_data)) {
-      $customer = $this->mollie->customers->create($customer_data);  
-    }
-    else {
-      $customer = new \stdClass();
-      $customer->id = $customer_data;
-    }
-
-    $payment_data = array_merge(
-      $payment_data,
-      ['sequenceType' => 'first', 'customerId' => $customer->id]
-    );
-
+    $customer = \is_array($customer) ? $this->mollie->customers->create($customer)->id : $customer;
+    $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);
     try {
-      return $this->createPayment($payment_data);
+      return $this->createPayment($payment_data, $customer);
     }
     catch (\Exception $e) {
-      if (\is_array($customer_data)) {
-        $this->mollie->customers->delete(
-          $customer->id,
-          array_key_exists('testmode', $payment_data) ? ['test_mode' => $payment_data['testmode']] : []
-        );
-      }
       throw new \Exception($e->getMessage());
     }
   }
@@ -204,10 +190,8 @@ class MollieManager
       // Then update the new customer and mandate id in database.
       return null;
     }
-
     $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);
-
-    return $this->createPayment($payment_data, $mandate_id);
+    return $this->createPayment($payment_data, $customer_id, $mandate_id);
   }
 
   /**
@@ -386,6 +370,25 @@ class MollieManager
     $profile = $this->mollie->profiles->create($data);
 
     return X::toArray($profile);
+  }
+
+  /**
+   * Update a profile
+   * 
+   * https://docs.mollie.com/reference/v2/profiles-api/update-profile
+   * 
+   * @param string $idProfile
+   * @return array
+   * @throws \Mollie\Api\Exceptions\ApiException
+   */
+  public function updateProfile(string $idProfile, array $data): array
+  {
+    $profile = $this->mollie->profiles->get($idProfile);
+    foreach ($data as $k => $d) {
+      $profile->{$k} = $d;
+    }
+    $updatedProfile = $profile->update();
+    return X::toArray($updatedProfile);
   }
 
 

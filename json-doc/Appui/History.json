@@ -12804,20 +12804,8 @@
                             "generation": "",
                             "maxlength": 16
                         },
-                        "name": {
+                        "mimetype": {
                             "position": 4,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 255
-                        },
-                        "title": {
-                            "position": 5,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12826,10 +12814,45 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL",
-                            "maxlength": 255
+                            "maxlength": 30
+                        },
+                        "name": {
+                            "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "",
+                            "maxlength": 1000
+                        },
+                        "title": {
+                            "position": 6,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 1000
+                        },
+                        "excerpt": {
+                            "position": 7,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
                         },
                         "content": {
-                            "position": 6,
+                            "position": 8,
                             "type": "mediumtext",
                             "null": 1,
                             "key": null,
@@ -12840,7 +12863,7 @@
                             "default": "NULL"
                         },
                         "private": {
-                            "position": 7,
+                            "position": 9,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -12850,6 +12873,39 @@
                             "generation": "",
                             "default": 0,
                             "maxlength": 1
+                        },
+                        "created": {
+                            "position": 10,
+                            "type": "datetime",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": ""
+                        },
+                        "edited": {
+                            "position": 11,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "editor": {
+                            "position": 12,
+                            "type": "binary",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 16
                         }
                     }
                 },
@@ -28993,20 +29049,8 @@
                             "generation": "",
                             "maxlength": 16
                         },
-                        "name": {
+                        "mimetype": {
                             "position": 4,
-                            "type": "varchar",
-                            "null": 0,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "",
-                            "maxlength": 255
-                        },
-                        "title": {
-                            "position": 5,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -29015,10 +29059,45 @@
                             "virtual": false,
                             "generation": "",
                             "default": "NULL",
-                            "maxlength": 255
+                            "maxlength": 30
+                        },
+                        "name": {
+                            "position": 5,
+                            "type": "varchar",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "",
+                            "maxlength": 1000
+                        },
+                        "title": {
+                            "position": 6,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 1000
+                        },
+                        "excerpt": {
+                            "position": 7,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
                         },
                         "content": {
-                            "position": 6,
+                            "position": 8,
                             "type": "mediumtext",
                             "null": 1,
                             "key": null,
@@ -29029,7 +29108,7 @@
                             "default": "NULL"
                         },
                         "private": {
-                            "position": 7,
+                            "position": 9,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -29039,6 +29118,39 @@
                             "generation": "",
                             "default": 0,
                             "maxlength": 1
+                        },
+                        "created": {
+                            "position": 10,
+                            "type": "datetime",
+                            "null": 0,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": ""
+                        },
+                        "edited": {
+                            "position": 11,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "editor": {
+                            "position": 12,
+                            "type": "binary",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 16
                         }
                     }
                 },

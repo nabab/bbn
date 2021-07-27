@@ -1,0 +1,1408 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\Permissions\\MollieManager",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
+    "startLine": 8,
+    "endLine": 599,
+    "contentConstructor": {
+        "file": "bbn\\Api\\Permissions\\MollieManager",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "MollieManager constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($access_token)\n  {\n    $this->mollie = new MollieApiClient();\n    $this->mollie->setAccessToken($access_token);\n  }",
+            "startLine": 19,
+            "endLine": 23,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "access_token",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProvider": {
+            "name": "getProvider",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->mollie;\n  }",
+            "startLine": 29,
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "canReceivePayments": {
+            "name": "canReceivePayments",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->canReceivePayments;\n  }",
+            "startLine": 50,
+            "endLine": 53,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "canReceiveSettlements": {
+            "name": "canReceiveSettlements",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->canReceiveSettlements;\n  }",
+            "startLine": 59,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "onboardingIsInReview": {
+            "name": "onboardingIsInReview",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->isInReview();\n  }",
+            "startLine": 68,
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "onboardingIsCompleted": {
+            "name": "onboardingIsCompleted",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->isCompleted();\n  }",
+            "startLine": 77,
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "onboardingNeedsData": {
+            "name": "onboardingNeedsData",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->needsData();\n  }",
+            "startLine": 86,
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDashboardLink": {
+            "name": "getDashboardLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->_links->dashboard->href;\n  }",
+            "startLine": 95,
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getOnboardingStatus": {
+            "name": "getOnboardingStatus",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->getOnboardingObject()->status;\n  }",
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "submitOnboardingData": {
+            "name": "submitOnboardingData",
+            "summary": "Submits onboarding data.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data\">https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    $this->mollie->onboarding->submit($data);\n  }",
+            "startLine": 118,
+            "endLine": 121,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createPayment": {
+            "name": "createPayment",
+            "summary": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data, $customer_id = NULL, $mandate_id = NULL)\n  {\n    if ($customer_id) {\n      $data = array_merge($data, ['customerId' => $customer_id]);\n    }\n    if ($mandate_id) {\n      $data = array_merge($data, ['mandateId' => $mandate_id]);\n    }\n    $payment = $this->mollie->payments->create($data);\n    return X::toArray($payment);\n  }",
+            "startLine": 133,
+            "endLine": 143,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "customer_id",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "mandate_id",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "createPaymentFirstTime": {
+            "name": "createPaymentFirstTime",
+            "summary": "Create a payment for the first time for the user.",
+            "description": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n   *\nThis will return the `customerId` and `mandateId` in the response.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n*\nThis will return the <code>customerId<\/code> and <code>mandateId<\/code> in the response.<\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($customer, array $payment_data)\n  {\n    $customer = \\is_array($customer) ? $this->mollie->customers->create($customer)->id : $customer;\n    $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);\n    try {\n      return $this->createPayment($payment_data, $customer);\n    }\n    catch (\\Exception $e) {\n      $this->mollie->customers->delete($customer);\n      throw new \\Exception($e->getMessage());\n    }\n  }",
+            "startLine": 156,
+            "endLine": 167,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "customer",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "data"
+                },
+                {
+                    "name": "payment_data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createOnDemandPayment": {
+            "name": "createOnDemandPayment",
+            "summary": "Charging immediately on-demand.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand\">https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $payment_data, $customer_id, $mandate_id)\n  {\n    if (!$this->customerHasValidMandate(\n      $customer_id,\n      $mandate_id,\n      array_key_exists('testmode', $payment_data) ? ['test_mode' => $payment_data['testmode']] : [])\n    ) {\n      \/\/ If the mandate is not valid then creates a new one by having\n      \/\/ The customer performs a first payment: createPaymentFirstTime()\n      \/\/ Then update the new customer and mandate id in database.\n      return null;\n    }\n    $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);\n    return $this->createPayment($payment_data, null, $mandate_id);\n  }",
+            "startLine": 180,
+            "endLine": 194,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "payment_data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "customer_id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "mandate_id",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getMandate": {
+            "name": "getMandate",
+            "summary": "Retrieve a mandate by its ID and its customer\u2019s ID.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($customer_id, $mandate_id, array $params = [])\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandate = $customer->getMandate($mandate_id, $params);\n\n    return X::toArray($mandate);\n  }",
+            "startLine": 223,
+            "endLine": 230,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "customer_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "mandate_id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "listMandates": {
+            "name": "listMandates",
+            "summary": "Retrieve all mandates for the given customerId, ordered from newest to oldest.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($customer_id, array $params = [])\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandates = $customer->mandates();\n\n    return X::toArray($mandates);\n  }",
+            "startLine": 242,
+            "endLine": 249,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "customer_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "revokeMandate": {
+            "name": "revokeMandate",
+            "summary": "Revoke a customer\u2019s mandate.",
+            "description": "*\nYou will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n   *\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p><em>\nYou will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n<\/em>\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($customer_id, $mandate_id, array $params = [])\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandate = $customer->getMandate($mandate_id);\n\n    $mandate->revoke();\n  }",
+            "startLine": 265,
+            "endLine": 272,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "customer_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "mandate_id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCustomer": {
+            "name": "getCustomer",
+            "summary": "Retrieve a single customer by its ID.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\">https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($customer_id, array $params = [])\n  {\n    return X::toArray(\n      $this->getCustomerFromId($customer_id, $params)\n    );\n  }",
+            "startLine": 284,
+            "endLine": 289,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "customer_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "refundPayment": {
+            "name": "refundPayment",
+            "summary": "Creates a Refund on the Payment. The refunded amount is credited to your customer.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund\">https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($payment_id, $amount, array $params = [])\n  {\n    $payment = $this->mollie->payments->get($payment_id, $params);\n\n    $params = array_merge([\n      \"amount\" => [\n        \"currency\" => $payment->amount->currency,\n        \"value\"    => $amount\n      ]\n    ], $params);\n\n    $refund = $payment->refund($params);\n\n    return X::toArray($refund);\n  }",
+            "startLine": 316,
+            "endLine": 330,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "payment_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "amount",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOrganization": {
+            "name": "getOrganization",
+            "summary": "Return the currently authenticated organization object.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization\">https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $organization =  $this->mollie->organizations->current();\n\n    return X::toArray($organization);\n  }",
+            "startLine": 340,
+            "endLine": 345,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getOrganizationId": {
+            "name": "getOrganizationId",
+            "summary": "Return the currently authenticated organization id.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->mollie->organizations->current()->id;\n  }",
+            "startLine": 353,
+            "endLine": 356,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "createProfile": {
+            "name": "createProfile",
+            "summary": "Create a profile in order to process payments.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    $profile = $this->mollie->profiles->create($data);\n\n    return X::toArray($profile);\n  }",
+            "startLine": 367,
+            "endLine": 372,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "updateProfile": {
+            "name": "updateProfile",
+            "summary": "Update a profile",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($idProfile, array $data)\n  {\n    $profile = $this->mollie->profiles->get($idProfile);\n    foreach ($data as $k => $d) {\n      $profile->{$k} = $d;\n    }\n    $updatedProfile = $profile->update();\n    return X::toArray($updatedProfile);\n  }",
+            "startLine": 383,
+            "endLine": 391,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProfile",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "rofile"
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProfiles": {
+            "name": "getProfiles",
+            "summary": "Retrieve all profiles available on the account.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $profiles = $this->mollie->profiles->page();\n\n    return X::toArray($profiles);\n  }",
+            "startLine": 402,
+            "endLine": 407,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "hasProfiles": {
+            "name": "hasProfiles",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return (bool)$this->mollie->profiles->page()->count;\n  }",
+            "startLine": 414,
+            "endLine": 417,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getActivePaymentMethods": {
+            "name": "getActivePaymentMethods",
+            "summary": "Retrieve all active payment methods.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($profile_id)\n  {\n    $methods = $this->mollie->methods->allActive([\n      'profileId' => $profile_id\n    ]);\n\n    return X::toArray($methods);\n  }",
+            "startLine": 428,
+            "endLine": 435,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "profile_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAllPaymentMethods": {
+            "name": "getAllPaymentMethods",
+            "summary": "Retrieve all enabled payment methods.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($profile_id)\n  {\n    $methods = $this->mollie->methods->allAvailable([\n      'profileId' => $profile_id\n    ]);\n\n    return X::toArray($methods);\n  }",
+            "startLine": 446,
+            "endLine": 453,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "profile_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "hasActivePaymentMethods": {
+            "name": "hasActivePaymentMethods",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($profile_id)\n  {\n    return (bool)$this->mollie->methods->allActive([\n      'profileId' => $profile_id\n    ])\n      ->count;\n  }",
+            "startLine": 460,
+            "endLine": 466,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "profile_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                }
+            ]
+        },
+        "enablePaymentMethod": {
+            "name": "enablePaymentMethod",
+            "summary": "Enable a payment method on a specific or authenticated profile to use it with payments.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method#\n   *\nList of payment methods: https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p><em>\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method<\/a>#\n<\/em>\nList of payment methods: <a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($profile_id, $payment_method_id)\n  {\n    $profile = $this->mollie->profiles->get($profile_id);\n\n    $method = $profile->enableMethod($payment_method_id);\n\n    return X::toArray($method);\n  }",
+            "startLine": 480,
+            "endLine": 487,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "profile_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "method_id"
+                },
+                {
+                    "name": "payment_method_id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "listPayments": {
+            "name": "listPayments",
+            "summary": "Retrieve all payments created ordered from newest to oldest.",
+            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n   *\n```php\n$client_payments = $mollie_manager->listPayments([\n 'testmode' => true,\n]);\nforeach ($client_payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n   *\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$client_payments = $mollie_manager->listPayments([\n 'testmode' => true,\n]);\nforeach ($client_payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}"
+                },
+                {
+                    "type": "text",
+                    "content": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $params = [], $from = NULL, $limit = 250)\n  {\n    $payments = $this->mollie->payments->page($from, $limit, $params);\n\n    return X::toArray($payments);\n  }",
+            "startLine": 515,
+            "endLine": 520,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "params",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
+                },
+                {
+                    "name": "from",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The number of payments to return (with a maximum of 250)."
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 250,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getPayment": {
+            "name": "getPayment",
+            "summary": "Retrieve a single payment object by it's id.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($payment_id, array $params = [])\n  {\n    $payment = $this->mollie->payments->get($payment_id, $params);\n\n    return X::toArray($payment);\n  }",
+            "startLine": 532,
+            "endLine": 537,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "payment_id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "listMainAccountPayments": {
+            "name": "listMainAccountPayments",
+            "summary": "Retrieve all main account payments created ordered from newest to oldest.",
+            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n   *\n```php\n$_payments = $mollie_manager->listMainAccountPayments();\nforeach ($payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n   *\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$_payments = $mollie_manager->listMainAccountPayments();\nforeach ($payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}"
+                },
+                {
+                    "type": "text",
+                    "content": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($api_key, array $params = [], $from = NULL, $limit = 250)\n  {\n    array $params = [],\n    string $from = null,\n    int $limit = 250\n  ): array\n  {\n    $mollie = new MollieApiClient();\n    $mollie->setApiKey($api_key);\n\n    $payments = $mollie->payments->page($from, $limit, $params);\n\n    return X::toArray($payments);\n  }",
+            "startLine": 564,
+            "endLine": 577,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "api_key",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
+                },
+                {
+                    "name": "from",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The number of payments to return (with a maximum of 250)."
+                },
+                {
+                    "name": "limit",
+                    "position": 3,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 250,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getMainAccountPayment": {
+            "name": "getMainAccountPayment",
+            "summary": "Retrieve a single payment object by it's id.",
+            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
+                }
+            ],
+            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($api_key, $payment_id, array $params = [])\n  {\n    $mollie = new MollieApiClient();\n    $mollie->setApiKey($api_key);\n\n    $payment = $mollie->payments->get($payment_id, $params);\n\n    return X::toArray($payment);\n  }",
+            "startLine": 590,
+            "endLine": 598,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "api_key",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "payment_id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 32,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\Permissions",
+    "shortName": "MollieManager",
+    "summary": ""
+}

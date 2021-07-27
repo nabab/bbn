@@ -291,7 +291,12 @@ class User extends Models\Cls\Basic
         // Check if the phone number is already registered
         if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))
           && ($exUser[$f['id']] !== $user_id)
-          && $this->updateApiTokenUserByTokenDevice($params[$f['token']], $params[$f['device_uid']], $exUser[$f['id']])
+          && $this->updateApiTokenUserByTokenDevice(
+            $params[$f['token']],
+            $params[$f['device_uid']],
+            $exUser[$f['id']],
+            $params[$f['device_lang']] ?? ''
+          )
         ) {
           if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [
             $this->class_cfg['arch']['users']['id'] => $user_id
@@ -2212,13 +2217,14 @@ class User extends Models\Cls\Basic
     );
   }
 
-  protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser): bool
+  protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser, string $deviceLang = ''): bool
   {
     if (!empty($token) && !empty($deviceUid) && !empty($idUser)) {
       return !!$this->db->update(
         $this->class_cfg['tables']['api_tokens'],
         [
-          $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser
+          $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser,
+          $this->class_cfg['arch']['api_tokens']['device_lang'] => $deviceLang
         ],
         [
           $this->class_cfg['arch']['api_tokens']['token'] => $token,

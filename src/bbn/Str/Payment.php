@@ -2,9 +2,10 @@
 
 namespace bbn\Str;
 
+use bbn\X;
+
 class Payment
 {
-  use bbn\X;
 
   private static $regexps =  [
     [

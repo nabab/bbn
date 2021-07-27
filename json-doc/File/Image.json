@@ -17,7 +17,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File\/Image.php",
     "startLine": 25,
-    "endLine": 1124,
+    "endLine": 1145,
     "contentConstructor": {
         "file": "bbn\\File\\Image",
         "returns": null
@@ -557,7 +557,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->test()) {\n      if (isset($this->w)) {\n        return $this->w;\n      }\n    }\n\n      return 0;\n  }",
+            "code": "function()\n  {\n    if ($this->test()) {\n      if (isset($this->w)) {\n        return $this->w;\n      }\n    }\n\n    return 0;\n  }",
             "startLine": 469,
             "endLine": 478,
             "isDeprecated": false,
@@ -590,7 +590,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->test()) {\n      if (isset($this->h)) {\n        return $this->h;\n      }\n    }\n\n      return 0;\n  }",
+            "code": "function()\n  {\n    if ($this->test()) {\n      if (isset($this->h)) {\n        return $this->h;\n      }\n    }\n\n    return 0;\n  }",
             "startLine": 492,
             "endLine": 501,
             "isDeprecated": false,
@@ -1231,6 +1231,58 @@
             "returns": null,
             "parent": false,
             "arguments": []
+        },
+        "replaceColor": {
+            "name": "replaceColor",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\File\\Image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($originalColor, $newColor = NULL, $precision = 0)\n  {\n    if (class_exists('\\\\Imagick')) {\n      $this->img = new \\Imagick($this->file);\n\n      if ($newColor === null) {\n        $this->img->setImageFormat('png');\n        $this->img->transparentPaintImage($originalColor, 0.0, 0.1 * \\Imagick::getQuantum(), 0);\n\n      } else {\n        $this->img->opaquePaintImage(\n          $originalColor, $newColor, 0.1 * \\Imagick::getQuantum(), 0\n        );\n      }\n    }\n    elseif (function_exists('imagecolorset')) {\n      \n    }\n\n    return false;\n  }",
+            "startLine": 1124,
+            "endLine": 1144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "originalColor",
+                    "position": 0,
+                    "type": null,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "newColor",
+                    "position": 1,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "precision",
+                    "position": 2,
+                    "type": null,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
         },
         "getSize": {
             "name": "getSize",
@@ -2103,7 +2155,7 @@
         "max_width": 5000
     },
     "constants": null,
-    "numMethods": 36,
+    "numMethods": 37,
     "numProperties": 5,
     "numConstants": 0,
     "numStaticProperties": 4,

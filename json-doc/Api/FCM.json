@@ -1,0 +1,142 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\FCM",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/FCM.php",
+    "startLine": 16,
+    "endLine": 66,
+    "contentConstructor": {
+        "file": "bbn\\Api\\FCM",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\FCM",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key)\n  {\n    $this->key = $key;\n  }",
+            "startLine": 23,
+            "endLine": 26,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "sendMessage": {
+            "name": "sendMessage",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\FCM",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($deviceToken, $title, $body, array $data = [])\n  {\n    if (($res = $this->_send([\n        'to' => $deviceToken,\n        'notification' => [\n          'title' => $title,\n          'body' => $body,\n          'vibrate' => 1,\n          'sound' => 'default',\n        ],\n        'data' => $data\n      ]))\n      && !empty($res->success)\n      && !empty($res->results)\n      && \\is_array($res->results)\n      && !empty($res->results[0]->message_id)\n    ) {\n      return $res->results[0]->message_id;\n    }\n    return null;\n  }",
+            "startLine": 28,
+            "endLine": 48,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "deviceToken",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "body",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": [],
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 1,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "key": ""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api",
+    "shortName": "FCM",
+    "summary": ""
+}
