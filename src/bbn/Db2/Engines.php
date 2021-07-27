@@ -115,17 +115,15 @@ interface Engines
   /**
    * Disables foreign keys check.
    *
-   * @return bbn\Db2
    */
-  public function disableKeys(): bbn\Db2;
+  public function disableKeys();
 
 
   /**
    * Enables foreign keys check.
    *
-   * @return bbn\Db2
    */
-  public function enableKeys(): bbn\Db2;
+  public function enableKeys();
 
 
   /**

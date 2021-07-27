@@ -5,7 +5,6 @@ namespace bbn\Db2;
 use bbn\Db2\Enums\Errors;
 use bbn\Str;
 use bbn\X;
-use phpDocumentor\Parser\Exception;
 
 trait HasError
 {
@@ -194,7 +193,7 @@ trait HasError
   public function check(): bool
   {
     if (!property_exists($this, 'current')) {
-      throw new Exception('Property current does not exist');
+      throw new \Exception('Property current does not exist');
     }
 
     if ($this->current !== null) {

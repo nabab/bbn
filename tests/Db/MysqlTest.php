@@ -26,6 +26,7 @@ class MysqlTest extends TestCase
     $this->setNonPublicPropertyValue('_has_error', false);
     $this->setNonPublicPropertyValue('last_error', null);
     $this->setNonPublicPropertyValue('last_real_params', self::$real_params_default);
+    $this->setNonPublicPropertyValue('on_error', Errors::E_STOP);
     $this->cleanTestingDir();
   }
 
@@ -78,6 +79,12 @@ class MysqlTest extends TestCase
     $this->cleanTestingDir();
   }
 
+  //  /** @test */
+//  public function isAggregateFunction_method_returns_true_if_the_given_name_is_aggregate_function()
+//  {
+//    $this->assertTrue(Mysql::isAggregateFunction('count'));
+//  }
+
  /** @test */
   public function constructor_test()
   {
@@ -105,6 +112,258 @@ class MysqlTest extends TestCase
 
     $this->assertSame(3000, $this->getNonPublicProperty('cache_renewal'));
     $this->assertSame(Errors::E_STOP, $this->getNonPublicProperty('on_error'));
+  }
+
+  /** @test */
+  public function constructor_throws_an_exception_when_fails_to_connect_to_database()
+  {
+    $this->expectException(\Exception::class);
+
+    $db_config = self::getDbConfig();
+
+    $db_config['db'] = 'bbn_test_dummy';
+
+    new Mysql($db_config);
+  }
+
+  /** @test */
+  public function constructor_throws_an_exception_when_host_is_not_provided_and_BBN_DB_HOST_is_not_defined()
+  {
+    $this->expectException(\Exception::class);
+
+    $db_config = self::getDbConfig();
+
+    unset($db_config['host']);
+
+    new Mysql($db_config);
+  }
+
+  /** @test */
+  public function constructor_throws_an_exception_when_user_is_not_provided_and_BBN_DB_HOST_is_not_defined()
+  {
+    $this->expectException(\Exception::class);
+
+    $db_config = self::getDbConfig();
+
+    unset($db_config['user']);
+
+    new Mysql($db_config);
+  }
+
+  /** @test */
+  public function getHost_method_returns_the_host()
+  {
+    $this->assertSame(self::getDbConfig()['host'], self::$mysql->getHost());
+  }
+
+  /** @test */
+  public function getConnectionCode_method_returns_connection_code()
+  {
+    $cfg = self::getDbConfig();
+
+    $this->assertSame(
+      "{$cfg['user']}@{$cfg['host']}",
+      self::$mysql->getConnectionCode()
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_the_config()
+  {
+    $db_cfg = self::getDbConfig();
+
+    $this->assertSame(
+      array_merge($db_cfg, [
+        'port'      => 3306,
+        'code_db'   => 'bbn_test',
+        'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}"
+      ]),
+      self::$mysql->getCfg()
+    );
+  }
+
+  /** @test */
+  public function disableKeys_method_disables_foreign_keys_check()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('rawQuery')
+      ->once()
+      ->with('SET FOREIGN_KEY_CHECKS=0;');
+
+    $this->assertInstanceOf(Mysql::class, $mysql->disableKeys());
+  }
+
+  /** @test */
+  public function enableKeys_method_enables_foreign_keys_check()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('rawQuery')
+      ->once()
+      ->with('SET FOREIGN_KEY_CHECKS=1;');
+
+    $this->assertInstanceOf(Mysql::class, $mysql->enableKeys());
+  }
+  
+  /** @test */
+  public function getConditions_method_returns_a_string_with_conditions_for_the_where_or_on_or_having_clauses()
+  {
+    $conditions = [
+      'conditions' => [
+        [
+          'conditions' => [
+            [
+              'field'     => 'id',
+              'operator'  => '=',
+              'value'     => 'aaaa2c70aaaaa2aaa47652540000aaaa'
+            ],
+            [
+              'field' => 'name',
+              'value' => 'john',
+              'operator'  => '=',
+            ],
+            [
+              'logic' => 'OR',
+              'conditions' => [
+                [
+                  'field' => 'created_at',
+                  'operator' => 'isnull'
+                ], [
+                  'field' => 'updated_at',
+                  'operator' => 'isnull'
+                ]
+              ]
+            ]
+          ],
+          'logic' => 'AND'
+        ]
+      ],
+      'logic' => 'AND',
+    ];
+
+    $cfg = [
+      'available_fields' => [
+        'id' => 'users'
+      ],
+      'models' => [
+        'users' => [
+          'fields' => [
+            'id' => [
+              'type' => 'binary',
+              'key'   => 'foo',
+              'maxlength' => 16,
+              'null' => false
+            ]
+          ]
+        ]
+      ]
+    ];
+
+    $expected = <<<RESULT
+(
+  `users`.`id` = ?
+  AND name = ?
+  AND (created_at IS NULL
+    OR updated_at IS NULL
+  )
+)
+
+RESULT;
+
+      $this->assertSame($expected, self::$mysql->getConditions($conditions, $cfg));
+  }
+
+  /** @test */
+  public function createIndex_method_created_index_for_the_givens_table_and_columns()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $expected_query = "CREATE UNIQUE INDEX `users_email` ON `bbn_test`.`users` ( `email` )";
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->with($expected_query)
+      ->andReturnTrue();
+
+    $mysql->shouldReceive('getCurrent')
+      ->once()
+      ->withNoArgs()
+      ->andReturn(self::$mysql->getCurrent());
+
+    $result = $mysql->createIndex('users', 'email', true);
+
+    $this->assertTrue($result);
+
+    // Another test
+    $expected_query2 = "CREATE INDEX `users_email` ON `bbn_test`.`users` ( `email`(20) )";
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->with($expected_query2)
+      ->andReturnTrue();
+
+    $mysql->shouldReceive('getCurrent')
+      ->once()
+      ->withNoArgs()
+      ->andReturn(self::$mysql->getCurrent());
+
+    $result2 = $mysql->createIndex('users', 'email', false, 20);
+
+    $this->assertTrue($result2);
+  }
+
+  /** @test */
+  public function createIndex_method_throws_an_exception_when_column_has_a_not_valid_name_and_mode_id_die()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->setErrorMode(Errors::E_DIE);
+    self::$mysql->createIndex('users', 'use*rs');
+  }
+
+  /** @test */
+  public function deleteIndex_method_deletes_the_given_index()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $expected_query = "ALTER TABLE `bbn_test`.`users` DROP INDEX `email`";
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->with($expected_query)
+      ->andReturnTrue();
+
+    $mysql->shouldReceive('getCurrent')
+      ->once()
+      ->withNoArgs()
+      ->andReturn(self::$mysql->getCurrent());
+
+    $result = $mysql->deleteIndex('users', 'email');
+
+    $this->assertTrue($result);
+  }
+
+  /** @test */
+  public function dropIndex_method_returns_false_when_the_given_key_has_a_not_valid_name()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('tableFullName')
+      ->once()
+      ->with('users' ,true)
+      ->andReturnNull();
+
+    $this->assertFalse(
+      $mysql->deleteIndex('users', 'email')
+    );
+  }
+  /** @test */
+  public function dropIndex_method_returns_false_when_table_full_name_cannot_be_retrieved()
+  {
+    $this->assertFalse(
+      self::$mysql->deleteIndex('users', 'ema*ail')
+    );
   }
 
   /** @test */

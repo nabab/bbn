@@ -24,104 +24,6 @@ class Mysql extends Sql
 {
   use bbn\Models\Tts\Cache, bbn\Db2\HasError;
 
-  /** @var array Allowed operators */
-  public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
-
-  /** @var array Numeric column types */
-  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
-
-  /** @var array Time and date column types */
-  public static $date_types = ['date', 'time', 'datetime'];
-
-  public static $types = [
-    'tinyint',
-    'smallint',
-    'mediumint',
-    'int',
-    'bigint',
-    'decimal',
-    'float',
-    'double',
-    'bit',
-    'char',
-    'varchar',
-    'binary',
-    'varbinary',
-    'tinyblob',
-    'blob',
-    'mediumblob',
-    'longblob',
-    'tinytext',
-    'text',
-    'mediumtext',
-    'longtext',
-    'enum',
-    'set',
-    'date',
-    'time',
-    'datetime',
-    'timestamp',
-    'year',
-    'geometry',
-    'point',
-    'linestring',
-    'polygon',
-    'geometrycollection',
-    'multilinestring',
-    'multipoint',
-    'multipolygon',
-    'json',
-  ];
-
-  public static $interoperability = [
-    'integer' => 'int',
-    'real' => 'decimal',
-    'text' => 'text',
-    'blob' => 'blob'
-  ];
-
-  public static $aggr_functions = [
-    'AVG',
-    'BIT_AND',
-    'BIT_OR',
-    'COUNT',
-    'GROUP_CONCAT',
-    'MAX',
-    'MIN',
-    'STD',
-    'STDDEV_POP',
-    'STDDEV_SAMP',
-    'STDDEV',
-    'SUM',
-    'VAR_POP',
-    'VAR_SAMP',
-    'VARIANCE',
-  ];
-
-  /**
-   * An array of functions for launching triggers on actions
-   * @var array
-   */
-  private $_triggers = [
-    'SELECT' => [
-      'before' => [],
-      'after' => []
-    ],
-    'INSERT' => [
-      'before' => [],
-      'after' => []
-    ],
-    'UPDATE' => [
-      'before' => [],
-      'after' => []
-    ],
-    'DELETE' => [
-      'before' => [],
-      'after' => []
-    ]
-  ];
-
-
   /** @var string The quote character */
   public $qte = '`';
 
@@ -129,11 +31,6 @@ class Mysql extends Sql
    * @var array
    */
   protected array $cfg;
-
-  /**
-   * @var bbn\Db2|null
-   */
-  protected ?bbn\Db2 $db;
 
   /**
    * @var \PDO
@@ -188,12 +85,6 @@ class Mysql extends Sql
    * @var PHPSQLParser
    */
   private $_parser;
-
-  /** @var array The 'kinds' of writing statement */
-  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
-
-  /** @var array The 'kinds' of structure alteration statement */
-  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
 
   /**
    * @var mixed $id_just_inserted
@@ -264,17 +155,13 @@ class Mysql extends Sql
    */
   protected $username;
 
-  /**
-   * The currently selected database
-   * @var mixed $current
-   */
-  protected $current;
 
   /**
    * Returns true if the column name is an aggregate function
    *
    * @param string $f The string to check
    * @return bool
+   * TODO: how this should work?
    */
   public static function isAggregateFunction(string $f): bool
   {
@@ -292,10 +179,9 @@ class Mysql extends Sql
    * Constructor
    *
    * @param array $cfg
-   * @param bbn\Db2|null $db
    * @throws \Exception
    */
-  public function __construct(array $cfg, bbn\Db2 $db = null)
+  public function __construct(array $cfg)
   {
     if (!\extension_loaded('pdo_mysql')) {
       throw new \Exception(X::_("The MySQL driver for PDO is not installed..."));
@@ -345,16 +231,15 @@ class Mysql extends Sql
 
     try {
 
-      $this->pdo = new \PDO(...$params);
-      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-      $this->cfg = $cfg;
-      $this->db  = $db;
-      $this->setHash($params);
-
       $this->current  = $cfg['db'] ?? null;
       $this->host     = $cfg['host'] ?? '127.0.0.1';
       $this->username = $cfg['user'] ?? null;
       $this->connection_code = $cfg['code_host'];
+
+      $this->pdo = new \PDO(...$params);
+      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->cfg = $cfg;
+      $this->setHash($params);
 
       if (!empty($cfg['cache_length'])) {
         $this->cache_renewal = (int)$cfg['cache_length'];
@@ -367,20 +252,11 @@ class Mysql extends Sql
       unset($cfg['pass']);
     }
     catch (\PDOException $e){
-      $err = X::_("Impossible to create the connection")." {$cfg['engine']}/$db "
+      $err = X::_("Impossible to create the connection").
+        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
              .X::_("with the following error").$e->getMessage();
       throw new \Exception($err);
     }
-  }
-
-  /**
-   * Returns the current database selected by the current connection.
-   *
-   * @return string|null
-   */
-  public function getCurrent(): ?string
-  {
-    return $this->current;
   }
 
   /**
@@ -409,24 +285,26 @@ class Mysql extends Sql
   /**
    * Disables foreign keys check.
    *
-   * @return bbn\Db2
+   * @return self
    */
-  public function disableKeys(): bbn\Db2
+  public function disableKeys(): self
   {
     $this->rawQuery('SET FOREIGN_KEY_CHECKS=0;');
-    return $this->db;
+
+    return $this;
   }
 
 
   /**
    * Enables foreign keys check.
    *
-   * @return bbn\Db2
+   * @return self
    */
-  public function enableKeys(): bbn\Db2
+  public function enableKeys(): self
   {
     $this->rawQuery('SET FOREIGN_KEY_CHECKS=1;');
-    return $this->db;
+
+    return $this;
   }
 
   /**
@@ -475,7 +353,7 @@ class Mysql extends Sql
               ) . ' ';
             }
             else {
-              // Remove the alias from where and join but not in having execpt if it's a count
+              // Remove the alias from where and join but not in having except if it's a count
               if (!$is_having && ($table === false) && isset($cfg['fields'][$field])) {
                 $field = $cfg['fields'][$field];
                 // Same for exp in case it's an alias
@@ -792,9 +670,9 @@ class Mysql extends Sql
 
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $st;
           } elseif (isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false)) {
-            $this->db->error("Error! The column '$f' exists on several tables in '" . implode(', ', $cfg['tables']));
+            $this->error("Error! The column '$f' exists on several tables in '" . implode(', ', $cfg['tables']));
           } else {
-            $this->db->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+            $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
           }
         }
 
@@ -849,7 +727,7 @@ class Mysql extends Sql
           $fields_to_put['values'][] = '?';
         }
       } else {
-        $this->db->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
 
       $i++;
@@ -891,7 +769,7 @@ class Mysql extends Sql
           $fields_to_put['values'][] = '?';
         }
       } else {
-        $this->db->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
     }
 
@@ -997,7 +875,7 @@ class Mysql extends Sql
           $group_to_put[] = $this->escape($g);
           //$group_to_put[] = $this->colFullName($g, $cfg['available_fields'][$g], true);
         } else {
-          $this->db->error("Error! The column '$g' doesn't exist for group by " . print_r($cfg, true));
+          $this->error("Error! The column '$g' doesn't exist for group by " . print_r($cfg, true));
         }
       }
 
@@ -1193,13 +1071,13 @@ class Mysql extends Sql
   {
     $st = '';
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
     if ($model && !empty($model['keys'])) {
-      $st   .= 'ALTER TABLE ' . $this->db->escape($table) . PHP_EOL;
+      $st   .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
       $last  = count($model['keys']) - 1;
-      $dbcls = &$this->db;
+
       $i     = 0;
       foreach ($model['keys'] as $name => $key) {
         $st .= '  ADD ';
@@ -1209,15 +1087,15 @@ class Mysql extends Sql
         ) {
           $st .= 'PRIMARY KEY';
         } elseif ($key['unique']) {
-          $st .= 'UNIQUE KEY ' . $this->db->escape($name);
+          $st .= 'UNIQUE KEY ' . $this->escape($name);
         } else {
-          $st .= 'KEY ' . $this->db->escape($name);
+          $st .= 'KEY ' . $this->escape($name);
         }
 
         $st .= ' (' . implode(
           ',', array_map(
-            function ($a) use (&$dbcls) {
-              return $dbcls->escape($a);
+            function ($a) {
+              return $this->escape($a);
             }, $key['columns']
           )
         ) . ')';
@@ -1239,7 +1117,7 @@ class Mysql extends Sql
   {
     $st = '';
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
     if ($model && !empty($model['keys'])) {
@@ -1249,13 +1127,13 @@ class Mysql extends Sql
         }
       );
       if ($last = count($constraints)) {
-        $st .= 'ALTER TABLE ' . $this->db->escape($table) . PHP_EOL;
+        $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
         $i   = 0;
         foreach ($constraints as $name => $key) {
           $i++;
           $st .= '  ADD ' .
-          'CONSTRAINT ' . $this->db->escape($key['constraint']) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
-          'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
+          'CONSTRAINT ' . $this->escape($key['constraint']) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
+          'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
             ($key['delete'] ? ' ON DELETE ' . $key['delete'] : '') .
             ($key['update'] ? ' ON UPDATE ' . $key['update'] : '') .
             ($i === $last ? ';' : ',' . PHP_EOL);
@@ -1277,7 +1155,7 @@ class Mysql extends Sql
   {
     $st = '';
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
     if ($st = $this->getCreateTable($table, $model)) {
@@ -1289,16 +1167,15 @@ class Mysql extends Sql
         if ($key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')) {
           $st .= 'PRIMARY KEY';
         } elseif ($key['unique']) {
-          $st .= 'UNIQUE KEY ' . $this->db->escape($name);
+          $st .= 'UNIQUE KEY ' . $this->escape($name);
         } else {
-          $st .= 'KEY ' . $this->db->escape($name);
+          $st .= 'KEY ' . $this->escape($name);
         }
 
-        $dbcls = &$this->db;
         $st   .= ' (' . implode(
           ',', array_map(
-            function ($a) use (&$dbcls) {
-              return $dbcls->escape($a);
+            function ($a) {
+              return $this->escape($a);
             }, $key['columns']
           )
         ) . ')';
@@ -1310,8 +1187,8 @@ class Mysql extends Sql
       foreach ($model['keys'] as $name => $key) {
         if (!empty($key['ref_table'])) {
           $st .= ',' . PHP_EOL . '  ' .
-          'CONSTRAINT ' . $this->db->escape($keybase.$i) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
-          'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
+          'CONSTRAINT ' . $this->escape($keybase.$i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
+          'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
             ($key['delete'] ? ' ON DELETE ' . $key['delete'] : '') .
             ($key['update'] ? ' ON UPDATE ' . $key['update'] : '');
           $i++;
@@ -1346,18 +1223,18 @@ class Mysql extends Sql
     if ($table = $this->tableFullName($table, true)) {
       foreach ($column as $i => $c) {
         if (!bbn\Str::checkName($c)) {
-          $this->db->error("Illegal column $c");
+          $this->error("Illegal column $c");
         }
 
         $name      .= '_' . $c;
         $column[$i] = $this->escape($column[$i]);
-        if (\is_int($length[$i]) && $length[$i] > 0) {
+        if (isset($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
           $column[$i] .= '(' . $length[$i] . ')';
         }
       }
 
       $name = bbn\Str::cut($name, 50);
-      return (bool)$this->db->query(
+      return (bool)$this->query(
         'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
         implode(', ', $column) . ' )'
       );
@@ -1371,20 +1248,17 @@ class Mysql extends Sql
    * Deletes an index
    *
    * @param null|string $table
-   * @param string      $key
+   * @param string $key
    * @return bool
+   * @throws \Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {
+
     if (($table = $this->tableFullName($table, true))
         && bbn\Str::checkName($key)
     ) {
-      return (bool)$this->db->query(
-        <<<MYSQL
-ALTER TABLE $table
-DROP INDEX `$key`
-MYSQL
-      );
+      return (bool)$this->query("ALTER TABLE $table DROP INDEX `$key`");
     }
 
     return false;
@@ -1450,7 +1324,7 @@ MYSQL
    * @param string $collation
    * @return bool
    */
-  public function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
+  private function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
     if (bbn\Str::checkName($database, $enc, $collation)) {
       return (bool)$this->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
@@ -1510,7 +1384,7 @@ MYSQL
   public function createUser(string $user, string $pass, string $db = null): bool
   {
     if (null === $db) {
-      $db = $this->db->getCurrent();
+      $db = $this->getCurrent();
     }
 
     if (($db = $this->escape($db))
@@ -1521,7 +1395,7 @@ MYSQL
         <<<MYSQL
 GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 ON $db . *
-TO '$user'@'{$this->db->getHost()}'
+TO '$user'@'{$this->getHost()}'
 IDENTIFIED BY '$pass'
 MYSQL
       );
@@ -1559,10 +1433,11 @@ MYSQL
    * @param string $user
    * @param string $host
    * @return array|null
+   * @throws \Exception
    */
   public function getUsers(string $user = '', string $host = ''): ?array
   {
-    if ($this->db->check()) {
+    if ($this->check()) {
       $cond = '';
       if (!empty($user) && bbn\Str::checkName($user)) {
         $cond .= " AND  user LIKE '$user' ";
@@ -1572,7 +1447,7 @@ MYSQL
         $cond .= " AND  host LIKE '$host' ";
       }
 
-      $us = $this->db->getRows(
+      $us = $this->getRows(
         <<<MYSQL
 SELECT DISTINCT host, User
 FROM mysql.user
@@ -1582,7 +1457,7 @@ MYSQL
       );
       $q  = [];
       foreach ($us as $u) {
-        $gs = $this->db->getColArray("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
+        $gs = $this->getColArray("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
         foreach ($gs as $g) {
           $q[] = $g;
         }
@@ -1606,8 +1481,8 @@ MYSQL
   public function dbSize(string $database = '', string $type = ''): int
   {
     $cur = null;
-    if ($database && ($this->db->getCurrent() !== $database)) {
-      $cur = $this->db->getCurrent();
+    if ($database && ($this->getCurrent() !== $database)) {
+      $cur = $this->getCurrent();
       $this->change($database);
     }
 
@@ -1642,7 +1517,7 @@ MYSQL
   {
     $size = 0;
     if (bbn\Str::checkName($table)) {
-      $row = $this->db->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+      $row = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
       if (!$type || (strtolower($type) === 'index')) {
         $size += $row['Index_length'];
       }
@@ -1666,14 +1541,14 @@ MYSQL
   public function status(string $table = '', string $database = '')
   {
     $cur = null;
-    if ($database && ($this->db->getCurrent() !== $database)) {
-      $cur = $this->db->getCurrent();
-      $this->db->change($database);
+    if ($database && ($this->getCurrent() !== $database)) {
+      $cur = $this->getCurrent();
+      $this->change($database);
     }
 
-    $r = $this->db->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+    $r = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
     if (null !== $cur) {
-      $this->db->change($cur);
+      $this->change($cur);
     }
 
     return $r;
@@ -3029,7 +2904,7 @@ MYSQL
    */
   public function getDatabases(): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
@@ -3080,12 +2955,12 @@ MYSQL
    */
   public function getTables(string $database = ''): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
     if (empty($database) || !bbn\Str::checkName($database)) {
-      $database = $this->db->getCurrent();
+      $database = $this->getCurrent();
     }
 
     $t2 = [];
@@ -3155,7 +3030,7 @@ MYSQL
    */
   public function getColumns(string $table): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
@@ -3457,7 +3332,7 @@ MYSQL;
    */
   public function getKeys(string $table): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
@@ -3466,11 +3341,11 @@ MYSQL;
       $t            = explode('.', $full);
       [$db, $table] = $t;
       $r            = [];
-      $indexes      = $this->db->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
+      $indexes      = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
       $keys         = [];
       $cols         = [];
       foreach ($indexes as $i => $index) {
-        $a = $this->db->getRow(
+        $a = $this->getRow(
           <<<MYSQL
 SELECT `CONSTRAINT_NAME` AS `name`,
 `ORDINAL_POSITION` AS `position`,
@@ -3496,7 +3371,7 @@ MYSQL
           $index['Seq_in_index']
         );
         if ($a) {
-          $b = $this->db->getRow(
+          $b = $this->getRow(
             <<<MYSQL
           SELECT `CONSTRAINT_NAME` AS `name`,
           `UPDATE_RULE` AS `update`,
@@ -3560,7 +3435,7 @@ MYSQL
 
     foreach ($tables as $t){
       if (!($model = $this->getColumns($t))) {
-        $this->db->error('Impossible to find the table '.$t);
+        $this->error('Impossible to find the table '.$t);
         throw new \Exception(X::_('Impossible to find the table ').$t);
       }
 
@@ -3588,7 +3463,7 @@ MYSQL
   public function getForeignKeys(string $col, string $table, string $db = null): array
   {
     if (!$db) {
-      $db = $this->db->getCurrent();
+      $db = $this->getCurrent();
     }
 
     $res   = [];
@@ -3633,49 +3508,6 @@ MYSQL
       ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment');
   }
 
-  /**
-   * Return the table's structure as an indexed array.
-   *
-   * ```php
-   * X::dump($db->modelize("table_users"));
-   * // (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )
-   * ```
-   *
-   * @param null|array|string $table The table's name
-   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
-   * @return null|array
-   */
-  public function modelize($table = null, bool $force = false): ?array
-  {
-    $r      = [];
-    $tables = false;
-    if (empty($table) || ($table === '*')) {
-      $tables = $this->getTables();
-    }
-    elseif (\is_string($table)) {
-      $tables = [$table];
-    }
-    elseif (\is_array($table)) {
-      $tables = $table;
-    }
-
-    if (\is_array($tables)) {
-      foreach ($tables as $t) {
-        if ($full = $this->tableFullName($t)) {
-          $r[$full] = $this->_get_cache($full, 'columns', $force);
-        }
-      }
-
-      if (\count($r) === 1) {
-        return end($r);
-      }
-
-      return $r;
-    }
-
-    return null;
-  }
-
 
   /**
    * @param string $table
@@ -3712,15 +3544,15 @@ MYSQL
   public function findReferences($column, string $db = ''): array
   {
     $changed = false;
-    if ($db && ($db !== $this->db->getCurrent())) {
-      $changed = $this->db->getCurrent();
+    if ($db && ($db !== $this->getCurrent())) {
+      $changed = $this->getCurrent();
       $this->change($db);
     }
 
     $column = $this->colFullName($column);
     $bits   = explode('.', $column);
     if (\count($bits) === 2) {
-      array_unshift($bits, $this->db->getCurrent());
+      array_unshift($bits, $this->getCurrent());
     }
 
     if (\count($bits) !== 3) {
@@ -3757,8 +3589,8 @@ MYSQL
   public function findRelations($column, string $db = ''): ?array
   {
     $changed = false;
-    if ($db && ($db !== $this->db->getCurrent())) {
-      $changed = $this->db->getCurrent();
+    if ($db && ($db !== $this->getCurrent())) {
+      $changed = $this->getCurrent();
       $this->change($db);
     }
 
@@ -4080,7 +3912,7 @@ MYSQL
     $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
     if ($r = $this->_exec(...$args)) {
       if (!is_object($r)) {
-        $this->db->log([$args, $this->processCfg($args)]);
+        $this->log([$args, $this->processCfg($args)]);
       }
       else{
         return $r->getObject();
@@ -4287,7 +4119,7 @@ MYSQL
         return ($a = $r->getIrow()) ? $a[0] : false;
       }
 
-      $this->db->log('ERROR IN SELECT_ONE', $this->last_cfg, $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
+      $this->log('ERROR IN SELECT_ONE', $this->last_cfg, $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
     }
 
     return false;
@@ -4359,7 +4191,7 @@ MYSQL
       return X::indexByFirstVal($rows);
     }
 
-    return $this->db->check() ? [] : null;
+    return $this->check() ? [] : null;
   }
 
 
@@ -4388,7 +4220,7 @@ MYSQL
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
-    if ($this->db->check()) {
+    if ($this->check()) {
       return $this->rselectAll(
         [
           'tables' => [$table],
@@ -4472,7 +4304,7 @@ MYSQL
   public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     $res = null;
-    if ($this->db->check()) {
+    if ($this->check()) {
       $res = [];
       if (\is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0])) {
         array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
@@ -4908,7 +4740,7 @@ MYSQL
    */
   private function _exec()
   {
-    if ($this->db->check()
+    if ($this->check()
       && ($cfg = $this->processCfg(\func_get_args()))
       && !empty($cfg['sql'])
     ) {

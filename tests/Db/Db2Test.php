@@ -1300,7 +1300,7 @@ class Db2Test extends TestCase
     $this->mysql_mock->shouldReceive('disableKeys')
       ->once()
       ->withNoArgs()
-      ->andReturn($this->db);
+      ->andReturnSelf();
 
     $this->assertInstanceOf(Db2::class, $this->db->disableKeys());
   }
@@ -1311,7 +1311,7 @@ class Db2Test extends TestCase
     $this->mysql_mock->shouldReceive('enableKeys')
       ->once()
       ->withNoArgs()
-      ->andReturn($this->db);
+      ->andReturnSelf();
 
     $this->assertInstanceOf(Db2::class, $this->db->enableKeys());
   }

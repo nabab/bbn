@@ -15,11 +15,130 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   private $cache = [];
 
+  /** @var array Allowed operators */
+  public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
 
-  final public function getEngine()
+  /** @var array Numeric column types */
+  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+
+  /** @var array Time and date column types */
+  public static $date_types = ['date', 'time', 'datetime'];
+
+  public static $types = [
+    'tinyint',
+    'smallint',
+    'mediumint',
+    'int',
+    'bigint',
+    'decimal',
+    'float',
+    'double',
+    'bit',
+    'char',
+    'varchar',
+    'binary',
+    'varbinary',
+    'tinyblob',
+    'blob',
+    'mediumblob',
+    'longblob',
+    'tinytext',
+    'text',
+    'mediumtext',
+    'longtext',
+    'enum',
+    'set',
+    'date',
+    'time',
+    'datetime',
+    'timestamp',
+    'year',
+    'geometry',
+    'point',
+    'linestring',
+    'polygon',
+    'geometrycollection',
+    'multilinestring',
+    'multipoint',
+    'multipolygon',
+    'json',
+  ];
+
+  public static $interoperability = [
+    'integer' => 'int',
+    'real' => 'decimal',
+    'text' => 'text',
+    'blob' => 'blob'
+  ];
+
+  public static $aggr_functions = [
+    'AVG',
+    'BIT_AND',
+    'BIT_OR',
+    'COUNT',
+    'GROUP_CONCAT',
+    'MAX',
+    'MIN',
+    'STD',
+    'STDDEV_POP',
+    'STDDEV_SAMP',
+    'STDDEV',
+    'SUM',
+    'VAR_POP',
+    'VAR_SAMP',
+    'VARIANCE',
+  ];
+
+  /**
+   * An array of functions for launching triggers on actions
+   * @var array
+   */
+  protected $_triggers = [
+    'SELECT' => [
+      'before' => [],
+      'after' => []
+    ],
+    'INSERT' => [
+      'before' => [],
+      'after' => []
+    ],
+    'UPDATE' => [
+      'before' => [],
+      'after' => []
+    ],
+    'DELETE' => [
+      'before' => [],
+      'after' => []
+    ]
+  ];
+
+  /** @var array The 'kinds' of writing statement */
+  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
+
+  /** @var array The 'kinds' of structure alteration statement */
+  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
+
+  /**
+   * The currently selected database
+   * @var mixed $current
+   */
+  protected $current;
+
+
+  public function getEngine()
   {
     $class = static::class;
     return strtolower(basename(str_replace('\\', '/', $class)));
+  }
+
+  /**
+   * Returns the current database selected by the current connection.
+   *
+   * @return string|null
+   */
+  public function getCurrent(): ?string
+  {
+    return $this->current;
   }
 
   /**
@@ -413,5 +532,48 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     return $r;
+  }
+
+  /**
+   * Return the table's structure as an indexed array.
+   *
+   * ```php
+   * X::dump($db->modelize("table_users"));
+   * // (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )
+   * ```
+   *
+   * @param null|array|string $table The table's name
+   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
+   * @return null|array
+   */
+  public function modelize($table = null, bool $force = false): ?array
+  {
+    $r      = [];
+    $tables = false;
+    if (empty($table) || ($table === '*')) {
+      $tables = $this->getTables();
+    }
+    elseif (\is_string($table)) {
+      $tables = [$table];
+    }
+    elseif (\is_array($table)) {
+      $tables = $table;
+    }
+
+    if (\is_array($tables)) {
+      foreach ($tables as $t) {
+        if ($full = $this->tableFullName($t)) {
+          $r[$full] = $this->_get_cache($full, 'columns', $force);
+        }
+      }
+
+      if (\count($r) === 1) {
+        return end($r);
+      }
+
+      return $r;
+    }
+
+    return null;
   }
 }
