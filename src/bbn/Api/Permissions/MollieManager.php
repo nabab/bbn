@@ -183,7 +183,7 @@ class MollieManager
     if (!$this->customerHasValidMandate(
       $customer_id,
       $mandate_id,
-      array_key_exists('testmode', $payment_data) ? ['test_mode' => $payment_data['testmode']] : [])
+      array_key_exists('testmode', $payment_data) ? ['testmode' => $payment_data['testmode']] : [])
     ) {
       // If the mandate is not valid then creates a new one by having
       // The customer performs a first payment: createPaymentFirstTime()
