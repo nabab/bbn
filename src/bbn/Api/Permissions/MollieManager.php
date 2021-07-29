@@ -316,17 +316,14 @@ class MollieManager
    */
   public function refundPayment(string $payment_id, string $amount, array $params = []): array
   {
-    $payment = $this->mollie->payments->get($payment_id, $params);
-
+    $payment = $this->mollie->payments->get($payment_id, ['testmode' => !empty($params['testmode'])]);
     $params = array_merge([
       "amount" => [
         "currency" => $payment->amount->currency,
         "value"    => $amount
       ]
     ], $params);
-
     $refund = $payment->refund($params);
-
     return X::toArray($refund);
   }
 
