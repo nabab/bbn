@@ -1027,11 +1027,7 @@ class Db2 implements Db2\Actions
    */
   public function getColArray(): array
   {
-    if ($r = $this->getByColumns(...\func_get_args())) {
-      return array_values(current($r));
-    }
-
-    return [];
+    return $this->language->getColArray(...\func_get_args());
   }
 
 
@@ -2345,7 +2341,7 @@ class Db2 implements Db2\Actions
    * Returns the SQL code for a DELETE statement.
    *
    * ```php
-   * X::dump($db->getDelete('table_users',['id'=>1]));
+   * X::dump($db->getDelete(['tables' => ['table_users']]));
    * // (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?
    * ```
    *

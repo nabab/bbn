@@ -13,7 +13,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /**
    * @var mixed $cache
    */
-  private $cache = [];
+  protected $cache = [];
 
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
@@ -543,8 +543,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * ```
    *
    * @param null|array|string $table The table's name
-   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
+   * @param bool $force If set to true will force the modernization to re-perform even if the cache exists
    * @return null|array
+   * @throws \Exception
    */
   public function modelize($table = null, bool $force = false): ?array
   {

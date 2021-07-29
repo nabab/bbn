@@ -690,27 +690,12 @@ class Db2Test extends TestCase
   /** @test */
   public function getColArray_method_return_an_array_with_the_values_of_single_field_resulting_from_the_query()
   {
-    $this->mysql_mock->shouldReceive('getByColumns')
+    $this->mysql_mock->shouldReceive('getColArray')
       ->once()
       ->with($query = 'SELECT id FROM table_users')
-      ->andReturn([
-        'name' => [
-          'john', 'doe'
-        ]
-      ]);
+      ->andReturn(['john', 'doe']);
 
     $this->assertSame(['john', 'doe'], $this->db->getColArray($query));
-  }
-
-  /** @test */
-  public function getColArray_method_returns_an_empty_array_when_getByColumns_returns_null()
-  {
-    $this->mysql_mock->shouldReceive('getByColumns')
-      ->once()
-      ->with($query = 'SELECT id FROM table_users')
-      ->andReturnNull();
-
-    $this->assertSame([], $this->db->getColArray($query));
   }
 
   /** @test */
@@ -2045,7 +2030,7 @@ class Db2Test extends TestCase
     $this->mysql_mock->shouldReceive('getUid')
       ->once()
       ->withNoArgs()
-      ->andReturn($result = '3c761f3e-ee41-11eb-b945-1b05c9e00886');
+      ->andReturn($result = '3c761f3eee4111ebb9451b05c9e00886');
 
     $this->assertSame($result, $this->db->getUid());
   }

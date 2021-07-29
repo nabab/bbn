@@ -460,6 +460,15 @@ interface Engines
   public function getKeyVal(): ?array;
 
   /**
+   * Return an array with the values of single field resulting from the query.
+   *
+   * @param string query
+   * @param mixed values
+   * @return array
+   */
+  public function getColArray(): array;
+
+  /**
    * Return a count of identical values in a field as array, Reporting a structure type 'num' - 'val'.
    *
    * @param $table
