@@ -737,11 +737,10 @@ class X
   public static function toObject($ar): ?\stdClass
   {
     if (\is_string($ar)) {
-      return json_decode($ar);
+      $ar = json_decode($ar);
     }
-
-    if (\is_array($ar)) {
-      return json_decode(json_encode($ar));
+    elseif (\is_array($ar)) {
+      $ar = json_decode(json_encode($ar));
     }
 
     return (object)$ar;
