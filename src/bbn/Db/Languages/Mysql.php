@@ -1,7 +1,9 @@
 <?php
+
 /**
  * @package db
  */
+
 namespace bbn\Db\Languages;
 
 use bbn;
@@ -181,11 +183,12 @@ class Mysql implements bbn\Db\Engines
     }
 
     $cfg['code_db']   = $cfg['db'] ?? '';
-    $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
-    $cfg['args']      = ['mysql:host='
-        .(in_array($cfg['host'], ['localhost', '127.0.0.1']) ? gethostname() : $cfg['host'])
-        .';port='.$cfg['port']
-        .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
+    $cfg['code_host'] = $cfg['user'] . '@' . $cfg['host'];
+    $cfg['args']      = [
+      'mysql:host='
+        . (in_array($cfg['host'], ['localhost', '127.0.0.1']) ? gethostname() : $cfg['host'])
+        . ';port=' . $cfg['port']
+        . (empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
       $cfg['pass'],
       [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
@@ -414,8 +417,10 @@ class Mysql implements bbn\Db\Engines
       $x = array_map(
         function ($a) {
           return $a['Database'];
-        }, array_filter(
-          $r->fetchAll(\PDO::FETCH_ASSOC), function ($a) {
+        },
+        array_filter(
+          $r->fetchAll(\PDO::FETCH_ASSOC),
+          function ($a) {
             return ($a['Database'] === 'information_schema') || ($a['Database'] === 'mysql') ? false : 1;
           }
         )
@@ -443,7 +448,7 @@ class Mysql implements bbn\Db\Engines
 
     $t2 = [];
     if (($r = $this->db->rawQuery("SHOW TABLES FROM `$database`"))
-        && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
+      && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];
@@ -498,10 +503,11 @@ MYSQL;
           }
 
           if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
-            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
-                && !empty($matches[1])
-                && \is_string($matches[1][0])
-                && ($matches[1][0][0] === "'")
+            if (
+              preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
+              && !empty($matches[1])
+              && \is_string($matches[1][0])
+              && ($matches[1][0][0] === "'")
             ) {
               $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
               $r[$f]['extra']  = $matches[1][0];
@@ -587,8 +593,7 @@ AND (
 )
 ORDER BY `KEY_COLUMN_USAGE`.`REFERENCED_TABLE_NAME` DESC
 LIMIT 1
-MYSQL
-          ,
+MYSQL,
           $db,
           $table,
           $index['Column_name'],
@@ -606,8 +611,7 @@ MYSQL
           AND `CONSTRAINT_SCHEMA` LIKE ?
           AND `TABLE_NAME` LIKE ?
           LIMIT 1
-MYSQL
-            ,
+MYSQL,
             $a['name'],
             $db,
             $table
@@ -664,10 +668,9 @@ MYSQL
         if (\is_array($f) && isset($f['logic']) && isset($f['conditions'])) {
           if ($tmp = $this->getConditions($f, $cfg, $is_having, $indent + 2)) {
             $res .= (empty($res) ? '(' : PHP_EOL . str_repeat(' ', $indent) . "$logic (") .
-            $tmp . PHP_EOL . str_repeat(' ', $indent) . ")";
+              $tmp . PHP_EOL . str_repeat(' ', $indent) . ")";
           }
-        }
-        elseif (isset($f['operator'], $f['field'])) {
+        } elseif (isset($f['operator'], $f['field'])) {
           $field = $f['field'];
           if (!array_key_exists('value', $f)) {
             $f['value'] = false;
@@ -681,30 +684,26 @@ MYSQL
           $is_json   = false;
           $model     = null;
           // Dealing with JSON fields and null filter value
-          if (in_array($f['operator'], ['isnull', 'isnotnull'])
-              && (
-                strpos($field, '->>')
-                || (isset($cfg['fields'][$field]) && strpos($cfg['fields'][$field], '->>'))
-                || (isset($cfg['ofields'][$field]) && strpos($cfg['ofields'][$field], '->>'))
-              )
+          if (
+            in_array($f['operator'], ['isnull', 'isnotnull'])
+            && (strpos($field, '->>')
+              || (isset($cfg['fields'][$field]) && strpos($cfg['fields'][$field], '->>'))
+              || (isset($cfg['ofields'][$field]) && strpos($cfg['ofields'][$field], '->>')))
           ) {
-            $field   = 'JSON_TYPE('.($cfg['fields'][$field] ?? ($cfg['ofields'][$field] ?? $field)).')';
+            $field   = 'JSON_TYPE(' . ($cfg['fields'][$field] ?? ($cfg['ofields'][$field] ?? $field)) . ')';
             $is_json = true;
           }
 
           if ($is_having) {
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
-          }
-          elseif (isset($cfg['available_fields'][$field])) {
+          } elseif (isset($cfg['available_fields'][$field])) {
             $table  = $cfg['available_fields'][$field];
             $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
             if ($table && $column && isset($cfg['models'][$table]['fields'][$column])) {
               $model = $cfg['models'][$table]['fields'][$column];
               $res  .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") .
-                (!empty($cfg['available_fields'][$field]) ? $this->colFullName($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true) : $this->colSimpleName($column, true)
-              ) . ' ';
-            }
-            else {
+                (!empty($cfg['available_fields'][$field]) ? $this->colFullName($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true) : $this->colSimpleName($column, true)) . ' ';
+            } else {
               // Remove the alias from where and join but not in having execpt if it's a count
               if (!$is_having && ($table === false) && isset($cfg['fields'][$field])) {
                 $field = $cfg['fields'][$field];
@@ -724,22 +723,17 @@ MYSQL
                 if (($model['maxlength'] === 16) && !empty($model['key'])) {
                   $is_uid = true;
                 }
-              }
-              elseif (\in_array($model['type'], self::$numeric_types, true)) {
+              } elseif (\in_array($model['type'], self::$numeric_types, true)) {
                 $is_number = true;
-              }
-              elseif (\in_array($model['type'], self::$date_types, true)) {
+              } elseif (\in_array($model['type'], self::$date_types, true)) {
                 $is_date = true;
               }
-            }
-            elseif ($f['value'] && Str::isUid($f['value'])) {
+            } elseif ($f['value'] && Str::isUid($f['value'])) {
               $is_uid = true;
-            }
-            elseif (\is_int($f['value']) || \is_float($f['value'])) {
+            } elseif (\is_int($f['value']) || \is_float($f['value'])) {
               $is_number = true;
             }
-          }
-          else {
+          } else {
             $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
           }
 
@@ -752,32 +746,28 @@ MYSQL
             case '=':
               if ($is_uid && $is_bool) {
                 $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
-              }
-              else {
+              } else {
                 $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
               }
               break;
             case '!=':
               if (isset($f['exp'])) {
                 $res .= '!= ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= '!= ?';
               }
               break;
             case 'like':
               if (isset($f['exp'])) {
                 $res .= 'LIKE ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= 'LIKE ?';
               }
               break;
             case 'not like':
               if (isset($f['exp'])) {
                 $res .= 'NOT LIKE ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= 'NOT LIKE ?';
               }
               break;
@@ -785,11 +775,9 @@ MYSQL
             case 'is':
               if ($is_uid && $is_bool) {
                 $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
-              }
-              elseif ($is_uid) {
+              } elseif ($is_uid) {
                 $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
-              }
-              else {
+              } else {
                 $res .= isset($f['exp']) ? '= ' . $f['exp'] : ($is_number ? '= ?' : 'LIKE ?');
               }
               break;
@@ -797,8 +785,7 @@ MYSQL
             case 'isnot':
               if ($is_uid) {
                 $res .= isset($f['exp']) ? '!= ' . $f['exp'] : '!= ?';
-              }
-              else {
+              } else {
                 $res .= isset($f['exp']) ? '!= ' . $f['exp'] : ($is_number ? '!= ?' : 'NOT LIKE ?');
               }
               break;
@@ -818,8 +805,7 @@ MYSQL
             case '>=':
               if (isset($f['exp'])) {
                 $res .= '>= ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= '>= ?';
               }
               break;
@@ -828,8 +814,7 @@ MYSQL
             case '>':
               if (isset($f['exp'])) {
                 $res .= '> ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= '> ?';
               }
               break;
@@ -838,8 +823,7 @@ MYSQL
             case '<=':
               if (isset($f['exp'])) {
                 $res .= '<= ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= '<= ?';
               }
               break;
@@ -848,13 +832,12 @@ MYSQL
             case '<':
               if (isset($f['exp'])) {
                 $res .= '< ' . $f['exp'];
-              }
-              else {
+              } else {
                 $res .= '< ?';
               }
               break;
 
-            /** @todo Check if it is working with an array */
+              /** @todo Check if it is working with an array */
             case 'isnull':
               $res .= $is_json ? '= \'NULL\'' : 'IS NULL';
               break;
@@ -915,9 +898,9 @@ MYSQL
             if (isset($cfg['fields'][$g])) {
               $g = $cfg['fields'][$g];
             }
-            
+
             if (($t = $cfg['available_fields'][$g])
-                && ($cfn = $this->colFullName($g, $t))
+              && ($cfn = $this->colFullName($g, $t))
             ) {
               $indexes[] = $cfn;
               //$idxs[] = $this->colSimpleName($g, true);
@@ -928,7 +911,7 @@ MYSQL
               $idxs[]    = $cfg['aliases'][$g] ?? $g;
             }
           }
-          
+
           if (!empty($cfg['having'])) {
             if (count($indexes) === count($cfg['group_by'])) {
               $res .= 'COUNT(*) FROM ( SELECT ';
@@ -1021,8 +1004,10 @@ MYSQL
 
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $st;
           } elseif (isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false)) {
+            $this->db->addStatement($res, $cfg['values'] ?? []);
             $this->db->error("Error! The column '$f' exists on several tables in '" . implode(', ', $cfg['tables']));
           } else {
+            $this->db->addStatement($res, $cfg['values'] ?? []);
             $this->db->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
           }
         }
@@ -1086,8 +1071,8 @@ MYSQL
 
     if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
       return 'INSERT ' . ($cfg['ignore'] ? 'IGNORE ' : '') . 'INTO ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL .
-      '(' . implode(', ', $fields_to_put['fields']) . ')' . PHP_EOL . ' VALUES (' .
-      implode(', ', $fields_to_put['values']) . ')' . PHP_EOL;
+        '(' . implode(', ', $fields_to_put['fields']) . ')' . PHP_EOL . ' VALUES (' .
+        implode(', ', $fields_to_put['values']) . ')' . PHP_EOL;
     }
 
     return '';
@@ -1157,8 +1142,8 @@ MYSQL
     $res = '';
     if (count($cfg['tables']) === 1) {
       $res = 'DELETE ' . ($cfg['ignore'] ? 'IGNORE ' : '') .
-      (count($cfg['join']) ? current($cfg['tables']) . ' ' : '') .
-      'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
+        (count($cfg['join']) ? current($cfg['tables']) . ' ' : '') .
+        'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
     }
 
     return $res;
@@ -1178,8 +1163,8 @@ MYSQL
       foreach ($cfg['join'] as $join) {
         if (isset($join['table'], $join['on']) && ($cond = $this->db->getConditions($join['on'], $cfg, false, 4))) {
           $res .= '  ' .
-          (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '') .
-          'JOIN ' . $this->tableFullName($join['table'], true) .
+            (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '') .
+            'JOIN ' . $this->tableFullName($join['table'], true) .
             (!empty($join['alias']) ? ' AS ' . $this->escape($join['alias']) : '')
             . PHP_EOL . '    ON ' . $cond;
         }
@@ -1245,9 +1230,10 @@ MYSQL
   public function getHaving(array $cfg): string
   {
     $res = '';
-    if (!empty($cfg['group_by'])
-        && !empty($cfg['having'])
-        && ($cond = $this->getConditions($cfg['having'], $cfg, true, 2))
+    if (
+      !empty($cfg['group_by'])
+      && !empty($cfg['having'])
+      && ($cond = $this->getConditions($cfg['having'], $cfg, true, 2))
     ) {
       if ($cfg['count']) {
         $res .= ' WHERE ' . $cond . PHP_EOL;
@@ -1321,7 +1307,7 @@ MYSQL
   public function getRawCreate(string $table): string
   {
     if (($table = $this->tableFullName($table, true))
-        && ($r = $this->db->rawQuery("SHOW CREATE TABLE $table"))
+      && ($r = $this->db->rawQuery("SHOW CREATE TABLE $table"))
     ) {
       return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
     }
@@ -1341,8 +1327,7 @@ MYSQL
     foreach ($model['fields'] as $name => $col) {
       if (!$done) {
         $done = true;
-      }
-      else {
+      } else {
         $st .= ',' . PHP_EOL;
       }
 
@@ -1350,19 +1335,16 @@ MYSQL
       if (!in_array($col['type'], self::$types)) {
         if (isset(self::$interoperability[$col['type']])) {
           $st .= self::$interoperability[$col['type']];
+        } else {
+          throw new \Exception(X::_("Impossible to recognize the column type") . " $col[type]");
         }
-        else {
-          throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
-        }
-      }
-      else {
+      } else {
         $st .= $col['type'];
       }
 
       if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
         $st .= ' (' . $col['extra'] . ')';
-      }
-      elseif (!empty($col['maxlength'])) {
+      } elseif (!empty($col['maxlength'])) {
         $st .= '(' . $col['maxlength'];
         if (!empty($col['decimals'])) {
           $st .= ',' . $col['decimals'];
@@ -1371,8 +1353,9 @@ MYSQL
         $st .= ')';
       }
 
-      if (in_array($col['type'], self::$numeric_types)
-          && empty($col['signed'])
+      if (
+        in_array($col['type'], self::$numeric_types)
+        && empty($col['signed'])
       ) {
         $st .= ' UNSIGNED';
       }
@@ -1386,9 +1369,9 @@ MYSQL
       } elseif (array_key_exists('default', $col)) {
         $st .= ' DEFAULT ';
         if (($col['default'] === 'NULL')
-            || bbn\Str::isNumber($col['default'])
-            || strpos($col['default'], '(')
-            || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+          || bbn\Str::isNumber($col['default'])
+          || strpos($col['default'], '(')
+          || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
         ) {
           $st .= (string)$col['default'];
         } else {
@@ -1416,9 +1399,10 @@ MYSQL
       $i     = 0;
       foreach ($model['keys'] as $name => $key) {
         $st .= '  ADD ';
-        if ($key['unique']
-            && isset($model['fields'][$key['columns'][0]])
-            && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
+        if (
+          $key['unique']
+          && isset($model['fields'][$key['columns'][0]])
+          && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
         ) {
           $st .= 'PRIMARY KEY';
         } elseif ($key['unique']) {
@@ -1428,10 +1412,12 @@ MYSQL
         }
 
         $st .= ' (' . implode(
-          ',', array_map(
+          ',',
+          array_map(
             function ($a) use (&$dbcls) {
               return $dbcls->escape($a);
-            }, $key['columns']
+            },
+            $key['columns']
           )
         ) . ')';
         $st .= $i === $last ? ';' : ',' . PHP_EOL;
@@ -1452,7 +1438,8 @@ MYSQL
 
     if ($model && !empty($model['keys'])) {
       $constraints = array_filter(
-        $model['keys'], function ($a) {
+        $model['keys'],
+        function ($a) {
           return !empty($a['ref_table']) && isset($a['columns']) && (count($a['columns']) === 1);
         }
       );
@@ -1462,8 +1449,8 @@ MYSQL
         foreach ($constraints as $name => $key) {
           $i++;
           $st .= '  ADD ' .
-          'CONSTRAINT ' . $this->db->escape($key['constraint']) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
-          'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
+            'CONSTRAINT ' . $this->db->escape($key['constraint']) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
+            'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
             ($key['delete'] ? ' ON DELETE ' . $key['delete'] : '') .
             ($key['update'] ? ' ON UPDATE ' . $key['update'] : '') .
             ($i === $last ? ';' : ',' . PHP_EOL);
@@ -1543,10 +1530,12 @@ MYSQL
 
         $dbcls = &$this->db;
         $st   .= ' (' . implode(
-          ',', array_map(
+          ',',
+          array_map(
             function ($a) use (&$dbcls) {
               return $dbcls->escape($a);
-            }, $key['columns']
+            },
+            $key['columns']
           )
         ) . ')';
       }
@@ -1557,8 +1546,8 @@ MYSQL
       foreach ($model['keys'] as $name => $key) {
         if (!empty($key['ref_table'])) {
           $st .= ',' . PHP_EOL . '  ' .
-          'CONSTRAINT ' . $this->db->escape($keybase.$i) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
-          'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
+            'CONSTRAINT ' . $this->db->escape($keybase . $i) . ' FOREIGN KEY (' . $this->db->escape($key['columns'][0]) . ') ' .
+            'REFERENCES ' . $this->db->escape($key['ref_table']) . ' (' . $this->db->escape($key['ref_column']) . ')' .
             ($key['delete'] ? ' ON DELETE ' . $key['delete'] : '') .
             ($key['update'] ? ' ON UPDATE ' . $key['update'] : '');
           $i++;
@@ -1605,7 +1594,7 @@ MYSQL
       $name = bbn\Str::cut($name, 50);
       return (bool)$this->db->query(
         'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
-        implode(', ', $column) . ' )'
+          implode(', ', $column) . ' )'
       );
     }
 
@@ -1623,7 +1612,7 @@ MYSQL
   public function deleteIndex(string $table, string $key): bool
   {
     if (($table = $this->tableFullName($table, true))
-        && bbn\Str::checkName($key)
+      && bbn\Str::checkName($key)
     ) {
       return (bool)$this->db->query(
         <<<MYSQL
@@ -1679,13 +1668,12 @@ MYSQL
   {
     if ($this->db->check()) {
       if (!Str::checkName($database)) {
-        throw new \Exception(X::_("Wrong database name")." $database");
+        throw new \Exception(X::_("Wrong database name") . " $database");
       }
 
       try {
         $this->db->rawQuery("DROP DATABASE `$database`");
-      }
-      catch (\Exception $e) {
+      } catch (\Exception $e) {
         return false;
       }
     }
@@ -1709,8 +1697,8 @@ MYSQL
     }
 
     if (($db = $this->escape($db))
-        && bbn\Str::checkName($user, $db)
-        && (strpos($pass, "'") === false)
+      && bbn\Str::checkName($user, $db)
+      && (strpos($pass, "'") === false)
     ) {
       return (bool)$this->db->rawQuery(
         <<<MYSQL
@@ -1909,6 +1897,4 @@ MYSQL
 
     return $sql;
   }
-
-
 }
