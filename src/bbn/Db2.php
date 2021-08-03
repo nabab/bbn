@@ -771,7 +771,7 @@ class Db2 implements Db2\Actions
    * ```
    *
    * @todo Either get rid of th efunction or include the UID types
-   * TODO is this needed?
+   * TODO-testing is this needed?
    * @param null|string $table The table's name.
    * @param int         $min
    * @return mixed
@@ -812,7 +812,7 @@ class Db2 implements Db2\Actions
     return null;
   }
 
-// TODO is this needed?
+// TODO-testing is this used?
   public function rselectRandom($table, array $fields = [], array $where = []):? array
   {
     if ($this->check() && ($num = $this->count($table, $where))) {
@@ -825,7 +825,7 @@ class Db2 implements Db2\Actions
     return null;
   }
 
-  // TODO is this needed?
+  // TODO-testing is this used?
   public function selectRandom($table, array $fields = [], array $where = []):? \stdClass
   {
     if ($this->check() && ($num = $this->count($table, $where))) {
@@ -843,7 +843,7 @@ class Db2 implements Db2\Actions
    * Returns a random value fitting the requested column's type
    *
    * @todo This great function has to be done properly
-   * TODO is this needed?
+   * TODO is this used?
    * @param $col
    * @param $table
    * @return mixed
@@ -1239,7 +1239,7 @@ class Db2 implements Db2\Actions
     return $this->language->selectOne($table, $field, $where, $order, $start);
   }
 
-  // TODO: is this used??
+  // TODO-testing: is this used??
   public function selectUnion(array $union, array $fields = [], array $where = [], array $order = [], int $start = 0):? array
   {
     $cfgs = [];
@@ -1466,7 +1466,7 @@ class Db2 implements Db2\Actions
    * @param array $where The "where" condition
    * @param array $order The "order" condition
    * @return array
-   * // TODO: this method stated that it will return string but actually it returns an array!
+   * // TODO-testing: this method stated that it will return string but actually it returns an array!
    */
   public function getValuesCount($table, string $field = null, array $where = [], array $order = []): array
   {

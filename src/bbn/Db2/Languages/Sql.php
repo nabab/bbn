@@ -230,7 +230,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $params['kind'] = 'PRAGMA';
         }
         else{
-          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
+          throw new \Exception(
+            \defined('BBN_IS_DEV') && BBN_IS_DEV
+              ? "Impossible to parse the query $statement"
+              : 'Impossible to parse the query'
+          );
         }
 
         // This will add to the queries array
@@ -276,7 +280,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $time = $q['last'];
       }
 
-      // That will always contains the parameters of the last query done
+      // That will always contain the parameters of the last query done
 
       $this->addStatement($q['sql'], $params);
       // If the statement is a structure modifier we need to clear the cache

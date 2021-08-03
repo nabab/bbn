@@ -1759,7 +1759,7 @@ MYSQL
       }
 
       if (bbn\Str::checkName($table)) {
-        return $escaped ? $this->qte . $table . $this->qte : $table;
+        return $escaped ? $this->escape($table) : $table;
       }
     }
 
@@ -1787,8 +1787,10 @@ MYSQL
         $ok    = 1;
       }
 
-      if ((null !== $ok) && bbn\Str::checkName($table, $col)) {
-        return $escaped ? $this->qte . $table . $this->qte . '.' . $this->qte . $col . $this->qte : $table . '.' . $col;
+      if ((null !== $ok) && bbn\Str::checkName($table) && bbn\Str::checkName($col)) {
+        return $escaped
+          ? $this->escape("$table.$col")
+          : "$table.$col";
       }
     }
 
@@ -1806,8 +1808,8 @@ MYSQL
   {
     if ($bits = explode('.', $col)) {
       $col = trim(end($bits), ' ' . $this->qte);
-      if (bbn\Str::checkName($col)) {
-        return $escaped ? $this->qte . $col . $this->qte : $col;
+      if ($col && bbn\Str::checkName($col)) {
+        return $escaped ? $this->escape($col) : $col;
       }
     }
 
@@ -1891,11 +1893,11 @@ MYSQL
   public function processCfg(array $args, bool $force = false): ?array
   {
     // Avoid confusion when
-    while (\is_array($args) && isset($args[0]) && \is_array($args[0])){
+    while (isset($args[0]) && \is_array($args[0])) {
       $args = $args[0];
     }
 
-    if (\is_array($args) && !empty($args['bbn_db_processed'])) {
+    if (!empty($args['bbn_db_processed'])) {
       return $args;
     }
 
@@ -1903,7 +1905,6 @@ MYSQL
       $args = $this->_treat_arguments($args);
     }
 
-    //var_dump("UPD0", $args);
     if (isset($args['hash'])) {
       if (isset($this->cfgs[$args['hash']])) {
         return array_merge(
@@ -1958,7 +1959,7 @@ MYSQL
       ) {
         $p                     = $models[$tfn]['fields'][$res['primary']];
         $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');
-        $res['primary_length'] = $p['maxlength'];
+        $res['primary_length'] = $p['maxlength'] ?? null;
         $res['primary_type']   = $p['type'];
         if (($res['kind'] === 'INSERT')
           && !$res['auto_increment']
@@ -2263,7 +2264,7 @@ MYSQL
           throw new \Exception("Impossible to identify the tables, check the log");
         }
 
-        $res['tables'][$i] = $this->tfn($t);
+        $res['tables'][$i] = $this->tableFullName($t);
       }
     }
     else{
@@ -2389,7 +2390,7 @@ MYSQL
       }
     }
 
-    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
+    $res['hash'] = $cfg['hash'] ?? $this->makeHash(
         $res['kind'],
         $res['ignore'],
         $res['count'],
@@ -2407,7 +2408,7 @@ MYSQL
   }
 
   /**
-   * Parses a SQL query and return an array.
+   * Parses an SQL query and return an array.
    *
    * @param string $statement
    * @return null|array
@@ -2932,6 +2933,7 @@ MYSQL
    * ```
    *
    * @return null|array
+   * @throws \Exception
    */
   public function getDatabases(): ?array
   {
@@ -3453,6 +3455,13 @@ MYSQL
   }
 
   /**
+   * Returns an array of fields for the given table(s).
+   *
+   * ```php
+   * X::dump($db->getFieldsList("table_users"));
+   * // (array) ['table_users.username', 'table_users.name']
+   * ```
+   *
    * @param $tables
    * @return array
    * @throws \Exception
@@ -3569,10 +3578,10 @@ MYSQL
    *
    * @param $column
    * @param string $db
-   * @return array|bool
+   * @return array|null
    *
    */
-  public function findReferences($column, string $db = ''): array
+  public function findReferences($column, string $db = ''): ?array
   {
     $changed = false;
     if ($db && ($db !== $this->getCurrent())) {
@@ -3587,7 +3596,7 @@ MYSQL
     }
 
     if (\count($bits) !== 3) {
-      return false;
+      return null;
     }
 
     $refs   = [];
@@ -3765,7 +3774,7 @@ MYSQL
    * @param string $id
    * @return $this
    */
-  public function setLastInsertId($id=''): self
+  public function setLastInsertId($id = ''): self
   {
     if ($id === '') {
       if ($this->id_just_inserted) {
@@ -4062,12 +4071,12 @@ MYSQL
    *        ]
    * ```
    *
-   * @param string|array                                          $table  The table's name or a configuration array
-   * @param string|array                                          $fields The fields's name
-   * @param array                                                 $where  The "where" condition
-   * @param array | boolean The "order" condition, default: false
-   * @param int                                                   $limit  The "limit" condition, default: 0
-   * @param int                                                   $start  The "start" condition, default: 0
+   * @param string|array  $table  The table's name or a configuration array
+   * @param string|array  $fields The fields's name
+   * @param array         $where  The "where" condition
+   * @param array|boolean $order The "order" condition, default: false
+   * @param int           $limit  The "limit" condition, default: 0
+   * @param int           $start  The "start" condition, default: 0
    * @return array
    */
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
@@ -4189,7 +4198,7 @@ MYSQL
    *
    * @param string|array $table The table's name or a configuration array
    * @param array        $where The "where" condition
-   * @return int
+   * @return int|null
    */
   public function count($table, array $where = []): ?int
   {
@@ -4236,7 +4245,7 @@ MYSQL
    * @param array|boolean $order  The "order" condition
    * @param int           $limit  The $limit condition, default: 0
    * @param int           $start  The $limit condition, default: 0
-   * @return array|false
+   * @return array|null
    */
   public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
@@ -4269,7 +4278,7 @@ MYSQL
    * @param string       $column The field's name.
    * @param array        $where  The "where" condition.
    * @param array        $order  The "order" condition.
-   * @return array
+   * @return array|null
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
@@ -4305,7 +4314,7 @@ MYSQL
    * @param array        $order The "order" condition
    * @return array|null
    */
-  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array
+  public function countFieldValues($table, string $field = null, array $where = [], array $order = []): ?array
   {
     if (\is_array($table) && \is_array($table['fields']) && count($table['fields'])) {
       $args  = $table;
@@ -4416,6 +4425,10 @@ MYSQL
    */
   public function insert($table, array $values = null, bool $ignore = false): ?int
   {
+    if (empty($table)) {
+      throw new \Exception(X::_('Table name is not specified'));
+    }
+
     if (\is_array($table) && isset($table['values'])) {
       $values = $table['values'];
     }
@@ -4429,7 +4442,15 @@ MYSQL
       $res = 0;
 
       foreach ($values as $v){
-        $res += $this->insert($table, $v, $ignore);
+        $res += $this->insert(
+          is_array($table)
+            ? ($table['tables'][0] ?? '')
+            : $table,
+          $v,
+          is_array($table)
+          ? ($table['ignore'] ?? $ignore)
+          : $ignore
+        );
       }
 
       return $res;
@@ -4465,6 +4486,9 @@ MYSQL
    */
   public function insertUpdate($table, array $values = null): ?int
   {
+    if (empty($table)) {
+      throw new \Exception(X::_('Table name is not specified'));
+    }
     // Twice the arguments
     if (\is_array($table) && isset($table['values'])) {
       $values = $table['values'];
@@ -4473,7 +4497,12 @@ MYSQL
     if (!X::isAssoc($values)) {
       $res = 0;
       foreach ($values as $v){
-        $res += $this->insertUpdate($table, $v);
+        $res += $this->insertUpdate(
+          is_array($table)
+            ? ($table['tables'][0] ?? $table['table'][0] ?? '')
+            : $table,
+          $v
+        );
       }
 
       return $res;
@@ -4791,7 +4820,7 @@ MYSQL
   /**
    * @returns null|\bbn\Db2\Query|int A selection query or the number of affected rows by a writing query
    */
-  private function _exec()
+  protected function _exec()
   {
     if ($this->check()
       && ($cfg = $this->processCfg(\func_get_args()))

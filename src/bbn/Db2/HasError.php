@@ -190,6 +190,12 @@ trait HasError
     return $this->last_error;
   }
 
+  /**
+   * Checks if the database is ready to process a query.
+   *
+   * @return bool
+   * @throws \Exception
+   */
   public function check(): bool
   {
     if (!property_exists($this, 'current')) {

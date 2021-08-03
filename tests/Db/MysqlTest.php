@@ -3,9 +3,9 @@
 namespace Db;
 
 use bbn\Cache;
-use bbn\Db2;
 use bbn\Db2\Enums\Errors;
 use bbn\Db2\Languages\Mysql;
+use bbn\Db2\Query;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
@@ -17,8 +17,6 @@ class MysqlTest extends TestCase
   use Reflectable, Files;
 
   protected static Mysql $mysql;
-
-  protected static $db_mock;
 
   protected static $real_params_default;
 
@@ -33,9 +31,14 @@ class MysqlTest extends TestCase
     $this->setNonPublicPropertyValue('last_error', null);
     $this->setNonPublicPropertyValue('last_real_params', self::$real_params_default);
     $this->setNonPublicPropertyValue('on_error', Errors::E_STOP);
+    $this->setNonPublicPropertyValue('id_just_inserted', null);
+    $this->setNonPublicPropertyValue('last_insert_id', null);
+    $this->setNonPublicPropertyValue('last_query', null);
+    $this->setNonPublicPropertyValue('current', self::getDbConfig()['db']);
     $this->cleanTestingDir();
     $this->clearCache();
     $this->dropAllTables();
+    self::$mysql->startFancyStuff();
   }
 
   public static function setUpBeforeClass(): void
@@ -55,7 +58,6 @@ class MysqlTest extends TestCase
       putenv("$key=$value");
     }
 
-    self::$db_mock    = \Mockery::mock(Db2::class);
     self::$cache_mock = \Mockery::mock(Cache::class);
 
     self::$mysql = new Mysql(self::getDbConfig());
@@ -118,7 +120,11 @@ class MysqlTest extends TestCase
 
   protected function dropAllTables()
   {
-    foreach (self::$mysql->getTables() as $table) {
+    if (!$tables = self::$mysql->getTables()) {
+      return;
+    }
+
+    foreach ($tables as $table) {
       $this->dropTableIfExists($table);
     }
   }
@@ -131,11 +137,9 @@ class MysqlTest extends TestCase
   protected function setCacheExpectations()
   {
     self::$cache_mock->shouldReceive('get')
-      ->once()
       ->andReturnFalse();
 
     self::$cache_mock->shouldReceive('set')
-      ->once()
       ->andReturnTrue();
   }
 
@@ -150,6 +154,46 @@ class MysqlTest extends TestCase
   {
     \Mockery::close();
     $this->cleanTestingDir();
+  }
+
+  protected function insertOne(string $table, array $params)
+  {
+    $query = "INSERT INTO `$table` SET ";
+
+    foreach ($params as $column => $value) {
+      $query .= "`$column` = '$value', ";
+    }
+
+    self::$connection->query(rtrim($query, ', '));
+  }
+
+  protected function insertMany(string $table, array $params)
+  {
+    foreach ($params as $fields) {
+      if (!is_array($fields)) {
+        continue;
+      }
+
+      $this->insertOne($table, $fields);
+    }
+  }
+
+  protected function assertDatabaseHas(string $table, string $field, string $value)
+  {
+    $record = self::$connection->query(
+      "SELECT $field FROM $table WHERE $field = '$value'"
+    );
+
+    $this->assertTrue($record->rowCount() > 0);
+  }
+
+  protected function assertDatabaseDoesNotHave(string $table, string $field, string $value)
+  {
+    $record = self::$connection->query(
+      "SELECT $field FROM $table WHERE $field = '$value'"
+    );
+
+    $this->assertTrue($record->rowCount() === 0);
   }
 
     /** @test */
@@ -1853,7 +1897,10 @@ first_name ASC';
     );
   }
 
-  /** @test */
+  /**
+   * @test
+   * @depends getDatabases_method_returns_database_names_as_array
+   */
   public function createMysqlDatabase_method_creates_a_database()
   {
     $this->dropDatabaseIfExists('bbn_create_test');
@@ -1868,7 +1915,10 @@ first_name ASC';
     $this->dropDatabaseIfExists('bbn_create_test');
   }
 
-  /** @test */
+  /**
+   * @test
+   * @depends getDatabases_method_returns_database_names_as_array
+   */
   public function createDatabase_method_creates_a_database()
   {
     $this->dropDatabaseIfExists('bbn_create_test');
@@ -1886,6 +1936,8 @@ first_name ASC';
   /**
    * @test
    * @depends createDatabase_method_creates_a_database
+   * @depends getDatabases_method_returns_database_names_as_array
+   *
    */
   public function dropDatabase_method_drops_the_given_database()
   {
@@ -2001,14 +2053,15 @@ first_name ASC';
     });
 
     $text = Str::genpwd(2000, 2000);
-    self::$connection->query("INSERT INTO users set description = '$text'");
+
+    $this->insertOne('users', ['description' => $text]);
 
     $this->assertTrue(self::$mysql->dbSize() > 0);
     $this->assertSame(0, self::$mysql->dbSize('', 'index'));
 
     $this->dropTableIfExists('users');
 
-    // Test with a database different than the current one
+    // Test with a database different from the current one
     $this->dropDatabaseIfExists('size_testing');
     self::$connection->query('CREATE DATABASE size_testing');
 
@@ -2026,7 +2079,8 @@ first_name ASC';
     });
 
     $text = Str::genpwd(5000, 4000);
-    self::$connection->query("INSERT INTO comments set description = '$text'");
+
+    $this->insertOne('comments', ['description' => $text]);
 
     $this->assertTrue(self::$mysql->tableSize('comments') > 0);
     $this->assertSame(0, self::$mysql->tableSize('comments', 'index'));
@@ -2177,6 +2231,2741 @@ first_name ASC';
   {
     $this->assertNull(self::$mysql->tableFullName('test_db*.users'));
     $this->assertNull(self::$mysql->tableFullName('test_db.users**'));
+  }
+
+  /** @test */
+  public function tableSimpleName_method_returns_table_simple_name()
+  {
+    $this->assertSame(
+      'users',
+      self::$mysql->tableSimpleName('db_test.users')
+    );
+
+    $this->assertSame(
+      '`users`',
+      self::$mysql->tableSimpleName('db_test.users', true)
+    );
+
+    $this->assertSame(
+      'users',
+      self::$mysql->tableSimpleName('`db_test`.`users`')
+    );
+
+    $this->assertSame(
+      '`users`',
+      self::$mysql->tableSimpleName('`db_test`.`users`', true)
+    );
+
+    $this->assertSame(
+      'users',
+      self::$mysql->tableSimpleName('users')
+    );
+
+    $this->assertSame(
+      'users',
+      self::$mysql->tableSimpleName('`users`')
+    );
+
+    $this->assertSame(
+      '`users`',
+      self::$mysql->tableSimpleName('`db_test`.`users`.`email`', true)
+    );
+  }
+
+  /** @test */
+  public function tableSimpleName_method_returns_null_when_the_given_table_name_is_not_valid()
+  {
+    $this->assertNull(
+      self::$mysql->tableSimpleName('db_test.users**')
+    );
+
+    $this->assertNull(
+      self::$mysql->tableSimpleName('')
+    );
+  }
+
+  /** @test */
+  public function colFullName_method_returns_column_full_name()
+  {
+    $this->assertSame(
+      'users.email',
+      self::$mysql->colFullName('email', 'users')
+    );
+
+    $this->assertSame(
+      '`users`.`email`',
+      self::$mysql->colFullName('email', 'users', true)
+    );
+
+    $this->assertSame(
+      'users.email',
+      self::$mysql->colFullName('users.email')
+    );
+
+    $this->assertSame(
+      '`users`.`email`',
+      self::$mysql->colFullName('users.email', null, true)
+    );
+
+    $this->assertSame(
+      '`users_2`.`email`',
+      self::$mysql->colFullName('users.email', 'users_2', true)
+    );
+  }
+
+  /** @test */
+  public function colFullName_method_returns_null_when_the_given_col_or_table_names_is_not_valid()
+  {
+    $this->assertNull(
+      self::$mysql->colFullName('')
+    );
+
+    $this->assertNull(
+      self::$mysql->colFullName('email**')
+    );
+
+    $this->assertNull(
+      self::$mysql->colFullName('email', 'users**')
+    );
+
+    $this->assertNull(
+      self::$mysql->colFullName('users**.email')
+    );
+
+    $this->assertNull(
+      self::$mysql->colFullName('users.email**')
+    );
+  }
+
+  /** @test */
+  public function colSimpleName_method_returns_column_simple_name()
+  {
+    $this->assertSame(
+      'email',
+      self::$mysql->colSimpleName('users.email')
+    );
+
+    $this->assertSame(
+      '`email`',
+      self::$mysql->colSimpleName('users.email', true)
+    );
+
+    $this->assertSame(
+      'email',
+      self::$mysql->colSimpleName('db_test.users.email')
+    );
+
+    $this->assertSame(
+      '`email`',
+      self::$mysql->colSimpleName('db_test.users.email', true)
+    );
+
+    $this->assertSame(
+      'email',
+      self::$mysql->colSimpleName('email')
+    );
+
+    $this->assertSame(
+      '`email`',
+      self::$mysql->colSimpleName('email', true)
+    );
+  }
+
+  /** @test */
+  public function colSimpleName_method_returns_null_when_the_given_column_name_is_not_valid()
+  {
+    $this->assertNull(
+      self::$mysql->colSimpleName('users.email**')
+    );
+
+    $this->assertNull(
+      self::$mysql->colSimpleName('db_test.users.email**')
+    );
+
+    $this->assertNull(
+      self::$mysql->colSimpleName('')
+    );
+  }
+
+  /** @test */
+  public function isTableFullName_method_checks_if_the_given_table_name_is_full_name()
+  {
+    $this->assertTrue(
+      self::$mysql->isTableFullName('db.users')
+    );
+
+    $this->assertFalse(
+      self::$mysql->isTableFullName('users')
+    );
+  }
+
+  /** @test */
+  public function isColFullName_method_checks_if_the_given_col_name_is_a_full_name()
+  {
+    $this->assertTrue(
+      self::$mysql->isColFullName('users.email')
+    );
+
+    $this->assertFalse(
+      self::$mysql->isColFullName('email')
+    );
+  }
+
+  /** @test */
+  public function rawQuery_method_executes_the_given_query_using_original_pdo_function()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) NOT NULL';
+    });
+
+    $this->insertOne('users', ['username' => 'foo']);
+
+    $result = self::$mysql->rawQuery("SELECT * FROM users");
+
+    $this->assertInstanceOf(\PDOStatement::class, $result);
+    $this->assertSame('foo', $result->fetchObject()->username);
+  }
+
+  /** @test */
+  public function startFancyStuff_method_sets_the_query_class_as_pdo_derived_statement_class()
+  {
+    self::$mysql->startFancyStuff();
+
+    $result = self::$connection->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+
+    $this->assertIsArray($result);
+    $this->assertSame(Query::class, $result[0]);
+    $this->assertSame(1, $this->getNonPublicProperty('_fancy'));
+  }
+
+  /** @test */
+  public function stopFancyStuff_method_sets_statement_class_to_pdo_statement()
+  {
+    self::$mysql->stopFancyStuff();
+
+    $result = self::$connection->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+
+    $this->assertIsArray($result);
+
+    $this->assertSame(\PDOStatement::class, $result[0]);
+    $this->assertFalse($this->getNonPublicProperty('_fancy'));
+  }
+
+  /** @test */
+  public function parseQuery_method_parses_an_sql_and_return_an_array()
+  {
+    $result = self::$mysql->parseQuery(
+      "SELECT * FROM users WHERE created_at > now()"
+    );
+
+    $this->assertIsArray($result);
+    $this->assertArrayHasKey('SELECT', $result);
+    $this->assertArrayHasKey('FROM', $result);
+    $this->assertArrayHasKey('WHERE', $result);
+
+    $this->assertSame('users', $result['FROM'][0]['table']);
+    $this->assertSame('created_at', $result['WHERE'][0]['base_expr']);
+    $this->assertSame('>', $result['WHERE'][1]['base_expr']);
+    $this->assertSame('now', $result['WHERE'][2]['base_expr']);
+  }
+
+  /** @test */
+  public function parseQuery_method_returns_null_when_the_given_arg_is_not_a_query()
+  {
+    $this->assertNull(
+      self::$mysql->parseQuery('foo')
+    );
+  }
+
+  /** @test */
+  public function getRealLastParams_method_returns_the_last_real_params()
+  {
+    $this->setNonPublicPropertyValue('last_real_params', ['foo' => 'bar']);
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      self::$mysql->getRealLastParams()
+    );
+  }
+
+  /** @test */
+  public function realLast_method_returns_the_real_last_query()
+  {
+    $this->setNonPublicPropertyValue('last_real_query', 'SELECT * FROM users');
+
+    $this->assertSame(
+      'SELECT * FROM users',
+      self::$mysql->realLast()
+    );
+  }
+
+  /** @test */
+  public function getLastValues_method_returns_the_last_params_values()
+  {
+    $this->setNonPublicPropertyValue('last_params', [
+      'values' => ['foo' => 'bar']
+    ]);
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      self::$mysql->getLastValues()
+    );
+
+    $this->setNonPublicPropertyValue('last_params', null);
+
+    $this->assertNull(self::$mysql->getLastValues());
+  }
+
+  /** @test */
+  public function getLastParams_method_returns_the_last_params()
+  {
+    $this->setNonPublicPropertyValue('last_params', [
+      'values' => ['foo' => 'bar']
+    ]);
+
+    $this->assertSame(
+      ['values' => ['foo' => 'bar']],
+      self::$mysql->getLastParams()
+    );
+  }
+
+  /** @test */
+  public function getQueryValues_method_returns_query_values()
+  {
+    $cfg = [
+      'values' => [
+        'id' => '7f4a2c70bcac11eba47652540000cfbe',
+        'username' => 'smith66',
+        'name'     => 'John Doe',
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'created_at' => '2021-07-30 17:04:00',
+        'updated_at' => '2021-07-30 22:04',
+        'role'       => 'user'
+      ],
+      'values_desc' => [
+        'id' => [
+          'type'      => 'binary',
+          'maxlength' => 16,
+        ],
+        'username' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'operator' => 'doesnotcontain'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'operator' => 'contains'
+        ],
+        'first_name' => [
+          'type' => 'varchar',
+          'operator' => 'startswith'
+        ],
+        'last_name' => [
+          'type' => 'varchar',
+          'operator' => 'endswith'
+        ],
+        'created_at' => [
+          'type' => 'datetime'
+        ],
+        'updated_at' => [
+          'type' => 'datetime'
+        ],
+        'role' => [
+          'type' => 'varchar'
+        ]
+      ]
+    ];
+
+    $result   = self::$mysql->getQueryValues($cfg);
+    $expected = [
+      hex2bin('7f4a2c70bcac11eba47652540000cfbe'),
+      "%smith66%",
+      "%John Doe%",
+      "John%",
+      "%Doe",
+      "2021-07-30 17:04:00",
+      "2021-07-30 22:04%",
+      "user"
+    ];
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function getQueryValues_method_returns_empty_array_when_the_given_configuration_has_empty_values_key()
+  {
+    $this->assertSame([], self::$mysql->getQueryValues([]));
+    $this->assertSame([], self::$mysql->getQueryValues(['values' => []]));
+  }
+
+  /** @test */
+  public function remove_conditions_value_removes_values_from_the_given_conditions_array()
+  {
+    $method = $this->getNonPublicMethod('_remove_conditions_value');
+
+    $cfg = [
+      'conditions' => [
+        [
+          'value' => 'foo1',
+          'field' => 'name'
+        ],
+        [
+          'logic'      => 'AND',
+          'conditions' => [
+            [
+              'value' => 'foo2',
+              'field' => 'name2'
+            ],
+            [
+              'value' => 'foo3',
+              'field' => 'name3'
+            ]
+          ]
+        ]
+      ]
+    ];
+
+    $expected = [
+      'hashed' => [
+        'conditions' => [
+          ['field' => 'name'],
+          [
+            'conditions' => [
+              ['field' => 'name2'],
+              ['field' => 'name3']
+            ],
+            'logic'      => 'AND'
+          ]
+        ]
+      ],
+      'values' => [
+        'foo1', 'foo2', 'foo3'
+      ]
+    ];
+
+    $result = $method->invoke(self::$mysql, $cfg);
+
+    $this->assertSame($expected, $result);
+
+    // Another test
+    $this->assertSame(
+      ['hashed' => ['foo' => 'bar'], 'values' => []],
+      $method->invoke(self::$mysql, ['foo' => 'bar'])
+    );
+  }
+
+  /** @test */
+  public function enableTrigger_method_enables_trigger_function()
+  {
+    $this->setNonPublicPropertyValue('_triggers_disabled', true);
+
+    $result = self::$mysql->enableTrigger();
+
+    $this->assertFalse(
+      $this->getNonPublicProperty('_triggers_disabled')
+    );
+
+    $this->assertInstanceOf(Mysql::class, $result);
+  }
+
+  /** @test */
+  public function disableTrigger_method_disables_trigger_functions()
+  {
+    $this->setNonPublicPropertyValue('_triggers_disabled', false);
+
+    $result = self::$mysql->disableTrigger();
+
+    $this->assertTrue(
+      $this->getNonPublicProperty('_triggers_disabled')
+    );
+
+    $this->assertInstanceOf(Mysql::class, $result);
+  }
+
+  /** @test */
+  public function isTriggerEnabled_method_checks_if_trigger_function_is_enabled()
+  {
+    $this->setNonPublicPropertyValue('_triggers_disabled', false);
+
+    $this->assertTrue(
+      self::$mysql->isTriggerEnabled()
+    );
+  }
+
+  /** @test */
+  public function isTriggerDisabled_method_checks_if_trigger_functions_is_disabled()
+  {
+    $this->setNonPublicPropertyValue('_triggers_disabled', true);
+
+    $this->assertTrue(
+      self::$mysql->isTriggerDisabled()
+    );
+  }
+
+  /** @test */
+  public function setTrigger_method_register_a_callback_to_be_applied_every_time_the_methods_kind_are_used()
+  {
+    $db = self::getDbConfig()['db'];
+
+    $default_triggers = $this->getNonPublicProperty('_triggers');
+
+    $this->createTable('users', function () {
+      return 'email varchar(255)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'name varchar(255)';
+    });
+
+    $expected = 'A call back function';
+
+    $result = self::$mysql->setTrigger(function () use ($expected) {
+      return $expected;
+    });
+
+    $this->assertInstanceOf(Mysql::class, $result);
+
+    $triggers = $this->getNonPublicProperty('_triggers');
+
+    $this->assertSame(
+      $expected,
+      $triggers['SELECT']['before']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['SELECT']['before']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['SELECT']['after']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['SELECT']['after']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['INSERT']['before']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['INSERT']['before']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['INSERT']['after']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['INSERT']['after']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['UPDATE']['before']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['UPDATE']['before']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['UPDATE']['after']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['UPDATE']['after']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['DELETE']['before']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['DELETE']['before']["$db.roles"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['DELETE']['after']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['DELETE']['after']["$db.roles"][0]()
+    );
+
+    // Another test
+    $this->setNonPublicPropertyValue('_triggers',  $default_triggers);
+
+    self::$mysql->setTrigger(function () use ($expected) {
+      return $expected;
+    }, 'insert', 'after', 'users');
+
+    $triggers = $this->getNonPublicProperty('_triggers');
+
+    $this->assertSame(
+      $expected,
+      $triggers['INSERT']['after']["$db.users"][0]()
+    );
+
+    // Another test
+    $this->setNonPublicPropertyValue('_triggers',  $default_triggers);
+
+    self::$mysql->setTrigger(function () use ($expected) {
+      return $expected;
+    }, ['insert', 'select'], ['after'], 'users');
+
+    $triggers = $this->getNonPublicProperty('_triggers');
+
+    $this->assertSame(
+      $expected,
+      $triggers['INSERT']['after']["$db.users"][0]()
+    );
+
+    $this->assertSame(
+      $expected,
+      $triggers['SELECT']['after']["$db.users"][0]()
+    );
+
+    $this->setNonPublicPropertyValue('_triggers',  $default_triggers);
+  }
+
+  /** @test */
+  public function getTriggers_method_returns_the_current_triggers()
+  {
+    $this->assertSame(
+      $this->getNonPublicProperty('_triggers'),
+      self::$mysql->getTriggers()
+    );
+  }
+
+  /** @test */
+  public function getDatabases_method_returns_database_names_as_array()
+  {
+    self::$connection->query('CREATE DATABASE get_database_test');
+
+    $result = self::$mysql->getDatabases();
+
+    $this->assertIsArray($result);
+
+    $this->assertTrue(
+      in_array(self::getDbConfig()['db'], $result)
+    );
+
+    $this->assertTrue(
+      in_array('get_database_test', $result)
+    );
+
+    $this->dropDatabaseIfExists('get_database_test');
+  }
+
+  /** @test */
+  public function getDatabases_returns_null_if_current_database_is_not_ready_to_process_a_query()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull($mysql->getDatabases());
+  }
+
+  /** @test */
+  public function getTables_method_returns_tables_names_of_current_database_as_array()
+  {
+    $this->assertEmpty(self::$mysql->getTables());
+
+    $this->createTable('users', function () {
+      return 'username varchar(255)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'name varchar(255)';
+    });
+
+    $result = self::$mysql->getTables();
+
+    $this->assertIsArray($result);
+
+   $this->assertTrue(
+     in_array('users', $result)
+   );
+
+    $this->assertTrue(
+      in_array('roles', $result)
+    );
+  }
+
+  /** @test */
+  public function getTables_method_returns_tables_names_of_the_given_database_as_array()
+  {
+    self::$connection->query("CREATE DATABASE bbn_testing");
+    self::$connection->query("USE bbn_testing");
+
+    $this->createTable('users', function () {
+      return 'username varchar(255)';
+    });
+
+    self::$connection->query("USE " . self::getDbConfig()['db']);
+
+    $result = self::$mysql->getTables('bbn_testing');
+
+    $this->assertIsArray($result);
+
+    $this->assertTrue(
+      in_array('users', $result)
+    );
+
+    $this->assertSame(
+      $this->getNonPublicProperty('current'),
+      self::getDbConfig()['db']
+    );
+
+    $this->dropDatabaseIfExists('bbn_testing');
+  }
+
+  /** @test */
+  public function getTables_method_returns_null_if_the_database_is_not_ready_to_process_a_query()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getTables()
+    );
+  }
+
+  /** @test */
+  public function getColumns_method_returns_column_config_of_the_given_table()
+  {
+    $this->assertEmpty(
+      self::$mysql->getColumns('users')
+    );
+
+    $this->createTable('users', function () {
+      return "id BINARY PRIMARY KEY,
+              username VARCHAR(255) NOT NULL UNIQUE,
+              balance DECIMAL(10, 2) UNSIGNED DEFAULT 0,
+              role ENUM ('Admin', 'User') NOT NULL DEFAULT 'User'
+              ";
+    });
+
+    $result = self::$mysql->getColumns('users');
+
+    $this->assertIsArray($result);
+    $this->assertArrayHasKey('id', $result);
+    $this->assertSame([
+      "position" => 1,
+      "type" => "binary",
+      "null" => 0,
+      "key" => "PRI",
+      "extra" => "",
+      "signed" => true,
+      "virtual" => false,
+      "generation" => "",
+      "maxlength" => 1
+    ], $result['id']);
+
+    $this->assertArrayHasKey('username', $result);
+    $this->assertSame([
+      "position" => 2,
+      "type" => "varchar",
+      "null" => 0,
+      "key" => "UNI",
+      "extra" => "",
+      "signed" => true,
+      "virtual" => false,
+      "generation" => "",
+      "maxlength" => 255
+    ], $result['username']);
+
+    $this->assertArrayHasKey('balance', $result);
+    $this->assertSame([
+      "position" => 3,
+      "type" => "decimal",
+      "null" => 1,
+      "key" => null,
+      "extra" => "",
+      "signed" => false,
+      "virtual" => false,
+      "generation" => "",
+      "default" => 0.0,
+      "maxlength" => 10,
+      "decimals" => 2,
+    ], $result['balance']);
+
+    $this->assertArrayHasKey('role', $result);
+    $this->assertSame([
+      "position" => 4,
+      "type" => "enum",
+      "null" => 0,
+      "key" => null,
+      "extra" => "'Admin','User'",
+      "signed" => true,
+      "virtual" => false,
+      "generation" => "",
+      "default" => "User",
+      "values" => [
+        "Admin", "User"
+      ],
+    ], $result['role']);
+  }
+
+  /** @test */
+  public function getColumns_method_returns_null_if_the_database_is_not_ready_to_process_the_query()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getColumns('users')
+    );
+  }
+
+  /** @test */
+  public function getRows_method_returns_an_array_of_indexed_arrays_for_every_row_as_a_query_result()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->assertEmpty(self::$mysql->getRows("SELECT * FROM users"));
+
+    $this->insertMany('users', [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2'],
+    ]);
+
+    $expected = [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2'],
+    ];
+
+    $this->assertSame($expected, self::$mysql->getRows("SELECT * FROM users"));
+  }
+
+  /** @test */
+  public function getRows_method_returns_null_when_query_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull($mysql->getRows('SELECT * FROM users'));
+  }
+
+  /** @test */
+  public function getRow_method_returns_the_first_row_resulting_from_a_query_as_array_indexed_with_field_name()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->assertEmpty(self::$mysql->getRow("SELECT * FROM users"));
+
+    $this->insertMany('users', [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2'],
+    ]);
+
+    $this->assertSame(
+      ['username' => 'john_doe'],
+      self::$mysql->getRow("SELECT * FROM users")
+    );
+  }
+
+  /** @test */
+  public function getRow_method_returns_null_when_query_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getRow('SELECT * FROM users')
+    );
+  }
+  
+  /** @test */
+  public function getIrow_method_returns_the_first_raw_resulting_from_a_query_as_numeric_indexed_array()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->assertEmpty(self::$mysql->getIrow("SELECT * FROM users"));
+
+    $this->insertMany('users', [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2']
+    ]);
+
+    $this->assertSame(
+      ['john_doe'],
+      self::$mysql->getIrow("SELECT * FROM users")
+    );
+  }
+
+  /** @test */
+  public function getIrow_method_returns_null_when_query_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getIrow('SELECT * FROM users')
+    );
+  }
+
+  /** @test */
+  public function getIrows_method_returns_all_rows_resulting_from_a_query_as_numeric_indexed_array()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->assertEmpty(self::$mysql->getIrows("SELECT * FROM users"));
+
+    $this->insertMany('users', [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2']
+    ]);
+
+    $expected = [
+      ['john_doe'],
+      ['john_doe_2'],
+    ];
+
+    $this->assertSame($expected, self::$mysql->getIrows("SELECT * FROM users"));
+  }
+
+  /** @test */
+  public function getIrows_method_returns_null_when_query_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getIrows('SELECT * FROM users')
+    );
+  }
+
+  /** @test */
+  public function getByColumns_method_returns_an_indexed_array_by_the_searched_field()
+  {
+    $this->createTable('users', function () {
+      return 'email VARCHAR(255), username VARCHAR(255), name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      [
+        'name'  => 'john',
+        'email' => 'jdoe@example.com',
+        'username' => 'jdoe',
+      ],
+      [
+        'name'  => 'smith',
+        'email' => 'sdoe@example.com',
+        'username' => 'sdoe',
+      ],
+    ]);
+
+    $result   = self::$mysql->getByColumns('SELECT name, email, username FROM users');
+    $expected = [
+      'name'     => ['john', 'smith'],
+      'email'    => ['jdoe@example.com', 'sdoe@example.com'],
+      'username' => ['jdoe', 'sdoe']
+    ];
+
+   $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function getObject_method_returns_the_first_row_resulting_from_a_query_as_object()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2']
+    ]);
+
+    $result = self::$mysql->getObject("SELECT * FROM users");
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('username', $result);
+    $this->assertSame('john_doe', $result->username);
+  }
+
+  /** @test */
+  public function getObjects_method_returns_an_array_of_objects_resulting_from_a_query()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'john_doe'],
+      ['username' => 'john_doe_2']
+    ]);
+
+    $result = self::$mysql->getObjects("SELECT * FROM users");
+
+    $this->assertIsArray($result);
+    $this->assertCount(2, $result);
+    $this->assertIsObject($result[0]);
+    $this->assertIsObject($result[1]);
+    $this->assertSame('john_doe', $result[0]->username);
+    $this->assertSame('john_doe_2', $result[1]->username);
+  }
+
+  /** @test */
+  public function getKeys_method_returns_the_keys_of_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'name VARCHAR(255)';
+    });
+
+    $this->assertEmpty(
+      self::$mysql->getKeys('SELECT * FROM USERS')
+    );
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              created_at DATETIME DEFAULT NULL,
+              role_id INT(11)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_role_id`
+       FOREIGN KEY (role_id) REFERENCES roles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    $result   = self::$mysql->getKeys('users');
+    $expected = [
+      'keys' => [
+        'PRIMARY' => [
+          'columns' => ['id'],
+          'ref_db' => null,
+          'ref_table' => null,
+          'ref_column' => null,
+          'constraint' => null,
+          'update' => null,
+          'delete' => null,
+          'unique' => 1
+        ],
+        'username' => [
+          'columns' => ['username'],
+          'ref_db' => null,
+          'ref_table' => null,
+          'ref_column' => null,
+          'constraint' => null,
+          'update' => null,
+          'delete' => null,
+          'unique' => 1
+        ],
+        'user_role_id' => [
+          'columns' => ['role_id'],
+          'ref_db'   => self::getDbConfig()['db'],
+          'ref_table' => 'roles',
+          'ref_column' => 'id',
+          'constraint' => 'user_role_id',
+          'update' => 'CASCADE',
+          'delete' => 'RESTRICT',
+          'unique' => 0
+        ]
+      ],
+      'cols' => [
+        'id' => ['PRIMARY'],
+        'username' => ['username'],
+        'role_id' => ['user_role_id']
+      ]
+    ];
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function getKeys_method_returns_null_if_the_database_is_not_ready_to_process_a_query()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getKeys('SELECT * FROM USER')
+    );
+  }
+
+  /** @test */
+  public function getFieldsList_method_returns_fields_list_for_the_given_tables()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255), name VARCHAR(255)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'name VARCHAR(255)';
+    });
+
+    $this->assertSame(
+      ['users.username', 'users.name'],
+      self::$mysql->getFieldsList('users')
+    );
+
+    $this->assertSame(
+      ['users.username', 'users.name', 'roles.name'],
+      self::$mysql->getFieldsList(['users', 'roles'])
+    );
+  }
+
+  /** @test */
+  public function getFieldsList_method_throws_an_exception_when_table_not_found()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->getFieldsList('users');
+  }
+
+  /** @test */
+  public function getForeignKeys_method_returns_an_array_of_tables_and_fields_related_to_the_given_foreign_key()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              created_at DATETIME DEFAULT NULL,
+              role_id INT(11)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_role_id`
+       FOREIGN KEY (role_id) REFERENCES roles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+      $this->assertSame(
+        [self::getDbConfig()['db'] . '.users' => ['role_id']],
+        self::$mysql->getForeignKeys('id', 'roles')
+      );
+
+    $this->assertSame(
+      [],
+      self::$mysql->getForeignKeys('id', 'roles', 'another_db')
+    );
+
+      $this->assertSame(
+        [],
+        self::$mysql->getForeignKeys('role_id', 'users')
+      );
+  }
+
+  /** @testing */
+  public function hasIdIncrement_method_returns_if_the_given_table_has_auto_increment_fields()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(255)';
+    });
+
+    $this->assertFalse(
+      self::$mysql->hasIdIncrement('users')
+    );
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT';
+    });
+
+    $this->assertTrue(
+      self::$mysql->hasIdIncrement('users')
+    );
+  }
+
+  /** @test */
+  public function fmodelize_method_returns_fields_structure_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE DEFAULT NULL';
+    });
+
+    $this->setCacheExpectations();
+
+    $result   = self::$mysql->fmodelize('users');
+    $expected = [
+      'id' => [
+        'position'  => 1,
+        'type'      => 'int',
+        'null'      => 0,
+        'key'       => 'PRI',
+        'extra'     => 'auto_increment',
+        'signed'    => true,
+        'virtual'   => false,
+        'generation'  => '',
+        'name' => 'id',
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => ['id'],
+            'ref_db' => null,
+            'ref_table' => null,
+            'ref_column' => null,
+            'constraint' => null,
+            'update' => null,
+            'delete' => null,
+            'unique' => 1
+          ],
+        ]
+      ],
+      'username' => [
+        'position'  => 2,
+        'type'      => 'varchar',
+        'null'      => 1,
+        'key'       => 'UNI',
+        'extra'     => '',
+        'signed'    => true,
+        'virtual'   => false,
+        'generation'  => '',
+        'default'    => 'NULL',
+        'maxlength' => 255,
+        'name' => 'username',
+        'keys' => [
+          'username' => [
+            'columns' => ['username'],
+            'ref_db' => null,
+            'ref_table' => null,
+            'ref_column' => null,
+            'constraint' => null,
+            'update' => null,
+            'delete' => null,
+            'unique' => 1
+          ]
+        ]
+      ]
+    ];
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function fmodelize_method_returns_null_when_modelize_returns_null()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('modelize')
+      ->once()
+      ->andReturnNull();
+
+    $this->assertNull(
+      $mysql->fmodelize('users')
+    );
+  }
+
+  /** @test */
+  public function findReferences_method_returns_an_array_with_foreign_key_references_for_the_given_column()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              created_at DATETIME DEFAULT NULL,
+              role_id INT(11)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_role_id`
+       FOREIGN KEY (role_id) REFERENCES roles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    $this->setCacheExpectations();
+
+    $this->assertSame(
+      [self::getDbConfig()['db'] . '.users.role_id'],
+      self::$mysql->findReferences('roles.id')
+    );
+
+    $this->assertSame(
+      [],
+      self::$mysql->findReferences('users.role_id')
+    );
+  }
+
+  /** @test */
+  public function findReferences_method_returns_Null_if_the_provided_column_name_does_not_have_table_name()
+  {
+    $this->assertNull(
+      self::$mysql->findReferences('role_id')
+    );
+  }
+
+  /** @test */
+  public function findReferences_method_returns_an_array_with_foreign_key_references_for_a_different_database()
+  {
+    self::$connection->query('CREATE DATABASE IF NOT EXISTS testing_db');
+    self::$connection->query('use testing_db');
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              role_id INT(11)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_role_id`
+       FOREIGN KEY (role_id) REFERENCES roles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    self::$connection->query('use ' . self::getDbConfig()['db']);
+
+    $this->setCacheExpectations();
+
+    $this->assertSame(
+      ['testing_db.users.role_id'],
+      self::$mysql->findReferences('roles.id', 'testing_db')
+    );
+
+    $this->assertSame(self::getDbConfig()['db'], self::$mysql->getCurrent());
+
+    $this->dropDatabaseIfExists('testing_db');
+  }
+
+  /** @test */
+  public function findRelations_method_returns_an_array_of_a_table_that_has_relations_to_more_than_one_tables()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              role_id INT(11),
+              profile_id INT(11)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    $this->createTable('profiles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_role`
+       FOREIGN KEY (role_id) REFERENCES roles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_profile`
+       FOREIGN KEY (profile_id) REFERENCES profiles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    $result   = self::$mysql->findRelations('roles.id');
+    $expected = [
+      'users' => [
+        'column' => 'role_id',
+        'refs' => [
+          'profile_id' => 'profiles.id'
+        ]
+      ]
+    ];
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function findRelations_method_returns_an_array_of_a_table_that_has_relations_to_more_than_one_tables_for_different_database()
+  {
+    self::$connection->query('CREATE DATABASE IF NOT EXISTS db_testing');
+    self::$connection->query('use db_testing');
+
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              role_id INT(11),
+              profile_id INT(11)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    $this->createTable('profiles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_role`
+       FOREIGN KEY (role_id) REFERENCES roles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    self::$connection->query(
+      'ALTER TABLE users ADD CONSTRAINT `user_profile`
+       FOREIGN KEY (profile_id) REFERENCES profiles (id) 
+       ON UPDATE CASCADE ON DELETE RESTRICT'
+    );
+
+    $result   = self::$mysql->findRelations('roles.id', 'db_testing');
+    $expected = [
+      'users' => [
+        'column' => 'role_id',
+        'refs' => [
+          'profile_id' => 'profiles.id'
+        ]
+      ]
+    ];
+
+    $this->assertSame($expected, $result);
+
+    $this->assertSame(
+      self::getDbConfig()['db'],
+      self::$mysql->getCurrent()
+    );
+
+    $this->dropDatabaseIfExists('db_testing');
+  }
+
+  /** @test */
+  public function findRelations_method_returns_null_when_the_given_name_does_not_has_table_name()
+  {
+    $this->assertNull(
+      self::$mysql->findRelations('id')
+    );
+  }
+
+  /** @test */
+  public function getPrimary_method_returns_primary_keys_of_the_given_table_as_an_array()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'name VARCHAR(255)';
+    });
+
+    $this->assertSame(
+      ['id'],
+      self::$mysql->getPrimary('users')
+    );
+
+    $this->assertSame(
+      [],
+      self::$mysql->getPrimary('roles')
+    );
+  }
+
+  /** @test */
+  public function getUniquePrimary_method_returns_the_unique_primary_key_of_the_given_table_as_string()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255)';
+    });
+
+    $this->createTable('roles', function () {
+      return 'name VARCHAR(255)';
+    });
+
+    $this->assertSame(
+      'id',
+      self::$mysql->getUniquePrimary('users')
+    );
+
+    $this->assertNull(
+      self::$mysql->getUniquePrimary('roles')
+    );
+  }
+
+  /** @test */
+  public function getUniqueKeys_method_returns_the_unique_keys_of_the_given_table_as_an_array()
+  {
+    $this->createTable('users', function () {
+      return 'username VARCHAR(22) NOT NULL, 
+      email VARCHAR(100) UNIQUE NOT NULL,
+      name VARCHAR(200) NOT NULL,
+      UNIQUE INDEX (username, email)';
+    });
+
+    $this->assertSame(
+      ['email'],
+      self::$mysql->getUniqueKeys('users')
+    );
+
+    $this->createTable('users', function () {
+      return 'username VARCHAR(22) NOT NULL, 
+      email VARCHAR(100) NOT NULL,
+      name VARCHAR(200) NOT NULL,
+      UNIQUE INDEX (username, email)';
+    });
+
+    $this->assertSame(
+      ['username', 'email'],
+      self::$mysql->getUniqueKeys('users')
+    );
+  }
+
+  /** @test */
+  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_for_the_given_id()
+  {
+    $this->setNonPublicPropertyValue('id_just_inserted', 22);
+    $this->setNonPublicPropertyValue('last_insert_id', 22);
+
+    $result = self::$mysql->setLastInsertId(44);
+
+    $this->assertSame(
+      44,
+      $this->getNonPublicProperty('last_insert_id')
+    );
+
+    $this->assertSame(
+      44,
+      $this->getNonPublicProperty('id_just_inserted')
+    );
+
+    $this->assertInstanceOf(Mysql::class, $result);
+  }
+
+  /** @test */
+  public function setLastInsertId_method_does_not_change_the_value_of_last_inserted_id_if_no_insert_query_performed()
+  {
+    self::$mysql->setLastInsertId();
+
+    $this->assertNull(
+      $this->getNonPublicProperty('id_just_inserted')
+    );
+
+    $this->assertSame(
+      0,
+      $this->getNonPublicProperty('last_insert_id')
+    );
+  }
+
+  /** @test */
+  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_from_last_insert_query()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, email VARCHAR(25)';
+    });
+
+    $this->insertOne('users', ['email' => 'mail@test.com']);
+
+    self::$mysql->setLastInsertId();
+
+    $this->assertSame(
+      1,
+      $this->getNonPublicProperty('last_insert_id')
+    );
+
+    $this->assertNull(
+      $this->getNonPublicProperty('id_just_inserted')
+    );
+  }
+
+  /** @test */
+  public function setLastInsertId_method_changes_the_value_of_last_inserted_id_from_id_just_inserted_property_when_not_null_ignoring_last_query()
+  {
+    $this->setNonPublicPropertyValue('id_just_inserted', 333);
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, email VARCHAR(25)';
+    });
+
+    $this->insertOne('users', ['email' => 'mail@test.com']);
+
+    self::$mysql->setLastInsertId();
+
+    $this->assertSame(
+      333,
+      $this->getNonPublicProperty('last_insert_id')
+    );
+  }
+
+  /** @test */
+  public function lastId_method_returns_the_last_inserted_id()
+  {
+    $this->setNonPublicPropertyValue('last_insert_id', 234);
+
+    $this->assertSame(234, self::$mysql->lastId());
+
+    $this->setNonPublicPropertyValue(
+      'last_insert_id',
+      hex2bin('7f4a2c70bcac11eba47652540000cfaa')
+    );
+
+    $this->assertSame(
+      '7f4a2c70bcac11eba47652540000cfaa',
+      self::$mysql->lastId()
+    );
+
+    $this->setNonPublicPropertyValue('last_insert_id', null);
+
+    $this->assertFalse(self::$mysql->lastId());
+  }
+
+  /** @test */
+  public function last_method_returns_the_last_for_the_current_connection()
+  {
+    $this->setNonPublicPropertyValue(
+      'last_query',
+      'SELECT * FROM users'
+    );
+
+    $this->assertSame(
+      'SELECT * FROM users',
+      self::$mysql->last()
+    );
+  }
+
+  /** @test */
+  public function countQueries_method_returns_the_count_of_queries()
+  {
+    $this->setNonPublicPropertyValue('queries', ['foo' => 'bar', 'bar' => 'foo']);
+
+    $this->assertSame(2, self::$mysql->countQueries());
+  }
+
+  /** @test */
+  public function flush_method_deletes_all_the_recorded_queries_and_returns_their_count()
+  {
+    $this->setNonPublicPropertyValue('queries', ['foo' => 'bar', 'bar' => 'foo']);
+
+    $result = self::$mysql->flush();
+
+    $this->assertSame([], $this->getNonPublicProperty('queries'));
+    $this->assertSame([], $this->getNonPublicProperty('list_queries'));
+
+    $this->assertSame(2, $result);
+  }
+
+  /** @test */
+  public function getOne_method_executes_the_given_query_and_extracts_the_first_column_result()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              username VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'foo'],
+      ['username' => 'bar'],
+    ]);
+
+    $this->assertSame(
+      'foo',
+      self::$mysql->getOne("SELECT username FROM users WHERE id = ?", 1)
+    );
+  }
+
+  /** @test */
+  public function getOne_method_returns_false_when_query_returns_false()
+  {
+    $this->assertFalse(
+      self::$mysql->getOne('SELECT username FROM users WHERE id = ?', 1)
+    );
+  }
+
+  /** @test */
+  public function getKeyVal_method_returns_an_array_indexed_with_the_first_field_of_the_request()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              username VARCHAR(255), 
+              email VARCHAR(255), 
+              name VARCHAR(255)';
+    });
+
+    $this->assertEmpty(
+      self::$mysql->getKeyVal('SELECT * FROM users')
+    );
+
+    $this->insertMany('users', [
+      [
+        'username' => 'jdoe',
+        'name'     => 'John Doe',
+        'email'    => 'jdoe@mail.com'
+      ],
+      [
+        'username' => 'sdoe',
+        'name'     => 'Smith Doe',
+        'email'    => 'sdoe@mail.com'
+      ]
+    ]);
+
+
+    $this->assertSame(
+      [
+        'jdoe' => [
+          'name'  => 'John Doe',
+          'email' => 'jdoe@mail.com'
+        ],
+        'sdoe' => [
+          'name'  => 'Smith Doe',
+          'email' => 'sdoe@mail.com'
+        ],
+      ],
+      self::$mysql->getKeyVal('SELECT username, name, email FROM users')
+    );
+
+    $this->assertSame(
+      [
+        'jdoe' => [
+          'name'  => 'John Doe',
+          'email' => 'jdoe@mail.com'
+        ]
+      ],
+      self::$mysql->getKeyVal('SELECT username, name, email FROM users WHERE id = ?', 1)
+    );
+
+    $this->assertSame(
+      [
+        1 => [
+          'username' => 'jdoe',
+          'email' => 'jdoe@mail.com',
+          'name' => 'John Doe'
+        ],
+        2 => [
+          'username' => 'sdoe',
+          'email' => 'sdoe@mail.com',
+          'name' => 'Smith Doe'
+        ]
+      ],
+      self::$mysql->getKeyVal('SELECT * FROM users')
+    );
+  }
+
+  /** @test */
+  public function getKeyVal_method_returns_null_when_query_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->getKeyVal('SELECT * FROM users')
+    );
+  }
+
+  /** @test */
+  public function getColArray_method_returns_an_array_of_the_values_of_single_field_as_result_from_query()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              username VARCHAR(255)';
+    });
+
+    $this->assertEmpty(
+      self::$mysql->getColArray('SELECT id FROM users')
+    );
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe'],
+      ['username' => 'sdoe'],
+    ]);
+
+    $this->assertSame(
+      [1, 2],
+      self::$mysql->getColArray('SELECT id FROM users')
+    );
+
+    $this->assertSame(
+      [1, 2],
+      self::$mysql->getColArray('SELECT id, username FROM users')
+    );
+
+    $this->assertSame(
+      [1, 2],
+      self::$mysql->getColArray('SELECT * FROM users')
+    );
+
+    $this->assertSame(
+      ['jdoe', 'sdoe'],
+      self::$mysql->getColArray('SELECT username FROM users')
+    );
+
+    $this->assertSame(
+      ['jdoe', 'sdoe'],
+      self::$mysql->getColArray('SELECT username, id FROM users')
+    );
+  }
+
+  /** @test */
+  public function select_method_returns_the_first_row_resulting_from_query_as_an_object()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              username VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe'],
+      ['username' => 'sdoe'],
+    ]);
+
+    $result = self::$mysql->select('users', ['id', 'username']);
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('id', $result);
+    $this->assertSame(1, $result->id);
+    $this->assertObjectHasAttribute('username', $result);
+    $this->assertSame('jdoe', $result->username);
+
+    $result = self::$mysql->select('users', 'id');
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('id', $result);
+    $this->assertSame(1, $result->id);
+    $this->assertObjectNotHasAttribute('username', $result);
+
+    $result = self::$mysql->select('users', [], ['id'], ['id' => 'DESC']);
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('id', $result);
+    $this->assertSame(2, $result->id);
+    $this->assertObjectHasAttribute('username', $result);
+    $this->assertSame('sdoe', $result->username);
+
+    $result = self::$mysql->select('users', [], ['id'], ['id' => 'ASC'], 1);
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('id', $result);
+    $this->assertSame(2, $result->id);
+    $this->assertObjectHasAttribute('username', $result);
+    $this->assertSame('sdoe', $result->username);
+
+    $this->assertNull(
+      self::$mysql->select('users', [], ['id' => 33])
+    );
+
+    $this->assertNull(
+      self::$mysql->select('users', [], [], [], 3)
+    );
+  }
+
+  /** @test */
+  public function selectAll_method_returns_table_rows_resulting_from_query_as_an_array_of_objects()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              username VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe'],
+      ['username' => 'sdoe'],
+    ]);
+
+    $result = self::$mysql->selectAll('users', []);
+
+    $this->assertIsArray($result);
+    $this->assertCount(2, $result);
+
+    $this->assertIsObject($result[0]);
+    $this->assertObjectHasAttribute('id', $result[0]);
+    $this->assertObjectHasAttribute('username', $result[0]);
+    $this->assertSame(1, $result[0]->id);
+    $this->assertSame('jdoe', $result[0]->username);
+
+    $this->assertIsObject($result[1]);
+    $this->assertObjectHasAttribute('id', $result[1]);
+    $this->assertObjectHasAttribute('username', $result[1]);
+    $this->assertSame(2, $result[1]->id);
+    $this->assertSame('sdoe', $result[1]->username);
+
+    $result = self::$mysql->selectAll('users', 'username', [], ['id' => 'DESC']);
+
+    $this->assertIsArray($result);
+    $this->assertCount(2, $result);
+
+    $this->assertIsObject($result[0]);
+    $this->assertObjectHasAttribute('username', $result[0]);
+    $this->assertSame('sdoe', $result[0]->username);
+
+    $this->assertIsObject($result[1]);
+    $this->assertObjectHasAttribute('username', $result[1]);
+    $this->assertSame('jdoe', $result[1]->username);
+
+    $result = self::$mysql->selectAll('users', 'username', [], ['id' => 'DESC'], 1);
+
+    $this->assertIsArray($result);
+    $this->assertCount(1, $result);
+
+    $this->assertIsObject($result[0]);
+    $this->assertObjectHasAttribute('username', $result[0]);
+    $this->assertSame('sdoe', $result[0]->username);
+
+    $this->assertSame(
+      [],
+      self::$mysql->selectAll('users', [], ['id' => 33])
+    );
+
+    $this->assertSame(
+      [],
+      self::$mysql->selectAll('users', [], [], [], 1, 3)
+    );
+  }
+
+  /** @test */
+  public function selectAll_method_returns_null_when_exec_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)
+      ->shouldAllowMockingProtectedMethods()
+      ->makePartial();
+
+    $mysql->shouldReceive('_exec')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->selectAll('user', [])
+    );
+  }
+
+  /** @test */
+  public function iselect_method_returns_the_first_row_resulting_from_query_as_numeric_array()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe'],
+    ]);
+
+    $this->assertSame(
+      [1, 'jdoe', 'John Doe'],
+      self::$mysql->iselect('users', [])
+    );
+
+    $this->assertSame(
+      ['jdoe'],
+      self::$mysql->iselect('users', 'username')
+    );
+
+    $this->assertSame(
+      [1, 'jdoe'],
+      self::$mysql->iselect('users', ['id', 'username'])
+    );
+
+    $this->assertSame(
+      [2, 'sdoe'],
+      self::$mysql->iselect('users', ['id', 'username'], [], [], 1)
+    );
+
+    $this->assertSame(
+      [2, 'sdoe'],
+      self::$mysql->iselect('users', ['id', 'username'], [],['id' => 'DESC'])
+    );
+
+    $this->assertNull(
+      self::$mysql->iselect('users', [], ['id' => 44])
+    );
+  }
+
+  /** @test */
+  public function iselectAll_method_returns_all_results_from_query_as_an_array_of_numeric_arrays()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255) NOT NULL';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      [
+        [1, 'jdoe', 'John Doe'],
+        [2, 'sdoe', 'Smith Doe']
+      ],
+      self::$mysql->iselectAll('users', [])
+    );
+
+    $this->assertSame(
+      [
+        ['jdoe'],
+        ['sdoe']
+      ],
+      self::$mysql->iselectAll('users', 'username')
+    );
+
+    $this->assertSame(
+      [
+        [1, 'John Doe'],
+        [2, 'Smith Doe']
+      ],
+      self::$mysql->iselectAll('users', ['id', 'name'])
+    );
+
+    $this->assertSame(
+      [
+        [2, 'Smith Doe']
+      ],
+      self::$mysql->iselectAll('users', ['id', 'name'], ['id' => 2])
+    );
+
+    $this->assertSame(
+      [
+        [2, 'Smith Doe'],
+        [1, 'John Doe']
+      ],
+      self::$mysql->iselectAll('users', ['id', 'name'], [], ['id' => 'DESC'])
+    );
+
+    $this->assertSame(
+      [
+        [2, 'Smith Doe']
+      ],
+      self::$mysql->iselectAll('users', ['id', 'name'], [], ['id' => 'DESC'], 1)
+    );
+
+    $this->assertEmpty(
+      self::$mysql->iselectAll('users', [], ['id' => 11])
+    );
+  }
+
+  /** @test */
+  public function iselectAll_method_returns_null_when_exec_function_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)
+      ->shouldAllowMockingProtectedMethods()
+      ->makePartial();
+
+    $mysql->shouldReceive('_exec')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->iselectAll('users', [])
+    );
+  }
+
+  /** @test */
+  public function rselect_method_returns_the_first_row_resulting_from_the_query_as_indexed_array()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      ['id' => 1, 'username' => 'jdoe', 'name' => 'John Doe'],
+      self::$mysql->rselect('users', [])
+    );
+
+    $this->assertSame(
+      ['id' => 2, 'username' => 'sdoe', 'name' => 'Smith Doe'],
+      self::$mysql->rselect('users', [], ['id' => 2])
+    );
+
+    $this->assertSame(
+      ['username' => 'sdoe'],
+      self::$mysql->rselect('users', 'username', [], ['id' => 'DESC'])
+    );
+
+    $this->assertSame(
+      ['id' => 2, 'username' => 'sdoe'],
+      self::$mysql->rselect('users', ['id', 'username'], [], [], 1)
+    );
+
+    $this->assertNull(
+      self::$mysql->rselect('users', ['id', 'username'], [], [], 3)
+    );
+
+    $this->assertNull(
+      self::$mysql->rselect('users', ['id', 'username'], ['id' => 33])
+    );
+  }
+
+  /** @test */
+  public function rselectAll_method_returns_query_results_as_an_array_of_indexed_arrays()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      [
+        [
+          'id' => 1,
+          'username' => 'jdoe',
+          'name' => 'John Doe'
+        ],
+        [
+          'id' => 2,
+          'username' => 'sdoe',
+          'name' => 'Smith Doe'
+        ]
+      ],
+      self::$mysql->rselectAll('users', [])
+    );
+
+    $this->assertSame(
+      [
+        [ 'username' => 'jdoe'],
+        ['username' => 'sdoe']
+      ],
+      self::$mysql->rselectAll('users', 'username')
+    );
+
+    $this->assertSame(
+      [
+        [
+          'id' => 2,
+          'name' => 'Smith Doe'
+        ],
+        [
+          'id' => 1,
+          'name' => 'John Doe'
+        ]
+      ],
+      self::$mysql->rselectAll('users', ['id', 'name'], [], ['id' => 'DESC'])
+    );
+
+    $this->assertSame(
+      [
+        [
+          'id' => 2,
+          'name' => 'Smith Doe'
+        ]
+      ],
+      self::$mysql->rselectAll('users', ['id', 'name'], [], [], 1, 1)
+    );
+
+    $this->assertEmpty(
+      self::$mysql->rselectAll('users', [], ['id' => 44])
+    );
+
+    $this->assertEmpty(
+      self::$mysql->rselectAll('users', [], [], [], 1, 33)
+    );
+  }
+
+  /** @test */
+  public function selectOne_method_returns_a_single_value_from_the_given_field_name()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      'jdoe',
+      self::$mysql->selectOne('users', 'username')
+    );
+
+    $this->assertSame(
+      1,
+      self::$mysql->selectOne('users')
+    );
+
+    $this->assertSame(
+      'Smith Doe',
+      self::$mysql->selectOne('users', 'name', ['id' => 2])
+    );
+
+    $this->assertSame(
+      'Smith Doe',
+      self::$mysql->selectOne('users', 'name', [], ['id' => 'DESC'])
+    );
+
+    $this->assertSame(
+      'Smith Doe',
+      self::$mysql->selectOne('users', 'name', [], [], 1)
+    );
+
+    $this->assertFalse(
+      self::$mysql->selectOne('users', 'username', ['id' => 333])
+    );
+
+    $this->assertFalse(
+      self::$mysql->selectOne('users', 'username', [], [], 44)
+    );
+  }
+
+  /** @test */
+  public function count_method_returns_the_number_of_records_in_the_table_for_the_given_arguments()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(25) NOT NULL UNIQUE';
+    });
+
+    $this->insertMany('users',[
+      ['username' => 'jdoe'], ['username' => 'sdoe']
+    ]);
+
+    $this->assertSame(2, self::$mysql->count('users'));
+    $this->assertSame(1, self::$mysql->count('users', ['username' => 'jdoe']));
+    $this->assertSame(0, self::$mysql->count('users', ['id' => 22]));
+
+    $this->assertSame(1, self::$mysql->count([
+      'table' => ['users'],
+      'where' => ['username' => 'sdoe']
+    ]));
+
+    $this->assertSame(1, self::$mysql->count([
+      'tables' => ['users'],
+      'where' => ['username' => 'sdoe']
+    ]));
+
+    $this->assertSame(2, self::$mysql->count([
+      'tables' => ['users']
+    ]));
+  }
+
+  /** @test */
+  public function count_method_returns_null_when_exec_returns_non_object()
+  {
+    $mysql = \Mockery::mock(Mysql::class)
+      ->makePartial()
+      ->shouldAllowMockingProtectedMethods();
+
+    $mysql->shouldReceive('_exec')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $mysql->count('users')
+    );
+  }
+
+  /** @test */
+  public function selectAllByKeys_method_returns_an_array_indexed_with_the_first_field_of_the_request()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      [
+        1 => ['username' => 'jdoe', 'name' => 'John Doe'],
+        2 => ['username' => 'sdoe', 'name' => 'Smith Doe']
+      ],
+      self::$mysql->selectAllByKeys('users')
+    );
+
+    $this->assertSame(
+      [
+        'jdoe' => ['id' => 1, 'name' => 'John Doe'],
+        'sdoe' => ['id' => 2, 'name' => 'Smith Doe']
+      ],
+      self::$mysql->selectAllByKeys('users', ['username', 'id', 'name'])
+    );
+
+    $this->assertSame(
+      [
+        'sdoe' => ['id' => 2, 'name' => 'Smith Doe'],
+        'jdoe' => ['id' => 1, 'name' => 'John Doe']
+      ],
+      self::$mysql->selectAllByKeys('users', ['username', 'id', 'name'], [], ['id' => 'DESC'])
+    );
+
+    $this->assertSame(
+      [
+        'sdoe' => ['id' => 2, 'name' => 'Smith Doe']
+      ],
+      self::$mysql->selectAllByKeys('users', ['username', 'id', 'name'], ['id' => '2'])
+    );
+
+    $this->assertSame(
+      [
+        'sdoe' => ['id' => 2, 'name' => 'Smith Doe']
+      ],
+      self::$mysql->selectAllByKeys('users', ['username', 'id', 'name'], [], [], 1, 1)
+    );
+
+    $this->assertEmpty(
+      self::$mysql->selectAllByKeys('users', [], ['id' => 33])
+    );
+
+    $this->assertEmpty(
+      self::$mysql->selectAllByKeys('users', [], [], [], 1, 33)
+    );
+  }
+
+  /** @test */
+  public function selectAllByKeys_method_returns_null_when_no_results_found_and_check_returns_false()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11)';
+    });
+
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertNull(
+      self::$mysql->selectAllByKeys('users')
+    );
+  }
+
+  /** @test */
+  public function stat_method_returns_an_array_with_the_count_of_values_resulting_from_the_query()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              username VARCHAR(255) UNIQUE,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'jdoe', 'name' => 'John Doe'],
+      ['username' => 'jdoe2', 'name' => 'John Doe'],
+      ['username' => 'jdoe3', 'name' => 'John Doe'],
+      ['username' => 'sdoe', 'name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      [
+        ['name' => 'John Doe', 'num' => 3],
+        ['name' => 'Smith Doe', 'num' => 1]
+      ],
+      self::$mysql->stat('users', 'name')
+    );
+
+    $this->assertSame(
+      [
+        ['name' => 'Smith Doe', 'num' => 1],
+        ['name' => 'John Doe', 'num' => 3]
+      ],
+      self::$mysql->stat('users', 'name', [], ['name' => 'DESC'])
+    );
+
+    $this->assertSame(
+      [
+        ['name' => 'John Doe', 'num' => 3]
+      ],
+      self::$mysql->stat('users', 'name', ['name' => 'John Doe'])
+    );
+  }
+
+  /** @test */
+  public function stat_method_returns_null_when_check_method_returns_null()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertNull(self::$mysql->stat('users', 'name'));
+  }
+
+  /** @test */
+  public function countFieldValues_method_returns_count_of_identical_values_in_a_field_as_array()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(255)';
+    });
+
+    $this->insertMany('users', [
+      ['name' => 'John Doe'],
+      ['name' => 'John Doe'],
+      ['name' => 'John Doe'],
+      ['name' => 'Smith Doe']
+    ]);
+
+    $this->assertSame(
+      [
+        ['val' => 'John Doe', 'num' => 3],
+        ['val' => 'Smith Doe', 'num' => 1]
+      ],
+      self::$mysql->countFieldValues('users', 'name')
+    );
+
+    $this->assertSame(
+      [
+        ['val' => 'John Doe', 'num' => 3],
+        ['val' => 'Smith Doe', 'num' => 1]
+      ],
+      self::$mysql->countFieldValues([
+        'table' => 'users',
+        'fields' => ['name']
+      ])
+    );
+
+    $this->assertSame(
+      [
+        ['val' => 'Smith Doe', 'num' => 1],
+        ['val' => 'John Doe', 'num' => 3]
+      ],
+      self::$mysql->countFieldValues('users', 'name', [], ['name' => 'DESC'])
+    );
+
+    $this->assertSame(
+      [
+        ['val' => 'John Doe', 'num' => 3]
+      ],
+      self::$mysql->countFieldValues('users', 'name', ['name' => 'John Doe'])
+    );
+
+    $this->assertEmpty(
+      self::$mysql->countFieldValues('users', 'name', ['name' => 'foo'])
+    );
+  }
+
+  /** @test */
+  public function getColumnValues_method_numeric_indexed_array_with_values_of_unique_column()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'username VARCHAR(20)';
+    });
+
+    $this->insertMany('users',[
+      ['username' => 'foo'],
+      ['username' => 'foo'],
+      ['username' => 'foo2'],
+      ['username' => 'foo3'],
+      ['username' => 'foo4'],
+      ['username' => 'foo4'],
+      ['username' => 'foo4'],
+    ]);
+
+    $this->assertSame(
+      ['foo', 'foo2', 'foo3', 'foo4'],
+      self::$mysql->getColumnValues('users', 'username')
+    );
+
+    $this->assertSame(
+      ['foo', 'foo2', 'foo3', 'foo4'],
+      self::$mysql->getColumnValues([
+        'table' => ['users'],
+        'fields' => ['username']
+      ])
+    );
+
+    $this->assertSame(
+      ['foo'],
+      self::$mysql->getColumnValues('users', 'username', ['username' => 'foo'])
+    );
+
+    $this->assertSame(
+      ['foo'],
+      self::$mysql->getColumnValues('users', 'DISTINCT username', ['username' => 'foo'])
+    );
+
+    $this->assertSame(
+      ['foo4', 'foo3', 'foo2', 'foo'],
+      self::$mysql->getColumnValues('users', 'username', [], ['username' => 'DESC'])
+    );
+
+    $this->assertSame(
+      ['foo2'],
+      self::$mysql->getColumnValues('users', 'username', [], [], 1, 1)
+    );
+
+    $this->assertEmpty(
+      self::$mysql->getColumnValues('users', 'username', ['username' => 'bar'])
+    );
+
+    $this->assertEmpty(
+      self::$mysql->getColumnValues('users', 'username', [], [], 1, 44)
+    );
+  }
+
+  /** @test */
+  public function getColumnValues_returns_null_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertNull(self::$mysql->getColumnValues('users', 'username'));
+  }
+
+  /** @test */
+  public function insert_method_inserts_values_in_the_given_table_and_returns_affected_rows()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'name VARCHAR(20), email VARCHAR(20) UNIQUE';
+    });
+
+    $this->assertSame(
+      2,
+      self::$mysql->insert('users', [
+        ['name' => 'John', 'email' => 'john@mail.com'],
+        ['name' => 'Smith', 'email' => 'smith@mail.com'],
+        ['name' => 'Smith', 'email' => 'smith@mail.com'],
+      ], true)
+    );
+
+
+    $this->assertDatabaseHas('users', 'email', 'john@mail.com');
+    $this->assertDatabaseHas('users', 'email', 'smith@mail.com');
+
+    self::$connection->query('DELETE FROM users');
+
+
+
+    $this->assertSame(
+      2,
+      self::$mysql->insert([
+        'tables' => ['users'],
+        'values' => [
+          ['name' => 'John', 'email' => 'john@mail.com'],
+          ['name' => 'Smith', 'email' => 'smith@mail.com'],
+          ['name' => 'Smith', 'email' => 'smith@mail.com']
+        ],
+        'ignore' => true
+      ])
+    );
+
+    $this->assertDatabaseHas('users', 'email', 'john@mail.com');
+    $this->assertDatabaseHas('users', 'email', 'smith@mail.com');
+  }
+
+  /** @test */
+  public function insert_method_throws_an_exception_when_table_name_is_empty()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->insert('');
+  }
+
+
+  /** @test */
+  public function insertUpdate_method_inserts_rows_in_the_given_table_if_not_exists_otherwise_update()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'name VARCHAR(20), email VARCHAR(20) UNIQUE';
+    });
+
+
+    $this->assertSame(
+      3,
+      self::$mysql->insertUpdate('users', [
+        ['name' => 'John', 'email' => 'john@mail.com'],
+        ['name' => 'Smith', 'email' => 'smith@mail.com'],
+        ['name' => 'Smith2', 'email' => 'smith@mail.com']
+      ])
+    );
+
+    $this->assertDatabaseHas('users', 'email', 'smith@mail.com');
+    $this->assertDatabaseHas('users', 'name', 'Smith2');
+    $this->assertDatabaseDoesNotHave('users', 'name', 'Smith');
+
+    self::$connection->query("DELETE FROM users");
+
+    $this->assertSame(
+      3,
+      self::$mysql->insertUpdate([
+        'tables' => ['users'],
+        'values' => [
+          ['name' => 'John', 'email' => 'john@mail.com'],
+          ['name' => 'Smith', 'email' => 'smith@mail.com'],
+          ['name' => 'Smith2', 'email' => 'smith@mail.com']
+        ]
+      ])
+    );
+
+    $this->assertDatabaseHas('users', 'email', 'smith@mail.com');
+    $this->assertDatabaseHas('users', 'name', 'Smith2');
+    $this->assertDatabaseDoesNotHave('users', 'name', 'Smith');
+  }
+
+  /** @test */
+  public function update_method_updates_rows_in_the_given_table()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'username VARCHAR(20) UNIQUE, name VARCHAR(20)';
+    });
+
+    $this->insertOne('users', ['username' => 'jdoe', 'name' => 'John']);
+
+    $this->assertSame(
+      1,
+      self::$mysql->update('users', ['name' => 'Smith'], ['username' => 'jdoe'])
+    );
+
+    $this->assertDatabaseHas('users', 'name', 'Smith');
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John');
+
+    $this->assertSame(
+      0,
+      self::$mysql->update('users', ['name' => 'Smith'], ['username' => 'jdoe'], true)
+    );
+
+    self::$connection->query('DELETE FROM users');
+
+    $this->insertOne('users', ['username' => 'jdoe', 'name' => 'John']);
+
+    $this->assertSame(
+      1,
+      self::$mysql->update([
+        'tables' => ['users'],
+        'where'  => ['username' => 'jdoe'],
+        'fields' => ['name'=> 'Smith']
+      ])
+    );
+
+    $this->assertDatabaseHas('users', 'name', 'Smith');
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John2');
+
+    $this->assertSame(
+      0,
+      self::$mysql->update([
+        'tables' => ['users'],
+        'where'  => ['username' => 'jdoe'],
+        'fields' => ['name'=> 'Smith'],
+        'ignore' => true
+      ])
+    );
+  }
+
+  /** @test */
+  public function delete_method_deletes_rows_from_the_given_table()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'username VARCHAR(20) UNIQUE, name VARCHAR(20)';
+    });
+
+    $this->insertOne('users', ['username' => 'jdoe', 'name' => 'John']);
+
+    $this->assertSame(
+      1,
+      self::$mysql->delete('users', ['username' => 'jdoe'])
+    );
+
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John');
+
+    $this->assertSame(
+      0,
+      self::$mysql->delete('users', ['username' => 'jdoe'])
+    );
+
+    $this->insertOne('users', ['username' => 'sdoe', 'name' => 'Smith']);
+
+    $this->assertSame(
+      1,
+      self::$mysql->delete([
+        'tables' => ['users'],
+        'where'  => ['username' => 'sdoe']
+      ])
+    );
+
+    $this->assertDatabaseDoesNotHave('users', 'name', 'Smith');
   }
 
   /** @test */
@@ -2441,12 +5230,16 @@ first_name ASC';
   {
     $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
+    self::$connection->query('CREATE DATABASE IF NOT EXISTS bbn_test_2');
+
     $result = self::$mysql->change('bbn_test_2');
 
     $this->assertSame('bbn_test_2', $this->getNonPublicProperty('current'));
     $this->assertTrue($result);
 
     self::$mysql->change(self::getDbConfig()['db']);
+
+    $this->dropDatabaseIfExists('bbn_test_2');
   }
 
   /** @test */
