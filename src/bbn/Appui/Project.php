@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: BBN
@@ -54,11 +55,9 @@ class Project extends bbn\Models\Cls\Db
     $this->fs      = new \bbn\File\System();
     if (\bbn\Str::isUid($id)) {
       $this->id = $id;
-    }
-    elseif (\is_string($id)) {
+    } elseif (\is_string($id)) {
       $this->id = $this->options->fromCode($id, 'list', 'project', 'appui');
-    }
-    elseif (defined('BBN_APP_NAME')) {
+    } elseif (defined('BBN_APP_NAME')) {
       $this->id = $this->options->fromCode(BBN_APP_NAME, 'list', 'project', 'appui');
     }
 
@@ -84,18 +83,16 @@ class Project extends bbn\Models\Cls\Db
       throw new \Exception(X::_("No application path given"));
     }
 
-    $file_environment = $appPath.'cfg/environment';
-    if ($this->fs->isFile($file_environment.'.json')) {
-      $envs = \json_decode($this->fs->getContents($file_environment.'.json'), true);
-    }
-    elseif ($this->fs->isFile($file_environment.'.yml')) {
+    $file_environment = $appPath . 'cfg/environment';
+    if ($this->fs->isFile($file_environment . '.json')) {
+      $envs = \json_decode($this->fs->getContents($file_environment . '.json'), true);
+    } elseif ($this->fs->isFile($file_environment . '.yml')) {
       try {
-        $envs = yaml_parse($this->fs->getContents($file_environment.'.yml'));
-      }
-      catch (\Exception $e) {
+        $envs = yaml_parse($this->fs->getContents($file_environment . '.yml'));
+      } catch (\Exception $e) {
         throw new \Exception(
           "Impossible to parse the file $file_environment.yaml"
-          .PHP_EOL.$e->getMessage()
+            . PHP_EOL . $e->getMessage()
         );
       }
       if ($envs === false) {
@@ -105,7 +102,7 @@ class Project extends bbn\Models\Cls\Db
 
     if (!empty($envs)) {
       foreach ($envs as $env) {
-        if ($env['app_path'] === dirname($appPath).'/') {
+        if ($env['app_path'] === dirname($appPath) . '/') {
           return $env;
         }
       }
@@ -190,7 +187,7 @@ class Project extends bbn\Models\Cls\Db
   {
     $paths = [];
     if ($this->check() && $this->id_path && !empty($this->repositories)) {
-      foreach($this->repositories as $rep){
+      foreach ($this->repositories as $rep) {
         $paths[] = [
           'id_option' => $rep['id'],
           'path' => $this->getRootPath($rep['name']),
@@ -216,7 +213,7 @@ class Project extends bbn\Models\Cls\Db
     $this->options->deleteCache($this->id, true);
     if ($this->check() && isset($this->id_langs)) {
       if ($ids = array_keys($this->options->options($this->id_langs))) {
-        foreach($ids as $i){
+        foreach ($ids as $i) {
           if (!empty($this->options->alias($i))) {
             $res[] = $this->options->alias($i);
           }
@@ -241,7 +238,8 @@ class Project extends bbn\Models\Cls\Db
     $languages     = $this->options->fullTree($uid_languages);
     $primaries     = array_values(
       array_filter(
-        $languages['items'], function ($v) {
+        $languages['items'],
+        function ($v) {
           return !empty($v['primary']);
         }
       )
@@ -263,7 +261,7 @@ class Project extends bbn\Models\Cls\Db
       $langs     = $primaries;
       $id_langs  = $this->id_langs;
       $res       = [];
-      foreach($langs as $l){
+      foreach ($langs as $l) {
         if ($id_opt = $this->options->add(
           [
             'text' => $l['text'],
@@ -271,8 +269,7 @@ class Project extends bbn\Models\Cls\Db
             'id_parent' => $this->id_langs,
             'id_alias' => $l['id'],
           ]
-        )
-        ) {
+        )) {
           $res[] = $l;
         }
       }
@@ -295,13 +292,12 @@ class Project extends bbn\Models\Cls\Db
     $repository = \is_string($rep) ? $this->repositories[$rep] : $rep;
     if ((!empty($repository)
         && is_array($repository))
-        && !empty($repository['root'])
-        && X::hasProps($repository, ['path', 'root', 'code'], true)
+      && !empty($repository['root'])
+      && X::hasProps($repository, ['path', 'root', 'code'], true)
     ) {
       if (strpos($repository['root'], '/') === 0) {
         $path = $repository['root'];
-      }
-      else {
+      } else {
         switch ($repository['root']) {
           case 'app':
             $path = $this->getAppPath();
@@ -347,11 +343,14 @@ class Project extends bbn\Models\Cls\Db
       // Current project
       if ($this->name === BBN_APP_NAME) {
         $this->appPath = bbn\Mvc::getAppPath();
-      }
-      else {
+      } else {
         $envs = $this->options->fullOptions('env', $this->id);
+        if (empty($envs)) {
+          throw new \Exception(X::_("Impossible to find environments for option %s", $this->id));
+        }
+
         if ($env = X::getRow($envs, ['type' => BBN_ENV])) {
-          $this->appPath = $env['text'];
+          $this->appPath = $env['code'];
           if (substr($this->appPath, -4) !== 'src/') {
             $this->appPath .= 'src/';
           }
@@ -374,9 +373,8 @@ class Project extends bbn\Models\Cls\Db
       if (defined('BBN_CDN_PATH')) {
         return BBN_CDN_PATH;
       }
-    }
-    elseif ($content = $this->getEnvironment()) {
-      return $content['app_path'].'src/';
+    } elseif ($content = $this->getEnvironment()) {
+      return $content['app_path'] . 'src/';
     }
 
     throw new \Exception(X::_("Impossible to find the CDN path for %s", $this->name));
@@ -392,9 +390,8 @@ class Project extends bbn\Models\Cls\Db
   {
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getLibPath();
-    }
-    elseif ($content = $this->getEnvironment()) {
-      return $content['lib_path'].'bbn\/';
+    } elseif ($content = $this->getEnvironment()) {
+      return $content['lib_path'] . 'bbn\/';
     }
 
     throw new \Exception(X::_("Impossible to find the libraries path for %s", $this->name));
@@ -410,11 +407,10 @@ class Project extends bbn\Models\Cls\Db
   {
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getDataPath($plugin);
-    }
-    elseif ($content = $this->getEnvironment()) {
+    } elseif ($content = $this->getEnvironment()) {
       $path = $content['data_path'];
       if ($plugin) {
-        $path .= 'plugins/'.$plugin.'/';
+        $path .= 'plugins/' . $plugin . '/';
       }
       return $path;
     }
@@ -432,11 +428,10 @@ class Project extends bbn\Models\Cls\Db
   {
     if ($this->name === BBN_APP_NAME) {
       return \bbn\Mvc::getUserDataPath($plugin);
-    }
-    elseif ($content = $this->getEnvironment()) {
+    } elseif ($content = $this->getEnvironment()) {
       $path = $content['data_path'];
       if ($plugin) {
-        $path .= 'plugins/'.$plugin.'/';
+        $path .= 'plugins/' . $plugin . '/';
       }
       return $path;
     }
@@ -445,13 +440,13 @@ class Project extends bbn\Models\Cls\Db
   }
 
 
-   /**
+  /**
    * Makes the repositories' configurations.
    *
    * @param string $code The repository's name (code)
    * @return array
    */
-  public function getRepositories(string $project_name =''): array
+  public function getRepositories(string $project_name = ''): array
   {
     $cats         = [];
     $repositories = [];
@@ -462,14 +457,16 @@ class Project extends bbn\Models\Cls\Db
     $projects = $this->options->fullTree($this->options->fromCode('path', $project_name, 'list', 'project', 'appui'));
     if (!empty($projects) && !empty($projects['items'])) {
       $projects = $projects['items'];
-      foreach ($projects as $i => $project){
+      foreach ($projects as $i => $project) {
         $paths = $this->options->fullTree($project['id']);
         if (isset($paths['items']) && count($paths['items'])) {
-          foreach ($paths['items'] as $repository){
-              $name = $paths['code'] . '/' . $repository['code'];
+          foreach ($paths['items'] as $repository) {
+            $name = $paths['code'] . '/' . $repository['code'];
             if (!isset($cats[$repository['id_alias']])) {
-              unset($repository['alias']['cfg']);
-              $cats[$repository['id_alias']] = $repository['alias'];
+              if (isset($repository['alias'])) {
+                unset($repository['alias']['cfg']);
+                $cats[$repository['id_alias']] = $repository['alias'];
+              }
             }
 
             unset($repository['cfg']);
@@ -481,11 +478,9 @@ class Project extends bbn\Models\Cls\Db
             $repositories[$name]['alias_code'] = $cats[$repository['id_alias']]['code'];
             if (!empty($cats[$repository['id_alias']]['tabs'])) {
               $repositories[$name]['tabs'] = $cats[$repository['id_alias']]['tabs'];
-            }
-            elseif (!empty($cats[$repository['id_alias']]['extensions'])) {
+            } elseif (!empty($cats[$repository['id_alias']]['extensions'])) {
               $repositories[$name]['extensions'] = $cats[$repository['id_alias']]['extensions'];
-            }
-            elseif (!empty($cats[$repository['id_alias']]['types'])) {
+            } elseif (!empty($cats[$repository['id_alias']]['types'])) {
               $repositories[$name]['types'] = $cats[$repository['id_alias']]['types'];
             }
 
@@ -524,9 +519,10 @@ class Project extends bbn\Models\Cls\Db
    */
   public function repository($name)
   {
-    if (!empty($this->repositories)
-        && is_array($this->repositories)
-        && !empty(array_key_exists($name, $this->repositories))
+    if (
+      !empty($this->repositories)
+      && is_array($this->repositories)
+      && !empty(array_key_exists($name, $this->repositories))
     ) {
       return $this->repositories[$name];
     }
@@ -543,10 +539,11 @@ class Project extends bbn\Models\Cls\Db
    */
   public function realToUrl(string $file)
   {
-    foreach ($this->repositories as $i => $d){
+    foreach ($this->repositories as $i => $d) {
       $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);
-      if ($root
-          && (strpos($file, $root) === 0)
+      if (
+        $root
+        && (strpos($file, $root) === 0)
       ) {
         $rep = $i;
         break;
@@ -554,7 +551,7 @@ class Project extends bbn\Models\Cls\Db
     }
 
     if (isset($rep)) {
-      $res = $rep.'/src/';
+      $res = $rep . '/src/';
 
       $bits = explode('/', substr($file, \strlen($root)));
       // MVC
@@ -564,9 +561,10 @@ class Project extends bbn\Models\Cls\Db
         $ext      = \bbn\Str::fileExt($fn);
         $fn       = \bbn\Str::fileExt($fn, 1)[0];
         $res     .= implode('/', $bits);
-        foreach ($d['tabs'] as $k => $t){
-          if (empty($t['fixed'])
-              && ($t['path'] === $tab_path . '/')
+        foreach ($d['tabs'] as $k => $t) {
+          if (
+            empty($t['fixed'])
+            && ($t['path'] === $tab_path . '/')
           ) {
             $res .= "/$fn/$t[url]";
             break;
@@ -595,10 +593,11 @@ class Project extends bbn\Models\Cls\Db
   public function repositoryFromUrl(string $url, bool $obj = false)
   {
     //search repository
-    if (is_array($this->repositories)
-        && count($this->repositories)
-    ) {//if in url name of repository break loop
-      foreach ($this->repositories as $i => $d){
+    if (
+      is_array($this->repositories)
+      && count($this->repositories)
+    ) { //if in url name of repository break loop
+      foreach ($this->repositories as $i => $d) {
         if ((strpos($url, $i) === 0)) {
           $repository = $i;
           break;
@@ -632,7 +631,8 @@ class Project extends bbn\Models\Cls\Db
       $this->lang         = $cfg['i18n'] ?? '';
       $this->code         = $o['code'];
       $this->option       = $o;
-      $this->repositories = $this->getRepositories($o['text']);
+      $this->repositories = $this->getRepositories($o['code']);
+      //$this->repositories = $this->getRepositories($o['text']);
 
       //the id of the child option 'lang' (children of this option are all languages for which the project is configured)
       if (!$this->id_langs = $this->options->fromCode('lang', $id)) {
@@ -658,13 +658,11 @@ class Project extends bbn\Models\Cls\Db
     if (empty($this->id_langs)) {
       $this->id_langs = $this->options->add(
         [
-        'text' => 'Languages',
-        'code' => 'lang',
-        'id_parent' => $this->id,
+          'text' => 'Languages',
+          'code' => 'lang',
+          'id_parent' => $this->id,
         ]
       );
     }
   }
-
-
 }
