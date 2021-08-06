@@ -24,17 +24,27 @@ class MysqlTest extends TestCase
 
   protected static $cache_mock;
 
+  protected static $default_triggers;
+
   protected function setUp(): void
   {
     $this->setNonPublicPropertyValue('_has_error_all', false);
     $this->setNonPublicPropertyValue('_has_error', false);
     $this->setNonPublicPropertyValue('last_error', null);
     $this->setNonPublicPropertyValue('last_real_params', self::$real_params_default);
+    $this->setNonPublicPropertyValue('last_params', self::$real_params_default);
     $this->setNonPublicPropertyValue('on_error', Errors::E_STOP);
     $this->setNonPublicPropertyValue('id_just_inserted', null);
     $this->setNonPublicPropertyValue('last_insert_id', null);
     $this->setNonPublicPropertyValue('last_query', null);
+    $this->setNonPublicPropertyValue('last_real_query', null);
     $this->setNonPublicPropertyValue('current', self::getDbConfig()['db']);
+    $this->setNonPublicPropertyValue('_triggers', self::$default_triggers);
+    $this->setNonPublicPropertyValue('_triggers_disabled', false);
+    $this->setNonPublicPropertyValue('last_cfg', []);
+    $this->setNonPublicPropertyValue('cfgs', []);
+    $this->setNonPublicPropertyValue('queries', []);
+    $this->setNonPublicPropertyValue('list_queries', []);
     $this->cleanTestingDir();
     $this->clearCache();
     $this->dropAllTables();
@@ -43,7 +53,13 @@ class MysqlTest extends TestCase
 
   public static function setUpBeforeClass(): void
   {
-    if (!file_exists($env_file = getcwd() . '/tests/.env.test')) {
+    $env_file = getcwd() . '/tests/.env.test';
+
+    if (strpos($env_file, '/tests/Db/') !== false) {
+      $env_file = str_ireplace('/tests/Db/', '/', $env_file);
+    }
+
+    if (!file_exists($env_file)) {
       throw new \Exception(
         'env file does not exist, please create the file in the tests dir, @see .env.test.example'
       );
@@ -76,6 +92,14 @@ class MysqlTest extends TestCase
 
     ReflectionHelpers::setNonPublicPropertyValue(
       'cache_engine', self::$mysql, self::$cache_mock
+    );
+
+    self::$default_triggers = ReflectionHelpers::getNonPublicProperty(
+      '_triggers', self::$mysql
+    );
+
+    ReflectionHelpers::setNonPublicPropertyValue(
+      'max_queries', self::$mysql, 60000000
     );
   }
 
@@ -199,7 +223,26 @@ class MysqlTest extends TestCase
     /** @test */
   public function isAggregateFunction_method_returns_true_if_the_given_name_is_aggregate_function()
   {
+    $this->assertTrue(Mysql::isAggregateFunction('count(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('COUNT(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('COUNT(id)'));
+    $this->assertTrue(Mysql::isAggregateFunction('COUNT('));
+    $this->assertTrue(Mysql::isAggregateFunction('sum(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('SUM(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('avg(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('AVG(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('min(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('MIN(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('max(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('MAX(*)'));
+    $this->assertTrue(Mysql::isAggregateFunction('GROUP_CONCAT('));
+    $this->assertTrue(Mysql::isAggregateFunction('group_concat('));
+
+    $this->assertFalse(Mysql::isAggregateFunction('id'));
     $this->assertFalse(Mysql::isAggregateFunction('count'));
+    $this->assertFalse(Mysql::isAggregateFunction('min'));
+    $this->assertFalse(Mysql::isAggregateFunction('MAX'));
+    $this->assertFalse(Mysql::isAggregateFunction('avg'));
   }
 
  /** @test */
@@ -2451,6 +2494,375 @@ first_name ASC';
     $this->assertSame(\PDOStatement::class, $result[0]);
     $this->assertFalse($this->getNonPublicProperty('_fancy'));
   }
+
+  /** @test */
+  public function processCfg_method_processes_the_given_insert_configurations()
+  {
+    $this->setCacheExpectations();
+
+    $db_config = self::getDbConfig();
+
+    $this->createTable('users', function () {
+      return 'id BINARY(16) PRIMARY KEY,
+              email VARCHAR(255) NOT NULL,
+              name VARCHAR(255) NOT NULL';
+    });
+
+    $cfg = [
+      'tables' => 'users',
+      'kind'  => 'INSERT',
+      'fields'  => ['email' => 'john@mail.com', 'name' => 'John']
+    ];
+
+    $result   = self::$mysql->processCfg($cfg);
+
+    $expected_sql = "INSERT INTO `{$db_config['db']}`.`users`
+(`email`, `name`, `id`)
+ VALUES (?, ?, ?)";
+
+    $this->assertSame(trim($expected_sql), trim($result['sql']));
+    $this->assertTrue(in_array('id', $result['fields']));
+    $this->assertSame(['john@mail.com', 'John'], $result['values']);
+    $this->assertCount(3, $result['values_desc']);
+    $this->assertTrue($result['generate_id']);
+    $this->assertFalse($result['auto_increment']);
+    $this->assertSame('id', $result['primary']);
+    $this->assertSame(16, $result['primary_length']);
+    $this->assertSame('binary', $result['primary_type']);
+  }
+
+  /** @test */
+  public function processCfg_method_processes_the_given_update_configurations()
+  {
+    $db_config = self::getDbConfig();
+
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              email VARCHAR(255) NOT NULL,
+              name VARCHAR(255) NOT NULL';
+    });
+
+    $cfg = [
+      'tables' => 'users',
+      'kind'   => 'UPDATE',
+      'fields' => ['email' => 'samantha@mail.com', 'name' => 'Samantha'],
+      'where'  => [['email', '=', 'sam@mail.com'], ['name', '=', 'Sam']]
+    ];
+
+    $result = self::$mysql->processCfg($cfg);
+
+    $expected_sql = "UPDATE `{$db_config['db']}`.`users` SET `email` = ?, `name` = ? WHERE  `users`.`email` = ? AND `users`.`name` = ?";
+
+    $this->assertSame(
+      $expected_sql,
+      str_replace("\n", ' ', trim($result['sql']))
+    );
+
+    $this->assertSame(
+      ['samantha@mail.com', 'Samantha', 'sam@mail.com', 'Sam'],
+      $result['values']
+    );
+
+    $this->assertSame(
+      [
+        'conditions' => [
+          [
+            'field' => 'email',
+            'operator' => '=',
+            'value' => 'sam@mail.com'
+          ],
+          [
+            'field' => 'name',
+            'operator' => '=',
+            'value' => 'Sam'
+          ]
+      ],
+        'logic' => 'AND'
+      ],
+      $result['filters']
+    );
+
+    $this->assertSame(
+      [
+        ['type' => 'varchar', 'maxlength' => 255],
+        ['type' => 'varchar', 'maxlength' => 255],
+        ['type' => 'varchar', 'maxlength' => 255, 'operator' => '='],
+        ['type' => 'varchar', 'maxlength' => 255, 'operator' => '=']
+      ],
+      $result['values_desc']
+    );
+
+    $this->assertTrue($result['auto_increment']);
+    $this->assertSame('id', $result['primary']);
+    $this->assertSame('int', $result['primary_type']);
+    $this->assertNotEmpty($result['hashed_where']['conditions']);
+  }
+
+  /** @test */
+  public function processCfg_method_processes_the_given_select_configurations()
+  {
+    $db_config = self::getDbConfig();
+
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(25) NOT NULL,
+              role_id INT(11) NOT NULL';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $cfg = [
+      'kind'   => 'SELECT',
+      'table'  => 'users',
+      'fields' => ['user_name' => 'users.name', 'role_name' => 'roles.name'],
+      'start' => 2,
+      'limit' => 25,
+      'join'   => [[
+        'table' => 'roles',
+        'on'    => [
+          'conditions' => [[
+            'field' => 'users.role_id',
+            'operator' => '=',
+            'exp' => 'roles.id'
+          ]]
+        ]
+      ]],
+      'where' => [
+        [
+          'conditions' => [
+            [
+              'field' => 'users.id',
+              'operator' => '>=',
+              'exp' => 1
+            ],
+            [
+              'field' => 'roles.name',
+              'operator' => '!=',
+              'value' => 'Super Admin'
+            ]
+          ]
+        ]
+      ],
+      'order' => ['users.name' => 'desc']
+    ];
+
+    $result = self::$mysql->processCfg($cfg);
+
+    $expected_sql = "SELECT `users`.`name` AS `user_name`, `roles`.`name` AS `role_name`
+FROM `{$db_config['db']}`.`users`
+  JOIN `{$db_config['db']}`.`roles`
+    ON 
+    `users`.`role_id` = roles.id
+WHERE (
+  `users`.`id` >= 1
+  AND `roles`.`name` != ?
+)
+ORDER BY `users`.`name` DESC
+LIMIT 2, 25";
+
+    $this->assertSame(trim($expected_sql), trim($result['sql']));
+
+    $this->assertSame(
+      [[
+        'table' => 'roles',
+        'on'    => [
+          'conditions' => [[
+            'field' => 'users.role_id',
+            'operator' => '=',
+            'exp' => 'roles.id'
+          ]],
+          'logic' => 'AND'
+        ],
+        'type' => 'right'
+      ]],
+      $result['join']
+    );
+
+    $this->assertSame(
+      [
+        'conditions' => [
+          ['conditions' => [[
+            'field' => 'users.id',
+            'operator' => '>=',
+            'exp' => 1
+          ],[
+            'field' => 'roles.name',
+            'operator' => '!=',
+            'value' => 'Super Admin'
+          ]],
+            'logic' => 'AND'
+          ],
+        ],
+        'logic' => 'AND'
+      ],
+      $result['filters']
+    );
+
+    $this->assertNotEmpty($result['hashed_join']);
+    $this->assertNotEmpty($result['hashed_where']['conditions']);
+    $this->assertSame(
+      ['users.name' => 'user_name', 'roles.name' => 'role_name'],
+      $result['aliases']
+    );
+    $this->assertSame(['Super Admin'], $result['values']);
+  }
+
+  /** @test */
+  public function processCfg_method_processes_the_given_aggregate_select_configurations()
+  {
+    $db = self::getDbConfig()['db'];
+
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(25) NOT NULL,
+              active TINYINT(1) NOT NULL DEFAULT 1';
+    });
+
+    $cfg = [
+      'tables' => 'users',
+      'count'  => true,
+      'group_by' => ['id'],
+      'where' => ['active' => 1]
+    ];
+
+    $result = self::$mysql->processCfg($cfg);
+
+    $expected_sql = "SELECT COUNT(*) FROM ( SELECT `users`.`id` AS `id`
+FROM `$db`.`users`
+WHERE 
+`users`.`active` = ?
+GROUP BY `id`
+) AS t";
+
+    $this->assertSame(trim($expected_sql), trim($result['sql']));
+  }
+
+  /** @test */
+  public function processCfg_returns_null_when_the_given_configurations_has_same_tables()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11)';
+    });
+
+
+    $this->assertNull(
+      self::$mysql->processCfg(['tables' => ['users', 'users']])
+    );
+  }
+
+  /** @test */
+  public function processCfg_returns_null_and_sets_an_error_when_no_hash_found()
+  {
+    $mysql = \Mockery::mock(Mysql::class)
+      ->shouldAllowMockingProtectedMethods()
+      ->makePartial();
+
+    $mysql->shouldReceive('_treat_arguments')
+      ->once()
+      ->with(['foo' => 'bar'])
+      ->andReturn(['foo' => 'bar']);
+
+    $mysql->shouldReceive('error')
+      ->once();
+
+    $this->assertNull(
+      $mysql->processCfg(['foo' => 'bar'])
+    );
+  }
+
+  /** @test */
+  public function processCfg_method_returns_previously_saved_cfg_using_hash()
+  {
+    $mysql = \Mockery::mock(Mysql::class)
+      ->shouldAllowMockingProtectedMethods()
+      ->makePartial();
+
+    $this->setNonPublicPropertyValue('cfgs', [
+      '123456' => [
+        'foo2' => 'bar2'
+      ]
+    ], $mysql);
+
+    $mysql->shouldReceive('_treat_arguments')
+      ->once()
+      ->with(['foo' => 'bar'])
+      ->andReturn(['hash' => '123456']);
+
+    $this->assertSame(
+      ['foo2' => 'bar2', 'values' => [], 'where' => [], 'filters' => []],
+      $mysql->processCfg(['foo' => 'bar'])
+    );
+  }
+
+  /** @test */
+  public function processCfg_method_returns_null_when_a_given_field_does_not_exists()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11)';
+    });
+
+    $cfg = [
+      'tables' => 'users',
+      'fields' => ['username' => 'username']
+    ];
+
+    $this->assertNull(
+      self::$mysql->processCfg($cfg)
+    );
+  }
+
+  /** @test */
+  public function reprocessCfg_method_test()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('processCfg')
+      ->once()
+      ->with(['foo' => 'bar'], true)
+      ->andReturn(['foo2' => 'bar2']);
+
+    $this->assertSame(['foo2' => 'bar2'], $mysql->reprocessCfg(['foo' => 'bar']));
+
+    // Another test
+
+    $this->setNonPublicPropertyValue('cfgs', [
+      '12345' => ['a' => 'b']
+    ], $mysql);
+
+    $mysql->shouldReceive('processCfg')
+      ->once()
+      ->with(
+        ['foo' => 'bar', 'hash' => '12345', 'values' => ['a', 'b']],
+        true
+      )
+      ->andReturn(['foo2' => 'bar2', 'values' => ['c', 'd']]);
+
+    $result = $mysql->reprocessCfg([
+      'bbn_db_processed' => true,
+      'bbn_db_treated'   => true,
+      'hash'             => '12345',
+      'foo'              => 'bar',
+      'values'           => ['a', 'b']
+    ]);
+
+    $this->assertSame(['foo2' => 'bar2', 'values' => ['a', 'b']], $result);
+
+    $this->assertSame([], $this->getNonPublicProperty('cfgs', $mysql));
+  }
+
 
   /** @test */
   public function parseQuery_method_parses_an_sql_and_return_an_array()
@@ -4969,6 +5381,1845 @@ first_name ASC';
   }
 
   /** @test */
+  public function fetch_method_returns_the_first_result_of_the_query_as_indexed_array_and_false_if_no_results()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'name VARCHAR(255), email VARCHAR(255)';
+    });
+
+    $this->assertFalse(
+      self::$mysql->fetch('SELECT * FROM users')
+    );
+
+    $this->insertMany('users', [
+      ['name' => 'John', 'email' => 'john@mail.com'],
+      ['name' => 'Smith', 'email' => 'smith@mail.com'],
+    ]);
+
+    $this->assertSame(
+      ['name' => 'John', 'John', 'email' => 'john@mail.com', 'john@mail.com'],
+      self::$mysql->fetch('SELECT * FROM users')
+    );
+
+    $this->assertSame(
+      ['email' => 'smith@mail.com', 'smith@mail.com'],
+      self::$mysql->fetch('SELECT email FROM users WHERE name = ?', 'Smith')
+    );
+  }
+
+  /** @test */
+  public function fetchAll_method_returns_an_array_of_indexed_arrays_for_all_query_result_and_empty_array_if_no_results()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'name VARCHAR(255), email VARCHAR(255)';
+    });
+
+    $this->assertSame(
+      [],
+      self::$mysql->fetchAll('SELECT * FROM users')
+    );
+
+    $this->insertMany('users', [
+      ['name' => 'John', 'email' => 'john@mail.com'],
+      ['name' => 'Smith', 'email' => 'smith@mail.com'],
+    ]);
+
+    $this->assertSame(
+      [
+        ['name' => 'Smith', 'Smith', 'email' => 'smith@mail.com', 'smith@mail.com'],
+        ['name' => 'John', 'John', 'email' => 'john@mail.com', 'john@mail.com']
+      ],
+      self::$mysql->fetchAll('SELECT * FROM users ORDER BY name DESC')
+    );
+
+    $this->assertSame(
+      [
+        ['name' => 'Smith', 'Smith']
+      ],
+      self::$mysql->fetchAll('SELECT name FROM users WHERE email = "smith@mail.com"')
+    );
+  }
+
+  /** @test */
+  public function fetchAll_method_returns_false_when_query_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('query')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertFalse(
+      $mysql->fetchAll('SELECT * FROM users')
+    );
+  }
+
+  /** @test */
+  public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_result_set()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'name VARCHAR(255), email VARCHAR(255)';
+    });
+
+    $this->assertFalse(
+      self::$mysql->fetchColumn('SELECT * FROM users')
+    );
+
+    $this->insertMany('users', [
+      ['name' => 'John', 'email'=> 'john@mail.com'],
+      ['name' => 'Smith', 'email' => 'smith@mail.com']
+    ]);
+
+    $this->assertSame(
+      'John',
+      self::$mysql->fetchColumn('SELECT * FROM users')
+    );
+
+    $this->assertSame(
+      'john@mail.com',
+      self::$mysql->fetchColumn('SELECT * FROM users', 1)
+    );
+
+    $this->assertSame(
+      'smith@mail.com',
+      self::$mysql->fetchColumn('SELECT * FROM users WHERE name = ?', 1, 'Smith')
+    );
+  }
+
+  /** @test */
+  public function fetchObject_method_returns_the_first_result_from_query_as_object_and_false_if_no_results()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'name VARCHAR(255), email VARCHAR(255)';
+    });
+
+    $this->assertFalse(
+      self::$mysql->fetchObject('SELECT * FROM users')
+    );
+
+    $this->insertMany('users', [
+      ['name' => 'John', 'email'=> 'john@mail.com'],
+      ['name' => 'Smith', 'email' => 'smith@mail.com']
+    ]);
+
+    $result = self::$mysql->fetchObject('SELECT * FROM users');
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('name', $result);
+    $this->assertObjectHasAttribute('email', $result);
+    $this->assertSame('John', $result->name);
+    $this->assertSame('john@mail.com', $result->email);
+
+    $result = self::$mysql->fetchObject('SELECT * FROM users ORDER BY name DESC');
+
+    $this->assertIsObject($result);
+    $this->assertObjectHasAttribute('name', $result);
+    $this->assertObjectHasAttribute('email', $result);
+    $this->assertSame('Smith', $result->name);
+    $this->assertSame('smith@mail.com', $result->email);
+  }
+
+  /** @test */
+  public function trigger_method_launches_a_function_before_or_after_if_registered_and_callable()
+  {
+    $cfg = [
+      'tables' => ['users'],
+      'kind'   => 'SELECT',
+      'moment' => 'after'
+    ];
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'SELECT' => [
+        'after' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return array_merge($cfg, ['foo' => 'bar']);
+            },
+            function ($cfg) {
+              return array_merge($cfg, ['foo2' => 'bar2']);
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $this->assertSame(
+      array_merge($cfg, [
+        'trig' => 1, 'run' => 1, 'foo' => 'bar', 'foo2' => 'bar2'
+      ]),
+      $method->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function trigger_method_does_not_launch_the_function_if_the_callback_return_falsy_result()
+  {
+    $cfg = [
+      'tables' => ['users'],
+      'kind'   => 'INSERT',
+      'moment' => 'before'
+    ];
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'INSERT' => [
+        'before' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return [];
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $this->assertSame(
+      array_merge($cfg, ['trig' => false, 'run' => false]),
+      $method->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function trigger_method_does_not_launch_the_function_if_table_is_not_registered()
+  {
+    $cfg = [
+      'tables' => ['users'],
+      'kind'   => 'UPDATE',
+      'moment' => 'before'
+    ];
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'UPDATE' => [
+        'before' => [
+          self::getDbConfig()['db'] . '.roles' => [
+            function ($cfg) {
+              return array_merge($cfg, ['foo' => 'bar']);
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->assertSame(
+      array_merge($cfg, ['trig' => 1, 'run' => 1]),
+      $method->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function trigger_method_does_not_launch_the_function_the_given_trigger_does_not_exist()
+  {
+    $cfg = [
+      'tables' => ['users'],
+      'kind'   => 'UPDATE',
+      'moment' => 'before'
+    ];
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'UPDATE' => [
+        'after' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return array_merge($cfg, ['foo' => 'bar']);
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->assertSame(
+      array_merge($cfg, ['trig' => 1, 'run' => 1]),
+      $method->invoke(self::$mysql, $cfg)
+    );
+  }
+
+
+  /** @test */
+  public function trigger_method_does_not_launch_the_function_if_no_table_name_is_given()
+  {
+    $cfg = [
+      'kind'   => 'UPDATE',
+      'moment' => 'before'
+    ];
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->assertSame(
+      array_merge($cfg, ['trig' => 1, 'run' => 1]),
+      $method->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function trigger_method_returns_the_config_array_as_is_if_triggers_is_disabled_and_moment_is_after()
+  {
+    $this->setNonPublicPropertyValue('_triggers_disabled', true);
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->assertSame(
+      ['moment' => 'after'],
+      $method->invoke(self::$mysql, ['moment' => 'after'])
+    );
+  }
+
+  /** @test */
+  public function trigger_method_returns_the_config_array_adding_trig_and_run_when_triggers_is_disabled_and_moment_is_before()
+  {
+    $this->setNonPublicPropertyValue('_triggers_disabled', true);
+
+    $method = $this->getNonPublicMethod('_trigger');
+
+    $this->assertSame(
+      ['moment' => 'before', 'run' => 1, 'trig' => 1],
+      $method->invoke(self::$mysql, ['moment' => 'before'])
+    );
+  }
+
+  /** @test */
+  public function add_kind_method_adds_the_given_type_to_the_given_args()
+  {
+    $method = $this->getNonPublicMethod('_add_kind');
+
+    $this->assertSame(
+      ['UPDATE','foo'],
+      $method->invoke(self::$mysql, ['foo'], 'update')
+    );
+
+    $this->assertSame(
+      [['foo', 'kind' => 'SELECT']],
+      $method->invoke(self::$mysql, [['foo']])
+    );
+
+    $this->assertNull(
+      $method->invoke(self::$mysql, ['foo' => ['bar']])
+    );
+  }
+
+ /** @test */
+  public function add_primary_method_adds_a_random_primary_value_when_missing_from_the_given_arguments()
+  {
+    $method = $this->getNonPublicMethod('_add_primary');
+
+    $cfg    = [
+      'primary'      => 'id',
+      'primary_type' => 'int',
+      'auto_increment' => false,
+      'fields' => ['id', 'name'],
+      'values' => ['John'],
+      'primary_length' => 4
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertCount(2, $cfg['values']);
+    $this->assertIsInt($cfg['values'][0]);
+    $this->assertSame(
+      $cfg['values'][0],
+      $this->getNonPublicProperty('id_just_inserted')
+    );
+
+    $cfg2    = [
+      'primary'      => 'id',
+      'primary_type' => 'binary',
+      'auto_increment' => false,
+      'fields' => ['id', 'name'],
+      'values' => ['John'],
+      'primary_length' => 16
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg2]);
+
+    $this->assertCount(2, $cfg2['values']);
+    $this->assertIsString($cfg2['values'][0]);
+    $this->assertSame(
+      $cfg2['values'][0],
+      $this->getNonPublicProperty('id_just_inserted')
+    );
+
+    $cfg3    = [
+      'primary'      => 'id',
+      'primary_type' => 'varchar',
+      'auto_increment' => false,
+      'fields' => ['id', 'name'],
+      'values' => ['John'],
+      'primary_length' => 16
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg3]);
+
+    $this->assertCount(1, $cfg3['values']);
+  }
+
+  /** @test */
+  public function add_primary_method_does_not_adda_a_random_primary_value_if_given_arguments_does_not_match_conditions()
+  {
+    $method = $this->getNonPublicMethod('_add_primary');
+
+    $cfg = $old_cfg = [
+      'primary'      => 'id',
+      'primary_type' => 'binary',
+      'auto_increment' => false,
+      'fields' => ['id', 'name'],
+      'values' => ['John', 'Doe']
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertSame($old_cfg, $cfg);
+
+    $cfg = $old_cfg = [
+      'primary'      => 'id',
+      'primary_type' => 'binary',
+      'auto_increment' => false,
+      'fields' => ['email', 'name'],
+      'values' => ['John']
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertSame($old_cfg, $cfg);
+
+    $cfg = $old_cfg = [
+      'primary'      => 'id',
+      'primary_type' => 'binary',
+      'auto_increment' => true,
+      'fields' => ['id', 'name'],
+      'values' => ['John']
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertSame($old_cfg, $cfg);
+
+    $cfg = $old_cfg = [
+      'primary'      => '',
+      'primary_type' => 'binary',
+      'auto_increment' => false,
+      'fields' => ['id', 'name'],
+      'values' => ['John']
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertSame($old_cfg, $cfg);
+
+    $cfg = $old_cfg = [
+      'primary_type' => 'binary',
+      'auto_increment' => false,
+      'fields' => ['id', 'name'],
+      'values' => ['John']
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertSame($old_cfg, $cfg);
+  }
+
+  /** @test */
+  public function exec_method_insert_test()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id BINARY(16) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'INSERT',
+      'fields'  => ['email' => 'john@mail.com', 'name' => 'John']
+    ];
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $this->assertSame(1, $method->invoke(self::$mysql, $cfg));
+    $this->assertDatabaseHas('users', 'email', 'john@mail.com');
+    $this->assertDatabaseHas('users', 'name', 'John');
+
+    $this->assertSame(
+      self::$connection->query("SELECT id FROM users LIMIT 1")->fetchObject()->id,
+      $this->getNonPublicProperty('last_insert_id')
+    );
+
+    $this->assertNotEmpty(
+      $this->getNonPublicProperty('last_cfg')
+    );
+  }
+
+  /** @test */
+  public function exec_method_update_test()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $this->insertMany('users', [
+      ['id' => 1,'email' => 'john@mail.com', 'name' => 'John'],
+      ['id' => 2, 'email' => 'smith@mail.com', 'name' => 'Smith']
+    ]);
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'UPDATE',
+      'fields'  => ['email' => 'john@mail.com', 'name' => 'John Doe'],
+      'where'   => ['id' => 1]
+    ];
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $this->assertSame(
+      1,
+      $method->invoke(self::$mysql, $cfg)
+    );
+
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John');
+    $this->assertDatabaseHas('users', 'name', 'John Doe');
+    $this->assertDatabaseHas('users', 'name', 'Smith');
+
+    $this->assertNotEmpty(
+      $this->getNonPublicProperty('last_cfg')
+    );
+  }
+
+  /** @test */
+  public function exec_method_delete_test()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(25)';
+    });
+
+    $this->insertMany('users', [
+      ['name' => 'John'],
+      ['name' => 'Sam']
+    ]);
+
+    $cfg = [
+      'table' => ['users'],
+      'kind'  => 'delete',
+      'where' => ['id' => 1]
+    ];
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $this->assertSame(
+      1,
+      $method->invoke(self::$mysql, $cfg
+      )
+    );
+
+    $this->assertDatabaseHas('users', 'name', 'Sam');
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John');
+
+    $this->assertNotEmpty(
+      $this->getNonPublicProperty('last_cfg')
+    );
+  }
+
+  /** @test */
+  public function exec_method_throws_an_exception_when_the_given_fields_has_no_values()
+  {
+    $this->getActualOutputForAssertion();
+    $this->expectException(\Exception::class);
+
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id BINARY(16) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'INSERT',
+      'fields'   => ['email', 'name']
+    ];
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $method->invoke(self::$mysql, $cfg);
+  }
+
+  /** @test */
+  public function exec_method_select_test()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $this->insertMany('users', [
+      ['id' => 1,'email' => 'john@mail.com', 'name' => 'John'],
+      ['id' => 2, 'email' => 'smith@mail.com', 'name' => 'Smith']
+    ]);
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'SELECT',
+      'fields'  => ['email', 'name']
+    ];
+
+    $result = $method->invoke(self::$mysql, $cfg);
+
+    $this->assertInstanceOf(\PDOStatement::class, $result);
+
+    $results = $result->fetchAll(\PDO::FETCH_ASSOC);
+
+    $this->assertSame(
+      [
+        ['email' => 'john@mail.com', 'name' => 'John'],
+        ['email' => 'smith@mail.com', 'name' => 'Smith']
+      ],
+      $results
+    );
+  }
+
+  /** @test */
+  public function exec_method_test_the_after_trigger_is_running()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id BINARY(16) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'INSERT' => [
+        'after' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return array_merge($cfg, ['run' => 'run is changed!']);
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'INSERT',
+      'fields'  => ['email' => 'john@mail.com', 'name' => 'John']
+    ];
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $this->assertSame(
+      'run is changed!',
+      $method->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function exec_method_test_when_trigger_returns_empty_run()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'INSERT' => [
+        'before' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return [];
+            }
+          ]
+        ],
+        'after' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return array_merge($cfg, ['run' => 1]); // To make sure that this closure won't execute
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'INSERT',
+      'fields'  => ['email' => 'john@mail.com', 'name' => 'John']
+    ];
+
+    $this->assertFalse(
+      $method->invoke(self::$mysql, $cfg)
+    );
+
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John');
+    $this->assertDatabaseDoesNotHave('users', 'email', 'john@mail.com');
+  }
+
+  /** @test */
+  public function exec_method_test_when_trigger_returns_empty_run_but_force_is_enabled()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY,
+              email VARCHAR(25) NOT NULL UNIQUE,
+              name VARCHAR(25) NOT NULL';
+    });
+
+    $this->setNonPublicPropertyValue('_triggers', [
+      'INSERT' => [
+        'before' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return [];
+            }
+          ]
+        ],
+        'after' => [
+          self::getDbConfig()['db'] . '.users' => [
+            function ($cfg) {
+              return array_merge($cfg, ['run' => 1]); // To make sure that this closure will execute since force is enabled
+            }
+          ]
+        ]
+      ]
+    ]);
+
+    $method = $this->getNonPublicMethod('_exec');
+
+    $cfg = [
+      'tables'  => 'users',
+      'kind'    => 'INSERT',
+      'fields'  => ['email' => 'john@mail.com', 'name' => 'John'],
+      'force'   => true
+    ];
+
+    $this->assertSame(
+      1,
+      $method->invoke(self::$mysql, $cfg)
+    );
+
+    $this->assertDatabaseDoesNotHave('users', 'name', 'John');
+    $this->assertDatabaseDoesNotHave('users', 'email', 'john@mail.com');
+  }
+
+  /** @test */
+  public function exec_method_returns_null_when_sql_has_falsy_value_from_the_returned_config_from_processCfg_method()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $mysql->shouldReceive('processCfg')
+      ->once()
+      ->andReturn(['tables' => ['users'], 'sql' => '']);
+
+    $this->assertNull(
+      $this->getNonPublicMethod('_exec', $mysql)
+      ->invoke($mysql)
+    );
+  }
+
+  /** @test */
+  public function exec_method_returns_null_when_processCfg_method_returns_nul()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $mysql->shouldReceive('processCfg')
+      ->once()
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->getNonPublicMethod('_exec', $mysql)
+        ->invoke($mysql)
+    );
+  }
+
+  /** @test */
+  public function exec_method_returns_null_when_check_method_returns_false()
+  {
+    $mysql = \Mockery::mock(Mysql::class)->makePartial();
+
+    $mysql->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->getNonPublicMethod('_exec', $mysql)
+        ->invoke($mysql)
+    );
+  }
+
+  /** @test */
+  public function treat_arguments_method_normalizes_arguments_by_making_it_a_uniform_array()
+  {
+    $cfg = [
+      'kind'   => 'SELECT',
+      'table'  => 'users',
+      'fields' => ['users.name', 'users.username'],
+      'join'   => [
+        [
+          'table' => 'roles',
+          'on'    => [[
+            'conditions' => [[
+              'field' => 'users.role_id',
+              'operator' => '=',
+              'exp' => 'role.id'
+            ]]
+          ]]
+        ]
+      ],
+      'where' => [[
+        'conditions' => [[
+          'field' => 'users.id',
+          'operator' => '>=',
+          'value' => 1
+        ]]
+      ]],
+      'order' => ['users.name' => 'desc']
+    ];
+
+    $expected = [
+      'kind' => 'SELECT',
+      'fields' => ['users.name', 'users.username'],
+      'where' => [[
+        'conditions' => [[
+          'field' => 'users.id',
+          'operator' => '>=',
+          'value' => 1
+        ]]
+      ]],
+      'order' => ['users.name' => 'desc'],
+      'limit' => 0,
+      'start' => 0,
+      'group_by' => [],
+      'having' => [],
+      'join' => [[
+        'table' => 'roles',
+        'on' => [
+          'conditions' => [[
+            'conditions' => [[
+              'field' => 'users.role_id',
+              'operator' => '=',
+              'exp' => 'role.id'
+            ]],
+            'logic' => 'AND'
+          ]],
+          'logic' => 'AND'
+        ],
+        'type' => 'right'
+      ]],
+      'tables' => [self::getDbConfig()['db'] . ".users"],
+      'aliases' => [],
+      'values' => [1],
+      'filters' => [
+        'conditions' => [[
+          'conditions' => [[
+            'field' => 'users.id',
+            'operator' => '>=',
+            'value' => 1
+          ]],
+          'logic' => 'AND'
+        ]],
+        'logic' => 'AND'
+      ],
+      'hashed_join' => [[
+        'conditions' => [[
+          'conditions' => [[
+            'exp' => 'role.id',
+            'field' => 'users.role_id',
+            'operator' => '='
+          ]],
+          'logic' => 'AND'
+        ]],
+        'logic' => 'AND'
+      ]],
+      'hashed_where' => [
+        'conditions' => [[
+          'conditions' => [[
+            'field' => 'users.id',
+            'operator' => '>='
+          ]],
+          'logic' => 'AND'
+        ]],
+        'logic' => 'AND'
+      ],
+      'hashed_having' => [],
+      'bbn_db_treated' => true,
+      'write' => false,
+      'ignore' => false,
+      'count' => false,
+    ];
+
+    $method = $this->getNonPublicMethod('_treat_arguments');
+    $result = $method->invoke(self::$mysql, $cfg);
+
+    $this->assertArrayHasKey('hash', $result);
+    unset($result['hash']);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function treat_arguments_method_sets_default_cfg_when_not_provided()
+  {
+    $result = $this->getNonPublicMethod('_treat_arguments')
+      ->invoke(self::$mysql, ['tables' => ['users']]);
+
+    $expected = [
+      'kind' => 'SELECT',
+      'fields' => [],
+      'where' => [],
+      'order' => [],
+      'limit' => 0,
+      'start' => 0,
+      'group_by' => [],
+      'having' => [],
+      'tables' => [self::getDbConfig()['db'] . '.users'],
+      'aliases' => [],
+      'values' => [],
+      'filters' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'join' => [],
+      'hashed_join' => [],
+      'hashed_where' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'hashed_having' => [],
+      'bbn_db_treated' => true,
+      'write' => false,
+      'ignore' => false,
+      'count' => false
+    ];
+
+    $this->assertArrayHasKey('hash', $result);
+    unset($result['hash']);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function treat_arguments_method_handle_arguments_when_the_given_config_is_a_numeric_array()
+  {
+    $cfg = [
+      [[
+        'SELECT',
+        'users',
+        ['username', 'name'],
+        [['id', '>=', 4]],
+        ['id' => 'desc'],
+        4,
+        9
+      ]]
+    ];
+
+    $expected = [
+      'kind' => 'SELECT',
+      'fields' => ['username', 'name'],
+      'where' => [['id', '>=', 4]],
+      'order' => ['id' => 'desc'],
+      'limit' => 4,
+      'start' => 9,
+      'group_by' => [],
+      'having' => [],
+      'tables' => [self::getDbConfig()['db'] . '.users'],
+      'aliases' => [],
+      'values' => [4],
+      'filters' => [
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '>=',
+          'value' => 4
+        ]],
+        'logic' => 'AND'
+      ],
+      'join' => [],
+      'hashed_join' => [],
+      'hashed_where' => [
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '>='
+        ]],
+        'logic' => 'AND'
+      ],
+      'hashed_having' => [],
+      'bbn_db_treated' => true,
+      'write' => false,
+      'ignore' => false,
+      'count' => false
+    ];
+
+    $result = $this->getNonPublicMethod('_treat_arguments')
+      ->invoke(self::$mysql, $cfg);
+
+    $this->assertArrayHasKey('hash', $result);
+    unset($result['hash']);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function treat_arguments_method_test_different_conditional_logic()
+  {
+    $cfg = [
+      'tables' => 'users', // should be converted to array
+      'fields' => 'username', // should be converted to array
+      'group_by' => 'id', // should be converted to array
+      'where' => 'id > 9', // should be converted to an empty array
+      'order' => 'id', // should be converted to ['id' => 'ASC]
+      'limit' => 'aaa', // should be unset if not integer
+      'start' => 'bbb', // should be unset if not integer
+      'join'  => ['foo'] // should be converted to empty array
+    ];
+
+    $expected = [
+      'kind' => 'SELECT',
+      'fields' => ['username'],
+      'where' => [],
+      'order' => ['id' => 'ASC'],
+      'group_by' => ['id'],
+      'having' => [],
+      'tables' => [self::getDbConfig()['db'] . '.users'],
+      'join' => [],
+      'aliases' => [],
+      'values' => [],
+      'filters' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'hashed_join' => [],
+      'hashed_where' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'hashed_having' => [],
+      'bbn_db_treated' => true,
+      'write' => false,
+      'ignore' => false,
+      'count' => false
+    ];
+
+    $result = $this->getNonPublicMethod('_treat_arguments')
+      ->invoke(self::$mysql, $cfg);
+
+    $this->assertArrayHasKey('hash', $result);
+    unset($result['hash']);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function treat_arguments_method_testing_handling_join_arguments()
+  {
+    $cfg = [
+      'tables' => ['users'],
+      'join' => [
+        'roles' => [
+          'table' => '', // Empty table will use the index 'users' for it
+          'on' => [
+            'conditions' => [[
+              'field' => 'users.role_id',
+              'exp' => 'roles.id'
+            ]]
+          ],
+          'type' => 'left'
+        ],
+        'profiles_alias' => [
+          'table' => 'profiles',
+          'alias' => '', // Empty alias will use the index 'roles_alias' for it
+          'on' => [
+            'conditions' => [[
+              'field' => 'users.profile_id',
+              'exp' => 'profiles.id',
+              'operator' => '='
+            ]]
+          ],
+        ]
+      ]
+    ];
+
+    $expected = [
+      'kind' => 'SELECT',
+      'fields' => [],
+      'where' => [],
+      'order' => [],
+      'limit' => 0,
+      'start' => 0,
+      'group_by' => [],
+      'having' => [],
+      'tables' => [self::getDbConfig()['db'] . '.users'],
+      'join' => [
+        [
+          'table' => 'roles',
+          'on' => [
+            'conditions' => [[
+              'field' => 'users.role_id',
+              'exp' => 'roles.id',
+              'operator' => 'eq'
+            ]],
+            'logic' => 'AND'
+          ],
+          'type' => 'left'
+        ],
+        [
+          'table' => 'profiles',
+          'alias' => 'profiles_alias',
+          'on' => [
+            'conditions' => [[
+              'field' => 'users.profile_id',
+              'exp' => 'profiles.id',
+              'operator' => '='
+            ]],
+            'logic' => 'AND'
+          ],
+          'type' => 'right'
+        ]
+      ],
+      'aliases' => [],
+      'values' => [],
+      'filters' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'hashed_join' => [[
+        'conditions' => [[
+          'exp' => 'roles.id',
+          'field' => 'users.role_id',
+          'operator' => 'eq'
+        ]],
+        'logic' => 'AND'
+      ],[
+        'conditions' => [[
+          'exp' => 'profiles.id',
+          'field' => 'users.profile_id',
+          'operator' => '='
+        ]],
+        'logic' => 'AND'
+      ]],
+      'hashed_where' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'hashed_having' => [],
+      'bbn_db_treated' => true,
+      'write' => false,
+      'ignore' => false,
+      'count' => false
+    ];
+
+    $result = $this->getNonPublicMethod('_treat_arguments')
+      ->invoke(self::$mysql, $cfg);
+
+    $this->assertArrayHasKey('hash', $result);
+    unset($result['hash']);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function treat_arguments_method_testing_having()
+  {
+    $cfg = [
+      'tables' => 'payments',
+      'fields' => [
+        'sum' => 'SUM(*)',
+        'user_id'
+      ],
+      'group_by' => ['user_id'],
+      'having' => [
+        'conditions' => [[
+          'field' => 'sum',
+          'operator' => '>',
+          'value' => 24000
+        ]]
+      ]
+    ];
+
+    $expected = [
+      'kind' => 'SELECT',
+      'fields' => ['sum' => 'SUM(*)', 'user_id'],
+      'where' => [],
+      'order' => [],
+      'limit' => 0,
+      'start' => 0,
+      'group_by' => ['user_id'],
+      'having' => [
+        'conditions' => [[
+          'conditions' => [[
+            'field' => 'sum',
+            'operator' => '>',
+            'value' => 24000
+          ]],
+          'logic' => 'AND'
+        ]],
+        'logic' => 'AND'
+      ],
+      'tables' => [self::getDbConfig()['db'] . '.payments'],
+      'aliases' => [
+        'SUM(*)' => 'sum'
+      ],
+      'values' => [24000],
+      'filters' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'join' => [],
+      'hashed_join' => [],
+      'hashed_where' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'hashed_having' => [
+        'conditions' => [[
+          'conditions' => [[
+            'field' => 'sum',
+            'operator' => '>'
+          ]],
+          'logic' => 'AND'
+        ]],
+        'logic' => 'AND'
+      ],
+      'bbn_db_treated' => true,
+      'write' => false,
+      'ignore' => false,
+      'count' => false
+    ];
+
+    $result = $this->getNonPublicMethod('_treat_arguments')
+      ->invoke(self::$mysql, $cfg);
+
+    $this->assertArrayHasKey('hash', $result);
+    unset($result['hash']);
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function treat_arguments_throws_an_exceptions_if_table_is_not_provided()
+  {
+    $this->expectException(\Error::class);
+
+    $this->getNonPublicMethod('_treat_arguments')
+      ->invoke(self::$mysql, ['foo' => 'bar']);
+  }
+
+  /** @test */
+  public function treat_arguments_method_returns_the_given_cfg_as_is_if_bbn_db_treated_exists()
+  {
+    $cfg = [
+      'bbn_db_treated' => true,
+      'tables' => ['users']
+    ];
+
+    $this->assertSame(
+      $cfg,
+      $this->getNonPublicMethod('_treat_arguments')
+        ->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function adapt_filters_method_test()
+  {
+    $cfg = [
+      'filters' => [
+        'conditions' => [],
+        'logic' => 'AND'
+      ],
+      'having' => [
+        'conditions' => [[
+          'field' => 'sum',
+          'operator' => '>',
+          'value' => 230
+        ]]
+      ]
+    ];
+
+    $expected = [
+      'filters' => [
+        'logic' => 'AND',
+        'conditions' => []
+      ],
+      'having' => [
+        'logic' => 'AND',
+        'conditions' => [[
+          'conditions' => [[
+            'field' => 'sum',
+            'operator' => '>',
+            'value' => 230
+          ]]
+        ],
+          []
+        ],
+      ]
+    ];
+
+    $method = $this->getNonPublicMethod('_adapt_filters');
+
+    $method->invokeArgs(self::$mysql, [&$cfg]);
+
+    $this->assertSame($expected, $cfg);
+
+    $cfg2 = [
+      'filters' => [
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '=',
+          'value' => 33
+        ]],
+        'logic' => 'AND'
+      ],
+      'having' => []
+    ];
+
+    $expected2 = [
+      'filters' => [
+        'logic' => 'AND',
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '=',
+          'value' => 33
+        ]]
+      ],
+      'having' => []
+    ];
+
+    $method->invokeArgs(self::$mysql, [&$cfg2]);
+
+    $this->assertSame($expected2, $cfg2);
+  }
+
+  /** @test */
+  public function adapt_bit_method_test_when_there_is_an_aggregate_function()
+  {
+    $cfg = [
+      'fields' => ['sum' => 'SUM(*)', 'max' => 'MAX(*)'],
+      'filters' => [
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '>',
+          'value' => 33
+        ], [
+          'field' => 'sum',
+          'operator' => '>',
+          'value' => 44
+        ],[
+          'field' => 'AVG(*)',
+          'operator' => '>',
+          'value' => 55
+        ],[
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'id',
+            'operator' => '>',
+            'exp' => 'max'
+          ],[
+            'field' => 'id',
+            'operator' => '<',
+            'exp' => 'MIN(*)'
+          ],[
+            'field' => 'id',
+            'operator' => '<',
+            'value' => 99
+          ]]
+        ]],
+        'logic' => 'AND'
+      ],
+      'having' => []
+    ];
+
+    $expected = [
+      $filters = [
+        'logic' => 'AND',
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '>',
+          'value' => 33
+        ],[
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'id',
+            'operator' => '>',
+            'exp' => 'max'
+          ],[
+            'field' => 'id',
+            'operator' => '<',
+            'exp' => 'MIN(*)'
+          ],[
+            'field' => 'id',
+            'operator' => '<',
+            'value' => 99
+          ]]
+        ]]
+      ],
+      $having = [
+        'logic' => 'AND',
+        'conditions' => [[
+          'field' => 'sum',
+          'operator' => '>',
+          'value' => 44
+        ],[
+          'field' => 'AVG(*)',
+          'operator' => '>',
+          'value' => 55
+        ],[
+          'field' => 'id',
+          'operator' => '>',
+          'exp' => 'max'
+        ],[
+          'field' => 'id',
+          'operator' => '<',
+          'exp' => 'MIN(*)'
+        ]]
+      ]
+    ];
+
+    $method = $this->getNonPublicMethod('_adapt_bit');
+
+    $result = $method->invoke(self::$mysql, $cfg, $cfg['filters']);
+
+    $this->assertSame([$filters, $having], $result);
+  }
+
+  /** @test */
+  public function adapt_bit_method_test_when_there_is_no_an_aggregate_function()
+  {
+    $cfg = [
+      'fields' => ['user_full_name' => 'name'],
+      'filters' => [
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '>',
+          'value' => 33
+        ], [
+          'field' => 'user_full_name',
+          'operator' => '!=',
+          'value' => 'John'
+        ]],
+        'logic' => 'AND'
+      ],
+      'having' => []
+    ];
+
+    $expected = [
+      [
+        'logic' => 'AND',
+        'conditions' => [[
+          'field' => 'id',
+          'operator' => '>',
+          'value' => 33
+        ],[
+          'field' => 'user_full_name',
+          'operator' => '!=',
+          'value' => 'John'
+        ]]
+      ],
+      []
+    ];
+
+    $method = $this->getNonPublicMethod('_adapt_bit');
+
+    $result = $method->invoke(self::$mysql, $cfg, $cfg['filters']);
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function set_limit_1_method_test_when_the_given_argument_is_an_array_of_array()
+  {
+    $cfg = [[
+      'table' => 'users',
+    ]];
+
+    $expected = [[
+      'table' => 'users',
+      'limit' => 1
+    ]];
+
+    $this->assertSame(
+      $expected,
+      $this->getNonPublicMethod('_set_limit_1')
+        ->invoke(self::$mysql, $cfg)
+    );
+
+  }
+
+  /** @test */
+  public function set_limit_1_method_test_when_given_args_is_a_numeric_array_with_only_table_name()
+  {
+    $cfg      = ['users'];
+    $expected = [
+      'users', // Table name
+      [], // Fields
+      [], // Where
+      [], // Order
+      1, // Limit
+      0 // Start
+    ];
+
+    $this->assertSame(
+      $expected,
+      $this->getNonPublicMethod('_set_limit_1')
+        ->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function set_limit_1_method_test_when_the_given_argument_is_a_numeric_array()
+  {
+    $cfg      = [
+      'users',
+      ['username', 'name'],
+      [['id', '>', 9]],
+      ['name' => 'desc'],
+      3,
+      1
+    ];
+
+    $expected = [
+      'users', // Table name
+      ['username', 'name'], // Fields
+      [['id', '>', 9]], // Where
+      ['name' => 'desc'], // Order
+      3, // Limit
+      3 // Start
+    ];
+
+    $this->assertSame(
+      $expected,
+      $this->getNonPublicMethod('_set_limit_1')
+        ->invoke(self::$mysql, $cfg)
+    );
+  }
+
+  /** @test */
+  public function addStatement_method_adds_query_statement_and_parameters_when_last_enabled_is_true()
+  {
+    $this->assertNull(
+      $this->getNonPublicProperty('last_real_query')
+    );
+
+    $this->assertSame(
+      self::$real_params_default,
+      $this->getNonPublicProperty('last_real_params')
+    );
+
+    $this->assertTrue(
+      $this->getNonPublicProperty('_last_enabled')
+    );
+
+    $this->assertNull(
+      $this->getNonPublicProperty('last_query')
+    );
+
+    $this->assertSame(
+      self::$real_params_default,
+      $this->getNonPublicProperty('last_params')
+    );
+
+
+    $result = $this->getNonPublicMethod('addStatement')
+      ->invoke(self::$mysql, $stmt = 'SELECT * FROM users', $params = ['foo' => 'bar']);
+
+    $this->assertSame(
+      $stmt,
+      $this->getNonPublicProperty('last_real_query')
+    );
+
+    $this->assertSame(
+      $params,
+      $this->getNonPublicProperty('last_real_params')
+    );
+
+    $this->assertSame(
+      $stmt,
+      $this->getNonPublicProperty('last_query')
+    );
+
+    $this->assertSame(
+      $params,
+      $this->getNonPublicProperty('last_params')
+    );
+
+    $this->assertInstanceOf(Mysql::class, $result);
+  }
+
+  /** @test */
+  public function addStatement_method_adds_query_statement_and_parameters_when_last_enabled_is_false()
+  {
+    $this->assertNull(
+      $this->getNonPublicProperty('last_real_query')
+    );
+
+    $this->assertSame(
+      self::$real_params_default,
+      $this->getNonPublicProperty('last_real_params')
+    );
+
+    $this->assertNull(
+      $this->getNonPublicProperty('last_query')
+    );
+
+    $this->assertSame(
+      self::$real_params_default,
+      $this->getNonPublicProperty('last_params')
+    );
+
+    $this->setNonPublicPropertyValue('_last_enabled', false);
+
+    $result = $this->getNonPublicMethod('addStatement')
+      ->invoke(self::$mysql, $stmt = 'SELECT * FROM users', $params = ['foo' => 'bar']);
+
+    $this->assertSame(
+      $stmt,
+      $this->getNonPublicProperty('last_real_query')
+    );
+
+    $this->assertSame(
+      $params,
+      $this->getNonPublicProperty('last_real_params')
+    );
+
+    $this->assertNull(
+      $this->getNonPublicProperty('last_query')
+    );
+
+    $this->assertSame(
+      self::$real_params_default,
+      $this->getNonPublicProperty('last_params')
+    );
+
+    $this->assertInstanceOf(Mysql::class, $result);
+  }
+
+  /** @test */
+  public function set_start_method_test_when_the_given_argument_is_an_array_of_array()
+  {
+    $cfg = [[
+      'table' => 'users'
+    ]];
+
+    $expected = [[
+      'table' => 'users',
+      'start' => 3
+    ]];
+
+    $this->assertSame(
+      $expected,
+      $this->getNonPublicMethod('_set_start')
+        ->invoke(self::$mysql, $cfg, 3)
+    );
+  }
+
+  /** @test */
+  public function set_start_method_test_when_given_args_is_a_numeric_array_with_only_table_name()
+  {
+    $cfg      = ['users'];
+    $expected = [
+      'users', // Table name
+      [], // Fields
+      [], // Where
+      [], // Order
+      1, // Limit
+      6 // Start
+    ];
+
+    $this->assertSame(
+      $expected,
+      $this->getNonPublicMethod('_set_start')
+        ->invoke(self::$mysql, $cfg, 6)
+    );
+  }
+
+  /** @test */
+  public function set_start_method_test_when_the_given_argument_is_a_numeric_array()
+  {
+    $cfg      = [
+      'users',
+      ['username', 'name'],
+      [['id', '>', 9]],
+      ['name' => 'desc'],
+      3,
+      1
+    ];
+
+    $expected = [
+      'users', // Table name
+      ['username', 'name'], // Fields
+      [['id', '>', 9]], // Where
+      ['name' => 'desc'], // Order
+      3, // Limit
+      10 // Start
+    ];
+
+    $this->assertSame(
+      $expected,
+      $this->getNonPublicMethod('_set_start')
+        ->invoke(self::$mysql, $cfg, 10)
+    );
+  }
+
+  /** @test */
+  public function retrieveQuery_method_retrieves_a_query_from_the_given_hash()
+  {
+    $this->setNonPublicPropertyValue('queries', [
+      '12345' => ['foo' => 'bar'],
+      '54321' => '12345'
+    ]);
+
+    $this->assertSame(['foo' => 'bar'], self::$mysql->retrieveQuery('12345'));
+    $this->assertSame(['foo' => 'bar'], self::$mysql->retrieveQuery('54321'));
+    $this->assertNull(self::$mysql->retrieveQuery('foo'));
+  }
+
+  /** @test */
+  public function extractFields_method_test()
+  {
+    $cfg = [
+      'available_fields' => [
+        'users.id'   => 'users',
+        'role_id'    => '',
+        'profile_id' => 'profiles',
+        'payments.card_id' => 'payments'
+      ]
+    ];
+
+    $conditions = [
+      'conditions' => [[
+        'field'     => 'users.id',
+        'operator'  => '>',
+        'value'     => 10
+      ],[
+        'field'     => 'role_id',
+        'operator'  => '=',
+        'exp'       => 'roles.id'
+      ],[
+        'field'     => 'profiles.id',
+        'operator'  => '=',
+        'exp'       => 'profile_id'
+      ],[
+        'field'     => 'permissions.id',
+        'operator'  => '=',
+        'exp'       => 'permission_id'
+      ],[
+        'conditions' => [[
+          'field'     => 'cards.id',
+          'operator'  => '=',
+          'exp'       =>  'payments.card_id'
+        ]]
+      ]]
+    ];
+
+    $expected = ['users.id', 'role_id', 'profiles.profile_id', 'payments.card_id'];
+    $result   = [];
+
+    $this->assertSame(
+      $expected,
+      self::$mysql->extractFields($cfg, $conditions, $result)
+    );
+
+    $this->assertSame($expected, $result);
+
+    $this->assertSame(
+      $expected,
+      self::$mysql->extractFields($cfg, $conditions['conditions'])
+    );
+  }
+
+  /** @test */
+  public function filterFilters_method_returns_an_array_of_specific_filters_added_to_the_existing_ones()
+  {
+    $cfg = [
+      'filters' => [
+        'conditions' => [[
+          'field' => 'name',
+          'operator' => '=',
+          'value' => 'John'
+        ],[
+          'field' => 'username',
+          'operator' => '=',
+          'value' => 'jdoe'
+        ],[
+          'conditions' => [[
+            'field' => 'name',
+            'operator' => '=',
+            'value' => 'Sam'
+          ],[
+            'field' => 'username',
+            'operator' => '=',
+            'value' => 'sdoe'
+          ]]
+        ]]
+      ]
+    ];
+
+    $this->assertSame(
+      [
+        ['field' => 'name', 'operator' => '=', 'value' => 'John'],
+        ['field' => 'name', 'operator' => '=', 'value' => 'Sam'],
+      ],
+      self::$mysql->filterFilters($cfg, 'name')
+    );
+
+    $this->assertSame(
+      [
+        ['field' => 'name', 'operator' => '=', 'value' => 'John'],
+        ['field' => 'name', 'operator' => '=', 'value' => 'Sam'],
+      ],
+      self::$mysql->filterFilters($cfg, 'name', '=')
+    );
+
+    $this->assertSame(
+      [],
+      self::$mysql->filterFilters($cfg, 'name', '!=')
+    );
+
+    $this->assertNull(
+      self::$mysql->filterFilters(['table' => 'users'], 'name')
+    );
+
+    $this->assertSame(
+      [],
+      self::$mysql->filterFilters(['filters' => []], 'name')
+    );
+  }
+
+  /** @test */
   public function makeHash_method_makes_a_hash_string_that_will_be_the_id_of_the_request()
   {
     $hash_contour    = $this->getNonPublicProperty('hash_contour');
@@ -5302,4 +7553,601 @@ first_name ASC';
 
     $this->assertSame([], $mysql->getColArray($query));
   }
+
+  /** @test */
+  public function query_method_executes_a_statement_and_returns_the_affected_rows_for_writing_statements()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function() {
+      return 'name VARCHAR(255), username VARCHAR(255)';
+    });
+
+    $result = self::$mysql->query('INSERT INTO users SET name = ?, username = ?', 'John', 'jdoe');
+
+    $this->assertSame(1, $result);
+    $this->assertDatabaseHas('users', 'name', 'John');
+    $this->assertDatabaseHas('users', 'username', 'jdoe');
+
+    $queries = $this->getNonPublicProperty('queries');
+
+    $this->assertIsArray($queries);
+    $this->assertCount(1, $queries);
+
+    $query = current($queries);
+
+    $this->assertSame(
+      'INSERT INTO users SET name = ?, username = ?',
+      $query['sql']
+    );
+    $this->assertSame('INSERT', $query['kind']);
+
+  }
+
+  /** @test */
+  public function query_method_executes_a_statement_and_returns_query_object_for_reading_statements()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(50) NOT NULL';
+    });
+
+    $this->insertMany('users', [
+      ['name' => 'John'],
+      ['name' => 'Sam']
+    ]);
+
+    $result = self::$mysql->query('SELECT * FROM users WHERE id >= ?', 1);
+
+    $this->assertInstanceOf(\PDOStatement::class, $result);
+    $this->assertInstanceOf(Query::class, $result);
+
+    $queries = $this->getNonPublicProperty('queries');
+
+    $this->assertIsArray($queries);
+    $this->assertCount(1, $queries);
+
+    $query = current($queries);
+
+    $this->assertSame(
+      'SELECT * FROM users WHERE id >= ?',
+      $query['sql']
+    );
+    $this->assertSame('SELECT', $query['kind']);
+  }
+
+  /** @test */
+  public function query_method_uses_the_saved_query()
+  {
+    $this->createTable('users', function () {
+      return 'name VARCHAR(20), username VARCHAR(20)';
+    });
+
+    $this->insertMany('users', [
+      ['name' => 'John', 'username' => 'jdoe'],
+      ['name' => 'Sam', 'username' => 'sdoe'],
+    ]);
+
+    $result = self::$mysql->query("SELECT username FROM users WHERE name = ?", 'John');
+
+    $this->assertInstanceOf(\PDOStatement::class, $result);
+
+    $this->assertSame(
+      [['username' => 'jdoe']],
+      $result->fetchAll(\PDO::FETCH_ASSOC)
+    );
+
+    $result2 = self::$mysql->query("SELECT username FROM users WHERE name = ?", 'Sam');
+
+    $this->assertInstanceOf(\PDOStatement::class, $result2);
+
+    $this->assertSame(
+      [['username' => 'sdoe']],
+      $result2->fetchAll(\PDO::FETCH_ASSOC)
+    );
+
+    self::$mysql->query("SELECT name FROM users WHERE username = ?", 'sdoe');
+
+    $this->assertCount(
+      2,
+      $this->getNonPublicProperty('queries')
+    );
+  }
+
+  /** @test */
+  public function query_method_throws_an_exception_if_the_given_query_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->query('foo');
+  }
+
+  /** @test */
+  public function query_method_sets_an_error_if_the_given_arguments_are_greater_than_query_placeholders()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->setErrorMode(Errors::E_DIE);
+
+    self::$mysql->query('SELECT * FROM user where id = ? AND user = ?', 1, 4, 5);
+  }
+
+  /** @test */
+  public function query_method_fills_the_missing_values_with_the_last_given_one_when_number_of_values_are_smaller_than_query_placeholders()
+  {
+    $this->createTable('users', function() {
+      return 'name VARCHAR(255), username VARCHAR(255)';
+    });
+
+    self::$mysql->query('INSERT INTO users SET name = ?, username = ?', 'John');
+
+    $this->assertDatabaseHas('users', 'name', 'John');
+    $this->assertDatabaseHas('users', 'username', 'John');
+  }
+
+  /** @test */
+  public function add_query_method_adds_to_queries_list_form_the_given_hash_and_arguments()
+  {
+    $method = $this->getNonPublicMethod('_add_query');
+
+    $method->invokeArgs(self::$mysql, [
+      $hash = '12345',
+      $stmt = 'SELECT * FROM users WHERE id = ?',
+      $kind = 'SELECT',
+      $placeholders = 1,
+      $options = ['option_1' => 'option_1_value']
+    ]);
+
+    $queries = $this->getNonPublicProperty('queries');
+    $query   = current($queries);
+
+    $this->assertCount(1, $queries);
+    $this->assertArrayHasKey('first', $query);
+    $this->assertIsFloat($query['first']);
+    unset($query['first']);
+
+    $this->assertSame(
+      [
+        'sql' => $stmt,
+        'kind' => $kind,
+        'write' => false,
+        'structure' => false,
+        'placeholders' => $placeholders,
+        'options' => $options,
+        'num' => 0,
+        'exe_time' => 0,
+        'last' => 0,
+        'prepared' => false
+      ],
+      $query
+    );
+
+    $list_queries = $this->getNonPublicProperty('list_queries');
+    $list_query   = current($list_queries);
+
+    $this->assertCount(1, $list_queries);
+    $this->assertArrayHasKey('last', $list_query);
+    $this->assertArrayHasKey('hash', $list_query);
+    $this->assertSame($hash, $list_query['hash']);
+  }
+
+  /** @test */
+  public function add_query_methods_removes_from_the_beginning_of_queries_list_if_max_queries_numbers_exceeded()
+  {
+    $method = $this->getNonPublicMethod('_add_query');
+
+    $args = [
+      'SELECT * FROM users WHERE id = ?',
+      'SELECT',
+      1,
+      ['option_1' => 'option_1_value']
+    ];
+
+    $this->setNonPublicPropertyValue('max_queries', 2);
+
+    $method->invoke(self::$mysql, '123', ...$args);
+    $method->invoke(self::$mysql, '1234', ...$args);
+    $method->invoke(self::$mysql, '12345', ...$args);
+
+    $queries = $this->getNonPublicProperty('queries');
+
+    $this->assertCount(2, $queries);
+    $this->assertArrayHasKey('1234', $queries);
+    $this->assertArrayHasKey('12345', $queries);
+    $this->assertArrayNotHasKey('123', $queries);
+
+    $list_queries = $this->getNonPublicProperty('list_queries');
+
+    $this->assertCount(2, $list_queries);
+
+    $list_queries_hashes = array_map(function ($item) {
+      return $item['hash'];
+    }, $list_queries);
+
+    $list_queries_hashes = array_flip($list_queries_hashes);
+
+    $this->assertArrayHasKey('1234', $list_queries_hashes);
+    $this->assertArrayHasKey('12345', $list_queries_hashes);
+    $this->assertArrayNotHasKey('123', $list_queries_hashes);
+  }
+
+  /** @test */
+  public function _remove_query_method_removes_from_the_beginning_of_queires_with_the_given_hash()
+  {
+    $method = $this->getNonPublicMethod('_remove_query');
+
+    $this->setNonPublicPropertyValue('queries', [
+      '123' => ['foo' => 'bar'],
+      '1234' => ['foo2' => 'bar2'],
+      '12345' => '123'
+    ]);
+
+    $method->invoke(self::$mysql, '123');
+    $method->invoke(self::$mysql, '123456789');
+
+    $this->assertSame(
+      ['1234' => ['foo2' => 'bar2']],
+      $this->getNonPublicProperty('queries')
+    );
+  }
+
+  /** @test */
+  public function update_query_updates_a_query_in_query_list_by_the_given_hash()
+  {
+    $this->setNonPublicPropertyValue('list_queries', [
+      ['hash' => '1234', 'last' => time()],
+      ['hash' => '12345', 'last' => time()],
+    ]);
+
+    $this->setNonPublicPropertyValue('queries', [
+      '1234' => [
+        'sql' => 'SELECT * FROM users where id = ?',
+        'kind' => 'SELECT',
+        'write' => false,
+        'structure' => false,
+        'placeholders' => 1,
+        'options' => ['foo' => 'bar'],
+        'num' => 0,
+        'exe_time' => 0,
+        'last' => 0,
+        'prepared' => false
+      ]
+    ]);
+
+    $this->getNonPublicMethod('_update_query')
+      ->invoke(self::$mysql, '1234');
+
+    $queries = $this->getNonPublicProperty('queries');
+    $this->assertCount(1, $queries);
+    $this->assertNotSame(0, $queries['1234']['last']);
+
+    unset($queries['1234']['last']);
+
+    $this->assertSame(
+      [
+        '1234' => [
+          'sql' => 'SELECT * FROM users where id = ?',
+          'kind' => 'SELECT',
+          'write' => false,
+          'structure' => false,
+          'placeholders' => 1,
+          'options' => ['foo' => 'bar'],
+          'num' => 1,
+          'exe_time' => 0,
+          'prepared' => false
+        ]
+      ],
+      $queries
+    );
+
+    $list_queries = $this->getNonPublicProperty('list_queries');
+
+    $this->assertCount(2, $list_queries);
+    // The one with the given hash should be moved to the end of the array
+    $this->assertSame(
+      '1234',
+      $list_queries[1]['hash']
+    );
+  }
+
+  /** @test */
+  public function update_query_removes_all_hashes_from_list_queries_and_queries_if_expired()
+  {
+    $length_queries = $this->getNonPublicProperty('length_queries') * 2;
+
+    $this->setNonPublicPropertyValue('list_queries', [
+      ['hash' => '12', 'last' => strtotime("-$length_queries Minutes")],
+      ['hash' => '1234', 'last' => time()],
+    ]);
+
+    $this->setNonPublicPropertyValue('queries', [
+      '1234' => [
+        'last' => 0,
+        'num'  => 0
+      ],
+      '12' => [
+        'last' => 0,
+        'num'  => 0
+      ]
+    ]);
+
+    $this->getNonPublicMethod('_update_query')
+      ->invoke(self::$mysql, '1234');
+
+    $queries = $this->getNonPublicProperty('queries');
+
+    $this->assertCount(1, $queries);
+    $this->assertArrayHasKey('1234', $queries);
+    $this->assertArrayNotHasKey('12', $queries);
+
+    $list_queries = $this->getNonPublicProperty('list_queries');
+
+    $this->assertCount(1, $list_queries);
+    $this->assertSame('1234', $list_queries[0]['hash']);
+  }
+
+  /** @test */
+  public function update_query_throws_an_exception_when_the_given_hash_does_not_exist_in_list_queries()
+  {
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage('Impossible to find the corresponding hash');
+
+    $this->setNonPublicPropertyValue('list_queries', [
+      ['hash' => '12', 'last' => 0]
+    ]);
+
+    $this->setNonPublicPropertyValue('queries', [
+      '1234' => [
+        'last' => 0,
+        'num' => 0
+      ]
+    ]);
+
+    $this->getNonPublicMethod('_update_query')
+      ->invoke(self::$mysql, '1234');
+  }
+
+  /** @test */
+  public function update_query_throws_an_exception_when_the_given_hash_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage('Impossible to find the query corresponding to this hash');
+
+    $this->setNonPublicPropertyValue('queries', [
+      '1234' => [
+        'last' => 0,
+        'num'  => 0
+      ]
+    ]);
+
+    $this->getNonPublicMethod('_update_query')
+      ->invoke(self::$mysql, '123');
+  }
+
+  /** @test */
+  public function modelize_method_returns_table_structure_as_an_indexed_array_for_the_given_table_name()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function () {
+      return 'id BINARY(16) PRIMARY KEY,
+              name VARCHAR(25) NOT NULL,
+              username VARCHAR(50) NOT NULL UNIQUE,
+              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              role_id INT(11) NOT NULL';
+    });
+
+    self::$connection->query(
+      "ALTER TABLE users ADD CONSTRAINT `user_role` FOREIGN KEY (`role_id`)
+       REFERENCES `roles` (id) ON DELETE CASCADE ON UPDATE RESTRICT"
+    );
+
+    $this->createTable('roles', function () {
+      return 'id int(11) PRIMARY KEY AUTO_INCREMENT,
+              name VARCHAR(25)';
+    });
+
+    $users_expected = [
+      'keys' => [
+        'PRIMARY' => [
+          'columns' => ['id'],
+          'ref_db'  => null,
+          'ref_table'  => null,
+          'ref_column'  => null,
+          'constraint'  => null,
+          'update'  => null,
+          'delete'  => null,
+          'unique'  => 1,
+        ],
+        'username' => [
+          'columns' => ['username'],
+          'ref_db' => null,
+          'ref_table' => null,
+          'ref_column' => null,
+          'constraint' => null,
+          'update' => null,
+          'delete' => null,
+          'unique' => 1,
+        ],
+        'user_role' => [
+          'columns' => ['role_id'],
+          'ref_db' => $db = self::getDbConfig()['db'],
+          'ref_table' => 'roles',
+          'ref_column' => 'id',
+          'constraint' => 'user_role',
+          'update'    => 'RESTRICT',
+          'delete'    => 'CASCADE',
+          'unique'    => 0
+        ]
+      ],
+      'cols' => [
+        'id' => ['PRIMARY'],
+        'username' => ['username'],
+        'role_id' => ['user_role']
+      ],
+      'fields' => [
+        'id' => [
+          'position' => 1,
+          'type' => 'binary',
+          'null'  => 0,
+          'key' => 'PRI',
+          'extra' => '',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => '',
+          'maxlength' => 16
+        ],
+        'name' => [
+          'position' => 2,
+          'type' => 'varchar',
+          'null'  => 0,
+          'key' => null,
+          'extra' => '',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => '',
+          'maxlength' => 25
+        ],
+        'username' => [
+          'position' => 3,
+          'type' => 'varchar',
+          'null'  => 0,
+          'key' => 'UNI',
+          'extra' => '',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => '',
+          'maxlength' => 50
+        ],
+        'created_at' => [
+          'position' => 4,
+          'type' => 'timestamp',
+          'null'  => 0,
+          'key' => null,
+          'extra' => 'DEFAULT_GENERATED',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => '',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'position' => 5,
+          'type' => 'int',
+          'null'  => 0,
+          'key' => 'MUL',
+          'extra' => '',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => ''
+        ]
+      ]
+    ];
+
+    $this->assertSame($users_expected, self::$mysql->modelize('users'));
+
+    $roles_expected = [
+      'keys' => [
+        'PRIMARY' => [
+          'columns' => ['id'],
+          'ref_db'  => null,
+          'ref_table'  => null,
+          'ref_column'  => null,
+          'constraint'  => null,
+          'update'  => null,
+          'delete'  => null,
+          'unique'  => 1,
+        ]
+      ],
+      'cols' => [
+        'id' => ['PRIMARY']
+      ],
+      'fields' => [
+        'id' => [
+          'position' => 1,
+          'type' => 'int',
+          'null'  => 0,
+          'key' => 'PRI',
+          'extra' => 'auto_increment',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => ''
+        ],
+        'name' => [
+          'position' => 2,
+          'type' => 'varchar',
+          'null'  => 1,
+          'key' => null,
+          'extra' => '',
+          'signed' => true,
+          'virtual' => false,
+          'generation'  => '',
+          'default' => 'NULL',
+          'maxlength' => 25
+        ]
+      ]
+    ];
+
+    $this->assertSame($roles_expected, self::$mysql->modelize('roles'));
+
+    $this->assertSame(
+      [
+        "$db.roles" => $roles_expected,
+        "$db.users" => $users_expected
+      ],
+      self::$mysql->modelize('*')
+    );
+  }
+
+  /** @test */
+  public function modelize_method_does_not_get_from_cache_if_the_given_force_parameter_is_true()
+  {
+    $db_config = self::getDbConfig();
+
+    $this->createTable('users', function () {
+      return 'id INT(11)';
+    });
+
+    self::$cache_mock->shouldNotReceive('cacheGet');
+
+    self::$cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        "mysql/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}/users",
+        $expected = [
+          'keys' => [],
+          'cols' => [],
+          'fields' => [
+            'id' => [
+              'position' => 1,
+              'type' => 'int',
+              'null' => 1,
+              'key' => null,
+              'extra' => '',
+              'signed' => true,
+              'virtual' => false,
+              'generation' => '',
+              'default' => 'NULL'
+            ]
+          ]
+        ],
+        $this->getNonPublicProperty('cache_renewal')
+      )
+      ->andReturnTrue();
+
+    $result = self::$mysql->modelize('users', true);
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function getEngine_method_returns_the_mysql_class_name()
+  {
+    $this->assertSame(
+      'mysql',
+      self::$mysql->getEngine()
+    );
+  }
+
+  /** @test */
+
 }

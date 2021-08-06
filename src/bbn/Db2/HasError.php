@@ -90,7 +90,9 @@ trait HasError
     $dbt   = array_reverse(debug_backtrace());
     array_walk(
       $dbt, function ($a, $i) use (&$msg) {
-      $msg[] = str_repeat(' ', $i).($i ? '->' : '')."{$a['function']}  (".basename(dirname($a['file'])).'/'.basename($a['file']).":{$a['line']})";
+        if (isset($a['file'])) {
+          $msg[] = str_repeat(' ', $i).($i ? '->' : '')."{$a['function']}  (".basename(dirname($a['file'])).'/'.basename($a['file']).":{$a['line']})";
+        }
     }
     );
     $this->log(implode(PHP_EOL, $msg));
