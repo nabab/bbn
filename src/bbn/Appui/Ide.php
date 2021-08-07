@@ -352,7 +352,7 @@ class Ide
    */
   public function getRepositories(string $project_name = '')
   {
-    return $this->projects ? $this->projects->getRepositories($project_name) : null;
+    return $this->projects ? $this->projects->getRepositories($project_name ?: $this->project) : null;
   }
 
 

@@ -350,7 +350,7 @@ class Project extends bbn\Models\Cls\Db
         }
 
         if ($env = X::getRow($envs, ['type' => BBN_ENV])) {
-          $this->appPath = $env['code'];
+          $this->appPath = $env['text'];
           if (substr($this->appPath, -4) !== 'src/') {
             $this->appPath .= 'src/';
           }
