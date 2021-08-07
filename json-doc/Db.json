@@ -10402,8 +10402,21 @@
                             "default": 1,
                             "maxlength": 1
                         },
-                        "formation_exemption": {
+                        "cotis_definie": {
                             "position": 71,
+                            "type": "decimal",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 14,
+                            "decimals": 2
+                        },
+                        "formation_exemption": {
+                            "position": 72,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -10415,17 +10428,6 @@
                             "maxlength": 1
                         },
                         "formation_gestion": {
-                            "position": 72,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "formation_tva": {
                             "position": 73,
                             "type": "date",
                             "null": 1,
@@ -10436,8 +10438,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "etat_dva": {
+                        "formation_tva": {
                             "position": 74,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "etat_dva": {
+                            "position": 75,
                             "type": "binary",
                             "null": 1,
                             "key": "MUL",
@@ -10449,7 +10462,7 @@
                             "maxlength": 16
                         },
                         "test": {
-                            "position": 75,
+                            "position": 76,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -10461,17 +10474,6 @@
                             "maxlength": 1
                         },
                         "cached": {
-                            "position": 76,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "change": {
                             "position": 77,
                             "type": "datetime",
                             "null": 1,
@@ -10482,8 +10484,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "full": {
+                        "change": {
                             "position": 78,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "full": {
+                            "position": 79,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -10495,7 +10508,7 @@
                             "maxlength": 1
                         },
                         "sigle": {
-                            "position": 79,
+                            "position": 80,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -11471,8 +11484,21 @@
                             "default": 1,
                             "maxlength": 1
                         },
-                        "formation_exemption": {
+                        "cotis_definie": {
                             "position": 73,
+                            "type": "decimal",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 14,
+                            "decimals": 2
+                        },
+                        "formation_exemption": {
+                            "position": 74,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -11484,17 +11510,6 @@
                             "maxlength": 1
                         },
                         "formation_gestion": {
-                            "position": 74,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "formation_tva": {
                             "position": 75,
                             "type": "date",
                             "null": 1,
@@ -11505,8 +11520,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "etat_dva": {
+                        "formation_tva": {
                             "position": 76,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "etat_dva": {
+                            "position": 77,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11518,7 +11544,7 @@
                             "maxlength": 16
                         },
                         "test": {
-                            "position": 77,
+                            "position": 78,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -11530,17 +11556,6 @@
                             "maxlength": 1
                         },
                         "cached": {
-                            "position": 78,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "change": {
                             "position": 79,
                             "type": "datetime",
                             "null": 1,
@@ -11551,8 +11566,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "groupe_nom": {
+                        "change": {
                             "position": 80,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "groupe_nom": {
+                            "position": 81,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -11564,7 +11590,7 @@
                             "maxlength": 100
                         },
                         "groupe_statut": {
-                            "position": 81,
+                            "position": 82,
                             "type": "enum",
                             "null": 1,
                             "key": null,
@@ -11581,7 +11607,7 @@
                             ]
                         },
                         "document_16_id": {
-                            "position": 82,
+                            "position": 83,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11593,7 +11619,7 @@
                             "maxlength": 16
                         },
                         "document_16_name": {
-                            "position": 83,
+                            "position": 84,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -11605,7 +11631,7 @@
                             "maxlength": 128
                         },
                         "document_16_type_document": {
-                            "position": 84,
+                            "position": 85,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11617,7 +11643,7 @@
                             "maxlength": 16
                         },
                         "document_16_fichiers": {
-                            "position": 85,
+                            "position": 86,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -11628,7 +11654,7 @@
                             "default": "NULL"
                         },
                         "document_16_date_ajout": {
-                            "position": 86,
+                            "position": 87,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -11639,7 +11665,7 @@
                             "default": "NULL"
                         },
                         "document_16_commentaire": {
-                            "position": 87,
+                            "position": 88,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -11650,7 +11676,7 @@
                             "default": "NULL"
                         },
                         "document_16_traitement": {
-                            "position": 88,
+                            "position": 89,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -11662,7 +11688,7 @@
                             "maxlength": 1
                         },
                         "document_16_poids": {
-                            "position": 89,
+                            "position": 90,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -11674,17 +11700,6 @@
                             "maxlength": 10
                         },
                         "document_16_date_doc": {
-                            "position": 90,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_16_date_ref": {
                             "position": 91,
                             "type": "date",
                             "null": 1,
@@ -11695,8 +11710,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_16_id_option": {
+                        "document_16_date_ref": {
                             "position": 92,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_16_id_option": {
+                            "position": 93,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11708,7 +11734,7 @@
                             "maxlength": 16
                         },
                         "document_16_externe": {
-                            "position": 93,
+                            "position": 94,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -11720,7 +11746,7 @@
                             "maxlength": 1
                         },
                         "document_16_ecritures": {
-                            "position": 94,
+                            "position": 95,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -11731,7 +11757,7 @@
                             "default": "NULL"
                         },
                         "document_17_id": {
-                            "position": 95,
+                            "position": 96,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11743,7 +11769,7 @@
                             "maxlength": 16
                         },
                         "document_17_name": {
-                            "position": 96,
+                            "position": 97,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -11755,7 +11781,7 @@
                             "maxlength": 128
                         },
                         "document_17_type_document": {
-                            "position": 97,
+                            "position": 98,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11767,7 +11793,7 @@
                             "maxlength": 16
                         },
                         "document_17_fichiers": {
-                            "position": 98,
+                            "position": 99,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -11778,7 +11804,7 @@
                             "default": "NULL"
                         },
                         "document_17_date_ajout": {
-                            "position": 99,
+                            "position": 100,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -11789,7 +11815,7 @@
                             "default": "NULL"
                         },
                         "document_17_commentaire": {
-                            "position": 100,
+                            "position": 101,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -11800,7 +11826,7 @@
                             "default": "NULL"
                         },
                         "document_17_traitement": {
-                            "position": 101,
+                            "position": 102,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -11812,7 +11838,7 @@
                             "maxlength": 1
                         },
                         "document_17_poids": {
-                            "position": 102,
+                            "position": 103,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -11824,17 +11850,6 @@
                             "maxlength": 10
                         },
                         "document_17_date_doc": {
-                            "position": 103,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_17_date_ref": {
                             "position": 104,
                             "type": "date",
                             "null": 1,
@@ -11845,8 +11860,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_17_id_option": {
+                        "document_17_date_ref": {
                             "position": 105,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_17_id_option": {
+                            "position": 106,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11858,7 +11884,7 @@
                             "maxlength": 16
                         },
                         "document_17_externe": {
-                            "position": 106,
+                            "position": 107,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -11870,7 +11896,7 @@
                             "maxlength": 1
                         },
                         "document_17_ecritures": {
-                            "position": 107,
+                            "position": 108,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -11881,7 +11907,7 @@
                             "default": "NULL"
                         },
                         "document_18_id": {
-                            "position": 108,
+                            "position": 109,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11893,7 +11919,7 @@
                             "maxlength": 16
                         },
                         "document_18_name": {
-                            "position": 109,
+                            "position": 110,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -11905,7 +11931,7 @@
                             "maxlength": 128
                         },
                         "document_18_type_document": {
-                            "position": 110,
+                            "position": 111,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -11917,7 +11943,7 @@
                             "maxlength": 16
                         },
                         "document_18_fichiers": {
-                            "position": 111,
+                            "position": 112,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -11928,7 +11954,7 @@
                             "default": "NULL"
                         },
                         "document_18_date_ajout": {
-                            "position": 112,
+                            "position": 113,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -11939,7 +11965,7 @@
                             "default": "NULL"
                         },
                         "document_18_commentaire": {
-                            "position": 113,
+                            "position": 114,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -11950,7 +11976,7 @@
                             "default": "NULL"
                         },
                         "document_18_traitement": {
-                            "position": 114,
+                            "position": 115,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -11962,7 +11988,7 @@
                             "maxlength": 1
                         },
                         "document_18_poids": {
-                            "position": 115,
+                            "position": 116,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -11974,17 +12000,6 @@
                             "maxlength": 10
                         },
                         "document_18_date_doc": {
-                            "position": 116,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_18_date_ref": {
                             "position": 117,
                             "type": "date",
                             "null": 1,
@@ -11995,8 +12010,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_18_id_option": {
+                        "document_18_date_ref": {
                             "position": 118,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_18_id_option": {
+                            "position": 119,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12008,7 +12034,7 @@
                             "maxlength": 16
                         },
                         "document_18_externe": {
-                            "position": 119,
+                            "position": 120,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -12020,7 +12046,7 @@
                             "maxlength": 1
                         },
                         "document_18_ecritures": {
-                            "position": 120,
+                            "position": 121,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12031,7 +12057,7 @@
                             "default": "NULL"
                         },
                         "document_19_id": {
-                            "position": 121,
+                            "position": 122,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12043,7 +12069,7 @@
                             "maxlength": 16
                         },
                         "document_19_name": {
-                            "position": 122,
+                            "position": 123,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12055,7 +12081,7 @@
                             "maxlength": 128
                         },
                         "document_19_type_document": {
-                            "position": 123,
+                            "position": 124,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12067,7 +12093,7 @@
                             "maxlength": 16
                         },
                         "document_19_fichiers": {
-                            "position": 124,
+                            "position": 125,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12078,7 +12104,7 @@
                             "default": "NULL"
                         },
                         "document_19_date_ajout": {
-                            "position": 125,
+                            "position": 126,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -12089,7 +12115,7 @@
                             "default": "NULL"
                         },
                         "document_19_commentaire": {
-                            "position": 126,
+                            "position": 127,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12100,7 +12126,7 @@
                             "default": "NULL"
                         },
                         "document_19_traitement": {
-                            "position": 127,
+                            "position": 128,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12112,7 +12138,7 @@
                             "maxlength": 1
                         },
                         "document_19_poids": {
-                            "position": 128,
+                            "position": 129,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12124,17 +12150,6 @@
                             "maxlength": 10
                         },
                         "document_19_date_doc": {
-                            "position": 129,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_19_date_ref": {
                             "position": 130,
                             "type": "date",
                             "null": 1,
@@ -12145,8 +12160,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_19_id_option": {
+                        "document_19_date_ref": {
                             "position": 131,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_19_id_option": {
+                            "position": 132,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12158,7 +12184,7 @@
                             "maxlength": 16
                         },
                         "document_19_externe": {
-                            "position": 132,
+                            "position": 133,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -12170,7 +12196,7 @@
                             "maxlength": 1
                         },
                         "document_19_ecritures": {
-                            "position": 133,
+                            "position": 134,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12181,7 +12207,7 @@
                             "default": "NULL"
                         },
                         "document_29_id": {
-                            "position": 134,
+                            "position": 135,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12193,7 +12219,7 @@
                             "maxlength": 16
                         },
                         "document_29_name": {
-                            "position": 135,
+                            "position": 136,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12205,7 +12231,7 @@
                             "maxlength": 128
                         },
                         "document_29_type_document": {
-                            "position": 136,
+                            "position": 137,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12217,7 +12243,7 @@
                             "maxlength": 16
                         },
                         "document_29_fichiers": {
-                            "position": 137,
+                            "position": 138,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12228,7 +12254,7 @@
                             "default": "NULL"
                         },
                         "document_29_date_ajout": {
-                            "position": 138,
+                            "position": 139,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -12239,7 +12265,7 @@
                             "default": "NULL"
                         },
                         "document_29_commentaire": {
-                            "position": 139,
+                            "position": 140,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12250,7 +12276,7 @@
                             "default": "NULL"
                         },
                         "document_29_traitement": {
-                            "position": 140,
+                            "position": 141,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12262,7 +12288,7 @@
                             "maxlength": 1
                         },
                         "document_29_poids": {
-                            "position": 141,
+                            "position": 142,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12274,17 +12300,6 @@
                             "maxlength": 10
                         },
                         "document_29_date_doc": {
-                            "position": 142,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_29_date_ref": {
                             "position": 143,
                             "type": "date",
                             "null": 1,
@@ -12295,8 +12310,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_29_id_option": {
+                        "document_29_date_ref": {
                             "position": 144,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_29_id_option": {
+                            "position": 145,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12308,7 +12334,7 @@
                             "maxlength": 16
                         },
                         "document_29_externe": {
-                            "position": 145,
+                            "position": 146,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -12320,7 +12346,7 @@
                             "maxlength": 1
                         },
                         "document_29_ecritures": {
-                            "position": 146,
+                            "position": 147,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12331,7 +12357,7 @@
                             "default": "NULL"
                         },
                         "document_35_id": {
-                            "position": 147,
+                            "position": 148,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12343,7 +12369,7 @@
                             "maxlength": 16
                         },
                         "document_35_name": {
-                            "position": 148,
+                            "position": 149,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12355,7 +12381,7 @@
                             "maxlength": 128
                         },
                         "document_35_type_document": {
-                            "position": 149,
+                            "position": 150,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12367,7 +12393,7 @@
                             "maxlength": 16
                         },
                         "document_35_fichiers": {
-                            "position": 150,
+                            "position": 151,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12378,7 +12404,7 @@
                             "default": "NULL"
                         },
                         "document_35_date_ajout": {
-                            "position": 151,
+                            "position": 152,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -12389,7 +12415,7 @@
                             "default": "NULL"
                         },
                         "document_35_commentaire": {
-                            "position": 152,
+                            "position": 153,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12400,7 +12426,7 @@
                             "default": "NULL"
                         },
                         "document_35_traitement": {
-                            "position": 153,
+                            "position": 154,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12412,7 +12438,7 @@
                             "maxlength": 1
                         },
                         "document_35_poids": {
-                            "position": 154,
+                            "position": 155,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12424,17 +12450,6 @@
                             "maxlength": 10
                         },
                         "document_35_date_doc": {
-                            "position": 155,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_35_date_ref": {
                             "position": 156,
                             "type": "date",
                             "null": 1,
@@ -12445,8 +12460,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_35_id_option": {
+                        "document_35_date_ref": {
                             "position": 157,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_35_id_option": {
+                            "position": 158,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12458,7 +12484,7 @@
                             "maxlength": 16
                         },
                         "document_35_externe": {
-                            "position": 158,
+                            "position": 159,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -12470,7 +12496,7 @@
                             "maxlength": 1
                         },
                         "document_35_ecritures": {
-                            "position": 159,
+                            "position": 160,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12481,7 +12507,7 @@
                             "default": "NULL"
                         },
                         "document_37_id": {
-                            "position": 160,
+                            "position": 161,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12493,7 +12519,7 @@
                             "maxlength": 16
                         },
                         "document_37_ecritures": {
-                            "position": 161,
+                            "position": 162,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12504,7 +12530,7 @@
                             "default": "NULL"
                         },
                         "document_39_id": {
-                            "position": 162,
+                            "position": 163,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12516,7 +12542,7 @@
                             "maxlength": 16
                         },
                         "document_39_name": {
-                            "position": 163,
+                            "position": 164,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12528,7 +12554,7 @@
                             "maxlength": 128
                         },
                         "document_39_type_document": {
-                            "position": 164,
+                            "position": 165,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12540,7 +12566,7 @@
                             "maxlength": 16
                         },
                         "document_39_fichiers": {
-                            "position": 165,
+                            "position": 166,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12551,7 +12577,7 @@
                             "default": "NULL"
                         },
                         "document_39_date_ajout": {
-                            "position": 166,
+                            "position": 167,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -12562,7 +12588,7 @@
                             "default": "NULL"
                         },
                         "document_39_commentaire": {
-                            "position": 167,
+                            "position": 168,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12573,7 +12599,7 @@
                             "default": "NULL"
                         },
                         "document_39_traitement": {
-                            "position": 168,
+                            "position": 169,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12585,7 +12611,7 @@
                             "maxlength": 1
                         },
                         "document_39_poids": {
-                            "position": 169,
+                            "position": 170,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -12597,17 +12623,6 @@
                             "maxlength": 10
                         },
                         "document_39_date_doc": {
-                            "position": 170,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_39_date_ref": {
                             "position": 171,
                             "type": "date",
                             "null": 1,
@@ -12618,8 +12633,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_39_id_option": {
+                        "document_39_date_ref": {
                             "position": 172,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_39_id_option": {
+                            "position": 173,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12631,7 +12657,7 @@
                             "maxlength": 16
                         },
                         "document_39_externe": {
-                            "position": 173,
+                            "position": 174,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -12643,7 +12669,7 @@
                             "maxlength": 1
                         },
                         "document_39_ecritures": {
-                            "position": 174,
+                            "position": 175,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -12654,7 +12680,7 @@
                             "default": "NULL"
                         },
                         "attestation_id": {
-                            "position": 175,
+                            "position": 176,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12666,7 +12692,7 @@
                             "maxlength": 16
                         },
                         "attestation_motif": {
-                            "position": 176,
+                            "position": 177,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12677,7 +12703,7 @@
                             "default": "NULL"
                         },
                         "attestation_delivrance": {
-                            "position": 177,
+                            "position": 178,
                             "type": "date",
                             "null": 1,
                             "key": null,
@@ -12688,7 +12714,7 @@
                             "default": "NULL"
                         },
                         "siege_id": {
-                            "position": 178,
+                            "position": 179,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12700,7 +12726,7 @@
                             "maxlength": 16
                         },
                         "siege_adresse": {
-                            "position": 179,
+                            "position": 180,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12711,7 +12737,7 @@
                             "default": "NULL"
                         },
                         "siege_cp": {
-                            "position": 180,
+                            "position": 181,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12723,7 +12749,7 @@
                             "maxlength": 5
                         },
                         "siege_ville": {
-                            "position": 181,
+                            "position": 182,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12735,18 +12761,6 @@
                             "maxlength": 40
                         },
                         "siege_tel": {
-                            "position": 182,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 10
-                        },
-                        "siege_fax": {
                             "position": 183,
                             "type": "varchar",
                             "null": 1,
@@ -12758,8 +12772,20 @@
                             "default": "NULL",
                             "maxlength": 10
                         },
-                        "siege_email": {
+                        "siege_fax": {
                             "position": 184,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 10
+                        },
+                        "siege_email": {
+                            "position": 185,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12771,7 +12797,7 @@
                             "maxlength": 100
                         },
                         "courrier_id": {
-                            "position": 185,
+                            "position": 186,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12783,7 +12809,7 @@
                             "maxlength": 16
                         },
                         "courrier_adresse": {
-                            "position": 186,
+                            "position": 187,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12794,7 +12820,7 @@
                             "default": "NULL"
                         },
                         "courrier_cp": {
-                            "position": 187,
+                            "position": 188,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12806,7 +12832,7 @@
                             "maxlength": 5
                         },
                         "courrier_ville": {
-                            "position": 188,
+                            "position": 189,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12818,18 +12844,6 @@
                             "maxlength": 40
                         },
                         "courrier_tel": {
-                            "position": 189,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 10
-                        },
-                        "courrier_fax": {
                             "position": 190,
                             "type": "varchar",
                             "null": 1,
@@ -12841,8 +12855,20 @@
                             "default": "NULL",
                             "maxlength": 10
                         },
-                        "courrier_email": {
+                        "courrier_fax": {
                             "position": 191,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 10
+                        },
+                        "courrier_email": {
+                            "position": 192,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -12854,7 +12880,7 @@
                             "maxlength": 100
                         },
                         "region_id": {
-                            "position": 192,
+                            "position": 193,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12866,18 +12892,6 @@
                             "maxlength": 16
                         },
                         "region_code": {
-                            "position": 193,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 255
-                        },
-                        "region_text": {
                             "position": 194,
                             "type": "varchar",
                             "null": 1,
@@ -12889,8 +12903,20 @@
                             "default": "NULL",
                             "maxlength": 255
                         },
-                        "departement_id": {
+                        "region_text": {
                             "position": 195,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 255
+                        },
+                        "departement_id": {
+                            "position": 196,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -12902,18 +12928,6 @@
                             "maxlength": 16
                         },
                         "departement_code": {
-                            "position": 196,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 255
-                        },
-                        "departement_text": {
                             "position": 197,
                             "type": "varchar",
                             "null": 1,
@@ -12925,8 +12939,20 @@
                             "default": "NULL",
                             "maxlength": 255
                         },
-                        "representants": {
+                        "departement_text": {
                             "position": 198,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 255
+                        },
+                        "representants": {
+                            "position": 199,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -12937,7 +12963,7 @@
                             "default": "NULL"
                         },
                         "num_representants": {
-                            "position": 199,
+                            "position": 200,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -12949,17 +12975,6 @@
                             "maxlength": 10
                         },
                         "representants_id": {
-                            "position": 200,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "representants_type_lien": {
                             "position": 201,
                             "type": "text",
                             "null": 1,
@@ -12970,7 +12985,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "representants_id_tiers": {
+                        "representants_type_lien": {
                             "position": 202,
                             "type": "text",
                             "null": 1,
@@ -12981,7 +12996,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "representants_id_option": {
+                        "representants_id_tiers": {
                             "position": 203,
                             "type": "text",
                             "null": 1,
@@ -12992,8 +13007,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "representants_max_age": {
+                        "representants_id_option": {
                             "position": 204,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "representants_max_age": {
+                            "position": 205,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -13005,7 +13031,7 @@
                             "maxlength": 3
                         },
                         "actionnaires": {
-                            "position": 205,
+                            "position": 206,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -13016,7 +13042,7 @@
                             "default": "NULL"
                         },
                         "num_actionnaires": {
-                            "position": 206,
+                            "position": 207,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -13028,17 +13054,6 @@
                             "maxlength": 10
                         },
                         "actionnaires_parts": {
-                            "position": 207,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "actionnaires_id": {
                             "position": 208,
                             "type": "text",
                             "null": 1,
@@ -13049,7 +13064,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "actionnaires_type_lien": {
+                        "actionnaires_id": {
                             "position": 209,
                             "type": "text",
                             "null": 1,
@@ -13060,7 +13075,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "actionnaires_id_tiers": {
+                        "actionnaires_type_lien": {
                             "position": 210,
                             "type": "text",
                             "null": 1,
@@ -13071,7 +13086,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "actionnaires_id_option": {
+                        "actionnaires_id_tiers": {
                             "position": 211,
                             "type": "text",
                             "null": 1,
@@ -13082,7 +13097,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar": {
+                        "actionnaires_id_option": {
                             "position": 212,
                             "type": "text",
                             "null": 1,
@@ -13093,7 +13108,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_adresse": {
+                        "cgar": {
                             "position": 213,
                             "type": "text",
                             "null": 1,
@@ -13104,8 +13119,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "num_cgar": {
+                        "cgar_adresse": {
                             "position": 214,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "num_cgar": {
+                            "position": 215,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -13117,17 +13143,6 @@
                             "maxlength": 10
                         },
                         "cgar_effet": {
-                            "position": 215,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "cgar_fin": {
                             "position": 216,
                             "type": "text",
                             "null": 1,
@@ -13138,7 +13153,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_montant": {
+                        "cgar_fin": {
                             "position": 217,
                             "type": "text",
                             "null": 1,
@@ -13149,7 +13164,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id": {
+                        "cgar_montant": {
                             "position": 218,
                             "type": "text",
                             "null": 1,
@@ -13160,7 +13175,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_type_lien": {
+                        "cgar_id": {
                             "position": 219,
                             "type": "text",
                             "null": 1,
@@ -13171,7 +13186,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id_tiers": {
+                        "cgar_type_lien": {
                             "position": 220,
                             "type": "text",
                             "null": 1,
@@ -13182,7 +13197,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id_lieu": {
+                        "cgar_id_tiers": {
                             "position": 221,
                             "type": "text",
                             "null": 1,
@@ -13193,7 +13208,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id_option": {
+                        "cgar_id_lieu": {
                             "position": 222,
                             "type": "text",
                             "null": 1,
@@ -13204,7 +13219,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales": {
+                        "cgar_id_option": {
                             "position": 223,
                             "type": "text",
                             "null": 1,
@@ -13215,8 +13230,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "num_succursales": {
+                        "succursales": {
                             "position": 224,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "num_succursales": {
+                            "position": 225,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -13228,17 +13254,6 @@
                             "maxlength": 10
                         },
                         "succursales_licence": {
-                            "position": 225,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "succursales_ca": {
                             "position": 226,
                             "type": "text",
                             "null": 1,
@@ -13249,7 +13264,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_date_radiation": {
+                        "succursales_ca": {
                             "position": 227,
                             "type": "text",
                             "null": 1,
@@ -13260,7 +13275,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_id": {
+                        "succursales_date_radiation": {
                             "position": 228,
                             "type": "text",
                             "null": 1,
@@ -13271,7 +13286,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_type_lien": {
+                        "succursales_id": {
                             "position": 229,
                             "type": "text",
                             "null": 1,
@@ -13282,7 +13297,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_id_lieu": {
+                        "succursales_type_lien": {
                             "position": 230,
                             "type": "text",
                             "null": 1,
@@ -13293,7 +13308,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_id_option": {
+                        "succursales_id_lieu": {
                             "position": 231,
                             "type": "text",
                             "null": 1,
@@ -13304,7 +13319,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_lieu_adresse": {
+                        "succursales_id_option": {
                             "position": 232,
                             "type": "text",
                             "null": 1,
@@ -13315,7 +13330,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_lieu_cp": {
+                        "succursales_lieu_adresse": {
                             "position": 233,
                             "type": "text",
                             "null": 1,
@@ -13326,7 +13341,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_lieu_ville": {
+                        "succursales_lieu_cp": {
                             "position": 234,
                             "type": "text",
                             "null": 1,
@@ -13337,8 +13352,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "infos_comp": {
+                        "succursales_lieu_ville": {
                             "position": 235,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "infos_comp": {
+                            "position": 236,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -14701,8 +14727,21 @@
                             "default": 0,
                             "maxlength": 10
                         },
-                        "appel": {
+                        "definie": {
                             "position": 11,
+                            "type": "decimal",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 14,
+                            "decimals": 2
+                        },
+                        "appel": {
+                            "position": 12,
                             "type": "date",
                             "null": 1,
                             "key": null,
@@ -14713,7 +14752,7 @@
                             "default": "NULL"
                         },
                         "annee": {
-                            "position": 12,
+                            "position": 13,
                             "type": "int",
                             "null": 0,
                             "key": "MUL",
@@ -14724,7 +14763,7 @@
                             "maxlength": 4
                         },
                         "creance": {
-                            "position": 13,
+                            "position": 14,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -14736,7 +14775,7 @@
                             "maxlength": 10
                         },
                         "ok": {
-                            "position": 14,
+                            "position": 15,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -14748,7 +14787,7 @@
                             "maxlength": 3
                         },
                         "auto": {
-                            "position": 15,
+                            "position": 16,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -26567,8 +26606,21 @@
                             "default": 1,
                             "maxlength": 1
                         },
-                        "formation_exemption": {
+                        "cotis_definie": {
                             "position": 71,
+                            "type": "decimal",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 14,
+                            "decimals": 2
+                        },
+                        "formation_exemption": {
+                            "position": 72,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -26580,17 +26632,6 @@
                             "maxlength": 1
                         },
                         "formation_gestion": {
-                            "position": 72,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "formation_tva": {
                             "position": 73,
                             "type": "date",
                             "null": 1,
@@ -26601,8 +26642,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "etat_dva": {
+                        "formation_tva": {
                             "position": 74,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "etat_dva": {
+                            "position": 75,
                             "type": "binary",
                             "null": 1,
                             "key": "MUL",
@@ -26614,7 +26666,7 @@
                             "maxlength": 16
                         },
                         "test": {
-                            "position": 75,
+                            "position": 76,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -26626,17 +26678,6 @@
                             "maxlength": 1
                         },
                         "cached": {
-                            "position": 76,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "change": {
                             "position": 77,
                             "type": "datetime",
                             "null": 1,
@@ -26647,8 +26688,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "full": {
+                        "change": {
                             "position": 78,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "full": {
+                            "position": 79,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -26660,7 +26712,7 @@
                             "maxlength": 1
                         },
                         "sigle": {
-                            "position": 79,
+                            "position": 80,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -27636,8 +27688,21 @@
                             "default": 1,
                             "maxlength": 1
                         },
-                        "formation_exemption": {
+                        "cotis_definie": {
                             "position": 73,
+                            "type": "decimal",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 14,
+                            "decimals": 2
+                        },
+                        "formation_exemption": {
+                            "position": 74,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -27649,17 +27714,6 @@
                             "maxlength": 1
                         },
                         "formation_gestion": {
-                            "position": 74,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "formation_tva": {
                             "position": 75,
                             "type": "date",
                             "null": 1,
@@ -27670,8 +27724,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "etat_dva": {
+                        "formation_tva": {
                             "position": 76,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "etat_dva": {
+                            "position": 77,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -27683,7 +27748,7 @@
                             "maxlength": 16
                         },
                         "test": {
-                            "position": 77,
+                            "position": 78,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -27695,17 +27760,6 @@
                             "maxlength": 1
                         },
                         "cached": {
-                            "position": 78,
-                            "type": "datetime",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "change": {
                             "position": 79,
                             "type": "datetime",
                             "null": 1,
@@ -27716,8 +27770,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "groupe_nom": {
+                        "change": {
                             "position": 80,
+                            "type": "datetime",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "groupe_nom": {
+                            "position": 81,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -27729,7 +27794,7 @@
                             "maxlength": 100
                         },
                         "groupe_statut": {
-                            "position": 81,
+                            "position": 82,
                             "type": "enum",
                             "null": 1,
                             "key": null,
@@ -27746,7 +27811,7 @@
                             ]
                         },
                         "document_16_id": {
-                            "position": 82,
+                            "position": 83,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -27758,7 +27823,7 @@
                             "maxlength": 16
                         },
                         "document_16_name": {
-                            "position": 83,
+                            "position": 84,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -27770,7 +27835,7 @@
                             "maxlength": 128
                         },
                         "document_16_type_document": {
-                            "position": 84,
+                            "position": 85,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -27782,7 +27847,7 @@
                             "maxlength": 16
                         },
                         "document_16_fichiers": {
-                            "position": 85,
+                            "position": 86,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -27793,7 +27858,7 @@
                             "default": "NULL"
                         },
                         "document_16_date_ajout": {
-                            "position": 86,
+                            "position": 87,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -27804,7 +27869,7 @@
                             "default": "NULL"
                         },
                         "document_16_commentaire": {
-                            "position": 87,
+                            "position": 88,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -27815,7 +27880,7 @@
                             "default": "NULL"
                         },
                         "document_16_traitement": {
-                            "position": 88,
+                            "position": 89,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -27827,7 +27892,7 @@
                             "maxlength": 1
                         },
                         "document_16_poids": {
-                            "position": 89,
+                            "position": 90,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -27839,17 +27904,6 @@
                             "maxlength": 10
                         },
                         "document_16_date_doc": {
-                            "position": 90,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_16_date_ref": {
                             "position": 91,
                             "type": "date",
                             "null": 1,
@@ -27860,8 +27914,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_16_id_option": {
+                        "document_16_date_ref": {
                             "position": 92,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_16_id_option": {
+                            "position": 93,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -27873,7 +27938,7 @@
                             "maxlength": 16
                         },
                         "document_16_externe": {
-                            "position": 93,
+                            "position": 94,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -27885,7 +27950,7 @@
                             "maxlength": 1
                         },
                         "document_16_ecritures": {
-                            "position": 94,
+                            "position": 95,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -27896,7 +27961,7 @@
                             "default": "NULL"
                         },
                         "document_17_id": {
-                            "position": 95,
+                            "position": 96,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -27908,7 +27973,7 @@
                             "maxlength": 16
                         },
                         "document_17_name": {
-                            "position": 96,
+                            "position": 97,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -27920,7 +27985,7 @@
                             "maxlength": 128
                         },
                         "document_17_type_document": {
-                            "position": 97,
+                            "position": 98,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -27932,7 +27997,7 @@
                             "maxlength": 16
                         },
                         "document_17_fichiers": {
-                            "position": 98,
+                            "position": 99,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -27943,7 +28008,7 @@
                             "default": "NULL"
                         },
                         "document_17_date_ajout": {
-                            "position": 99,
+                            "position": 100,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -27954,7 +28019,7 @@
                             "default": "NULL"
                         },
                         "document_17_commentaire": {
-                            "position": 100,
+                            "position": 101,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -27965,7 +28030,7 @@
                             "default": "NULL"
                         },
                         "document_17_traitement": {
-                            "position": 101,
+                            "position": 102,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -27977,7 +28042,7 @@
                             "maxlength": 1
                         },
                         "document_17_poids": {
-                            "position": 102,
+                            "position": 103,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -27989,17 +28054,6 @@
                             "maxlength": 10
                         },
                         "document_17_date_doc": {
-                            "position": 103,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_17_date_ref": {
                             "position": 104,
                             "type": "date",
                             "null": 1,
@@ -28010,8 +28064,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_17_id_option": {
+                        "document_17_date_ref": {
                             "position": 105,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_17_id_option": {
+                            "position": 106,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28023,7 +28088,7 @@
                             "maxlength": 16
                         },
                         "document_17_externe": {
-                            "position": 106,
+                            "position": 107,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -28035,7 +28100,7 @@
                             "maxlength": 1
                         },
                         "document_17_ecritures": {
-                            "position": 107,
+                            "position": 108,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28046,7 +28111,7 @@
                             "default": "NULL"
                         },
                         "document_18_id": {
-                            "position": 108,
+                            "position": 109,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28058,7 +28123,7 @@
                             "maxlength": 16
                         },
                         "document_18_name": {
-                            "position": 109,
+                            "position": 110,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28070,7 +28135,7 @@
                             "maxlength": 128
                         },
                         "document_18_type_document": {
-                            "position": 110,
+                            "position": 111,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28082,7 +28147,7 @@
                             "maxlength": 16
                         },
                         "document_18_fichiers": {
-                            "position": 111,
+                            "position": 112,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28093,7 +28158,7 @@
                             "default": "NULL"
                         },
                         "document_18_date_ajout": {
-                            "position": 112,
+                            "position": 113,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -28104,7 +28169,7 @@
                             "default": "NULL"
                         },
                         "document_18_commentaire": {
-                            "position": 113,
+                            "position": 114,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28115,7 +28180,7 @@
                             "default": "NULL"
                         },
                         "document_18_traitement": {
-                            "position": 114,
+                            "position": 115,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28127,7 +28192,7 @@
                             "maxlength": 1
                         },
                         "document_18_poids": {
-                            "position": 115,
+                            "position": 116,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28139,17 +28204,6 @@
                             "maxlength": 10
                         },
                         "document_18_date_doc": {
-                            "position": 116,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_18_date_ref": {
                             "position": 117,
                             "type": "date",
                             "null": 1,
@@ -28160,8 +28214,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_18_id_option": {
+                        "document_18_date_ref": {
                             "position": 118,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_18_id_option": {
+                            "position": 119,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28173,7 +28238,7 @@
                             "maxlength": 16
                         },
                         "document_18_externe": {
-                            "position": 119,
+                            "position": 120,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -28185,7 +28250,7 @@
                             "maxlength": 1
                         },
                         "document_18_ecritures": {
-                            "position": 120,
+                            "position": 121,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28196,7 +28261,7 @@
                             "default": "NULL"
                         },
                         "document_19_id": {
-                            "position": 121,
+                            "position": 122,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28208,7 +28273,7 @@
                             "maxlength": 16
                         },
                         "document_19_name": {
-                            "position": 122,
+                            "position": 123,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28220,7 +28285,7 @@
                             "maxlength": 128
                         },
                         "document_19_type_document": {
-                            "position": 123,
+                            "position": 124,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28232,7 +28297,7 @@
                             "maxlength": 16
                         },
                         "document_19_fichiers": {
-                            "position": 124,
+                            "position": 125,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28243,7 +28308,7 @@
                             "default": "NULL"
                         },
                         "document_19_date_ajout": {
-                            "position": 125,
+                            "position": 126,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -28254,7 +28319,7 @@
                             "default": "NULL"
                         },
                         "document_19_commentaire": {
-                            "position": 126,
+                            "position": 127,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28265,7 +28330,7 @@
                             "default": "NULL"
                         },
                         "document_19_traitement": {
-                            "position": 127,
+                            "position": 128,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28277,7 +28342,7 @@
                             "maxlength": 1
                         },
                         "document_19_poids": {
-                            "position": 128,
+                            "position": 129,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28289,17 +28354,6 @@
                             "maxlength": 10
                         },
                         "document_19_date_doc": {
-                            "position": 129,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_19_date_ref": {
                             "position": 130,
                             "type": "date",
                             "null": 1,
@@ -28310,8 +28364,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_19_id_option": {
+                        "document_19_date_ref": {
                             "position": 131,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_19_id_option": {
+                            "position": 132,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28323,7 +28388,7 @@
                             "maxlength": 16
                         },
                         "document_19_externe": {
-                            "position": 132,
+                            "position": 133,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -28335,7 +28400,7 @@
                             "maxlength": 1
                         },
                         "document_19_ecritures": {
-                            "position": 133,
+                            "position": 134,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28346,7 +28411,7 @@
                             "default": "NULL"
                         },
                         "document_29_id": {
-                            "position": 134,
+                            "position": 135,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28358,7 +28423,7 @@
                             "maxlength": 16
                         },
                         "document_29_name": {
-                            "position": 135,
+                            "position": 136,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28370,7 +28435,7 @@
                             "maxlength": 128
                         },
                         "document_29_type_document": {
-                            "position": 136,
+                            "position": 137,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28382,7 +28447,7 @@
                             "maxlength": 16
                         },
                         "document_29_fichiers": {
-                            "position": 137,
+                            "position": 138,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28393,7 +28458,7 @@
                             "default": "NULL"
                         },
                         "document_29_date_ajout": {
-                            "position": 138,
+                            "position": 139,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -28404,7 +28469,7 @@
                             "default": "NULL"
                         },
                         "document_29_commentaire": {
-                            "position": 139,
+                            "position": 140,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28415,7 +28480,7 @@
                             "default": "NULL"
                         },
                         "document_29_traitement": {
-                            "position": 140,
+                            "position": 141,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28427,7 +28492,7 @@
                             "maxlength": 1
                         },
                         "document_29_poids": {
-                            "position": 141,
+                            "position": 142,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28439,17 +28504,6 @@
                             "maxlength": 10
                         },
                         "document_29_date_doc": {
-                            "position": 142,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_29_date_ref": {
                             "position": 143,
                             "type": "date",
                             "null": 1,
@@ -28460,8 +28514,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_29_id_option": {
+                        "document_29_date_ref": {
                             "position": 144,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_29_id_option": {
+                            "position": 145,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28473,7 +28538,7 @@
                             "maxlength": 16
                         },
                         "document_29_externe": {
-                            "position": 145,
+                            "position": 146,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -28485,7 +28550,7 @@
                             "maxlength": 1
                         },
                         "document_29_ecritures": {
-                            "position": 146,
+                            "position": 147,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28496,7 +28561,7 @@
                             "default": "NULL"
                         },
                         "document_35_id": {
-                            "position": 147,
+                            "position": 148,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28508,7 +28573,7 @@
                             "maxlength": 16
                         },
                         "document_35_name": {
-                            "position": 148,
+                            "position": 149,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28520,7 +28585,7 @@
                             "maxlength": 128
                         },
                         "document_35_type_document": {
-                            "position": 149,
+                            "position": 150,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28532,7 +28597,7 @@
                             "maxlength": 16
                         },
                         "document_35_fichiers": {
-                            "position": 150,
+                            "position": 151,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28543,7 +28608,7 @@
                             "default": "NULL"
                         },
                         "document_35_date_ajout": {
-                            "position": 151,
+                            "position": 152,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -28554,7 +28619,7 @@
                             "default": "NULL"
                         },
                         "document_35_commentaire": {
-                            "position": 152,
+                            "position": 153,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28565,7 +28630,7 @@
                             "default": "NULL"
                         },
                         "document_35_traitement": {
-                            "position": 153,
+                            "position": 154,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28577,7 +28642,7 @@
                             "maxlength": 1
                         },
                         "document_35_poids": {
-                            "position": 154,
+                            "position": 155,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28589,17 +28654,6 @@
                             "maxlength": 10
                         },
                         "document_35_date_doc": {
-                            "position": 155,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_35_date_ref": {
                             "position": 156,
                             "type": "date",
                             "null": 1,
@@ -28610,8 +28664,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_35_id_option": {
+                        "document_35_date_ref": {
                             "position": 157,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_35_id_option": {
+                            "position": 158,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28623,7 +28688,7 @@
                             "maxlength": 16
                         },
                         "document_35_externe": {
-                            "position": 158,
+                            "position": 159,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -28635,7 +28700,7 @@
                             "maxlength": 1
                         },
                         "document_35_ecritures": {
-                            "position": 159,
+                            "position": 160,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28646,7 +28711,7 @@
                             "default": "NULL"
                         },
                         "document_37_id": {
-                            "position": 160,
+                            "position": 161,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28658,7 +28723,7 @@
                             "maxlength": 16
                         },
                         "document_37_ecritures": {
-                            "position": 161,
+                            "position": 162,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28669,7 +28734,7 @@
                             "default": "NULL"
                         },
                         "document_39_id": {
-                            "position": 162,
+                            "position": 163,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28681,7 +28746,7 @@
                             "maxlength": 16
                         },
                         "document_39_name": {
-                            "position": 163,
+                            "position": 164,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28693,7 +28758,7 @@
                             "maxlength": 128
                         },
                         "document_39_type_document": {
-                            "position": 164,
+                            "position": 165,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28705,7 +28770,7 @@
                             "maxlength": 16
                         },
                         "document_39_fichiers": {
-                            "position": 165,
+                            "position": 166,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28716,7 +28781,7 @@
                             "default": "NULL"
                         },
                         "document_39_date_ajout": {
-                            "position": 166,
+                            "position": 167,
                             "type": "datetime",
                             "null": 1,
                             "key": null,
@@ -28727,7 +28792,7 @@
                             "default": "NULL"
                         },
                         "document_39_commentaire": {
-                            "position": 167,
+                            "position": 168,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28738,7 +28803,7 @@
                             "default": "NULL"
                         },
                         "document_39_traitement": {
-                            "position": 168,
+                            "position": 169,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28750,7 +28815,7 @@
                             "maxlength": 1
                         },
                         "document_39_poids": {
-                            "position": 169,
+                            "position": 170,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -28762,17 +28827,6 @@
                             "maxlength": 10
                         },
                         "document_39_date_doc": {
-                            "position": 170,
-                            "type": "date",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "document_39_date_ref": {
                             "position": 171,
                             "type": "date",
                             "null": 1,
@@ -28783,8 +28837,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "document_39_id_option": {
+                        "document_39_date_ref": {
                             "position": 172,
+                            "type": "date",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "document_39_id_option": {
+                            "position": 173,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28796,7 +28861,7 @@
                             "maxlength": 16
                         },
                         "document_39_externe": {
-                            "position": 173,
+                            "position": 174,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -28808,7 +28873,7 @@
                             "maxlength": 1
                         },
                         "document_39_ecritures": {
-                            "position": 174,
+                            "position": 175,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -28819,7 +28884,7 @@
                             "default": "NULL"
                         },
                         "attestation_id": {
-                            "position": 175,
+                            "position": 176,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28831,7 +28896,7 @@
                             "maxlength": 16
                         },
                         "attestation_motif": {
-                            "position": 176,
+                            "position": 177,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28842,7 +28907,7 @@
                             "default": "NULL"
                         },
                         "attestation_delivrance": {
-                            "position": 177,
+                            "position": 178,
                             "type": "date",
                             "null": 1,
                             "key": null,
@@ -28853,7 +28918,7 @@
                             "default": "NULL"
                         },
                         "siege_id": {
-                            "position": 178,
+                            "position": 179,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28865,7 +28930,7 @@
                             "maxlength": 16
                         },
                         "siege_adresse": {
-                            "position": 179,
+                            "position": 180,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28876,7 +28941,7 @@
                             "default": "NULL"
                         },
                         "siege_cp": {
-                            "position": 180,
+                            "position": 181,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28888,7 +28953,7 @@
                             "maxlength": 5
                         },
                         "siege_ville": {
-                            "position": 181,
+                            "position": 182,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28900,18 +28965,6 @@
                             "maxlength": 40
                         },
                         "siege_tel": {
-                            "position": 182,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 10
-                        },
-                        "siege_fax": {
                             "position": 183,
                             "type": "varchar",
                             "null": 1,
@@ -28923,8 +28976,20 @@
                             "default": "NULL",
                             "maxlength": 10
                         },
-                        "siege_email": {
+                        "siege_fax": {
                             "position": 184,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 10
+                        },
+                        "siege_email": {
+                            "position": 185,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28936,7 +29001,7 @@
                             "maxlength": 100
                         },
                         "courrier_id": {
-                            "position": 185,
+                            "position": 186,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -28948,7 +29013,7 @@
                             "maxlength": 16
                         },
                         "courrier_adresse": {
-                            "position": 186,
+                            "position": 187,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -28959,7 +29024,7 @@
                             "default": "NULL"
                         },
                         "courrier_cp": {
-                            "position": 187,
+                            "position": 188,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28971,7 +29036,7 @@
                             "maxlength": 5
                         },
                         "courrier_ville": {
-                            "position": 188,
+                            "position": 189,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -28983,18 +29048,6 @@
                             "maxlength": 40
                         },
                         "courrier_tel": {
-                            "position": 189,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 10
-                        },
-                        "courrier_fax": {
                             "position": 190,
                             "type": "varchar",
                             "null": 1,
@@ -29006,8 +29059,20 @@
                             "default": "NULL",
                             "maxlength": 10
                         },
-                        "courrier_email": {
+                        "courrier_fax": {
                             "position": 191,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 10
+                        },
+                        "courrier_email": {
+                            "position": 192,
                             "type": "varchar",
                             "null": 1,
                             "key": null,
@@ -29019,7 +29084,7 @@
                             "maxlength": 100
                         },
                         "region_id": {
-                            "position": 192,
+                            "position": 193,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -29031,18 +29096,6 @@
                             "maxlength": 16
                         },
                         "region_code": {
-                            "position": 193,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 255
-                        },
-                        "region_text": {
                             "position": 194,
                             "type": "varchar",
                             "null": 1,
@@ -29054,8 +29107,20 @@
                             "default": "NULL",
                             "maxlength": 255
                         },
-                        "departement_id": {
+                        "region_text": {
                             "position": 195,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 255
+                        },
+                        "departement_id": {
+                            "position": 196,
                             "type": "binary",
                             "null": 1,
                             "key": null,
@@ -29067,18 +29132,6 @@
                             "maxlength": 16
                         },
                         "departement_code": {
-                            "position": 196,
-                            "type": "varchar",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL",
-                            "maxlength": 255
-                        },
-                        "departement_text": {
                             "position": 197,
                             "type": "varchar",
                             "null": 1,
@@ -29090,8 +29143,20 @@
                             "default": "NULL",
                             "maxlength": 255
                         },
-                        "representants": {
+                        "departement_text": {
                             "position": 198,
+                            "type": "varchar",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 255
+                        },
+                        "representants": {
+                            "position": 199,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -29102,7 +29167,7 @@
                             "default": "NULL"
                         },
                         "num_representants": {
-                            "position": 199,
+                            "position": 200,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -29114,17 +29179,6 @@
                             "maxlength": 10
                         },
                         "representants_id": {
-                            "position": 200,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "representants_type_lien": {
                             "position": 201,
                             "type": "text",
                             "null": 1,
@@ -29135,7 +29189,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "representants_id_tiers": {
+                        "representants_type_lien": {
                             "position": 202,
                             "type": "text",
                             "null": 1,
@@ -29146,7 +29200,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "representants_id_option": {
+                        "representants_id_tiers": {
                             "position": 203,
                             "type": "text",
                             "null": 1,
@@ -29157,8 +29211,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "representants_max_age": {
+                        "representants_id_option": {
                             "position": 204,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "representants_max_age": {
+                            "position": 205,
                             "type": "int",
                             "null": 1,
                             "key": null,
@@ -29170,7 +29235,7 @@
                             "maxlength": 3
                         },
                         "actionnaires": {
-                            "position": 205,
+                            "position": 206,
                             "type": "text",
                             "null": 1,
                             "key": null,
@@ -29181,7 +29246,7 @@
                             "default": "NULL"
                         },
                         "num_actionnaires": {
-                            "position": 206,
+                            "position": 207,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -29193,17 +29258,6 @@
                             "maxlength": 10
                         },
                         "actionnaires_parts": {
-                            "position": 207,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "actionnaires_id": {
                             "position": 208,
                             "type": "text",
                             "null": 1,
@@ -29214,7 +29268,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "actionnaires_type_lien": {
+                        "actionnaires_id": {
                             "position": 209,
                             "type": "text",
                             "null": 1,
@@ -29225,7 +29279,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "actionnaires_id_tiers": {
+                        "actionnaires_type_lien": {
                             "position": 210,
                             "type": "text",
                             "null": 1,
@@ -29236,7 +29290,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "actionnaires_id_option": {
+                        "actionnaires_id_tiers": {
                             "position": 211,
                             "type": "text",
                             "null": 1,
@@ -29247,7 +29301,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar": {
+                        "actionnaires_id_option": {
                             "position": 212,
                             "type": "text",
                             "null": 1,
@@ -29258,7 +29312,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_adresse": {
+                        "cgar": {
                             "position": 213,
                             "type": "text",
                             "null": 1,
@@ -29269,8 +29323,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "num_cgar": {
+                        "cgar_adresse": {
                             "position": 214,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "num_cgar": {
+                            "position": 215,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -29282,17 +29347,6 @@
                             "maxlength": 10
                         },
                         "cgar_effet": {
-                            "position": 215,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "cgar_fin": {
                             "position": 216,
                             "type": "text",
                             "null": 1,
@@ -29303,7 +29357,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_montant": {
+                        "cgar_fin": {
                             "position": 217,
                             "type": "text",
                             "null": 1,
@@ -29314,7 +29368,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id": {
+                        "cgar_montant": {
                             "position": 218,
                             "type": "text",
                             "null": 1,
@@ -29325,7 +29379,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_type_lien": {
+                        "cgar_id": {
                             "position": 219,
                             "type": "text",
                             "null": 1,
@@ -29336,7 +29390,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id_tiers": {
+                        "cgar_type_lien": {
                             "position": 220,
                             "type": "text",
                             "null": 1,
@@ -29347,7 +29401,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id_lieu": {
+                        "cgar_id_tiers": {
                             "position": 221,
                             "type": "text",
                             "null": 1,
@@ -29358,7 +29412,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "cgar_id_option": {
+                        "cgar_id_lieu": {
                             "position": 222,
                             "type": "text",
                             "null": 1,
@@ -29369,7 +29423,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales": {
+                        "cgar_id_option": {
                             "position": 223,
                             "type": "text",
                             "null": 1,
@@ -29380,8 +29434,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "num_succursales": {
+                        "succursales": {
                             "position": 224,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "num_succursales": {
+                            "position": 225,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -29393,17 +29458,6 @@
                             "maxlength": 10
                         },
                         "succursales_licence": {
-                            "position": 225,
-                            "type": "text",
-                            "null": 1,
-                            "key": null,
-                            "extra": "",
-                            "signed": true,
-                            "virtual": false,
-                            "generation": "",
-                            "default": "NULL"
-                        },
-                        "succursales_ca": {
                             "position": 226,
                             "type": "text",
                             "null": 1,
@@ -29414,7 +29468,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_date_radiation": {
+                        "succursales_ca": {
                             "position": 227,
                             "type": "text",
                             "null": 1,
@@ -29425,7 +29479,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_id": {
+                        "succursales_date_radiation": {
                             "position": 228,
                             "type": "text",
                             "null": 1,
@@ -29436,7 +29490,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_type_lien": {
+                        "succursales_id": {
                             "position": 229,
                             "type": "text",
                             "null": 1,
@@ -29447,7 +29501,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_id_lieu": {
+                        "succursales_type_lien": {
                             "position": 230,
                             "type": "text",
                             "null": 1,
@@ -29458,7 +29512,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_id_option": {
+                        "succursales_id_lieu": {
                             "position": 231,
                             "type": "text",
                             "null": 1,
@@ -29469,7 +29523,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_lieu_adresse": {
+                        "succursales_id_option": {
                             "position": 232,
                             "type": "text",
                             "null": 1,
@@ -29480,7 +29534,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_lieu_cp": {
+                        "succursales_lieu_adresse": {
                             "position": 233,
                             "type": "text",
                             "null": 1,
@@ -29491,7 +29545,7 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "succursales_lieu_ville": {
+                        "succursales_lieu_cp": {
                             "position": 234,
                             "type": "text",
                             "null": 1,
@@ -29502,8 +29556,19 @@
                             "generation": "",
                             "default": "NULL"
                         },
-                        "infos_comp": {
+                        "succursales_lieu_ville": {
                             "position": 235,
+                            "type": "text",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": true,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL"
+                        },
+                        "infos_comp": {
+                            "position": 236,
                             "type": "json",
                             "null": 1,
                             "key": null,
@@ -30866,8 +30931,21 @@
                             "default": 0,
                             "maxlength": 10
                         },
-                        "appel": {
+                        "definie": {
                             "position": 11,
+                            "type": "decimal",
+                            "null": 1,
+                            "key": null,
+                            "extra": "",
+                            "signed": false,
+                            "virtual": false,
+                            "generation": "",
+                            "default": "NULL",
+                            "maxlength": 14,
+                            "decimals": 2
+                        },
+                        "appel": {
+                            "position": 12,
                             "type": "date",
                             "null": 1,
                             "key": null,
@@ -30878,7 +30956,7 @@
                             "default": "NULL"
                         },
                         "annee": {
-                            "position": 12,
+                            "position": 13,
                             "type": "int",
                             "null": 0,
                             "key": "MUL",
@@ -30889,7 +30967,7 @@
                             "maxlength": 4
                         },
                         "creance": {
-                            "position": 13,
+                            "position": 14,
                             "type": "int",
                             "null": 0,
                             "key": null,
@@ -30901,7 +30979,7 @@
                             "maxlength": 10
                         },
                         "ok": {
-                            "position": 14,
+                            "position": 15,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
@@ -30913,7 +30991,7 @@
                             "maxlength": 3
                         },
                         "auto": {
-                            "position": 15,
+                            "position": 16,
                             "type": "tinyint",
                             "null": 0,
                             "key": null,
