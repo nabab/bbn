@@ -922,28 +922,30 @@ class User extends Models\Cls\Basic
   public function closeSession($with_session = false): self
   {
     if ($this->id) {
-      $p =& $this->class_cfg['arch']['sessions'];
-      $this->db->update(
-        $this->class_cfg['tables']['sessions'], [
-          $p['ip_address'] => $this->ip_address,
-          $p['user_agent'] => $this->user_agent,
-          $p['opened'] => 0,
-          $p['last_activity'] => date('Y-m-d H:i:s'),
-          $p['cfg'] => json_encode($this->sess_cfg)
-        ],[
-          $p['id_user'] => $this->id,
-          $p['sess_id'] => $this->session->getId()
-        ]
-      );
+      if ($this->session) {
+        $p =& $this->class_cfg['arch']['sessions'];
+        $this->db->update(
+          $this->class_cfg['tables']['sessions'], [
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 0,
+            $p['last_activity'] => date('Y-m-d H:i:s'),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ],[
+            $p['id_user'] => $this->id,
+            $p['sess_id'] => $this->session->getId()
+          ]
+        );
+        if ($with_session) {
+          $this->session->set([]);
+        }
+        else{
+          $this->session->set([], $this->userIndex);
+        }
+      }
       $this->auth     = false;
       $this->id       = null;
       $this->sess_cfg = null;
-      if ($with_session) {
-        $this->session->set([]);
-      }
-      else{
-        $this->session->set([], $this->userIndex);
-      }
     }
 
     return $this;
