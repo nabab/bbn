@@ -7772,7 +7772,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function _remove_query_method_removes_from_the_beginning_of_queires_with_the_given_hash()
+  public function _remove_query_method_removes_from_the_beginning_of_queries_with_the_given_hash()
   {
     $method = $this->getNonPublicMethod('_remove_query');
 
@@ -7923,6 +7923,250 @@ GROUP BY `id`
     $this->getNonPublicMethod('_update_query')
       ->invoke(self::$mysql, '123');
   }
+
+  /** @test */
+  public function get_cache_method_returns_table_structure_from_database_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              email VARCHAR(255) NOT NULL UNIQUE';
+    });
+
+    $this->setCacheExpectations();
+
+    $result = $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, 'users');
+
+    $expected = [
+      'keys' => [
+        'PRIMARY' => [
+          'columns' => ['id'],
+          'ref_db' => null,
+          'ref_table' => null,
+          'ref_column' => null,
+          'constraint' => null,
+          'update' => null,
+          'delete' => null,
+          'unique' => 1,
+        ],
+        'email' => [
+          'columns' => ['email'],
+          'ref_db' => null,
+          'ref_table' => null,
+          'ref_column' => null,
+          'constraint' => null,
+          'update' => null,
+          'delete' => null,
+          'unique' => 1,
+        ]
+      ],
+      'cols' => [
+        'id' => ['PRIMARY'],
+        'email' => ['email']
+      ],
+      'fields' => [
+        'id' => [
+          'position' => 1,
+          'type' => 'int',
+          'null' => 0,
+          'key' => 'PRI',
+          'extra' => 'auto_increment',
+          'signed' => true,
+          'virtual' => false,
+          'generation' => ''
+        ],
+        'email' => [
+          'position' => 2,
+          'type' => 'varchar',
+          'null' => 0,
+          'key' => 'UNI',
+          'extra' => '',
+          'signed' => true,
+          'virtual' => false,
+          'generation' => '',
+          'maxlength' => 255
+        ]
+      ]
+    ];
+
+    $this->assertSame($expected, $result);
+    $this->assertNotEmpty(
+      $cache = $this->getNonPublicProperty('cache')
+    );
+    $this->assertSame($expected, current($cache));
+  }
+
+  /** @test */
+  public function get_cache_method_returns_all_tables_names_from_database_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  {
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT,
+              email VARCHAR(255) NOT NULL UNIQUE';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT';
+    });
+
+    $this->setCacheExpectations();
+
+    $result = $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, self::getDbConfig()['db'], 'tables');
+
+    $this->assertSame($expected = ['roles', 'users'], $result);
+    $this->assertNotEmpty(
+      $cache = $this->getNonPublicProperty('cache')
+    );
+    $this->assertSame($expected, current($cache));
+  }
+
+  /** @test */
+  public function get_cache_method_returns_all_databases_names_when_cache_does_not_exist_and_saves_it_in_cache_property()
+  {
+    $this->setCacheExpectations();
+
+    $result = $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, '', 'databases');
+
+    $this->assertTrue(in_array(self::getDbConfig()['db'], $result));
+    $this->assertNotEmpty(
+      $cache = $this->getNonPublicProperty('cache')
+    );
+    $this->assertTrue(in_array(self::getDbConfig()['db'], current($cache)));
+  }
+
+  /** @test */
+  public function get_cache_method_returns_table_structure_from_cache_property_when_exists()
+  {
+    $db_config = self::getDbConfig();
+
+    $this->setNonPublicPropertyValue('cache', [
+      "{$db_config['engine']}/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}/users"
+       => [
+         'foo' => 'bar'
+      ]
+    ]);
+
+    $this->assertSame(
+      ['foo' => 'bar'],
+      $this->getNonPublicMethod('_get_cache')->invoke(
+        self::$mysql, 'users'
+      )
+    );
+  }
+
+  /** @test */
+  public function get_cache_method_returns_table_structure_from_cache_class_when_exists_and_does_not_exist_in_cache_property()
+  {
+    $cache_name = $this->getNonPublicMethod('_db_cache_name')
+      ->invoke(self::$mysql, 'users', 'columns');
+
+    $cache_name_method = $this->getNonPublicMethod('_cache_name');
+
+    self::$cache_mock->shouldReceive('get')
+      ->with(
+        $cache_name_method->invoke(self::$mysql, $cache_name)
+      )
+      ->andReturn(['foo' => 'bar']);
+
+    $result = $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, 'users');
+
+    $this->assertSame(['foo' => 'bar'], $result);
+    $this->assertNotEmpty(
+      $cache = $this->getNonPublicProperty('cache')
+    );
+    $this->assertSame(['foo' => 'bar'], current($cache));
+  }
+
+  /** @test */
+  public function get_cache_method_returns_table_structure_from_database_when_cache_exists_but_force_is_true()
+  {
+    $this->setCacheExpectations();
+
+    $this->createTable('users', function() {
+      return 'id INT(11)';
+    });
+
+    $db_config = self::getDbConfig();
+
+    $this->setNonPublicPropertyValue('cache', [
+      "{$db_config['engine']}/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}/users"
+      => [
+        'foo' => 'bar'
+      ]
+    ]);
+
+    $result = $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, $db_config['db'], 'tables', true);
+
+    $this->assertNotSame(['foo' => 'bar'], $result);
+  }
+
+  /** @test */
+  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_table_structure()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setCacheExpectations();
+
+    $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, 'users');
+  }
+
+  /** @test */
+  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_tables_names()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setCacheExpectations();
+
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, self::getDbConfig()['db'], 'tables');
+  }
+
+  /** @test */
+  public function get_cache_method_throws_an_exception_when_it_fails_to_retrieve_databases_names()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->setCacheExpectations();
+
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->getNonPublicMethod('_get_cache')
+      ->invoke(self::$mysql, '', 'databases');
+  }
+
+  /** @test */
+  public function db_cache_name_returns_cache_name_of_database_structure()
+  {
+    $method    = $this->getNonPublicMethod('_db_cache_name');
+    $db_config = self::getDbConfig();
+
+    $this->assertSame(
+      "{$db_config['engine']}/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}/users",
+      $method->invoke(self::$mysql, 'users', 'columns')
+    );
+
+    $this->assertSame(
+      "{$db_config['engine']}/{$db_config['user']}@{$db_config['host']}/table_name",
+      $method->invoke(self::$mysql, 'table_name', 'tables')
+    );
+
+    $this->assertSame(
+      "{$db_config['engine']}/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}",
+      $method->invoke(self::$mysql, '', 'tables')
+    );
+
+    $this->assertSame(
+      "{$db_config['engine']}/{$db_config['user']}@{$db_config['host']}/_bbn-database",
+      $method->invoke(self::$mysql, '', 'databases')
+    );
+  }
+
 
   /** @test */
   public function modelize_method_returns_table_structure_as_an_indexed_array_for_the_given_table_name()
@@ -8147,7 +8391,4 @@ GROUP BY `id`
       self::$mysql->getEngine()
     );
   }
-
-  /** @test */
-
 }
