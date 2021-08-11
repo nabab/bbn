@@ -72,7 +72,7 @@ class Db2 implements Db2\Actions
           throw new \Exception(X::_("The database engine %s is not recognized", $engine));
         }
 
-        $this->language = new $cls($cfg, $this);
+        $this->language = new $cls($cfg);
       }
 
       self::retrieverInit($this);
