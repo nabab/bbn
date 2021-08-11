@@ -341,15 +341,18 @@ class User extends Models\Cls\Basic
         }
 
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
-        // Verify that the code is correct
-        $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
-        if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
-          throw new \Exception(X::_('Invalid code'));
-        }
+        if (!$this->hasSkipVerification()) {
+          // Verify that the code is correct
+          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
-        if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
-          throw new \Exception(X::_('Invalid code'));
+          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
+            throw new \Exception(X::_('Invalid code'));
+          }
+
+          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
+            throw new \Exception(X::_('Invalid code'));
+          }
         }
 
         // Update verification code to null
@@ -947,7 +950,6 @@ class User extends Models\Cls\Basic
       $this->id       = null;
       $this->sess_cfg = null;
     }
-
     return $this;
   }
 
@@ -2120,17 +2122,15 @@ class User extends Models\Cls\Basic
     catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
       return false;
     }
-    if (!$phone->isValidNumber()) {
-      return false;
-    }
     $phone_number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
-    return $this->db->rselect(
+    $user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users'],
       [
         $this->class_cfg['arch']['users']['login'] => $phone_number
       ]
     );
+    return !empty($user) && !$this->hasSkipVerification($user[$this->class_cfg['arch']['users']['id']]) && !$phone->isValidNumber() ? false : $user;
   }
 
 
@@ -2176,7 +2176,7 @@ class User extends Models\Cls\Basic
       return false;
     }
     
-    if (!$phone->isValidNumber()) {
+    if (!$this->hasSkipVerification() && !$phone->isValidNumber()) {
       return false;
     }
 
@@ -2262,6 +2262,21 @@ class User extends Models\Cls\Basic
     return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
       $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
     ]);
+  }
+
+  public function hasSkipVerification(string $id = ''): bool
+  {
+    if ($cfg = $this->db->selectOne(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['cfg'],
+      [
+        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id
+      ]
+    )) {
+      $cfg = json_decode($cfg);
+      return !empty($cfg->skip_verification);
+    }
+    return false;
   }
 
   /**
