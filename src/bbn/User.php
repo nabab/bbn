@@ -1156,7 +1156,7 @@ class User extends Models\Cls\Basic
       $this->class_cfg['arch']['hotlinks']['id_user'],
       ],[
       $this->class_cfg['arch']['hotlinks']['id'] => $id,
-      [$this->class_cfg['arch']['hotlinks']['expire'], '>', Date('Y-m-d H:i:s')]
+      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]
       ]
     )
     ) {
