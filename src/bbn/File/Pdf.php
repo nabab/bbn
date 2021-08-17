@@ -107,6 +107,9 @@ EOF
     }
 	}
   
+  public function getObj(){
+    return $this->pdf;
+  }
   
   public function getConfig(array $cfg = null){
     if ( \is_array($cfg) ){
