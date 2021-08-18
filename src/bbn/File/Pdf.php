@@ -213,6 +213,14 @@ EOF
     }
     return 0;
   }
+
+  public function setDpi(int $dpi) {
+    if ($this->check()) {
+      $this->pdf->dpi = $dpi;
+      $this->pdf->img_dpi = $dpi;
+    }
+    return $this;
+  }
   
 	public function makeAttachment(){
 		if ( $this->check() ){
