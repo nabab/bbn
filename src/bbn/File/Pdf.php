@@ -184,6 +184,35 @@ EOF
       die();
 		}
 	}
+
+  public function download($file = 'MyPDF.pdf'){
+		if ( $this->check() ){
+			$this->pdf->Output($file, \Mpdf\Output\Destination::DOWNLOAD);
+      die();
+		}
+	}
+
+  public function setPageSize($size){
+    if ($this->check()) {
+      $orientation = $this->pdf->CurOrientation;
+      $this->pdf->_setPageSize($size, $orientation);
+    }
+    return $this;
+  }
+
+  public function getCurrentPageContentHeight(){
+    if ($this->check()) {
+      return $this->pdf->y;
+    }
+    return 0;
+  }
+
+  public function getCurrentPageHeight(){
+    if ($this->check()) {
+      return $this->pdf->h;
+    }
+    return 0;
+  }
   
 	public function makeAttachment(){
 		if ( $this->check() ){
