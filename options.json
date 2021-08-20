@@ -934,9 +934,6 @@
                     "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
-                        "text": "Working schedule",
-                        "code": "wp"
-                      }, {
                         "text": "Staff absents",
                         "code": "staff_absent",
                         "limit":5,
