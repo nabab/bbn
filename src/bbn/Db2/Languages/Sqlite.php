@@ -19,13 +19,24 @@ use bbn\X;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
-class Sqlite implements bbn\Db2\Engines
+class Sqlite extends Sql
 {
 
   private $sqlite_keys_enabled = false;
 
-  /** @var bbn\Db The connection object */
-  protected $db;
+  /**
+   * @var array
+   */
+  protected array $cfg;
+
+  /**
+   * The host of this connection
+   * @var string $host
+   */
+  protected $host;
+
+  /** @var string The connection code as it would be stored in option */
+  protected $connection_code;
 
   /** @var array Allowed operators */
   public static $operators = ['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'];
@@ -110,13 +121,69 @@ class Sqlite implements bbn\Db2\Engines
    * Constructor
    * @param bbn\Db2 $db
    */
-  public function __construct(bbn\Db2 $db = null)
+  public function __construct(array $cfg = [])
   {
     if (!\extension_loaded('pdo_sqlite')) {
-      die('The SQLite driver for PDO is not installed...');
+      throw new \Exception('The SQLite driver for PDO is not installed...');
     }
 
-    $this->db = $db;
+    $cfg['engine'] = 'sqlite';
+
+    if (!isset($cfg['db']) && \defined('BBN_DATABASE')) {
+      $cfg['db'] = BBN_DATABASE;
+    }
+
+    if (empty($cfg['db']) || !\is_string($cfg['db'])) {
+      throw new \Exception('Database name is not specified');
+    }
+
+    if (is_file($cfg['db'])) {
+      $info        = pathinfo($cfg['db']);
+      $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
+      $cfg['db']   = $info['basename'];
+    }
+    elseif (\defined('BBN_DATA_PATH')
+      && is_dir(BBN_DATA_PATH.'db')
+      && (strpos($cfg['db'], '/') === false)
+    ) {
+      $cfg['host'] = BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR;
+      if (!is_file(BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR.$cfg['db'])
+        && (strpos($cfg['db'], '.') === false)
+      ) {
+        $cfg['db'] .= '.sqlite';
+      }
+    }
+    else{
+      $info = pathinfo($cfg['db']);
+      if (is_writable($info['dirname'])) {
+        $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
+        $cfg['db']   = isset($info['extension']) ? $info['basename'] : $info['basename'].'.sqlite';
+      }
+    }
+
+    if (!isset($cfg['host'])) {
+      throw new \Exception('Db file could not be located');
+    }
+
+    $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];
+    $cfg['db']   = 'main';
+
+    try {
+      $this->current  = $cfg['db'];
+      $this->host     = $cfg['host'];
+      $this->connection_code = $cfg['host'];
+
+      $this->pdo = new \PDO(...$cfg['args']);
+      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->cfg = $cfg;
+      $this->setHash($cfg['args']);
+
+    } catch (\PDOException $e) {
+      $err = X::_("Impossible to create the connection").
+        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
+        .X::_("with the following error").$e->getMessage();
+      throw new \Exception($err);
+    }
   }
 
 
@@ -128,56 +195,6 @@ class Sqlite implements bbn\Db2\Engines
    *                                                                                                                *
    *****************************************************************************************************************/
 
-
-  /**
-   * @param array $cfg The user's options
-   * @return array|null The final configuration
-   */
-  public function getConnection(array $cfg = []): ?array
-  {
-    $cfg['engine'] = 'sqlite';
-    if (!isset($cfg['db']) && \defined('BBN_DATABASE')) {
-      $cfg['db'] = BBN_DATABASE;
-    }
-
-    if (!empty($cfg['db']) && \is_string($cfg['db'])) {
-      if (is_file($cfg['db'])) {
-        $info        = pathinfo($cfg['db']);
-        $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
-        $cfg['db']   = $info['basename'];
-      }
-      elseif (\defined('BBN_DATA_PATH')
-          && is_dir(BBN_DATA_PATH.'db')
-          && (strpos($cfg['db'], '/') === false)
-      ) {
-        $cfg['host'] = BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR;
-        if (!is_file(BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR.$cfg['db'])
-            && (strpos($cfg['db'], '.') === false)
-        ) {
-          $cfg['db'] .= '.sqlite';
-        }
-      }
-      else{
-        $info = pathinfo($cfg['db']);
-        if (is_writable($info['dirname'])) {
-          $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
-          $cfg['db']   = isset($info['extension']) ? $info['basename'] : $info['basename'].'.sqlite';
-        }
-      }
-
-      if (isset($cfg['host'])) {
-        $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];
-        $cfg['code_db'] = $cfg['db'];
-        $cfg['code_host'] = $cfg['host'];
-        $cfg['db']   = 'main';
-        return $cfg;
-      }
-    }
-
-    return null;
-  }
-
-
   /**
    * Actions to do once the PDO object has been created
    *
@@ -187,14 +204,15 @@ class Sqlite implements bbn\Db2\Engines
   {
     // Obliged to do that  if we want to use foreign keys with SQLite
     $this->enableKeys();
-    return;
   }
 
 
-    /**
+  /**
+   * Changes the current database to the given one.
+   *
    * @param string $db The database name or file
-     * @return string | false
-     */
+   * @return string|false
+   */
   public function change(string $db): bool
   {
     if (strpos($db, '.') === false) {
@@ -202,8 +220,10 @@ class Sqlite implements bbn\Db2\Engines
     }
 
     $info = pathinfo($db);
-    if (( $info['filename'] !== $this->db->getCurrent() ) && file_exists($this->db->host.$db) && strpos($db, $this->qte) === false) {
-      $this->db->rawQuery("ATTACH '".$this->db->host.$db."' AS ".$info['filename']);
+    if (($info['filename'] !== $this->getCurrent()) && file_exists($this->host.$db) && strpos($db, $this->qte) === false) {
+      $this->rawQuery("ATTACH '".$this->host.$db."' AS ".$info['filename']);
+      $this->current = $info['filename'];
+
       return true;
     }
 
@@ -211,35 +231,13 @@ class Sqlite implements bbn\Db2\Engines
   }
 
 
-    /**
-     * Returns a database item expression escaped like database, table, column, key names
-     *
-     * @param string $item The item's name (escaped or not)
-     * @return string
-     */
-  public function escape(string $item): string
-  {
-    $items = explode('.', str_replace($this->qte, '', $item));
-    $r     = [];
-    foreach ($items as $m){
-      if (!bbn\Str::checkName($m)) {
-        return false;
-      }
-
-      $r[] = $this->qte.$m.$this->qte;
-    }
-
-    return implode('.', $r);
-  }
-
-
   /**
-     * Returns a table's full name i.e. database.table
-     *
-     * @param string $table   The table's name (escaped or not)
-     * @param bool   $escaped If set to true the returned string will be escaped
-     * @return null|string
-     */
+   * Returns a table's full name i.e. database.table
+   *
+   * @param string $table   The table's name (escaped or not)
+   * @param bool   $escaped If set to true the returned string will be escaped
+   * @return null|string
+   */
   public function tableFullName(string $table, bool $escaped = false): ?string
   {
     $bits = explode('.', str_replace($this->qte, '', $table));
@@ -247,152 +245,86 @@ class Sqlite implements bbn\Db2\Engines
       $db    = trim($bits[0]);
       $table = trim($bits[1]);
     }
-    else{
-      $db    = $this->db->getCurrent();
+    else {
+      $db    = $this->getCurrent();
       $table = trim($bits[0]);
     }
 
-    if (bbn\Str::checkName($db, $table)) {
+    if (bbn\Str::checkName($table) && bbn\Str::checkName($db)) {
       if ($db === 'main') {
         return $escaped ? $this->qte.$table.$this->qte : $table;
       }
 
-      return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;
+      return $escaped
+        ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte
+        : $db.'.'.$table;
     }
 
       return null;
   }
 
 
-    /**
-     * Returns a table's simple name i.e. table
-     *
-     * @param string $table   The table's name (escaped or not)
-     * @param bool   $escaped If set to true the returned string will be escaped
-     * @return null|string
-     */
+  /**
+   * Returns a table's simple name i.e. table
+   *
+   * @param string $table   The table's name (escaped or not)
+   * @param bool   $escaped If set to true the returned string will be escaped
+   * @return null|string
+   */
   public function tableSimpleName(string $table, bool $escaped = false): ?string
   {
     if ($table = trim($table)) {
       $bits  = explode('.', str_replace($this->qte, '', $table));
       $table = end($bits);
+
       if (bbn\Str::checkName($table)) {
         return $escaped ? $this->qte.$table.$this->qte : $table;
       }
     }
 
-        return false;
+    return false;
   }
-
-
-    /**
-     * Returns a column's full name i.e. table.column
-     *
-     * @param string      $col     The column's name (escaped or not)
-     * @param null|string $table   The table's name (escaped or not)
-     * @param bool        $escaped If set to true the returned string will be escaped
-     * @return null|string
-     */
-  public function colFullName(string $col, $table = null, $escaped = false): ?string
-  {
-    if ($col = trim($col)) {
-      $bits = explode('.', str_replace($this->qte, '', $col));
-      $ok   = null;
-      $col  = array_pop($bits);
-      if ($table && ($table = $this->tableSimpleName($table))) {
-        $ok = 1;
-      }
-      elseif (\count($bits)) {
-        $table = array_pop($bits);
-        $ok    = 1;
-      }
-
-      if ((null !== $ok) && bbn\Str::checkName($table, $col)) {
-        return $escaped ? '"'.$table.'"."'.$col.'"' : $table.'.'.$col;
-      }
-    }
-
-        return null;
-  }
-
-
-    /**
-     * Returns a column's simple name i.e. column
-     *
-     * @param string $col     The column's name (escaped or not)
-     * @param bool   $escaped If set to true the returned string will be escaped
-     * @return null|string
-     */
-  public function colSimpleName(string $col, bool $escaped=false): ?string
-  {
-    if ($col = trim($col)) {
-      $bits = explode('.', str_replace($this->qte, '', $col));
-      $col  = end($bits);
-      if (bbn\Str::checkName($col)) {
-        return $escaped ? $this->qte.$col.$this->qte : $col;
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @param string $table
-   * @return bool
-   */
-  public function isTableFullName(string $table): bool
-  {
-    //return true;
-    return strpos($table, '.') ? true : false;
-  }
-
-
-  /**
-   * @param string $col
-   * @return bool
-   */
-  public function isColFullName(string $col): bool
-  {
-    return (bool)strpos($col, '.');
-  }
-
 
   /**
    * Disable foreign keys check
    *
-   * @return bbn\Db
+   * @return self
    */
-  public function disableKeys(): bbn\Db
+  public function disableKeys(): self
   {
-    $this->db->rawQuery('PRAGMA foreign_keys = OFF;');
-    return $this->db;
+    $this->rawQuery('PRAGMA foreign_keys = OFF;');
+
+    return $this;
   }
 
 
   /**
    * Enable foreign keys check
    *
-   * @return bbn\Db
+   * @return self
    */
-  public function enableKeys(): bbn\Db
+  public function enableKeys(): self
   {
-    $this->db->rawQuery('PRAGMA foreign_keys = ON;');
-    return $this->db;
+    $this->rawQuery('PRAGMA foreign_keys = ON;');
+
+    return $this;
   }
 
 
   /**
-     * @return null|array
-     */
+   * Return databases' names as an array.
+   *
+   * @return null|array
+   * @throws \Exception
+   */
   public function getDatabases(): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
     $x  = [];
-    $fs = bbn\File\Dir::scan($this->db->host);
+    $fs = bbn\File\Dir::scan($this->host);
     foreach ($fs as $f){
       if (is_file($f)) {
         $x[] = pathinfo($f, PATHINFO_FILENAME);
@@ -405,24 +337,27 @@ class Sqlite implements bbn\Db2\Engines
 
 
   /**
+   * Return tables' names of a database as an array.
+   *
    * @param string $database Database name
    * @return null|array
+   * @throws \Exception
    */
-  public function getTables(string $database=''): ?array
+  public function getTables(string $database = ''): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
     if (empty($database) || !bbn\Str::checkName($database)) {
-        $database = $this->db->getCurrent() === 'main' ? '' : '"'.$this->db->getCurrent().'".';
+      $database = $this->getCurrent() === 'main' ? '' : '"'.$this->getCurrent().'".';
     }
     elseif ($database === 'main') {
       $database = '';
     }
 
-      $t2 = [];
-    if (( $r = $this->db->rawQuery(
+    $t2 = [];
+    if (($r = $this->rawQuery(
       '
       SELECT "tbl_name"
       FROM '.$database.'"sqlite_master"
@@ -437,24 +372,27 @@ class Sqlite implements bbn\Db2\Engines
       }
     }
 
-      return $t2;
+    return $t2;
   }
 
 
   /**
+   * Returns the columns' configuration of the given table.
+   *
    * @param null|string $table The table's name
    * @return null|array
+   * @throws \Exception
    */
   public function getColumns(string $table): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
     $r = [];
     if ($table = $this->tableFullName($table)) {
       $p = 1;
-      if ($rows = $this->db->getRows("PRAGMA table_info($table)")) {
+      if ($rows = $this->getRows("PRAGMA table_info($table)")) {
         foreach ($rows as $row){
           $f     = $row['name'];
           $r[$f] = [
@@ -472,9 +410,17 @@ class Sqlite implements bbn\Db2\Engines
           }
           elseif (( strpos($type, 'int') !== false ) || ( strpos($type, 'bool') !== false ) || ( strpos($type, 'timestamp') !== false )) {
             $r[$f]['type'] = 'INTEGER';
+
+            if (strpos($type, 'unsigned') !== false) {
+              $r[$f]['signed'] = 0;
+            }
           }
           elseif (( strpos($type, 'floa') !== false ) || ( strpos($type, 'doub') !== false ) || ( strpos($type, 'real') !== false )) {
             $r[$f]['type'] = 'REAL';
+
+            if (strpos($type, 'unsigned') !== false) {
+              $r[$f]['signed'] = 0;
+            }
           }
           elseif (( strpos($type, 'char') !== false ) || ( strpos($type, 'text') !== false )) {
             $r[$f]['type'] = 'TEXT';
@@ -496,12 +442,15 @@ class Sqlite implements bbn\Db2\Engines
 
 
   /**
+   * Returns the keys of the given table.
+   *
    * @param string $table The table's name
    * @return null|array
+   * @throws \Exception
    */
   public function getKeys(string $table): ?array
   {
-    if (!$this->db->check()) {
+    if (!$this->check()) {
       return null;
     }
 
@@ -510,10 +459,10 @@ class Sqlite implements bbn\Db2\Engines
       $r        = [];
       $keys     = [];
       $cols     = [];
-      $database = $this->db->getCurrent() === 'main' ? '' : '"'.$this->db->getCurrent().'".';
-      if ($indexes = $this->db->getRows('PRAGMA index_list('.$table.')')) {
+      $database = $this->getCurrent() === 'main' ? '' : '"'.$this->getCurrent().'".';
+      if ($indexes = $this->getRows('PRAGMA index_list('.$table.')')) {
         foreach ($indexes as $d){
-          if ($fields = $this->db->getRows('PRAGMA index_info('.$database.'"'.$d['name'].'")')) {
+          if ($fields = $this->getRows('PRAGMA index_info('.$database.'"'.$d['name'].'")')) {
             /** @todo Redo, $a is false! */
             foreach ($fields as $d2){
               $a = false;
@@ -541,6 +490,33 @@ class Sqlite implements bbn\Db2\Engines
         }
       }
 
+      if ($constraints = $this->getRows("PRAGMA foreign_key_list($database\"$table\")")) {
+        foreach ($constraints as $constraint) {
+          $constraint_name = "constraint_{$constraint['table']}_{$constraint['from']}";
+
+          if (empty($cols[$constraint['from']])) {
+            $keys[$constraint_name] = [
+              'columns' => [$constraint['from']],
+              'ref_db' => $this->getCurrent(),
+              'ref_table' => $constraint['table'] ?? null,
+              'ref_column' => $constraint['to'] ??  null,
+              'unique' => 0
+            ];
+
+            $cols[$constraint['from']] = [$constraint_name];
+
+          } else {
+            foreach ($cols[$constraint['from']] as $col) {
+              if (isset($keys[$col])) {
+                $keys[$col]['ref_db'] = $this->getCurrent();
+                $keys[$col]['ref_table'] = $constraint['table'] ?? null;
+                $keys[$col]['ref_column'] = $constraint['to'] ?? null;
+              }
+            }
+          }
+        }
+      }
+
       $r['keys'] = $keys;
       $r['cols'] = $cols;
     }
@@ -548,612 +524,9 @@ class Sqlite implements bbn\Db2\Engines
       return $r;
   }
 
-
   /**
-   * Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise
+   * Get a string starting with ORDER BY with corresponding parameters to $order.
    *
-   * @param array $conditions
-   * @param array $cfg
-   * @param bool  $is_having
-   * @return string
-   */
-  public function getConditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string
-  {
-    $res = '';
-    if (isset($conditions['conditions'], $conditions['logic'])) {
-      $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
-      foreach ($conditions['conditions'] as $key => $f){
-        if (\is_array($f) && isset($f['logic']) && isset($f['conditions'])) {
-          if ($tmp = $this->getConditions($f, $cfg, $is_having, $indent + 2)) {
-            $res .= (empty($res) ? '(' : PHP_EOL.str_repeat(' ', $indent)."$logic (").
-                    $tmp.PHP_EOL.str_repeat(' ', $indent).")";
-          }
-        }
-        elseif (isset($f['operator'], $f['field'])) {
-          $field = $f['field'];
-          if (!array_key_exists('value', $f)) {
-            $f['value'] = false;
-          }
-
-          $is_number = false;
-          $is_null   = true;
-          $is_uid    = false;
-          $is_date   = false;
-          $model     = null;
-          if ($is_having) {
-            $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").$field.' ';
-          }
-          elseif (isset($cfg['available_fields'][$field])) {
-            $table  = $cfg['available_fields'][$field];
-            $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
-            if ($table && $column && isset($cfg['models'][$table]['fields'][$column])) {
-              $model = $cfg['models'][$table]['fields'][$column];
-              $res  .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").
-                      (!empty($cfg['available_fields'][$field]) ? $this->colFullName($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true) : $this->colSimpleName($column, true)
-                      ).' ';
-            }
-            else{
-              // Remove the alias from where and join but not in having execpt if it's a count
-              if (!$is_having && ($table === false) && isset($cfg['fields'][$field])) {
-                $field = $cfg['fields'][$field];
-                // Same for exp in case it's an alias
-                if (!empty($f['exp']) && isset($cfg['fields'][$f['exp']])) {
-                  $f['exp'] = $cfg['fields'][$f['exp']];
-                }
-              }
-
-              $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
-            }
-
-            if (!empty($model)) {
-              $is_null = (bool)$model['null'];
-              if ($model['type'] === 'binary') {
-                $is_number = true;
-                if (($model['maxlength'] === 16) && $model['key']) {
-                  $is_uid = true;
-                }
-              }
-              elseif (\in_array($model['type'], self::$numeric_types, true)) {
-                $is_number = true;
-              }
-              elseif (\in_array($model['type'], self::$date_types, true)) {
-                $is_date = true;
-              }
-            }
-            elseif ($f['value'] && \bbn\Str::isUid($f['value'])) {
-              $is_uid = true;
-            }
-            elseif (is_int($f['value']) || is_float($f['value'])) {
-              $is_number = true;
-            }
-          }
-          else{
-            $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
-          }
-
-          switch (strtolower($f['operator'])){
-            case '=':
-              if (isset($f['exp'])) {
-                $res .= '= '.$f['exp'];
-              }
-              else {
-                $res .= '= ?';
-              }
-              break;
-            case '!=':
-              if (isset($f['exp'])) {
-                $res .= '!= '.$f['exp'];
-              }
-              else {
-                $res .= '!= ?';
-              }
-              break;
-            case 'like':
-              if (isset($f['exp'])) {
-                $res .= 'LIKE '.$f['exp'];
-              }
-              else {
-                $res .= 'LIKE ?';
-              }
-              break;
-            case 'not like':
-              if (isset($f['exp'])) {
-                $res .= 'NOT LIKE '.$f['exp'];
-              }
-              else {
-                $res .= 'NOT LIKE ?';
-              }
-              break;
-            case 'eq':
-            case 'is':
-              if (isset($f['exp'])) {
-                $res .= '= '.$f['exp'];
-              }
-              elseif ($is_uid || $is_number) {
-                $res .= '= ?';
-              }
-              else{
-                $res .= 'LIKE ?';
-              }
-              break;
-            case 'neq':
-            case 'isnot':
-              if (isset($f['exp'])) {
-                $res .= '!= '.$f['exp'];
-              }
-              elseif ($is_uid || $is_number) {
-                $res .= '!= ?';
-              }
-              else{
-                $res .= 'NOT LIKE ?';
-              }
-              break;
-
-            case 'doesnotcontains':
-            case 'doesnotcontain':
-              $res .= 'NOT LIKE '.($f['exp'] ?? '?');
-              break;
-
-            case 'endswith':
-            case 'startswith':
-            case 'contains':
-              $res .= 'LIKE '.($f['exp'] ?? '?');
-              break;
-
-            case 'gte':
-            case '>=':
-              if (isset($f['exp'])) {
-                $res .= '>= '.$f['exp'];
-              }
-              else{
-                $res .= '>= ?';
-              }
-              break;
-
-            case 'gt':
-            case '>':
-              if (isset($f['exp'])) {
-                $res .= '> '.$f['exp'];
-              }
-              else{
-                $res .= '> ?';
-              }
-              break;
-
-            case 'lte':
-            case '<=':
-              if (isset($f['exp'])) {
-                $res .= '<= '.$f['exp'];
-              }
-              else{
-                $res .= '<= ?';
-              }
-              break;
-
-            case 'lt':
-            case '<':
-              if (isset($f['exp'])) {
-                $res .= '< '.$f['exp'];
-              }
-              else{
-                $res .= '< ?';
-              }
-              break;
-
-            /** @todo Check if it is working with an array */
-            case 'isnull':
-              $res .= 'IS NULL';
-              break;
-
-            case 'isnotnull':
-              $res .= 'IS NOT NULL';
-              break;
-
-            case 'isempty':
-              $res .= $is_number ? '= 0' : "LIKE ''";
-              break;
-
-            case 'isnotempty':
-              $res .= $is_number ? '!= 0' : "NOT LIKE ''";
-              break;
-
-            case 'doesnotcontain':
-              $res .= $is_number ? '!= ?' : 'NOT LIKE ?';
-              break;
-
-            case 'contains':
-              $res .= 'LIKE ?';
-              break;
-
-            default:
-              $res .= '= ?';
-              break;
-          }
-        }
-      }
-    }
-
-    if (!empty($res)) {
-      return str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $res.PHP_EOL);
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Generates a string starting with SELECT ... FROM with corresponding parameters
-   *
-   * @param array $cfg The configuration array
-   * @return string
-   */
-  public function getSelect(array $cfg): string
-  {
-    // 22/06/2020 imported from mysql.php by Mirko
-    $res = '';
-    if (\is_array($cfg['tables']) && !empty($cfg['tables'])) {
-      $res = 'SELECT ';
-      if (!empty($cfg['count'])) {
-        if ($cfg['group_by']) {
-          $indexes = [];
-          $idxs    = [];
-          foreach ($cfg['group_by'] as $g){
-            // Alias
-            if (isset($cfg['fields'][$g])) {
-              $g = $cfg['fields'][$g];
-            }
-
-            if (($t = $cfg['available_fields'][$g])
-                && ($cfn = $this->colFullName($g, $t))
-            ) {
-              $indexes[] = $cfn;
-              //$idxs[] = $this->colSimpleName($g, true);
-              // Changed by Mirko
-              $idxs[] = $this->colSimpleName($cfg['aliases'][$g] ?? $g, true);
-            }
-            else {
-              $indexes[] = $g;
-              $idxs[]    = $g;
-            }
-          }
-
-          if (!empty($cfg['having'])) {
-            if (count($indexes) === count($cfg['group_by'])) {
-              $res .= 'COUNT(*) FROM ( SELECT ';
-              $tmp  = [];
-              if ($extracted_fields = $this->db->extractFields($cfg, $cfg['having']['conditions'])) {
-                //die(var_dump($extracted_fields));
-                foreach ($extracted_fields as $ef) {
-                  if (!in_array($ef, $indexes)) {
-                    if (!empty($cfg['fields'][$ef])) {
-                      $tmp[$ef] = $cfg['fields'][$ef];
-                    }
-                    else {
-                      $tmp[] = $ef;
-                    }
-                  }
-                }
-              }
-
-              $cfg['fields'] = $indexes;
-              foreach ($tmp as $k => $v) {
-                if (is_string($k)) {
-                  $cfg['fields'][$k] = $v;
-                }
-                else {
-                  $cfg['fields'][] = $v;
-                }
-              }
-            }
-            else{
-              $res .= 'COUNT(*) FROM ( SELECT ';
-            }
-          }
-          else{
-            if (count($indexes) === count($cfg['group_by'])) {
-              $res .= 'COUNT(*) FROM ( SELECT ';
-              //$cfg['fields'] = $indexes;
-              // Changed by Mirko
-              $cfg['fields'] = array_combine($idxs, $indexes);
-            }
-            else{
-              $res .= 'COUNT(*) FROM ( SELECT ';
-            }
-          }
-        }
-        else{
-          $res          .= 'COUNT(*)';
-          $cfg['fields'] = [];
-        }
-      }
-
-      if (!empty($cfg['fields'])) {
-        $fields_to_put = [];
-        // Checking the selected fields
-        foreach ($cfg['fields'] as $alias => $f){
-          $is_distinct = false;
-          $f           = trim($f);
-          $bits        = explode(' ', $f);
-          if ((count($bits) > 1) && (strtolower($bits[0]) === 'distinct')) {
-            $is_distinct = true;
-            array_shift($bits);
-            $f = implode(' ', $bits);
-          }
-
-          // Adding the alias in $fields
-          if (strpos($f, '(')) {
-            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$this->escape($alias) : '');
-          }
-          elseif (array_key_exists($f, $cfg['available_fields'])) {
-            $idx    = $cfg['available_fields'][$f];
-            $csn    = $this->colSimpleName($f);
-            $is_uid = false;
-            //die(var_dump($idx, $f, $tables[$idx]));
-            if (($idx !== false) && isset($cfg['models'][$idx]['fields'][$csn])) {
-              $column = $cfg['models'][$idx]['fields'][$csn];
-              if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
-                $is_uid = true;
-                if (!\is_string($alias)) {
-                  $alias = $csn;
-                }
-              }
-            }
-
-            //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
-            if ($is_uid) {
-              $st = 'LOWER(HEX('.$this->colFullName($csn, $cfg['available_fields'][$f], true).'))';
-            }
-            // For JSON fields
-            elseif ($cfg['available_fields'][$f] === false) {
-              $st = $f;
-            }
-            else{
-              $st = $this->colFullName($csn, $cfg['available_fields'][$f], true);
-            }
-
-            if (\is_string($alias)) {
-              $st .= ' AS '.$this->escape($alias);
-            }
-
-            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$st;
-          }
-          elseif (isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false)) {
-            $this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
-          }
-          else{
-            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
-          }
-        }
-
-        $res .= implode(', ', $fields_to_put);
-      }
-
-      $res          .= PHP_EOL;
-      $tables_to_put = [];
-      foreach ($cfg['tables'] as $alias => $tfn){
-        $st = $this->tableFullName($tfn, true);
-        if ($alias !== $tfn) {
-          $st .= ' AS '.$this->escape($alias);
-        }
-
-        $tables_to_put[] = $st;
-      }
-
-      $res .= 'FROM '.implode(', ', $tables_to_put).PHP_EOL;
-      return $res;
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * @param array $cfg The configuration array
-   * @return string
-   */
-  public function getInsert(array $cfg): string
-  {
-    $fields_to_put = [
-      'values' => [],
-      'fields' => []
-    ];
-    $i             = 0;
-    foreach ($cfg['fields'] as $alias => $f){
-      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model  = $cfg['models'][$cfg['available_fields'][$f]];
-        $csn    = $this->colSimpleName($f);
-        $is_uid = false;
-        if (isset($model['fields'][$csn])) {
-          $column = $model['fields'][$csn];
-          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
-            $is_uid = true;
-          }
-
-          $fields_to_put['fields'][] = $this->colSimpleName($f, true);
-          $fields_to_put['values'][] = $is_uid && (!$column['null'] || (null !== $cfg['values'][$i])) ? 'UNHEX(?)' : '?';
-        }
-      }
-      else{
-        $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
-      }
-
-      $i++;
-    }
-
-    if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
-      return 'INSERT '.($cfg['ignore'] ? 'IGNORE ' : '').'INTO '.$this->tableSimpleName(current($cfg['tables']), true).PHP_EOL.
-        '('.implode(', ', $fields_to_put['fields']).')'.PHP_EOL.' VALUES ('.
-        implode(', ', $fields_to_put['values']).')'.PHP_EOL;
-    }
-
-    return '';
-  }
-
-
-  /**
-   * @param array $cfg The configuration array
-   * @return string
-   */
-  public function getUpdate(array $cfg): string
-  {
-    $res           = '';
-    $fields_to_put = [
-      'values' => [],
-      'fields' => []
-    ];
-    foreach ($cfg['fields'] as $alias => $f){
-      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model  = $cfg['models'][$cfg['available_fields'][$f]];
-        $csn    = $this->colSimpleName($f);
-        $is_uid = false;
-        if (isset($model['fields'][$csn])) {
-          $column = $model['fields'][$csn];
-          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
-            $is_uid = true;
-          }
-
-          $fields_to_put['fields'][] = $this->colSimpleName($f, true);
-          $fields_to_put['values'][] = $is_uid ? 'UNHEX(?)' : '?';
-        }
-      }
-      else{
-        $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
-      }
-    }
-
-    if (count($fields_to_put['fields'])) {
-      $res .= 'UPDATE '.($cfg['ignore'] ? 'IGNORE ' : '').$this->tableSimpleName(current($cfg['tables']), true).' SET ';
-      $last = count($fields_to_put['fields']) - 1;
-      foreach ($fields_to_put['fields'] as $i => $f){
-        $res .= $f.' = '.$fields_to_put['values'][$i];
-        if ($i < $last) {
-          $res .= ',';
-        }
-
-        $res .= PHP_EOL;
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Return SQL code for row(s) DELETE.
-   *
-   * ```php
-   * X::dump($db->getDelete('table_users',['id'=>1]));
-   * // (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?
-   * ```
-   *
-   * @param array $cfg The configuration array
-   * @return string
-   */
-  public function getDelete(array $cfg): string
-  {
-    $res = '';
-    if (count($cfg['tables']) === 1) {
-      $res = 'DELETE '.( $cfg['ignore'] ? 'IGNORE ' : '' ).
-        'FROM '.$this->tableFullName(current($cfg['tables']), true).PHP_EOL;
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Returns a string with the JOIN part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getJoin(array $cfg): string
-  {
-    $res = '';
-    if (!empty($cfg['join'])) {
-      foreach ($cfg['join'] as $join){
-        if (isset($join['table'], $join['on']) && ($cond = $this->db->getConditions($join['on'], $cfg, false, 4))) {
-          $res .= '  '.
-            (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '').
-            'JOIN '.$this->tableFullName($join['table'],true).
-            (!empty($join['alias']) ? ' AS '.$this->escape($join['alias']) : '').PHP_EOL.'ON '.$cond;
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Returns a string with the JOIN part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getWhere(array $cfg): string
-  {
-    $res = $this->getConditions($cfg['filters'] ?? [], $cfg);
-    if (!empty($res)) {
-      $res = 'WHERE '.$res;
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Returns a string with the GROUP BY part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getGroupBy(array $cfg): string
-  {
-    $res          = '';
-    $group_to_put = [];
-    if (!empty($cfg['group_by'])) {
-      foreach ($cfg['group_by'] as $g){
-        if (isset($cfg['available_fields'][$g])) {
-          $group_to_put[] = $this->escape($g);
-          /*
-          if ( isset($cfg['available_fields'][$this->isColFullName($g) ? $this->colFullName($g) : $this->colSimpleName($g)]) ){
-          $group_to_put[] = $this->escape($g);
-          //$group_to_put[] = $this->colFullName($g, $cfg['available_fields'][$g], true);
-          */
-        }
-        else{
-          $this->db->error("Error! The column '$g' doesn't exist for group by ".print_r($cfg, true));
-        }
-      }
-
-      if (count($group_to_put)) {
-        $res .= 'GROUP BY '.implode(', ', $group_to_put).PHP_EOL;
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Returns a string with the HAVING part of the query if there is, empty otherwise
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getHaving(array $cfg): string
-  {
-    $res = '';
-    if (!empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->getConditions($cfg['having'], $cfg, !$cfg['count'], 2))) {
-      $res .= '  HAVING '.$cond.PHP_EOL;
-    }
-
-    return $res;
-  }
-
-
-  /**
    * @param array $cfg
    * @return string
    */
@@ -1161,13 +534,23 @@ class Sqlite implements bbn\Db2\Engines
   {
     $res = '';
     if (!empty($cfg['order'])) {
-      foreach ($cfg['order'] as $col => $dir){
-        if (\is_array($dir) && isset($dir['field'], $cfg['available_fields'][$dir['field']])) {
-          $res .= $this->escape($dir['field']).' COLLATE NOCASE '.
-            (!empty($dir['dir']) && strtolower($dir['dir']) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
+      foreach ($cfg['order'] as $col => $dir) {
+        if (\is_array($dir) && isset($dir['field'])) {
+          $col = $dir['field'];
+          $dir = $dir['dir'] ?? 'ASC';
         }
-        elseif (isset($cfg['available_fields'][$col])) {
-          $res .= $this->escape($col).' COLLATE NOCASE '.
+
+        if (isset($cfg['available_fields'][$col])) {
+          // If it's an alias we use the simple name
+          if (isset($cfg['fields'][$col])) {
+            $f = $this->colSimpleName($col, true);
+          } elseif ($cfg['available_fields'][$col] === false) {
+            $f = $this->escape($col);
+          } else {
+            $f = $this->colFullName($col, $cfg['available_fields'][$col], true);
+          }
+
+          $res .= $f.' COLLATE NOCASE '.
             (strtolower($dir) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
         }
       }
@@ -1180,24 +563,6 @@ class Sqlite implements bbn\Db2\Engines
     return $res;
   }
 
-
-  /**
-   * Get a string starting with LIMIT with corresponding parameters to $where
-   *
-   * @param array $cfg
-   * @return string
-   */
-  public function getLimit(array $cfg): string
-  {
-    $res = '';
-    if (!empty($cfg['limit']) && bbn\Str::isInteger($cfg['limit'])) {
-      $res .= 'LIMIT '.(!empty($cfg['start']) && bbn\Str::isInteger($cfg['start']) ? (string)$cfg['start'] : '0').', '.$cfg['limit'];
-    }
-
-    return $res;
-  }
-
-
   /**
    * @param null|string $table The table for which to create the statement
    * @return string
@@ -1205,9 +570,9 @@ class Sqlite implements bbn\Db2\Engines
   public function getRawCreate(string $table): string
   {
     if (($table = $this->tableFullName($table, true))
-        && ($r = $this->db->rawQuery("SHOW CREATE TABLE $table"))
+        && ($r = $this->rawQuery("SELECT sql FROM sqlite_master WHERE name = $table"))
     ) {
-      return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
+      return $r->fetch(\PDO::FETCH_ASSOC)['sql'] ?? '';
     }
 
     return '';
@@ -1217,10 +582,10 @@ class Sqlite implements bbn\Db2\Engines
   public function getCreateTable(string $table, array $model = null): string
   {
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
-    $st   = 'CREATE TABLE ' . $this->db->escape($table) . ' (' . PHP_EOL;
+    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
     $done = false;
     foreach ($model['fields'] as $name => $col) {
       if (!$done) {
@@ -1230,10 +595,11 @@ class Sqlite implements bbn\Db2\Engines
         $st .= ',' . PHP_EOL;
       }
 
-      $st .= '  ' . $this->db->escape($name) . ' ';
-      if (!in_array($col['type'], self::$types)) {
-        if (isset(self::$interoperability[$col['type']])) {
-          $st .= self::$interoperability[$col['type']];
+      $st .= '  ' . $this->escape($name) . ' ';
+
+      if (!in_array(strtolower($col['type']), self::$types)) {
+        if (isset(self::$interoperability[strtolower($col['type'])])) {
+          $st .= self::$interoperability[strtolower($col['type'])];
         }
         // No error: no type is fine
       }
@@ -1245,7 +611,7 @@ class Sqlite implements bbn\Db2\Engines
         $st .= ' NOT NULL';
       }
 
-      if (array_key_exists('default', $col)) {
+      if (array_key_exists('default', $col) && $col['default'] !== null) {
         $st .= ' DEFAULT ';
         if (($col['default'] === 'NULL')
             || bbn\Str::isNumber($col['default'])
@@ -1255,17 +621,16 @@ class Sqlite implements bbn\Db2\Engines
           $st .= (string)$col['default'];
         }
         else {
-          $st .= "'" . bbn\Str::escapeSquotes($col['default']) . "'";
+          $st .= "'" . $col['default'] . "'";
         }
       }
     }
 
     if (isset($model['keys']['PRIMARY'])) {
-      $db  = &$this->db;
       $st .= ','.PHP_EOL.'  PRIMARY KEY ('.X::join(
         array_map(
-          function ($a) use ($db) {
-            return $db->escape($a);
+          function ($a) {
+            return $this->escape($a);
           },
           $model['keys']['PRIMARY']['columns']
         ),
@@ -1278,16 +643,14 @@ class Sqlite implements bbn\Db2\Engines
   }
 
 
-  public function getCreateKeys(string $table, array $model = null)
+  public function getCreateKeys(string $table, ?array $model = null): string
   {
     $st = '';
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
     if ($model && !empty($model['keys'])) {
-      $last  = count($model['keys']) - 1;
-      $dbcls = &$this->db;
       foreach ($model['keys'] as $name => $key) {
         if ($name === 'PRIMARY') {
           continue;
@@ -1298,12 +661,12 @@ class Sqlite implements bbn\Db2\Engines
           $st .= 'UNIQUE ';
         }
 
-        $st .= 'INDEX \''.Str::escapeSquotes($name).'\' ON ' . $this->db->escape($table);
-        $db  = &$this->db;
+        $st .= 'INDEX \''.Str::escapeSquotes($name).'\' ON ' . $this->escape($table);
+
         $st .= ' ('.X::join(
           array_map(
-            function ($a) use ($db) {
-              return $db->escape($a);
+            function ($a) {
+              return $this->escape($a);
             },
             $key['columns']
           ),
@@ -1325,7 +688,7 @@ class Sqlite implements bbn\Db2\Engines
   {
     $st = '';
     if (!$model) {
-      $model = $this->db->modelize($table);
+      $model = $this->modelize($table);
     }
 
     if ($st = $this->getCreateTable($table, $model)) {
@@ -1360,7 +723,7 @@ class Sqlite implements bbn\Db2\Engines
     $name = bbn\Str::encodeFilename($table);
     foreach ($column as $i => $c){
       if (!bbn\Str::checkName($c)) {
-        $this->db->error("Illegal column $c");
+        $this->error("Illegal column $c");
       }
 
       $name      .= '_'.$c;
@@ -1381,7 +744,7 @@ class Sqlite implements bbn\Db2\Engines
       }
 
       X::log(['index', $query],'vito');
-      return (bool)$this->db->rawQuery($query);
+      return (bool)$this->rawQuery($query);
     }
 
         return false;
@@ -1400,7 +763,7 @@ class Sqlite implements bbn\Db2\Engines
     if (( $table = $this->tableFullName($table, 1) ) && bbn\Str::checkName($key)) {
       //changed the row above because if the table has no rows query() returns 0
       //return (bool)$this->db->query("ALTER TABLE $table DROP INDEX `$key`");
-      return $this->db->query('DROP INDEX IF EXISTS '.$key) !== false;
+      return $this->query('DROP INDEX IF EXISTS '.$key) !== false;
     }
 
         return false;
@@ -1422,9 +785,9 @@ class Sqlite implements bbn\Db2\Engines
         $database = $database.'.sqlite';
       }
 
-      if(empty(file_exists($this->db->host.$database))) {
-        fopen($this->db->host.$database, 'w');
-        return file_exists($this->db->host.$database);
+      if (empty(file_exists($this->host.$database))) {
+        fopen($this->host.$database, 'w');
+        return file_exists($this->host.$database);
       }
     }
 
@@ -1445,9 +808,9 @@ class Sqlite implements bbn\Db2\Engines
         $database = $database.'.sqlite';
       }
 
-      if(file_exists($this->db->host.$database)) {
-        unlink($this->db->host.$database);
-        return file_exists($this->db->host.$database);
+      if (file_exists($this->host.$database)) {
+        unlink($this->host.$database);
+        return file_exists($this->host.$database);
       }
     }
 
@@ -1507,15 +870,15 @@ class Sqlite implements bbn\Db2\Engines
   public function status(string $table = '', string $database = '')
   {
     $cur = null;
-    if ($database && ($this->db->getCurrent() !== $database)) {
-      $cur = $this->db->getCurrent();
-      $this->db->change($database);
+    if ($database && ($this->getCurrent() !== $database)) {
+      $cur = $this->getCurrent();
+      $this->change($database);
     }
 
     //$r = $this->db->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
-    $r = $this->db->getRow('SELECT * FROM dbstat WHERE Name LIKE ?', $table);
+    $r = $this->getRow('SELECT * FROM dbstat WHERE Name LIKE ?', $table);
     if (null !== $cur) {
-      $this->db->change($cur);
+      $this->change($cur);
     }
 
     return $r;
@@ -1580,7 +943,7 @@ class Sqlite implements bbn\Db2\Engines
   {
     $str = $this->createTable($table_name, $columns, $keys, $with_constraints, $charset);
     if ($str !== '') {
-      return (bool)$this->db->rawQuery($str);
+      return (bool)$this->rawQuery($str);
     }
 
     return false;
@@ -1592,7 +955,7 @@ class Sqlite implements bbn\Db2\Engines
     $st = '';
     if (!empty($model)) {
       if ($last = count($model)) {
-        $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
+        $st .= 'ALTER TABLE '.$this->escape($table).PHP_EOL;
         $i   = 0;
 
         if (!is_array($model[0])) {
@@ -1606,12 +969,12 @@ class Sqlite implements bbn\Db2\Engines
           X::log($key, 'vito');
           $i++;
           $st .= '  ADD '.
-            'CONSTRAINT '.$this->db->escape($key['constraint']).
-            ($key['foreign_key'] ? ' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') ' : '').
-            ($key['unique'] ? ' UNIQUE ('.$this->db->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
-            ($key['primary_key'] ? ' PRIMARY KEY ('.$this->db->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
-            ' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') '.
-            'REFERENCES '.$this->db->escape($table).'('.$this->db->escape($key['columns'][0]).') '.
+            'CONSTRAINT '.$this->escape($key['constraint']).
+            ($key['foreign_key'] ? ' FOREIGN KEY ('.$this->escape($key['columns'][0]).') ' : '').
+            ($key['unique'] ? ' UNIQUE ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
+            ($key['primary_key'] ? ' PRIMARY KEY ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
+            ' FOREIGN KEY ('.$this->escape($key['columns'][0]).') '.
+            'REFERENCES '.$this->escape($table).'('.$this->escape($key['columns'][0]).') '.
             ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
             ($key['update'] ? ' ON UPDATE '.$key['update'] : '').
             ($i === $last ? ';' : ','.PHP_EOL);
@@ -1627,11 +990,40 @@ class Sqlite implements bbn\Db2\Engines
   {
     $str = $this->getCreateConstraints($table,  $model);
     if ($str !== '') {
-      return (bool)$this->db->rawQuery($str);
+      return (bool)$this->rawQuery($str);
     }
 
     return false;
   }
 
 
+  public function getQueryValues(array $cfg): array
+  {
+    // TODO: Implement getQueryValues() method.
+  }
+
+  public function getFieldsList($tables): array
+  {
+    // TODO: Implement getFieldsList() method.
+  }
+
+  public function getPrimary(string $table): array
+  {
+    // TODO: Implement getPrimary() method.
+  }
+
+  public function getCfg(): array
+  {
+    // TODO: Implement getCfg() method.
+  }
+
+  public function getHost(): ?string
+  {
+    return $this->host;
+  }
+
+  public function getConnectionCode()
+  {
+    // TODO: Implement getConnectionCode() method.
+  }
 }

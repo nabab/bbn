@@ -987,6 +987,148 @@ MYSQL
     return [];
   }
 
+  /**
+   * @param null|string $table The table for which to create the statement
+   * @return string
+   */
+  public function getRawCreate(string $table): string
+  {
+    if (($table = $this->tableFullName($table, true))
+      && ($r = $this->rawQuery("SHOW CREATE TABLE $table"))
+    ) {
+      return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
+    }
+
+    return '';
+  }
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
+  public function getCreateTable(string $table, array $model = null): string
+  {
+    if (!$model) {
+      $model = $this->modelize($table);
+    }
+
+    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
+    $done = false;
+    foreach ($model['fields'] as $name => $col) {
+      if (!$done) {
+        $done = true;
+      }
+      else {
+        $st .= ',' . PHP_EOL;
+      }
+
+      $st .= '  ' . $this->escape($name) . ' ';
+      if (!in_array($col['type'], self::$types)) {
+        if (isset(self::$interoperability[$col['type']])) {
+          $st .= self::$interoperability[$col['type']];
+        }
+        else {
+          throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
+        }
+      }
+      else {
+        $st .= $col['type'];
+      }
+
+      if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
+        if (empty($col['extra'])) {
+          throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
+        }
+
+        $st .= ' (' . $col['extra'] . ')';
+      }
+      elseif (!empty($col['maxlength'])) {
+        $st .= '(' . $col['maxlength'];
+        if (!empty($col['decimals'])) {
+          $st .= ',' . $col['decimals'];
+        }
+
+        $st .= ')';
+      }
+
+      if (in_array($col['type'], self::$numeric_types)
+        && empty($col['signed'])
+      ) {
+        $st .= ' UNSIGNED';
+      }
+
+      if (empty($col['null'])) {
+        $st .= ' NOT NULL';
+      }
+
+      if (!empty($col['virtual'])) {
+        $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
+      } elseif (array_key_exists('default', $col)) {
+        $st .= ' DEFAULT ';
+        if (($col['default'] === 'NULL')
+          || Str::isNumber($col['default'])
+          || strpos($col['default'], '(')
+          || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+        ) {
+          $st .= (string)$col['default'];
+        } else {
+          $st .= $col['default'];
+        }
+      }
+    }
+
+    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+    return $st;
+  }
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
+  public function getCreateKeys(string $table, array $model = null): string
+  {
+    $st = '';
+    if (!$model) {
+      $model = $this->modelize($table);
+    }
+
+    if ($model && !empty($model['keys'])) {
+      $st   .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $last  = count($model['keys']) - 1;
+
+      $i     = 0;
+      foreach ($model['keys'] as $name => $key) {
+        $st .= '  ADD ';
+        if (!empty($key['unique'])
+          && isset($model['fields'][$key['columns'][0]])
+          && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
+        ) {
+          $st .= 'PRIMARY KEY';
+        } elseif (!empty($key['unique'])) {
+          $st .= 'UNIQUE KEY ' . $this->escape($name);
+        } else {
+          $st .= 'KEY ' . $this->escape($name);
+        }
+
+        $st .= ' (' . implode(
+            ',', array_map(
+              function ($a) {
+                return $this->escape($a);
+              }, $key['columns']
+            )
+          ) . ')';
+        $st .= $i === $last ? ';' : ',' . PHP_EOL;
+        $i++;
+      }
+    }
+
+    return $st;
+  }
+
   public function __toString()
   {
     return 'mysql';

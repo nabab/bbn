@@ -1494,7 +1494,7 @@ first_name ASC';
       ]
     ];
 
-    self::$mysql->getCreate('users', $cfg);
+    self::$mysql->getCreateTable('users', $cfg);
   }
 
   /** @test */
