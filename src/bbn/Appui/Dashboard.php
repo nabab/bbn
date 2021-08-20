@@ -1,7 +1,9 @@
 <?php
+
 /**
  * @package appui
  */
+
 namespace bbn\Appui;
 
 use bbn;
@@ -100,7 +102,6 @@ class Dashboard
     if (!empty($id)) {
       $this->setCurrent($id);
     }
-
   }
 
 
@@ -116,7 +117,7 @@ class Dashboard
     return !!$this->getId($code);
   }
 
-  
+
   /** 
    * Sets the current dashboard by setting code and id properies.
    */
@@ -129,8 +130,7 @@ class Dashboard
         }
 
         $this->id = $id;
-      }
-      else {
+      } else {
         if (!($this->id = $this->getId($id))) {
           throw new \Exception(sprintf(_("Unable to load the dashboard using identifier: %s"), $id));
         }
@@ -161,19 +161,19 @@ class Dashboard
     }
 
     if ($this->db->insert(
-      $this->cfgPref['table'], [
-      $this->archPref['id_option'] => $this->idList,
-      $this->archPref['num'] => $d[$this->archPref['num']] ?? null,
-      $this->archPref['text'] => $d[$this->archPref['text']],
-      $this->archPref['id_link'] => !empty($d[$this->archPref['id_link']]) ? $d[$this->archPref['id_link']] : null,
-      $this->archPref['id_alias'] => !empty($d[$this->archPref['id_alias']]) ? $d[$this->archPref['id_alias']] : null,
-      $this->archPref['id_user'] => !empty($d[$this->archPref['id_user']]) ? $d[$this->archPref['id_user']] : null,
-      $this->archPref['id_group'] => !empty($d[$this->archPref['id_group']]) ? $d[$this->archPref['id_group']] : null,
-      $this->archPref['public'] => $d[$this->archPref['public']] ?? 0,
-      $this->archPref['cfg'] => ($cfg = $this->pref->getCfg(false, $d)) ? json_encode($cfg) : null
+      $this->cfgPref['table'],
+      [
+        $this->archPref['id_option'] => $this->idList,
+        $this->archPref['num'] => $d[$this->archPref['num']] ?? null,
+        $this->archPref['text'] => $d[$this->archPref['text']],
+        $this->archPref['id_link'] => !empty($d[$this->archPref['id_link']]) ? $d[$this->archPref['id_link']] : null,
+        $this->archPref['id_alias'] => !empty($d[$this->archPref['id_alias']]) ? $d[$this->archPref['id_alias']] : null,
+        $this->archPref['id_user'] => !empty($d[$this->archPref['id_user']]) ? $d[$this->archPref['id_user']] : null,
+        $this->archPref['id_group'] => !empty($d[$this->archPref['id_group']]) ? $d[$this->archPref['id_group']] : null,
+        $this->archPref['public'] => $d[$this->archPref['public']] ?? 0,
+        $this->archPref['cfg'] => ($cfg = $this->pref->getCfg(false, $d)) ? json_encode($cfg) : null
       ]
-    )
-    ) {
+    )) {
       return $this->db->lastId();
     }
 
@@ -197,11 +197,13 @@ class Dashboard
         throw new \Exception(_("The dashboard's text is mandatory"));
       }
 
-      $t                            =& $this;
+      $t                            = &$this;
       $data                         = \array_filter(
-        $d, function ($f) use ($t) {
+        $d,
+        function ($f) use ($t) {
           return \in_array($f, \array_values($t->archPref), true);
-        }, ARRAY_FILTER_USE_KEY
+        },
+        ARRAY_FILTER_USE_KEY
       );
       $data[$this->archPref['cfg']] = ($cfg = $this->pref->getCfg(false, $d)) ? json_encode($cfg) : null;
       unset($data[$this->archPref['id']]);
@@ -241,10 +243,11 @@ class Dashboard
       }
 
       return $this->pref->addBit(
-        $this->id, [
-        $this->archBits['id_option'] => $id,
-        $this->archBits['text'] => $text,
-        $this->archBits['num'] => $this->pref->getMaxBitNum($this->id, null, true) ?: 1
+        $this->id,
+        [
+          $this->archBits['id_option'] => $id,
+          $this->archBits['text'] => $text,
+          $this->archBits['num'] => $this->pref->getMaxBitNum($this->id, null, true) ?: 1
         ]
       );
     }
@@ -272,9 +275,11 @@ class Dashboard
     $d1                              = $this->pref->getBitCfg(null, $this->_prepareWidget($widget));
     $d2                              = $this->pref->getBitCfg(null, $this->_prepareWidget($opt));
     $toSave                          = \array_filter(
-      $d1, function ($v, $k) use ($d2) {
+      $d1,
+      function ($v, $k) use ($d2) {
         return $d2[$k] != $v;
-      }, ARRAY_FILTER_USE_BOTH
+      },
+      ARRAY_FILTER_USE_BOTH
     );
     $toSave[$this->archBits['text']] = $widget[$this->archBits['text']];
     return (bool)$this->pref->updateBit($id, $toSave);
@@ -298,7 +303,7 @@ class Dashboard
       if ($alias = $this->db->selectAll($this->cfgPref['table'], [], [$this->archPref['id_alias'] => $this->id])) {
         foreach ($alias as $a) {
           if (($cfg = \json_decode($a->{$this->archPref['cfg']}, true))
-              && isset($cfg['widget'], $cfg['widget'][$id])
+            && isset($cfg['widget'], $cfg['widget'][$id])
           ) {
             unset($cfg['widget'][$id]);
             if (!$this->pref->setCfg($a->${$this->archPref['id']}, $cfg)) {
@@ -334,10 +339,12 @@ class Dashboard
     }
 
     return (bool)$this->db->update(
-      $this->cfgPref['tables']['user_options_bits'], [
-      $this->archBits['num'] => $num
-      ], [
-      $this->archBits['id'] => $id
+      $this->cfgPref['tables']['user_options_bits'],
+      [
+        $this->archBits['num'] => $num
+      ],
+      [
+        $this->archBits['id'] => $id
       ]
     );
   }
@@ -350,9 +357,8 @@ class Dashboard
    */
   public function addNativeWidget(array $widget): ?string
   {
-    if (($id = $this->opt->add($this->_prepareNativeWidget($widget)))
-        && $this->perm->createFromId($id)
-    ) {
+    if (($id = $this->opt->add($this->_prepareNativeWidget($widget)))) {
+      $this->perm->createFromId($id);
       return $id;
     }
 
@@ -378,7 +384,7 @@ class Dashboard
 
   /**
    * Deletes a native widget
-   * @param string The widget's ID
+   * @param string $id The widget's ID
    * @return bool
    */
   public function deleteNativeWidget(string $id): bool
@@ -401,14 +407,33 @@ class Dashboard
 
 
   /**
+   * Moves a native widget
+   * @param string $id The widget's ID
+   * @param string $idParent The new widget's parent
+   * @return bool
+   */
+  public function moveNativeWidget(string $id, string $idParent): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    if (!Str::isUid($idParent)) {
+      throw new \Exception(_("The parent id must be a uuid"));
+    }
+    return !!$this->opt->move($id, $idParent);
+  }
+
+
+  /**
    * Saves the widget configuration
    * @param array $data
    * @return string|bool
    */
   public function save(array $data)
   {
-    if (!empty($data[$this->archBits['id']])
-        && !empty($data[$this->archBits['cfg']])
+    if (
+      !empty($data[$this->archBits['id']])
+      && !empty($data[$this->archBits['cfg']])
     ) {
       $idWidget = $data[$this->archBits['id']];
       $cfg      = Str::isJson($data[$this->archBits['cfg']]) ? json_decode(Str::isJson($data[$this->archBits['cfg']]), true) : (is_array($data[$this->archBits['cfg']]) ? $data[$this->archBits['cfg']] : []);
@@ -422,17 +447,16 @@ class Dashboard
 
           $uCfg['widgets'][$idWidget] = X::mergeArrays($uCfg['widgets'][$idWidget] ?? [], $cfg);
           return (bool)$this->pref->setCfg($uDash[$this->archPref['id']], $uCfg);
-        }
-        elseif ($this->pref->shareWithUser($idDash, $this->user->getId())) {
+        } elseif ($this->pref->shareWithUser($idDash, $this->user->getId())) {
           $idUsrDash = $this->db->lastId();
           if ($this->pref->setCfg(
-            $idUsrDash, [
-            'widgets' => [
-              $idWidget => $cfg
+            $idUsrDash,
+            [
+              'widgets' => [
+                $idWidget => $cfg
+              ]
             ]
-            ]
-          )
-          ) {
+          )) {
             return $idUsrDash;
           }
         }
@@ -458,7 +482,7 @@ class Dashboard
           $uCfg['widgets'] = [];
         }
 
-        foreach ($order as $i => $k){
+        foreach ($order as $i => $k) {
           if (!isset($uCfg['widgets'][$k])) {
             $uCfg['widgets'][$k] = [];
           }
@@ -476,10 +500,9 @@ class Dashboard
         if ($changed && $this->pref->setCfg($uDash[$this->archPref['id']], $uCfg)) {
           return $changed;
         }
-      }
-      else {
+      } else {
         $cfg = ['widgets' => []];
-        foreach ($order as $i => $k){
+        foreach ($order as $i => $k) {
           $cfg['widgets'][$k] = [$this->archBits['num'] => $i + 1];
         }
 
@@ -532,13 +555,13 @@ class Dashboard
       $widgets = \array_values($widgets);
     }
 
-    foreach ($widgets as $widget){
-      if (Str::isInteger($widget[$this->archOpt['num']])
-          && !\array_key_exists($widget[$this->archOpt['num']], $ret)
+    foreach ($widgets as $widget) {
+      if (
+        Str::isInteger($widget[$this->archOpt['num']])
+        && !\array_key_exists($widget[$this->archOpt['num']], $ret)
       ) {
         $ret[$widget[$this->archOpt['num']]] = $widget['key'];
-      }
-      else {
+      } else {
         $toend[] = $widget['key'];
       }
     }
@@ -557,7 +580,7 @@ class Dashboard
   {
     $widgets = $this->_getWidgets($url, true);
     $ret     = [];
-    foreach ($widgets as $w){
+    foreach ($widgets as $w) {
       $ret[$w[$this->archOpt['code']]] = $w;
     }
 
@@ -599,9 +622,10 @@ class Dashboard
    */
   public function getWidgetOption(string $id, bool $full = false)
   {
-    if (Str::isUid($id)
-        && ($bit = $this->pref->getBit($id))
-        && !empty($bit[$this->archBits['id_option']])
+    if (
+      Str::isUid($id)
+      && ($bit = $this->pref->getBit($id))
+      && !empty($bit[$this->archBits['id_option']])
     ) {
       return $full ? $this->opt->option($bit[$this->archBits['id_option']]) : $bit[$this->archBits['id_option']];
     }
@@ -618,10 +642,12 @@ class Dashboard
   public function getUserDashboard(string $id): ?array
   {
     return $this->db->rselect(
-      $this->cfgPref['tables']['user_options'], [], [
-      $this->archPref['id_alias'] => $id,
-      $this->archPref['id_user'] => $this->user->getId(),
-      $this->archPref['public'] => 0
+      $this->cfgPref['tables']['user_options'],
+      [],
+      [
+        $this->archPref['id_alias'] => $id,
+        $this->archPref['id_user'] => $this->user->getId(),
+        $this->archPref['public'] => 0
       ]
     );
   }
@@ -642,16 +668,14 @@ class Dashboard
         }
       )) {
         return $by_id_user[0]['id_alias'];
-      }
-      elseif ($by_id_group = \array_filter(
+      } elseif ($by_id_group = \array_filter(
         $all,
         function ($a) {
           return !empty($a['id_group']) && !empty($a['id_alias']);
         }
       )) {
         return $by_id_group[0]['id_alias'];
-      }
-      elseif ($by_public = \array_filter(
+      } elseif ($by_public = \array_filter(
         $all,
         function ($a) {
           return !empty($a['public']) && !empty($a['id_alias']);
@@ -678,29 +702,30 @@ class Dashboard
     if (!Str::isUid($code)) {
       return $this->db->selectOne(
         [
-        'table' => $this->cfgPref['tables']['user_options'],
-        'fields' => [$this->archPref['id']],
-        'where' => [
-          'conditions' => [[
-            'field' => $this->archPref['id_option'],
-            'value' => $this->idList
-          ], [
-            'field' => $this->archPref['cfg'] . '->>"$.code"',
-            'value' => $code
-          ], [
-            'logic' => 'OR',
+          'table' => $this->cfgPref['tables']['user_options'],
+          'fields' => [$this->archPref['id']],
+          'where' => [
             'conditions' => [[
-              'field' => $this->archPref['id_user'],
-              'value' => $this->user->getId()
+              'field' => $this->archPref['id_option'],
+              'value' => $this->idList
             ], [
-              'field' => $this->archPref['id_group'],
-              'value' => $this->user->getGroup()
+              'field' => $this->archPref['cfg'] . '->>"$.code"',
+              'value' => $code
             ], [
-              'field' => $this->archPref['public'],
-              'value' => 1
+              'logic' => 'OR',
+              'conditions' => [[
+                'field' => $this->archPref['id_user'],
+                'value' => $this->user->getId()
+              ], [
+                'field' => $this->archPref['id_group'],
+                'value' => $this->user->getGroup()
+              ], [
+                'field' => $this->archPref['public'],
+                'value' => 1
+              ]]
             ]]
-          ]]
-        ]]
+          ]
+        ]
       );
     }
 
@@ -749,8 +774,9 @@ class Dashboard
       if ($widgets = $this->pref->getBits($this->id, false)) {
         foreach ($widgets as $w) {
           // Getting the option
-          if (!empty($w[$this->archBits['id_option']])
-              && ($o = $this->opt->option($w[$this->archBits['id_option']]))
+          if (
+            !empty($w[$this->archBits['id_option']])
+            && ($o = $this->opt->option($w[$this->archBits['id_option']]))
           ) {
             // Set "text" property coming from the bit
             $o[$this->archOpt['text']] = $w[$this->archBits['text']];
@@ -767,7 +793,7 @@ class Dashboard
 
             // Set the widget's url
             if (!empty($o[$this->archOpt['code']])) {
-              $o['url'] = $url.$o[$this->archOpt['code']];
+              $o['url'] = $url . $o[$this->archOpt['code']];
             }
 
             unset(
@@ -781,7 +807,7 @@ class Dashboard
       }
     }
 
-    X::sort_by($res, $this->archOpt['num'], 'asc');
+    X::sortBy($res, $this->archOpt['num'], 'asc');
     return $res;
   }
 
@@ -879,10 +905,10 @@ class Dashboard
     if (!!$this->id) {
       // Looking for some preferences if he has some
       if (($uDash = $this->getUserDashboard($this->id))
-          && !empty($uDash[$this->archPref['cfg']])
-          && Str::isJson($uDash[$this->archPref['cfg']])
-          && ($uDashCfg = json_decode($uDash[$this->archPref['cfg']], true))
-          && !empty($uDashCfg['widgets'])
+        && !empty($uDash[$this->archPref['cfg']])
+        && Str::isJson($uDash[$this->archPref['cfg']])
+        && ($uDashCfg = json_decode($uDash[$this->archPref['cfg']], true))
+        && !empty($uDashCfg['widgets'])
       ) {
         $widgetPrefs = $uDashCfg['widgets'];
       }
@@ -891,12 +917,13 @@ class Dashboard
       if ($widgets = $this->pref->getBits($this->id, false)) {
         foreach ($widgets as $w) {
           // Getting the option
-          if (!empty($w[$this->archBits['id_option']])
-              && ($o = $this->opt->option($w[$this->archBits['id_option']]))
+          if (
+            !empty($w[$this->archBits['id_option']])
+            && ($o = $this->opt->option($w[$this->archBits['id_option']]))
           ) {
             // Checking the permission
             if (($id_perm = $this->perm->optionToPermission($o[$this->archOpt['id']]))
-                && $this->perm->has($id_perm)
+              && $this->perm->has($id_perm)
             ) {
               // Set "text" property coming from the bit
               $o[$this->archOpt['text']] = $w[$this->archBits['text']];
@@ -911,7 +938,7 @@ class Dashboard
               $o['key'] = $w[$this->archBits['id']];
               // Set the widget's url
               if (!empty($o[$this->archOpt['code']])) {
-                $o['url'] = $url.$o[$this->archOpt['code']];
+                $o['url'] = $url . $o[$this->archOpt['code']];
               }
 
               // Get the preferences of the single widget
@@ -953,8 +980,8 @@ class Dashboard
    */
   private function _filterByPermissions(array $widgets): array
   {
-    $oa   =& $this->archOpt;
-    $perm =& $this->perm;
+    $oa   = &$this->archOpt;
+    $perm = &$this->perm;
     // Filter the widgets by user's permissions
     return \array_values(
       \array_filter(
@@ -962,7 +989,7 @@ class Dashboard
         function ($w) use (&$oa, &$perm) {
           // The alias is the widget itself on which the permission should be set
           return !empty($w[$oa['id_alias']]) &&
-              $perm->has($w[$oa['id_alias']]);
+            $perm->has($w[$oa['id_alias']]);
         }
       )
     );
@@ -988,16 +1015,19 @@ class Dashboard
         function ($p) use ($t) {
           return \array_merge(
             [
-            $t->archPref['id'] => $p[$t->archPref['id']],
-            $t->archPref['id_option'] => $p[$t->archPref['id_option']],
-            $t->archPref['text'] => $p[$t->archPref['text']],
-            $t->archPref['num'] => $p[$t->archPref['num']],
-            'hidden' => isset($p['hidden']) ? !!$p['hidden'] : false
-            ], $p['widget']
+              $t->archPref['id'] => $p[$t->archPref['id']],
+              $t->archPref['id_option'] => $p[$t->archPref['id_option']],
+              $t->archPref['text'] => $p[$t->archPref['text']],
+              $t->archPref['num'] => $p[$t->archPref['num']],
+              'hidden' => isset($p['hidden']) ? !!$p['hidden'] : false
+            ],
+            $p['widget']
           );
-        }, \array_values(
+        },
+        \array_values(
           \array_filter(
-            $prefs, function ($p) {
+            $prefs,
+            function ($p) {
               return !empty($p['widget']);
             }
           )
@@ -1007,6 +1037,4 @@ class Dashboard
 
     return [];
   }
-
-
 }
