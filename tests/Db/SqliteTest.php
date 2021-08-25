@@ -6,6 +6,7 @@ use bbn\Cache;
 use bbn\Db2\Enums\Errors;
 use bbn\Db2\Languages\Sqlite;
 use bbn\Db2\Query;
+use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
 use tests\Reflectable;
@@ -160,6 +161,7 @@ class SqliteTest extends TestCase
       ->invoke($sqlite, $expected_cfg['args']),
       $this->getNonPublicProperty('hash', $sqlite)
     );
+    $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
   }
 
   /** @test */
@@ -3583,6 +3585,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
     $this->cache_mock->shouldReceive('set')
       ->once()
       ->with(
+        Str::encodeFilename(str_replace('\\', '/', \get_class($this->sqlite)), true).'/' .
         'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/users',
         $expected = [
           'keys' => [],

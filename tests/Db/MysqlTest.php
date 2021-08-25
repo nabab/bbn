@@ -272,6 +272,7 @@ class MysqlTest extends TestCase
 
     $this->assertSame(3000, $this->getNonPublicProperty('cache_renewal'));
     $this->assertSame(Errors::E_STOP, $this->getNonPublicProperty('on_error'));
+    $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
   }
 
   /** @test */
@@ -8382,6 +8383,7 @@ GROUP BY `id`
     self::$cache_mock->shouldReceive('set')
       ->once()
       ->with(
+        Str::encodeFilename(str_replace('\\', '/', \get_class(self::$mysql)), true).'/' .
         "mysql/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}/users",
         $expected = [
           'keys' => [],

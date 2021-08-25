@@ -97,7 +97,7 @@ class Mysql extends Sql
     ];
 
     try {
-
+      $this->cacheInit();
       $this->current  = $cfg['db'] ?? null;
       $this->host     = $cfg['host'] ?? '127.0.0.1';
       $this->username = $cfg['user'] ?? null;

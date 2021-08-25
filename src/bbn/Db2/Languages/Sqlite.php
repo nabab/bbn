@@ -151,6 +151,7 @@ class Sqlite extends Sql
     $cfg['db']   = 'main';
 
     try {
+      $this->cacheInit();
       $this->current  = $cfg['db'];
       $this->host     = $cfg['host'];
       $this->connection_code = $cfg['host'];
