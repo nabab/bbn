@@ -98,28 +98,10 @@ class Sqlite extends Sql
   /** @var string The quote character */
   public $qte = '"';
 
-
-  /**
-   * Returns true if the column name is an aggregate function
-   *
-   * @param string $f The string to check
-   * @return bool
-   */
-  public static function isAggregateFunction(string $f): bool
-  {
-    foreach (self::$aggr_functions as $a) {
-      if (preg_match('/^'.$a.'\\s*\\(/i', $f)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-
   /**
    * Constructor
-   * @param bbn\Db2 $db
+   * @param array $cfg
+   * @throws \Exception
    */
   public function __construct(array $cfg = [])
   {
@@ -400,7 +382,9 @@ class Sqlite extends Sql
             'null' => $row['notnull'] == 0 ? 1 : 0,
             'key' => $row['pk'] == 1 ? 'PRI' : null,
             'default' => $row['dflt_value'],
-            'extra' => null,
+            // INTEGER PRIMARY KEY is a ROWID
+            // https://www.sqlite.org/autoinc.html
+            'extra' => $row['type'] === 'INTEGER' && $row['pk'] == 1 ? 'auto_increment' :  null,
             'maxlength' => null,
             'signed' => 1
           ];
@@ -463,43 +447,80 @@ class Sqlite extends Sql
       if ($indexes = $this->getRows('PRAGMA index_list('.$table.')')) {
         foreach ($indexes as $d){
           if ($fields = $this->getRows('PRAGMA index_info('.$database.'"'.$d['name'].'")')) {
-            /** @todo Redo, $a is false! */
             foreach ($fields as $d2){
-              $a = false;
-              if (!isset($keys[$d['name']])) {
-                $keys[$d['name']] = [
+              $key_name = strtolower($d['origin']) === 'pk' ? 'PRIMARY' : $d['name'];
+              if (!isset($keys[$key_name])) {
+                $keys[$key_name] = [
                   'columns' => [$d2['name']],
-                  'ref_db' => $a ? $a['ref_db'] : null,
-                  'ref_table' => $a ? $a['ref_table'] : null,
-                  'ref_column' => $a ? $a['ref_column'] : null,
+                  'ref_db' => null,
+                  'ref_table' => null,
+                  'ref_column' => null,
+                  'constraint' => null,
+                  'update' => null,
+                  'delete' => null,
                   'unique' => $d['unique'] == 1 ? 1 : 0
                 ];
               }
               else{
-                $keys[$d['name']]['columns'][] = $d2['name'];
+                $keys[$key_name]['columns'][] = $d2['name'];
               }
 
               if (!isset($cols[$d2['name']])) {
-                $cols[$d2['name']] = [$d['name']];
+                $cols[$d2['name']] = [$key_name];
               }
               else{
-                $cols[$d2['name']][] = $d['name'];
+                $cols[$d2['name']][] = $key_name;
               }
             }
           }
         }
       }
 
+      // when a column is INTEGER PRIMARY KEY it doesn't show up in the query: PRAGMA index_list
+      // INTEGER PRIMARY KEY considered as auto_increment: https://www.sqlite.org/autoinc.html
+      if ($columns = $this->getColumns($table)) {
+        $columns = array_filter($columns, function ($item) {
+          return $item['extra'] === 'auto_increment' && $item['key'] === 'PRI';
+        });
+
+        foreach ($columns as $column_name => $column) {
+          if (!isset($keys['PRIMARY'])) {
+            $keys['PRIMARY'] = [
+              'columns' => [$column_name],
+              'ref_db' => null,
+              'ref_table' => null,
+              'ref_column' => null,
+              'constraint' => null,
+              'update' => null,
+              'delete' => null,
+              'unique' => 1
+            ];
+          }
+          else {
+            $keys['PRIMARY']['columns'][] = $column_name;
+          }
+
+          if (!isset($cols[$column_name])) {
+            $cols[$column_name] = ['PRIMARY'];
+          }
+          else {
+            $cols[$column_name][] = 'PRIMARY';
+          }
+        }
+      }
+
       if ($constraints = $this->getRows("PRAGMA foreign_key_list($database\"$table\")")) {
         foreach ($constraints as $constraint) {
-          $constraint_name = "constraint_{$constraint['table']}_{$constraint['from']}";
-
+          $constraint_name = "{$constraint['table']}_{$constraint['from']}";
           if (empty($cols[$constraint['from']])) {
             $keys[$constraint_name] = [
               'columns' => [$constraint['from']],
               'ref_db' => $this->getCurrent(),
               'ref_table' => $constraint['table'] ?? null,
               'ref_column' => $constraint['to'] ??  null,
+              'constraint' => $constraint_name,
+              'update' => $constraint['on_update'] ?? null,
+              'delete' => $constraint['on_delete'] ?? null,
               'unique' => 0
             ];
 
@@ -511,6 +532,9 @@ class Sqlite extends Sql
                 $keys[$col]['ref_db'] = $this->getCurrent();
                 $keys[$col]['ref_table'] = $constraint['table'] ?? null;
                 $keys[$col]['ref_column'] = $constraint['to'] ?? null;
+                $keys[$col]['constraint'] = $constraint_name;
+                $keys[$col]['update'] = $constraint['on_update'] ?? null;
+                $keys[$col]['delete'] =  $constraint['on_delete'] ?? null;
               }
             }
           }
@@ -579,6 +603,12 @@ class Sqlite extends Sql
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateTable(string $table, array $model = null): string
   {
     if (!$model) {
@@ -621,7 +651,7 @@ class Sqlite extends Sql
           $st .= (string)$col['default'];
         }
         else {
-          $st .= "'" . $col['default'] . "'";
+          $st .= "'" . trim($col['default'], "'") . "'";
         }
       }
     }
@@ -643,6 +673,12 @@ class Sqlite extends Sql
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateKeys(string $table, ?array $model = null): string
   {
     $st = '';
@@ -683,7 +719,7 @@ class Sqlite extends Sql
   /**
    * @param null|string $table The table for which to create the statement
    * @return string
-     */
+   */
   public function getCreate(string $table, array $model = null): string
   {
     $st = '';
@@ -714,12 +750,6 @@ class Sqlite extends Sql
       $column = [$column];
     }
 
-    if (!\is_null($length)) {
-      if (!\is_array($length)) {
-        $length = [$length];
-      }
-    }
-
     $name = bbn\Str::encodeFilename($table);
     foreach ($column as $i => $c){
       if (!bbn\Str::checkName($c)) {
@@ -728,7 +758,7 @@ class Sqlite extends Sql
 
       $name      .= '_'.$c;
       $column[$i] = '`'.$column[$i].'`';
-      if (\is_int($length[$i]) && $length[$i] > 0) {
+      if (!empty($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
         $column[$i] .= '('.$length[$i].')';
       }
     }
@@ -739,7 +769,7 @@ class Sqlite extends Sql
       if (($order === "ASC") || ($order === "DESC")) {
         $query .= ' '. $order .' );';
       }
-      else{
+      else {
         $query .= ' );';
       }
 
@@ -747,7 +777,7 @@ class Sqlite extends Sql
       return (bool)$this->rawQuery($query);
     }
 
-        return false;
+    return false;
   }
 
 
@@ -760,13 +790,13 @@ class Sqlite extends Sql
    */
   public function deleteIndex(string $table, string $key): bool
   {
-    if (( $table = $this->tableFullName($table, 1) ) && bbn\Str::checkName($key)) {
+    if (($this->tableFullName($table, 1)) && bbn\Str::checkName($key)) {
       //changed the row above because if the table has no rows query() returns 0
       //return (bool)$this->db->query("ALTER TABLE $table DROP INDEX `$key`");
       return $this->query('DROP INDEX IF EXISTS '.$key) !== false;
     }
 
-        return false;
+    return false;
   }
 
 
@@ -776,12 +806,10 @@ class Sqlite extends Sql
    * @param string $database
    * @return bool
    */
-
-
   public function createDatabase(string $database): bool
   {
     if (bbn\Str::checkFilename($database)) {
-      if(empty(strpos($database, '.sqlite'))) {
+      if (empty(strpos($database, '.sqlite'))) {
         $database = $database.'.sqlite';
       }
 
@@ -804,13 +832,13 @@ class Sqlite extends Sql
   public function dropDatabase(string $database): bool
   {
     if (bbn\Str::checkFilename($database)) {
-      if(empty(strpos($database, '.sqlite'))) {
+      if (empty(strpos($database, '.sqlite'))) {
         $database = $database.'.sqlite';
       }
 
       if (file_exists($this->host.$database)) {
         unlink($this->host.$database);
-        return file_exists($this->host.$database);
+        return !file_exists($this->host.$database);
       }
     }
 
@@ -821,9 +849,9 @@ class Sqlite extends Sql
   /**
    * Creates a database user
    *
-   * @param string $user
-   * @param string $pass
-   * @param string $db
+   * @param string|null $user
+   * @param string|null $pass
+   * @param string|null $db
    * @return bool
    */
   public function createUser(string $user = null, string $pass = null, string $db = null): bool
@@ -835,7 +863,7 @@ class Sqlite extends Sql
   /**
    * Deletes a database user
    *
-   * @param string $user
+   * @param string|null $user
    * @return bool
    */
   public function deleteUser(string $user = null): bool
@@ -857,7 +885,11 @@ class Sqlite extends Sql
 
   public function dbSize(string $database = '', string $type = ''): int
   {
-    return @filesize($database) ?: 0;
+    if (empty(strpos($database, '.sqlite'))) {
+      $database = $database.'.sqlite';
+    }
+
+   return @filesize($this->host . $database) ?: 0;
   }
 
 
@@ -867,6 +899,14 @@ class Sqlite extends Sql
   }
 
 
+  /**
+   * Gets the status of a table.
+   *
+   * @param string $table
+   * @param string $database
+   * @return array|false|null
+   * @throws \Exception
+   */
   public function status(string $table = '', string $database = '')
   {
     $cur = null;
@@ -875,8 +915,7 @@ class Sqlite extends Sql
       $this->change($database);
     }
 
-    //$r = $this->db->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
-    $r = $this->getRow('SELECT * FROM dbstat WHERE Name LIKE ?', $table);
+    $r = $this->getRow('SELECT * FROM dbstat WHERE name LIKE ?', $table);
     if (null !== $cur) {
       $this->change($cur);
     }
@@ -885,12 +924,23 @@ class Sqlite extends Sql
   }
 
 
+  /**
+   * @return string
+   */
   public function getUid(): string
   {
     return bbn\X::makeUid();
   }
 
 
+  /**
+   * @param $table_name
+   * @param array $columns
+   * @param array|null $keys
+   * @param bool $with_constraints
+   * @param string $charset
+   * @return string
+   */
   public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
   {
     $lines = [];
@@ -950,6 +1000,14 @@ class Sqlite extends Sql
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   * TODO-testing: ALTER TABLE ADD CONSTRAINT is not supported:
+   * https://www.sqlite.org/omitted.html
+   */
   public function getCreateConstraints(string $table, array $model = null): string
   {
     $st = '';
@@ -970,11 +1028,10 @@ class Sqlite extends Sql
           $i++;
           $st .= '  ADD '.
             'CONSTRAINT '.$this->escape($key['constraint']).
-            ($key['foreign_key'] ? ' FOREIGN KEY ('.$this->escape($key['columns'][0]).') ' : '').
-            ($key['unique'] ? ' UNIQUE ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
-            ($key['primary_key'] ? ' PRIMARY KEY ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
-            ' FOREIGN KEY ('.$this->escape($key['columns'][0]).') '.
-            'REFERENCES '.$this->escape($table).'('.$this->escape($key['columns'][0]).') '.
+            (!empty($key['foreign_key']) ? ' FOREIGN KEY ('.$this->escape($key['columns'][0]).') ' : '').
+            (!empty($key['unique']) ? ' UNIQUE ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
+            (!empty($key['primary_key']) ? ' PRIMARY KEY ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
+            'REFERENCES '.$this->escape($key['ref_table']).'('.$this->escape($key['columns'][0]).') '.
             ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
             ($key['update'] ? ' ON UPDATE '.$key['update'] : '').
             ($i === $last ? ';' : ','.PHP_EOL);
@@ -986,6 +1043,12 @@ class Sqlite extends Sql
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return bool
+   * @throws \Exception
+   */
   public function createConstraintsSqlite(string $table, array $model = null): bool
   {
     $str = $this->getCreateConstraints($table,  $model);
@@ -996,25 +1059,25 @@ class Sqlite extends Sql
     return false;
   }
 
-
-  public function getQueryValues(array $cfg): array
-  {
-    // TODO: Implement getQueryValues() method.
-  }
-
-  public function getFieldsList($tables): array
-  {
-    // TODO: Implement getFieldsList() method.
-  }
-
+  /**
+   * Return primary keys of a table as a numeric array.
+   *
+   * @param string $table
+   * @return array
+   * @throws \Exception
+   */
   public function getPrimary(string $table): array
   {
-    // TODO: Implement getPrimary() method.
+    if (($keys = $this->getKeys($table)) && isset($keys['keys']['PRIMARY'])) {
+      return $keys['keys']['PRIMARY']['columns'];
+    }
+
+    return [];
   }
 
   public function getCfg(): array
   {
-    // TODO: Implement getCfg() method.
+    return $this->cfg;
   }
 
   public function getHost(): ?string
@@ -1024,6 +1087,11 @@ class Sqlite extends Sql
 
   public function getConnectionCode()
   {
-    // TODO: Implement getConnectionCode() method.
+    return $this->connection_code;
+  }
+
+  public function __toString()
+  {
+    return 'sqlite';
   }
 }

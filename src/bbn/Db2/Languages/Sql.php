@@ -499,6 +499,154 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
   /**
+   * @param array $cfg
+   * @return array
+   */
+  public function getQueryValues(array $cfg): array
+  {
+    $res = [];
+    if (!empty($cfg['values'])) {
+      foreach ($cfg['values'] as $i => $v) {
+        // Transforming the values if needed
+        if (($cfg['values_desc'][$i]['type'] === 'binary')
+          && ($cfg['values_desc'][$i]['maxlength'] === 16)
+          && Str::isUid($v)
+        ) {
+          $res[] = hex2bin($v);
+        }
+        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
+              && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
+              && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
+              && (\strlen($v) < 19))            )
+        ) {
+          $res[] = $v.'%';
+        }
+        elseif (!empty($cfg['values_desc'][$i]['operator'])) {
+          switch ($cfg['values_desc'][$i]['operator']){
+            case 'contains':
+            case 'doesnotcontain':
+              $res[] = '%'.$v.'%';
+              break;
+            case 'startswith':
+              $res[] = $v.'%';
+              break;
+            case 'endswith':
+              $res[] = '%'.$v;
+              break;
+            default:
+              $res[] = $v;
+          }
+        }
+        else{
+          $res[] = $v;
+        }
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Returns an array of fields for the given table(s).
+   *
+   * ```php
+   * X::dump($db->getFieldsList("table_users"));
+   * // (array) ['table_users.username', 'table_users.name']
+   * ```
+   *
+   * @param $tables
+   * @return array
+   * @throws \Exception
+   */
+  public function getFieldsList($tables): array
+  {
+    $res = [];
+    if (!\is_array($tables)) {
+      $tables = [$tables];
+    }
+
+    foreach ($tables as $t){
+      if (!($model = $this->getColumns($t))) {
+        $this->error('Impossible to find the table '.$t);
+        throw new \Exception(X::_('Impossible to find the table ').$t);
+      }
+
+      foreach (array_keys($model) as $f){
+        $res[] = $this->colFullName($f, $t);
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Return primary keys of a table as a numeric array.
+   *
+   * ```php
+   * X::dump($db-> get_primary('table_users'));
+   * // (array) ["id"]
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function getPrimary(string $table): array
+  {
+    if (($keys = $this->getKeys($table)) && isset($keys['keys']['PRIMARY'])) {
+      return $keys['keys']['PRIMARY']['columns'];
+    }
+
+    return [];
+  }
+
+  /**
+   * Return the unique primary key of the given table.
+   *
+   * ```php
+   * X::dump($db->getUniquePrimary('table_users'));
+   * // (string) id
+   * ```
+   *
+   * @param string $table The table's name
+   * @return null|string
+   */
+  public function getUniquePrimary(string $table): ?string
+  {
+    if (($keys = $this->getKeys($table))
+      && isset($keys['keys']['PRIMARY'])
+      && (\count($keys['keys']['PRIMARY']['columns']) === 1)
+    ) {
+      return $keys['keys']['PRIMARY']['columns'][0];
+    }
+
+    return null;
+  }
+
+  /**
+   * Return the unique keys of a table as a numeric array.
+   *
+   * ```php
+   * X::dump($db->getUniqueKeys('table_users'));
+   * // (array) ["userid", "userdataid"]
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function getUniqueKeys(string $table): array
+  {
+    if ($ks = $this->getKeys($table)) {
+      foreach ($ks['keys'] as $k){
+        if ($k['unique']) {
+          return $k['columns'];
+        }
+      }
+    }
+
+    return [];
+  }
+
+  /**
    * @param array $conditions
    * @param array $cfg
    */
@@ -532,7 +680,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       foreach ($res['fields'] as $i => $f){
         if (!empty($res['available_fields'][$f])
           && isset($res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)])
-          && $res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)]['virtual']
+          && !empty($res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)]['virtual'])
         ) {
           array_unshift($to_remove, $i);
         }
@@ -1038,7 +1186,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
-      return 'INSERT ' . (!empty($cfg['ignore']) ? 'IGNORE ' : '') . 'INTO ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL .
+      return 'INSERT ' . (!empty($cfg['ignore']) ? $this->getIgnore() : '') . 'INTO ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL .
         '(' . implode(', ', $fields_to_put['fields']) . ')' . PHP_EOL . ' VALUES (' .
         implode(', ', $fields_to_put['values']) . ')' . PHP_EOL;
     }
@@ -1079,7 +1227,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
-      $res .= 'UPDATE ' . (!empty($cfg['ignore']) ? 'IGNORE ' : '') . $this->tableFullName(current($cfg['tables']), true) . ' SET ';
+      $res .= 'UPDATE ' . (!empty($cfg['ignore']) ? $this->getIgnore() : '') . $this->tableFullName(current($cfg['tables']), true) . ' SET ';
       $last = count($fields_to_put['fields']) - 1;
       foreach ($fields_to_put['fields'] as $i => $f) {
         $res .= $f . ' = ' . $fields_to_put['values'][$i];
@@ -1111,7 +1259,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     $res = '';
     if (count($cfg['tables']) === 1) {
-      $res = 'DELETE ' . (!empty($cfg['ignore']) ? 'IGNORE ' : '') .
+      $res = 'DELETE ' . (!empty($cfg['ignore']) ? $this->getIgnore() : '') .
         (count($cfg['join'] ?? []) ? current($cfg['tables']) . ' ' : '') .
         'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
     }
@@ -1271,6 +1419,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
   /**
+   * @return string
+   */
+  private function getIgnore()
+  {
+    return ($this->getEngine() === 'sqlite' ? 'OR ' : '') . 'IGNORE ';
+  }
+
+  /**
    * @param string $table
    * @param array|null $model
    * @return string
@@ -1307,138 +1463,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     return $st;
   }
-
-
-  /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   * @throws \Exception
-   */
-  public function getCreate(string $table, array $model = null): string
-  {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
-    }
-
-    if ($st = $this->getCreateTable($table, $model)) {
-
-      if (empty($model['keys'])) {
-        return $st;
-      }
-
-      $lines = X::split($st, PHP_EOL);
-      $end   = array_pop($lines);
-      $st    = X::join($lines, PHP_EOL);
-
-      foreach ($model['keys'] as $name => $key) {
-        $st .= ',' . PHP_EOL . '  ';
-        if (
-          !empty($key['unique']) &&
-          (count($key['columns']) === 1) &&
-          isset($model['fields'][$key['columns'][0]]) &&
-          isset($model['fields'][$key['columns'][0]]['key']) &&
-          $model['fields'][$key['columns'][0]]['key'] === 'PRI'
-        ) {
-          $st .= 'PRIMARY KEY';
-        } elseif (!empty($key['unique'])) {
-          $st .= 'UNIQUE KEY ' . $this->escape($name);
-        } else {
-          $st .= 'KEY ' . $this->escape($name);
-        }
-
-        $st   .= ' (' . implode(
-            ',', array_map(
-              function ($a) {
-                return $this->escape($a);
-              }, $key['columns']
-            )
-          ) . ')';
-      }
-
-      // For avoiding constraint names conflicts
-      $keybase = strtolower(Str::genpwd(8, 4));
-      $i       = 1;
-      foreach ($model['keys'] as $name => $key) {
-        if (!empty($key['ref_table']) && !empty($key['ref_column'])) {
-          $st .= ',' . PHP_EOL . '  ' .
-            'CONSTRAINT ' . $this->escape($keybase.$i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
-            'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
-            (!empty($key['delete']) ? ' ON DELETE ' . $key['delete'] : '') .
-            (!empty($key['update']) ? ' ON UPDATE ' . $key['update'] : '');
-          $i++;
-        }
-      }
-
-      $st .= PHP_EOL . $end;
-    }
-
-    return $st;
-  }
-
-
-  /**
-   * Creates an index
-   *
-   * @param null|string $table
-   * @param string|array $column
-   * @param bool $unique
-   * @param null $length
-   * @return bool
-   * @throws \Exception
-   */
-  public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
-  {
-    $column = (array)$column;
-    if ($length) {
-      $length = (array)$length;
-    }
-
-    $name = Str::encodeFilename($table);
-    if ($table = $this->tableFullName($table, true)) {
-      foreach ($column as $i => $c) {
-        if (!Str::checkName($c)) {
-          $this->error("Illegal column $c");
-        }
-
-        $name      .= '_' . $c;
-        $column[$i] = $this->escape($column[$i]);
-        if (isset($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
-          $column[$i] .= '(' . $length[$i] . ')';
-        }
-      }
-
-      $name = Str::cut($name, 50);
-      return (bool)$this->rawQuery(
-        'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
-        implode(', ', $column) . ' )'
-      );
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Deletes an index
-   *
-   * @param null|string $table
-   * @param string $key
-   * @return bool
-   * @throws \Exception
-   */
-  public function deleteIndex(string $table, string $key): bool
-  {
-    if (($table = $this->tableFullName($table, true))
-      && Str::checkName($key)
-    ) {
-      return (bool)$this->rawQuery("ALTER TABLE $table DROP INDEX `$key`");
-    }
-
-    return false;
-  }
-
 
   /**
    * @param string $table
@@ -1477,7 +1501,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getAlterKey(string $table, array $cfg): string
   {
-    // TODO: Implement getAlterKey() method.
     return '';
   }
 
@@ -1866,7 +1889,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         elseif (($this->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
           $params['kind'] = 'PRAGMA';
         }
-        else{
+        else {
           throw new \Exception(
             \defined('BBN_IS_DEV') && BBN_IS_DEV
               ? "Impossible to parse the query $statement"
