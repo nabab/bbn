@@ -70,8 +70,8 @@ class MysqlTest extends TestCase
     foreach (explode(PHP_EOL, $env) as $item) {
       $res = explode('=', $item);
       $key  = $res[0];
-      $value = $res[1];
-      putenv("$key=$value");
+      $value = $res[1] ?? "";
+      @putenv("$key=$value");
     }
 
     self::$cache_mock = \Mockery::mock(Cache::class);
@@ -112,7 +112,8 @@ class MysqlTest extends TestCase
       'pass'          => getenv('db_pass'),
       'db'            => getenv('db_name'),
       'cache_length'  => 3000,
-      'on_error'      => Errors::E_STOP
+      'on_error'      => Errors::E_STOP,
+      'force_host'    => true
     );
   }
 

@@ -45,7 +45,7 @@ class SqliteTest extends TestCase
 
   protected function tearDown(): void
   {
-//    $this->cleanTestingDir();
+    $this->cleanTestingDir();
     \Mockery::close();
   }
 
