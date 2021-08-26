@@ -1127,6 +1127,20 @@ class X
 
 
   /**
+   * Dumps the given variable and dies.
+   *
+   * @param mixed
+   * @return void
+   *
+   */
+  public static function ddump(): void
+  {
+    self::dump(...\func_get_args());
+    die();
+  }
+
+
+  /**
    * Dumps the given variable in HTML.
    *
    * @param mixed
@@ -1135,6 +1149,19 @@ class X
   public static function hdump(): void
   {
     echo self::getHdump(...\func_get_args());
+  }
+
+
+  /**
+   * Dumps the given variable in HTML and dies.
+   *
+   * @param mixed
+   * @return void
+   */
+  public static function hddump(): void
+  {
+    self::hdump(...\func_get_args());
+    die();
   }
 
 

@@ -1649,7 +1649,19 @@ class User extends Models\Cls\Basic
   {
     if (is_null($this->_encryption_key)) {
       if ($this->auth) {
-        $this->_encryption_key = $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['enckey'], ['id' => $this->id]);
+        $this->_encryption_key = $this->db->selectOne(
+          $this->class_cfg['table'],
+          $this->class_cfg['arch']['users']['enckey'],
+          ['id' => $this->id]
+        );
+        if (!$this->_encryption_key) {
+          $this->_encryption_key = Str::genpwd(32, 16);
+          $this->db->update(
+            $this->class_cfg['table'],
+            [$this->class_cfg['arch']['users']['enckey'] => $this->_encryption_key],
+            ['id' => $this->id]
+          );
+        }
       }
     }
 
