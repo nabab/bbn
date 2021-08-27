@@ -79,7 +79,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, bbn\\User $user = NULL, bbn\\User\\Preferences $preferences = NULL)\n  {\n    self::optionalInit();\n    $this->_init_class_cfg();\n    $this->db   = $db;\n    $this->user = $user ?: bbn\\User::getInstance();\n    $this->pref = $preferences ?: bbn\\User\\Preferences::getInstance();;\n  }",
+            "code": "function(bbn\\Db $db, bbn\\User $user = NULL, bbn\\User\\Preferences $preferences = NULL)\n  {\n    self::optionalInit();\n    $this->_init_class_cfg();\n    $this->db   = $db;\n    $this->user = $user ?: bbn\\User::getInstance();\n    $this->pref = $preferences ?: bbn\\User\\Preferences::getInstance();\n  }",
             "startLine": 99,
             "endLine": 106,
             "isDeprecated": false,

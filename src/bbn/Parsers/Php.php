@@ -845,7 +845,7 @@ class Php extends bbn\Models\Cls\Basic
     ];
     $comments = $method->getDocComment();
     if (($doc = $this->parseMethodComments($comments))
-        && ($extracted = $this->_extract_description($doc['description']))
+        && ($extracted = $this->_extract_description(is_array($doc['description']) ? $doc['description']['description'] : $doc['description']))
     ) {
       $ar = \bbn\X::mergeArrays($ar, $extracted);
     }

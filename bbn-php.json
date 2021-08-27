@@ -7566,7 +7566,7 @@
                                 "text": "createMysqlDatabase",
                                 "value": "createMysqlDatabase",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/createMysqlDatabase",
-                                "desc": "Creates a database"
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -7590,7 +7590,7 @@
                                 "text": "dbSize",
                                 "value": "dbSize",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/dbSize",
-                                "desc": ""
+                                "desc": "Gets the size of a database"
                             },
                             {
                                 "type": "method",
@@ -7606,7 +7606,7 @@
                                 "text": "deleteUser",
                                 "value": "deleteUser",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/deleteUser",
-                                "desc": "There's an error in the query REVOKE ALL PRIVILEGES ON *.*"
+                                "desc": "Deletes a database user"
                             },
                             {
                                 "type": "method",
@@ -7654,7 +7654,7 @@
                                 "text": "getConditions",
                                 "value": "getConditions",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getConditions",
-                                "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise"
+                                "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise."
                             },
                             {
                                 "type": "method",
@@ -7702,7 +7702,7 @@
                                 "text": "getDatabases",
                                 "value": "getDatabases",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getDatabases",
-                                "desc": ""
+                                "desc": "Return databases' names as an array."
                             },
                             {
                                 "type": "method",
@@ -7766,7 +7766,7 @@
                                 "text": "getOrder",
                                 "value": "getOrder",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getOrder",
-                                "desc": ""
+                                "desc": "Get a string starting with ORDER BY with corresponding parameters to $order."
                             },
                             {
                                 "type": "method",
@@ -7790,7 +7790,7 @@
                                 "text": "getTableComment",
                                 "value": "getTableComment",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getTableComment",
-                                "desc": "Returns the comment (or an empty string if none) for a given table."
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -7798,7 +7798,7 @@
                                 "text": "getTables",
                                 "value": "getTables",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getTables",
-                                "desc": ""
+                                "desc": "Return tables' names of a database as an array."
                             },
                             {
                                 "type": "method",
@@ -7806,7 +7806,7 @@
                                 "text": "getUid",
                                 "value": "getUid",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getUid",
-                                "desc": ""
+                                "desc": "Returns a UUID"
                             },
                             {
                                 "type": "method",
@@ -7830,7 +7830,7 @@
                                 "text": "getWhere",
                                 "value": "getWhere",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getWhere",
-                                "desc": "Returns a string with the JOIN part of the query if there is, empty otherwise"
+                                "desc": "Returns a string with the WHERE part of the query if there is, empty otherwise"
                             },
                             {
                                 "type": "method",
@@ -7870,7 +7870,7 @@
                                 "text": "renameTable",
                                 "value": "renameTable",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/renameTable",
-                                "desc": "Renames the given table to the new given name."
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -7878,7 +7878,7 @@
                                 "text": "status",
                                 "value": "status",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/status",
-                                "desc": ""
+                                "desc": "Gets the status of a table"
                             },
                             {
                                 "type": "method",
@@ -7902,7 +7902,7 @@
                                 "text": "tableSize",
                                 "value": "tableSize",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/tableSize",
-                                "desc": ""
+                                "desc": "Gets the size of a table"
                             }
                         ]
                     },
@@ -7967,7 +7967,7 @@
                                 "text": "createMysqlDatabase",
                                 "value": "createMysqlDatabase",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/createMysqlDatabase",
-                                "desc": "Creates a database"
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -7991,7 +7991,7 @@
                                 "text": "dbSize",
                                 "value": "dbSize",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/dbSize",
-                                "desc": ""
+                                "desc": "Gets the size of a database"
                             },
                             {
                                 "type": "method",
@@ -8007,7 +8007,7 @@
                                 "text": "deleteUser",
                                 "value": "deleteUser",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/deleteUser",
-                                "desc": "There's an error in the query REVOKE ALL PRIVILEGES ON *.*"
+                                "desc": "Deletes a database user"
                             },
                             {
                                 "type": "method",
@@ -8055,7 +8055,7 @@
                                 "text": "getConditions",
                                 "value": "getConditions",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getConditions",
-                                "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise"
+                                "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise."
                             },
                             {
                                 "type": "method",
@@ -8103,7 +8103,7 @@
                                 "text": "getDatabases",
                                 "value": "getDatabases",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getDatabases",
-                                "desc": ""
+                                "desc": "Return databases' names as an array."
                             },
                             {
                                 "type": "method",
@@ -8167,7 +8167,7 @@
                                 "text": "getOrder",
                                 "value": "getOrder",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getOrder",
-                                "desc": ""
+                                "desc": "Get a string starting with ORDER BY with corresponding parameters to $order."
                             },
                             {
                                 "type": "method",
@@ -8191,7 +8191,7 @@
                                 "text": "getTableComment",
                                 "value": "getTableComment",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getTableComment",
-                                "desc": "Returns the comment (or an empty string if none) for a given table."
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -8199,7 +8199,7 @@
                                 "text": "getTables",
                                 "value": "getTables",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getTables",
-                                "desc": ""
+                                "desc": "Return tables' names of a database as an array."
                             },
                             {
                                 "type": "method",
@@ -8207,7 +8207,7 @@
                                 "text": "getUid",
                                 "value": "getUid",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getUid",
-                                "desc": ""
+                                "desc": "Returns a UUID"
                             },
                             {
                                 "type": "method",
@@ -8231,7 +8231,7 @@
                                 "text": "getWhere",
                                 "value": "getWhere",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/getWhere",
-                                "desc": "Returns a string with the JOIN part of the query if there is, empty otherwise"
+                                "desc": "Returns a string with the WHERE part of the query if there is, empty otherwise"
                             },
                             {
                                 "type": "method",
@@ -8271,7 +8271,7 @@
                                 "text": "renameTable",
                                 "value": "renameTable",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/renameTable",
-                                "desc": "Renames the given table to the new given name."
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -8279,7 +8279,7 @@
                                 "text": "status",
                                 "value": "status",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/status",
-                                "desc": ""
+                                "desc": "Gets the status of a table"
                             },
                             {
                                 "type": "method",
@@ -8303,7 +8303,7 @@
                                 "text": "tableSize",
                                 "value": "tableSize",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Pgsql\/tableSize",
-                                "desc": ""
+                                "desc": "Gets the size of a table"
                             }
                         ]
                     },
@@ -8328,7 +8328,7 @@
                                 "text": "change",
                                 "value": "change",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/change",
-                                "desc": ""
+                                "desc": "Changes the current database to the given one."
                             },
                             {
                                 "type": "method",
@@ -8456,7 +8456,7 @@
                                 "text": "getColumns",
                                 "value": "getColumns",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getColumns",
-                                "desc": ""
+                                "desc": "Returns the columns' configuration of the given table."
                             },
                             {
                                 "type": "method",
@@ -8464,7 +8464,7 @@
                                 "text": "getConditions",
                                 "value": "getConditions",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getConditions",
-                                "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise"
+                                "desc": "Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise."
                             },
                             {
                                 "type": "method",
@@ -8512,7 +8512,7 @@
                                 "text": "getDatabases",
                                 "value": "getDatabases",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getDatabases",
-                                "desc": ""
+                                "desc": "Return databases' names as an array."
                             },
                             {
                                 "type": "method",
@@ -8544,7 +8544,7 @@
                                 "text": "getInsert",
                                 "value": "getInsert",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getInsert",
-                                "desc": ""
+                                "desc": "Generates a string for the insert from a cfg array."
                             },
                             {
                                 "type": "method",
@@ -8560,7 +8560,7 @@
                                 "text": "getKeys",
                                 "value": "getKeys",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getKeys",
-                                "desc": ""
+                                "desc": "Returns the keys of the given table."
                             },
                             {
                                 "type": "method",
@@ -8576,7 +8576,7 @@
                                 "text": "getOrder",
                                 "value": "getOrder",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getOrder",
-                                "desc": ""
+                                "desc": "Get a string starting with ORDER BY with corresponding parameters to $order."
                             },
                             {
                                 "type": "method",
@@ -8600,7 +8600,7 @@
                                 "text": "getTableComment",
                                 "value": "getTableComment",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getTableComment",
-                                "desc": "Returns the comment (or an empty string if none) for a given table."
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -8608,7 +8608,7 @@
                                 "text": "getTables",
                                 "value": "getTables",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getTables",
-                                "desc": ""
+                                "desc": "Return tables' names of a database as an array."
                             },
                             {
                                 "type": "method",
@@ -8640,7 +8640,7 @@
                                 "text": "getWhere",
                                 "value": "getWhere",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/getWhere",
-                                "desc": "Returns a string with the JOIN part of the query if there is, empty otherwise"
+                                "desc": "Returns a string with the WHERE part of the query if there is, empty otherwise"
                             },
                             {
                                 "type": "method",
@@ -8656,7 +8656,7 @@
                                 "text": "isColFullName",
                                 "value": "isColFullName",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/isColFullName",
-                                "desc": ""
+                                "desc": "Returns true if the given string is the full name of a column ('table.column')."
                             },
                             {
                                 "type": "method",
@@ -8664,7 +8664,7 @@
                                 "text": "isTableFullName",
                                 "value": "isTableFullName",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/isTableFullName",
-                                "desc": ""
+                                "desc": "Returns true if the given string is the full name of a table ('database.table')."
                             },
                             {
                                 "type": "method",
@@ -8680,7 +8680,7 @@
                                 "text": "renameTable",
                                 "value": "renameTable",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/renameTable",
-                                "desc": "Renames the given table to the new given name."
+                                "desc": ""
                             },
                             {
                                 "type": "method",
@@ -8688,7 +8688,7 @@
                                 "text": "status",
                                 "value": "status",
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Sqlite\/status",
-                                "desc": ""
+                                "desc": "Gets the status of a table."
                             },
                             {
                                 "type": "method",
@@ -9409,7 +9409,7 @@
                         "text": "createIndex",
                         "value": "createIndex",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/createIndex",
-                        "desc": "Creates an index"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9417,7 +9417,7 @@
                         "text": "createUser",
                         "value": "createUser",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/createUser",
-                        "desc": "Creates a database user"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9433,7 +9433,7 @@
                         "text": "deleteIndex",
                         "value": "deleteIndex",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/deleteIndex",
-                        "desc": "Deletes an index"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9441,7 +9441,7 @@
                         "text": "deleteUser",
                         "value": "deleteUser",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/deleteUser",
-                        "desc": "Deletes a database user"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9449,7 +9449,7 @@
                         "text": "disableKeys",
                         "value": "disableKeys",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/disableKeys",
-                        "desc": "Fetches the database and returns an array of a single row num-indexed"
+                        "desc": "Disables foreign keys check."
                     },
                     {
                         "type": "method",
@@ -9465,7 +9465,7 @@
                         "text": "enableKeys",
                         "value": "enableKeys",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/enableKeys",
-                        "desc": "Fetches the database and returns an array of several arrays of rows num-indexed"
+                        "desc": "Enables foreign keys check."
                     },
                     {
                         "type": "method",
@@ -9481,7 +9481,7 @@
                         "text": "getColumns",
                         "value": "getColumns",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getColumns",
-                        "desc": "Fetches the database and returns an object of a single row"
+                        "desc": "Return columns' structure of a table as an array indexed with the fields names."
                     },
                     {
                         "type": "method",
@@ -9505,7 +9505,7 @@
                         "text": "getCreate",
                         "value": "getCreate",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getCreate",
-                        "desc": "Fetches the database and returns an array of objects"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9513,7 +9513,7 @@
                         "text": "getDatabases",
                         "value": "getDatabases",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getDatabases",
-                        "desc": "Fetches the database and returns an array of arrays, one per column, each having each column's values"
+                        "desc": "Return databases' names as an array."
                     },
                     {
                         "type": "method",
@@ -9521,7 +9521,7 @@
                         "text": "getDelete",
                         "value": "getDelete",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getDelete",
-                        "desc": "Returns the SQL code for a DELETE statement."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9529,7 +9529,7 @@
                         "text": "getGroupBy",
                         "value": "getGroupBy",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getGroupBy",
-                        "desc": "Returns a string with the GROUP BY part of the query if there is, empty otherwise"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9537,7 +9537,7 @@
                         "text": "getHaving",
                         "value": "getHaving",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getHaving",
-                        "desc": "Returns a string with the HAVING part of the query if there is, empty otherwise"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9545,7 +9545,7 @@
                         "text": "getInsert",
                         "value": "getInsert",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getInsert",
-                        "desc": "Fetches the database and returns an array of objects"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9553,7 +9553,7 @@
                         "text": "getJoin",
                         "value": "getJoin",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getJoin",
-                        "desc": "Returns a string with the JOIN part of the query if there is, empty otherwise"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9561,7 +9561,7 @@
                         "text": "getKeys",
                         "value": "getKeys",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getKeys",
-                        "desc": "Fetches the database and returns an array of objects."
+                        "desc": "Return the table's keys as an array indexed with the fields names."
                     },
                     {
                         "type": "method",
@@ -9569,7 +9569,7 @@
                         "text": "getLimit",
                         "value": "getLimit",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getLimit",
-                        "desc": "Get a string starting with LIMIT with corresponding parameters to $where"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9577,7 +9577,7 @@
                         "text": "getOrder",
                         "value": "getOrder",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getOrder",
-                        "desc": "Get a string starting with ORDER BY with corresponding parameters to $order"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9585,7 +9585,7 @@
                         "text": "getSelect",
                         "value": "getSelect",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getSelect",
-                        "desc": "Generates a string starting with SELECT ... FROM with corresponding parameters"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9593,7 +9593,7 @@
                         "text": "getTableComment",
                         "value": "getTableComment",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getTableComment",
-                        "desc": "Returns the comment (or an empty string if none) for a given table."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9601,7 +9601,7 @@
                         "text": "getTables",
                         "value": "getTables",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getTables",
-                        "desc": "Fetches the database and returns an object of a single row, alias of get_object"
+                        "desc": "Return tables' names of a database as an array."
                     },
                     {
                         "type": "method",
@@ -9617,7 +9617,7 @@
                         "text": "getUpdate",
                         "value": "getUpdate",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getUpdate",
-                        "desc": "Fetches the database and returns an array of objects"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9625,7 +9625,7 @@
                         "text": "getUsers",
                         "value": "getUsers",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getUsers",
-                        "desc": "Returns an array of queries to recreate the user(s)"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9633,7 +9633,7 @@
                         "text": "getWhere",
                         "value": "getWhere",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/getWhere",
-                        "desc": "Returns a string with the JOIN part of the query if there is, empty otherwise"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -9665,7 +9665,7 @@
                         "text": "renameTable",
                         "value": "renameTable",
                         "url": "bbn-php\/doc\/method\/Db\/Engines\/renameTable",
-                        "desc": "Renames the given table to the new given name."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -16555,7 +16555,7 @@
                 "text": "__toString",
                 "value": "__toString",
                 "url": "bbn-php\/doc\/method\/Db\/__toString",
-                "desc": "Makes that echoing the connection shows its engin and host."
+                "desc": "Makes that echoing the connection shows its engine and host."
             },
             {
                 "type": "method",
@@ -16563,7 +16563,7 @@
                 "text": "addStatement",
                 "value": "addStatement",
                 "url": "bbn-php\/doc\/method\/Db\/addStatement",
-                "desc": "Return an object with all the properties of the statement and where it is carried out."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -16611,7 +16611,7 @@
                 "text": "clear",
                 "value": "clear",
                 "url": "bbn-php\/doc\/method\/Db\/clear",
-                "desc": "Clear."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -16683,7 +16683,7 @@
                 "text": "createDatabase",
                 "value": "createDatabase",
                 "url": "bbn-php\/doc\/method\/Db\/createDatabase",
-                "desc": ""
+                "desc": "Creates a database"
             },
             {
                 "type": "method",
@@ -16691,7 +16691,7 @@
                 "text": "createDatabaseSqlite",
                 "value": "createDatabaseSqlite",
                 "url": "bbn-php\/doc\/method\/Db\/createDatabaseSqlite",
-                "desc": "test"
+                "desc": ""
             },
             {
                 "type": "method",
@@ -16739,7 +16739,7 @@
                 "text": "dbSize",
                 "value": "dbSize",
                 "url": "bbn-php\/doc\/method\/Db\/dbSize",
-                "desc": ""
+                "desc": "Gets the size of a database"
             },
             {
                 "type": "method",
@@ -16755,7 +16755,7 @@
                 "text": "deleteIgnore",
                 "value": "deleteIgnore",
                 "url": "bbn-php\/doc\/method\/Db\/deleteIgnore",
-                "desc": "If exist deletess row(s) in a table, else ignore."
+                "desc": "If exist deletes row(s) in a table, else ignore."
             },
             {
                 "type": "method",
@@ -16835,7 +16835,7 @@
                 "text": "error",
                 "value": "error",
                 "url": "bbn-php\/doc\/method\/Db\/error",
-                "desc": "Set an error and acts appropriately based oon the error mode"
+                "desc": ""
             },
             {
                 "type": "method",
@@ -16883,7 +16883,7 @@
                 "text": "fetchColumn",
                 "value": "fetchColumn",
                 "url": "bbn-php\/doc\/method\/Db\/fetchColumn",
-                "desc": "Transposition of the original fetchColumn method, but with the query included. Return an arra or false if no result"
+                "desc": "Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result"
             },
             {
                 "type": "method",
@@ -16891,7 +16891,7 @@
                 "text": "fetchObject",
                 "value": "fetchObject",
                 "url": "bbn-php\/doc\/method\/Db\/fetchObject",
-                "desc": "Return an array with stdClass object or false if no result."
+                "desc": "Return stdClass object or false if no result."
             },
             {
                 "type": "method",
@@ -16899,7 +16899,7 @@
                 "text": "filterFilters",
                 "value": "filterFilters",
                 "url": "bbn-php\/doc\/method\/Db\/filterFilters",
-                "desc": "Retrieve an array of specific filters among the existing ones."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -16987,7 +16987,7 @@
                 "text": "getColumns",
                 "value": "getColumns",
                 "url": "bbn-php\/doc\/method\/Db\/getColumns",
-                "desc": "Return colums' structure of a table as an array indexed with the fields names."
+                "desc": "Return columns' structure of a table as an array indexed with the fields names."
             },
             {
                 "type": "method",
@@ -17003,7 +17003,7 @@
                 "text": "getConditions",
                 "value": "getConditions",
                 "url": "bbn-php\/doc\/method\/Db\/getConditions",
-                "desc": ""
+                "desc": "Returns a string with the conditions for any filter clause."
             },
             {
                 "type": "method",
@@ -17139,7 +17139,7 @@
                 "text": "getHash",
                 "value": "getHash",
                 "url": "bbn-php\/doc\/method\/Db\/getHash",
-                "desc": "Gets the last hash created."
+                "desc": "Gets the created hash."
             },
             {
                 "type": "method",
@@ -17211,7 +17211,7 @@
                 "text": "getLastCfg",
                 "value": "getLastCfg",
                 "url": "bbn-php\/doc\/method\/Db\/getLastCfg",
-                "desc": "Return the last config for this connection."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17251,7 +17251,7 @@
                 "text": "getLogLine",
                 "value": "getLogLine",
                 "url": "bbn-php\/doc\/method\/Db\/getLogLine",
-                "desc": "Returns a string with the given text in the middle of a \"line\" of logs."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17259,7 +17259,7 @@
                 "text": "getObj",
                 "value": "getObj",
                 "url": "bbn-php\/doc\/method\/Db\/getObj",
-                "desc": "Return the first row resulting from the query as an object (similar to {@link get_object()})."
+                "desc": "Return the first row resulting from the query as an object (similar to {@link getObject()})."
             },
             {
                 "type": "method",
@@ -17347,7 +17347,7 @@
                 "text": "getTableComment",
                 "value": "getTableComment",
                 "url": "bbn-php\/doc\/method\/Db\/getTableComment",
-                "desc": "Returns the comment (or an empty string if none) for a given table."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17371,7 +17371,7 @@
                 "text": "getUid",
                 "value": "getUid",
                 "url": "bbn-php\/doc\/method\/Db\/getUid",
-                "desc": ""
+                "desc": "Returns a UUID"
             },
             {
                 "type": "method",
@@ -17483,7 +17483,7 @@
                 "text": "isColFullName",
                 "value": "isColFullName",
                 "url": "bbn-php\/doc\/method\/Db\/isColFullName",
-                "desc": ""
+                "desc": "Returns true if the given string is the full name of a column ('table.column')."
             },
             {
                 "type": "method",
@@ -17515,7 +17515,7 @@
                 "text": "isTableFullName",
                 "value": "isTableFullName",
                 "url": "bbn-php\/doc\/method\/Db\/isTableFullName",
-                "desc": "Returns true if the string corresponds to the tipology of a table full name."
+                "desc": "Returns true if the given string is the full name of a table ('database.table')."
             },
             {
                 "type": "method",
@@ -17579,7 +17579,7 @@
                 "text": "parseQuery",
                 "value": "parseQuery",
                 "url": "bbn-php\/doc\/method\/Db\/parseQuery",
-                "desc": "Parses a SQL query and return an array."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17619,7 +17619,7 @@
                 "text": "rawQuery",
                 "value": "rawQuery",
                 "url": "bbn-php\/doc\/method\/Db\/rawQuery",
-                "desc": "Executes the original PDO query function"
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17643,7 +17643,7 @@
                 "text": "renameTable",
                 "value": "renameTable",
                 "url": "bbn-php\/doc\/method\/Db\/renameTable",
-                "desc": "Renames the given table to the new given name."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17667,7 +17667,7 @@
                 "text": "retrieveCfg",
                 "value": "retrieveCfg",
                 "url": "bbn-php\/doc\/method\/Db\/retrieveCfg",
-                "desc": "Retrieves a configuration array based on its hash."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17675,7 +17675,7 @@
                 "text": "retrieveQuery",
                 "value": "retrieveQuery",
                 "url": "bbn-php\/doc\/method\/Db\/retrieveQuery",
-                "desc": "Retrieves a query array based on its hash."
+                "desc": ""
             },
             {
                 "type": "method",
@@ -17795,7 +17795,7 @@
                 "text": "status",
                 "value": "status",
                 "url": "bbn-php\/doc\/method\/Db\/status",
-                "desc": ""
+                "desc": "Gets the status of a table"
             },
             {
                 "type": "method",
@@ -17827,7 +17827,7 @@
                 "text": "tableSize",
                 "value": "tableSize",
                 "url": "bbn-php\/doc\/method\/Db\/tableSize",
-                "desc": ""
+                "desc": "Gets the size of a table"
             },
             {
                 "type": "method",
@@ -17835,7 +17835,7 @@
                 "text": "tfn",
                 "value": "tfn",
                 "url": "bbn-php\/doc\/method\/Db\/tfn",
-                "desc": "Return table's simple name."
+                "desc": "Return table's full name."
             },
             {
                 "type": "method",

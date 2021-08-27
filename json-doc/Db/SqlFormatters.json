@@ -1,0 +1,795 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\SqlFormatters",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/SqlFormatters.php",
+    "startLine": 5,
+    "endLine": 164,
+    "contentConstructor": null,
+    "methods": {
+        "getSelect": {
+            "name": "getSelect",
+            "summary": "Generates a string starting with SELECT ... FROM with corresponding parameters",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param array $cfg The configuration array\n   * @return false|array\n   *\/\n  public function getInsert(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param array $cfg The configuration array\n   * @return false|array\n   *\/\n  public function getUpdate(array $cfg): string;\n\n\n  \/**\n   * Returns the SQL code for a DELETE statement.\n   *\n   * @param array $cfg The configuration array\n   * @return string\n   *\/\n  public function getDelete(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getJoin(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getWhere(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the GROUP BY part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getGroupBy(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 13,
+            "endLine": 13,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getInsert": {
+            "name": "getInsert",
+            "summary": "Fetches the database and returns an array of objects",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param array $cfg The configuration array\n   * @return false|array\n   *\/\n  public function getUpdate(array $cfg): string;\n\n\n  \/**\n   * Returns the SQL code for a DELETE statement.\n   *\n   * @param array $cfg The configuration array\n   * @return string\n   *\/\n  public function getDelete(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getJoin(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getWhere(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the GROUP BY part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getGroupBy(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 22,
+            "endLine": 22,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUpdate": {
+            "name": "getUpdate",
+            "summary": "Fetches the database and returns an array of objects",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Returns the SQL code for a DELETE statement.\n   *\n   * @param array $cfg The configuration array\n   * @return string\n   *\/\n  public function getDelete(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getJoin(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getWhere(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the GROUP BY part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getGroupBy(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 31,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getDelete": {
+            "name": "getDelete",
+            "summary": "Returns the SQL code for a DELETE statement.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getJoin(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getWhere(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the GROUP BY part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getGroupBy(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 40,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getJoin": {
+            "name": "getJoin",
+            "summary": "Returns a string with the JOIN part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Returns a string with the JOIN part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getWhere(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the GROUP BY part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getGroupBy(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 49,
+            "endLine": 49,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getWhere": {
+            "name": "getWhere",
+            "summary": "Returns a string with the JOIN part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Returns a string with the GROUP BY part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getGroupBy(array $cfg): string;\n\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 58,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getGroupBy": {
+            "name": "getGroupBy",
+            "summary": "Returns a string with the GROUP BY part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Returns a string with the HAVING part of the query if there is, empty otherwise\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getHaving(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 67,
+            "endLine": 67,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getHaving": {
+            "name": "getHaving",
+            "summary": "Returns a string with the HAVING part of the query if there is, empty otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Get a string starting with ORDER BY with corresponding parameters to $order\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getOrder(array $cfg): string;\n\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 76,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getOrder": {
+            "name": "getOrder",
+            "summary": "Get a string starting with ORDER BY with corresponding parameters to $order",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Get a string starting with LIMIT with corresponding parameters to $where\n   *\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getLimit(array $cfg): string;\n\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 85,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getLimit": {
+            "name": "getLimit",
+            "summary": "Get a string starting with LIMIT with corresponding parameters to $where",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n\n  \/**\n   * Fetches the database and returns an array of objects\n   *\n   * @param string $table The table for which to create the statement\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreate(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 94,
+            "endLine": 94,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreate": {
+            "name": "getCreate",
+            "summary": "Fetches the database and returns an array of objects",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateTable(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 104,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreateTable": {
+            "name": "getCreateTable",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateKeys(string $table, array $model = null): string;\n\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 111,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreateKeys": {
+            "name": "getCreateKeys",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n  \/**\n   * @param string $table\n   * @param array|null $model\n   * @return string\n   *\/\n  public function getCreateConstraints(string $table, array $model = null): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 118,
+            "endLine": 118,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCreateConstraints": {
+            "name": "getCreateConstraints",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $model = NULL)\n  {\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlter(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 125,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAlter": {
+            "name": "getAlter",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $cfg)\n  {\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterTable(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 133,
+            "endLine": 133,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAlterTable": {
+            "name": "getAlterTable",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $cfg)\n  {\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterColumn(string $table, array $cfg): string;\n\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 141,
+            "endLine": 141,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAlterColumn": {
+            "name": "getAlterColumn",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $cfg)\n  {\n\n  \/**\n   * @param string $table\n   * @param array $cfg\n   * @return string\n   *\/\n  public function getAlterKey(string $table, array $cfg): string;\n\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 149,
+            "endLine": 149,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAlterKey": {
+            "name": "getAlterKey",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, array $cfg)\n  {\n  \/**\n   * @param array $cfg\n   * @return array\n   *\/\n  }",
+            "startLine": 157,
+            "endLine": 157,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getQueryValues": {
+            "name": "getQueryValues",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlFormatters",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n  }",
+            "startLine": 163,
+            "endLine": 163,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 19,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": true,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": true,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db",
+    "shortName": "SqlFormatters",
+    "summary": ""
+}

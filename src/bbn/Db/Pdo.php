@@ -20,9 +20,10 @@ namespace bbn\Db;
  */
 interface Pdo
 {
-
+  /*
+  Error
   protected $pdo;
-
+  */
 
   /**
    * Fetches the database and returns an array of a single row text-indexed
