@@ -121,7 +121,9 @@ class SqliteTest extends TestCase
       "SELECT $field FROM $table WHERE $field = '$value'"
     );
 
-    $this->assertTrue(count($record->fetchAll()) > 0);
+    $this->assertTrue(
+      count($this->sqlite->fetchAllResults($record)) > 0
+    );
   }
 
 
@@ -131,7 +133,9 @@ class SqliteTest extends TestCase
       "SELECT $field FROM $table WHERE $field = '$value'"
     );
 
-    $this->assertTrue(count($record->fetchAll()) === 0);
+    $this->assertTrue(
+      count($this->sqlite->fetchAllResults($record)) === 0
+    );
   }
 
   /** @test */
@@ -488,7 +492,9 @@ class SqliteTest extends TestCase
   {
     $this->sqlite->disableKeys();
 
-    $result = $this->sqlite->rawQuery('PRAGMA foreign_keys')->fetchAll();
+    $result = $this->sqlite->fetchAllResults(
+      $this->sqlite->rawQuery('PRAGMA foreign_keys')
+    );
 
     $this->assertSame(0, $result[0]['foreign_keys']);
   }
@@ -498,7 +504,9 @@ class SqliteTest extends TestCase
   {
     $this->sqlite->enableKeys();
 
-    $result = $this->sqlite->rawQuery('PRAGMA foreign_keys')->fetchAll();
+    $result = $this->sqlite->fetchAllResults(
+      $this->sqlite->rawQuery('PRAGMA foreign_keys')
+    );
 
     $this->assertSame(1, $result[0]['foreign_keys']);
   }
@@ -4274,7 +4282,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
 
     $this->assertInstanceOf(\PDOStatement::class, $result);
 
-    $results = $result->fetchAll(\PDO::FETCH_ASSOC);
+    $results = $this->sqlite->fetchAllResults($result, \PDO::FETCH_ASSOC);
 
     $this->assertSame(
       [
@@ -7944,7 +7952,8 @@ GROUP BY "id"
 
     $this->assertSame(
       [['username' => 'jdoe']],
-      $result->fetchAll(\PDO::FETCH_ASSOC)
+      $this->sqlite->fetchAllResults($result, \PDO::FETCH_ASSOC)
+
     );
 
     $result2 = $this->sqlite->query("SELECT username FROM users WHERE name = ?", 'Sam');
@@ -7953,7 +7962,7 @@ GROUP BY "id"
 
     $this->assertSame(
       [['username' => 'sdoe']],
-      $result2->fetchAll(\PDO::FETCH_ASSOC)
+      $this->sqlite->fetchAllResults($result2, \PDO::FETCH_ASSOC)
     );
 
     $this->sqlite->query("SELECT name FROM users WHERE username = ?", 'sdoe');

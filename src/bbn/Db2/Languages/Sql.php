@@ -4369,7 +4369,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function fetchAll(string $query)
   {
     if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchAll();
+      return $this->fetchAllResults($r);
     }
 
     return false;
@@ -4721,5 +4721,19 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     return null;
+  }
+
+  /**
+   * @param \PDOStatement $PDOStatement
+   * @param ...$args
+   * @return bool|array
+   */
+  public function fetchAllResults(\PDOStatement $PDOStatement, ...$args)
+  {
+    if (method_exists($PDOStatement, '_fetchAll')) {
+      return $PDOStatement->_fetchAll(...$args);
+    }
+
+    return  $PDOStatement->fetchAll(...$args);
   }
 }

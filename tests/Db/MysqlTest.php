@@ -76,6 +76,8 @@ class MysqlTest extends TestCase
 
     self::$cache_mock = \Mockery::mock(Cache::class);
 
+    self::createTestingDatabase();
+
     self::$mysql = new Mysql(self::getDbConfig());
 
     self::$mysql->startFancyStuff();
@@ -103,6 +105,28 @@ class MysqlTest extends TestCase
     );
   }
 
+  protected static function createTestingDatabase()
+  {
+    try {
+      $db_cfg = self::getDbConfig();
+
+      $pdo = new \PDO(
+        "mysql:host={$db_cfg['host']};port={$db_cfg['port']}",
+        $db_cfg['user'],
+        $db_cfg['pass'],
+        [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
+      );
+      $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+      $pdo->query("SET FOREIGN_KEY_CHECKS=0;");
+
+      $pdo->query("CREATE DATABASE IF NOT EXISTS {$db_cfg['db']}");
+
+    } catch (\PDOException $e) {
+      throw new \Exception("Unable to establish db connnection for testing: " . $e->getMessage());
+    }
+  }
+
   protected static function getDbConfig()
   {
     return array(
@@ -111,6 +135,7 @@ class MysqlTest extends TestCase
       'user'          => getenv('db_user'),
       'pass'          => getenv('db_pass'),
       'db'            => getenv('db_name'),
+      'port'          => getenv('db_port'),
       'cache_length'  => 3000,
       'on_error'      => Errors::E_STOP,
       'force_host'    => true
@@ -1902,7 +1927,7 @@ first_name ASC';
 
   /**
    * @test
-   * @depends createIndex_method_created_index_for_the_givens_table_and_columns
+   * @depends createIndex_method_creates_index_for_the_givens_table_and_columns
    */
   public function deleteIndex_method_deletes_the_given_index()
   {
@@ -2222,11 +2247,11 @@ first_name ASC';
       ]
     ];
 
-    $expected = 'CREATE TABLE users (
-"email" text(255) NOT NULL,
-"id" int UNSIGNED NOT NULL,
-"balance" decimal NOT NULL DEFAULT \'0\'
-); ENGINE=InnoDB DEFAULT CHARSET=utf8";';
+    $expected = 'CREATE TABLE `users` (
+`email` text(255) NOT NULL,
+`id` int UNSIGNED NOT NULL,
+`balance` decimal NOT NULL DEFAULT \'0\'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
     $this->assertSame(
       $expected,
@@ -3850,12 +3875,14 @@ GROUP BY `id`
   /** @test */
   public function hasIdIncrement_method_returns_true_if_the_given_table_has_auto_increment_fields()
   {
-    $this->createTable('users', function () {
+    $this->setCacheExpectations();
+
+    $this->createTable('roles', function () {
       return 'username VARCHAR(255)';
     });
 
     $this->assertFalse(
-      self::$mysql->hasIdIncrement('users')
+      self::$mysql->hasIdIncrement('roles')
     );
 
     $this->createTable('users', function () {
@@ -6021,7 +6048,7 @@ GROUP BY `id`
 
     $this->assertInstanceOf(\PDOStatement::class, $result);
 
-    $results = $result->fetchAll(\PDO::FETCH_ASSOC);
+    $results = self::$mysql->fetchAllResults($result, \PDO::FETCH_ASSOC);
 
     $this->assertSame(
       [
@@ -7662,7 +7689,7 @@ GROUP BY `id`
 
     $this->assertSame(
       [['username' => 'jdoe']],
-      $result->fetchAll(\PDO::FETCH_ASSOC)
+      self::$mysql->fetchAllResults($result, \PDO::FETCH_ASSOC)
     );
 
     $result2 = self::$mysql->query("SELECT username FROM users WHERE name = ?", 'Sam');
@@ -7671,7 +7698,7 @@ GROUP BY `id`
 
     $this->assertSame(
       [['username' => 'sdoe']],
-      $result2->fetchAll(\PDO::FETCH_ASSOC)
+      self::$mysql->fetchAllResults($result2, \PDO::FETCH_ASSOC)
     );
 
     self::$mysql->query("SELECT name FROM users WHERE username = ?", 'sdoe');
