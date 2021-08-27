@@ -49,6 +49,7 @@ class MysqlTest extends TestCase
     $this->clearCache();
     $this->dropAllTables();
     self::$mysql->startFancyStuff();
+    self::$connection->query('USE ' . self::getDbConfig()['db']);
   }
 
   public static function setUpBeforeClass(): void
@@ -89,12 +90,6 @@ class MysqlTest extends TestCase
       'last_real_params', self::$mysql
     );
 
-    self::$connection = ReflectionHelpers::getNonPublicProperty(
-      'pdo', self::$mysql
-    );
-
-    self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
-
     ReflectionHelpers::setNonPublicPropertyValue(
       'cache_engine', self::$mysql, self::$cache_mock
     );
@@ -113,20 +108,21 @@ class MysqlTest extends TestCase
     try {
       $db_cfg = self::getDbConfig();
 
-      $pdo = new \PDO(
-        "mysql:host={$db_cfg['host']};port={$db_cfg['port']}",
+      self::$connection = new \PDO(
+        "mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
         $db_cfg['user'],
         $db_cfg['pass'],
         [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
       );
-      $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-      $pdo->query("SET FOREIGN_KEY_CHECKS=0;");
+      self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-      $pdo->query("CREATE DATABASE IF NOT EXISTS {$db_cfg['db']}");
+      self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
+
+      self::$connection->query("CREATE DATABASE IF NOT EXISTS {$db_cfg['db']}");
 
     } catch (\PDOException $e) {
-      throw new \Exception("Unable to establish db connnection for testing: " . $e->getMessage());
+      throw new \Exception("Unable to establish db connection for testing: " . $e->getMessage());
     }
   }
 
@@ -2531,7 +2527,7 @@ first_name ASC';
   {
     self::$mysql->startFancyStuff();
 
-    $result = self::$connection->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+    $result = $this->getNonPublicProperty('pdo')->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
 
     $this->assertIsArray($result);
     $this->assertSame(Query::class, $result[0]);
@@ -2543,7 +2539,7 @@ first_name ASC';
   {
     self::$mysql->stopFancyStuff();
 
-    $result = self::$connection->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+    $result = $this->getNonPublicProperty('pdo')->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
 
     $this->assertIsArray($result);
 
@@ -4157,7 +4153,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findRelations_method_returns_null_when_the_given_name_does_not_has_table_name()
+  public function findRelations_method_returns_null_when_the_given_name_does_not_has_column_name()
   {
     $this->assertNull(
       self::$mysql->findRelations('id')
@@ -4278,7 +4274,8 @@ GROUP BY `id`
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, email VARCHAR(25)';
     });
 
-    $this->insertOne('users', ['email' => 'mail@test.com']);
+    $this->getNonPublicProperty('pdo')
+      ->query("INSERT INTO users SET email = 'mail@test.com'");
 
     self::$mysql->setLastInsertId();
 
@@ -5913,7 +5910,9 @@ GROUP BY `id`
     $this->assertDatabaseHas('users', 'name', 'John');
 
     $this->assertSame(
-      self::$connection->query("SELECT id FROM users LIMIT 1")->fetchObject()->id,
+      bin2hex(
+        self::$connection->query("SELECT id FROM users LIMIT 1")->fetchObject()->id
+      ),
       $this->getNonPublicProperty('last_insert_id')
     );
 

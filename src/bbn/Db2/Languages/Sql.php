@@ -456,7 +456,18 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function rawQuery()
   {
-    return $this->pdo->query(...\func_get_args());
+    if ($this->_fancy) {
+      $this->stopFancyStuff();
+      $switch_to_fancy = true;
+    }
+
+    $result = $this->pdo->query(...\func_get_args());
+
+    if (!empty($switch_to_fancy)) {
+      $this->startFancyStuff();
+    }
+
+    return $result;
   }
 
   /**

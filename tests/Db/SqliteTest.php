@@ -496,7 +496,7 @@ class SqliteTest extends TestCase
       $this->sqlite->rawQuery('PRAGMA foreign_keys')
     );
 
-    $this->assertSame(0, $result[0]['foreign_keys']);
+    $this->assertSame('0', $result[0]['foreign_keys']);
   }
 
   /** @test */
@@ -508,7 +508,7 @@ class SqliteTest extends TestCase
       $this->sqlite->rawQuery('PRAGMA foreign_keys')
     );
 
-    $this->assertSame(1, $result[0]['foreign_keys']);
+    $this->assertSame('1', $result[0]['foreign_keys']);
   }
 
   /** @test */
@@ -2157,6 +2157,9 @@ CREATE INDEX \'key\' ON "users" ("username");';
     // Create the keys from the query from the other test that this one depends on
     // So that the modelize method can get table structure
     foreach (explode(';', $query) as $q) {
+      if (empty($q)) {
+        continue;
+      }
       $this->sqlite->rawQuery($q);
     }
 
