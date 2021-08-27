@@ -1,18 +1,18 @@
 <?php
 
-namespace bbn\Db2\Languages;
+namespace bbn\Db\Languages;
 
-use bbn\Db2\Engines;
-use bbn\Db2\EnginesApi;
-use bbn\Db2\SqlEngines;
-use bbn\Db2\SqlFormatters;
+use bbn\Db\Engines;
+use bbn\Db\EnginesApi;
+use bbn\Db\SqlEngines;
+use bbn\Db\SqlFormatters;
 use bbn\Str;
 use bbn\X;
 use PHPSQLParser\PHPSQLParser;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 {
-  use \bbn\Db2\HasError, \bbn\Models\Tts\Cache;
+  use \bbn\Db\HasError, \bbn\Models\Tts\Cache;
 
   /** @var string The quote character */
   public $qte = '`';
@@ -1959,7 +1959,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         // This is a writing statement, it will execute the statement and return the number of affected rows
         if ($q['write']) {
           // A prepared query already exists for the writing
-          /** @var \bbn\Db2\Query */
+          /** @var \bbn\Db\Query */
           if ($q['prepared']) {
             $r = $q['prepared']->init($params['values'])->execute();
           }
@@ -2469,7 +2469,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
   /**
-   * @returns null|\bbn\Db2\Query|int A selection query or the number of affected rows by a writing query
+   * @returns null|\bbn\Db\Query|int A selection query or the number of affected rows by a writing query
    */
   protected function _exec()
   {
@@ -2497,7 +2497,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           // Executing the query
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
-          /** @var \bbn\Db2\Query */
+          /** @var \bbn\Db\Query */
 
           $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
         }
@@ -3408,7 +3408,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function startFancyStuff(): self
   {
-    $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\bbn\Db2\Query::class, [$this]]);
+    $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\bbn\Db\Query::class, [$this]]);
     $this->_fancy = 1;
 
     return $this;
@@ -3574,7 +3574,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getOne()
   {
-    /** @var \bbn\Db2\Query $r */
+    /** @var \bbn\Db\Query $r */
     if ($r = $this->query(...\func_get_args())) {
       return $r->fetchColumn(0);
     }

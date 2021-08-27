@@ -106,7 +106,7 @@ interface Api
 	 * @param int $start The "start" condition, default: 0.
 	 * @return mixed
 	 */
-	public function selectOne($table, $field, array $where = [], array $order = [], int $start = 0);
+	public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);
 
   /**
    * Return the number of records in the table corresponding to the $where condition (non mandatory).
@@ -143,15 +143,15 @@ interface Api
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array;
 
-  /**
-   * Inserts/Updates rows in the a given table
-   *
-   * @param $table
-   * @param array $values
-   * @param $ignore
-   * @return int
-   */
-	public function insert($table, array $values = null, $ignore): ?int;
+	/**
+	 * Inserts/Updates rows in the a given table
+	 *
+	 * @param $table
+	 * @param array|null $values
+	 * @param bool $ignore
+	 * @return int
+	 */
+	public function insert($table, array $values = null, bool $ignore = false): ?int;
 
 	/**
 	 * Inserts/Updates rows in the a given table
@@ -160,25 +160,25 @@ interface Api
 	 */
 	public function insertUpdate($table, array $values = null): ?int;
 
-  /**
-   * Updates rows in the a given table
-   *
-   * @param array|string $table
-   * @param array|null $values
-   * @param array $where
-   * @param bool $ignore
-   * @return int
-   */
+	/**
+	 * Updates rows in the a given table
+	 *
+	 * @param array|string $table
+	 * @param array|null $values
+	 * @param array|null $where
+	 * @param bool $ignore
+	 * @return int
+	 */
   public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;
 
-  /**
-   * Updates rows in the a given table
-   *
-   * @param array|string $table
-   * @param array|null $values
-   * @param array $where
-   * @return int
-   */
+	/**
+	 * Updates rows in the a given table
+	 *
+	 * @param array|string $table
+	 * @param array|null $values
+	 * @param array|null $where
+	 * @return int
+	 */
   public function updateIgnore($table, array $values = null, array $where = null): ?int;
 
   /**
@@ -208,4 +208,3 @@ interface Api
 	 * @return false|array
 	 */
 }
-?>

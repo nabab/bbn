@@ -3,17 +3,17 @@
 namespace Db;
 
 use bbn\Cache;
-use bbn\Db2;
-use bbn\Db2\Enums\Errors;
-use bbn\Db2\Languages\Mysql;
+use bbn\Db;
+use bbn\Db\Enums\Errors;
+use bbn\Db\Languages\Mysql;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
 
-class Db2Test extends TestCase
+class DbTest extends TestCase
 {
   use Reflectable;
 
-  protected Db2 $db;
+  protected Db $db;
 
   protected $mysql_mock;
 
@@ -43,7 +43,7 @@ class Db2Test extends TestCase
     $this->mysql_mock->shouldReceive('__toString')
       ->andReturn('mysql');
 
-    $this->db = new Db2($this->getDbConfig());
+    $this->db = new Db($this->getDbConfig());
 
     $this->setNonPublicPropertyValue('cache_engine', $this->cache_mock);
   }
@@ -76,8 +76,8 @@ class Db2Test extends TestCase
     $db_cfg = $this->getDbConfig();
 
     $this->assertInstanceOf(
-      Db2::class,
-      $this->getNonPublicProperty('retriever_instance', Db2::class)
+      Db::class,
+      $this->getNonPublicProperty('retriever_instance', Db::class)
     );
 
     $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
@@ -95,26 +95,26 @@ class Db2Test extends TestCase
 
     unset($db_config['engine']);
 
-    $this->db = new Db2($db_config);
+    $this->db = new Db($db_config);
   }
 
   /** @test */
   public function isEngineSupported_method_checks_if_the_given_db_engine_is_supported_or_not()
   {
-    $this->assertTrue(Db2::isEngineSupported('mysql'));
-    $this->assertTrue(Db2::isEngineSupported('pgsql'));
-    $this->assertTrue(Db2::isEngineSupported('sqlite'));
-    $this->assertFalse(Db2::isEngineSupported('foo'));
+    $this->assertTrue(Db::isEngineSupported('mysql'));
+    $this->assertTrue(Db::isEngineSupported('pgsql'));
+    $this->assertTrue(Db::isEngineSupported('sqlite'));
+    $this->assertFalse(Db::isEngineSupported('foo'));
   }
 
   /** @test */
   public function getEngineIcon_method_returns_the_icon_for_the_given_db_engine()
   {
     foreach ($this->getNonPublicProperty('engines') as $engine => $icon) {
-      $this->assertSame($icon, Db2::getEngineIcon($engine));
+      $this->assertSame($icon, Db::getEngineIcon($engine));
     }
 
-    $this->assertNull(Db2::getEngineIcon('foo'));
+    $this->assertNull(Db::getEngineIcon('foo'));
   }
 
   /** @test */
@@ -307,7 +307,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->setErrorMode(Errors::E_STOP_ALL);
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -326,17 +326,17 @@ class Db2Test extends TestCase
   {
     $this->cache_mock->shouldReceive('get')
       ->once()
-      ->with('bbn/Db2/foo/method_name')
+      ->with('bbn/Db/foo/method_name')
       ->andReturnTrue();
 
     $this->cache_mock->shouldReceive('deleteAll')
       ->once()
-      ->with('bbn/Db2/foo/method_name')
+      ->with('bbn/Db/foo/method_name')
       ->andReturnTrue();
 
     $result = $this->db->clearCache('foo', 'method_name');
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -344,14 +344,14 @@ class Db2Test extends TestCase
   {
     $this->cache_mock->shouldReceive('get')
       ->once()
-      ->with('bbn/Db2/foo/method_name')
+      ->with('bbn/Db/foo/method_name')
       ->andReturnFalse();
 
     $this->cache_mock->shouldNotReceive('deleteAll');
 
     $result = $this->db->clearCache('foo', 'method_name');
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -359,12 +359,12 @@ class Db2Test extends TestCase
   {
     $this->cache_mock->shouldReceive('deleteAll')
       ->once()
-      ->with('bbn/Db2/')
+      ->with('bbn/Db/')
       ->andReturnTrue();
 
     $result = $this->db->clearAllCache();
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -377,7 +377,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->stopFancyStuff();
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -390,7 +390,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->startFancyStuff();
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -403,7 +403,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->enableTrigger();
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -416,7 +416,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->disableTrigger();
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -454,7 +454,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->setTrigger($callback, 'select', 'after');
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
   /** @test */
@@ -603,7 +603,7 @@ class Db2Test extends TestCase
       ->with(2)
       ->andReturnSelf();
 
-    $this->assertInstanceOf(Db2::class, $this->db->setLastInsertId(2));
+    $this->assertInstanceOf(Db::class, $this->db->setLastInsertId(2));
   }
 
   /** @test */
@@ -1198,7 +1198,7 @@ class Db2Test extends TestCase
 
     $result = $this->db->change('bbn_test_2');
 
-    $this->assertInstanceOf(Db2::class, $result);
+    $this->assertInstanceOf(Db::class, $result);
   }
 
 
@@ -1287,7 +1287,7 @@ class Db2Test extends TestCase
       ->withNoArgs()
       ->andReturnSelf();
 
-    $this->assertInstanceOf(Db2::class, $this->db->disableKeys());
+    $this->assertInstanceOf(Db::class, $this->db->disableKeys());
   }
 
   /** @test */
@@ -1298,7 +1298,7 @@ class Db2Test extends TestCase
       ->withNoArgs()
       ->andReturnSelf();
 
-    $this->assertInstanceOf(Db2::class, $this->db->enableKeys());
+    $this->assertInstanceOf(Db::class, $this->db->enableKeys());
   }
 
   /** @test */
