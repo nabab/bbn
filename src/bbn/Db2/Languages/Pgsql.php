@@ -238,12 +238,27 @@ class Pgsql extends Sql
    *
    * @param string $db The database name or file
    * @return bool
+   * @throws \Exception
    */
   public function change(string $db): bool
   {
     if (($this->getCurrent() !== $db) && Str::checkName($db)) {
-      $this->rawQuery("USE `$db`");
-      $this->current = $db;
+      $old_db = $this->getCurrent();
+      // Close the current connection
+      $this->pdo = null;
+      // Invoke the constructor method after changing the db name.
+      // pgsql does not support changing database, only by creating new connection.
+      $this->cfg['db'] = $db;
+
+      try {
+        $this->__construct($this->cfg);
+
+      } catch (\Exception $e) {
+        $this->cfg['db'] = $old_db;
+        $this->__construct($this->cfg);
+        throw new \Exception($e->getMessage());
+      }
+
       return true;
     }
 
@@ -297,8 +312,6 @@ class Pgsql extends Sql
    * Creates a database
    *
    * @param string $database
-   * @param string $enc
-   * @param string $collation
    * @return bool
    */
   public function createDatabase(string $database): bool
@@ -321,8 +334,23 @@ class Pgsql extends Sql
         throw new \Exception(X::_("Wrong database name")." $database");
       }
 
+      if ($database === $this->getCurrent()) {
+        throw new \Exception(X::_('Cannot drop the currently open database!'));
+      }
+
       try {
-        $this->rawQuery("DROP DATABASE `$database`");
+        $active_connections = $this->rawQuery("SELECT *
+                                                FROM pg_stat_activity
+                                                WHERE datname = '$database'");
+
+        if ($active_connections->rowCount() > 0) {
+          // Close all connections
+          $this->rawQuery("SELECT pg_terminate_backend (pg_stat_activity.pid)
+                            FROM pg_stat_activity
+                            WHERE pg_stat_activity.datname = '$database'");
+        }
+
+        $this->rawQuery("DROP DATABASE IF EXISTS $database");
       }
       catch (\Exception $e) {
         return false;
@@ -626,7 +654,7 @@ MYSQL
       $x = array_map(
         function ($a) {
           return $a['datname'];
-        }, $r->fetchAll(\PDO::FETCH_ASSOC)
+        }, $this->fetchAllResults($r, \PDO::FETCH_ASSOC)
       );
       sort($x);
     }
@@ -673,6 +701,7 @@ MYSQL
     }
 
     if ($database !== $this->getCurrent()) {
+      $this->cfg['db'] = $database;
       return (new self ($this->cfg))->getTables();
     }
 
@@ -683,7 +712,7 @@ MYSQL
               AND table_type = 'BASE TABLE'";
 
     if (($r = $this->rawQuery($query))
-      && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
+      && ($t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];

@@ -104,7 +104,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /**
    * @var \PDO
    */
-  protected \PDO $pdo;
+  protected ?\PDO $pdo;
 
   /**
    * @var array $queries

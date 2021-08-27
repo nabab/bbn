@@ -7,7 +7,6 @@ use bbn\Db2\Enums\Errors;
 use bbn\Db2\Languages\Pgsql;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
-use tests\ReflectionHelpers;
 
 class PgsqlTest extends TestCase
 {
@@ -16,6 +15,8 @@ class PgsqlTest extends TestCase
   protected Pgsql $pgsql;
 
   protected $cache_mock;
+
+  protected $db2 = 'new_db';
 
   public static function setUpBeforeClass(): void
   {
@@ -37,6 +38,9 @@ class PgsqlTest extends TestCase
       $res = explode('=', $item);
       $key  = $res[0];
       $value = $res[1] ?? "";
+      if (empty($key) || empty($value)) {
+        continue;
+      }
       @putenv("$key=$value");
     }
   }
@@ -53,12 +57,14 @@ class PgsqlTest extends TestCase
     $this->cache_mock = \Mockery::mock(Cache::class);
     $this->pgsql->startFancyStuff();
     $this->dropAllTables();
+    $this->dropDatabaseIfExists($this->db2);
   }
 
   protected function tearDown(): void
   {
     \Mockery::close();
     $this->dropAllTables();
+    $this->dropDatabaseIfExists($this->db2);
   }
 
 
@@ -76,33 +82,52 @@ class PgsqlTest extends TestCase
     );
   }
 
-  protected function createTable(string $table, callable $callback)
+  protected function createTable(string $table, callable $callback, ?Pgsql $pgsql = null)
   {
-    $this->dropTableIfExist($table);
-
     $structure = $callback();
 
-    $this->pgsql->rawQuery("CREATE TABLE $table ($structure)");
+    $obj = $pgsql ?? $this->pgsql;
+
+    $this->dropTableIfExist($table, $obj);
+
+    $obj->rawQuery("CREATE TABLE $table ($structure)");
   }
 
-  protected function dropTableIfExist(string $table)
+  protected function createDatabase(string $database)
   {
-    $this->pgsql->rawQuery("DROP TABLE IF EXISTS $table");
+    $this->dropDatabaseIfExists($database);
+
+    $this->pgsql->rawQuery("CREATE DATABASE $database ENCODING 'UTF8'");
+  }
+
+  protected function dropTableIfExist(string $table, ?Pgsql $pgsql = null)
+  {
+    $obj = $pgsql ?? $this->pgsql;
+
+    $obj->rawQuery("DROP TABLE IF EXISTS $table");
   }
 
   protected function dropDatabaseIfExists(string $database)
   {
-    $this->pgsql->rawQuery("SELECT pg_terminate_backend (pg_stat_activity.pid)
+    $active_connections = $this->pgsql->rawQuery("SELECT *
+                            FROM pg_stat_activity
+                            WHERE datname = '$database'");
+
+    if ($active_connections->rowCount() > 0) {
+      $this->pgsql->rawQuery("SELECT pg_terminate_backend (pg_stat_activity.pid)
                             FROM pg_stat_activity
                             WHERE pg_stat_activity.datname = '$database'");
+    }
 
     $this->pgsql->rawQuery("DROP DATABASE IF EXISTS $database");
   }
 
-  protected function dropAllTables()
+  protected function dropAllTables(?Pgsql $pgsql = null)
   {
-    foreach ($this->pgsql->getTables() as $table) {
-      $this->dropTableIfExist($table);
+    $obj = $pgsql ?? $this->pgsql;
+
+    foreach ($obj->getTables() as $table) {
+      $this->dropTableIfExist($table, $obj);
     }
   }
 
@@ -310,30 +335,141 @@ RESULT;
     $this->assertSame($expected, $this->pgsql->getConditions($conditions, $cfg));
   }
 
+  /**
+   * @test
+   * @depends getTables_method_returns_table_names_of_a_database_as_array
+   */
+  public function change_method_changes_the_current_database_to_a_new_one()
+  {
+    $this->createTable('user_db_1', function () {
+      return 'id INT PRIMARY KEY';
+    });
+
+    $this->createDatabase($this->db2);
+
+    $result = $this->pgsql->change($this->db2);
+
+    $this->createTable('user_db_2', function () {
+      return 'id INT PRIMARY KEY';
+    });
+
+    $this->assertTrue($result);
+
+    $this->assertSame(
+      $this->db2,
+      $this->getNonPublicProperty('current')
+    );
+
+    $this->assertSame(
+      ['user_db_2'],
+      $this->pgsql->getTables()
+    );
+
+    $this->assertSame(
+      $this->db2,
+      $this->getNonPublicProperty('cfg')['code_db']
+    );
+
+    $this->pgsql->change($this->getDbConfig()['db']);
+  }
+
+  /** @test */
+  public function change_method_returns_false_when_the_given_database_same_as_the_current_one()
+  {
+    $this->assertFalse(
+      $this->pgsql->change($this->getDbConfig()['db'])
+    );
+  }
+
+  /** @test */
+  public function change_method_returns_false_when_the_given_database_name_is_not_valid()
+  {
+    $this->assertFalse(
+      $this->pgsql->change('new_db**')
+    );
+  }
+
+  /** @test */
+  public function change_method_throws_an_exception_if_the_given_database_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->pgsql->change('unknown_db');
+  }
+
   /** @test */
   public function createPgsqlDatabase_method_creates_a_database()
   {
-    $this->dropDatabaseIfExists('new_db');
+    $this->dropDatabaseIfExists($this->db2);
 
     $method = $this->getNonPublicMethod('createPgsqlDatabase');
 
-    $method->invoke($this->pgsql, 'new_db');
+    $method->invoke($this->pgsql, $this->db2);
 
-    $this->assertTrue(in_array('new_db', $this->pgsql->getDatabases()));
-
-    $this->dropDatabaseIfExists('new_db');
+    $this->assertTrue(in_array($this->db2, $this->pgsql->getDatabases()));
   }
 
   /** @test */
   public function createDatabase_method_creates_a_database()
   {
-    $this->dropDatabaseIfExists('new_db');
+    $this->pgsql->createDatabase($this->db2);
 
-    $this->pgsql->createDatabase('new_db');
+    $this->assertTrue(in_array($this->db2, $this->pgsql->getDatabases()));
+  }
 
-    $this->assertTrue(in_array('new_db', $this->pgsql->getDatabases()));
+  /** @test */
+  public function dropDatabase_method_drops_the_given_database()
+  {
+    $this->createDatabase($this->db2);
 
-    $this->dropDatabaseIfExists('new_db');
+    $this->assertTrue(
+      $this->pgsql->dropDatabase($this->db2)
+    );
+
+    // Try and connect to the db
+    $db_cfg = $this->getDbConfig();
+    $db_cfg['db'] = $this->db2;
+
+    try {
+      new Pgsql($db_cfg);
+    } catch (\Exception $e) {
+      $error = true;
+    }
+
+    $this->assertTrue(isset($error) && $error === true);
+  }
+
+  /** @test */
+  public function dropDatabase_method_drop_the_given_database_when_there_is_active_connection_to_it()
+  {
+    $this->createDatabase($this->db2);
+
+    // Connect to the database
+    $db_cfg = $this->getDbConfig();
+    $db_cfg['db'] = $this->db2;
+
+    new Pgsql($db_cfg);
+
+    $this->assertTrue(
+      $this->pgsql->dropDatabase($this->db2)
+    );
+
+    // Try and connect to the db again
+    try {
+      new Pgsql($db_cfg);
+    } catch (\Exception $e) {
+      $error = true;
+    }
+
+    $this->assertTrue(isset($error) && $error === true);
+  }
+
+  /** @test */
+  public function dropDatabase_throws_an_exception_when_the_given_database_same_as_the_current_database()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->pgsql->dropDatabase($this->getDbConfig()['db']);
   }
 
   /**
@@ -355,14 +491,34 @@ RESULT;
     );
   }
 
+  /** @test */
+  public function getTables_method_returns_table_names_of_another_database_as_array()
+  {
+    $this->createDatabase('another_db');
+
+    $db_config = $this->getDbConfig();
+    $db_config['db'] = 'another_db';
+
+    $new_pgsql = new Pgsql($db_config);
+
+    $this->createTable('history', function () {
+      return 'id INT PRIMARY KEY';
+    }, $new_pgsql);
+
+    $this->assertSame(
+      ['history'],
+      $this->pgsql->getTables('another_db')
+    );
+
+    $this->dropDatabaseIfExists('another_db');
+  }
+
   /**
    * @test
    * @depends createDatabase_method_creates_a_database
    */
   public function getDatabases_returns_database_names_as_array()
   {
-    $this->dropDatabaseIfExists('bbn_test_2');
-
     $this->pgsql->createDatabase('bbn_test_2');
 
     $result = $this->pgsql->getDatabases();

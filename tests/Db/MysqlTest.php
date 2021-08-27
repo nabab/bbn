@@ -71,6 +71,9 @@ class MysqlTest extends TestCase
       $res = explode('=', $item);
       $key  = $res[0];
       $value = $res[1] ?? "";
+      if (empty($key) || empty($value)) {
+        continue;
+      }
       @putenv("$key=$value");
     }
 
