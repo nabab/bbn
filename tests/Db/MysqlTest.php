@@ -70,8 +70,8 @@ class MysqlTest extends TestCase
     foreach (explode(PHP_EOL, $env) as $item) {
       $res = explode('=', $item);
       $key  = $res[0];
-      $value = $res[1];
-      putenv("$key=$value");
+      $value = $res[1] ?? "";
+      @putenv("$key=$value");
     }
 
     self::$cache_mock = \Mockery::mock(Cache::class);
@@ -112,7 +112,8 @@ class MysqlTest extends TestCase
       'pass'          => getenv('db_pass'),
       'db'            => getenv('db_name'),
       'cache_length'  => 3000,
-      'on_error'      => Errors::E_STOP
+      'on_error'      => Errors::E_STOP,
+      'force_host'    => true
     );
   }
 
@@ -272,6 +273,7 @@ class MysqlTest extends TestCase
 
     $this->assertSame(3000, $this->getNonPublicProperty('cache_renewal'));
     $this->assertSame(Errors::E_STOP, $this->getNonPublicProperty('on_error'));
+    $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
   }
 
   /** @test */
@@ -1494,7 +1496,7 @@ first_name ASC';
       ]
     ];
 
-    self::$mysql->getCreate('users', $cfg);
+    self::$mysql->getCreateTable('users', $cfg);
   }
 
   /** @test */
@@ -1861,7 +1863,7 @@ first_name ASC';
 
 
   /** @test */
-  public function createIndex_method_created_index_for_the_givens_table_and_columns()
+  public function createIndex_method_creates_index_for_the_givens_table_and_columns()
   {
     $this->createTable('users', function () {
       return "`email` varchar(255) NOT NULL";
@@ -1877,15 +1879,16 @@ first_name ASC';
     // Another test with a not unique key
     $this->clearCache();
     $this->createTable('users', function () {
-      return "`email` varchar(255) NOT NULL";
+      return "`email` varchar(255) NOT NULL,
+              `username` varchar(20) NOT NULL";
     });
 
-    $result2 = self::$mysql->createIndex('users', 'email', false, 20);
+    $result2 = self::$mysql->createIndex('users', ['email', 'username'], false, 20);
     $model2  = $this->getTableStructure('users');
 
     $this->assertTrue($result2);
-    $this->assertTrue(isset($model2['keys']['users_email']['unique']));
-    $this->assertSame(0, $model2['keys']['users_email']['unique']);
+    $this->assertTrue(isset($model2['keys']['users_email_username']['unique']));
+    $this->assertSame(0, $model2['keys']['users_email_username']['unique']);
   }
 
   /** @test */
@@ -1918,20 +1921,6 @@ first_name ASC';
     $this->assertArrayNotHasKey('users_email', $model['keys']);
   }
 
-  /** @test */
-  public function deleteIndex_method_returns_false_when_the_given_key_has_a_not_valid_name()
-  {
-    $mysql = \Mockery::mock(Mysql::class)->makePartial();
-
-    $mysql->shouldReceive('tableFullName')
-      ->once()
-      ->with('users' ,true)
-      ->andReturnNull();
-
-    $this->assertFalse(
-      $mysql->deleteIndex('users', 'email')
-    );
-  }
   /** @test */
   public function deleteIndex_method_returns_false_when_table_full_name_cannot_be_retrieved()
   {
@@ -2204,6 +2193,45 @@ first_name ASC';
 
     $this->assertIsString($result);
     $this->assertSame(32, strlen($result));
+  }
+
+  /** @test */
+  public function createTable_method_returns_a_string_of_create_table_statement_from_given_arguments()
+  {
+    $columns = [
+      'email' => [
+        'name' => 'email',
+        'type' => 'text',
+        'maxlength' => 255
+      ],
+      'id' => [
+        'type' => 'int',
+
+      ],
+      'name' => [
+        'null'=> true,
+        'default' => 'NULL'
+      ],
+      'balance' => [
+        'type' => 'decimal',
+        'values' => '(10,2)',
+        'default' => 0
+      ],
+      'invalid_name***' => [
+        'type' => 'text'
+      ]
+    ];
+
+    $expected = 'CREATE TABLE users (
+"email" text(255) NOT NULL,
+"id" int UNSIGNED NOT NULL,
+"balance" decimal NOT NULL DEFAULT \'0\'
+); ENGINE=InnoDB DEFAULT CHARSET=utf8";';
+
+    $this->assertSame(
+      $expected,
+      self::$mysql->createTable('users', $columns)
+    );
   }
 
   /** @test */
@@ -3819,8 +3847,8 @@ GROUP BY `id`
       );
   }
 
-  /** @testing */
-  public function hasIdIncrement_method_returns_if_the_given_table_has_auto_increment_fields()
+  /** @test */
+  public function hasIdIncrement_method_returns_true_if_the_given_table_has_auto_increment_fields()
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(255)';
@@ -4154,9 +4182,9 @@ GROUP BY `id`
   {
     $this->createTable('users', function () {
       return 'username VARCHAR(22) NOT NULL, 
-      email VARCHAR(100) UNIQUE NOT NULL,
+      email VARCHAR(100) NOT NULL,
       name VARCHAR(200) NOT NULL,
-      UNIQUE INDEX (username, email)';
+      UNIQUE INDEX (email)';
     });
 
     $this->assertSame(
@@ -8356,6 +8384,7 @@ GROUP BY `id`
     self::$cache_mock->shouldReceive('set')
       ->once()
       ->with(
+        Str::encodeFilename(str_replace('\\', '/', \get_class(self::$mysql)), true).'/' .
         "mysql/{$db_config['user']}@{$db_config['host']}/{$db_config['db']}/users",
         $expected = [
           'keys' => [],
@@ -8389,6 +8418,98 @@ GROUP BY `id`
     $this->assertSame(
       'mysql',
       self::$mysql->getEngine()
+    );
+  }
+
+  /** @test */
+  public function arrangeConditions_method_test()
+  {
+    $cfg = [
+      'available_fields' => [
+        'users.username' => 'username',
+        'users.id' => 'id',
+        'name' => 'name'
+      ],
+      'tables' => ['users' => 'users']
+    ];
+
+    $conditions = [
+      'conditions' => [[
+        'field' => 'username'
+      ],[
+        'field' => 'name'
+      ],[
+        'conditions' => [[
+          'field' => 'id'
+        ]]
+      ]]
+    ];
+
+    $expected = [
+      'conditions' => [[
+        'field' => 'users.username'
+      ],[
+        'field' => 'name'
+      ],[
+        'conditions' => [[
+          'field' => 'users.id'
+        ]]
+      ]]
+    ];
+
+    self::$mysql->arrangeConditions($conditions, $cfg);
+
+    $this->assertSame($expected, $conditions);
+  }
+
+  /** @test */
+  public function removeVirtual_method_test()
+  {
+    $cfg = [
+      'fields' => [
+        'username', 'id'
+      ],
+      'values' => [
+        'jdoe', 1
+      ],
+      'available_fields' => [
+        'username' => 'username'
+      ],
+      'models' => [
+        'username' => [
+          'fields' => [
+            'username' => [
+              'virtual' => true
+            ]
+          ]
+        ]
+      ]
+    ];
+
+    $expected = [
+      'fields' => [
+        'id'
+      ],
+      'values' => [
+        1
+      ],
+      'available_fields' => [
+        'username' => 'username'
+      ],
+      'models' => [
+        'username' => [
+          'fields' => [
+            'username' => [
+              'virtual' => true
+            ]
+          ]
+        ]
+      ]
+    ];
+
+    $this->assertSame(
+      $expected,
+      self::$mysql->removeVirtual($cfg)
     );
   }
 }

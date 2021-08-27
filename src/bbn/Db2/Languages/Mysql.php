@@ -88,7 +88,7 @@ class Mysql extends Sql
     $cfg['code_db']   = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
     $params           = ['mysql:host='
-        .(in_array($cfg['host'], ['localhost', '127.0.0.1']) ? gethostname() : $cfg['host'])
+        .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
         .';port='.$cfg['port']
         .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
@@ -97,7 +97,7 @@ class Mysql extends Sql
     ];
 
     try {
-
+      $this->cacheInit();
       $this->current  = $cfg['db'] ?? null;
       $this->host     = $cfg['host'] ?? '127.0.0.1';
       $this->username = $cfg['user'] ?? null;
@@ -440,7 +440,6 @@ MYSQL
    * @param string $charset
    * @param string $engine
    * @return string
-   * //TODO-testing: Is this needed, another method exists getCreateTable
    */
   public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
   {
@@ -497,56 +496,6 @@ MYSQL
   {
     return;
   }
-
-
-  /**
-   * @param array $cfg
-   * @return array
-   */
-  public function getQueryValues(array $cfg): array
-  {
-    $res = [];
-    if (!empty($cfg['values'])) {
-      foreach ($cfg['values'] as $i => $v) {
-        // Transforming the values if needed
-        if (($cfg['values_desc'][$i]['type'] === 'binary')
-          && ($cfg['values_desc'][$i]['maxlength'] === 16)
-          && Str::isUid($v)
-        ) {
-          $res[] = hex2bin($v);
-        }
-        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
-              && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
-              && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
-              && (\strlen($v) < 19))            )
-        ) {
-          $res[] = $v.'%';
-        }
-        elseif (!empty($cfg['values_desc'][$i]['operator'])) {
-          switch ($cfg['values_desc'][$i]['operator']){
-            case 'contains':
-            case 'doesnotcontain':
-              $res[] = '%'.$v.'%';
-              break;
-            case 'startswith':
-              $res[] = $v.'%';
-              break;
-            case 'endswith':
-              $res[] = '%'.$v;
-              break;
-            default:
-              $res[] = $v;
-          }
-        }
-        else{
-          $res[] = $v;
-        }
-      }
-    }
-
-    return $res;
-  }
-
 
   /****************************************************************
    *                                                              *
@@ -887,104 +836,273 @@ MYSQL
   }
 
   /**
-   * Returns an array of fields for the given table(s).
-   *
-   * ```php
-   * X::dump($db->getFieldsList("table_users"));
-   * // (array) ['table_users.username', 'table_users.name']
-   * ```
-   *
-   * @param $tables
-   * @return array
+   * @param null|string $table The table for which to create the statement
+   * @return string
+   */
+  public function getRawCreate(string $table): string
+  {
+    if (($table = $this->tableFullName($table, true))
+      && ($r = $this->rawQuery("SHOW CREATE TABLE $table"))
+    ) {
+      return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
+    }
+
+    return '';
+  }
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
    * @throws \Exception
    */
-  public function getFieldsList($tables): array
+  public function getCreateTable(string $table, array $model = null): string
   {
-    $res = [];
-    if (!\is_array($tables)) {
-      $tables = [$tables];
+    if (!$model) {
+      $model = $this->modelize($table);
     }
 
-    foreach ($tables as $t){
-      if (!($model = $this->getColumns($t))) {
-        $this->error('Impossible to find the table '.$t);
-        throw new \Exception(X::_('Impossible to find the table ').$t);
+    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
+    $done = false;
+    foreach ($model['fields'] as $name => $col) {
+      if (!$done) {
+        $done = true;
+      }
+      else {
+        $st .= ',' . PHP_EOL;
       }
 
-      foreach (array_keys($model) as $f){
-        $res[] = $this->colFullName($f, $t);
+      $st .= '  ' . $this->escape($name) . ' ';
+      if (!in_array($col['type'], self::$types)) {
+        if (isset(self::$interoperability[$col['type']])) {
+          $st .= self::$interoperability[$col['type']];
+        }
+        else {
+          throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
+        }
       }
-    }
+      else {
+        $st .= $col['type'];
+      }
 
-    return $res;
-  }
+      if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
+        if (empty($col['extra'])) {
+          throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
+        }
 
+        $st .= ' (' . $col['extra'] . ')';
+      }
+      elseif (!empty($col['maxlength'])) {
+        $st .= '(' . $col['maxlength'];
+        if (!empty($col['decimals'])) {
+          $st .= ',' . $col['decimals'];
+        }
 
-  /**
-   * Return primary keys of a table as a numeric array.
-   *
-   * ```php
-   * X::dump($db-> get_primary('table_users'));
-   * // (array) ["id"]
-   * ```
-   *
-   * @param string $table The table's name
-   * @return array
-   */
-  public function getPrimary(string $table): array
-  {
-    if (($keys = $this->getKeys($table)) && isset($keys['keys']['PRIMARY'])) {
-      return $keys['keys']['PRIMARY']['columns'];
-    }
+        $st .= ')';
+      }
 
-    return [];
-  }
+      if (in_array($col['type'], self::$numeric_types)
+        && empty($col['signed'])
+      ) {
+        $st .= ' UNSIGNED';
+      }
 
-  /**
-   * Return the unique primary key of the given table.
-   *
-   * ```php
-   * X::dump($db->getUniquePrimary('table_users'));
-   * // (string) id
-   * ```
-   *
-   * @param string $table The table's name
-   * @return null|string
-   */
-  public function getUniquePrimary(string $table): ?string
-  {
-    if (($keys = $this->getKeys($table))
-      && isset($keys['keys']['PRIMARY'])
-      && (\count($keys['keys']['PRIMARY']['columns']) === 1)
-    ) {
-      return $keys['keys']['PRIMARY']['columns'][0];
-    }
+      if (empty($col['null'])) {
+        $st .= ' NOT NULL';
+      }
 
-    return null;
-  }
-
-  /**
-   * Return the unique keys of a table as a numeric array.
-   *
-   * ```php
-   * X::dump($db->getUniqueKeys('table_users'));
-   * // (array) ["userid", "userdataid"]
-   * ```
-   *
-   * @param string $table The table's name
-   * @return array
-   */
-  public function getUniqueKeys(string $table): array
-  {
-    if ($ks = $this->getKeys($table)) {
-      foreach ($ks['keys'] as $k){
-        if ($k['unique']) {
-          return $k['columns'];
+      if (!empty($col['virtual'])) {
+        $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
+      } elseif (array_key_exists('default', $col)) {
+        $st .= ' DEFAULT ';
+        if (($col['default'] === 'NULL')
+          || Str::isNumber($col['default'])
+          || strpos($col['default'], '(')
+          || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+        ) {
+          $st .= (string)$col['default'];
+        } else {
+          $st .= $col['default'];
         }
       }
     }
 
-    return [];
+    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+    return $st;
+  }
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
+  public function getCreateKeys(string $table, array $model = null): string
+  {
+    $st = '';
+    if (!$model) {
+      $model = $this->modelize($table);
+    }
+
+    if ($model && !empty($model['keys'])) {
+      $st   .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $last  = count($model['keys']) - 1;
+
+      $i     = 0;
+      foreach ($model['keys'] as $name => $key) {
+        $st .= '  ADD ';
+        if (!empty($key['unique'])
+          && isset($model['fields'][$key['columns'][0]])
+          && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
+        ) {
+          $st .= 'PRIMARY KEY';
+        } elseif (!empty($key['unique'])) {
+          $st .= 'UNIQUE KEY ' . $this->escape($name);
+        } else {
+          $st .= 'KEY ' . $this->escape($name);
+        }
+
+        $st .= ' (' . implode(
+            ',', array_map(
+              function ($a) {
+                return $this->escape($a);
+              }, $key['columns']
+            )
+          ) . ')';
+        $st .= $i === $last ? ';' : ',' . PHP_EOL;
+        $i++;
+      }
+    }
+
+    return $st;
+  }
+
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
+  public function getCreate(string $table, array $model = null): string
+  {
+    $st = '';
+    if (!$model) {
+      $model = $this->modelize($table);
+    }
+
+    if ($st = $this->getCreateTable($table, $model)) {
+
+      if (empty($model['keys'])) {
+        return $st;
+      }
+
+      $lines = X::split($st, PHP_EOL);
+      $end   = array_pop($lines);
+      $st    = X::join($lines, PHP_EOL);
+
+      foreach ($model['keys'] as $name => $key) {
+        $st .= ',' . PHP_EOL . '  ';
+        if (
+          !empty($key['unique']) &&
+          (count($key['columns']) === 1) &&
+          isset($model['fields'][$key['columns'][0]]) &&
+          isset($model['fields'][$key['columns'][0]]['key']) &&
+          $model['fields'][$key['columns'][0]]['key'] === 'PRI'
+        ) {
+          $st .= 'PRIMARY KEY';
+        } elseif (!empty($key['unique'])) {
+          $st .= 'UNIQUE KEY ' . $this->escape($name);
+        } else {
+          $st .= 'KEY ' . $this->escape($name);
+        }
+
+        $st   .= ' (' . implode(
+            ',', array_map(
+              function ($a) {
+                return $this->escape($a);
+              }, $key['columns']
+            )
+          ) . ')';
+      }
+
+      // For avoiding constraint names conflicts
+      $keybase = strtolower(Str::genpwd(8, 4));
+      $i       = 1;
+      foreach ($model['keys'] as $name => $key) {
+        if (!empty($key['ref_table']) && !empty($key['ref_column'])) {
+          $st .= ',' . PHP_EOL . '  ' .
+            'CONSTRAINT ' . $this->escape($keybase.$i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
+            'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
+            (!empty($key['delete']) ? ' ON DELETE ' . $key['delete'] : '') .
+            (!empty($key['update']) ? ' ON UPDATE ' . $key['update'] : '');
+          $i++;
+        }
+      }
+
+      $st .= PHP_EOL . $end;
+    }
+
+    return $st;
+  }
+
+  /**
+   * Creates an index
+   *
+   * @param null|string $table
+   * @param string|array $column
+   * @param bool $unique
+   * @param null $length
+   * @return bool
+   * @throws \Exception
+   */
+  public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
+  {
+    $column = (array)$column;
+    if ($length) {
+      $length = (array)$length;
+    }
+
+    $name = Str::encodeFilename($table);
+    if ($table = $this->tableFullName($table, true)) {
+      foreach ($column as $i => $c) {
+        if (!Str::checkName($c)) {
+          $this->error("Illegal column $c");
+        }
+
+        $name      .= '_' . $c;
+        $column[$i] = $this->escape($column[$i]);
+        if (isset($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
+          $column[$i] .= '(' . $length[$i] . ')';
+        }
+      }
+
+      $name = Str::cut($name, 50);
+      return (bool)$this->rawQuery(
+        'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
+        implode(', ', $column) . ' )'
+      );
+    }
+
+    return false;
+  }
+
+  /**
+   * Deletes an index
+   *
+   * @param null|string $table
+   * @param string $key
+   * @return bool
+   * @throws \Exception
+   */
+  public function deleteIndex(string $table, string $key): bool
+  {
+    if (($table = $this->tableFullName($table, true))
+      && Str::checkName($key)
+    ) {
+      return (bool)$this->rawQuery("ALTER TABLE $table DROP INDEX `$key`");
+    }
+
+    return false;
   }
 
   public function __toString()
