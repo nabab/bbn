@@ -161,7 +161,7 @@ JAVASCRIPT;
         case 'css':
           return $this->_content;
         case 'less':
-          $less = new \lessc();
+          $less = new \bbn\Compilers\Less();
           return $less->compile($this->_content);
         case 'scss':
           $scss = new \Leafo\ScssPhp\Compiler();

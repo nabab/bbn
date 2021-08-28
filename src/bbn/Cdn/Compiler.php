@@ -171,7 +171,7 @@ class Compiler extends bbn\Models\Cls\Basic
           break;
 
         case 'less':
-          $less = new \lessc();
+          $less = new \bbn\Compilers\Less();
           $less->setImportDir([\dirname($this->fpath.$file)]);
           try {
             $c = $less->compile($c);

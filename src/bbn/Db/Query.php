@@ -176,17 +176,17 @@ class Query extends \PDOStatement implements Actions
    * @param bool $ctor_args
    * @return bool|array
    */
-  public function fetchAll($fetch_style = \PDO::FETCH_BOTH, $fetch_argument = false, $ctor_args = false)
+  public function _fetchAll($fetch_style = \PDO::FETCH_BOTH, $fetch_argument = false, $ctor_args = false)
   {
     $this->execute();
     if ($ctor_args) {
-      $res = parent::fetchAll($fetch_style,$fetch_argument,$ctor_args);
+      $res = $this->fetchAll($fetch_style, $fetch_argument, $ctor_args);
     }
     elseif ($fetch_argument) {
-      $res = parent::fetchAll($fetch_style,$fetch_argument);
+      $res = $this->fetchAll($fetch_style, $fetch_argument);
     }
     else{
-      $res = parent::fetchAll($fetch_style);
+      $res = $this->fetchAll($fetch_style);
     }
 
     return bbn\Str::correctTypes($res);
@@ -266,7 +266,7 @@ class Query extends \PDOStatement implements Actions
   public function getRows(): ?array
   {
     if (!$this->write) {
-      $r = $this->fetchAll(\PDO::FETCH_ASSOC);
+      $r = $this->_fetchAll(\PDO::FETCH_ASSOC);
       return $r === false ? null : $r;
     }
 
@@ -293,7 +293,7 @@ class Query extends \PDOStatement implements Actions
   public function getIrows(): ?array
   {
     if (!$this->write) {
-      return $this->fetchAll(\PDO::FETCH_NUM);
+      return $this->_fetchAll(\PDO::FETCH_NUM);
     }
 
     return null;
@@ -307,7 +307,7 @@ class Query extends \PDOStatement implements Actions
   {
     if (!$this->write) {
       $r  = [];
-      $ds = $this->fetchAll(\PDO::FETCH_ASSOC);
+      $ds = $this->_fetchAll(\PDO::FETCH_ASSOC);
       foreach ($ds as $d){
         foreach ($d as $k => $v){
           if (!isset($r[$k])) {
@@ -353,7 +353,7 @@ class Query extends \PDOStatement implements Actions
   public function getObjects(): ?array
   {
     if (!$this->write) {
-      return $this->fetchAll(\PDO::FETCH_OBJ);
+      return $this->_fetchAll(\PDO::FETCH_OBJ);
     }
 
     return null;

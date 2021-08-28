@@ -535,7 +535,7 @@ MYSQL
         function ($a) {
           return $a['Database'];
         }, array_filter(
-          $r->fetchAll(\PDO::FETCH_ASSOC), function ($a) {
+          $this->fetchAllResults($r, \PDO::FETCH_ASSOC), function ($a) {
           return ($a['Database'] === 'information_schema') || ($a['Database'] === 'mysql') ? false : 1;
         }
         )
@@ -586,7 +586,7 @@ MYSQL
 
     $t2 = [];
     if (($r = $this->rawQuery("SHOW TABLES FROM `$database`"))
-      && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
+      && ($t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];
@@ -922,7 +922,7 @@ MYSQL
         ) {
           $st .= (string)$col['default'];
         } else {
-          $st .= $col['default'];
+          $st .= "'" . trim($col['default'], "'") . "'";
         }
       }
     }

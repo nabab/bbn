@@ -346,7 +346,7 @@ class Sqlite extends Sql
       FROM '.$database.'"sqlite_master"
         WHERE type = \'table\''
     ) )
-        && $t1 = $r->fetchAll(\PDO::FETCH_NUM)
+        && $t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM)
     ) {
       foreach ($t1 as $t){
         if (strpos($t[0], 'sqlite') !== 0) {
