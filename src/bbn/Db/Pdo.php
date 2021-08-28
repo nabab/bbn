@@ -2,7 +2,7 @@
 /**
  * @package db
  */
-namespace bbn\Db2;
+namespace bbn\Db;
 
 /**
  * DB Interface

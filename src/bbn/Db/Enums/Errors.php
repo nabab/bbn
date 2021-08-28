@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Db2\Enums;
+namespace bbn\Db\Enums;
 
 class Errors
 {

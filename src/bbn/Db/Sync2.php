@@ -93,7 +93,7 @@ class Sync2 extends bbn\Models\Cls\Db
    */
   private $max_retry = 5;
 
-  public function __construct(Db $db, array $tables, array $sync_cfg = null, array $arch = [])
+  public function __construct(Db2 $db, array $tables, array $sync_cfg = null, array $arch = [])
   {
     parent::__construct($db);
     Singleton::init($this);
@@ -163,7 +163,7 @@ class Sync2 extends bbn\Models\Cls\Db
         $this->tables[$i] = $this->current_connection->tableFullName($t);
       }
       $this->current_connection->setTrigger(
-        '\\bbn\Db\\sync::trigger',
+        '\\bbn\Db2\\sync::trigger',
         ['delete', 'update', 'insert'],
         ['before', 'after'],
         $this->tables

@@ -3,8 +3,8 @@
 namespace Db;
 
 use bbn\Cache;
-use bbn\Db2\Enums\Errors;
-use bbn\Db2\Languages\Pgsql;
+use bbn\Db\Enums\Errors;
+use bbn\Db\Languages\Pgsql;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;

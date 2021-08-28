@@ -1,8 +1,8 @@
 <?php
 
-namespace bbn\Db2;
+namespace bbn\Db;
 
-use bbn\Db2\Enums\Errors;
+use bbn\Db\Enums\Errors;
 use bbn\Str;
 use bbn\X;
 

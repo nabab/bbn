@@ -3,9 +3,9 @@
 namespace Db;
 
 use bbn\Cache;
-use bbn\Db2\Enums\Errors;
-use bbn\Db2\Languages\Mysql;
-use bbn\Db2\Query;
+use bbn\Db\Enums\Errors;
+use bbn\Db\Languages\Mysql;
+use bbn\Db\Query;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
