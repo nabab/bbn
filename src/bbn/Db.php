@@ -66,7 +66,7 @@ class Db implements Db\Actions
       }
       else {
         $engine = $cfg['engine'];
-        $cls    = '\\bbn\\Db2\\Languages\\'.ucwords($engine);
+        $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
 
         if (!class_exists($cls)) {
           throw new \Exception(X::_("The database engine %s is not recognized", $engine));
@@ -175,7 +175,7 @@ class Db implements Db\Actions
    */
   public function isAggregateFunction(string $f): bool
   {
-    $cls = '\\bbn\\Db2\\languages\\'.$this->engine;
+    $cls = '\\bbn\\Db\\languages\\'.$this->engine;
     return $cls::isAggregateFunction($f);
   }
 
@@ -1777,7 +1777,7 @@ class Db implements Db\Actions
    * X::dump($db->query("DELETE FROM table_users WHERE name LIKE '%lucy%'"));
    * // (int) 3
    * X::dump($db->query("SELECT * FROM table_users WHERE name = 'John"));
-   * // (bbn\Db2\Query) Object
+   * // (bbn\Db\Query) Object
    * ```
    *
    * @param array|string $statement

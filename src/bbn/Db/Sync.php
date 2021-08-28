@@ -112,7 +112,7 @@ class Sync
    * @param string  $sync_table
    * @return void
    */
-  public static function init(Db2 $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void
+  public static function init(Db $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void
   {
     if (self::$is_init) {
       throw new \Exception("Impossible to init twice the dbsync class");
@@ -164,7 +164,7 @@ class Sync
         self::$tables[$i] = self::$current_connection->tfn($t);
       }
       self::$current_connection->setTrigger(
-        '\\bbn\Db2\\sync::trigger',
+        '\\bbn\Db\\sync::trigger',
         ['delete', 'update', 'insert'],
         ['before', 'after'],
         self::$tables

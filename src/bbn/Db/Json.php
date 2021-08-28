@@ -16,7 +16,7 @@ use bbn;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
  */
-class Json //implements bbn\Db2\Api
+class Json //implements bbn\Db\Api
 {
   private $db;
   
