@@ -116,6 +116,8 @@ class Pgsql extends Sql
     'VARIANCE',
   ];
 
+  /** @var string The quote character */
+  public $qte = '';
 
   /**
    * Constructor
@@ -344,7 +346,7 @@ class Pgsql extends Sql
                                                 WHERE datname = '$database'");
 
         if ($active_connections->rowCount() > 0) {
-          // Close all connections
+          // Close all active connections
           $this->rawQuery("SELECT pg_terminate_backend (pg_stat_activity.pid)
                             FROM pg_stat_activity
                             WHERE pg_stat_activity.datname = '$database'");
@@ -372,22 +374,20 @@ class Pgsql extends Sql
    */
   public function createUser(string $user, string $pass, string $db = null): bool
   {
-    if (null === $db) {
-      $db = $this->getCurrent();
-    }
-
-    if (($db = $this->escape($db))
-      && bbn\Str::checkName($user, $db)
+    if (bbn\Str::checkName($user)
       && (strpos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
-        <<<MYSQL
-CREATE USER '$user'@'{$this->getHost()}' IDENTIFIED BY '$pass';
-GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
-ON $db . *
-TO '$user'@'{$this->getHost()}';
-MYSQL
-      );
+        <<<PGSQL
+CREATE USER $user WITH PASSWORD '$pass' CREATEDB;
+PGSQL
+      ) &&
+        (bool)$this->rawQuery(
+          <<<PGSQL
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "public" TO $user;
+PGSQL
+
+        );
     }
 
     return false;
@@ -404,9 +404,8 @@ MYSQL
   public function deleteUser(string $user): bool
   {
     if (bbn\Str::checkName($user)) {
-      $host = $this->getHost();
-      $this->rawQuery("REVOKE ALL PRIVILEGES ON *.* FROM '$user'@'$host'");
-      return (bool)$this->rawQuery("DROP USER '$user'@'$host'");
+      $this->rawQuery("REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA \"public\" FROM $user");
+      return (bool)$this->rawQuery("DROP USER $user");
     }
 
     return false;
@@ -414,6 +413,8 @@ MYSQL
 
 
   /**
+   * Return an array of users.
+   *
    * @param string $user
    * @param string $host
    * @return array|null
@@ -424,27 +425,19 @@ MYSQL
     if ($this->check()) {
       $cond = '';
       if (!empty($user) && bbn\Str::checkName($user)) {
-        $cond .= " AND  user LIKE '$user' ";
-      }
-
-      if (!empty($host) && bbn\Str::checkName($host)) {
-        $cond .= " AND  host LIKE '$host' ";
+        $cond .= " AND user LIKE '$user' ";
       }
 
       $us = $this->getRows(
-        <<<MYSQL
-SELECT DISTINCT host, user
-FROM mysql.user
-WHERE 1
+        <<<PSQL
+SELECT usename AS user FROM pg_catalog.pg_user
+WHERE 1 = 1
 $cond
-MYSQL
+PSQL
       );
       $q  = [];
       foreach ($us as $u) {
-        $gs = $this->getColArray("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
-        foreach ($gs as $g) {
-          $q[] = $g;
-        }
+        $q[] = $u['user'];
       }
 
       return $q;
@@ -464,26 +457,38 @@ MYSQL
    */
   public function dbSize(string $database = '', string $type = ''): int
   {
-    $cur = null;
     if ($database && ($this->getCurrent() !== $database)) {
-      $cur = $this->getCurrent();
-      $this->change($database);
+      return $this->newInstance(
+        array_merge($this->cfg, ['db' => $database])
+      )
+        ->dbSize($database, $type);
     }
 
-    $q    = $this->query('SHOW TABLE STATUS');
     $size = 0;
-    while ($row = $q->getRow()) {
-      if (!$type || ($type === 'data')) {
-        $size += $row['Data_length'];
+
+    if ($tables = $this->getTables()) {
+      if ($type === 'data') {
+        $function = "pg_relation_size";
+      }
+      elseif ($type === 'index') {
+        $function = "pg_indexes_size";
+      }
+      else {
+        $function = "pg_total_relation_size";
       }
 
-      if (!$type || ($type === 'index')) {
-        $size += $row['Index_length'];
+      $query = "SELECT ";
+      $args  = [];
+      foreach ($tables as $table) {
+        $query .= "$function(?), ";
+        $args[] = $table;
       }
-    }
 
-    if ($cur !== null) {
-      $this->change($cur);
+      $table_sizes = $this->getRow(trim($query, ', '), ...$args);
+
+      foreach ($table_sizes as $table_size) {
+        $size += $table_size;
+      }
     }
 
     return $size;
@@ -502,19 +507,24 @@ MYSQL
   {
     $size = 0;
     if (bbn\Str::checkName($table)) {
-      $row = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+
+      if ($type === 'data') {
+        $function = "pg_relation_size";
+      }
+      elseif ($type === 'index') {
+        $function = "pg_indexes_size";
+      }
+      else {
+        $function = "pg_total_relation_size";
+      }
+
+      $row = $this->getRow("SELECT $function(?)", $table);
 
       if (!$row) {
         throw new \Exception(X::_('Table ') . $table . X::_(' Not found'));
       }
 
-      if (!$type || (strtolower($type) === 'index')) {
-        $size += $row['Index_length'];
-      }
-
-      if (!$type || (strtolower($type) === 'data')) {
-        $size += $row['Data_length'];
-      }
+      $size = current(array_values($row));
     }
 
     return $size;
@@ -526,23 +536,28 @@ MYSQL
    *
    * @param string $table
    * @param string $database
-   * @return mixed
+   * @return array|false|null
    * @throws \Exception
    */
   public function status(string $table = '', string $database = '')
   {
-    $cur = null;
     if ($database && ($this->getCurrent() !== $database)) {
-      $cur = $this->getCurrent();
-      $this->change($database);
+      return $this->newInstance(
+        array_merge($this->cfg, ['db' => $database])
+      )
+        ->status($table, $database);
     }
 
-    $r = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
-    if (null !== $cur) {
-      $this->change($cur);
+    $query = "SELECT *
+              FROM pg_catalog.pg_tables
+              WHERE schemaname != 'pg_catalog' 
+              AND schemaname != 'information_schema'";
+
+    if (!empty($table)) {
+      $query .= " AND tablename LIKE ?";
     }
 
-    return $r;
+    return $this->getRow($query, !empty($table) ? $table : []);
   }
 
 
@@ -555,7 +570,8 @@ MYSQL
   {
     $uid = null;
     while (!bbn\Str::isBuid(hex2bin($uid))) {
-      $uid = $this->getOne("SELECT replace(uuid(),'-','')");
+      $uid = $this->getOne("SELECT gen_random_uuid()");
+      $uid = str_replace('-', '', $uid);
     }
 
     return $uid;
@@ -584,17 +600,18 @@ MYSQL
         } elseif (!empty($c['values']) && \is_array($c['values'])) {
           $st .= '(';
           foreach ($c['values'] as $i => $v) {
-            $st .= "'" . bbn\Str::escapeSquotes($v) . "'";
+            if (Str::isInteger($v)) {
+              $st .= bbn\Str::escapeSquotes($v);
+            }
+            else {
+              $st .= "'" . bbn\Str::escapeSquotes($v) . "'";
+            }
             if ($i < count($c['values']) - 1) {
               $st .= ',';
             }
           }
 
           $st .= ')';
-        }
-
-        if ((strpos($c['type'], 'int') !== false) && empty($c['signed'])) {
-          $st .= ' UNSIGNED';
         }
 
         if (empty($c['null'])) {
@@ -611,7 +628,7 @@ MYSQL
 
     if (count($lines)) {
       $sql = 'CREATE TABLE ' . $this->tableSimpleName($table_name, true) . ' (' . PHP_EOL . implode(',' . PHP_EOL, $lines) .
-        PHP_EOL . ') ENGINE=' . $engine . ' DEFAULT CHARSET=' . $charset . ';';
+        PHP_EOL . ');';
     }
 
     return $sql;
@@ -772,8 +789,9 @@ MYSQL
    *          ]
    * ```
    *
-   * @param null|string $table The table's name
+   * @param string $table The table's name
    * @return null|array
+   * @throws \Exception
    */
   public function getColumns(string $table): ?array
   {
@@ -835,30 +853,6 @@ MYSQL;
             }
           }
         }
-
-        /*
-        else{
-        preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
-        if ( strpos($row['Type'],'text') !== false ){
-        $r[$f]['type'] = 'text';
-        }
-        else if ( strpos($row['Type'],'blob') !== false ){
-        $r[$f]['type'] = 'blob';
-        }
-        else if ( strpos($row['Type'],'int(') !== false ){
-        $r[$f]['type'] = 'int';
-        }
-        else if ( strpos($row['Type'],'char(') !== false ){
-        $r[$f]['type'] = 'varchar';
-        }
-        if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
-        $r[$f]['maxlength'] = (int)$matches[1][0];
-        }
-        if ( !isset($r[$f]['type']) ){
-        $r[$f]['type'] = strpos($row['Type'], '(') ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
-        }
-        }
-        */
       }
     }
 
@@ -1231,6 +1225,22 @@ MYSQL
     }
 
     return false;
+  }
+
+  /**
+   * @param array $cfg
+   * @return self
+   * @throws \Exception
+   */
+  private function newInstance(array $cfg): self
+  {
+    $instance = new self($cfg);
+
+    if ($this->_fancy) {
+      $instance->startFancyStuff();
+    }
+
+    return $instance;
   }
 
   public function __toString()

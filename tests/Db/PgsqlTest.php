@@ -5,6 +5,7 @@ namespace Db;
 use bbn\Cache;
 use bbn\Db2\Enums\Errors;
 use bbn\Db2\Languages\Pgsql;
+use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
 
@@ -38,8 +39,11 @@ class PgsqlTest extends TestCase
       $res = explode('=', $item);
       $key  = $res[0];
       $value = $res[1] ?? "";
-      if (empty($key) || empty($value)) {
+      if (empty($key)) {
         continue;
+      }
+      if (empty($value)) {
+        $value = '';
       }
       @putenv("$key=$value");
     }
@@ -63,7 +67,7 @@ class PgsqlTest extends TestCase
   protected function tearDown(): void
   {
     \Mockery::close();
-    $this->dropAllTables();
+//    $this->dropAllTables();
     $this->dropDatabaseIfExists($this->db2);
   }
 
@@ -91,6 +95,40 @@ class PgsqlTest extends TestCase
     $this->dropTableIfExist($table, $obj);
 
     $obj->rawQuery("CREATE TABLE $table ($structure)");
+  }
+
+  protected function insertOne(string $table, array $params, ?Pgsql $pgsql = null)
+  {
+    $query = "INSERT INTO $table (";
+
+    foreach ($params as $column => $value) {
+      $query .= "$column,  ";
+    }
+
+    $query = rtrim($query, ', ');
+
+    $query .= ") VALUES (";
+
+    foreach ($params as $value) {
+      $query .= "'$value', ";
+    }
+
+    $query = rtrim($query, ', ') .  ")";
+
+    $obj = $pgsql ?? $this->pgsql;
+
+    $obj->rawQuery(rtrim($query, ', '));
+  }
+
+  protected function insertMany(string $table, array $params, ?Pgsql $pgsql = null)
+  {
+    foreach ($params as $fields) {
+      if (!is_array($fields)) {
+        continue;
+      }
+
+      $this->insertOne($table, $fields, $pgsql);
+    }
   }
 
   protected function createDatabase(string $database)
@@ -126,8 +164,10 @@ class PgsqlTest extends TestCase
   {
     $obj = $pgsql ?? $this->pgsql;
 
-    foreach ($obj->getTables() as $table) {
-      $this->dropTableIfExist($table, $obj);
+    if ($tables = $obj->getTables()) {
+      foreach ($tables as $table) {
+        $this->dropTableIfExist($table, $obj);
+      }
     }
   }
 
@@ -323,7 +363,7 @@ class PgsqlTest extends TestCase
 
     $expected = <<<RESULT
 (
-  `users`.`id` = ?
+  users.id = ?
   AND name = ?
   AND (created_at IS NULL
     OR updated_at IS NULL
@@ -472,6 +512,209 @@ RESULT;
     $this->pgsql->dropDatabase($this->getDbConfig()['db']);
   }
 
+  /** @test */
+  public function dropDatabase_method_throws_an_exception_when_the_given_name_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->pgsql->dropDatabase('db***');
+  }
+
+  /** @test */
+  public function dropDatabase_method_returns_false_if_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertFalse(
+      $this->pgsql->dropDatabase($this->getDbConfig()['db'])
+    );
+  }
+
+  /** @test */
+  public function createUser_method_creates_a_new_database_user()
+  {
+    try {
+      $this->pgsql->deleteUser('new_user');
+    } catch (\Exception $e) {
+
+    }
+
+    $this->createTable('users', function () {
+        return 'id INT PRIMARY KEY';
+    });
+
+    $this->assertTrue(
+      $this->pgsql->createUser('new_user', '123456')
+    );
+
+    // Connect with the new user
+    $cfg = $this->getDbConfig();
+    $cfg['user'] = 'new_user';
+    $cfg['pass'] = '123456';
+
+    $pgsql = new Pgsql($cfg);
+
+    $this->assertSame(
+      ['users'],
+      $pgsql->getTables(),
+    );
+
+    $this->pgsql->deleteUser('new_user');
+  }
+
+  /** @test */
+  public function createUser_method_returns_false_when_the_given_user_is_not_a_valid_name()
+  {
+    $this->assertFalse(
+      $this->pgsql->createUser('user***', '123')
+    );
+  }
+
+  public function createUser_method_returns_false_when_the_given_password_is_not_valid()
+  {
+    $this->assertFalse(
+      $this->pgsql->createUser('user', "123'")
+    );
+  }
+
+  /**
+   * @test
+   * @depends createUser_method_creates_a_new_database_user
+   */
+  public function deleteUser_method_deletes_the_given_user_from_database()
+  {
+    $this->pgsql->createUser('new_user', '12345');
+
+    $result = $this->pgsql->deleteUser('new_user');
+
+    $this->assertTrue($result);
+  }
+
+  /** @test */
+  public function deleteUser_method_returns_false_when_the_given_user_is_not_valid_name()
+  {
+    $this->assertFalse(
+      $this->pgsql->deleteUser('user***')
+    );
+  }
+
+  /** @test */
+  public function getUsers_method_returns_all_current_users()
+  {
+    $user = $this->getDbConfig()['user'];
+
+    $this->assertTrue(
+      in_array($user, $this->pgsql->getUsers())
+    );
+
+    $this->assertTrue(
+      in_array($user, $this->pgsql->getUsers($user))
+    );
+
+    $this->assertEmpty(
+      $this->pgsql->getUsers('foo')
+    );
+  }
+
+  /** @test */
+  public function getUsers_method_returns_null_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertNull(
+      $this->pgsql->getUsers()
+    );
+  }
+
+  /** @test */
+  public function dbSize_method_returns_the_size_of_the_current_database()
+  {
+    $this->createTable('users', function () {
+      return 'id serial PRIMARY KEY,
+              name VARCHAR(255) UNIQUE NOT NULL';
+    });
+
+    $this->createTable('posts', function () {
+      return 'id serial PRIMARY KEY,
+              description TEXT NOT NULL';
+    });
+
+    $this->insertMany('users', [
+      ['name' => 'John'],
+      ['name' => 'Sam']
+    ]);
+
+    $this->insertMany('posts', [
+      ['description' => Str::genpwd(1400, 1400)],
+      ['description' => Str::genpwd(1100, 1100)],
+    ]);
+
+    $total_size = $this->pgsql->dbSize();
+    $index_size = $this->pgsql->dbSize('', 'index');
+    $data_size = $this->pgsql->dbSize('', 'data');
+
+    $this->assertGreaterThan(0 ,$total_size);
+    $this->assertGreaterThan(0 ,$index_size);
+    $this->assertGreaterThan(0 ,$data_size);
+
+    $this->assertNotSame($total_size, $index_size);
+    $this->assertNotSame($total_size, $data_size);
+    $this->assertNotSame($data_size, $index_size);
+  }
+
+  /** @test */
+  public function dbSize_method_returns_the_size_of_the_given_database()
+  {
+    $this->createDatabase($this->db2);
+
+    $cfg = $this->getDbConfig();
+    $cfg['db'] = $this->db2;
+
+    $pgsql = new Pgsql($cfg);
+
+    $this->createTable('users', function () {
+      return 'id serial PRIMARY KEY,
+              name VARCHAR(255) UNIQUE NOT NULL';
+    }, $pgsql);
+
+    $this->createTable('posts', function () {
+      return 'id serial PRIMARY KEY,
+              description TEXT NOT NULL';
+    }, $pgsql);
+
+    $this->insertMany('users', [
+      ['name' => 'John'],
+      ['name' => 'Sam']
+    ], $pgsql);
+
+    $this->insertMany('posts', [
+      ['description' => Str::genpwd(1400, 1400)],
+      ['description' => Str::genpwd(1100, 1100)],
+    ], $pgsql);
+
+    $this->assertSame(0, $this->pgsql->dbSize());
+
+    $total_size = $this->pgsql->dbSize($this->db2);
+    $index_size = $this->pgsql->dbSize($this->db2, 'index');
+    $data_size = $this->pgsql->dbSize($this->db2, 'data');
+
+    $this->assertGreaterThan(0 ,$total_size);
+    $this->assertGreaterThan(0 ,$index_size);
+    $this->assertGreaterThan(0 ,$data_size);
+
+    $this->assertNotSame($total_size, $index_size);
+    $this->assertNotSame($total_size, $data_size);
+    $this->assertNotSame($data_size, $index_size);
+
+    $this->dropDatabaseIfExists($this->db2);
+  }
+
+  /** @test */
+  public function dbSize_method_returns_zero_when_no_tables_in_database()
+  {
+    $this->assertSame(0, $this->pgsql->dbSize());
+  }
+
   /**
    * @test
    */
@@ -485,9 +728,198 @@ RESULT;
       return 'id INT PRIMARY KEY';
     });
 
+    $expected = ['users', 'roles'];
+    $result   = $this->pgsql->getTables();
+
+    sort($expected);
+    sort($result);
+
+    $this->assertSame($expected, $result);
+  }
+
+  /** @test */
+  public function tableSize_method_returns_the_size_of_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id serial PRIMARY KEY,
+              username VARCHAR(255) UNIQUE NOT NULL';
+    });
+
+    $this->insertMany('users', [
+      ['username' => 'John'],
+      ['username' => 'Sam'],
+    ]);
+
+    $total_size = $this->pgsql->tableSize('users');
+    $index_size = $this->pgsql->tableSize('users', 'index');
+    $data_size  = $this->pgsql->tableSize('users', 'data');
+
+    $this->assertGreaterThan(0, $total_size);
+    $this->assertGreaterThan(0, $index_size);
+    $this->assertGreaterThan(0, $data_size);
+
+    $this->assertNotSame($total_size, $index_size);
+    $this->assertNotSame($total_size, $data_size);
+    $this->assertNotSame($index_size, $data_size);
+  }
+
+  /** @test */
+  public function tableSize_method_throws_an_exception_when_the_given_table_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->pgsql->tableSize('roles');
+  }
+
+  /** @test */
+  public function status_method_returns_status_of_the_given_table_for_the_current_database()
+  {
+    $this->createTable('posts', function () {
+      return 'id serial PRIMARY KEY,
+              content TEXT NOT NULL';
+    });
+
+    $this->createTable('comments', function () {
+      return 'content TEXT NOT NULL';
+    });
+
+    $expected_posts = [
+      'schemaname' => 'public',
+      'tablename' => 'posts',
+      'tableowner' => $this->getDbConfig()['user'],
+      'tablespace' => null,
+      'hasindexes' => true,
+      'hasrules' => false,
+      'hastriggers' => false,
+      'rowsecurity' => false
+    ];
+
+    $expected_comments = [
+      'schemaname' => 'public',
+      'tablename' => 'comments',
+      'tableowner' => $this->getDbConfig()['user'],
+      'tablespace' => null,
+      'hasindexes' => false,
+      'hasrules' => false,
+      'hastriggers' => false,
+      'rowsecurity' => false
+    ];
+
+    $this->assertSame($expected_comments, $this->pgsql->status('comments'));
+    $this->assertSame($expected_posts, $this->pgsql->status('posts'));
+  }
+
+  /** @test */
+  public function status_method_returns_status_of_the_given_table_for_the_given_database()
+  {
+    $this->createDatabase($this->db2);
+
+    $cfg       = $this->getDbConfig();
+    $cfg['db'] = $this->db2;
+
+    $pgsql = new Pgsql($cfg);
+
+    $this->createTable('posts', function () {
+      return 'id serial PRIMARY KEY,
+              content TEXT NOT NULL';
+    }, $pgsql);
+
+    $this->createTable('comments', function () {
+      return 'id serial PRIMARY KEY,
+              content TEXT NOT NULL';
+    }, $pgsql);
+
+    $this->assertNull(
+      $this->pgsql->status()
+    );
+
+    $result   = $this->pgsql->status('', $this->db2);
+    $expected = [
+      'schemaname' => 'public',
+      'tablename' => 'posts',
+      'tableowner' => $this->getDbConfig()['user'],
+      'tablespace' => null,
+      'hasindexes' => true,
+      'hasrules' => false,
+      'hastriggers' => false,
+      'rowsecurity' => false
+    ];
+
+    $this->assertSame($expected, $result);
+    $this->assertNull($this->pgsql->status());
+  }
+
+  /** @test */
+  public function getUid_method_returns_a_uuid()
+  {
+    $result = $this->pgsql->getUid();
+
+    $this->assertIsString($result);
+    $this->assertSame(32, strlen($result));
+  }
+
+  /** @test */
+  public function createTable_method_returns_a_string_of_create_table_statement_from_given_arguments()
+  {
+    $columns = [
+      'email' => [
+        'name' => 'email',
+        'type' => 'varchar',
+        'maxlength' => 255
+      ],
+      'id' => [
+        'type' => 'int',
+
+      ],
+      'name' => [
+        'null'=> true,
+        'default' => 'NULL'
+      ],
+      'balance' => [
+        'type' => 'numeric',
+        'values' => [10, 2],
+        'default' => 0
+      ],
+      'invalid_name***' => [
+        'type' => 'text'
+      ]
+    ];
+
+    $expected = "CREATE TABLE users (
+email varchar(255) NOT NULL,
+id int NOT NULL,
+balance numeric(10,2) NOT NULL DEFAULT '0'
+);";
+
     $this->assertSame(
-      ['users', 'roles'],
-      $this->pgsql->getTables()
+      $expected,
+      $this->pgsql->createTable('users', $columns)
+    );
+  }
+
+  /**
+   * @test
+   * @depends createDatabase_method_creates_a_database
+   */
+  public function getDatabases_returns_database_names_as_array()
+  {
+    $this->pgsql->createDatabase('bbn_test_2');
+
+    $result = $this->pgsql->getDatabases();
+
+    $this->assertTrue(in_array('bbn_test_2', $result));
+    $this->assertTrue(in_array($this->getDbConfig()['db'], $result));
+
+    $this->dropDatabaseIfExists('bbn_test_2');
+  }
+
+  /** @test */
+  public function getDatabases_method_returns_null_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertNull(
+      $this->pgsql->getDatabases()
     );
   }
 
@@ -513,19 +945,14 @@ RESULT;
     $this->dropDatabaseIfExists('another_db');
   }
 
-  /**
-   * @test
-   * @depends createDatabase_method_creates_a_database
-   */
-  public function getDatabases_returns_database_names_as_array()
+  /** @test */
+  public function getTables_method_returns_null_when_check_method_returns_null()
   {
-    $this->pgsql->createDatabase('bbn_test_2');
+    $this->setNonPublicPropertyValue('current', null);
 
-    $result = $this->pgsql->getDatabases();
-
-    $this->assertTrue(in_array('bbn_test_2', $result));
-    $this->assertTrue(in_array($this->getDbConfig()['db'], $result));
-
-    $this->dropDatabaseIfExists('bbn_test_2');
+    $this->assertNull(
+      $this->pgsql->getTables()
+    );
   }
+
 }

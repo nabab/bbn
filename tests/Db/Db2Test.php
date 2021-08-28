@@ -77,7 +77,7 @@ class Db2Test extends TestCase
 
     $this->assertInstanceOf(
       Db2::class,
-      $this->getNonPublicProperty('retriever_instance', Db2::class)
+      $this->getNonPublicProperty('retriever_instance', $this->db)
     );
 
     $this->assertInstanceOf(Cache::class, $this->getNonPublicProperty('cache_engine'));
