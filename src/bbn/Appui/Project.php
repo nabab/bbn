@@ -461,6 +461,11 @@ class Project extends bbn\Models\Cls\Db
         $paths = $this->options->fullTree($project['id']);
         if (isset($paths['items']) && count($paths['items'])) {
           foreach ($paths['items'] as $repository) {
+            if (empty($repository['id_alias'])) {
+              $this->log(['No id alias for repo', $repository, $project_name]);
+              continue;
+            }
+
             $name = $paths['code'] . '/' . $repository['code'];
             if (!isset($cats[$repository['id_alias']])) {
               if (isset($repository['alias'])) {

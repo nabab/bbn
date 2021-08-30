@@ -74,7 +74,7 @@
                     {
                         "name": "cfg",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -86,7 +86,7 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -142,7 +142,7 @@
                     {
                         "name": "cfg",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -154,7 +154,7 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -256,7 +256,7 @@
                     {
                         "name": "css",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -268,7 +268,7 @@
                 {
                     "name": "css",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -390,7 +390,7 @@
                     {
                         "name": "class",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -402,7 +402,7 @@
                 {
                     "name": "class",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -457,7 +457,7 @@
                     {
                         "name": "ele",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -469,7 +469,7 @@
                 {
                     "name": "ele",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -665,7 +665,7 @@
                     {
                         "name": "with_ele",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": false,
                         "has_default": true,
                         "default": 1,
@@ -677,7 +677,7 @@
                 {
                     "name": "with_ele",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 1,
@@ -732,7 +732,7 @@
                     {
                         "name": "arr",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -744,7 +744,7 @@
                 {
                     "name": "arr",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -799,7 +799,7 @@
                     {
                         "name": "txt",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -811,7 +811,7 @@
                 {
                     "name": "txt",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -866,7 +866,7 @@
                     {
                         "name": "c",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -878,7 +878,7 @@
                 {
                     "name": "c",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -933,7 +933,7 @@
                     {
                         "name": "with_js",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": false,
                         "has_default": true,
                         "default": 1,
@@ -946,7 +946,7 @@
                 {
                     "name": "with_js",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 1,

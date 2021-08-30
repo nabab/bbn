@@ -41,7 +41,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -51,7 +51,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -118,7 +118,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -128,7 +128,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -205,7 +205,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,7 +215,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -282,7 +282,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -292,7 +292,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -369,7 +369,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -379,7 +379,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -446,7 +446,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -456,7 +456,7 @@
                 {
                     "name": "fields",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -486,7 +486,7 @@
                 {
                     "name": "limit",
                     "position": 4,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -496,7 +496,7 @@
                 {
                     "name": "start",
                     "position": 5,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -530,7 +530,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -540,7 +540,7 @@
                 {
                     "name": "field",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -607,7 +607,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -659,7 +659,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -813,7 +813,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -868,7 +868,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -914,7 +914,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -978,7 +978,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

@@ -240,7 +240,7 @@
                 {
                     "name": "d",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -436,7 +436,7 @@
                 {
                     "name": "date",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -562,7 +562,7 @@
                 {
                     "name": "user",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -758,7 +758,7 @@
                 {
                     "name": "from_when",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -767,7 +767,7 @@
                 {
                     "name": "column",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -822,7 +822,7 @@
                 {
                     "name": "from_when",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -831,7 +831,7 @@
                 {
                     "name": "column",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -883,7 +883,7 @@
                 {
                     "name": "from_when",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -892,7 +892,7 @@
                 {
                     "name": "column",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -944,7 +944,7 @@
                 {
                     "name": "from_when",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -953,7 +953,7 @@
                 {
                     "name": "column",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1008,7 +1008,7 @@
                 {
                     "name": "when",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1069,7 +1069,7 @@
                 {
                     "name": "when",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1078,7 +1078,7 @@
                 {
                     "name": "column",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1224,7 +1224,7 @@
                 {
                     "name": "column",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,

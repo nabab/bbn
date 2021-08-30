@@ -501,7 +501,7 @@
                 {
                     "name": "group_id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -652,7 +652,7 @@
                 {
                     "name": "user",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -661,7 +661,7 @@
                 {
                     "name": "full",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": true,
@@ -934,7 +934,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -943,7 +943,7 @@
                 {
                     "name": "pass",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -999,7 +999,7 @@
                 {
                     "name": "exp",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,

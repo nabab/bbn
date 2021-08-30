@@ -853,7 +853,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -862,7 +862,7 @@
                 {
                     "name": "cfg",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1265,7 +1265,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1353,7 +1353,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1590,7 +1590,7 @@
                 {
                     "name": "kind",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1599,7 +1599,7 @@
                 {
                     "name": "moment",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1608,7 +1608,7 @@
                 {
                     "name": "tables",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "*",
@@ -1670,7 +1670,7 @@
                 {
                     "name": "tables",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1761,7 +1761,7 @@
                 {
                     "name": "column",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1892,7 +1892,7 @@
                 {
                     "name": "statement",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2011,7 +2011,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2084,7 +2084,7 @@
                 {
                     "name": "table",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2234,7 +2234,7 @@
                 {
                     "name": "query",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2277,7 +2277,7 @@
                 {
                     "name": "query",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

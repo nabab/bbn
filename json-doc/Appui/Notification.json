@@ -140,7 +140,7 @@
                 {
                     "name": "perms",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": true,
@@ -375,7 +375,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -393,7 +393,7 @@
                 {
                     "name": "moment",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -438,7 +438,7 @@
                 {
                     "name": "moment",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -698,7 +698,7 @@
                 {
                     "name": "notification",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -840,7 +840,7 @@
                 {
                     "name": "notification",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1139,7 +1139,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1148,7 +1148,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1160,7 +1160,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1169,7 +1169,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1694,7 +1694,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

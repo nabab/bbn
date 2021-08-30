@@ -38,7 +38,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -47,7 +47,7 @@
                 {
                     "name": "post",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -56,7 +56,7 @@
                 {
                     "name": "arguments",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,

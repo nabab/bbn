@@ -304,7 +304,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -350,7 +350,7 @@
                 {
                     "name": "errno",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -360,7 +360,7 @@
                 {
                     "name": "errstr",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -369,7 +369,7 @@
                 {
                     "name": "errfile",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -378,7 +378,7 @@
                 {
                     "name": "errline",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -424,7 +424,7 @@
                 {
                     "name": "obj",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -488,7 +488,7 @@
                 {
                     "name": "obj",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -552,7 +552,7 @@
                 {
                     "name": "obj",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -623,7 +623,7 @@
                 {
                     "name": "format",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "Y\/m\/d",
@@ -632,7 +632,7 @@
                 {
                     "name": "max",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 100,
@@ -687,7 +687,7 @@
                 {
                     "name": "format",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "Y\/m\/d",
@@ -904,7 +904,7 @@
                 {
                     "name": "ar",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -950,7 +950,7 @@
                 {
                     "name": "obj",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1074,7 +1074,7 @@
                 {
                     "name": "arr",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1084,7 +1084,7 @@
                 {
                     "name": "remove_space",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1130,7 +1130,7 @@
                 {
                     "name": "keyname",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "value",
@@ -1140,7 +1140,7 @@
                 {
                     "name": "valname",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "text",
@@ -1444,7 +1444,7 @@
                 {
                     "name": "selected",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1454,7 +1454,7 @@
                 {
                     "name": "empty_label",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1551,7 +1551,7 @@
                 {
                     "name": "key",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1604,7 +1604,7 @@
                 {
                     "name": "key",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1647,7 +1647,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1831,7 +1831,7 @@
                 {
                     "name": "where",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1894,7 +1894,7 @@
                 {
                     "name": "where",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1948,7 +1948,7 @@
                 {
                     "name": "where",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2011,7 +2011,7 @@
                 {
                     "name": "where",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2067,7 +2067,7 @@
                 {
                     "name": "where",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2120,7 +2120,7 @@
                 {
                     "name": "where",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2291,7 +2291,7 @@
                 {
                     "name": "key",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2301,7 +2301,7 @@
                 {
                     "name": "dir",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -2384,7 +2384,7 @@
                 {
                     "name": "param",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2512,7 +2512,7 @@
                 {
                     "name": "ar",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2677,7 +2677,7 @@
                 {
                     "name": "del",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": ";",
@@ -2687,7 +2687,7 @@
                 {
                     "name": "enc",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\"",
@@ -2697,7 +2697,7 @@
                 {
                     "name": "sep",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\n",
@@ -2751,7 +2751,7 @@
                 {
                     "name": "delimiter",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": ";",
@@ -2760,7 +2760,7 @@
                 {
                     "name": "enclosure",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\"",
@@ -2769,7 +2769,7 @@
                 {
                     "name": "separator",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\n",
@@ -2779,7 +2779,7 @@
                 {
                     "name": "encloseAll",
                     "position": 4,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2789,7 +2789,7 @@
                 {
                     "name": "nullToMysqlNull",
                     "position": 5,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2843,7 +2843,7 @@
                 {
                     "name": "strict",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -3093,7 +3093,7 @@
                 {
                     "name": "binary",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -3103,7 +3103,7 @@
                 {
                     "name": "hyphens",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -3146,7 +3146,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3191,7 +3191,7 @@
                 {
                     "name": "v1",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3201,7 +3201,7 @@
                 {
                     "name": "v2",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3255,7 +3255,7 @@
                 {
                     "name": "json",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3307,7 +3307,7 @@
                 {
                     "name": "json",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": true,
@@ -3353,7 +3353,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3605,7 +3605,7 @@
                 {
                     "name": "subject",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3614,7 +3614,7 @@
                 {
                     "name": "search",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3668,7 +3668,7 @@
                 {
                     "name": "subject",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3677,7 +3677,7 @@
                 {
                     "name": "search",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3749,7 +3749,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3758,7 +3758,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

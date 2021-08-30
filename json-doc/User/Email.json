@@ -293,7 +293,7 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -759,7 +759,7 @@
                 {
                     "name": "sync",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -793,7 +793,7 @@
                 {
                     "name": "account",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -802,7 +802,7 @@
                 {
                     "name": "force",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -977,7 +977,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1103,7 +1103,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1288,7 +1288,7 @@
                 {
                     "name": "force",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1391,7 +1391,7 @@
                 {
                     "name": "id_account",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1400,7 +1400,7 @@
                 {
                     "name": "force",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1690,7 +1690,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1699,7 +1699,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1711,7 +1711,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1720,7 +1720,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1870,7 +1870,7 @@
                 {
                     "name": "id",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

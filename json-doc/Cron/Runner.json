@@ -88,7 +88,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -97,7 +97,7 @@
                 {
                     "name": "log",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -570,7 +570,7 @@
                     {
                         "name": "name",
                         "position": 0,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -579,7 +579,7 @@
                     {
                         "name": "arguments",
                         "position": 1,
-                        "type": null,
+                        "type": "",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -591,7 +591,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -600,7 +600,7 @@
                 {
                     "name": "arguments",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1001,7 +1001,7 @@
                 {
                     "name": "type",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1265,7 +1265,7 @@
                 {
                     "name": "start",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1274,7 +1274,7 @@
                 {
                     "name": "num",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 10,

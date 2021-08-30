@@ -1138,14 +1138,14 @@
                     "fcolor": "#fdfdfd",
                     "extensions": [
                       {
-                        "ext": "css",
-                        "mode": "css",
-                        "default": "\/* CSS Document *\/\n\n"
-                      },
-                      {
                         "ext": "less",
                         "mode": "less",
                         "default": "\/* LESS Document *\/\n\n"
+                      },
+                      {
+                        "ext": "css",
+                        "mode": "css",
+                        "default": "\/* CSS Document *\/\n\n"
                       }
                     ]
                   }

@@ -49,7 +49,7 @@
                 {
                     "name": "column",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -67,7 +67,7 @@
                 {
                     "name": "length",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,

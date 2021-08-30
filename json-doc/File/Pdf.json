@@ -81,7 +81,7 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -173,7 +173,7 @@
                 {
                     "name": "cfg",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -207,7 +207,7 @@
                 {
                     "name": "html",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -216,7 +216,7 @@
                 {
                     "name": "cfg",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -225,7 +225,7 @@
                 {
                     "name": "sign",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -259,7 +259,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -293,7 +293,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "MyPDF.pdf",
@@ -327,7 +327,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "MyPDF.pdf",
@@ -361,7 +361,7 @@
                 {
                     "name": "size",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -501,7 +501,7 @@
                 {
                     "name": "filename",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -535,7 +535,7 @@
                 {
                     "name": "files",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -569,7 +569,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -578,7 +578,7 @@
                 {
                     "name": "page",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

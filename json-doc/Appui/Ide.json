@@ -62,7 +62,7 @@
                 {
                     "name": "routes",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -534,7 +534,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -713,7 +713,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -857,7 +857,7 @@
                 {
                     "name": "rep",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1307,7 +1307,7 @@
                 {
                     "name": "file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1463,7 +1463,7 @@
                 {
                     "name": "type",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "file",
@@ -1765,7 +1765,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2457,7 +2457,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2515,7 +2515,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2549,7 +2549,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2558,7 +2558,7 @@
                 {
                     "name": "raw",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2592,7 +2592,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2626,7 +2626,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2732,7 +2732,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2741,7 +2741,7 @@
                 {
                     "name": "mode",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2750,7 +2750,7 @@
                 {
                     "name": "root",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -2847,7 +2847,7 @@
                 {
                     "name": "raw",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,

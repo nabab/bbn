@@ -14,6 +14,9 @@
     "namespace": true,
     "traits": [],
     "interfaces": {
+        "IteratorAggregate": {
+            "name": "IteratorAggregate"
+        },
         "Traversable": {
             "name": "Traversable"
         },
@@ -113,12 +116,12 @@
                 "parent": false,
                 "arguments": [
                     {
-                        "name": "bound_input_params",
+                        "name": "params",
                         "position": 0,
-                        "type": null,
+                        "type": "array",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
@@ -127,7 +130,7 @@
                 {
                     "name": "args",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -229,30 +232,30 @@
                 "parent": false,
                 "arguments": [
                     {
-                        "name": "how",
+                        "name": "mode",
                         "position": 0,
-                        "type": null,
+                        "type": "int",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": "PDO::FETCH_DEFAULT"
                     },
                     {
-                        "name": "orientation",
+                        "name": "cursorOrientation",
                         "position": 1,
-                        "type": null,
+                        "type": "int",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": "PDO::FETCH_ORI_NEXT"
                     },
                     {
-                        "name": "offset",
+                        "name": "cursorOffset",
                         "position": 2,
-                        "type": null,
+                        "type": "int",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": 0,
                         "default_name": ""
                     }
                 ]
@@ -261,7 +264,7 @@
                 {
                     "name": "how",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -270,7 +273,7 @@
                 {
                     "name": "orientation",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -279,7 +282,7 @@
                 {
                     "name": "offset",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -287,8 +290,8 @@
                 }
             ]
         },
-        "fetchAll": {
-            "name": "fetchAll",
+        "_fetchAll": {
+            "name": "_fetchAll",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -296,7 +299,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($fetch_style = 4, $fetch_argument = false, $ctor_args = false)\n  {\n    $this->execute();\n    if ($ctor_args) {\n      $res = parent::fetchAll($fetch_style,$fetch_argument,$ctor_args);\n    }\n    elseif ($fetch_argument) {\n      $res = parent::fetchAll($fetch_style,$fetch_argument);\n    }\n    else{\n      $res = parent::fetchAll($fetch_style);\n    }\n\n    return bbn\\Str::correctTypes($res);\n  }",
+            "code": "function($fetch_style = 4, $fetch_argument = false, $ctor_args = false)\n  {\n    $this->execute();\n    if ($ctor_args) {\n      $res = $this->fetchAll($fetch_style, $fetch_argument, $ctor_args);\n    }\n    elseif ($fetch_argument) {\n      $res = $this->fetchAll($fetch_style, $fetch_argument);\n    }\n    else{\n      $res = $this->fetchAll($fetch_style);\n    }\n\n    return bbn\\Str::correctTypes($res);\n  }",
             "startLine": 179,
             "endLine": 193,
             "isDeprecated": false,
@@ -308,63 +311,12 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": null,
-            "parent": {
-                "name": "fetchAll",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 3,
-                "numberOfRequiredParameters": 0,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "how",
-                        "position": 0,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "class_name",
-                        "position": 1,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "ctor_args",
-                        "position": 2,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
+            "parent": false,
             "arguments": [
                 {
                     "name": "fetch_style",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 4,
@@ -374,7 +326,7 @@
                 {
                     "name": "fetch_argument",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -384,7 +336,7 @@
                 {
                     "name": "ctor_args",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -438,12 +390,12 @@
                 "parent": false,
                 "arguments": [
                     {
-                        "name": "column_number",
+                        "name": "column",
                         "position": 0,
-                        "type": null,
+                        "type": "int",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": 0,
                         "default_name": ""
                     }
                 ]
@@ -452,7 +404,7 @@
                 {
                     "name": "column_number",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -506,21 +458,21 @@
                 "parent": false,
                 "arguments": [
                     {
-                        "name": "class_name",
+                        "name": "class",
                         "position": 0,
-                        "type": null,
+                        "type": "string",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": "stdClass",
                         "default_name": ""
                     },
                     {
-                        "name": "ctor_args",
+                        "name": "constructorArgs",
                         "position": 1,
-                        "type": null,
+                        "type": "array",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": [],
                         "default_name": ""
                     }
                 ]
@@ -529,7 +481,7 @@
                 {
                     "name": "class_name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "stdClass",
@@ -539,7 +491,7 @@
                 {
                     "name": "ctor_args",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -646,7 +598,7 @@
                     {
                         "name": "column",
                         "position": 0,
-                        "type": null,
+                        "type": "int",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -658,7 +610,7 @@
                 {
                     "name": "column",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -751,7 +703,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      $r = $this->fetchAll(\\PDO::FETCH_ASSOC);\n      return $r === false ? null : $r;\n    }\n\n    return null;\n  }",
+            "code": "function()\n  {\n    if (!$this->write) {\n      $r = $this->_fetchAll(\\PDO::FETCH_ASSOC);\n      return $r === false ? null : $r;\n    }\n\n    return null;\n  }",
             "startLine": 266,
             "endLine": 274,
             "isDeprecated": false,
@@ -805,7 +757,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetchAll(\\PDO::FETCH_NUM);\n    }\n\n    return null;\n  }",
+            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(\\PDO::FETCH_NUM);\n    }\n\n    return null;\n  }",
             "startLine": 293,
             "endLine": 300,
             "isDeprecated": false,
@@ -832,7 +784,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      $r  = [];\n      $ds = $this->fetchAll(\\PDO::FETCH_ASSOC);\n      foreach ($ds as $d){\n        foreach ($d as $k => $v){\n          if (!isset($r[$k])) {\n            $r[$k] = [];\n          }\n\n          $r[$k][] = $v;\n        }\n      }\n\n      return $r;\n    }\n\n    return null;\n  }",
+            "code": "function()\n  {\n    if (!$this->write) {\n      $r  = [];\n      $ds = $this->_fetchAll(\\PDO::FETCH_ASSOC);\n      foreach ($ds as $d){\n        foreach ($d as $k => $v){\n          if (!isset($r[$k])) {\n            $r[$k] = [];\n          }\n\n          $r[$k][] = $v;\n        }\n      }\n\n      return $r;\n    }\n\n    return null;\n  }",
             "startLine": 306,
             "endLine": 325,
             "isDeprecated": false,
@@ -913,7 +865,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetchAll(\\PDO::FETCH_OBJ);\n    }\n\n    return null;\n  }",
+            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(\\PDO::FETCH_OBJ);\n    }\n\n    return null;\n  }",
             "startLine": 353,
             "endLine": 360,
             "isDeprecated": false,
@@ -930,145 +882,6 @@
             ],
             "parent": false,
             "arguments": []
-        },
-        "bindParam": {
-            "name": "bindParam",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "PDOStatement",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 5,
-            "numberOfRequiredParameters": 2,
-            "returns": null,
-            "parent": {
-                "name": "bindParam",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 5,
-                "numberOfRequiredParameters": 2,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "paramno",
-                        "position": 0,
-                        "type": null,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "param",
-                        "position": 1,
-                        "type": null,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "type",
-                        "position": 2,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "maxlen",
-                        "position": 3,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "driverdata",
-                        "position": 4,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
-            "arguments": [
-                {
-                    "name": "paramno",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "param",
-                    "position": 1,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "type",
-                    "position": 2,
-                    "type": null,
-                    "required": false,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "maxlen",
-                    "position": 3,
-                    "type": null,
-                    "required": false,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "driverdata",
-                    "position": 4,
-                    "type": null,
-                    "required": false,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
         },
         "bindColumn": {
             "name": "bindColumn",
@@ -1117,16 +930,16 @@
                     {
                         "name": "column",
                         "position": 0,
-                        "type": null,
+                        "type": "stringint|",
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "param",
+                        "name": "var",
                         "position": 1,
-                        "type": null,
+                        "type": "mixed",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1135,28 +948,28 @@
                     {
                         "name": "type",
                         "position": 2,
-                        "type": null,
+                        "type": "int",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
+                        "has_default": true,
+                        "default": 2,
+                        "default_name": "PDO::PARAM_STR"
                     },
                     {
-                        "name": "maxlen",
+                        "name": "maxLength",
                         "position": 3,
-                        "type": null,
+                        "type": "int",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": 0,
                         "default_name": ""
                     },
                     {
-                        "name": "driverdata",
+                        "name": "driverOptions",
                         "position": 4,
-                        "type": null,
+                        "type": "mixed",
                         "required": false,
-                        "has_default": false,
-                        "default": "",
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
@@ -1165,16 +978,16 @@
                 {
                     "name": "column",
                     "position": 0,
-                    "type": null,
+                    "type": "stringint|",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "param",
+                    "name": "var",
                     "position": 1,
-                    "type": null,
+                    "type": "mixed",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1183,28 +996,167 @@
                 {
                     "name": "type",
                     "position": 2,
-                    "type": null,
+                    "type": "int",
                     "required": false,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
+                    "has_default": true,
+                    "default": 2,
+                    "default_name": "PDO::PARAM_STR"
                 },
                 {
-                    "name": "maxlen",
+                    "name": "maxLength",
                     "position": 3,
-                    "type": null,
+                    "type": "int",
                     "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "driverOptions",
+                    "position": 4,
+                    "type": "mixed",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "bindParam": {
+            "name": "bindParam",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "bindParam",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 5,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "param",
+                        "position": 0,
+                        "type": "stringint|",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "var",
+                        "position": 1,
+                        "type": "mixed",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "type",
+                        "position": 2,
+                        "type": "int",
+                        "required": false,
+                        "has_default": true,
+                        "default": 2,
+                        "default_name": "PDO::PARAM_STR"
+                    },
+                    {
+                        "name": "maxLength",
+                        "position": 3,
+                        "type": "int",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "driverOptions",
+                        "position": 4,
+                        "type": "mixed",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "param",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "driverdata",
-                    "position": 4,
-                    "type": null,
-                    "required": false,
+                    "name": "var",
+                    "position": 1,
+                    "type": "mixed",
+                    "required": true,
                     "has_default": false,
                     "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 2,
+                    "default_name": "PDO::PARAM_STR"
+                },
+                {
+                    "name": "maxLength",
+                    "position": 3,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "driverOptions",
+                    "position": 4,
+                    "type": "mixed",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
@@ -1254,206 +1206,9 @@
                 "parent": false,
                 "arguments": [
                     {
-                        "name": "paramno",
-                        "position": 0,
-                        "type": null,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
                         "name": "param",
-                        "position": 1,
-                        "type": null,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "type",
-                        "position": 2,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
-            "arguments": [
-                {
-                    "name": "paramno",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "param",
-                    "position": 1,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "type",
-                    "position": 2,
-                    "type": null,
-                    "required": false,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "errorCode": {
-            "name": "errorCode",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "PDOStatement",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
-            "parent": {
-                "name": "errorCode",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": null,
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "errorInfo": {
-            "name": "errorInfo",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "PDOStatement",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
-            "parent": {
-                "name": "errorInfo",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": null,
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "setAttribute": {
-            "name": "setAttribute",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "PDOStatement",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": null,
-            "parent": {
-                "name": "setAttribute",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "attribute",
                         "position": 0,
-                        "type": null,
+                        "type": "stringint|",
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1462,19 +1217,28 @@
                     {
                         "name": "value",
                         "position": 1,
-                        "type": null,
+                        "type": "mixed",
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
+                    },
+                    {
+                        "name": "type",
+                        "position": 2,
+                        "type": "int",
+                        "required": false,
+                        "has_default": true,
+                        "default": 2,
+                        "default_name": "PDO::PARAM_STR"
                     }
                 ]
             },
             "arguments": [
                 {
-                    "name": "attribute",
+                    "name": "param",
                     "position": 0,
-                    "type": null,
+                    "type": "stringint|",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1483,163 +1247,20 @@
                 {
                     "name": "value",
                     "position": 1,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "getAttribute": {
-            "name": "getAttribute",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "PDOStatement",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": {
-                "name": "getAttribute",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 1,
-                "numberOfRequiredParameters": 1,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "attribute",
-                        "position": 0,
-                        "type": null,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
-            "arguments": [
-                {
-                    "name": "attribute",
-                    "position": 0,
-                    "type": null,
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "setFetchMode": {
-            "name": "setFetchMode",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "PDOStatement",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": null,
-            "parent": {
-                "name": "setFetchMode",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "PDOStatement",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "",
-                "startLine": false,
-                "endLine": false,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": true,
-                "isUserDefined": false,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 2,
-                "numberOfRequiredParameters": 1,
-                "returns": null,
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "mode",
-                        "position": 0,
-                        "type": null,
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "params",
-                        "position": 1,
-                        "type": null,
-                        "required": false,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
-            "arguments": [
-                {
-                    "name": "mode",
-                    "position": 0,
-                    "type": null,
+                    "type": "mixed",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "params",
-                    "position": 1,
-                    "type": null,
+                    "name": "type",
+                    "position": 2,
+                    "type": "int",
                     "required": false,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
+                    "has_default": true,
+                    "default": 2,
+                    "default_name": "PDO::PARAM_STR"
                 }
             ]
         },
@@ -1736,6 +1357,473 @@
                 "arguments": []
             },
             "arguments": []
+        },
+        "errorCode": {
+            "name": "errorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "errorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "errorInfo": {
+            "name": "errorInfo",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "errorInfo",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "fetchAll": {
+            "name": "fetchAll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "fetchAll",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": true,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "mode",
+                        "position": 0,
+                        "type": "int",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": "PDO::FETCH_DEFAULT"
+                    },
+                    {
+                        "name": "args",
+                        "position": 1,
+                        "type": "mixed",
+                        "required": false,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "PDO::FETCH_DEFAULT"
+                },
+                {
+                    "name": "args",
+                    "position": 1,
+                    "type": "mixed",
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAttribute": {
+            "name": "getAttribute",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "getAttribute",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "int",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setAttribute": {
+            "name": "setAttribute",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "setAttribute",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "attribute",
+                        "position": 0,
+                        "type": "int",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "value",
+                        "position": 1,
+                        "type": "mixed",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "attribute",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 1,
+                    "type": "mixed",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setFetchMode": {
+            "name": "setFetchMode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "setFetchMode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": true,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "mode",
+                        "position": 0,
+                        "type": "int",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "args",
+                        "position": 1,
+                        "type": "mixed",
+                        "required": false,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "args",
+                    "position": 1,
+                    "type": "mixed",
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getIterator": {
+            "name": "getIterator",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "PDOStatement",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "",
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "Iterator"
+            ],
+            "parent": {
+                "name": "getIterator",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "PDOStatement",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "",
+                "startLine": false,
+                "endLine": false,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": true,
+                "isUserDefined": false,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": [
+                    "Iterator"
+                ],
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
         }
     },
     "properties": {
@@ -1753,11 +1841,12 @@
     },
     "staticProperties": [],
     "constants": null,
-    "numMethods": 28,
+    "numMethods": 30,
     "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [
+        "IteratorAggregate",
         "Traversable",
         "bbn\\Db\\Actions"
     ],

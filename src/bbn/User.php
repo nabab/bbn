@@ -708,21 +708,19 @@ class User extends Models\Cls\Basic
         if (($key !== $this->fields['id'])
             && ($key !== $this->fields['cfg'])
             && ($key !== 'auth')
+            && ($key !== 'admin')
+            && ($key !== 'dev')
             && ($key !== 'pass')
-            && \in_array($key, $this->fields)
         ) {
           $update[$key] = $val;
         }
       }
 
       if (\count($update) > 0) {
-        $r = (bool)$this->db->update(
-          $this->class_cfg['tables']['users'],
-          $update,
-          [$this->fields['id'] => $this->id]
-        );
+        $r = (bool)$this->update($this->getId(), $update, true);
         /** @todo Why did I do this?? */
         if ($r) {
+          /** @todo WTF?? */
           $this->setSession(['cfg' => false]);
           $this->_user_info();
         }
