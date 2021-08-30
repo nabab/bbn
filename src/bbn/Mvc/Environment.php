@@ -63,6 +63,11 @@ class Environment
   private $_files;
 
   /**
+   * @var array $_cookie
+   */
+  private $_cookie;
+
+  /**
    * @var string The current active locale, shared with the whole MVC.
    */
   private $_locale;
@@ -173,7 +178,9 @@ class Environment
     }
 
     $this->_url = implode('/', $this->_params ?: []);
-    $this->setLocale();
+    if (!$this->_locale) {
+      $this->setLocale();
+    }
     return $this;
   }
 
@@ -297,7 +304,8 @@ class Environment
         $lang = X::split(X::split($this->_locale, '-')[0], '_')[0];
       }
 
-      putenv("LANG=".$this->_locale);
+      putenv("LANG=".$lang);
+      putenv("LC_MESSAGES=".$this->_locale);
       setlocale(LC_MESSAGES, $this->_locale);
     }
     else {

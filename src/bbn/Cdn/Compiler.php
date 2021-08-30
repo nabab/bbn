@@ -197,7 +197,7 @@ class Compiler extends Basic
 
         case 'scss':
           try{
-            $scss = new \Leafo\ScssPhp\Compiler();
+            $scss = new \ScssPhp\ScssPhp\Compiler();
             $scss->setImportPaths([\dirname($this->fpath.$file)]);
             if (is_file(\dirname($this->fpath.$file).'/_def.scss')) {
               $c = file_get_contents((\dirname($this->fpath.$file).'/_def.scss')).$c;

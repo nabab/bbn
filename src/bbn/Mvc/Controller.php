@@ -71,6 +71,18 @@ class Controller implements Api
    */
   private $_checkers = [];
 
+  /**
+   * The URL path to the plugin.
+   * @var null|string
+   */
+  private $_plugin;
+
+  /**
+   * The plugin name.
+   * @var null|string
+   */
+  private $_plugin_name;
+
   public
     /**
      * The db connection if accepted by the mvc class.
@@ -145,15 +157,17 @@ class Controller implements Api
   public function reset(array $info, $data = false)
   {
     if (isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
-      $this->_path     = $info['path'];
-      $this->_plugin   = $info['plugin'];
-      $this->_request  = $info['request'];
-      $this->_file     = $info['file'];
-      $this->_root     = $info['root'];
-      $this->arguments = $info['args'];
-      $this->_checkers = $info['checkers'];
-      $this->mode      = $info['mode'];
-      $this->data      = \is_array($data) ? $data : [];
+      $this->_path        = $info['path'];
+      $this->_plugin      = $info['plugin'];
+      $this->_request     = $info['request'];
+      $this->_file        = $info['file'];
+      $this->_root        = $info['root'];
+      $this->arguments    = $info['args'];
+      $this->_checkers    = $info['checkers'];
+      $this->_plugin      = $info['plugin'];
+      $this->_plugin_name = $info['plugin_name'];
+      $this->mode         = $info['mode'];
+      $this->data         = \is_array($data) ? $data : [];
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
       /** @var bbn\Db db */
@@ -551,9 +565,9 @@ class Controller implements Api
   public function process()
   {
     if (\is_null($this->_is_controlled)) {
-      if ($this->_plugin) {
+      if ($this->_plugin_name) {
         $router = Router::getInstance();
-        if ($textDomain = $router->getLocaleDomain($this->_plugin)) {
+        if ($textDomain = $router->getLocaleDomain($this->_plugin_name)) {
           $oldTextDomain = textdomain(null);
           if ($textDomain !== $oldTextDomain) {
             textdomain($textDomain);
