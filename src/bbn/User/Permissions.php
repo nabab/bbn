@@ -4,13 +4,7 @@
  */
 namespace bbn\User;
 
-use bbn;
-use bbn\X;
-use bbn\Str;
-use bbn\User;
-use bbn\Db;
-use bbn\Appui\Option;
-
+use Exception, bbn, bbn\X, bbn\Str, bbn\User, bbn\Db, bbn\Appui\Option, bbn\Mvc, bbn\File\System;
 /**
  * A permission system linked to options, User classes and preferences.
  *
@@ -60,15 +54,15 @@ class Permissions extends bbn\Models\Cls\Basic
   public function __construct(array $routes = null)
   {
     if (!($this->opt = Option::getInstance())) {
-      throw new \Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));
+      throw new Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));
     }
 
     if (!($this->user = User::getInstance())) {
-      throw new \Exception(X::_('Impossible to construct permissions: you need to instantiate user before'));
+      throw new Exception(X::_('Impossible to construct permissions: you need to instantiate user before'));
     }
 
     if (!($this->pref = Preferences::getInstance())) {
-      throw new \Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));
+      throw new Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));
     }
 
     if ($routes) {
@@ -130,7 +124,7 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     if (!$root) {
-      throw new \Exception(X::_("Impossible to find the permission code for $path"));
+      throw new Exception(X::_("Impossible to find the permission code for $path"));
     }
 
     $parts  = explode('/', trim($path, '/'));
@@ -192,7 +186,7 @@ class Permissions extends bbn\Models\Cls\Basic
     // Main application
     if ($root === 'permissions') {
       if (array_shift($bits) !== 'access') {
-        throw new \Exception("The permission should be under access");
+        throw new Exception("The permission should be under access");
       }
 
       $ok = true;
@@ -200,7 +194,7 @@ class Permissions extends bbn\Models\Cls\Basic
     // Plugins
     elseif ($plugin = X::getRow($this->plugins, ['name' => 'appui-'.$root])) {
       if ((array_shift($bits) !== 'permissions') || (array_shift($bits) !== 'access')) {
-        throw new \Exception("The permission should be under permissions/access of the plugin");
+        throw new Exception("The permission should be under permissions/access of the plugin");
       }
 
       $prefix = $plugin['url'].'/';
@@ -517,7 +511,7 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function optionToPermission(string $id_option, bool $create = false): ?string
   {
-    if (bbn\Str::isUid($id_option)) {
+    if (Str::isUid($id_option)) {
       $aliases = $this->opt->getAliasItems($id_option);
       $root    = $this->optionPermissionRoot($id_option);
       $id_perm = null;
@@ -651,10 +645,10 @@ class Permissions extends bbn\Models\Cls\Basic
     if (in_array($access, $parents, true)) {
       $path_to_file = $this->opt->toPath($id_perm, '', $access);
       if (substr($path_to_file, -1) === '/') {
-        return is_dir(bbn\Mvc::getAppPath().'mvc/public/'.substr($path_to_file, 0, -1));
+        return is_dir(Mvc::getAppPath().'mvc/public/'.substr($path_to_file, 0, -1));
       }
 
-      return file_exists(bbn\Mvc::getAppPath().'mvc/public/'.$path_to_file.'.php');
+      return file_exists(Mvc::getAppPath().'mvc/public/'.$path_to_file.'.php');
     }
     else {
       $plugin_name = $this->opt->code($parents[2]);
@@ -664,10 +658,10 @@ class Permissions extends bbn\Models\Cls\Basic
 
       $path_to_file = $this->opt->toPath($id_perm, '', $parents[4]);
       if (substr($path_to_file, -1) === '/') {
-        return is_dir(bbn\Mvc::getPluginPath($plugin_name).'mvc/public/'.substr($path_to_file, 0, -1));
+        return is_dir(Mvc::getPluginPath($plugin_name).'mvc/public/'.substr($path_to_file, 0, -1));
       }
 
-      return file_exists(bbn\Mvc::getPluginPath($plugin_name).'mvc/public/'.$path_to_file.'.php');
+      return file_exists(Mvc::getPluginPath($plugin_name).'mvc/public/'.$path_to_file.'.php');
     }
 
     return false;
@@ -719,7 +713,7 @@ class Permissions extends bbn\Models\Cls\Basic
       if (($num > 4) && ($this->opt->code($parents[3]) === 'plugins')) {
         $root_parent = $this->opt->fromCode('plugins', 'permissions', $parents[2]);
         if (!$root_parent) {
-          throw new \Exception("Impossible to find a parent for plugin $plugin");
+          throw new Exception("Impossible to find a parent for plugin's permission ".$parents[2]);
         }
 
         $plugin  = $this->opt->code($parents[4]);
@@ -772,11 +766,10 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     $num = 0;
-    $fs  = new bbn\File\System();
+    $fs  = new System();
     $ff  = function ($a) use ($url, $path) {
-      $mvc = \bbn\Mvc::getInstance();
       if (empty($url)) {
-        $a['path'] = substr($a['name'], strlen(\bbn\Mvc::appPath().'mvc/public/'));
+        $a['path'] = substr($a['name'], strlen(Mvc::getAppPath().'mvc/public/'));
       }
       else {
         $a['path'] = $url.substr($a['name'], strlen($path.'mvc/public/'));
@@ -788,6 +781,7 @@ class Permissions extends bbn\Models\Cls\Basic
 
       return \bbn\User\Permissions::fFilter($a);
     };
+
     if ($all = $fs->getTree($path.'mvc/public', '', false, $ff)) {
       $all = self::fTreat($all, false);
       usort($all, ['\\bbn\User\\Permissions', 'fSort']);
@@ -810,7 +804,7 @@ class Permissions extends bbn\Models\Cls\Basic
   public function accessUpdateApp(): ?int
   {
     if ($id_page = $this->getOptionId('access')) {
-      return $this->accessUpdatePath(bbn\Mvc::getAppPath(), $id_page);
+      return $this->accessUpdatePath(Mvc::getAppPath(), $id_page);
     }
 
     return null;
@@ -986,7 +980,7 @@ class Permissions extends bbn\Models\Cls\Basic
       if ($id_page) {
 
         /** @todo Add the possibility to do it for another project? */
-        $fs = new bbn\File\System();
+        $fs = new System();
 
         if ($withApp) {
           $res['total'] += (int)$this->accessUpdateApp();
@@ -1003,7 +997,7 @@ class Permissions extends bbn\Models\Cls\Basic
               );
               X::log($err, 'errorUpdatePermissions');
               continue;
-              throw new \Exception($err);
+              throw new Exception($err);
             }
 
             $res['total'] += $this->accessUpdatePath($route['path'].'src/', $root, $url);
@@ -1143,7 +1137,7 @@ class Permissions extends bbn\Models\Cls\Basic
 
   public static function fFilter(array $a): bool
   {
-    $mvc = bbn\Mvc::getInstance();
+    $mvc = Mvc::getInstance();
     if (!empty($a['num'])
       || ((substr($a['name'], -4) === '.php')
           && (basename($a['name']) !== '_ctrl.php'))
@@ -1267,14 +1261,14 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   private function _get_id_option(string $id_option = null, $type = 'access'): ?string
   {
-    if ($id_option && !bbn\Str::isUid($id_option)) {
+    if ($id_option && !Str::isUid($id_option)) {
       $id_option = $this->fromPath($id_option, $type);
     }
     elseif (null === $id_option) {
       $id_option = $this->getCurrent();
     }
 
-    if (bbn\Str::isUid($id_option)) {
+    if (Str::isUid($id_option)) {
       return $id_option;
     }
 
