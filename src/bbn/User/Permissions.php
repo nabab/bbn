@@ -511,39 +511,36 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function optionToPermission(string $id_option, bool $create = false): ?string
   {
-    if (Str::isUid($id_option)) {
-      $aliases = $this->opt->getAliasItems($id_option);
-      $root    = $this->optionPermissionRoot($id_option);
-      $id_perm = null;
-      $all     = [];
-      foreach ($aliases as $a) {
-        $parents = $this->opt->parents($a);
-        if (in_array($root, $parents)) {
-          $id_perm = $a;
-          break;
-        }
-      }
+    /** @var string The result - an option's ID */
+    $id_perm = null;
 
-      /*
-      if (!$id_perm) {
-        foreach ($aliases as $i => $a) {
-          foreach ($all[$i] as $b) {
-            if ($this->opt->alias($b) === $root) {
-              $id_perm = $a;
-              break;
-            }
-          }
-        }
-      }
-      */
-
-      if (!$id_perm && $create) {
-        $this->createFromId($id_option);
-        return $this->optionToPermission($id_option);
-      }
-
-      return $id_perm ?: null;
+    if (!Str::isUid($id_option)) {
+      throw new Exception("The string sent is not a UID: $id_option");
     }
+
+    if (!$this->opt->exists($id_option)) {
+      throw new Exception("The options with a UID $id_option doesn't exist");
+    }
+
+    /** @var array List of aliases (permissions have aliases to the original options) */
+    $aliases = $this->opt->getAliasItems($id_option);
+
+    /** @var string The root (with options code) for this option's permission */
+    $root    = $this->optionPermissionRoot($id_option);
+
+    foreach ($aliases as $a) {
+      $parents = $this->opt->parents($a);
+      if (in_array($root, $parents)) {
+        $id_perm = $a;
+        break;
+      }
+    }
+
+    if (!$id_perm && $create) {
+      return $this->createFromId($id_option);
+    }
+
+    return $id_perm ?: null;
   }
 
 
@@ -701,16 +698,21 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     /** @var string The option's ID for appui */
     $appui   = $this->opt->fromCode('appui');
+
     /** @var string The option's ID for plugins */
     $plugins = $this->opt->fromCode('plugins');
+
     /** @var array The parents, the first being root */
     $parents = array_reverse($this->opt->parents($id));
+
     $num     = count($parents);
 
     // Looking for the root of the options' permissions
     if (($num > 2) && \in_array($parents[1], [$appui, $plugins])) {
 
       if (($num > 4) && ($this->opt->code($parents[3]) === 'plugins')) {
+
+        /** @var string  */
         $root_parent = $this->opt->fromCode('plugins', 'permissions', $parents[2]);
         if (!$root_parent) {
           throw new Exception("Impossible to find a parent for plugin's permission ".$parents[2]);
@@ -1015,66 +1017,137 @@ class Permissions extends bbn\Models\Cls\Basic
   }
 
 
-  public function createFromId(string $id): ?int
+  public function createFromId(string $id): ?string
   {
-    // The option
-    if ($opt = $this->opt->option($id)) {
-      // All the parents from the closest
-      $parents = $this->opt->parents($id);
-      // The farest parent having permissions set
-      $id_parent = false;
-      foreach ($parents as $i => $p) {
-        $cfg = $this->opt->getCfg($p);
-        if (!$cfg['permissions']) {
+    $opt = $this->opt->option($id);
+    if (!$opt) {
+      throw new Exception("The option $id doesn't exist");
+    }
+
+    if ($this->optionToPermission($id)) {
+      throw new Exception("The permission for option $id already exist");
+    }
+
+    /** @var string The option's ID for appui */
+    $appui   = $this->opt->fromCode('appui');
+
+    /** @var string The option's ID for plugins */
+    $plugins = $this->opt->fromCode('plugins');
+
+    /** @var array The parents, the first being root */
+    $parents = array_reverse($this->opt->parents($id));
+
+    /** @var string The root (with options code) for this option's permission */
+    $root    = $this->optionPermissionRoot($id);
+
+    $num     = count($parents);
+
+    if ($num < 2) {
+      throw new Exception("The permission for option $id already exist");
+    }
+
+    // Removing root
+    array_shift($parents);
+    $root_original = array_shift($parents);
+
+    // Looking for the root of the options' permissions
+    if (($num > 2) && \in_array($root_original, [$appui, $plugins])) {
+
+      if (($num > 4) && ($this->opt->code($parents[1]) === 'plugins')) {
+
+        /** @var string  */
+        $root_parent = $this->opt->fromCode('plugins', 'permissions', $parents[0]);
+        if (!$root_parent) {
+          throw new Exception("Impossible to find a parent for plugin's permission ".$parents[0]);
+        }
+
+        array_shift($parents);
+        array_shift($parents);
+        $plugin  = $this->opt->code(array_shift($parents));
+        $alias = $this->opt->fromCode('options', 'permissions', $plugin, $root_original);
+        $id_root = $this->opt->fromCode($plugin, $root_parent);
+
+        if (!$id_root) {
+          $id_root = $this->opt->add([
+            'id_parent' => $root_parent,
+            'code' => $plugin,
+            'text' => $plugin,
+            'id_alias' => $alias
+          ]);
+        }
+
+      }
+      else {
+        $id_root = $this->opt->fromCode('options', 'permissions', array_shift($parents));
+      }
+    }
+    else {
+      $id_root = $this->opt->fromCode('options', 'permissions', $appui);
+    }
+
+    if (!$id_root) {
+      throw new Exception("No root found for option $id");
+    }
+
+    $parents = array_reverse($parents);
+    // All the parents from the closest
+    $parents = $this->opt->parents($id);
+    // The farest parent having permissions set
+    $id_parent = false;
+    $perm_parents = [];
+    $id_parent_perm = null;
+    // Looping all the parent IDs from the deepest
+    foreach ($parents as $i => $p) {
+      $cfg = $this->opt->getCfg($p);
+      $id_parent = null;
+      // The root is the last with permnission on
+      if (!$cfg['permissions']) {
+        break;
+      }
+      else {
+        if (!$i && ($cfg['permissions'] === 'children')) {
+          $id_parent = $p;
+        }
+        elseif (in_array($cfg['permissions'], ['all', 'cascade'])) {
+          $id_parent = $p;
+        }
+      }
+
+      if ($id_parent) {
+        // Looking for the permission
+        $aliases = $this->opt->getAliasItems($id_parent);
+        foreach ($aliases as $a) {
+          if (in_array($root, $this->opt->parents($a))) {
+            $id_parent_perm = $a;
+            break;
+          }
+        }
+        
+        // We break at first permission found
+        if ($id_parent_perm) {
           break;
         }
         else {
-          if (!$i && ($cfg['permissions'] === 'children')) {
-            $id_parent = $p;
-          }
-          elseif (in_array($cfg['permissions'], ['all', 'cascade'])) {
-            $id_parent = $p;
-          }
+          $perm_parents[] = $id_parent;
         }
       }
-      // If no parent with permissions this option must have it
-      if (!$id_parent) {
-        $cfg = $this->opt->getCfg($id);
-        if (!$cfg['permissions']) {
-          return null;
-        }
-
-        /** @var string The option's ID for appui */
-        $appui = $this->opt->fromCode('appui');
-
-        /** @var string The option's ID for plugins */
-        $plugins = $this->opt->fromCode('plugins');
-
-        /** @var string The option's ID of the permissions on options $id_option */
-        $id_option = $this->getOptionId('options');
-        // we need to locate the root of the permission
-        $rparents = array_reverse($parents);
-        // Looking for the root of the options' permissions
-        if ((count($rparents) > 2) && \in_array($rparents[1], [$appui, $plugins])) {
-          $id_perm = $this->opt->fromCode('options', 'permissions', $rparents[2]);
-        }
-        else {
-          $id_perm = $id_option;
-        }
-        
-      }
-      // Otherwise the parent permission needs to exist
-      elseif (!($id_perm = $this->optionToPermission($id_parent))) {
-        return null;
-      }
-
-      return $this->opt->add([
-        'id_parent' => $id_perm,
-        'id_alias' => $id
-      ]) ? 1 : 0;
     }
 
-    return null;
+    X::log(['perm_parents', $perm_parents]);
+    $id_parent = $id_parent_perm ?: $id_root;
+    foreach (array_reverse($perm_parents) as $a) {
+      $id_parent = $this->opt->add([
+        'id_parent' => $id_parent,
+        'id_alias'  => $a
+      ]);
+    }
+
+    X::log($this->opt->option($id_parent));
+
+    return $this->opt->add([
+      'id_parent' => $id_parent,
+      'id_alias'  => $id
+    ]);
   }
 
 
