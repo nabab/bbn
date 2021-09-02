@@ -130,6 +130,128 @@ class Cms extends bbn\Models\Cls\Db
 		
 	}
 
+
+	public function getLatest($limit, $start): array
+	{
+		$cfg = $this->_notes->getLastVersionCfg();
+		$cf = $this->_notes->getClassCfg();
+		$cf_ev = $this->_events->getClassCfg();
+		$cfg['fields'][] = $cf_ev['arch']['events']['start'];
+		$cfg['fields'][] = $cf_ev['arch']['events']['end'];
+		$cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);
+		$cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);
+		$cfg['join'][] = [
+			'table' => $cf['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf_ev['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf['tables']['url'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$total = $this->db->count($cfg);
+		$cfg['where'] = [
+			'conditions' => [
+				[
+					'field' => 'start',
+					'operator' => '<=',
+					'exp' => 'NOW()'
+				]
+			]
+		];
+
+		$cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
+		$cfg['limit'] = $limit;
+		$cfg['start'] = $start;
+
+		return [
+			'data' => $this->db->rselectAll($cfg),
+			'total' => $total
+		];
+	}
+
+
+	public function getNext($limit, $start): array
+	{
+		$cfg = $this->_notes->getLastVersionCfg();
+		$cf = $this->_notes->getClassCfg();
+		$cf_ev = $this->_events->getClassCfg();
+		$cfg['fields'][] = $cf_ev['arch']['events']['start'];
+		$cfg['fields'][] = $cf_ev['arch']['events']['end'];
+		$cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);
+		$cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);
+		$cfg['join'][] = [
+			'table' => $cf['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf_ev['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf['tables']['url'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$total = $this->db->count($cfg);
+		$cfg['where'] = [
+			'conditions' => [
+				[
+					'field' => 'start',
+					'operator' => '>',
+					'exp' => 'NOW()'
+				]
+			]
+		];
+
+		$cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
+		$cfg['limit'] = $limit;
+		$cfg['start'] = $start;
+
+		return [
+			'data' => $this->db->rselectAll($cfg),
+			'total' => $total
+		];
+	}
+
   /**
    * Returns the note with its url, start and end date of publication.
    *

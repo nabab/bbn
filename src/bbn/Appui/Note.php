@@ -633,6 +633,57 @@ class Note extends bbn\Models\Cls\Db
     ]);
   }
 
+
+  public function getLastVersionCfg(): array
+  {
+    $cf  = &$this->class_cfg;
+    return [
+      'table' => $cf['table'],
+      'fields' => [
+        'versions1.' . $cf['arch']['versions']['id_note'],
+        'versions1.' . $cf['arch']['versions']['version'],
+        'versions1.' . $cf['arch']['versions']['title'],
+        'versions1.' . $cf['arch']['versions']['content'],
+        'versions1.' . $cf['arch']['versions']['id_user'],
+        'versions1.' . $cf['arch']['versions']['creation'],
+      ],
+      'join' => [[
+        'table' => $cf['tables']['versions'],
+        'type' => 'left',
+        'alias' => 'versions1',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => 'versions1.' . $cf['arch']['versions']['id_note'],
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['versions'],
+        'type' => 'left',
+        'alias' => 'versions2',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => 'versions2.' . $cf['arch']['versions']['id_note'],
+          ], [
+            'field' => 'versions1.' . $cf['arch']['versions']['version'],
+            'operator' => '<',
+            'exp' => 'versions2.' . $cf['arch']['versions']['version'],
+          ]],
+        ],
+      ]],
+      'group_by' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+      'order' => [[
+        'field' => 'versions1.' . $cf['arch']['versions']['version'],
+        'dir' => 'DESC',
+      ], [
+        'field' => 'versions1.' . $cf['arch']['versions']['creation'],
+        'dir' => 'DESC',
+      ]]
+    ];
+
+  }
+
   /**
    * @param null $type
    * @param mixed|false $id_user
@@ -640,7 +691,7 @@ class Note extends bbn\Models\Cls\Db
    * @param int $start
    * @return array|false
    */
-  public function getByType($type = null, $id_user = false, int $limit = 0, int $start = 0)
+  public function getByType($type = null, $id_user = false, int $limit = 10, int $start = 0)
   {
     $db  = &$this->db;
     $cf  = &$this->class_cfg;
@@ -667,57 +718,13 @@ class Note extends bbn\Models\Cls\Db
         ];
       }
 
-      $notes = $db->rselectAll(
-        [
-          'table' => $cf['table'],
-          'fields' => [
-            'versions1.' . $cf['arch']['versions']['id_note'],
-            'versions1.' . $cf['arch']['versions']['version'],
-            'versions1.' . $cf['arch']['versions']['title'],
-            'versions1.' . $cf['arch']['versions']['content'],
-            'versions1.' . $cf['arch']['versions']['id_user'],
-            'versions1.' . $cf['arch']['versions']['creation'],
-          ],
-          'join' => [[
-            'table' => $cf['tables']['versions'],
-            'type' => 'left',
-            'alias' => 'versions1',
-            'on' => [
-              'conditions' => [[
-                'field' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-                'exp' => 'versions1.' . $cf['arch']['versions']['id_note'],
-              ]],
-            ],
-          ], [
-            'table' => $cf['tables']['versions'],
-            'type' => 'left',
-            'alias' => 'versions2',
-            'on' => [
-              'conditions' => [[
-                'field' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-                'exp' => 'versions2.' . $cf['arch']['versions']['id_note'],
-              ], [
-                'field' => 'versions1.' . $cf['arch']['versions']['version'],
-                'operator' => '<',
-                'exp' => 'versions2.' . $cf['arch']['versions']['version'],
-              ]],
-            ],
-          ]],
-          'where' => [
-            'conditions' => $where,
-          ],
-          'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-          'order' => [[
-            'field' => 'versions1.' . $cf['arch']['versions']['version'],
-            'dir' => 'DESC',
-          ], [
-            'field' => 'versions1.' . $cf['arch']['versions']['creation'],
-            'dir' => 'DESC',
-          ]],
-          'limit' => $limit,
-          'start' => $start,
-        ]
-      );
+      $cfg = $this->getLastVersionCfg();
+      $cfg['where'] = [
+        'conditions' => $where,
+      ];
+      $cfg['limit'] = $limit;
+      $cfg['start'] = $start;
+      $notes = $db->rselectAll($cfg);
       foreach ($notes as $note) {
         if ($medias = $db->getColumnValues(
           $cf['tables']['nmedias'],
