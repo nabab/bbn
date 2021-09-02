@@ -160,7 +160,8 @@ class Cms extends bbn\Models\Cls\Db
    */
 	public function getAll(int $limit = 50, int $start = 0): array 
 	{
-		$pages = $this->_notes->getByType($this->_options->fromCode('pages', 'types', 'note', 'appui'), false, $limit, $start);
+		$id_pages = $this->_options->fromCode('pages', 'types', 'note', 'appui');
+		$pages = $this->_notes->getByType($id_pages, false, $limit, $start);
 
     return array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
@@ -174,15 +175,27 @@ class Cms extends bbn\Models\Cls\Db
     }, $pages);
 	}
 
+  /**
+   * Returns the number of all the notes of type 'pages'.
+   *
+   * @return int
+   */
+	public function countAll(): int
+	{
+		$id_pages = $this->_options->fromCode('pages', 'types', 'note', 'appui');
+		return $this->_notes->countByType($id_pages);
+	}
+
+	
  /**
  * If the given url correspond to a published note returns the id.
  * 
  * @param string $url
  * @return string|null
  */
-	public function getByUrl(string $url):? string
+	public function getByUrl(string $url, bool $force = false):? string
 	{
-		if (($id_note = $this->_notes->urlToId($url)) && $this->isPublished($id_note)){
+		if (($id_note = $this->_notes->urlToId($url)) && ($force || $this->isPublished($id_note))) {
       return $id_note;
 		}
 

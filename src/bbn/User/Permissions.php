@@ -1021,6 +1021,7 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     $opt = $this->opt->option($id);
     if (!$opt) {
+      X::log($this->opt->option($id));
       throw new Exception("The option $id doesn't exist");
     }
 
@@ -1048,30 +1049,44 @@ class Permissions extends bbn\Models\Cls\Basic
 
     // Removing root
     array_shift($parents);
+    // appui or plugins or neither (main app)
     $root_original = array_shift($parents);
 
     // Looking for the root of the options' permissions
     if (($num > 2) && \in_array($root_original, [$appui, $plugins])) {
 
+      // Plugin inside a plugin
       if (($num > 4) && ($this->opt->code($parents[1]) === 'plugins')) {
 
         /** @var string  */
-        $root_parent = $this->opt->fromCode('plugins', 'permissions', $parents[0]);
+        $id_plugin = array_shift($parents);
+        // dropping 'plugins'
+        array_shift($parents);
+
+        $root_parent = $this->opt->fromCode('plugins', 'permissions', $id_plugin);
         if (!$root_parent) {
-          throw new Exception("Impossible to find a parent for plugin's permission ".$parents[0]);
+          throw new Exception("Impossible to find a parent for plugin's permission ".$id_plugin);
         }
 
-        array_shift($parents);
-        array_shift($parents);
-        $plugin  = $this->opt->code(array_shift($parents));
-        $alias = $this->opt->fromCode('options', 'permissions', $plugin, $root_original);
-        $id_root = $this->opt->fromCode($plugin, $root_parent);
+        $id_subplugin = array_shift($parents);
+        $subplugin  = $this->opt->code($id_subplugin);
+        if ($root_original === $appui) {
+
+        }
+        $alias = $this->opt->fromCode(
+          'options',
+          'permissions',
+          substr($subplugin, $root_original === $appui ? 6: 0),
+          $root_original
+        );
+
+        $id_root = $this->opt->fromCode($subplugin, $root_parent);
 
         if (!$id_root) {
           $id_root = $this->opt->add([
             'id_parent' => $root_parent,
-            'code' => $plugin,
-            'text' => $plugin,
+            'code' => $subplugin,
+            'text' => $subplugin,
             'id_alias' => $alias
           ]);
         }
@@ -1101,8 +1116,14 @@ class Permissions extends bbn\Models\Cls\Basic
       $cfg = $this->opt->getCfg($p);
       $id_parent = null;
       // The root is the last with permnission on
-      if (!$cfg['permissions']) {
-        break;
+      if (!$cfg['permissions'] ) {
+        $parent_option = $this->opt->option($p);
+        if (!empty($parent_option['alias'])) {
+          $scfg = $this->opt->getCfg($parent_option['id_alias']);
+          if ($scfg['permissions']) {
+            $id_parent = $p;
+          }
+        }
       }
       else {
         if (!$i && ($cfg['permissions'] === 'children')) {

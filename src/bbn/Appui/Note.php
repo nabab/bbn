@@ -47,6 +47,7 @@ class Note extends bbn\Models\Cls\Db
         'id_parent' => 'id_parent',
         'id_alias' => 'id_alias',
         'id_type' => 'id_type',
+        'id_option' => 'id_option',
         'mime' => 'mime',
         'lang' => 'lang',
         'excerpt' => 'excerpt',
@@ -180,7 +181,8 @@ class Note extends bbn\Models\Cls\Db
    * @param string|null $alias
    * @param string $mime
    * @param string $lang
-   * @return false|null
+   * @param string|null $id_option
+   * @return string|null
    */
   public function insert(
     $title,
@@ -191,13 +193,15 @@ class Note extends bbn\Models\Cls\Db
     string $parent = null,
     string $alias = null,
     string $mime = '',
-    string $lang = ''
+    string $lang = '',
+    string $id_option = null
   ) {
     if (is_array($title)) {
       $props = [
         'title',
         'content',
         'type',
+        'id_option',
         'private',
         'locked',
         'parent',
@@ -236,6 +240,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['id_parent'] => $parent,
           $cf['arch']['notes']['id_alias'] => $alias,
           $cf['arch']['notes']['id_type'] => $type,
+          $cf['arch']['notes']['id_option'] => $id_option,
           $cf['arch']['notes']['excerpt'] => $excerpt,
           $cf['arch']['notes']['private'] => !empty($private) ? 1 : 0,
           $cf['arch']['notes']['locked'] => !empty($locked) ? 1 : 0,
@@ -449,6 +454,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['id_alias'],
           $cf['arch']['notes']['excerpt'],
           $cf['arch']['notes']['id_type'],
+          $cf['arch']['notes']['id_option'],
           $cf['arch']['notes']['private'],
           $cf['arch']['notes']['locked'],
           $cf['arch']['notes']['pinned'],
