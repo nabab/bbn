@@ -46,56 +46,85 @@ class Pgsql extends Sql
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
 
   /** @var array Numeric column types */
-  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+  public static $numeric_types = [
+    'integer',
+    'int',
+    'smallint',
+    'tinyint',
+    'smallint',
+    'mediumint',
+    'bigint',
+    'decimal',
+    'numeric',
+    'float',
+    'double',
+    'double precision',
+    'real'
+  ];
+
+  protected static $numeric_with_max_values = ['decimal', 'numeric'];
 
   /** @var array Time and date column types */
   public static $date_types = ['date', 'time', 'datetime'];
 
   public static $types = [
-    'tinyint',
+    'smallserial',
+    'serial',
+    'bigserial',
     'smallint',
-    'mediumint',
     'int',
+    'integer',
     'bigint',
     'decimal',
     'float',
-    'double',
+    'real',
+    'double precision',
+    'numeric',
+    'money',
     'bit',
+    'bit varying',
+    'character',
     'char',
     'varchar',
-    'binary',
-    'varbinary',
-    'tinyblob',
-    'blob',
-    'mediumblob',
-    'longblob',
-    'tinytext',
+    'character varying',
+    'bytea',
     'text',
-    'mediumtext',
-    'longtext',
-    'enum',
-    'set',
     'date',
     'time',
-    'datetime',
     'timestamp',
-    'year',
-    'geometry',
+    'timestampz',
+    'timestamp without time zone',
+    'timestamp with time zone',
+    'time without time zone',
+    'time with time zone',
+    'interval',
     'point',
-    'linestring',
+    'line',
+    'lseg',
     'polygon',
-    'geometrycollection',
-    'multilinestring',
-    'multipoint',
-    'multipolygon',
+    'box',
+    'path',
+    'circle',
     'json',
+    'jsonb',
+    'boolean'
   ];
 
   public static $interoperability = [
-    'integer' => 'int',
-    'real' => 'decimal',
     'text' => 'text',
-    'blob' => 'blob'
+    'tinytext' => 'text',
+    'mediumtext' => 'text',
+    'longtext' => 'text',
+    'blob' => 'bytea',
+    'binary' => 'bytea',
+    'varbinary' => 'bytea',
+    'mediumblob' => 'bytea',
+    'longblob' => 'bytea',
+    'tinyint' => 'smallint',
+    'mediumint' => 'integer',
+    'double' => 'double precision',
+    'datetime' => 'timestamp',
+    'linestring' => 'line'
   ];
 
   public static $aggr_functions = [
@@ -718,8 +747,10 @@ PSQL
     }
 
     if ($database !== $this->getCurrent()) {
-      $this->cfg['db'] = $database;
-      return (new self ($this->cfg))->getTables();
+      return (new self (
+        array_merge($this->cfg, ['db' => $database])
+      ))
+        ->getTables();
     }
 
     $t2 = [];
@@ -764,7 +795,7 @@ PSQL
    *              "extra" => "",
    *              "signed" => 0,
    *              "maxlength" => "30",
-   *              "type" => "varchar",
+   *              "type" => "character varying",
    *            ],
    *            "surname" => [
    *              "position" => 3,
@@ -774,7 +805,7 @@ PSQL
    *              "extra" => "",
    *              "signed" => 0,
    *              "maxlength" => "30",
-   *              "type" => "varchar",
+   *              "type" => "character varying",
    *            ],
    *            "address" => [
    *              "position" => 4,
@@ -800,57 +831,55 @@ PSQL
     }
 
     $r = [];
-    if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
-      [$db, $table] = $t;
-      $sql          = <<<MYSQL
-        SELECT *
-        FROM `information_schema`.`COLUMNS`
-        WHERE `TABLE_NAME` LIKE ?
-        AND `TABLE_SCHEMA` LIKE ?
-        ORDER BY `ORDINAL_POSITION` ASC
-MYSQL;
-      if ($rows = $this->getRows($sql, $table, $db)) {
-        $p = 1;
+    if ($table = $this->tableFullName($table)) {
+      $keys         = $this->getKeys($table);
+      $primary_keys = $keys['keys']['PRIMARY']['columns'] ?? [];
+
+      $unique_keys_arr = array_filter($keys['keys'] ?? [], function ($item, $key) {
+        return (bool)$item['unique'] === true && $key !== 'PRIMARY';
+      }, ARRAY_FILTER_USE_BOTH);
+
+      $unique_keys = array_map(function ($item) {
+        return $item['columns'][0] ?? null;
+      }, array_values($unique_keys_arr));
+
+      $sql          = <<<PGSQL
+        SELECT * FROM information_schema.columns 
+        WHERE table_name LIKE ?
+        ORDER BY ordinal_position
+PGSQL;
+      if ($rows = $this->getRows($sql, $table)) {
         foreach ($rows as $row) {
-          $f          = $row['COLUMN_NAME'];
-          $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
-            && (stripos($row['DATA_TYPE'], 'blob') === false)
-            && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
+          $f          = $row['column_name'];
+
           $r[$f]      = [
-            'position' => $p++,
-            'type' => $row['DATA_TYPE'],
-            'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
-            'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
-            'extra' => $row['EXTRA'],
-            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
-            'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
-            'generation' => $row['GENERATION_EXPRESSION'],
+            'position' => $row['ordinal_position'],
+            'type' => $row['data_type'],
+            'udt_name' => $row['udt_name'],
+            'null' => $row['is_nullable'] === 'NO' ? 0 : 1,
+            'key' => in_array($row['column_name'], $primary_keys)
+              ? 'PRI'
+              : (in_array($row['column_name'], $unique_keys)
+                ? 'UNI'
+                : null),
+            'extra' => strpos($row['column_default'], 'nextval') !== false &&
+                       strpos($row['data_type'], 'int') !== false
+              ? 'auto_increment'
+              : '',
+            'signed' => $row['numeric_precision'] !== null,
+            'virtual' => false,
+            'generation' => $row['generation_expression'],
           ];
-          if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
-            $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
+          if (($row['column_default'] !== null) || ($row['is_nullable'] === 'YES')) {
+            $r[$f]['default'] = \is_null($row['column_default']) ? 'NULL' : $row['column_default'];
           }
 
-          if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
-            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
-              && !empty($matches[1])
-              && \is_string($matches[1][0])
-              && ($matches[1][0][0] === "'")
-            ) {
-              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
-              $r[$f]['extra']  = $matches[1][0];
-            } else {
-              $r[$f]['values'] = [];
-            }
-          } elseif (preg_match_all('/\((\d+)?(?:,)|(\d+)\)/', $row['COLUMN_TYPE'], $matches)) {
-            if (empty($matches[1][0])) {
-              if (!empty($matches[2][0])) {
-                $r[$f]['maxlength'] = (int)$matches[2][0];
-              }
-            } else {
-              $r[$f]['maxlength'] = (int)$matches[1][0];
-              $r[$f]['decimals']  = (int)$matches[2][1];
-            }
+          if ($row['character_maximum_length'] !== null) {
+            $r[$f]['maxlength'] = $row['character_maximum_length'];
+          }
+          elseif ($row['numeric_precision'] !== null && $row['numeric_scale'] !== null) {
+            $r[$f]['maxlength'] = $row['numeric_precision'];
+            $r[$f]['decimals']  = $row['numeric_scale'];
           }
         }
       }
@@ -862,6 +891,7 @@ MYSQL;
 
   /**
    * Returns the keys of the given table.
+   *
    * @param string $table The table's name
    * @return null|array
    */
@@ -872,80 +902,103 @@ MYSQL;
     }
 
     $r = [];
-    if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
-      [$db, $table] = $t;
-      $r            = [];
-      $indexes      = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
+    if ($table = $this->tableFullName($table)) {
+      $indexes      = $this->getRows(<<<PGSQL
+SELECT
+    i.relname as index_name,
+    a.attname as column_name,
+    ix.indisprimary as is_primary,
+	  ix.indisunique as is_unique,
+    CASE 
+      WHEN ix.indisprimary = true THEN 'PRIMARY'
+      ELSE i.relname
+    END 
+        AS key_name
+from
+    pg_class t,
+    pg_class i,
+    pg_index ix,
+    pg_attribute a
+where
+    t.oid = ix.indrelid
+    and i.oid = ix.indexrelid
+    and a.attrelid = t.oid
+    and a.attnum = ANY(ix.indkey)
+    and t.relkind = 'r'
+    and t.relname = '$table'
+order by
+    t.relname,
+    i.relname;
+PGSQL
+);
+
       $keys         = [];
       $cols         = [];
-      foreach ($indexes as $i => $index) {
-        $a = $this->getRow(
-          <<<MYSQL
-SELECT `CONSTRAINT_NAME` AS `name`,
-`ORDINAL_POSITION` AS `position`,
-`REFERENCED_TABLE_SCHEMA` AS `ref_db`,
-`REFERENCED_TABLE_NAME` AS `ref_table`,
-`REFERENCED_COLUMN_NAME` AS `ref_column`
-FROM `information_schema`.`KEY_COLUMN_USAGE`
-WHERE `TABLE_SCHEMA` LIKE ?
-AND `TABLE_NAME` LIKE ?
-AND `COLUMN_NAME` LIKE ?
-AND (
-  `CONSTRAINT_NAME` LIKE ? OR
-  (`REFERENCED_TABLE_NAME` IS NOT NULL OR `ORDINAL_POSITION` = ?)
-)
-ORDER BY `KEY_COLUMN_USAGE`.`REFERENCED_TABLE_NAME` DESC
-LIMIT 1
-MYSQL
-          ,
-          $db,
-          $table,
-          $index['Column_name'],
-          $index['Key_name'],
-          $index['Seq_in_index']
-        );
-        if ($a) {
-          $b = $this->getRow(
-            <<<MYSQL
-          SELECT `CONSTRAINT_NAME` AS `name`,
-          `UPDATE_RULE` AS `update`,
-          `DELETE_RULE` AS `delete`
-          FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
-          WHERE `CONSTRAINT_NAME` LIKE ?
-          AND `CONSTRAINT_SCHEMA` LIKE ?
-          AND `TABLE_NAME` LIKE ?
-          LIMIT 1
-MYSQL
-            ,
-            $a['name'],
-            $db,
-            $table
-          );
-        } elseif (isset($b)) {
-          unset($b);
-        }
-
-        if (!isset($keys[$index['Key_name']])) {
-          $keys[$index['Key_name']] = [
-            'columns' => [$index['Column_name']],
-            'ref_db' => isset($a, $a['ref_db']) ? $a['ref_db'] : null,
-            'ref_table' => isset($a, $a['ref_table']) ? $a['ref_table'] : null,
-            'ref_column' => isset($a, $a['ref_column']) ? $a['ref_column'] : null,
-            'constraint' => isset($b, $b['name']) ? $b['name'] : null,
-            'update' => isset($b, $b['update']) ? $b['update'] : null,
-            'delete' => isset($b, $b['delete']) ? $b['delete'] : null,
-            'unique' => $index['Non_unique'] ? 0 : 1,
+      foreach ($indexes as $index) {
+        if (!isset($keys[$index['key_name']])) {
+          $keys[$index['key_name']] = [
+            'columns' => [$index['column_name']],
+            'ref_db' => null,
+            'ref_table' => null,
+            'ref_column' => null,
+            'constraint' => null,
+            'update' => null,
+            'delete' => null,
+            'unique' => (int)$index['is_unique'],
           ];
         } else {
-          $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
-          $keys[$index['Key_name']]['ref_db']    = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
+          $keys[$index['key_name']]['columns'][] = $index['column_name'];
         }
 
-        if (!isset($cols[$index['Column_name']])) {
-          $cols[$index['Column_name']] = [$index['Key_name']];
+        if (!isset($cols[$index['column_name']])) {
+          $cols[$index['column_name']] = [$index['key_name']];
         } else {
-          $cols[$index['Column_name']][] = $index['Key_name'];
+          $cols[$index['column_name']][] = $index['key_name'];
+        }
+      }
+
+      if ($constraints = $this->getRows(<<<PGSQL
+SELECT
+    tc.table_schema, 
+    tc.constraint_name, 
+    tc.table_name, 
+    kcu.column_name, 
+    ccu.table_schema AS foreign_table_schema,
+    ccu.table_name AS foreign_table_name,
+    ccu.column_name AS foreign_column_name 
+FROM 
+    information_schema.table_constraints AS tc 
+    JOIN information_schema.key_column_usage AS kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+    JOIN information_schema.constraint_column_usage AS ccu
+      ON ccu.constraint_name = tc.constraint_name
+      AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = '$table';
+PGSQL
+      )) {
+        foreach ($constraints as $constraint) {
+          if (!isset($keys[$constraint['column_name']])) {
+            $keys[$constraint['constraint_name']] = [
+              'columns' => [$constraint['column_name']],
+              'ref_db' => $this->getCurrent(),
+              'ref_table' => $constraint['foreign_table_name'],
+              'ref_column' => $constraint['foreign_column_name'],
+              'constraint' => $constraint['constraint_name'],
+              'update' => null,
+              'delete' => null,
+              'unique' => 0,
+            ];
+          } else {
+            $keys[$constraint['key_name']]['columns'][] = $constraint['column_name'];
+            $keys[$constraint['key_name']]['ref_db']    = $keys[$constraint['key_name']]['ref_table'] = $keys[$constraint['key_name']]['ref_column'] = null;
+          }
+
+          if (!isset($cols[$constraint['column_name']])) {
+            $cols[$constraint['column_name']] = [$constraint['constraint_name']];
+          } else {
+            $cols[$constraint['column_name']][] = $constraint['constraint_name'];
+          }
         }
       }
 
@@ -958,15 +1011,50 @@ MYSQL
 
 
   /**
-   * @param null|string $table The table for which to create the statement
+   * @param string $table The table for which to create the statement
    * @return string
    */
   public function getRawCreate(string $table): string
   {
-    if (($table = $this->tableFullName($table, true))
-      && ($r = $this->rawQuery("SHOW CREATE TABLE $table"))
+    if ($table = $this->tableFullName($table, true)){
+
+      if ($r = $this->rawQuery(<<<PGSQL
+SELECT 'CREATE TABLE $table' || '\n' || ' (' || '\n' || '' || 
+    string_agg(column_list.column_expr, ', ' || '\n' || '') || 
+    '' || '\n' || ');' AS create_table
+FROM ( 
+  SELECT '    ' || column_name || ' ' || 
+    CASE 
+        WHEN STRPOS(column_default, 'nextval') > 0 AND STRPOS(data_type, 'int') > 0
+        THEN REPLACE(REPLACE(data_type, 'integer', 'serial'), 'int', 'serial')
+        ELSE data_type 
+      END
+    || 
+       coalesce('(' || character_maximum_length || ')', '') || 
+	   CASE 
+			WHEN STRPOS(data_type, 'int') = 0 AND numeric_precision IS NOT NULL AND numeric_scale IS NOT NUll 
+			THEN '(' || numeric_precision || ',' ||  numeric_scale || ')'
+			ELSE ''
+		END ||
+       CASE 
+			WHEN is_nullable = 'YES' THEN '' 
+			ELSE ' NOT NULL' 
+		END ||
+		CASE 
+			WHEN STRPOS(column_default, 'nextval') > 0 AND STRPOS(data_type, 'int') > 0
+			THEN ''
+			ELSE coalesce(' DEFAULT ' || column_default || ' ', '') 
+		END
+	 
+	AS column_expr
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = '$table'
+  ORDER BY ordinal_position) column_list;
+PGSQL
+      )
     ) {
-      return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
+        return $r->fetch(\PDO::FETCH_ASSOC)['create_table'] ?? '';
+      }
     }
 
     return '';
@@ -995,9 +1083,23 @@ MYSQL
       }
 
       $st .= '  ' . $this->escape($name) . ' ';
-      if (!in_array($col['type'], self::$types)) {
-        if (isset(self::$interoperability[$col['type']])) {
-          $st .= self::$interoperability[$col['type']];
+      $col_type = $col['type'];
+
+      if (array_key_exists('default', $col) && strpos($col['default'], '::') !== FALSE) {
+        [$col['default']] = explode('::', $col['default']);
+      }
+
+      if ($col_type === 'USER-DEFINED' && !empty($col['udt_name'])) {
+        $col['type'] = $col['udt_name'];
+      }
+
+      if (!in_array($col_type, self::$types)) {
+        if (isset(self::$interoperability[$col_type])) {
+          $st      .= self::$interoperability[$col_type];
+          $col_type = self::$interoperability[$col_type];
+        }
+        else if ($col_type === 'USER-DEFINED') {
+          $st .= $col['type'];
         }
         else {
           throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
@@ -1007,26 +1109,20 @@ MYSQL
         $st .= $col['type'];
       }
 
-      if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
-        if (empty($col['extra'])) {
-          throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
-        }
-
-        $st .= ' (' . $col['extra'] . ')';
-      }
-      elseif (!empty($col['maxlength'])) {
+      if (
+        !empty($col['maxlength']) &&
+        (
+          (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
+          ||
+          !in_array($col_type, self::$numeric_types)
+        )
+      ) {
         $st .= '(' . $col['maxlength'];
         if (!empty($col['decimals'])) {
           $st .= ',' . $col['decimals'];
         }
 
         $st .= ')';
-      }
-
-      if (in_array($col['type'], self::$numeric_types)
-        && empty($col['signed'])
-      ) {
-        $st .= ' UNSIGNED';
       }
 
       if (empty($col['null'])) {
@@ -1043,13 +1139,14 @@ MYSQL
           || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
         ) {
           $st .= (string)$col['default'];
-        } else {
-          $st .= $col['default'];
+        }
+        else {
+          $st .= "'" . trim($col['default'], "'") . "'";
         }
       }
     }
 
-    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+    $st .= PHP_EOL . ')';
     return $st;
   }
 
@@ -1072,16 +1169,16 @@ MYSQL
 
       $i     = 0;
       foreach ($model['keys'] as $name => $key) {
-        $st .= '  ADD ';
         if (!empty($key['unique'])
           && isset($model['fields'][$key['columns'][0]])
           && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
         ) {
-          $st .= 'PRIMARY KEY';
+          $st .= 'ADD PRIMARY KEY';
         } elseif (!empty($key['unique'])) {
-          $st .= 'UNIQUE KEY ' . $this->escape($name);
+          $st .= 'ADD CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
         } else {
-          $st .= 'KEY ' . $this->escape($name);
+          $i++;
+          continue;
         }
 
         $st .= ' (' . implode(
@@ -1096,10 +1193,12 @@ MYSQL
       }
     }
 
-    return $st;
+    return trim($st, ',' . PHP_EOL);
   }
 
   /**
+   * Return SQL string for table creation.
+   *
    * @param string $table
    * @param array|null $model
    * @return string
@@ -1122,8 +1221,10 @@ MYSQL
       $end   = array_pop($lines);
       $st    = X::join($lines, PHP_EOL);
 
+      $indexes = [];
+
       foreach ($model['keys'] as $name => $key) {
-        $st .= ',' . PHP_EOL . '  ';
+        $separator = ',' . PHP_EOL . '  ';
         if (
           !empty($key['unique']) &&
           (count($key['columns']) === 1) &&
@@ -1131,11 +1232,17 @@ MYSQL
           isset($model['fields'][$key['columns'][0]]['key']) &&
           $model['fields'][$key['columns'][0]]['key'] === 'PRI'
         ) {
-          $st .= 'PRIMARY KEY';
+          $st .= $separator . 'PRIMARY KEY';
         } elseif (!empty($key['unique'])) {
-          $st .= 'UNIQUE KEY ' . $this->escape($name);
-        } else {
-          $st .= 'KEY ' . $this->escape($name);
+          $st .= $separator . 'CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
+        } elseif (!empty($key['ref_table']) && !empty($key['ref_column'])) {
+          continue;
+        }
+        else {
+          // Pgsql does not support creating normal indexes in the create table statement
+          // so will return it as another sql
+          $indexes[$name] = $key;
+          continue;
         }
 
         $st   .= ' (' . implode(
@@ -1162,6 +1269,21 @@ MYSQL
       }
 
       $st .= PHP_EOL . $end;
+
+      if (!empty($indexes)) {
+        $st .= ';' . PHP_EOL;
+        foreach ($indexes as $name => $index) {
+          $st   .= 'CREATE INDEX ' . $this->escape($name) . " ON $table";
+          $st   .= ' (' . implode(
+              ',', array_map(
+                function ($a) {
+                  return $this->escape($a);
+                }, $index['columns']
+              )
+            ) . ')';
+          $st .= ";" . PHP_EOL;
+        }
+      }
     }
 
     return $st;
@@ -1180,9 +1302,6 @@ MYSQL
   public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
   {
     $column = (array)$column;
-    if ($length) {
-      $length = (array)$length;
-    }
 
     $name = Str::encodeFilename($table);
     if ($table = $this->tableFullName($table, true)) {
@@ -1193,14 +1312,11 @@ MYSQL
 
         $name      .= '_' . $c;
         $column[$i] = $this->escape($column[$i]);
-        if (isset($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
-          $column[$i] .= '(' . $length[$i] . ')';
-        }
       }
 
       $name = Str::cut($name, 50);
       return (bool)$this->rawQuery(
-        'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
+        'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX $name ON $table ( " .
         implode(', ', $column) . ' )'
       );
     }
@@ -1211,23 +1327,44 @@ MYSQL
   /**
    * Deletes an index
    *
-   * @param null|string $table
+   * @param string $table
    * @param string $key
    * @return bool
-   * @throws \Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {
-    if (($table = $this->tableFullName($table, true))
-      && Str::checkName($key)
-    ) {
-      return (bool)$this->rawQuery("ALTER TABLE $table DROP INDEX `$key`");
+    if (Str::checkName($key)) {
+      return (bool)$this->rawQuery("DROP INDEX $key CASCADE");
     }
 
     return false;
   }
 
   /**
+   * Returns a table's full name i.e. database.table
+   *
+   * @param string $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
+   * @return string|null
+   */
+  public function tableFullName(string $table, bool $escaped = false): ?string
+  {
+    if ($full = parent::tableFullName($table, $escaped)) {
+      return explode('.', $full)[1] ?? null;
+    }
+
+    return null;
+  }
+
+  public function getHexStatement(string $col_name): string
+  {
+    return "encode($col_name, 'hex')";
+  }
+
+  /**
+   * Returns a new instance of the class.
+   * Used when changing database since pgsql does not support it.
+   *
    * @param array $cfg
    * @return self
    * @throws \Exception
@@ -1238,6 +1375,8 @@ MYSQL
 
     if ($this->_fancy) {
       $instance->startFancyStuff();
+    } else {
+      $instance->stopFancyStuff();
     }
 
     return $instance;

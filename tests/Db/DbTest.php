@@ -27,7 +27,7 @@ class DbTest extends TestCase
     $this->mysql_mock->shouldReceive('getCfg')
       ->once()
       ->withNoArgs()
-      ->andReturn(array_merge($db_cfg = $this->getDbConfig(), [
+      ->andReturn(array_merge($db_cfg = self::getDbConfig(), [
         'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}"
       ]));
 
@@ -43,7 +43,7 @@ class DbTest extends TestCase
     $this->mysql_mock->shouldReceive('__toString')
       ->andReturn('mysql');
 
-    $this->db = new Db($this->getDbConfig());
+    $this->db = new Db(self::getDbConfig());
 
     $this->setNonPublicPropertyValue('cache_engine', $this->cache_mock);
   }
@@ -73,7 +73,7 @@ class DbTest extends TestCase
   /** @test */
   public function constructor_test()
   {
-    $db_cfg = $this->getDbConfig();
+    $db_cfg = self::getDbConfig();
 
     $this->assertInstanceOf(
       Db::class,
@@ -91,7 +91,7 @@ class DbTest extends TestCase
   {
     $this->expectException(\Exception::class);
 
-    $db_config = $this->getDbConfig();
+    $db_config = self::getDbConfig();
 
     unset($db_config['engine']);
 
@@ -140,9 +140,9 @@ class DbTest extends TestCase
     $this->mysql_mock->shouldReceive('getHost')
       ->once()
       ->withNoArgs()
-      ->andReturn($this->getDbConfig()['host']);
+      ->andReturn(self::getDbConfig()['host']);
 
-    $this->assertSame($this->getDbConfig()['host'], $this->db->getHost());
+    $this->assertSame(self::getDbConfig()['host'], $this->db->getHost());
   }
 
   /** @test */
@@ -151,9 +151,9 @@ class DbTest extends TestCase
     $this->mysql_mock->shouldReceive('getCurrent')
       ->once()
       ->withNoArgs()
-      ->andReturn($this->getDbConfig()['db']);
+      ->andReturn(self::getDbConfig()['db']);
 
-    $this->assertSame($this->getDbConfig()['db'], $this->db->getCurrent());
+    $this->assertSame(self::getDbConfig()['db'], $this->db->getCurrent());
   }
 
   /** @test */
@@ -170,7 +170,7 @@ class DbTest extends TestCase
   /** @test */
   public function to_string_method_returns_a_string_when_the_object_is_used_as_a_string()
   {
-    $db_config = $this->getDbConfig();
+    $db_config = self::getDbConfig();
 
     $this->mysql_mock->shouldReceive('getHost')
       ->once()
@@ -186,7 +186,7 @@ class DbTest extends TestCase
   /** @test */
   public function getConnectionCode_returns_connection_code()
   {
-    $db_cfg = $this->getDbConfig();
+    $db_cfg = self::getDbConfig();
 
     $this->mysql_mock->shouldReceive('getConnectionCode')
       ->once()

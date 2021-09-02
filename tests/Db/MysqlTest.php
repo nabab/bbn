@@ -466,9 +466,9 @@ RESULT;
     $cfg = [
       'tables' => [
         'users' => 'users',
-        'r'     => 'roles'
+        'roles'     => 'roles'
       ],
-      'fields' => ['id', 'username', 'unique_roles' => 'distinct role_name', 'cfg'],
+      'fields' => ['id', 'username', 'role_name', 'cfg'],
       'available_fields' => [
         'id' => 'users',
         'username' => 'users',
@@ -492,11 +492,29 @@ RESULT;
     $db_name = self::getDbConfig()['db'];
 
     $result   = self::$mysql->getSelect($cfg);
-    $expected = "SELECT LOWER(HEX(`users`.`id`)) AS `id`, `users`.`username`, DISTINCT `roles`.`role_name` AS `unique_roles`, `users`.`cfg`
-FROM `$db_name`.`users`, `$db_name`.`roles` AS `r`
+    $expected = "SELECT LOWER(HEX(`users`.`id`)) AS `id`, `users`.`username`, `roles`.`role_name`, `users`.`cfg`
+FROM `$db_name`.`users`, `$db_name`.`roles`
 ";
+    $this->createTable('users', function () {
+      return 'id binary NOT NULL PRIMARY KEY,
+              username varchar(255) NOT NULL,
+              cfg TEXT NOT NULL';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id binary PRIMARY KEY,
+              role_name varchar(20) NOT NULL';
+    });
 
     $this->assertSame($expected, $result);
+
+    try {
+      self::$mysql->rawQuery($expected);
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+    }
+
+    $this->assertTrue(!isset($error), $error ?? '');
   }
 
   /** @test */
@@ -7514,13 +7532,13 @@ GROUP BY `id`
   /** @test */
   public function getHost_method_returns_the_host_of_the_current_connection()
   {
-    $this->assertSame($this->getDbConfig()['host'], self::$mysql->getHost());
+    $this->assertSame(self::getDbConfig()['host'], self::$mysql->getHost());
   }
 
   /** @test */
   public function getCurrent_method_returns_the_current_database_of_the_current_connection()
   {
-    $this->assertSame($this->getDbConfig()['db'], self::$mysql->getCurrent());
+    $this->assertSame(self::getDbConfig()['db'], self::$mysql->getCurrent());
   }
 
   /** @test */
@@ -7536,7 +7554,7 @@ GROUP BY `id`
   /** @test */
   public function change_method_changes_the_database_to_the_given_one()
   {
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
+    $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
     self::$connection->query('CREATE DATABASE IF NOT EXISTS bbn_test_2');
 
@@ -7553,7 +7571,7 @@ GROUP BY `id`
   /** @test */
   public function change_method_does_not_change_the_database_if_language_object_fails_to_change()
   {
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
+    $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
     try {
       self::$mysql->change('bbn_test_3');
@@ -7561,7 +7579,7 @@ GROUP BY `id`
 
     }
 
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
+    $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
   }
 
   /** @test */

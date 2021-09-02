@@ -836,7 +836,7 @@ MYSQL
   }
 
   /**
-   * @param null|string $table The table for which to create the statement
+   * @param string $table The table for which to create the statement
    * @return string
    */
   public function getRawCreate(string $table): string
@@ -1089,10 +1089,9 @@ MYSQL
   /**
    * Deletes an index
    *
-   * @param null|string $table
+   * @param string $table
    * @param string $key
    * @return bool
-   * @throws \Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {

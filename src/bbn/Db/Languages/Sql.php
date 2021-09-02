@@ -1116,8 +1116,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             }
 
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
+
             if ($is_uid) {
-              $st = 'LOWER(HEX(' . $this->colFullName($csn, $cfg['available_fields'][$f], true) . '))';
+              if (method_exists($this, 'getHexStatement')) {
+                $st = 'LOWER(' . $this->getHexStatement($this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
+              }
+              else {
+                $st = 'LOWER(HEX(' . $this->colFullName($csn, $cfg['available_fields'][$f], true) . '))';
+              }
             }
             // For JSON fields
             elseif ($cfg['available_fields'][$f] === false) {
