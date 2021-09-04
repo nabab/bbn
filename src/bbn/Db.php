@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use bbn\Db\Engines;
+
 /**
  * Half ORM half DB management, the simplest class for data queries.
  *
@@ -15,196 +17,15 @@ namespace bbn;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @todo Check for the tables and column names legality in _treat_arguments
  */
-class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
+class Db implements Db\Actions
 {
   use Models\Tts\Cache;
   use Models\Tts\Retriever;
 
   /**
-   * The error configuration for continuing after an error occurred
-   */
-  protected const E_CONTINUE = 'continue';
-
-  /**
-   * The error configuration for dying after an error occurred
-   */
-  protected const E_DIE = 'die';
-
-  /**
-   * The error configuration for stopping all requests on all connections after an error occurred
-   */
-  protected const E_STOP_ALL = 'stop_all';
-
-  /**
-   * The error configuration for stopping requests on the current connection after an error occurred
-   */
-  protected const E_STOP = 'stop';
-
-  /**
-   * An elegant separator
-   */
-  protected const LINE = '---------------------------------------------------------------------------------';
-
-  /**
-   * When set to true last_query will be filled with the latest statement.
-   * @var bool
-   */
-  private $_last_enabled = true;
-
-  /**
-   * A PHPSQLParser object
-   * @var \PHPSQLParser\PHPSQLParser
-   */
-  private $_parser;
-
-  /**
-   * @var mixed $cache
-   */
-  private $_cache = [];
-
-  /**
-   * If set to false, Query will return a regular PDOStatement
-   * Use stop_fancy_stuff() to set it to false
-   * And use start_fancy_stuff to set it back to true
-   * @var int $fancy
-   */
-  private $_fancy = 1;
-
-  /**
-   * Error state of the current connection
-   * @var bool $has_error
-   */
-  private $_has_error = false;
-
-  /**
-   * An array of functions for launching triggers on actions
-   * @var array
-   */
-  private $_triggers = [
-    'SELECT' => [
-      'before' => [],
-      'after' => []
-    ],
-    'INSERT' => [
-      'before' => [],
-      'after' => []
-    ],
-    'UPDATE' => [
-      'before' => [],
-      'after' => []
-    ],
-    'DELETE' => [
-      'before' => [],
-      'after' => []
-    ]
-  ];
-
-  /**
-   * @var bool
-   */
-  private $_triggers_disabled = false;
-
-  /** @var string The connection code as it would be stored in option */
-  protected $connection_code;
-
-  /**
-   * @todo is bool or string??
-   * Unique string identifier for current connection
-   * @var string
-   */
-  protected $hash;
-
-  /**
-   * @var Db\Languages\Mysql Can be other driver
+   * @var Db\Engines Can be other driver
    */
   protected $language = false;
-
-  /**
-   * @var integer $cache_renewal
-   */
-  protected $cache_renewal = 3600;
-
-  /**
-   * @var array $list_queries
-   */
-  protected $list_queries = [];
-
-  /**
-   * @var int $max_queries
-   */
-  protected $max_queries = 50;
-
-  /**
-   * @var int $length_queries
-   */
-  protected $length_queries = 60;
-
-  /**
-   * @var mixed $last_insert_id
-   */
-  protected $last_insert_id;
-
-  /**
-   * @var mixed $id_just_inserted
-   */
-  protected $id_just_inserted;
-
-  /**
-   * @var mixed $hash_contour
-   */
-  protected $hash_contour = '__BBN__';
-
-  /**
-   * @var string \$last_query
-   */
-  protected $last_query;
-
-  /**
-   * The information that will be accessed by Db\Query as the current statement's options
-   * @var array $last_params
-   */
-  protected $last_params = ['sequences' => false, 'values' => false];
-
-  /**
-   * @var string \$last_query
-   */
-  protected $last_real_query;
-
-  /**
-   * The information that will be accessed by Db\Query as the current statement's options
-   * @var array $last_params
-   */
-  protected $last_real_params = ['sequences' => false, 'values' => false];
-
-  /**
-   * @var array $last_cfg
-   */
-  protected $last_cfg;
-
-  /**
-   * @var mixed $last_prepared
-   */
-  protected $last_prepared;
-
-  /**
-   * @var array $queries
-   */
-  protected $queries = [];
-
-  /**
-   * @var array $cfgs The configs recorded for helpers functions
-   */
-  protected $cfgs = [];
-
-  /**
-   * @var string $qte The quote character for table and column names.
-   */
-  protected $qte;
-
-  /**
-   * @var string $last_error
-   */
-  protected $last_error = false;
 
   /**
    * The ODBC engine of this connection
@@ -212,38 +33,9 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   protected $engine;
 
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $host;
 
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $username;
 
-  /**
-   * The currently selected database
-   * @var mixed $current
-   */
-  protected $current;
 
-  /**
-   * @var string $on_error
-   * Possible values:
-   * *    stop: the script will go on but no further database query will be executed
-   * *    die: the script will die with the error
-   * *    continue: the script and further queries will be executed
-   */
-  protected $on_error = self::E_STOP_ALL;
-
-  /** @var array The 'kinds' of writing statement */
-  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
-
-  /** @var array The 'kinds' of structure alteration statement */
-  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
 
   /** @var array The database engines allowed */
   protected static $engines = [
@@ -253,10 +45,53 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   ];
 
   /**
-   * Error state of the current connection
-   * @var bool
+   * Constructor
+   *
+   * ```php
+   * $dbtest = new bbn\Db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
+   *  // (void)
+   * ```
+   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
+   * @throws \Exception
    */
-  private static $_has_error_all = false;
+  public function __construct(array $cfg = [])
+  {
+    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
+      $cfg['engine'] = BBN_DB_ENGINE;
+    }
+
+    if (isset($cfg['engine'])) {
+      if ($cfg['engine'] instanceof Engines) {
+        $this->language = $cfg['engine'];
+      }
+      else {
+        $engine = $cfg['engine'];
+        $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
+
+        if (!class_exists($cls)) {
+          throw new \Exception(X::_("The database engine %s is not recognized", $engine));
+        }
+
+        $this->language = new $cls($cfg);
+      }
+
+      self::retrieverInit($this);
+      $this->cacheInit();
+
+      if ($cfg = $this->getCfg()) {
+        $this->postCreation();
+        $this->engine = (string)$cfg['engine'];
+        $this->startFancyStuff();
+      }
+    }
+
+    if (!$this->engine) {
+      $connection  = $cfg['engine'] ?? 'No engine';
+      $connection .= '/'.($cfg['db'] ?? 'No DB');
+      $this->log(X::_("Impossible to create the connection for").' '.$connection);
+      throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
+    }
+  }
 
 
   /**
@@ -284,113 +119,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     return self::$engines[$engine] ?? null;
   }
 
-
-  /**
-   * test
-   */
-  public static function createDatabaseSqlite(string $database)
+  public function getCfg(): array
   {
-    if (!is_file($database)) {
-      file_put_contents($database,'');
-      if (is_file($database)) {
-        return [
-          'engine' => 'sqlite',
-          'db' => $database
-        ];
-      }
-    }
-
-    return false;
+    return $this->language->getCfg();
   }
-
-
-  /**
-   * Returns a string with the given text in the middle of a "line" of logs.
-   *
-   * @param string $text The text to write
-   *
-   * @return void
-   */
-  public static function getLogLine(string $text = '')
-  {
-    if ($text) {
-      $text = ' '.$text.' ';
-    }
-
-    $tot  = \strlen(self::LINE) - \strlen($text);
-    $char = \substr(self::LINE, 0, 1);
-    return \str_repeat($char, floor($tot / 2)).$text.\str_repeat($char, ceil($tot / 2));
-  }
-
-
-  /**
-   * Constructor
-   *
-   * ```php
-   * $dbtest = new bbn\Db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
-   *  // (void)
-   * ```
-   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
-   */
-  public function __construct(array $cfg = [])
-  {
-    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
-      $cfg['engine'] = BBN_DB_ENGINE;
-    }
-
-    if (isset($cfg['engine'])) {
-      $engine = $cfg['engine'];
-      $db     = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');
-      $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
-      if (!class_exists($cls)) {
-        die("Sorry the engine class $engine does not exist");
-      }
-
-      self::retrieverInit($this);
-      $this->cacheInit();
-      $this->language = new $cls($this);
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
-      if ($cfg = $this->getConnection($cfg)) {
-        $this->qte = $this->language->qte;
-        try{
-          parent::__construct(...($cfg['args'] ?: []));
-        }
-        catch (\PDOException $e){
-          $err = X::_("Impossible to create the connection")." $engine/$db "
-                 .X::_("with the following error").$e->getMessage();
-          throw new \Exception($err);
-        }
-
-        $this->language->postCreation();
-        $this->current  = $cfg['db'] ?? null;
-        $this->engine   = $cfg['engine'];
-        $this->host     = $cfg['host'] ?? '127.0.0.1';
-        $this->username = $cfg['user'] ?? null;
-        $this->connection_code = $cfg['code_host'];
-        $this->hash     = $this->_make_hash($cfg['args']);
-        $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        if (!empty($cfg['cache_length'])) {
-          $this->cache_renewal = (int)$cfg['cache_length'];
-        }
-
-        $this->startFancyStuff();
-        if (!empty($cfg['error_mode'])) {
-          $this->setErrorMode($cfg['error_mode']);
-        }
-      }
-    }
-
-    if (!$this->engine) {
-      $connection  = $cfg['engine'] ?? 'No engine';
-      $connection .= '/'.($cfg['db'] ?? 'No DB');
-      $this->log(X::_("Impossible to create the connection for").' '.$connection);
-      throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
-    }
-  }
-
 
   /**
    * Returns the engine used by the current connection.
@@ -410,7 +142,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getHost(): ?string
   {
-    return $this->host;
+    return $this->language->getHost();
   }
 
 
@@ -421,7 +153,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getCurrent(): ?string
   {
-    return $this->current;
+    return $this->language->getCurrent();
   }
 
 
@@ -432,9 +164,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getLastError(): ?string
   {
-    return $this->last_error;
+    return $this->language->getLastError();
   }
-
 
   /**
    * Returns true if the column name is an aggregate function
@@ -450,19 +181,22 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
-   * Makes that echoing the connection shows its engin and host.
+   * Makes that echoing the connection shows its engine and host.
    *
    * @return string
    */
   public function __toString()
   {
-    return "Connection {$this->engine} to {$this->host}";
+    return "Connection {$this->engine} to " . $this->getHost();
   }
 
 
+  /**
+   * @return string
+   */
   public function getConnectionCode()
   {
-    return $this->connection_code;
+    return $this->language->getConnectionCode();
   }
 
 
@@ -474,25 +208,28 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *                                                              *
    ****************************************************************/
 
-
   /**
-   * Gets the last hash created.
+   * Gets the created hash.
    *
    * ```php
    * X::dump($db->getHash());
    * // (string) 3819056v431b210daf45f9b5dc2
    * ```
-   *
-   * @todo chiedere e thomas se deve diventare private e se va bene la descrizione
    * @return string
    */
-  public function getHash()
+  public function getHash(): string
   {
-    return $this->hash;
+    return $this->language->getHash();
   }
 
 
-  public function replaceTableInConditions(array $conditions, $old_name, $new_name)
+  /**
+   * @param array $conditions
+   * @param $old_name
+   * @param $new_name
+   * @return array
+   */
+  public function replaceTableInConditions(array $conditions, $old_name, $new_name): array
   {
     return X::map(
       function ($a) use ($old_name, $new_name) {
@@ -511,315 +248,14 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
-   * Retrieves a query array based on its hash.
-   * @param string $hash
-   * @return array|null
-   */
-  public function retrieveQuery(string $hash): ?array
-  {
-    if (isset($this->queries[$hash])) {
-      if (\is_string($this->queries[$hash])) {
-        $hash = $this->queries[$hash];
-      }
-
-      return $this->queries[$hash];
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Retrieves a configuration array based on its hash.
-   * @param string $hash
-   * @return array|null
-   */
-  public function retrieveCfg(string $hash): ?array
-  {
-    return $this->cfgs[$hash] ?? null;
-  }
-
-
-  /**
    * @param array $where
    * @param bool  $full
    * @return array|bool
    */
-  public function treatConditions(array $where, $full = true)
+  public function treatConditions(array $where, bool $full = true)
   {
-    if (!isset($where['conditions'])) {
-      $where['conditions'] = $where;
-    }
-
-    if (isset($where['conditions']) && \is_array($where['conditions'])) {
-      if (!isset($where['logic']) || (strtoupper($where['logic']) !== 'OR')) {
-        $where['logic'] = 'AND';
-      }
-
-      $res = [
-        'conditions' => [],
-        'logic' => $where['logic']
-      ];
-      foreach ($where['conditions'] as $key => $f){
-        $is_array = \is_array($f);
-        if ($is_array
-            && array_key_exists('conditions', $f)
-            && \is_array($f['conditions'])
-        ) {
-          $res['conditions'][] = $this->treatConditions($f, false);
-        }
-        else {
-          if (\is_string($key)) {
-            // 'id_user' => [1, 2] Will do OR
-            if (!$is_array) {
-              if (null === $f) {
-                $f = [
-                  'field' => $key,
-                  'operator' => 'isnull'
-                ];
-              }
-              else{
-                $f = [
-                  'field' => $key,
-                  'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
-                  'value' => $f
-                ];
-              }
-            }
-            elseif (isset($f[0])) {
-              $tmp = [
-                'conditions' => [],
-                'logic' => 'OR'
-              ];
-              foreach ($f as $v){
-                if (null === $v) {
-                  $tmp['conditions'][] = [
-                    'field' => $key,
-                    'operator' => 'isnull'
-                  ];
-                }
-                else{
-                  $tmp['conditions'][] = [
-                    'field' => $key,
-                    'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
-                    'value' => $v
-                  ];
-                }
-              }
-
-              $res['conditions'][] = $tmp;
-            }
-          }
-          elseif ($is_array && !X::isAssoc($f) && count($f) >= 2) {
-            $tmp = [
-              'field' => $f[0],
-              'operator' => $f[1]
-            ];
-            if (isset($f[3])) {
-              $tmp['exp'] = $f[3];
-            }
-            elseif (array_key_exists(2, $f)) {
-              if (is_array($f[2])) {
-                $tmp = [
-                  'conditions' => [],
-                  'logic' => 'AND'
-                ];
-                foreach ($f[2] as $v){
-                  if (null === $v) {
-                    $tmp['conditions'][] = [
-                      'field' => $f[0],
-                      'operator' => 'isnotnull'
-                    ];
-                  }
-                  else{
-                    $tmp['conditions'][] = [
-                      'field' => $f[0],
-                      'operator' => $f[1],
-                      'value' => $v
-                    ];
-                  }
-                }
-
-                $res['conditions'][] = $tmp;
-              }
-              elseif ($f[2] === null) {
-                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
-              }
-              else{
-                $tmp['value'] = $f[2];
-              }
-            }
-
-            $f = $tmp;
-          }
-
-          if (isset($f['field'])) {
-            if (!isset($f['operator'])) {
-              $f['operator'] = 'eq';
-            }
-
-            $res['conditions'][] = $f;
-          }
-        }
-      }
-
-      if ($full) {
-        $tmp = $this->_remove_conditions_value($res);
-        $res = [
-          'hashed' => $tmp['hashed'],
-          'values' => $tmp['values'],
-          'where' => $res
-        ];
-      }
-
-      return $res;
-    }
-
-    return false;
+    return $this->language->treatConditions($where, $full);
   }
-
-
-  public function extractFields(array $cfg, array $conditions, array &$res = null)
-  {
-    if (null === $res) {
-      $res = [];
-    }
-
-    if (isset($conditions['conditions'])) {
-      $conditions = $conditions['conditions'];
-    }
-
-    foreach ($conditions as $c) {
-      if (isset($c['conditions'])) {
-        $this->extractFields($cfg, $c['conditions'], $res);
-      }
-      else {
-        if (isset($c['field'], $cfg['available_fields'][$c['field']])) {
-          $res[] = $cfg['available_fields'][$c['field']] ? $this->cfn($c['field'], $cfg['available_fields'][$c['field']]) : $c['field'];
-        }
-
-        if (isset($c['exp'])) {
-          $res[] = $cfg['available_fields'][$c['exp']] ? $this->cfn($c['exp'], $cfg['available_fields'][$c['exp']]) : $c['exp'];
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Retrieve an array of specific filters among the existing ones.
-   *
-   * @param array $cfg
-   * @param $field
-   * @param null  $operator
-   * @return array|null
-   */
-  public function filterFilters(array $cfg, $field, $operator = null): ?array
-  {
-    if (isset($cfg['filters'])) {
-      $f = function ($cond, &$res = []) use (&$f, $field, $operator) {
-        foreach ($cond as $c){
-          if (isset($c['conditions'])) {
-            $f($c['conditions'], $res);
-          }
-          elseif (($c['field'] === $field) && (!$operator || ($operator === $c['operator']))) {
-            $res[] = $c;
-          }
-        }
-
-        return $res;
-      };
-      return isset($cfg['filters']['conditions']) ? $f($cfg['filters']['conditions']) : [];
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @param array $where
-   * @param array $cfg
-   * @return array
-   */
-  public function getValuesDesc(array $where, array $cfg, &$others = []): array
-  {
-    if (!empty($where['conditions'])) {
-      foreach ($where['conditions'] as &$f){
-        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
-          $this->getValuesDesc($f, $cfg, $others);
-        }
-        elseif (array_key_exists('value', $f)) {
-          $desc = [
-            'primary' => false,
-            'type' => null,
-            'maxlength' => null,
-            'operator' => $f['operator'] ?? null
-          ];
-          if (isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']])) {
-            $t = $cfg['available_fields'][$f['field']];
-            if (isset($cfg['models'], $f['field'], $cfg['tables_full'][$t], $cfg['models'][$cfg['tables_full'][$t]])
-                && ($model = $cfg['models'][$cfg['tables_full'][$t]])
-                && ($fname = $this->csn($f['field']))
-            ) {
-              if (!empty($model['fields'][$fname]['type'])) {
-                $desc = [
-                  'type' => $model['fields'][$fname]['type'],
-                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
-                  'operator' => $f['operator'] ?? null
-                ];
-              }
-              // Fixing filters using alias
-              elseif (isset($cfg['fields'][$f['field']])
-                  && ($fname = $this->csn($cfg['fields'][$f['field']]))
-                  && !empty($model['fields'][$fname]['type'])
-              ) {
-                $desc = [
-                  'type' => $model[$fname]['type'],
-                  'maxlength' => $model[$fname]['maxlength'] ?? null,
-                  'operator' => $f['operator'] ?? null
-                ];
-              }
-
-              if (!empty($desc['type'])
-                  && isset($model['keys']['PRIMARY'])
-                  && (count($model['keys']['PRIMARY']['columns']) === 1)
-                  && ($model['keys']['PRIMARY']['columns'][0] === $fname)
-              ) {
-                $desc['primary'] = true;
-              }
-            }
-          }
-
-          $others[] = $desc;
-        }
-      }
-    }
-
-    return $others;
-  }
-
-
-  public function arrangeConditions(array &$conditions, array $cfg): void
-  {
-    if (!empty($cfg['available_fields']) && isset($conditions['conditions'])) {
-      foreach ($conditions['conditions'] as &$c){
-        if (array_key_exists('conditions', $c) && \is_array($c['conditions'])) {
-          $this->arrangeConditions($c, $cfg);
-        }
-        elseif (isset($c['field']) && empty($cfg['available_fields'][$c['field']]) && !$this->isColFullName($c['field'])) {
-          foreach ($cfg['tables'] as $t => $o){
-            if (isset($cfg['available_fields'][$this->colFullName($c['field'], $t)])) {
-              $c['field'] = $this->colFullName($c['field'], $t);
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
 
   /**
    * @param array $cfg
@@ -827,362 +263,19 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function reprocessCfg(array $cfg): ?array
   {
-    unset($cfg['bbn_db_processed']);
-    unset($cfg['bbn_db_treated']);
-    unset($this->cfgs[$cfg['hash']]);
-    $tmp = $this->processCfg($cfg, true);
-    if (!empty($cfg['values']) && (count($cfg['values']) === count($tmp['values']))) {
-      $tmp = array_merge($tmp, ['values' => $cfg['values']]);
-    }
-
-    return $tmp;
+    return $this->language->reprocessCfg($cfg);
   }
-
 
   /**
    *
    * @param array $args
+   * @param bool $force
    * @return array|null
    */
-  public function processCfg(array $args, $force = false): ?array
+  public function processCfg(array $args, bool $force = false): ?array
   {
-    // Avoid confusion when
-    while (\is_array($args) && isset($args[0]) && \is_array($args[0])){
-      $args = $args[0];
-    }
-
-    if (\is_array($args) && !empty($args['bbn_db_processed'])) {
-      return $args;
-    }
-
-    if (empty($args['bbn_db_treated'])) {
-      $args = $this->_treat_arguments($args);
-    }
-
-    //var_dump("UPD0", $args);
-    if (isset($args['hash'])) {
-      if (isset($this->cfgs[$args['hash']])) {
-        return array_merge(
-          $this->cfgs[$args['hash']], [
-          'values' => $args['values'] ?: [],
-          'where' => $args['where'] ?: [],
-          'filters' => $args['filters'] ?: []
-          ]
-        );
-      }
-
-      /** @var array $tables_full  Each of the tables' full name. */
-      $tables_full = [];
-      $res         = array_merge(
-        $args, [
-        'tables' => [],
-        'values_desc' => [],
-        'bbn_db_processed' => true,
-        'available_fields' => [],
-        'generate_id' => false
-        ]
-      );
-      $models      = [];
-
-      foreach ($args['tables'] as $key => $tab) {
-        if (empty($tab)) {
-          $this->log(\debug_backtrace());
-          throw new \Exception("$key is not defined");
-        }
-
-        $tfn = $this->tfn($tab);
-
-        // 2 tables in the same statement can't have the same idx
-        $idx = \is_string($key) ? $key : $tfn;
-        // Error if they do
-        if (isset($tables_full[$idx])) {
-          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']));
-          return null;
-        }
-
-        $tables_full[$idx]   = $tfn;
-        $res['tables'][$idx] = $tfn;
-        if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
-          $models[$tfn] = $model;
-        }
-      }
-
-      if ((\count($res['tables']) === 1)
-          && ($tfn = array_values($res['tables'])[0])
-          && isset($models[$tfn]['keys']['PRIMARY'])
-          && (\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
-          && ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
-      ) {
-        $p                     = $models[$tfn]['fields'][$res['primary']];
-        $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');
-        $res['primary_length'] = $p['maxlength'];
-        $res['primary_type']   = $p['type'];
-        if (($res['kind'] === 'INSERT')
-            && !$res['auto_increment']
-            && !\in_array($this->csn($res['primary']), $res['fields'], true)
-        ) {
-          $res['generate_id'] = true;
-          $res['fields'][]    = $res['primary'];
-        }
-      }
-
-      foreach ($args['join'] as $key => $join){
-        if (!empty($join['table']) && !empty($join['on'])) {
-          $tfn = $this->tfn($join['table']);
-          if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
-            $models[$tfn] = $model;
-          }
-
-          $idx               = $join['alias'] ?? $tfn;
-          $tables_full[$idx] = $tfn;
-        }
-        else{
-          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
-        }
-      }
-
-      foreach ($tables_full as $idx => $tfn){
-        foreach ($models[$tfn]['fields'] as $col => $cfg){
-          $res['available_fields'][$this->cfn($col, $idx)] = $idx;
-          $csn                                             = $this->csn($col);
-          if (!isset($res['available_fields'][$csn])) {
-            /*
-            $res['available_fields'][$csn] = false;
-            }
-            else{
-            */
-            $res['available_fields'][$csn] = $idx;
-          }
-        }
-      }
-
-      foreach ($res['ofields'] as $idx => $col){
-        if (!isset($res['available_fields'][$col])) {
-          $res['available_fields'][$col] = $col;
-        }
-
-        if (\is_string($idx) && !isset($res['available_fields'][$idx])) {
-          $res['available_fields'][$idx] = $res['available_fields'][$col];
-        }
-      }
-
-      foreach ($res['fields'] as $idx => &$col){
-        if (strpos($col, '(')
-            || strpos($col, '-')
-            || strpos($col, "+")
-            || strpos($col, '*')
-            || strpos($col, "/")
-            /*
-          strpos($col, '->"$.')  ||
-          strpos($col, "->'$.") ||
-          strpos($col, '->>"$.')  ||
-          strpos($col, "->>'$.") ||
-          */
-            // string as value
-            || preg_match('/^[\\\'\"]{1}[^\\\'\"]*[\\\'\"]{1}$/', $col)
-        ) {
-          $res['available_fields'][$col] = false;
-        }
-
-        if (\is_string($idx)) {
-          if (!isset($res['available_fields'][$col])) {
-            //$this->log($res);
-            $this->error("Impossible to find the column $col");
-            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
-            return null;
-          }
-
-          $res['available_fields'][$idx] = $res['available_fields'][$col];
-        }
-      }
-
-      // From here the available fields are defined
-      if (!empty($res['filters'])) {
-        $this->arrangeConditions($res['filters'], $res);
-      }
-
-      unset($col);
-      $res['models']      = $models;
-      $res['tables_full'] = $tables_full;
-      switch ($res['kind']){
-        case 'SELECT':
-          if (empty($res['fields'])) {
-            foreach (array_keys($res['available_fields']) as $f){
-              if ($this->isColFullName($f)) {
-                $res['fields'][] = $f;
-              }
-            }
-          }
-
-          //X::log($res, 'sql');
-          if ($res['select_st'] = $this->language->getSelect($res)) {
-            $res['sql'] = $res['select_st'];
-          }
-          break;
-        case 'INSERT':
-          $res = $this->removeVirtual($res);
-          if ($res['insert_st'] = $this->language->getInsert($res)) {
-            $res['sql'] = $res['insert_st'];
-          }
-
-          //var_dump($res);
-          break;
-        case 'UPDATE':
-          $res = $this->removeVirtual($res);
-          if ($res['update_st'] = $this->getUpdate($res)) {
-            $res['sql'] = $res['update_st'];
-          }
-          break;
-        case 'DELETE':
-          if ($res['delete_st'] = $this->getDelete($res)) {
-            $res['sql'] = $res['delete_st'];
-          }
-          break;
-      }
-
-      $res['join_st']   = $this->language->getJoin($res);
-      $res['where_st']  = $this->language->getWhere($res);
-      $res['group_st']  = $this->language->getGroupBy($res);
-      $res['having_st'] = $this->language->getHaving($res);
-      $cls              = '\\bbn\\Db\\languages\\'.$this->engine;
-      if (empty($res['count'])
-          && (count($res['fields']) === 1)
-          && ($cls::isAggregateFunction(reset($res['fields'])))
-      ) {
-        $res['order_st'] = '';
-        $res['limit_st'] = '';
-      }
-      else {
-        $res['order_st'] = $res['count'] ? '' : $this->language->getOrder($res);
-        $res['limit_st'] = $res['count'] ? '' : $this->language->getLimit($res);
-      }
-
-      if (!empty($res['sql'])) {
-        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'];
-        if ($res['count'] && $res['group_by']) {
-          $res['sql'] .= ') AS t '.PHP_EOL;
-        }
-
-        $res['sql']           .= $res['having_st'].$res['order_st'].$res['limit_st'];
-        $res['statement_hash'] = $this->_make_hash($res['sql']);
-
-        foreach ($res['join'] as $r){
-          $this->getValuesDesc($r['on'], $res, $res['values_desc']);
-        }
-
-        if (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE')) {
-          foreach ($res['fields'] as $name){
-            $desc = [];
-            if (isset($res['models'], $res['available_fields'][$name])) {
-              $t = $res['available_fields'][$name];
-              if (isset($tables_full[$t])
-                  && ($model = $res['models'][$tables_full[$t]]['fields'])
-                  && ($fname = $this->csn($name))
-                  && !empty($model[$fname]['type'])
-              ) {
-                $desc['type']      = $model[$fname]['type'];
-                $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
-              }
-            }
-
-            $res['values_desc'][] = $desc;
-          }
-        }
-
-        $this->getValuesDesc($res['filters'], $res, $res['values_desc']);
-        $this->getValuesDesc($res['having'], $res, $res['values_desc']);
-        $this->cfgs[$res['hash']] = $res;
-      }
-
-      return $res;
-    }
-
-    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
-    return null;
+    return $this->language->processCfg($args, $force);
   }
-
-
-  public function removeVirtual(array $res): array
-  {
-    if (isset($res['fields'])) {
-      $to_remove = [];
-      foreach ($res['fields'] as $i => $f){
-        if (!empty($res['available_fields'][$f])
-            && isset($res['models'][$res['available_fields'][$f]]['fields'][$this->csn($f)])
-            && $res['models'][$res['available_fields'][$f]]['fields'][$this->csn($f)]['virtual']
-        ) {
-          array_unshift($to_remove, $i);
-        }
-      }
-
-      foreach ($to_remove as $i) {
-        array_splice($res['fields'], $i, 1);
-        array_splice($res['values'], $i, 1);
-      }
-    }
-
-    return $res;
-  }
-
-
-  /**
-   * Set an error and acts appropriately based oon the error mode
-   *
-   * @param $e
-   * @return void
-   */
-  public function error($e): void
-  {
-    $this->_has_error = true;
-    self::_set_has_error_all();
-    $msg = [
-      self::LINE,
-      self::getLogLine('ERROR DB!'),
-      self::LINE
-    ];
-    if (\is_string($e)) {
-      $msg[] = self::getLogLine('USER MESSAGE');
-      $msg[] = $e;
-    }
-    elseif (method_exists($e, 'getMessage')) {
-      $msg[] = self::getLogLine('DB MESSAGE');
-      $msg[] = $e->getMessage();
-    }
-
-    $this->last_error = end($msg);
-    $msg[]            = self::getLogLine('QUERY');
-    $msg[]            = $this->last();
-    if ($this->last_real_params['values']) {
-      $msg[] = self::getLogLine('VALUES');
-      foreach ($this->last_real_params['values'] as $v){
-        if ($v === null) {
-          $msg[] = 'NULL';
-        }
-        elseif (\is_bool($v)) {
-          $msg[] = $v ? 'TRUE' : 'FALSE';
-        }
-        elseif (\is_string($v)) {
-          $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);
-        }
-        else{
-          $msg[] = $v;
-        }
-      }
-    }
-
-    $msg[] = self::getLogLine('BACKTRACE');
-    $dbt   = array_reverse(debug_backtrace());
-    array_walk(
-      $dbt, function ($a, $i) use (&$msg) {
-        $msg[] = str_repeat(' ', $i).($i ? '->' : '')."{$a['function']}  (".basename(dirname($a['file'])).'/'.basename($a['file']).":{$a['line']})";
-      }
-    );
-    $this->log(implode(PHP_EOL, $msg));
-    if ($this->on_error === self::E_DIE) {
-      die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'</pre>' : 'Database error');
-    }
-  }
-
 
   /**
    * Checks if the database is ready to process a query.
@@ -1195,26 +288,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function check(): bool
   {
-    if ($this->current !== null) {
-      // if $on_error is set to E_CONTINUE returns true
-      if ($this->on_error === self::E_CONTINUE) {
-        return true;
-      }
-
-      // If any connection has an error with mode E_STOP_ALL
-      if (self::$_has_error_all && ($this->on_error !== self::E_STOP_ALL)) {
-        return false;
-      }
-
-      // If this connection has an error with mode E_STOP
-      if ($this->_has_error && ($this->on_error !== self::E_STOP)) {
-        return false;
-      }
-
-      return true;
-    }
-
-    return false;
+    return $this->language->check();
   }
 
 
@@ -1225,7 +299,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * $db->$db->log('test');
    * ```
    * @param mixed $st
-   * @return db
+   * @return self
    */
   public function log($st): self
   {
@@ -1243,15 +317,15 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * ```php
    * $db->setErrorMode('continue'|'die'|'stop_all|'stop');
-   * // (void)
+   * // (self)
    * ```
    *
    * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
-   * @return db
+   * @return self
    */
-  public function setErrorMode($mode): self
+  public function setErrorMode(string $mode): self
   {
-    $this->on_error = $mode;
+    $this->language->setErrorMode($mode);
     return $this;
   }
 
@@ -1267,7 +341,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getErrorMode(): string
   {
-    return $this->on_error;
+    return $this->language->getErrorMode();
   }
 
 
@@ -1283,11 +357,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $mode 'columns','tables' or 'databases'
    * @return self
    */
-  public function clearCache($item, $mode): self
+  public function clearCache(string $item, string $mode): self
   {
-    $cache_name = $this->_cache_name($item, $mode);
-    if ($this->cacheHas($cache_name)) {
-      $this->cacheDelete($cache_name);
+    if ($this->cacheHas($item, $mode)) {
+      $this->cacheDelete($item, $mode);
     }
 
     return $this;
@@ -1316,15 +389,17 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * ```php
    *  $db->stopFancyStuff();
-   * // (void)
+   * // (self)
    * ```
    *
-   * @return db
+   * @return self
    */
   public function stopFancyStuff(): self
   {
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\PDOStatement::class]);
-    $this->_fancy = false;
+    if ($this->language) {
+      $this->language->stopFancyStuff();
+    }
+
     return $this;
   }
 
@@ -1334,54 +409,14 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * ```php
    * $db->startFancyStuff();
-   * // (void)
+   * // (self)
    * ```
-   * @return db
+   * @return self
    */
   public function startFancyStuff(): self
   {
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [Db\Query::class, [$this]]);
-    $this->_fancy = 1;
-    return $this;
-  }
-
-
-  /**
-   * Clear.
-   *
-   * ```php
-   * $db->clear()
-   * // (void)
-   * ```
-   *
-   * @return db
-   */
-  public function clear(): self
-  {
-    $this->queries      = [];
-    $this->list_queries = [];
-    return $this;
-  }
-
-
-  /**
-   * Return an object with all the properties of the statement and where it is carried out.
-   *
-   * ```php
-   * X::dump($db->addStatement('SELECT name FROM table_users'));
-   * // (db)
-   * ```
-   *
-   * @param string $statement
-   * @return db
-   */
-  public function addStatement($statement, $params): self
-  {
-    $this->last_real_query  = $statement;
-    $this->last_real_params = $params;
-    if ($this->_last_enabled) {
-      $this->last_query  = $statement;
-      $this->last_params = $params;
+    if ($this->language) {
+      $this->language->startFancyStuff();
     }
 
     return $this;
@@ -1400,11 +435,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   /**
    * Enable the triggers' functions
    *
-   * @return db
+   * @return self
    */
   public function enableTrigger(): self
   {
-    $this->_triggers_disabled = false;
+    $this->language->enableTrigger();
     return $this;
   }
 
@@ -1412,82 +447,39 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   /**
    * Disable the triggers' functions
    *
-   * @return db
+   * @return self
    */
   public function disableTrigger(): self
   {
-    $this->_triggers_disabled = true;
+    $this->language->disableTrigger();
     return $this;
   }
 
 
   public function isTriggerEnabled(): bool
   {
-    return !$this->_triggers_disabled;
+    return $this->language->isTriggerEnabled();
   }
 
 
   public function isTriggerDisabled(): bool
   {
-    return $this->_triggers_disabled;
+    return $this->language->isTriggerDisabled();
   }
 
 
   /**
    * Apply a function each time the methods $kind are used
    *
-   * @param callable          $function
-   * @param array|string      $kind     select|insert|update|delete
-   * @param array|string      $moment   before|after
-   * @param null|string|array $tables   database's table(s) name(s)
-   * @return db
+   * @param callable            $function
+   * @param array|string|null   $kind     select|insert|update|delete
+   * @param array|string|null   $moment   before|after
+   * @param null|string|array   $tables   database's table(s) name(s)
+   * @return self
    */
   public function setTrigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self
   {
-    $kinds   = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
-    $moments = ['before', 'after'];
-    if (empty($kind)) {
-      $kind = $kinds;
-    }
-    elseif (!\is_array($kind)) {
-      $kind = (array)strtoupper($kind);
-    }
-    else{
-      $kind = array_map('strtoupper', $kind);
-    }
-
-    if (empty($moment)) {
-      $moment = $moments;
-    }
-    else {
-      $moment = !\is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);
-    }
-
-    foreach ($kind as $k){
-      if (\in_array($k, $kinds, true)) {
-        foreach ($moment as $m){
-          if (array_key_exists($m, $this->_triggers[$k]) && \in_array($m, $moments, true)) {
-            if ($tables === '*') {
-              $tables = $this->getTables();
-            }
-            elseif (Str::checkName($tables)) {
-              $tables = [$tables];
-            }
-
-            if (\is_array($tables)) {
-              foreach ($tables as $table){
-                $t = $this->tfn($table);
-                if (!isset($this->_triggers[$k][$m][$t])) {
-                  $this->_triggers[$k][$m][$t] = [];
-                }
-
-                $this->_triggers[$k][$m][$t][] = $function;
-              }
-            }
-          }
-        }
-      }
-    }
+    $this->language->setTrigger($function, $kind, $moment, $tables);
 
     return $this;
   }
@@ -1498,7 +490,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getTriggers(): array
   {
-    return $this->_triggers;
+    return $this->language->getTriggers();
   }
 
 
@@ -1514,26 +506,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   /**
    * @param $tables
    * @return array
+   * @throws \Exception
    */
   public function getFieldsList($tables): array
   {
-    $res = [];
-    if (!\is_array($tables)) {
-      $tables = [$tables];
-    }
-
-    foreach ($tables as $t){
-      if (!($model = $this->getColumns($t))) {
-        $this->error('Impossible to find the table '.$t);
-        die('Impossible to find the table '.$t);
-      }
-
-      foreach (array_keys($model) as $f){
-        $res[] = $this->cfn($f, $t);
-      }
-    }
-
-    return $res;
+    return $this->language->getFieldsList($tables);
   }
 
 
@@ -1545,37 +522,14 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * // (Array)
    * ```
    *
-   * @param string $col   The column's name
+   * @param string $col The column's name
    * @param string $table The table's name
-   * @param string $db    The database name if different from the current one
+   * @param string|null $db The database name if different from the current one
    * @return array with tables and fields related to the searched foreign key
    */
   public function getForeignKeys(string $col, string $table, string $db = null): array
   {
-    if (!$db) {
-      $db = $this->current;
-    }
-
-    $res   = [];
-    $model = $this->modelize();
-    foreach ($model as $tn => $m){
-      foreach ($m['keys'] as $k => $t){
-        if (($t['ref_table'] === $table)
-            && ($t['ref_column'] === $col)
-            && ($t['ref_db'] === $db)
-            && (\count($t['columns']) === 1)
-        ) {
-          if (!isset($res[$tn])) {
-            $res[$tn] = [$t['columns'][0]];
-          }
-          else{
-            $res[$tn][] = $t['columns'][0];
-          }
-        }
-      }
-    }
-
-    return $res;
+    return $this->language->getForeignKeys($col, $table, $db);
   }
 
 
@@ -1591,56 +545,26 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $table The table's name
    * @return bool
    */
-  public function hasIdIncrement($table): bool
+  public function hasIdIncrement(string $table): bool
   {
-    return ($model = $this->modelize($table)) &&
-      isset($model['keys']['PRIMARY']) &&
-      (\count($model['keys']['PRIMARY']['columns']) === 1) &&
-      ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment');
+    if (method_exists($this->language, 'hasIdIncrement')) {
+      return $this->language->hasIdIncrement($table);
+    }
+
+    return false;
   }
 
 
   /**
    * Return the table's structure as an indexed array.
    *
-   * ```php
-   * X::dump($db->modelize("table_users"));
-   * // (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )
-   * ```
-   *
    * @param null|array|string $table The table's name
-   * @param bool              $force If set to true will force the modelization to reperform even if the cache exists
+   * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
    * @return null|array
    */
   public function modelize($table = null, bool $force = false): ?array
   {
-    $r      = [];
-    $tables = false;
-    if (empty($table) || ($table === '*')) {
-      $tables = $this->getTables($this->current);
-    }
-    elseif (\is_string($table)) {
-      $tables = [$table];
-    }
-    elseif (\is_array($table)) {
-      $tables = $table;
-    }
-
-    if (\is_array($tables)) {
-      foreach ($tables as $t) {
-        if ($full = $this->tfn($t)) {
-          $r[$full] = $this->_get_cache($full, 'columns', $force);
-        }
-      }
-
-      if (\count($r) === 1) {
-        return end($r);
-      }
-
-      return $r;
-    }
-
-    return null;
+    return $this->language->modelize($table, $force);
   }
 
 
@@ -1649,20 +573,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param bool   $force
    * @return null|array
    */
-  public function fmodelize($table = '', $force = false): ?array
+  public function fmodelize(string $table = '', bool $force = false): ?array
   {
-    if ($res = $this->modelize(...\func_get_args())) {
-      foreach ($res['fields'] as $n => $f){
-        $res['fields'][$n]['name'] = $n;
-        $res['fields'][$n]['keys'] = [];
-        if (isset($res['cols'][$n])) {
-          foreach ($res['cols'][$n] as $key){
-            $res['fields'][$n]['keys'][$key] = $res['keys'][$key];
-          }
-        }
-      }
-
-      return $res['fields'];
+    if (method_exists($this->language, 'fmodelize')) {
+      return $this->language->fmodelize($table, $force);
     }
 
     return null;
@@ -1677,42 +591,13 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @return array|bool
    *
    */
-  public function findReferences($column, $db = ''): array
+  public function findReferences($column, string $db = ''): array
   {
-    $changed = false;
-    if ($db && ($db !== $this->current)) {
-      $changed = $this->current;
-      $this->change($db);
+    if (method_exists($this->language, 'findReferences')) {
+      return $this->language->findReferences($column, $db);
     }
 
-    $column = $this->cfn($column);
-    $bits   = explode('.', $column);
-    if (\count($bits) === 2) {
-      array_unshift($bits, $this->current);
-    }
-
-    if (\count($bits) !== 3) {
-      return false;
-    }
-
-    $refs   = [];
-    $schema = $this->modelize();
-    $test   = function ($key) use ($bits) {
-      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-    };
-    foreach ($schema as $table => $cfg){
-      foreach ($cfg['keys'] as $k){
-        if ($test($k)) {
-          $refs[] = $table.'.'.$k['columns'][0];
-        }
-      }
-    }
-
-    if ($changed) {
-      $this->change($changed);
-    }
-
-    return $refs;
+    return [];
   }
 
 
@@ -1723,71 +608,9 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $db
    * @return array|bool
    */
-  public function findRelations($column, $db = ''): ?array
+  public function findRelations($column, string $db = ''): ?array
   {
-    $changed = false;
-    if ($db && ($db !== $this->current)) {
-      $changed = $this->current;
-      $this->change($db);
-    }
-
-    $column = $this->cfn($column);
-    $bits   = explode('.', $column);
-    if (\count($bits) === 2) {
-      array_unshift($bits, $db ?: $this->current);
-    }
-
-    if (\count($bits) !== 3) {
-      return null;
-    }
-
-    $table = $bits[1];
-    if ($schema = $this->modelize()) {
-      $refs = [];
-      $test = function ($key) use ($bits) {
-        return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-      };
-      foreach ($schema as $tf => $cfg) {
-        $t = $this->tsn($tf);
-        if ($t !== $table) {
-          foreach ($cfg['keys'] as $k) {
-            if ($test($k)) {
-              foreach ($cfg['keys'] as $k2) {
-                // Is not the same table
-                if (!$test($k2)
-                    // Has a reference
-                    && !empty($k2['ref_column'])
-                    // and refers to a single column
-                    && (\count($k['columns']) === 1)
-                    // A unique reference
-                    && (\count($k2['columns']) === 1)
-                    // To a table with a primary
-                    && isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']])
-                    // which is a sole column
-                    && (\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1)
-                    // We retrieve the key name
-                    && ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0])
-                    // which is unique
-                    && !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])
-                ) {
-                  if (!isset($refs[$t])) {
-                    $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
-                  }
-
-                  $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if ($changed) {
-        $this->change($changed);
-      }
-
-      return $refs;
-    }
+    return $this->language->findRelations($column, $db);
   }
 
 
@@ -1802,13 +625,9 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $table The table's name
    * @return array
    */
-  public function getPrimary($table): array
+  public function getPrimary(string $table): array
   {
-    if (($keys = $this->getKeys($table)) && isset($keys['keys']['PRIMARY'])) {
-      return $keys['keys']['PRIMARY']['columns'];
-    }
-
-    return [];
+    return $this->language->getPrimary($table);
   }
 
 
@@ -1823,13 +642,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $table The table's name
    * @return null|string
    */
-  public function getUniquePrimary($table): ?string
+  public function getUniquePrimary(string $table): ?string
   {
-    if (($keys = $this->getKeys($table))
-        && isset($keys['keys']['PRIMARY'])
-        && (\count($keys['keys']['PRIMARY']['columns']) === 1)
-    ) {
-      return $keys['keys']['PRIMARY']['columns'][0];
+    if (method_exists($this->language, 'getUniquePrimary')) {
+      return $this->language->getUniquePrimary($table);
     }
 
     return null;
@@ -1847,15 +663,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $table The table's name
    * @return array
    */
-  public function getUniqueKeys($table): array
+  public function getUniqueKeys(string $table): array
   {
-    $fields = [[]];
-    if ($ks = $this->getKeys($table)) {
-      foreach ($ks['keys'] as $k){
-        if ($k['unique']) {
-          return $k['columns'];
-        }
-      }
+    if (method_exists($this->language, 'getUniqueKeys')) {
+      return $this->language->getUniqueKeys($table);
     }
 
     return [];
@@ -1903,68 +714,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param mixed $id The last inserted id
    * @return self
    */
-  public function setLastInsertId($id=''): self
+  public function setLastInsertId($id = ''): self
   {
-    if ($id === '') {
-      if ($this->id_just_inserted) {
-        $id                     = $this->id_just_inserted;
-        $this->id_just_inserted = null;
-      }
-      else{
-        $id = $this->lastInsertId();
-        if (\is_string($id) && Str::isInteger($id) && ((int)$id != PHP_INT_MAX)) {
-          $id = (int)$id;
-        }
-      }
-    }
-    else{
-      $this->id_just_inserted = $id;
-    }
+    $this->language->setLastInsertId($id);
 
-    $this->last_insert_id = $id;
     return $this;
   }
-
-
-  /**
-   * Parses a SQL query and return an array.
-   *
-   * @param string $statement
-   * @return null|array
-   */
-  public function parseQuery(string $statement): ?array
-  {
-    if ($this->_parser === null) {
-      $this->_parser = new \PHPSQLParser\PHPSQLParser();
-    }
-
-    $done = false;
-    try {
-      $r    = $this->_parser->parse($statement);
-      $done = 1;
-    }
-    catch (\Exception $e){
-      $this->log('Error while parsing the query '.$statement);
-    }
-
-    if ($done) {
-      if (!$r || !count($r)) {
-        $this->log('Impossible to parse the query '.$statement);
-        return null;
-      }
-
-      if (isset($r['BRACKET']) && (\count($r) === 1)) {
-        /** @todo Is it impossible to parse queries with brackets ? */
-        //throw new \Exception('Bracket in the query '.$statement);
-        return null;
-      }
-
-      return $r;
-    }
-
-    return null;
-  }
-
 
   /**
    * Return the last query for this connection.
@@ -1978,25 +733,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function last(): ?string
   {
-    return $this->last_query;
+    return $this->language->last();
   }
-
-
-  /**
-   * Return the last config for this connection.
-   *
-   * ```php
-   * X::dump($db->getLastCfg());
-   * // (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)
-   * ```
-   *
-   * @return string
-   */
-  public function getLastCfg(): ?array
-  {
-    return $this->last_cfg;
-  }
-
 
   /**
    * Return the last inserted ID.
@@ -2010,11 +748,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function lastId()
   {
-    if ($this->last_insert_id) {
-      return Str::isBuid($this->last_insert_id) ? bin2hex($this->last_insert_id) : $this->last_insert_id;
-    }
-
-    return false;
+    return $this->language->lastId();
   }
 
 
@@ -2025,43 +759,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function flush(): int
   {
-    $num                = \count($this->queries);
-    $this->queries      = [];
-    $this->list_queries = [];
-    return $num;
+    return $this->language->flush();
   }
-
-
-  public function selfAnalyze()
-  {
-    $o = get_object_vars($this);
-    $res = [];
-    foreach ($o as $k => $v) {
-      try {
-        $res[$k] = strlen(serialize($v));
-      }
-      catch (\Exception $e) {
-        $res[$k] = $e->getMessage();
-      }
-    }
-    return $res;
-  }
-
-
-  /**
-   * Executes the original PDO query function
-   *
-   * ```php
-   * X::dump($db->rawQuery());
-   * // (bool)
-   * ```
-   * @return bool|\PDOStatement
-   */
-  public function rawQuery()
-  {
-    return parent::query(...\func_get_args());
-  }
-
 
   /**
    * Generate a new casual id based on the max number of characters of id's column structure in the given table
@@ -2072,6 +771,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @todo Either get rid of th efunction or include the UID types
+   * TODO-testing is this needed?
    * @param null|string $table The table's name.
    * @param int         $min
    * @return mixed
@@ -2112,7 +812,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     return null;
   }
 
-
+// TODO-testing is this used?
   public function rselectRandom($table, array $fields = [], array $where = []):? array
   {
     if ($this->check() && ($num = $this->count($table, $where))) {
@@ -2125,7 +825,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
     return null;
   }
 
-
+  // TODO-testing is this used?
   public function selectRandom($table, array $fields = [], array $where = []):? \stdClass
   {
     if ($this->check() && ($num = $this->count($table, $where))) {
@@ -2143,6 +843,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * Returns a random value fitting the requested column's type
    *
    * @todo This great function has to be done properly
+   * TODO is this used?
    * @param $col
    * @param $table
    * @return mixed
@@ -2224,7 +925,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function countQueries(): int
   {
-    return \count($this->queries);
+    return $this->language->countQueries();
   }
 
 
@@ -2251,12 +952,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getOne()
   {
-    /** @var Db\Query $r */
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchColumn(0);
-    }
-
-    return false;
+   return $this->language->getOne(...\func_get_args());
   }
 
 
@@ -2312,15 +1008,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getKeyVal(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      if ($rows = $r->getRows()) {
-        return X::indexByFirstVal($rows);
-      }
-
-      return [];
-    }
-
-    return null;
+    return $this->language->getKeyVal(...\func_get_args());
   }
 
 
@@ -2339,11 +1027,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getColArray(): array
   {
-    if ($r = $this->getByColumns(...\func_get_args())) {
-      return array_values(current($r));
-    }
-
-    return [];
+    return $this->language->getColArray(...\func_get_args());
   }
 
 
@@ -2377,17 +1061,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
   {
-    $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
-    if ($r = $this->_exec(...$args)) {
-      if (!is_object($r)) {
-        $this->log([$args, $this->processCfg($args)]);
-      }
-      else{
-        return $r->getObject();
-      }
-    }
-
-    return null;
+    return $this->language->select($table, $fields, $where, $order, $start);
   }
 
 
@@ -2421,11 +1095,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      return $r->getObjects();
-    }
-
-    return null;
+    return $this->language->selectAll($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -2451,11 +1121,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      return $r->getIrow();
-    }
-
-    return null;
+    return $this->language->iselect($table, $fields, $where, $order, $start);
   }
 
 
@@ -2479,21 +1145,17 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *        ]
    * ```
    *
-   * @param string|array                                          $table  The table's name or a configuration array
-   * @param string|array                                          $fields The fields's name
-   * @param array                                                 $where  The "where" condition
-   * @param array | boolean The "order" condition, default: false
-   * @param int                                                   $limit  The "limit" condition, default: 0
-   * @param int                                                   $start  The "start" condition, default: 0
+   * @param string|array  $table  The table's name or a configuration array
+   * @param string|array  $fields The fields's name
+   * @param array         $where  The "where" condition
+   * @param array|boolean $order The "order" condition, default: false
+   * @param int           $limit  The "limit" condition, default: 0
+   * @param int           $start  The "start" condition, default: 0
    * @return array
    */
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      return $r->getIrows();
-    }
-
-    return null;
+    return $this->language->iselectAll($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -2519,11 +1181,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      return $r->getRow();
-    }
-
-    return null;
+    return $this->language->rselect($table, $fields, $where, $order, $start);
   }
 
 
@@ -2557,15 +1215,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      if (method_exists($r, 'getRows')) {
-        return $r->getRows();
-      }
-
-      $this->log('ERROR IN RSELECT_ALL', $r);
-    }
-
-    return [];
+    return $this->language->rselectAll($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -2586,18 +1236,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      if (method_exists($r, 'getIrow')) {
-        return ($a = $r->getIrow()) ? $a[0] : false;
-      }
-
-      $this->log('ERROR IN SELECT_ONE', $this->getLastCfg(), $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
-    }
-
-    return false;
+    return $this->language->selectOne($table, $field, $where, $order, $start);
   }
 
-
+  // TODO-testing: is this used??
   public function selectUnion(array $union, array $fields = [], array $where = [], array $order = [], int $start = 0):? array
   {
     $cfgs = [];
@@ -2672,21 +1314,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function count($table, array $where = []): ?int
   {
-    $args = \is_string($table) ? [
-      'tables' => [$table],
-      'where' => $where
-    ] : $table;
-    $args['count'] = true;
-    if (!empty($args['bbn_db_processed'])) {
-      unset($args['bbn_db_processed']);
-    }
-
-    if (\is_object($r = $this->_exec($args))) {
-      $a = $r->getIrow();
-      return $a ? (int)$a[0] : null;
-    }
-
-    return null;
+    return $this->language->count($table, $where);
   }
 
 
@@ -2720,11 +1348,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($rows = $this->rselectAll($table, $fields, $where, $order, $limit, $start)) {
-      return X::indexByFirstVal($rows);
-    }
-
-    return $this->check() ? [] : null;
+    return $this->language->selectAllByKeys($table, $fields, $where, $order, $limit, $start);
   }
 
 
@@ -2753,22 +1377,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
-    if ($this->check()) {
-      return $this->rselectAll(
-        [
-        'tables' => [$table],
-        'fields' => [
-          $column,
-          'num' => 'COUNT(*)'
-        ],
-        'where' => $where,
-        'order' => $order,
-        'group_by' => [$column]
-        ]
-      );
-    }
-
-    return null;
+    return $this->language->stat($table, $column, $where, $order);
   }
 
 
@@ -2776,17 +1385,17 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * Return the unique values of a column of a table as a numeric indexed array.
    *
    * ```php
-   * X::dump($db->getFieldValues("table_users", "surname", [['id', '>', '2']], 1, 1));
+   * X::dump($db->getFieldValues("table_users", "surname", [['id', '>', '2']]));
    * // (array) ["Smiths", "White"]
    * ```
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string       $field The field's name
+   * @param string|null  $field The field's name
    * @param array        $where The "where" condition
    * @param array        $order The "order" condition
    * @return array | false
    */
-  public function getFieldValues($table, $field = null,  array $where = [], array $order = []): ?array
+  public function getFieldValues($table, string $field = null, array $where = [], array $order = []): ?array
   {
     return $this->getColumnValues($table, $field, $where, $order);
   }
@@ -2804,33 +1413,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param null|string  $field The field's name
    * @param array        $where The "where" condition
    * @param array        $order The "order" condition
-   * @return array | false
+   * @return array|null
    */
-  public function countFieldValues($table, string $field = null,  array $where = [], array $order = [])
+  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array
   {
-    if (\is_array($table) && \is_array($table['fields']) && count($table['fields'])) {
-      $args  = $table;
-      $field = array_values($table['fields'])[0];
-    }
-    else{
-      $args = [
-        'tables' => [$table],
-        'where' => $where,
-        'order' => $order
-      ];
-    }
-
-    $args = array_merge(
-      $args, [
-      'kind' => 'SELECT',
-      'fields' => [
-        'val' => $field,
-        'num' => 'COUNT(*)'
-      ],
-      'group_by' => [$field]
-      ]
-    );
-    return $this->rselectAll($args);
+    return $this->language->countFieldValues($table, $field, $where, $order);
   }
 
 
@@ -2849,31 +1436,16 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string       $field The field's name
-   * @param array        $where The "where" condition
-   * @param array        $order The "order" condition
+   * @param string|null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @param int $limit
+   * @param int $start
    * @return array
    */
   public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    $res = null;
-    if ($this->check()) {
-      $res = [];
-      if (\is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0])) {
-        array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
-      }
-      elseif (\is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0)) {
-        $field = 'DISTINCT '.$field;
-      }
-
-      if ($rows = $this->iselectAll($table, $field, $where, $order, $limit, $start)) {
-        foreach ($rows as $row){
-          $res[] = $row[0];
-        }
-      }
-    }
-
-    return $res;
+    return $this->language->getColumnValues($table, $field, $where, $order, $limit, $start);
   }
 
 
@@ -2890,12 +1462,13 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string       $field The field's name
-   * @param array        $where The "where" condition
-   * @param array        $order The "order" condition
+   * @param string|null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
    * @return array
+   * // TODO-testing: this method stated that it will return string but actually it returns an array!
    */
-  public function getValuesCount($table, string $field = null, array $where = [], $order): array
+  public function getValuesCount($table, string $field = null, array $where = [], array $order = []): array
   {
     return $this->countFieldValues($table, $field, $where, $order);
   }
@@ -2933,40 +1506,15 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *  ]);
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The values to insert.
-   * @param bool         $ignore If true, controls if the row is already existing and ignores it.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The values to insert.
+   * @param bool $ignore If true, controls if the row is already existing and ignores it.
    *
    * @return int Number affected rows.
    */
-  public function insert($table, array $values = null, $ignore = false): ?int
+  public function insert($table, array $values = null, bool $ignore = false): ?int
   {
-    if (\is_array($table) && isset($table['values'])) {
-      $values = $table['values'];
-    }
-
-    // Array of arrays
-    if (\is_array($values)
-        && count($values)
-        && !X::isAssoc($values)
-        && \is_array($values[0])
-    ) {
-      $res = 0;
-
-      foreach ($values as $v){
-        $res += $this->insert($table, $v, $ignore);
-      }
-
-      return $res;
-    }
-
-    $cfg         = \is_array($table) ? $table : [
-      'tables' => [$table],
-      'fields' => $values,
-      'ignore' => $ignore
-    ];
-    $cfg['kind'] = 'INSERT';
-    return $this->_exec($cfg);
+    return $this->language->insert($table, $values, $ignore);
   }
 
 
@@ -2983,57 +1531,14 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The values to insert.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The values to insert.
    *
    * @return int The number of rows inserted or updated.
    */
   public function insertUpdate($table, array $values = null): ?int
   {
-    // Twice the arguments
-    if (\is_array($table) && isset($table['values'])) {
-      $values = $table['values'];
-    }
-
-    if (!X::isAssoc($values)) {
-      $res = 0;
-      foreach ($values as $v){
-        $res += $this->insertUpdate($table, $v);
-      }
-
-      return $res;
-    }
-
-    $keys   = $this->getKeys($table);
-    $unique = [];
-    foreach ($keys['keys'] as $k){
-      // Checking each unique key
-      if ($k['unique']) {
-        $i = 0;
-        foreach ($k['columns'] as $c){
-          if (isset($values[$c])) {
-            $unique[$c] = $values[$c];
-            $i++;
-          }
-        }
-
-        // Only if the number of known field values matches the number of columns
-        // which are parts of the unique key
-        // If a value is null it won't pass isset and so won't be used
-        if (($i === \count($k['columns'])) && $this->count($table, $unique)) {
-          // Removing unique matching fields from the values (as it is the where)
-          foreach ($unique as $f => $v){
-            unset($values[$f]);
-          }
-
-          // For updating
-          return $this->update($table, $values, $unique);
-        }
-      }
-    }
-
-    // No need to update, inserting
-    return $this->insert($table, $values);
+    return $this->language->insertUpdate($table, $values);
   }
 
 
@@ -3051,23 +1556,16 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The new value(s).
-   * @param array        $where  The "where" condition.
-   * @param boolean      $ignore If IGNORE should be added to the statement
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The new value(s).
+   * @param array|null $where The "where" condition.
+   * @param boolean $ignore If IGNORE should be added to the statement
    *
    * @return int The number of rows updated.
    */
   public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
   {
-    $cfg         = \is_array($table) ? $table : [
-      'tables' => [$table],
-      'where' => $where,
-      'fields' => $values,
-      'ignore' => $ignore
-    ];
-    $cfg['kind'] = 'UPDATE';
-    return $this->_exec($cfg);
+    return $this->language->update($table, $values, $where, $ignore);
   }
 
 
@@ -3085,9 +1583,9 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values
-   * @param array        $where  The "where" condition.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values
+   * @param array|null $where The "where" condition.
    *
    * @return int The number of rows deleted.
    */
@@ -3104,26 +1602,20 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * $db->delete("table_users", ['id' => '32']);
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $where  The "where" condition.
-   * @param bool         $ignore default: false.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $where The "where" condition.
+   * @param bool $ignore default: false.
    *
    * @return int The number of rows deleted.
    */
   public function delete($table, array $where = null, bool $ignore = false): ?int
   {
-    $cfg         = \is_array($table) ? $table : [
-      'tables' => [$table],
-      'where' => $where,
-      'ignore' => $ignore
-    ];
-    $cfg['kind'] = 'DELETE';
-    return $this->_exec($cfg);
+    return $this->language->delete($table, $where, $ignore);
   }
 
 
   /**
-   * If exist deletess row(s) in a table, else ignore.
+   * If exist deletes row(s) in a table, else ignore.
    *
    * <code>
    * $db->deleteIgnore(
@@ -3133,7 +1625,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * </code>
    *
    * @param string|array $table The table name or the configuration array.
-   * @param array        $where The "where" condition.
+   * @param array|null $where The "where" condition.
    *
    * @return int The number of rows deleted.
    */
@@ -3156,8 +1648,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * );
    * </code>
    *
-   * @param string|array $table  The table name or the configuration array.
-   * @param array        $values The row(s) values.
+   * @param string|array $table The table name or the configuration array.
+   * @param array|null $values The row(s) values.
    *
    * @return int The number of rows inserted.
    */
@@ -3199,15 +1691,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @param string $query
-   * @return array | false
+   * @return array|false
    */
-  public function fetch($query)
+  public function fetch(string $query)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetch();
-    }
-
-    return false;
+    return $this->language->fetch(...\func_get_args());
   }
 
 
@@ -3238,20 +1726,16 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @param string $query
-   * @return array | false
+   * @return array|false
    */
-  public function fetchAll($query)
+  public function fetchAll(string $query)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchAll();
-    }
-
-    return false;
+    return $this->language->fetchAll(...\func_get_args());
   }
 
 
   /**
-   * Transposition of the original fetchColumn method, but with the query included. Return an arra or false if no result
+   * Transposition of the original fetchColumn method, but with the query included. Return an array or false if no result
    * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work
    *
    * @param $query
@@ -3260,16 +1744,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function fetchColumn($query, int $num = 0)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchColumn($num);
-    }
-
-    return false;
+    return $this->language->fetchColumn(...\func_get_args());
   }
 
 
   /**
-   * Return an array with stdClass object or false if no result.
+   * Return stdClass object or false if no result.
    *
    * ```php
    * X::dump($db->fetchObject("SELECT * FROM table_users WHERE name = 'john'"));
@@ -3285,11 +1765,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function fetchObject($query)
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->fetchObject();
-    }
-
-    return false;
+    return $this->language->fetchObject(...\func_get_args());
   }
 
 
@@ -3305,215 +1781,13 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @param array|string $statement
-   * @return int|Db\Query
+   * @return false|int
    */
   public function query($statement)
   {
     if ($this->check()) {
-      $args = \func_get_args();
-      // If fancy is false we just use the regular PDO query function
-      if (!$this->_fancy) {
-        return parent::query(...$args);
-      }
-
-      // The function can be called directly with func_get_args()
-      while ((\count($args) === 1) && \is_array($args[0])){
-        $args = $args[0];
-      }
-
-      if (!empty($args[0]) && \is_string($args[0])) {
-        // The first argument is the statement
-        $statement = trim(array_shift($args));
-
-        // Sending a hash as second argument from helper functions will bind it to the saved statement
-        if (count($args)
-            && \is_string($args[0])
-            && isset($this->queries[$args[0]])
-        ) {
-          $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
-          $hash_sent = array_shift($args);
-        }
-        else {
-          $hash = $this->_make_hash($statement);
-        }
-
-        $driver_options = [];
-        if (count($args)
-            && \is_array($args[0])
-        ) {
-          // Case where drivers are arguments
-          if (!array_key_exists(0, $args[0])) {
-            $driver_options = array_shift($args);
-          }
-          // Case where values are in a single argument
-          elseif (\count($args) === 1) {
-            $args = $args[0];
-          }
-        }
-
-        /** @var array $params Will become the property last_params each time a query is executed */
-        $params     = [
-          'statement' => $statement,
-          'values' => [],
-          'last' => microtime(true)
-        ];
-        $num_values = 0;
-        foreach ($args as $i => $arg){
-          if (!\is_array($arg)) {
-            $params['values'][] = $arg;
-            $num_values++;
-          }
-          elseif (isset($arg[2])) {
-            $params['values'][] = $arg[2];
-            $num_values++;
-          }
-        }
-
-        if (!isset($this->queries[$hash])) {
-          /** @var int $placeholders The number of placeholders in the statement */
-          $placeholders = 0;
-          if ($sequences = $this->parseQuery($statement)) {
-            /* Or looking for question marks */
-            $sequences = array_keys($sequences);
-            preg_match_all('/(\?)/', $statement, $exp);
-            $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
-            while ($sequences[0] === 'OPTIONS'){
-              array_shift($sequences);
-            }
-
-            $params['kind']      = $sequences[0];
-            $params['union']     = isset($sequences['UNION']);
-            $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
-            $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
-          }
-          elseif (($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
-            $params['kind'] = 'PRAGMA';
-          }
-          else{
-            die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
-          }
-
-          // This will add to the queries array
-          $this->_add_query(
-            $hash,
-            $statement,
-            $params['kind'],
-            $placeholders,
-            $driver_options
-          );
-          if (!empty($hash_sent)) {
-            $this->queries[$hash_sent] = $hash;
-          }
-        }
-        // The hash of the hash for retrieving a query based on the helper's config's hash
-        elseif (\is_string($this->queries[$hash])) {
-          $hash = $this->queries[$hash];
-        }
-
-        $this->_update_query($hash);
-        $q =& $this->queries[$hash];
-        /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
-        if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
-          $params['values'] = array_merge(
-            $params['values'],
-            array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
-          );
-          $num_values       = \count($params['values']);
-        }
-
-        /* The number of values must match the number of placeholders to bind */
-        if ($num_values !== $q['placeholders']) {
-          $this->error(
-            'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
-            .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
-            .print_r(\func_get_args(), true)
-            .print_r($q, true)
-          );
-          exit;
-        }
-
-        if ($q['exe_time'] === 0) {
-          $time = $q['last'];
-        }
-
-        // That will always contains the parameters of the last query done
-
-        $this->addStatement($q['sql'], $params);
-        // If the statement is a structure modifier we need to clear the cache
-        if ($q['structure']) {
-          $tmp                = $q;
-          $this->queries      = [$hash => $tmp];
-          $this->list_queries = [[
-            'hash' => $hash,
-            'last' => $tmp['last']
-          ]];
-          unset($tmp);
-          /** @todo Clear the cache */
-        }
-
-        try{
-          // This is a writing statement, it will execute the statement and return the number of affected rows
-          if ($q['write']) {
-            // A prepared query already exists for the writing
-            /** @var Db\Query */
-            if ($q['prepared']) {
-              $r = $q['prepared']->init($params['values'])->execute();
-            }
-            // If there are no values we can assume the statement doesn't need to be prepared and is just executed
-            elseif ($num_values === 0) {
-              // Native PDO function which returns the number of affected rows
-              $r = $this->exec($q['sql']);
-            }
-            // Preparing the query
-            else{
-              // Native PDO function which will use Db\Query as base class
-              /** @var Db\Query */
-              $q['prepared'] = $this->prepare($q['sql'], $q['options']);
-              $r             = $q['prepared']->execute();
-            }
-          }
-          // This is a reading statement, it will prepare the statement and return a query object
-          else{
-            if (!$q['prepared']) {
-              // Native PDO function which will use Db\Query as base class
-              $q['prepared'] = $this->prepare($q['sql'], $driver_options);
-            }
-            else{
-              // Returns the same Db\Query object
-              $q['prepared']->init($params['values']);
-            }
-          }
-
-          if (!empty($time) && ($q['exe_time'] === 0)) {
-            $q['exe_time'] = microtime(true) - $time;
-          }
-        }
-        catch (\PDOException $e){
-          $this->error($e);
-        }
-
-        if ($this->check()) {
-          // So if read statement returns the query object
-          if (!$q['write']) {
-            return $q['prepared'];
-          }
-
-          // If it is a write statement returns the number of affected rows
-          if ($q['prepared'] && $q['write']) {
-            $r = $q['prepared']->rowCount();
-          }
-
-          // If it is an insert statement we (try to) set the last inserted ID
-          if (($q['kind'] === 'INSERT') && $r) {
-            $this->setLastInsertId();
-          }
-
-          return $r ?? false;
-        }
-      }
+      return $this->language->query(...\func_get_args());
     }
-
-    return false;
   }
 
 
@@ -3527,14 +1801,14 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
-   * Return table's simple name.
-   * (similar to {@link table_simple_name()})
+   * Return table's full name.
+   * (similar to {@link table_full_name()})
    *
    * ```php
-   * X::dump($db->tsn("work_db.table_users"));
-   * // (string) table_users
-   * X::dump($db->tsn("work_db.table_users", true));
-   * // (string) `table_users`
+   * X::dump($db->tfn("table_users"));
+   * // (string) work_db.table_users
+   * X::dump($db->tfn("table_users", true));
+   * // (string) `work_db`.`table_users`
    * ```
    *
    * @param string $table   The table's name
@@ -3580,11 +1854,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    *
    * @param string $col     The column's name (escaped or not).
-   * @param string $table   The table's name (escaped or not).
+   * @param string|null $table   The table's name (escaped or not).
    * @param bool   $escaped If set to true the returned string will be escaped.
    * @return null|string
    */
-  public function cfn(string $col, $table = null, bool $escaped = false): ?string
+  public function cfn(string $col, ?string $table = null, bool $escaped = false): ?string
   {
     return $this->colFullName($col, $table, $escaped);
   }
@@ -3619,21 +1893,6 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *                                                              *
    ****************************************************************/
 
-
-  /**
-   * @param array $cfg The user's options
-   * @return array|null The final configuration
-   */
-  public function getConnection(array $cfg = []): ?array
-  {
-    if ($this->language) {
-      return $this->language->getConnection($cfg);
-    }
-
-    return null;
-  }
-
-
   /**
    * Actions to do once the PDO object has been created
    *
@@ -3641,12 +1900,9 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function postCreation()
   {
-    // Obliged to do that  if we want to use foreign keys with SQLite
     if ($this->language && !$this->engine) {
       $this->language->postCreation();
     }
-
-    return;
   }
 
 
@@ -3664,9 +1920,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function change(string $db): self
   {
-    if ($this->language->change($db)) {
-      $this->current = $db;
-    }
+    $this->language->change($db);
 
     return $this;
   }
@@ -3710,15 +1964,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
-   * Returns true if the string corresponds to the tipology of a table full name.
-   * (similar to {@link table_full_name()})
-   *
-   * ```php
-   * X::dump($db->tfn("table_users"));
-   * // (String) db_example.table_users
-   * X::dump($db->tfn("table_users", true));
-   * // (String) `db_example`.`table_users`
-   * ```
+   * Returns true if the given string is the full name of a table ('database.table').
    *
    * @param string $table The table's name
    * @return bool
@@ -3730,6 +1976,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
+   * Returns true if the given string is the full name of a column ('table.column').
+   *
    * @param string $col
    * @return bool
    */
@@ -3769,12 +2017,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * // (string) \`table_users\`.\`name\`
    * ```
    *
-   * @param string $col     The column's name (escaped or not)
-   * @param string $table   The table's name (escaped or not)
-   * @param bool   $escaped If set to true the returned string will be escaped
+   * @param string $col The column's name (escaped or not)
+   * @param string|null $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
    * @return string | false
    */
-  public function colFullName(string $col, $table = '', $escaped = false): ?string
+  public function colFullName(string $col, ?string $table = null, bool $escaped = false): ?string
   {
     return $this->language->colFullName($col, $table, $escaped);
   }
@@ -3805,10 +2053,10 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * ```php
    * X::dump($db->disableKeys());
-   * // (db)
+   * // (self)
    * ```
    *
-   * @return db
+   * @return self
    */
   public function disableKeys(): self
   {
@@ -3825,7 +2073,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * // (db)
    * ```
    *
-   * @return db
+   * @return self
    */
   public function enableKeys(): self
   {
@@ -3848,12 +2096,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *      "db_mail"
    *      ]
    * ```
-   *
    * @return null|array
    */
   public function getDatabases(): ?array
   {
-    return $this->_get_cache('', 'databases');
+    return $this->language->getDatabases();
   }
 
 
@@ -3884,20 +2131,16 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @param string $database Database name
    * @return null|array
    */
-  public function getTables(string $database=''): ?array
+  public function getTables(string $database = ''): ?array
   {
-    if (empty($database)) {
-      $database = $this->current;
-    }
-
-    return $this->_get_cache($database, 'tables');
+    return $this->language->getTables($database);
   }
 
 
   /**
-   * Return colums' structure of a table as an array indexed with the fields names.
+   * Return columns' structure of a table as an array indexed with the fields names.
    *
-   * ```php
+   * * ```php
    * X::dump($db->getColumns('table_users'));
    * /* (array)[
    *            "id" => [
@@ -3948,11 +2191,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getColumns(string $table): ?array
   {
-    if ($tmp = $this->_get_cache($table)) {
-      return $tmp['fields'];
-    }
-
-    return null;
+    return $this->language->getColumns($table);
   }
 
 
@@ -3999,21 +2238,17 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getKeys(string $table): ?array
   {
-    if ($tmp = $this->_get_cache($table)) {
-      return [
-        'keys' => $tmp['keys'],
-        'cols' => $tmp['cols']
-      ];
-    }
-
-    return null;
+    return $this->language->getKeys($table);
   }
 
 
   /**
+   * Returns a string with the conditions for any filter clause.
+   *
    * @param array $conditions
    * @param array $cfg
-   * @param bool  $is_having
+   * @param bool $is_having
+   * @param int $indent
    * @return string
    */
   public function getConditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string
@@ -4026,7 +2261,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * Return SQL code for row(s) SELECT.
    *
    * ```php
-   * X::dump($db->getSelect('table_users',['name','surname']));
+   * X::dump($db->getSelect(['tables' => ['users'],'fields' => ['id', 'name']]));
    * /*
    * (string)
    *   SELECT
@@ -4036,10 +2271,13 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getSelect(array $cfg): string
   {
-    return $this->language->getSelect(...$this->_add_kind(\func_get_args()));
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
+    return $this->language->getSelect($cfg);
   }
 
 
@@ -4060,9 +2298,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getInsert(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     $cfg['kind'] = 'INSERT';
     return $this->language->getInsert($this->processCfg($cfg));
   }
@@ -4085,9 +2326,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getUpdate(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     $cfg['kind'] = 'UPDATE';
     return $this->language->getUpdate($this->processCfg($cfg));
   }
@@ -4097,15 +2341,18 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * Returns the SQL code for a DELETE statement.
    *
    * ```php
-   * X::dump($db->getDelete('table_users',['id'=>1]));
+   * X::dump($db->getDelete(['tables' => ['table_users']]));
    * // (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?
    * ```
    *
    * @param array $cfg The configuration array
    * @return string
+   * @throws \Exception
    */
   public function getDelete(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     $cfg['kind'] = 'DELETE';
     return $this->language->getDelete($this->processCfg($cfg));
   }
@@ -4116,9 +2363,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getJoin(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getJoin($cfg);
   }
 
@@ -4133,9 +2383,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getWhere(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getWhere($cfg);
   }
 
@@ -4145,9 +2398,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getGroupBy(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getGroupBy($cfg);
   }
 
@@ -4157,9 +2413,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getHaving(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getHaving($cfg);
   }
 
@@ -4174,9 +2433,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getOrder(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getOrder($cfg);
   }
 
@@ -4185,29 +2447,19 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * Get a string starting with LIMIT with corresponding parameters to $limit.
    *
    * ```php
-   * X::dump($db->getLimit(3,1));
+   * X::dump($db->getLimit(['limit' => 3, 'start'  => 1]));
    * // (string) LIMIT 1, 3
    * ```
    *
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getLimit(array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getLimit($cfg);
-  }
-
-
-  /**
-   * Returns the comment (or an empty string if none) for a given table.
-   *
-   * @param string $table The table's name
-   *
-   * @return string The table's comment
-   */
-  public function getTableComment(string $table): string
-  {
-    return $this->language->getTableComment($table);
   }
 
 
@@ -4229,103 +2481,166 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * ```
    * @param string $table The table's name
    * @return string | false
+   * @throws \Exception
    */
   public function getCreate(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreate($table, $model);
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateTable(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreateTable($table, $model);
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateKeys(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreateKeys($table, $model);
   }
 
 
+  /**
+   * @param string $table
+   * @param array|null $model
+   * @return string
+   * @throws \Exception
+   */
   public function getCreateConstraints(string $table, array $model = null): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getCreateConstraints($table, $model);
   }
-
-
-  public function createConstraintsSqlite(string $table, array $model = null)
-  {
-    return $this->language->createConstraintsSqlite(...\func_get_args());
-  }
-
 
   /**
    * Creates an index on one or more column(s) of the table
    *
+   * @param string $table
+   * @param string|array $column
+   * @param bool $unique
+   * @param null $length
+   * @return bool
+   * @throws \Exception
    * @todo return data
    *
    * ```php
-   * X::dump($db->create_db_index('table_users','id_group'));
-   * // (void)
+   * X::dump($db->createIndex('table_users','id_group'));
+   * // (bool) true
    * ```
    *
-   * @param string       $table
-   * @param string|array $column
-   * @param bool         $unique
-   * @param null         $length
-   * @return bool
    */
   public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
   {
-    return $this->language->createIndex($table, $column, $unique);
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
+    return $this->language->createIndex($table, $column, $unique, $length);
   }
 
 
   /**
    * Deletes index on a column of the table.
    *
+   * @param string $table The table's name.
+   * @param string $key The key's name.
+   * @return bool
+   * @throws \Exception
    * @todo far vedere a thomas perchè non funziona/return data
    *
    * ```php
-   * X::dump($db->delete_db_index('table_users','id_group'));
-   * // (void)
+   * X::dump($db->deleteIndex('table_users','id_group'));
+   * // (bool) true
    * ```
    *
-   * @param string $table The table's name.
-   * @param string $key   The key's name.
-   * @return bool
    */
   public function deleteIndex(string $table, string $key): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->deleteIndex($table, $key);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlter(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlter($table, $cfg);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlterTable(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlterTable($table, $cfg);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlterColumn(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlterColumn($table, $cfg);
   }
 
 
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
   public function getAlterKey(string $table, array $cfg): string
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getAlterKey($table, $cfg);
   }
 
 
+  /**
+   * @param $table
+   * @param $cfg
+   * @return int
+   */
   public function alter($table, $cfg): int
   {
     return $this->language->alter($table, $cfg);
@@ -4337,17 +2652,20 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @todo return data
    *
    * ```php
-   * X::dump($db->create_db_user('Michael','22101980','db_example'));
-   * // (void)
+   * X::dump($db->createUser('Michael','22101980','db_example'));
+   * // (bool) true
    * ```
    *
-   * @param string $user
-   * @param string $pass
-   * @param string $db
+   * @param string|null $user
+   * @param string|null $pass
+   * @param string|null $db
    * @return bool
+   * @throws \Exception
    */
   public function createUser(string $user = null, string $pass = null, string $db = null): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->createUser($user, $pass, $db);
   }
 
@@ -4358,21 +2676,28 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    * @todo non mi funziona ma forse per una questione di permessi/ return data
    *
    * ```php
-   * X::dump($db->delete_db_user('Michael'));
-   * // (void)
+   * X::dump($db->deleteUser('Michael'));
+   * // (bool) true
    * ```
    *
    * @param string $user
    * @return bool
+   * @throws \Exception
    */
-  public function deleteUser(string $user = null): bool
+  public function deleteUser(string $user): bool
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->deleteUser($user);
   }
 
 
   /**
    * Return an array including privileges of a specific db_user or all db_users.
+   * @param string $user . The user's name, without params will return all privileges of all db_users
+   * @param string $host . The host
+   * @return array
+   * @throws \Exception
    * @todo far vedere  a th la descrizione
    *
    * ```php
@@ -4383,17 +2708,18 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *    ]
    * ```
    *
-   * @param string $user. The user's name, without params will return all privileges of all db_users
-   * @param string $host. The host
-   * @return array
    */
   public function getUsers(string $user = '', string $host = ''): ?array
   {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
     return $this->language->getUsers($user, $host);
   }
 
 
   /**
+   * Gets the size of a database
+   *
    * @param string $database
    * @param string $type
    * @return int
@@ -4405,6 +2731,8 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
+   * Gets the size of a table
+   *
    * @param string $table
    * @param string $type
    * @return int
@@ -4416,9 +2744,11 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
+   * Gets the status of a table
+   *
    * @param string $table
    * @param string $database
-   * @return array|false|mixed
+   * @return mixed
    */
   public function status(string $table = '', string $database = '')
   {
@@ -4427,11 +2757,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
 
 
   /**
-   * @return string
+   * Returns a UUID
+   *
+   * @return string|null
    */
-  public function getUid(): string
+  public function getUid(): ?string
   {
-    //return hex2bin(str_replace('-', '', X::makeUid()));
     return $this->language->getUid();
   }
 
@@ -4459,47 +2790,25 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    *
    * @param string query.
    * @param int The var ? value.
-   * @return array | false
+   * @return array|false
    *
    */
   public function getRow(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getRow();
-    }
-
-    return null;
+    return $this->language->getRow(...\func_get_args());
   }
 
 
   /**
    * Return an array that includes indexed arrays for every row resultant from the query.
    *
-   * ```php
-   * X::dump($db->getRows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2));
-   * /* (array)[
-   *            [
-   *            "id" => 3,
-   *            "name" => "john",
-   *            ],
-   *            [
-   *            "id" => 4,
-   *            "name" => "barbara",
-   *            ],
-   *          ]
-   * ```
-   *
    * @param string
    * @param int The var ? value
-   * @return array | false
+   * @return array|false
    */
   public function getRows(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getRows();
-    }
-
-    return null;
+    return $this->language->getRows(...\func_get_args());
   }
 
 
@@ -4521,11 +2830,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getIrow(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getIrow();
-    }
-
-    return null;
+    return $this->language->getIrow(...\func_get_args());
   }
 
 
@@ -4551,11 +2856,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getIrows(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getIrows();
-    }
-
-    return null;
+    return $this->language->getIrows(...\func_get_args());
   }
 
 
@@ -4582,16 +2883,12 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getByColumns(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getByColumns();
-    }
-
-    return null;
+    return $this->language->getByColumns(...\func_get_args());
   }
 
 
   /**
-   * Return the first row resulting from the query as an object (similar to {@link get_object()}).
+   * Return the first row resulting from the query as an object (similar to {@link getObject()}).
    *
    * ```php
    * X::dump($db->getObj("SELECT surname FROM table_users"));
@@ -4605,7 +2902,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getObj(): ?\stdClass
   {
-    return $this->getObject(\func_get_args());
+    return $this->getObject(...\func_get_args());
   }
 
 
@@ -4625,11 +2922,7 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getObject(): ?\stdClass
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getObject();
-    }
-
-    return null;
+    return $this->language->getObject(...\func_get_args());
   }
 
 
@@ -4663,26 +2956,16 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
    */
   public function getObjects(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
-      return $r->getObjects();
-    }
-
-    return [];
+    return $this->language->getObjects(...\func_get_args());
   }
 
 
-  public function createTable()
-  {
-    return $this->language->createTable(...\func_get_args());
-  }
-
-
-  public function createTableSqlite()
-  {
-    return $this->language->createTableSqlite(...\func_get_args());
-  }
-
-
+  /**
+   * Creates a database
+   *
+   * @param string $database
+   * @return bool
+   */
   public function createDatabase(string $database): bool
   {
     return $this->language->createDatabase(...\func_get_args());
@@ -4701,943 +2984,98 @@ class Db extends \PDO implements Db\Actions, Db\Api, Db\Engines
   }
 
 
-  public function enableLast()
-  {
-    $this->_last_enabled = true;
-  }
-
-
-  public function disableLast()
-  {
-    $this->_last_enabled = false;
-  }
-
-
-  public function getRealLastParams(): ?array
-  {
-    return $this->last_real_params;
-  }
-
-
-  public function realLast(): ?string
-  {
-    return $this->last_real_query;
-  }
-
-
-  public function getLastParams(): ?array
-  {
-    return $this->last_params;
-  }
-
-
-  public function getLastValues(): ?array
-  {
-    return $this->last_params ? $this->last_params['values'] : null;
-  }
-
-
-  public function getQueryValues(array $cfg): array
-  {
-    $res = [];
-    if (!empty($cfg['values'])) {
-      foreach ($cfg['values'] as $i => $v) {
-        // Transforming the values if needed
-        if (($cfg['values_desc'][$i]['type'] === 'binary')
-            && ($cfg['values_desc'][$i]['maxlength'] === 16)
-            && Str::isUid($v)
-        ) {
-          $res[] = hex2bin($v);
-        }
-        elseif (\is_string($v) && ((($cfg['values_desc'][$i]['type'] === 'date')
-            && (\strlen($v) < 10)) || (($cfg['values_desc'][$i]['type'] === 'time')
-            && (\strlen($v) < 8)) || (($cfg['values_desc'][$i]['type'] === 'datetime')
-            && (\strlen($v) < 19)))
-        ) {
-          $res[] = $v.'%';
-        }
-        elseif (!empty($cfg['values_desc'][$i]['operator'])) {
-          switch ($cfg['values_desc'][$i]['operator']){
-            case 'contains':
-            case 'doesnotcontain':
-              $res[] = '%'.$v.'%';
-              break;
-            case 'startswith':
-              $res[] = $v.'%';
-              break;
-            case 'endswith':
-              $res[] = '%'.$v;
-              break;
-            default:
-              $res[] = $v;
-          }
-        }
-        else{
-          $res[] = $v;
-        }
-      }
-    }
-
-    return $res;
-  }
-
-
   /**
-   * Renames the given table to the new given name.
-   * 
-   * @param string $table   The current table's name
-   * @param string $newName The new name.
-   * @return bool  True if it succeeded
-   */
-  public function renameTable(string $table, string $newName): bool
-  {
-    return $this->language->renameTable($table, $newName);
-  }
-
-
-
-  /**
-   * Sets the has_error_all variable to true.
-   *
    * @return void
    */
-  private static function _set_has_error_all(): void
+  public function enableLast()
   {
-    self::$_has_error_all = true;
+    if (method_exists($this->language, __FUNCTION__)) {
+      $this->language->enableLast();
+    }
   }
 
 
   /**
-   * Gets the cache name of a database structure or part.
-   *
-   * @param string $item 'db_name' or 'table'
-   * @param string $mode 'columns','tables' or 'databases'
-   *
-   * @return bool|string
+   * @return void
    */
-  private function _db_cache_name(string $item, string $mode)
+  public function disableLast()
   {
-    $r = false;
-    if ($this->engine === 'sqlite') {
-      $h = md5($this->host.dirname($this->current));
+    if (method_exists($this->language, __FUNCTION__)) {
+      $this->language->disableLast();
     }
-    else {
-      $h = str_replace('/', '-', $this->getConnectionCode());
-    }
-
-    switch ($mode){
-      case 'columns':
-        $r = $this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
-        break;
-      case 'tables':
-        $r = $this->engine.'/'.$h.'/'.($item ?: $this->current);
-        break;
-      case 'databases':
-        $r = $this->engine.'/'.$h.'/_bbn-database';
-        break;
-    }
-
-    return $r;
   }
 
-
   /**
-   * Returns the table's structure's array, either from the cache or from _modelize().
-   *
-   * @param string $item  The item to get
-   * @param string $mode  The type of item to get (columns, rables, Databases)
-   * @param bool   $force If true the cache is recreated even if it exists
    * @return array|null
+   * @throws \Exception
    */
-  private function _get_cache($item, $mode = 'columns', $force = false): ?array
+  public function getRealLastParams(): ?array
   {
-    $cache_name = $this->_db_cache_name($item, $mode);
-    if ($force && isset($this->cache[$cache_name])) {
-      unset($this->cache[$cache_name]);
-    }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    if (!isset($this->cache[$cache_name])) {
-      if ($force || !($tmp = $this->cacheGet($cache_name))) {
-        switch ($mode){
-          case 'columns':
-            $keys = $this->language->getKeys($item);
-            $cols = $this->language->getColumns($item);
-            if (\is_array($keys) && \is_array($cols)) {
-              $tmp = [
-                'keys' => $keys['keys'],
-                'cols' => $keys['cols'],
-                'fields' => $cols
-              ];
-            }
-            break;
-          case 'tables':
-            $tmp = $this->language->getTables($item);
-            break;
-          case 'databases':
-            $tmp = $this->language->getDatabases();
-            break;
-        }
-
-        if (!\is_array($tmp)) {
-          $st = "Error while creating the cache for the table $item in mode $mode";
-          $this->log($st);
-          throw new \Exception($st);
-        }
-
-        $this->cacheSet($cache_name, '', $tmp, $this->cache_renewal);
-      }
-
-      if ($tmp) {
-        $this->cache[$cache_name] = $tmp;
-      }
-    }
-
-    return $this->cache[$cache_name] ?? null;
+    return $this->language->getRealLastParams();
   }
 
 
   /**
-   * Removes values from the given conditions array and returns an array with values and hashed.
-   *
-   * @param array $where  Conditions
-   * @param array $values Values
-   * @return array
+   * @return string|null
+   * @throws \Exception
    */
-  private function _remove_conditions_value(array $where, array &$values = []): array
+  public function realLast(): ?string
   {
-    if (isset($where['conditions'])) {
-      foreach ($where['conditions'] as &$f){
-        ksort($f);
-        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
-          $tmp = $this->_remove_conditions_value($f, $values);
-          $f   = $tmp['hashed'];
-        }
-        elseif (array_key_exists('value', $f)) {
-          $values[] = $f['value'];
-          unset($f['value']);
-        }
-      }
-    }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    return [
-      'hashed' => $where,
-      'values' => $values
-    ];
+    return $this->language->realLast();
   }
 
 
   /**
-   * Adds the specs of a query to the $queries object.
-   *
-   * @param string $hash         The hash of the statement.
-   * @param string $statement    The SQL full statement.
-   * @param string $kind         The type of statement.
-   * @param int    $placeholders The number of placeholders.
-   * @param array  $options      The driver options.
+   * @return array|null
+   * @throws \Exception
    */
-  private function _add_query(string $hash, string $statement, string $kind, int $placeholders, array $options)
+  public function getLastParams(): ?array
   {
-    $now                  = microtime(true);
-    $this->queries[$hash] = [
-      'sql' => $statement,
-      'kind' => $kind,
-      'write' => \in_array($kind, self::$write_kinds, true),
-      'structure' => \in_array($kind, self::$structure_kinds, true),
-      'placeholders' => $placeholders,
-      'options' => $options,
-      'num' => 0,
-      'exe_time' => 0,
-      'first' => $now,
-      'last' => 0,
-      'prepared' => false
-    ];
-    $this->list_queries[] = [
-      'hash' => $hash,
-      'last' => $now
-    ];
-    $num                  = count($this->list_queries);
-    while ($num > $this->max_queries) {
-      $num--;
-      $this->_remove_query($this->list_queries[0]['hash']);
-      array_shift($this->list_queries);
-    }
-  }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-
-  private function _remove_query(string $hash): void
-  {
-    if (X::hasProp($this->queries, $hash)) {
-      unset($this->queries[$hash]);
-      while ($idx = \array_search($hash, $this->queries, true)) {
-        unset($this->queries[$idx]);
-      }
-    }
-  }
-
-
-  private function _update_query($hash)
-  {
-    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
-      $last_index                   = count($this->list_queries) - 1;
-      $now                          = \microtime(true);
-      $this->queries[$hash]['last'] = $now;
-      $this->queries[$hash]['num']++;
-      if ($this->list_queries[$last_index]['hash'] !== $hash) {
-        if (($idx = X::find($this->list_queries, ['hash' => $hash])) !== null) {
-          $this->list_queries[$idx]['last'] = $now;
-          X::move($this->list_queries, $idx, $last_index);
-        }
-        else {
-          throw new \Exception(X::_("Impossible to find the corresponding hash"));
-        }
-      }
-      else {
-        $this->list_queries[$last_index]['last'] = $now;
-      }
-
-      $num = count($this->list_queries) - 1;
-      while (($num > 0)
-          && ($now > ($this->list_queries[0]['last'] + $this->length_queries))
-      ) {
-        $num--;
-        if (!is_string($this->list_queries[0]['hash'])) {
-          X::log($this->list_queries);
-          X::log(count($this->list_queries));
-        }
-
-        $this->_remove_query($this->list_queries[0]['hash']);
-        array_shift($this->list_queries);
-      }
-
-      if (empty($this->queries)) {
-        $debug = debug_backtrace();
-        X::log($debug, 'db_explained');
-        throw new \Exception(X::_("The queries object is empty!"));
-      }
-    }
-    else {
-      throw new \Exception(X::_("Impossible to find the query corresponding to this hash"));
-    }
-
+    return $this->language->getLastParams();
   }
 
 
   /**
-   * Makes a string that will be the id of the request.
-   *
-   * @return string
-   *
+   * @return array|null
+   * @throws \Exception
    */
-  private function _make_hash(): string
+  public function getLastValues(): ?array
   {
-    $args = \func_get_args();
-    if ((\count($args) === 1) && \is_array($args[0])) {
-      $args = $args[0];
-    }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    $st = '';
-    foreach ($args as $a){
-      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
-    }
-
-    return $this->hash_contour.md5($st).$this->hash_contour;
+    return $this->language->getLastValues();
   }
 
 
   /**
-   * Launches a function before or after
-   *
    * @param array $cfg
    * @return array
+   * @throws \Exception
    */
-  private function _trigger(array $cfg): array
+  public function getQueryValues(array $cfg): array
   {
-    if ($this->_triggers_disabled) {
-      if ($cfg['moment'] === 'after') {
-        return $cfg;
-      }
+    $this->ensureLanguageMethodExists(__FUNCTION__);
 
-      $cfg['run']  = 1;
-      $cfg['trig'] = 1;
-      return $cfg;
-    }
-
-    if (!isset($cfg['trig'])) {
-      $cfg['trig'] = 1;
-    }
-
-    if (!isset($cfg['run'])) {
-      $cfg['run'] = 1;
-    }
-
-    if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
-      $table = $this->tfn(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
-      // Specific to a table
-      if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
-        foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
-          if ($f && \is_callable($f)) {
-            if (!($tmp = $f($cfg))) {
-              $cfg['run']  = false;
-              $cfg['trig'] = false;
-            }
-            else{
-              $cfg = $tmp;
-            }
-          }
-        }
-
-        //echo X::makeTree($trig);
-        //echo X::makeTree($cfg);
-      }
-    }
-
-    return $cfg;
+    return $this->language->getQueryValues($cfg);
   }
 
 
   /**
-   * @param array  $args
-   * @param string $kind
-   * @return array
-   */
-  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
-  {
-    $kind = strtoupper($kind);
-    if (!isset($args[0])) {
-      return null;
-    }
-
-    if (!\is_array($args[0])) {
-      array_unshift($args, $kind);
-    }
-    else {
-      $args[0]['kind'] = $kind;
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * Adds a random primary value when it is absent from the set and present in the fields
-   * @param array $cfg
-   */
-  private function _add_primary(array &$cfg): void
-  {
-    // Inserting a row without primary when primary is needed and no auto-increment
-    if (!empty($cfg['primary'])
-        && empty($cfg['auto_increment'])
-        && (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1)
-        && (count($cfg['values']) === (count($cfg['fields']) - 1))
-    ) {
-      $val = false;
-      switch ($cfg['primary_type']){
-        case 'int':
-          $val = random_int(
-            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] - 3 : 1) / 2),
-            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
-          );
-          break;
-        case 'binary':
-          if ($cfg['primary_length'] === 16) {
-            $val = $this->getUid();
-          }
-          break;
-      }
-
-      if ($val) {
-        array_splice($cfg['values'], $idx, 0, $val);
-        $this->setLastInsertId($val);
-      }
-    }
-  }
-
-
-  /**
-   * @returns null|Db\Query|int A selection query or the number of affected rows by a writing query
-   */
-  private function _exec()
-  {
-    if ($this->check()
-        && ($cfg = $this->processCfg(\func_get_args()))
-        && !empty($cfg['sql'])
-    ) {
-      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
-      $cfg['moment'] = 'before';
-      $cfg['trig']   = null;
-      if ($cfg['kind'] === 'INSERT') {
-        // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
-        $this->_add_primary($cfg);
-      }
-
-      if (count($cfg['values']) !== count($cfg['values_desc'])) {
-        X::dump($cfg);
-        die('Database error in values count');
-      }
-
-      // Launching the trigger BEFORE execution
-      if ($cfg = $this->_trigger($cfg)) {
-        if (!empty($cfg['run'])) {
-          //$this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
-          // Executing the query
-          /** @todo Put hash back! */
-          //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
-          /** @var \bbn\Db\Query */
-          $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
-        }
-
-        if (!empty($cfg['force'])) {
-          $cfg['trig'] = 1;
-        }
-        elseif (null === $cfg['trig']) {
-          $cfg['trig'] = (bool)$cfg['run'];
-        }
-
-        if ($cfg['trig']) {
-          $cfg['moment'] = 'after';
-          $cfg           = $this->_trigger($cfg);
-        }
-
-        $this->last_cfg = $cfg;
-        if (!\in_array($cfg['kind'], self::$write_kinds, true)) {
-          return $cfg['run'] ?? null;
-        }
-
-        if (isset($cfg['value'])) {
-          return $cfg['value'];
-        }
-
-        if (isset($cfg['run'])) {
-          return $cfg['run'];
-        }
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Normalizes arguments by making it a uniform array.
+   * Throws ans exception if language class method does not exist.
    *
-   * <ul><h3>The array will have the following indexes:</h3>
-   * <li>fields</li>
-   * <li>where</li>
-   * <li>filters</li>
-   * <li>order</li>
-   * <li>limit</li>
-   * <li>start</li>
-   * <li>join</li>
-   * <li>group_by</li>
-   * <li>having</li>
-   * <li>values</li>
-   * <li>hashed_join</li>
-   * <li>hashed_where</li>
-   * <li>hashed_having</li>
-   * <li>php</li>
-   * <li>done</li>
-   * </ul>
-   *
-   * @todo Check for the tables and column names legality!
-   *
-   * @param $cfg
-   * @return array
+   * @param string $method
+   * @throws \Exception
    */
-  private function _treat_arguments($cfg): array
+  private function ensureLanguageMethodExists(string $method)
   {
-    while (isset($cfg[0]) && \is_array($cfg[0])){
-      $cfg = $cfg[0];
-    }
-
-    if (\is_array($cfg)
-        && array_key_exists('tables', $cfg)
-        && array_key_exists('bbn_db_treated', $cfg)
-        && ($cfg['bbn_db_treated'] === true)
-    ) {
-      return $cfg;
-    }
-
-    $res = [
-      'kind' => 'SELECT',
-      'fields' => [],
-      'ofields' => [],
-      'where' => [],
-      'order' => [],
-      'limit' => 0,
-      'start' => 0,
-      'group_by' => [],
-      'having' => [],
-    ];
-    if (X::isAssoc($cfg)) {
-      if (isset($cfg['table']) && !isset($cfg['tables'])) {
-        $cfg['tables'] = $cfg['table'];
-        unset($cfg['table']);
-      }
-
-      $res = array_merge($res, $cfg);
-    }
-    elseif (count($cfg) > 1) {
-      $res['kind']   = strtoupper($cfg[0]);
-      $res['tables'] = $cfg[1];
-      if (isset($cfg[2])) {
-        $res['fields'] = $cfg[2];
-      }
-
-      if (isset($cfg[3])) {
-        $res['where'] = $cfg[3];
-      }
-
-      if (isset($cfg[4])) {
-        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
-      }
-
-      if (isset($cfg[5]) && Str::isInteger($cfg[5])) {
-        $res['limit'] = $cfg[5];
-      }
-
-      if (isset($cfg[6]) && !empty($res['limit'])) {
-        $res['start'] = $cfg[6];
-      }
-    }
-
-    $res = array_merge(
-      $res, [
-      'aliases' => [],
-      'values' => [],
-      'filters' => [],
-      'join' => [],
-      'hashed_join' => [],
-      'hashed_where' => [],
-      'hashed_having' => [],
-      'bbn_db_treated' => true
-      ]
-    );
-    $res['kind']   = strtoupper($res['kind']);
-    $res['write']  = \in_array($res['kind'], self::$write_kinds, true);
-    $res['ignore'] = $res['write'] && !empty($res['ignore']);
-    $res['count']  = !$res['write'] && !empty($res['count']);
-    if (!\is_array($res['tables'])) {
-      $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
-    }
-
-    if (!empty($res['tables'])) {
-      foreach ($res['tables'] as $i => $t){
-        if (!is_string($t)) {
-          X::log([$cfg, debug_backtrace()], 'db_explained');
-          throw new \Exception(X::_("Impossible to identify the tables, check the log"));
-        }
-
-        $res['tables'][$i] = $this->tfn($t);
-        if (is_null($res['tables'][$i])) {
-          X::log([$res, debug_backtrace()], 'db_explained');
-          throw new \Exception(X::_("Impossible to find the table %s, check the log", $i));
-        }
-      }
-    }
-    else{
-      throw new \Error(X::_('No table given'));
-      return [];
-    }
-
-    if (!empty($res['fields'])) {
-      if (\is_string($res['fields'])) {
-        $res['fields'] = [$res['fields']];
-      }
-    }
-    elseif (!empty($res['columns'])) {
-      $res['fields'] = (array)$res['columns'];
-    }
-
-    if (!empty($res['fields'])) {
-      if ($res['kind'] === 'SELECT') {
-        foreach ($res['fields'] as $k => $col) {
-          if (\is_string($k)) {
-            $res['aliases'][$col] = $k;
-          }
-        }
-      }
-      elseif ((($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
-          && \is_string(array_keys($res['fields'])[0])
-      ) {
-        $res['values'] = array_values($res['fields']);
-        $res['fields'] = array_keys($res['fields']);
-      }
-    }
-
-    if (!\is_array($res['group_by'])) {
-      $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
-    }
-
-    if (!\is_array($res['where'])) {
-      $res['where'] = [];
-    }
-
-    if (!\is_array($res['order'])) {
-      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
-    }
-
-    if (!Str::isInteger($res['limit'])) {
-      unset($res['limit']);
-    }
-
-    if (!Str::isInteger($res['start'])) {
-      unset($res['start']);
-    }
-
-    if (!empty($cfg['join'])) {
-      foreach ($cfg['join'] as $k => $join){
-        if (\is_array($join)) {
-          if (\is_string($k)) {
-            if (empty($join['table'])) {
-              $join['table'] = $k;
-            }
-            elseif (empty($join['alias'])) {
-              $join['alias'] = $k;
-            }
-          }
-
-          if (isset($join['table'], $join['on']) && ($tmp = $this->treatConditions($join['on'], false))) {
-            if (!isset($join['type'])) {
-              $join['type'] = 'right';
-            }
-
-            $res['join'][] = array_merge($join, ['on' => $tmp]);
-          }
-        }
-      }
-    }
-
-    if ($tmp = $this->treatConditions($res['where'], false)) {
-      $res['filters'] = $tmp;
-    }
-
-    if (!empty($res['having']) && ($tmp = $this->treatConditions($res['having'], false))) {
-      $res['having'] = $tmp;
-    }
-
-    if (!empty($res['group_by'])) {
-      $this->_adapt_filters($res);
-    }
-
-    if (!empty($res['join'])) {
-      $new_join = [];
-      foreach ($res['join'] as $k => $join){
-        if ($tmp = $this->treatConditions($join['on'])) {
-          $new_item             = $join;
-          $new_item['on']       = $tmp['where'];
-          $res['hashed_join'][] = $tmp['hashed'];
-          if (!empty($tmp['values'])) {
-            foreach ($tmp['values'] as $v){
-              $res['values'][] = $v;
-            }
-          }
-
-          $new_join[] = $new_item;
-        }
-      }
-
-      $res['join'] = $new_join;
-    }
-
-    if (!empty($res['filters']) && ($tmp = $this->treatConditions($res['filters']))) {
-      $res['filters']      = $tmp['where'];
-      $res['hashed_where'] = $tmp['hashed'];
-      if (\is_array($tmp) && isset($tmp['values'])) {
-        foreach ($tmp['values'] as $v){
-          $res['values'][] = $v;
-        }
-      }
-    }
-
-    if (!empty($res['having']) && ($tmp = $this->treatConditions($res['having']))) {
-      $res['having']        = $tmp['where'];
-      $res['hashed_having'] = $tmp['hashed'];
-      foreach ($tmp['values'] as $v){
-        $res['values'][] = $v;
-      }
-    }
-
-    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
-      $res['kind'],
-      $res['ignore'],
-      $res['count'],
-      $res['tables'],
-      $res['fields'],
-      $res['hashed_join'],
-      $res['hashed_where'],
-      $res['hashed_having'],
-      $res['group_by'],
-      $res['order'],
-      $res['limit'] ?? 0,
-      $res['start'] ?? 0
-    );
-    return $res;
-  }
-
-
-  private function _adapt_filters(&$cfg): void
-  {
-    if (!empty($cfg['filters'])) {
-      [$cfg['filters'], $having] = $this->_adapt_bit($cfg, $cfg['filters']);
-      if (empty($cfg['having']['conditions'])) {
-        $cfg['having'] = $having;
-      }
-      else {
-        $cfg['having'] = [
-          'logic' => 'AND',
-          'conditions' => [
-            $cfg['having'],
-            $having
-          ]
-        ];
-      }
+    if (!method_exists($this->language, $method)) {
+      throw new \Exception(X::_('Method not found on the language class!'));
     }
   }
-
-
-  private function _adapt_bit($cfg, $where, $having = [])
-  {
-    if (X::hasProps($where, ['logic', 'conditions'])) {
-      $new = [
-        'logic' => $where['logic'],
-        'conditions' => []
-      ];
-      foreach ($where['conditions'] as $c) {
-        $is_aggregate = false;
-        if (isset($c['field'])) {
-          $is_aggregate = $this->isAggregateFunction($c['field']);
-          if (!$is_aggregate && isset($cfg['fields'][$c['field']])) {
-            $is_aggregate = $this->isAggregateFunction($cfg['fields'][$c['field']]);
-          }
-        }
-
-        if (!$is_aggregate && isset($c['exp'])) {
-          $is_aggregate = $this->isAggregateFunction($c['exp']);
-          if (!$is_aggregate && isset($cfg['fields'][$c['exp']])) {
-            $is_aggregate = $this->isAggregateFunction($cfg['fields'][$c['exp']]);
-          }
-        }
-
-        if (!$is_aggregate) {
-          if (X::hasProps($c, ['conditions', 'logic'])) {
-            $tmp = $this->_adapt_bit($cfg, $c, $having);
-            if (!empty($tmp[0]['conditions'])) {
-              $new['conditions'][] = $c;
-            }
-
-            if (!empty($tmp[1]['conditions'])) {
-              $having = $tmp[1];
-            }
-          }
-          else {
-            $new['conditions'][] = $c;
-          }
-        }
-        else {
-          if (!isset($having['conditions'])) {
-            $having = [
-              'logic' => $where['logic'],
-              'conditions' => []
-            ];
-          }
-
-          if (isset($cfg['aliases'][$c['field']])) {
-            $c['field'] = $cfg['aliases'][$c['field']];
-          }
-          elseif (isset($c['exp'], $cfg['aliases'][$c['exp']])) {
-            $c['exp'] = $cfg['aliases'][$c['exp']];
-          }
-
-          $having['conditions'][] = $c;
-        }
-      }
-
-      return [$new, $having];
-    }
-  }
-
-
-  /**
-   * @param array $args
-   * @return array
-   */
-  private function _set_limit_1(array $args): array
-  {
-    if (\is_array($args[0])
-        && (isset($args[0]['tables']) || isset($args[0]['table']))
-    ) {
-      $args[0]['limit'] = 1;
-    }
-    else {
-      $start = $args[4] ?? 0;
-      $num   = count($args);
-      // Adding fields
-      if ($num === 1) {
-        $args[] = [];
-        $num++;
-      }
-
-      // Adding where
-      if ($num === 2) {
-        $args[] = [];
-        $num++;
-      }
-
-      // Adding order
-      if ($num === 3) {
-        $args[] = [];
-        $num++;
-      }
-
-      if ($num === 4) {
-        $args[] = 1;
-        $num++;
-      }
-
-      $args   = array_slice($args, 0, 5);
-      $args[] = $start;
-    }
-
-    return $args;
-  }
-
-
-  /**
-   * @param array $args
-   * @return array
-   */
-  private function _set_start(array $args, int $start): array
-  {
-    if (\is_array($args[0])
-        && (isset($args[0]['tables']) || isset($args[0]['table']))
-    ) {
-      $args[0]['start'] = $start;
-    }
-    else {
-      if (isset($args[5])) {
-        $args[5] = $start;
-      }
-      else{
-        while (count($args) < 6){
-          switch (count($args)){
-            case 1:
-            case 2:
-            case 3:
-              $args[] = [];
-              break;
-            case 4:
-              $args[] = 1;
-              break;
-            case 5:
-              $args[] = $start;
-              break;
-          }
-        }
-      }
-    }
-
-    return $args;
-  }
-
-
 }

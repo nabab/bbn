@@ -166,10 +166,10 @@ class History
         $cfg['val'] = null;
       }
       elseif (Str::isUid($cfg['old'])
-          && $this->db->count(
-            $this->getHistoryUidsTableName(),
-            [$this->getHistoryUidsColumnName('bbn_uid') => $cfg['old']]
-          )
+        && $this->db->count(
+          $this->getHistoryUidsTableName(),
+          [$this->getHistoryUidsColumnName('bbn_uid') => $cfg['old']]
+        )
       ) {
         $cfg['ref'] = $cfg['old'];
         $cfg['val'] = null;
@@ -182,13 +182,13 @@ class History
       // New row in the history table
       if ($res = $this->db->insert(
         $this->getHistoryTableName(), [
-        $this->getHistoryTableColumnName('opr') => $cfg['operation'],
-        $this->getHistoryTableColumnName('uid') => $cfg['line'],
-        $this->getHistoryTableColumnName('col') => $cfg['column'],
-        $this->getHistoryTableColumnName('val') => $cfg['val'],
-        $this->getHistoryTableColumnName('ref') => $cfg['ref'],
-        $this->getHistoryTableColumnName('tst') => $this->date ?: $cfg['chrono'],
-        $this->getHistoryTableColumnName('usr') => $this->user
+          $this->getHistoryTableColumnName('opr') => $cfg['operation'],
+          $this->getHistoryTableColumnName('uid') => $cfg['line'],
+          $this->getHistoryTableColumnName('col') => $cfg['column'],
+          $this->getHistoryTableColumnName('val') => $cfg['val'],
+          $this->getHistoryTableColumnName('ref') => $cfg['ref'],
+          $this->getHistoryTableColumnName('tst') => $this->date ?: $cfg['chrono'],
+          $this->getHistoryTableColumnName('usr') => $this->user
         ]
       )
       ) {
@@ -213,7 +213,7 @@ class History
   private function _get_table_where(string $table): ?string
   {
     if (Str::checkName($table)
-        && ($model = $this->database_obj->modelize($table))
+      && ($model = $this->database_obj->modelize($table))
     ) {
       $col      = $this->db->escape($this->getHistoryTableColumnName('col'));
       $where_ar = [];
@@ -493,8 +493,8 @@ MYSQL;
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (Str::checkName($table)
-        && ($date = $this->validDate($from_when))
-        && ($id_table = $this->database_obj->tableId($table))
+      && ($date = $this->validDate($from_when))
+      && ($id_table = $this->database_obj->tableId($table))
     ) {
       $this->disable();
       $tab      = $this->db->escape($this->getHistoryTableName());
@@ -520,26 +520,26 @@ MYSQL;
 
       $res = $this->db->rselect(
         [
-        'tables' => [$tab_uids],
-        'fields' => [
-          $line,
-          $id_col,
-          $chrono,
-          'val' => 'IFNULL('.$this->getHistoryTableColumnName('val').', '.$this->getHistoryTableColumnName('ref').')',
-          $usr
-        ],
-        'join' => [[
-          'table' => $tab,
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => $uid,
-              'operator' => '=',
-              'exp' => $line
-            ]]
-          ]]],
-        'where' => $where,
-        'order' => [$chrono => 'ASC']
+          'tables' => [$tab_uids],
+          'fields' => [
+            $line,
+            $id_col,
+            $chrono,
+            'val' => 'IFNULL('.$this->getHistoryTableColumnName('val').', '.$this->getHistoryTableColumnName('ref').')',
+            $usr
+          ],
+          'join' => [[
+            'table' => $tab,
+            'on' => [
+              'logic' => 'AND',
+              'conditions' => [[
+                'field' => $uid,
+                'operator' => '=',
+                'exp' => $line
+              ]]
+            ]]],
+          'where' => $where,
+          'order' => [$chrono => 'ASC']
         ]
       );
       $this->enable();
@@ -643,7 +643,7 @@ MYSQL;
       if ($when >= time()) {
         $r = $this->db->rselect(
           $table, $columns, [
-          $cfg['primary'] => $id
+            $cfg['primary'] => $id
           ]
         ) ?: null;
       }
@@ -669,10 +669,10 @@ MYSQL;
                 $this->getHistoryTableColumnName('ref')
               ]
               , [
-              $this->getHistoryTableColumnName('uid') => $id,
-              $this->getHistoryTableColumnName('col') => $model['fields'][$col]['id_option'],
-              $this->getHistoryTableColumnName('opr') => 'UPDATE',
-              [$this->getHistoryTableColumnName('tst'), '>', $when]
+                $this->getHistoryTableColumnName('uid') => $id,
+                $this->getHistoryTableColumnName('col') => $model['fields'][$col]['id_option'],
+                $this->getHistoryTableColumnName('opr') => 'UPDATE',
+                [$this->getHistoryTableColumnName('tst'), '>', $when]
               ]
             )
             ) {
@@ -683,7 +683,7 @@ MYSQL;
           if (!$tmp) {
             $r[$col] = $this->db->selectOne(
               $table, $col, [
-              $cfg['primary'] => $id
+                $cfg['primary'] => $id
               ]
             );
           }
@@ -748,8 +748,8 @@ MYSQL;
         $this->getHistoryTableColumnName('uid') => $id,
         $this->getHistoryTableColumnName('col') => $id_col,
         $this->getHistoryTableColumnName('opr') => 'INSERT'
-        ], [
-        $this->getHistoryTableColumnName('tst') => 'DESC'
+      ], [
+          $this->getHistoryTableColumnName('tst') => 'DESC'
         ]
       )
       ) {
@@ -777,8 +777,8 @@ MYSQL;
         $this->getHistoryTableName(), $this->getHistoryTableColumnName('tst'), [
         $this->getHistoryTableColumnName('uid') => $id,
         $this->getHistoryTableColumnName('col') => $id_col
-        ], [
-        $this->getHistoryTableColumnName('tst') => 'DESC'
+      ], [
+          $this->getHistoryTableColumnName('tst') => 'DESC'
         ]
       );
     }
@@ -851,15 +851,15 @@ MYSQL;
         $where[$this->getHistoryTableColumnName('opr')] = $p;
         if ($q = $this->db->rselectAll(
           [
-          'table' => $this->getHistoryTableName(),
-          'fields' => $fields,
-          'where' => [
-            'conditions' => $where
-          ],
-          'order' => [[
-            'field' => $this->getHistoryTableColumnName('tst'),
-            'dir' => 'desc'
-          ]]
+            'table' => $this->getHistoryTableName(),
+            'fields' => $fields,
+            'where' => [
+              'conditions' => $where
+            ],
+            'order' => [[
+              'field' => $this->getHistoryTableColumnName('tst'),
+              'dir' => 'desc'
+            ]]
           ]
         )
         ) {
@@ -909,8 +909,8 @@ MYSQL;
   public function getColumnHistory(string $table, string $id, string $column)
   {
     if ($this->check()
-        && ($primary = $this->db->getPrimary($table))
-        && ($modelize = $this->getTableCfg($table))
+      && ($primary = $this->db->getPrimary($table))
+      && ($modelize = $this->getTableCfg($table))
     ) {
       if (Str::isUid($column)) {
         $column = X::find($modelize['fields'], ['id_option' => strtolower($column)]);
@@ -922,7 +922,7 @@ MYSQL;
 
       $current = $this->db->selectOne(
         $table, $column, [
-        $primary[0] => $id
+          $primary[0] => $id
         ]
       );
       $val = $modelize['fields'][$column] === 'binary' ? $this->getHistoryTableColumnName('ref') : $this->getHistoryTableColumnName('val');
@@ -993,10 +993,10 @@ MYSQL;
             'fields' => []
           ];
           if ($this->isLinked($table)
-              && isset($model['keys']['PRIMARY'])
-              && (\count($model['keys']['PRIMARY']['columns']) === 1)
-              && ($primary = $model['keys']['PRIMARY']['columns'][0])
-              && !empty($model['fields'][$primary])
+            && isset($model['keys']['PRIMARY'])
+            && (\count($model['keys']['PRIMARY']['columns']) === 1)
+            && ($primary = $model['keys']['PRIMARY']['columns'][0])
+            && !empty($model['fields'][$primary])
           ) {
             // Looking for the config of the table
             $this->structures[$table]['history']        = 1;
@@ -1007,8 +1007,8 @@ MYSQL;
             $this->structures[$table]['id']             = $this->database_obj->tableId($this->db->tsn($table), $this->db->getCurrent());
             $this->structures[$table]['fields']         = array_filter(
               $model['fields'], function ($a) {
-                return isset($a['id_option']);
-              }
+              return isset($a['id_option']);
+            }
             );
           }
         }
@@ -1088,10 +1088,10 @@ MYSQL;
     $tables = $cfg['tables'] ?? (array)$cfg['table'];
     // Will return false if disabled, the table doesn't exist, or doesn't have history
     if (($cfg['kind'] === 'SELECT')
-        && ($cfg['moment'] === 'before')
-        && !empty($cfg['tables'])
-        && !in_array($this->db->tfn($this->getHistoryTableName()), $cfg['tables_full'], true)
-        && !in_array($this->db->tfn($this->getHistoryUidsTableName()), $cfg['tables_full'], true)
+      && ($cfg['moment'] === 'before')
+      && !empty($cfg['tables'])
+      && !in_array($this->db->tfn($this->getHistoryTableName()), $cfg['tables_full'], true)
+      && !in_array($this->db->tfn($this->getHistoryUidsTableName()), $cfg['tables_full'], true)
     ) {
       $change = 0;
       if (!isset($cfg['history'])) {
@@ -1101,7 +1101,7 @@ MYSQL;
           $post_join = false;
           $model     = $this->db->modelize($t['table']);
           if (isset($model['keys']['PRIMARY'])
-              && ($model['keys']['PRIMARY']['ref_table'] === $this->db->csn($this->getHistoryUidsTableName()))
+            && ($model['keys']['PRIMARY']['ref_table'] === $this->db->csn($this->getHistoryUidsTableName()))
           ) {
             $change++;
             if ($t['type'] !== 'left') {
@@ -1191,7 +1191,7 @@ MYSQL;
         foreach ($cfg['tables'] as $alias => $table){
           $model = $this->db->modelize($table);
           if (isset($model['keys']['PRIMARY']['ref_table'])
-              && ($this->db->tfn($model['keys']['PRIMARY']['ref_db'].'.'.$model['keys']['PRIMARY']['ref_table']) === $this->getHistoryUidsTableName())
+            && ($this->db->tfn($model['keys']['PRIMARY']['ref_db'].'.'.$model['keys']['PRIMARY']['ref_table']) === $this->getHistoryUidsTableName())
           ) {
             $change++;
             $new_join[] = [
@@ -1228,8 +1228,8 @@ MYSQL;
     }
 
     if (isset($cfg['write'])
-        && ($table = $this->db->tfn(current($tables)))
-        && ($s = $this->getTableCfg($table))
+      && ($table = $this->db->tfn(current($tables)))
+      && ($s = $this->getTableCfg($table))
     ) {
       // This happens before the query is executed
       if ($cfg['moment'] === 'before') {
@@ -1282,23 +1282,23 @@ MYSQL;
                   $this->disable();
                   if ($tmp = $this->db->selectOne(
                     [
-                    'tables' => [$table],
-                    'fields' => [$s['primary']],
-                    'join' => [[
-                      'table' => $this->getHistoryUidsTableName(),
-                      'on' => [[
-                        'field' => $this->db->cfn(
-                          $this->getHistoryUidsColumnName('bbn_uid'),
-                          $this->getHistoryUidsTableName()
-                        ),
-                        'operator' => 'eq',
-                        'exp' => $this->db->cfn($s['primary'], $table, true)
-                      ]]
-                    ]],
-                    'where' => [
-                      'conditions' => $fields,
-                      'logic' => 'AND'
-                    ]
+                      'tables' => [$table],
+                      'fields' => [$s['primary']],
+                      'join' => [[
+                        'table' => $this->getHistoryUidsTableName(),
+                        'on' => [[
+                          'field' => $this->db->cfn(
+                            $this->getHistoryUidsColumnName('bbn_uid'),
+                            $this->getHistoryUidsTableName()
+                          ),
+                          'operator' => 'eq',
+                          'exp' => $this->db->cfn($s['primary'], $table, true)
+                        ]]
+                      ]],
+                      'where' => [
+                        'conditions' => $fields,
+                        'logic' => 'AND'
+                      ]
                     ]
                   )
                   ) {
@@ -1314,36 +1314,36 @@ MYSQL;
             }
 
             if ($primary_defined
-                && ($this->db->selectOne(
+              && ($this->db->selectOne(
                   $this->getHistoryUidsTableName(),
                   $this->getColumn(),
                   [$this->getHistoryUidsColumnName('bbn_uid') => $primary_value]
                 ) === 0)
 
-                && ($all = $this->db->rselect(
-                  [
+              && ($all = $this->db->rselect(
+                [
                   'table' => $table,
                   'fields' => $cfg['fields'],
                   'join' => [[
-                  'table' => $this->getHistoryUidsTableName(),
-                  'on' => [
-                    'conditions' => [[
-                      'field' => $s['primary'],
-                      'exp' => 'bbn_uid'
-                    ], [
-                      'field' => $this->getColumn(),
-                      'value' => 0
-                    ]]
-                  ]
+                    'table' => $this->getHistoryUidsTableName(),
+                    'on' => [
+                      'conditions' => [[
+                        'field' => $s['primary'],
+                        'exp' => 'bbn_uid'
+                      ], [
+                        'field' => $this->getColumn(),
+                        'value' => 0
+                      ]]
+                    ]
                   ]],
                   'where' => [
-                  'conditions' => [[
-                    'field' => $s['primary'],
-                    'value' => $primary_value
-                  ]]
+                    'conditions' => [[
+                      'field' => $s['primary'],
+                      'value' => $primary_value
+                    ]]
                   ]
-                  ]
-                ))
+                ]
+              ))
             ) {
               // We won't execute the after trigger
               $cfg['trig'] = false;
@@ -1370,7 +1370,7 @@ MYSQL;
               $this->disable();
               if ($cfg['value'] = $this->db->update(
                 $this->getHistoryUidsTableName(), [$this->getHistoryUidsColumnName('bbn_active') => 1], [
-                [$this->getHistoryUidsColumnName('bbn_uid'), '=', $primary_value]
+                  [$this->getHistoryUidsColumnName('bbn_uid'), '=', $primary_value]
                 ]
               )
               ) {
@@ -1381,7 +1381,7 @@ MYSQL;
                   $this->enable();
                   $this->db->update(
                     $table, $update, [
-                    $s['primary'] => $primary_value
+                      $s['primary'] => $primary_value
                     ]
                   );
                 }
@@ -1403,11 +1403,11 @@ MYSQL;
               }
 
               if (!$primary_defined && $this->db->insert(
-                $this->getHistoryUidsTableName(), [
-                  $this->getHistoryUidsColumnName('bbn_uid') => $primary_value,
-                  $this->getHistoryUidsColumnName('bbn_table') => $s['id']
-                ]
-              )
+                  $this->getHistoryUidsTableName(), [
+                    $this->getHistoryUidsColumnName('bbn_uid') => $primary_value,
+                    $this->getHistoryUidsColumnName('bbn_table') => $s['id']
+                  ]
+                )
               ) {
                 $cfg['history'][] = [
                   'operation' => 'INSERT',
@@ -1424,13 +1424,13 @@ MYSQL;
           case 'UPDATE':
             // ********** CHANGED BY MIRKO *************
             if ($primary_where
-                && ($row = $this->db->rselect($table, $cfg['fields'], [$s['primary'] => $primary_where]))
+              && ($row = $this->db->rselect($table, $cfg['fields'], [$s['primary'] => $primary_where]))
             ) {
               $time = microtime(true);
               foreach ($cfg['fields'] as $i => $idx){
                 $csn = $this->db->csn($idx);
                 if (array_key_exists($csn, $s['fields'])
-                    && ($row[$csn] !== $cfg['values'][$i])
+                  && ($row[$csn] !== $cfg['values'][$i])
                 ) {
                   $cfg['history'][] = [
                     'operation' => 'UPDATE',
@@ -1482,8 +1482,8 @@ MYSQL;
               $cfg['value'] = $this->db->update(
                 $this->getHistoryUidsTableName(), [
                 $this->getHistoryUidsColumnName('bbn_active') => 0
-                ], [
-                $this->getHistoryUidsColumnName('bbn_uid') => $primary_where
+              ], [
+                  $this->getHistoryUidsColumnName('bbn_uid') => $primary_where
                 ]
               );
               //var_dump("HIST", $primary_where);
@@ -1504,7 +1504,7 @@ MYSQL;
         }
       }
       elseif (($cfg['moment'] === 'after')
-          && isset($cfg['history'])
+        && isset($cfg['history'])
       ) {
         foreach ($cfg['history'] as $h){
           $this->_insert($h);
