@@ -49,6 +49,7 @@ class MysqlTest extends TestCase
     $this->clearCache();
     $this->dropAllTables();
     self::$mysql->startFancyStuff();
+    self::$connection->query('USE ' . self::getDbConfig()['db']);
   }
 
   public static function setUpBeforeClass(): void
@@ -71,10 +72,15 @@ class MysqlTest extends TestCase
       $res = explode('=', $item);
       $key  = $res[0];
       $value = $res[1] ?? "";
+      if (empty($key) || empty($value)) {
+        continue;
+      }
       @putenv("$key=$value");
     }
 
     self::$cache_mock = \Mockery::mock(Cache::class);
+
+    self::createTestingDatabase();
 
     self::$mysql = new Mysql(self::getDbConfig());
 
@@ -83,12 +89,6 @@ class MysqlTest extends TestCase
     self::$real_params_default = ReflectionHelpers::getNonPublicProperty(
       'last_real_params', self::$mysql
     );
-
-    self::$connection = ReflectionHelpers::getNonPublicProperty(
-      'pdo', self::$mysql
-    );
-
-    self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
 
     ReflectionHelpers::setNonPublicPropertyValue(
       'cache_engine', self::$mysql, self::$cache_mock
@@ -103,6 +103,29 @@ class MysqlTest extends TestCase
     );
   }
 
+  protected static function createTestingDatabase()
+  {
+    try {
+      $db_cfg = self::getDbConfig();
+
+      self::$connection = new \PDO(
+        "mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
+        $db_cfg['user'],
+        $db_cfg['pass'],
+        [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
+      );
+
+      self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+      self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
+
+      self::$connection->query("CREATE DATABASE IF NOT EXISTS {$db_cfg['db']}");
+
+    } catch (\PDOException $e) {
+      throw new \Exception("Unable to establish db connection for testing: " . $e->getMessage());
+    }
+  }
+
   protected static function getDbConfig()
   {
     return array(
@@ -111,6 +134,7 @@ class MysqlTest extends TestCase
       'user'          => getenv('db_user'),
       'pass'          => getenv('db_pass'),
       'db'            => getenv('db_name'),
+      'port'          => getenv('db_port'),
       'cache_length'  => 3000,
       'on_error'      => Errors::E_STOP,
       'force_host'    => true
@@ -442,9 +466,9 @@ RESULT;
     $cfg = [
       'tables' => [
         'users' => 'users',
-        'r'     => 'roles'
+        'roles'     => 'roles'
       ],
-      'fields' => ['id', 'username', 'unique_roles' => 'distinct role_name', 'cfg'],
+      'fields' => ['id', 'username', 'role_name', 'cfg'],
       'available_fields' => [
         'id' => 'users',
         'username' => 'users',
@@ -468,11 +492,29 @@ RESULT;
     $db_name = self::getDbConfig()['db'];
 
     $result   = self::$mysql->getSelect($cfg);
-    $expected = "SELECT LOWER(HEX(`users`.`id`)) AS `id`, `users`.`username`, DISTINCT `roles`.`role_name` AS `unique_roles`, `users`.`cfg`
-FROM `$db_name`.`users`, `$db_name`.`roles` AS `r`
+    $expected = "SELECT LOWER(HEX(`users`.`id`)) AS `id`, `users`.`username`, `roles`.`role_name`, `users`.`cfg`
+FROM `$db_name`.`users`, `$db_name`.`roles`
 ";
+    $this->createTable('users', function () {
+      return 'id binary NOT NULL PRIMARY KEY,
+              username varchar(255) NOT NULL,
+              cfg TEXT NOT NULL';
+    });
+
+    $this->createTable('roles', function () {
+      return 'id binary PRIMARY KEY,
+              role_name varchar(20) NOT NULL';
+    });
 
     $this->assertSame($expected, $result);
+
+    try {
+      self::$mysql->rawQuery($expected);
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+    }
+
+    $this->assertTrue(!isset($error), $error ?? '');
   }
 
   /** @test */
@@ -1902,7 +1944,7 @@ first_name ASC';
 
   /**
    * @test
-   * @depends createIndex_method_created_index_for_the_givens_table_and_columns
+   * @depends createIndex_method_creates_index_for_the_givens_table_and_columns
    */
   public function deleteIndex_method_deletes_the_given_index()
   {
@@ -2222,11 +2264,11 @@ first_name ASC';
       ]
     ];
 
-    $expected = 'CREATE TABLE users (
-"email" text(255) NOT NULL,
-"id" int UNSIGNED NOT NULL,
-"balance" decimal NOT NULL DEFAULT \'0\'
-); ENGINE=InnoDB DEFAULT CHARSET=utf8";';
+    $expected = 'CREATE TABLE `users` (
+`email` text(255) NOT NULL,
+`id` int UNSIGNED NOT NULL,
+`balance` decimal NOT NULL DEFAULT \'0\'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
     $this->assertSame(
       $expected,
@@ -2503,7 +2545,7 @@ first_name ASC';
   {
     self::$mysql->startFancyStuff();
 
-    $result = self::$connection->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+    $result = $this->getNonPublicProperty('pdo')->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
 
     $this->assertIsArray($result);
     $this->assertSame(Query::class, $result[0]);
@@ -2515,7 +2557,7 @@ first_name ASC';
   {
     self::$mysql->stopFancyStuff();
 
-    $result = self::$connection->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+    $result = $this->getNonPublicProperty('pdo')->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
 
     $this->assertIsArray($result);
 
@@ -3850,12 +3892,14 @@ GROUP BY `id`
   /** @test */
   public function hasIdIncrement_method_returns_true_if_the_given_table_has_auto_increment_fields()
   {
-    $this->createTable('users', function () {
+    $this->setCacheExpectations();
+
+    $this->createTable('roles', function () {
       return 'username VARCHAR(255)';
     });
 
     $this->assertFalse(
-      self::$mysql->hasIdIncrement('users')
+      self::$mysql->hasIdIncrement('roles')
     );
 
     $this->createTable('users', function () {
@@ -4127,7 +4171,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function findRelations_method_returns_null_when_the_given_name_does_not_has_table_name()
+  public function findRelations_method_returns_null_when_the_given_name_does_not_has_column_name()
   {
     $this->assertNull(
       self::$mysql->findRelations('id')
@@ -4248,7 +4292,8 @@ GROUP BY `id`
       return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, email VARCHAR(25)';
     });
 
-    $this->insertOne('users', ['email' => 'mail@test.com']);
+    $this->getNonPublicProperty('pdo')
+      ->query("INSERT INTO users SET email = 'mail@test.com'");
 
     self::$mysql->setLastInsertId();
 
@@ -5411,8 +5456,6 @@ GROUP BY `id`
   /** @test */
   public function fetch_method_returns_the_first_result_of_the_query_as_indexed_array_and_false_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -5440,8 +5483,6 @@ GROUP BY `id`
   /** @test */
   public function fetchAll_method_returns_an_array_of_indexed_arrays_for_all_query_result_and_empty_array_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -5489,8 +5530,6 @@ GROUP BY `id`
   /** @test */
   public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_result_set()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -5523,8 +5562,6 @@ GROUP BY `id`
   /** @test */
   public function fetchObject_method_returns_the_first_result_from_query_as_object_and_false_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -5883,7 +5920,9 @@ GROUP BY `id`
     $this->assertDatabaseHas('users', 'name', 'John');
 
     $this->assertSame(
-      self::$connection->query("SELECT id FROM users LIMIT 1")->fetchObject()->id,
+      bin2hex(
+        self::$connection->query("SELECT id FROM users LIMIT 1")->fetchObject()->id
+      ),
       $this->getNonPublicProperty('last_insert_id')
     );
 
@@ -6021,7 +6060,7 @@ GROUP BY `id`
 
     $this->assertInstanceOf(\PDOStatement::class, $result);
 
-    $results = $result->fetchAll(\PDO::FETCH_ASSOC);
+    $results = self::$mysql->fetchAllResults($result, \PDO::FETCH_ASSOC);
 
     $this->assertSame(
       [
@@ -7485,13 +7524,13 @@ GROUP BY `id`
   /** @test */
   public function getHost_method_returns_the_host_of_the_current_connection()
   {
-    $this->assertSame($this->getDbConfig()['host'], self::$mysql->getHost());
+    $this->assertSame(self::getDbConfig()['host'], self::$mysql->getHost());
   }
 
   /** @test */
   public function getCurrent_method_returns_the_current_database_of_the_current_connection()
   {
-    $this->assertSame($this->getDbConfig()['db'], self::$mysql->getCurrent());
+    $this->assertSame(self::getDbConfig()['db'], self::$mysql->getCurrent());
   }
 
   /** @test */
@@ -7507,7 +7546,7 @@ GROUP BY `id`
   /** @test */
   public function change_method_changes_the_database_to_the_given_one()
   {
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
+    $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
     self::$connection->query('CREATE DATABASE IF NOT EXISTS bbn_test_2');
 
@@ -7524,7 +7563,7 @@ GROUP BY `id`
   /** @test */
   public function change_method_does_not_change_the_database_if_language_object_fails_to_change()
   {
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
+    $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
 
     try {
       self::$mysql->change('bbn_test_3');
@@ -7532,7 +7571,7 @@ GROUP BY `id`
 
     }
 
-    $this->assertSame($this->getDbConfig()['db'], $this->getNonPublicProperty('current'));
+    $this->assertSame(self::getDbConfig()['db'], $this->getNonPublicProperty('current'));
   }
 
   /** @test */
@@ -7662,7 +7701,7 @@ GROUP BY `id`
 
     $this->assertSame(
       [['username' => 'jdoe']],
-      $result->fetchAll(\PDO::FETCH_ASSOC)
+      self::$mysql->fetchAllResults($result, \PDO::FETCH_ASSOC)
     );
 
     $result2 = self::$mysql->query("SELECT username FROM users WHERE name = ?", 'Sam');
@@ -7671,7 +7710,7 @@ GROUP BY `id`
 
     $this->assertSame(
       [['username' => 'sdoe']],
-      $result2->fetchAll(\PDO::FETCH_ASSOC)
+      self::$mysql->fetchAllResults($result2, \PDO::FETCH_ASSOC)
     );
 
     self::$mysql->query("SELECT name FROM users WHERE username = ?", 'sdoe');

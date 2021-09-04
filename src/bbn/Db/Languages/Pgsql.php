@@ -46,56 +46,85 @@ class Pgsql extends Sql
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
 
   /** @var array Numeric column types */
-  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+  public static $numeric_types = [
+    'integer',
+    'int',
+    'smallint',
+    'tinyint',
+    'smallint',
+    'mediumint',
+    'bigint',
+    'decimal',
+    'numeric',
+    'float',
+    'double',
+    'double precision',
+    'real'
+  ];
+
+  protected static $numeric_with_max_values = ['decimal', 'numeric'];
 
   /** @var array Time and date column types */
   public static $date_types = ['date', 'time', 'datetime'];
 
   public static $types = [
-    'tinyint',
+    'smallserial',
+    'serial',
+    'bigserial',
     'smallint',
-    'mediumint',
     'int',
+    'integer',
     'bigint',
     'decimal',
     'float',
-    'double',
+    'real',
+    'double precision',
+    'numeric',
+    'money',
     'bit',
+    'bit varying',
+    'character',
     'char',
     'varchar',
-    'binary',
-    'varbinary',
-    'tinyblob',
-    'blob',
-    'mediumblob',
-    'longblob',
-    'tinytext',
+    'character varying',
+    'bytea',
     'text',
-    'mediumtext',
-    'longtext',
-    'enum',
-    'set',
     'date',
     'time',
-    'datetime',
     'timestamp',
-    'year',
-    'geometry',
+    'timestampz',
+    'timestamp without time zone',
+    'timestamp with time zone',
+    'time without time zone',
+    'time with time zone',
+    'interval',
     'point',
-    'linestring',
+    'line',
+    'lseg',
     'polygon',
-    'geometrycollection',
-    'multilinestring',
-    'multipoint',
-    'multipolygon',
+    'box',
+    'path',
+    'circle',
     'json',
+    'jsonb',
+    'boolean'
   ];
 
   public static $interoperability = [
-    'integer' => 'int',
-    'real' => 'decimal',
     'text' => 'text',
-    'blob' => 'blob'
+    'tinytext' => 'text',
+    'mediumtext' => 'text',
+    'longtext' => 'text',
+    'blob' => 'bytea',
+    'binary' => 'bytea',
+    'varbinary' => 'bytea',
+    'mediumblob' => 'bytea',
+    'longblob' => 'bytea',
+    'tinyint' => 'smallint',
+    'mediumint' => 'integer',
+    'double' => 'double precision',
+    'datetime' => 'timestamp',
+    'linestring' => 'line'
   ];
 
   public static $aggr_functions = [
@@ -116,6 +145,8 @@ class Pgsql extends Sql
     'VARIANCE',
   ];
 
+  /** @var string The quote character */
+  public $qte = '';
 
   /**
    * Constructor
@@ -238,12 +269,27 @@ class Pgsql extends Sql
    *
    * @param string $db The database name or file
    * @return bool
+   * @throws \Exception
    */
   public function change(string $db): bool
   {
     if (($this->getCurrent() !== $db) && Str::checkName($db)) {
-      $this->rawQuery("USE `$db`");
-      $this->current = $db;
+      $old_db = $this->getCurrent();
+      // Close the current connection
+      $this->pdo = null;
+      // Invoke the constructor method after changing the db name.
+      // pgsql does not support changing database, only by creating new connection.
+      $this->cfg['db'] = $db;
+
+      try {
+        $this->__construct($this->cfg);
+
+      } catch (\Exception $e) {
+        $this->cfg['db'] = $old_db;
+        $this->__construct($this->cfg);
+        throw new \Exception($e->getMessage());
+      }
+
       return true;
     }
 
@@ -297,8 +343,6 @@ class Pgsql extends Sql
    * Creates a database
    *
    * @param string $database
-   * @param string $enc
-   * @param string $collation
    * @return bool
    */
   public function createDatabase(string $database): bool
@@ -321,8 +365,23 @@ class Pgsql extends Sql
         throw new \Exception(X::_("Wrong database name")." $database");
       }
 
+      if ($database === $this->getCurrent()) {
+        throw new \Exception(X::_('Cannot drop the currently open database!'));
+      }
+
       try {
-        $this->rawQuery("DROP DATABASE `$database`");
+        $active_connections = $this->rawQuery("SELECT *
+                                                FROM pg_stat_activity
+                                                WHERE datname = '$database'");
+
+        if ($active_connections->rowCount() > 0) {
+          // Close all active connections
+          $this->rawQuery("SELECT pg_terminate_backend (pg_stat_activity.pid)
+                            FROM pg_stat_activity
+                            WHERE pg_stat_activity.datname = '$database'");
+        }
+
+        $this->rawQuery("DROP DATABASE IF EXISTS $database");
       }
       catch (\Exception $e) {
         return false;
@@ -344,22 +403,20 @@ class Pgsql extends Sql
    */
   public function createUser(string $user, string $pass, string $db = null): bool
   {
-    if (null === $db) {
-      $db = $this->getCurrent();
-    }
-
-    if (($db = $this->escape($db))
-      && bbn\Str::checkName($user, $db)
+    if (bbn\Str::checkName($user)
       && (strpos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
-        <<<MYSQL
-CREATE USER '$user'@'{$this->getHost()}' IDENTIFIED BY '$pass';
-GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
-ON $db . *
-TO '$user'@'{$this->getHost()}';
-MYSQL
-      );
+        <<<PGSQL
+CREATE USER $user WITH PASSWORD '$pass' CREATEDB;
+PGSQL
+      ) &&
+        (bool)$this->rawQuery(
+          <<<PGSQL
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "public" TO $user;
+PGSQL
+
+        );
     }
 
     return false;
@@ -376,9 +433,8 @@ MYSQL
   public function deleteUser(string $user): bool
   {
     if (bbn\Str::checkName($user)) {
-      $host = $this->getHost();
-      $this->rawQuery("REVOKE ALL PRIVILEGES ON *.* FROM '$user'@'$host'");
-      return (bool)$this->rawQuery("DROP USER '$user'@'$host'");
+      $this->rawQuery("REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA \"public\" FROM $user");
+      return (bool)$this->rawQuery("DROP USER $user");
     }
 
     return false;
@@ -386,6 +442,8 @@ MYSQL
 
 
   /**
+   * Return an array of users.
+   *
    * @param string $user
    * @param string $host
    * @return array|null
@@ -396,27 +454,19 @@ MYSQL
     if ($this->check()) {
       $cond = '';
       if (!empty($user) && bbn\Str::checkName($user)) {
-        $cond .= " AND  user LIKE '$user' ";
-      }
-
-      if (!empty($host) && bbn\Str::checkName($host)) {
-        $cond .= " AND  host LIKE '$host' ";
+        $cond .= " AND user LIKE '$user' ";
       }
 
       $us = $this->getRows(
-        <<<MYSQL
-SELECT DISTINCT host, user
-FROM mysql.user
-WHERE 1
+        <<<PSQL
+SELECT usename AS user FROM pg_catalog.pg_user
+WHERE 1 = 1
 $cond
-MYSQL
+PSQL
       );
       $q  = [];
       foreach ($us as $u) {
-        $gs = $this->getColArray("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
-        foreach ($gs as $g) {
-          $q[] = $g;
-        }
+        $q[] = $u['user'];
       }
 
       return $q;
@@ -436,26 +486,38 @@ MYSQL
    */
   public function dbSize(string $database = '', string $type = ''): int
   {
-    $cur = null;
     if ($database && ($this->getCurrent() !== $database)) {
-      $cur = $this->getCurrent();
-      $this->change($database);
+      return $this->newInstance(
+        array_merge($this->cfg, ['db' => $database])
+      )
+        ->dbSize($database, $type);
     }
 
-    $q    = $this->query('SHOW TABLE STATUS');
     $size = 0;
-    while ($row = $q->getRow()) {
-      if (!$type || ($type === 'data')) {
-        $size += $row['Data_length'];
+
+    if ($tables = $this->getTables()) {
+      if ($type === 'data') {
+        $function = "pg_relation_size";
+      }
+      elseif ($type === 'index') {
+        $function = "pg_indexes_size";
+      }
+      else {
+        $function = "pg_total_relation_size";
       }
 
-      if (!$type || ($type === 'index')) {
-        $size += $row['Index_length'];
+      $query = "SELECT ";
+      $args  = [];
+      foreach ($tables as $table) {
+        $query .= "$function(?), ";
+        $args[] = $table;
       }
-    }
 
-    if ($cur !== null) {
-      $this->change($cur);
+      $table_sizes = $this->getRow(trim($query, ', '), ...$args);
+
+      foreach ($table_sizes as $table_size) {
+        $size += $table_size;
+      }
     }
 
     return $size;
@@ -474,19 +536,24 @@ MYSQL
   {
     $size = 0;
     if (bbn\Str::checkName($table)) {
-      $row = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+
+      if ($type === 'data') {
+        $function = "pg_relation_size";
+      }
+      elseif ($type === 'index') {
+        $function = "pg_indexes_size";
+      }
+      else {
+        $function = "pg_total_relation_size";
+      }
+
+      $row = $this->getRow("SELECT $function(?)", $table);
 
       if (!$row) {
         throw new \Exception(X::_('Table ') . $table . X::_(' Not found'));
       }
 
-      if (!$type || (strtolower($type) === 'index')) {
-        $size += $row['Index_length'];
-      }
-
-      if (!$type || (strtolower($type) === 'data')) {
-        $size += $row['Data_length'];
-      }
+      $size = current(array_values($row));
     }
 
     return $size;
@@ -498,23 +565,28 @@ MYSQL
    *
    * @param string $table
    * @param string $database
-   * @return mixed
+   * @return array|false|null
    * @throws \Exception
    */
   public function status(string $table = '', string $database = '')
   {
-    $cur = null;
     if ($database && ($this->getCurrent() !== $database)) {
-      $cur = $this->getCurrent();
-      $this->change($database);
+      return $this->newInstance(
+        array_merge($this->cfg, ['db' => $database])
+      )
+        ->status($table, $database);
     }
 
-    $r = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
-    if (null !== $cur) {
-      $this->change($cur);
+    $query = "SELECT *
+              FROM pg_catalog.pg_tables
+              WHERE schemaname != 'pg_catalog' 
+              AND schemaname != 'information_schema'";
+
+    if (!empty($table)) {
+      $query .= " AND tablename LIKE ?";
     }
 
-    return $r;
+    return $this->getRow($query, !empty($table) ? $table : []);
   }
 
 
@@ -527,7 +599,8 @@ MYSQL
   {
     $uid = null;
     while (!bbn\Str::isBuid(hex2bin($uid))) {
-      $uid = $this->getOne("SELECT replace(uuid(),'-','')");
+      $uid = $this->getOne("SELECT gen_random_uuid()");
+      $uid = str_replace('-', '', $uid);
     }
 
     return $uid;
@@ -556,17 +629,18 @@ MYSQL
         } elseif (!empty($c['values']) && \is_array($c['values'])) {
           $st .= '(';
           foreach ($c['values'] as $i => $v) {
-            $st .= "'" . bbn\Str::escapeSquotes($v) . "'";
+            if (Str::isInteger($v)) {
+              $st .= bbn\Str::escapeSquotes($v);
+            }
+            else {
+              $st .= "'" . bbn\Str::escapeSquotes($v) . "'";
+            }
             if ($i < count($c['values']) - 1) {
               $st .= ',';
             }
           }
 
           $st .= ')';
-        }
-
-        if ((strpos($c['type'], 'int') !== false) && empty($c['signed'])) {
-          $st .= ' UNSIGNED';
         }
 
         if (empty($c['null'])) {
@@ -583,7 +657,7 @@ MYSQL
 
     if (count($lines)) {
       $sql = 'CREATE TABLE ' . $this->tableSimpleName($table_name, true) . ' (' . PHP_EOL . implode(',' . PHP_EOL, $lines) .
-        PHP_EOL . ') ENGINE=' . $engine . ' DEFAULT CHARSET=' . $charset . ';';
+        PHP_EOL . ');';
     }
 
     return $sql;
@@ -626,7 +700,7 @@ MYSQL
       $x = array_map(
         function ($a) {
           return $a['datname'];
-        }, $r->fetchAll(\PDO::FETCH_ASSOC)
+        }, $this->fetchAllResults($r, \PDO::FETCH_ASSOC)
       );
       sort($x);
     }
@@ -673,7 +747,10 @@ MYSQL
     }
 
     if ($database !== $this->getCurrent()) {
-      return (new self ($this->cfg))->getTables();
+      return (new self (
+        array_merge($this->cfg, ['db' => $database])
+      ))
+        ->getTables();
     }
 
     $t2 = [];
@@ -683,7 +760,7 @@ MYSQL
               AND table_type = 'BASE TABLE'";
 
     if (($r = $this->rawQuery($query))
-      && ($t1 = $r->fetchAll(\PDO::FETCH_NUM))
+      && ($t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];
@@ -718,7 +795,7 @@ MYSQL
    *              "extra" => "",
    *              "signed" => 0,
    *              "maxlength" => "30",
-   *              "type" => "varchar",
+   *              "type" => "character varying",
    *            ],
    *            "surname" => [
    *              "position" => 3,
@@ -728,7 +805,7 @@ MYSQL
    *              "extra" => "",
    *              "signed" => 0,
    *              "maxlength" => "30",
-   *              "type" => "varchar",
+   *              "type" => "character varying",
    *            ],
    *            "address" => [
    *              "position" => 4,
@@ -743,8 +820,9 @@ MYSQL
    *          ]
    * ```
    *
-   * @param null|string $table The table's name
+   * @param string $table The table's name
    * @return null|array
+   * @throws \Exception
    */
   public function getColumns(string $table): ?array
   {
@@ -753,83 +831,60 @@ MYSQL
     }
 
     $r = [];
-    if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
-      [$db, $table] = $t;
-      $sql          = <<<MYSQL
-        SELECT *
-        FROM `information_schema`.`COLUMNS`
-        WHERE `TABLE_NAME` LIKE ?
-        AND `TABLE_SCHEMA` LIKE ?
-        ORDER BY `ORDINAL_POSITION` ASC
-MYSQL;
-      if ($rows = $this->getRows($sql, $table, $db)) {
-        $p = 1;
+    if ($table = $this->tableFullName($table)) {
+      $keys         = $this->getKeys($table);
+      $primary_keys = $keys['keys']['PRIMARY']['columns'] ?? [];
+
+      $unique_keys_arr = array_filter($keys['keys'] ?? [], function ($item, $key) {
+        return (bool)$item['unique'] === true && $key !== 'PRIMARY';
+      }, ARRAY_FILTER_USE_BOTH);
+
+      $unique_keys = array_map(function ($item) {
+        return $item['columns'][0] ?? null;
+      }, array_values($unique_keys_arr));
+
+      $sql          = <<<PGSQL
+        SELECT * FROM information_schema.columns 
+        WHERE table_name LIKE ?
+        ORDER BY ordinal_position
+PGSQL;
+      if ($rows = $this->getRows($sql, $table)) {
         foreach ($rows as $row) {
-          $f          = $row['COLUMN_NAME'];
-          $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
-            && (stripos($row['DATA_TYPE'], 'blob') === false)
-            && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
+          $f          = $row['column_name'];
+
           $r[$f]      = [
-            'position' => $p++,
-            'type' => $row['DATA_TYPE'],
-            'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
-            'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
-            'extra' => $row['EXTRA'],
-            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
-            'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
-            'generation' => $row['GENERATION_EXPRESSION'],
+            'position' => $row['ordinal_position'],
+            'type' => $row['data_type'] === 'bytea' ? 'binary' : $row['data_type'],
+            'udt_name' => $row['udt_name'],
+            'null' => $row['is_nullable'] === 'NO' ? 0 : 1,
+            'key' => in_array($row['column_name'], $primary_keys)
+              ? 'PRI'
+              : (in_array($row['column_name'], $unique_keys)
+                ? 'UNI'
+                : null),
+            'extra' => strpos($row['column_default'], 'nextval') !== false &&
+                       strpos($row['data_type'], 'int') !== false
+              ? 'auto_increment'
+              : '',
+            'signed' => $row['numeric_precision'] !== null,
+            'virtual' => false,
+            'generation' => $row['generation_expression'],
           ];
-          if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
-            $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
+          if ($row['column_default'] !== null || $row['is_nullable'] === 'YES') {
+            $r[$f]['default'] = \is_null($row['column_default']) ? 'NULL' : $row['column_default'];
           }
 
-          if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {
-            if (preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches)
-              && !empty($matches[1])
-              && \is_string($matches[1][0])
-              && ($matches[1][0][0] === "'")
-            ) {
-              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
-              $r[$f]['extra']  = $matches[1][0];
-            } else {
-              $r[$f]['values'] = [];
-            }
-          } elseif (preg_match_all('/\((\d+)?(?:,)|(\d+)\)/', $row['COLUMN_TYPE'], $matches)) {
-            if (empty($matches[1][0])) {
-              if (!empty($matches[2][0])) {
-                $r[$f]['maxlength'] = (int)$matches[2][0];
-              }
-            } else {
-              $r[$f]['maxlength'] = (int)$matches[1][0];
-              $r[$f]['decimals']  = (int)$matches[2][1];
-            }
+          if ($row['character_maximum_length'] !== null) {
+            $r[$f]['maxlength'] = $row['character_maximum_length'];
+          }
+          elseif ($row['numeric_precision'] !== null && $row['numeric_scale'] !== null) {
+            $r[$f]['maxlength'] = $row['numeric_precision'];
+            $r[$f]['decimals']  = $row['numeric_scale'];
+          }
+          elseif ($row['data_type'] === 'bytea') {
+            $r[$f]['maxlength'] = 16;
           }
         }
-
-        /*
-        else{
-        preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
-        if ( strpos($row['Type'],'text') !== false ){
-        $r[$f]['type'] = 'text';
-        }
-        else if ( strpos($row['Type'],'blob') !== false ){
-        $r[$f]['type'] = 'blob';
-        }
-        else if ( strpos($row['Type'],'int(') !== false ){
-        $r[$f]['type'] = 'int';
-        }
-        else if ( strpos($row['Type'],'char(') !== false ){
-        $r[$f]['type'] = 'varchar';
-        }
-        if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
-        $r[$f]['maxlength'] = (int)$matches[1][0];
-        }
-        if ( !isset($r[$f]['type']) ){
-        $r[$f]['type'] = strpos($row['Type'], '(') ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
-        }
-        }
-        */
       }
     }
 
@@ -839,6 +894,7 @@ MYSQL;
 
   /**
    * Returns the keys of the given table.
+   *
    * @param string $table The table's name
    * @return null|array
    */
@@ -849,80 +905,103 @@ MYSQL;
     }
 
     $r = [];
-    if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
-      [$db, $table] = $t;
-      $r            = [];
-      $indexes      = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
+    if ($table = $this->tableFullName($table)) {
+      $indexes      = $this->getRows(<<<PGSQL
+SELECT
+    i.relname as index_name,
+    a.attname as column_name,
+    ix.indisprimary as is_primary,
+	  ix.indisunique as is_unique,
+    CASE 
+      WHEN ix.indisprimary = true THEN 'PRIMARY'
+      ELSE i.relname
+    END 
+        AS key_name
+from
+    pg_class t,
+    pg_class i,
+    pg_index ix,
+    pg_attribute a
+where
+    t.oid = ix.indrelid
+    and i.oid = ix.indexrelid
+    and a.attrelid = t.oid
+    and a.attnum = ANY(ix.indkey)
+    and t.relkind = 'r'
+    and t.relname = '$table'
+order by
+    t.relname,
+    i.relname;
+PGSQL
+);
+
       $keys         = [];
       $cols         = [];
-      foreach ($indexes as $i => $index) {
-        $a = $this->getRow(
-          <<<MYSQL
-SELECT `CONSTRAINT_NAME` AS `name`,
-`ORDINAL_POSITION` AS `position`,
-`REFERENCED_TABLE_SCHEMA` AS `ref_db`,
-`REFERENCED_TABLE_NAME` AS `ref_table`,
-`REFERENCED_COLUMN_NAME` AS `ref_column`
-FROM `information_schema`.`KEY_COLUMN_USAGE`
-WHERE `TABLE_SCHEMA` LIKE ?
-AND `TABLE_NAME` LIKE ?
-AND `COLUMN_NAME` LIKE ?
-AND (
-  `CONSTRAINT_NAME` LIKE ? OR
-  (`REFERENCED_TABLE_NAME` IS NOT NULL OR `ORDINAL_POSITION` = ?)
-)
-ORDER BY `KEY_COLUMN_USAGE`.`REFERENCED_TABLE_NAME` DESC
-LIMIT 1
-MYSQL
-          ,
-          $db,
-          $table,
-          $index['Column_name'],
-          $index['Key_name'],
-          $index['Seq_in_index']
-        );
-        if ($a) {
-          $b = $this->getRow(
-            <<<MYSQL
-          SELECT `CONSTRAINT_NAME` AS `name`,
-          `UPDATE_RULE` AS `update`,
-          `DELETE_RULE` AS `delete`
-          FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
-          WHERE `CONSTRAINT_NAME` LIKE ?
-          AND `CONSTRAINT_SCHEMA` LIKE ?
-          AND `TABLE_NAME` LIKE ?
-          LIMIT 1
-MYSQL
-            ,
-            $a['name'],
-            $db,
-            $table
-          );
-        } elseif (isset($b)) {
-          unset($b);
-        }
-
-        if (!isset($keys[$index['Key_name']])) {
-          $keys[$index['Key_name']] = [
-            'columns' => [$index['Column_name']],
-            'ref_db' => isset($a, $a['ref_db']) ? $a['ref_db'] : null,
-            'ref_table' => isset($a, $a['ref_table']) ? $a['ref_table'] : null,
-            'ref_column' => isset($a, $a['ref_column']) ? $a['ref_column'] : null,
-            'constraint' => isset($b, $b['name']) ? $b['name'] : null,
-            'update' => isset($b, $b['update']) ? $b['update'] : null,
-            'delete' => isset($b, $b['delete']) ? $b['delete'] : null,
-            'unique' => $index['Non_unique'] ? 0 : 1,
+      foreach ($indexes as $index) {
+        if (!isset($keys[$index['key_name']])) {
+          $keys[$index['key_name']] = [
+            'columns' => [$index['column_name']],
+            'ref_db' => null,
+            'ref_table' => null,
+            'ref_column' => null,
+            'constraint' => null,
+            'update' => null,
+            'delete' => null,
+            'unique' => (int)$index['is_unique'],
           ];
         } else {
-          $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
-          $keys[$index['Key_name']]['ref_db']    = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
+          $keys[$index['key_name']]['columns'][] = $index['column_name'];
         }
 
-        if (!isset($cols[$index['Column_name']])) {
-          $cols[$index['Column_name']] = [$index['Key_name']];
+        if (!isset($cols[$index['column_name']])) {
+          $cols[$index['column_name']] = [$index['key_name']];
         } else {
-          $cols[$index['Column_name']][] = $index['Key_name'];
+          $cols[$index['column_name']][] = $index['key_name'];
+        }
+      }
+
+      if ($constraints = $this->getRows(<<<PGSQL
+SELECT
+    tc.table_schema, 
+    tc.constraint_name, 
+    tc.table_name, 
+    kcu.column_name, 
+    ccu.table_schema AS foreign_table_schema,
+    ccu.table_name AS foreign_table_name,
+    ccu.column_name AS foreign_column_name 
+FROM 
+    information_schema.table_constraints AS tc 
+    JOIN information_schema.key_column_usage AS kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+    JOIN information_schema.constraint_column_usage AS ccu
+      ON ccu.constraint_name = tc.constraint_name
+      AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = '$table';
+PGSQL
+      )) {
+        foreach ($constraints as $constraint) {
+          if (!isset($keys[$constraint['column_name']])) {
+            $keys[$constraint['constraint_name']] = [
+              'columns' => [$constraint['column_name']],
+              'ref_db' => $this->getCurrent(),
+              'ref_table' => $constraint['foreign_table_name'],
+              'ref_column' => $constraint['foreign_column_name'],
+              'constraint' => $constraint['constraint_name'],
+              'update' => null,
+              'delete' => null,
+              'unique' => 0,
+            ];
+          } else {
+            $keys[$constraint['key_name']]['columns'][] = $constraint['column_name'];
+            $keys[$constraint['key_name']]['ref_db']    = $keys[$constraint['key_name']]['ref_table'] = $keys[$constraint['key_name']]['ref_column'] = null;
+          }
+
+          if (!isset($cols[$constraint['column_name']])) {
+            $cols[$constraint['column_name']] = [$constraint['constraint_name']];
+          } else {
+            $cols[$constraint['column_name']][] = $constraint['constraint_name'];
+          }
         }
       }
 
@@ -935,15 +1014,50 @@ MYSQL
 
 
   /**
-   * @param null|string $table The table for which to create the statement
+   * @param string $table The table for which to create the statement
    * @return string
    */
   public function getRawCreate(string $table): string
   {
-    if (($table = $this->tableFullName($table, true))
-      && ($r = $this->rawQuery("SHOW CREATE TABLE $table"))
+    if ($table = $this->tableFullName($table, true)){
+
+      if ($r = $this->rawQuery(<<<PGSQL
+SELECT 'CREATE TABLE $table' || '\n' || ' (' || '\n' || '' || 
+    string_agg(column_list.column_expr, ', ' || '\n' || '') || 
+    '' || '\n' || ');' AS create_table
+FROM ( 
+  SELECT '    ' || column_name || ' ' || 
+    CASE 
+        WHEN STRPOS(column_default, 'nextval') > 0 AND STRPOS(data_type, 'int') > 0
+        THEN REPLACE(REPLACE(data_type, 'integer', 'serial'), 'int', 'serial')
+        ELSE data_type 
+      END
+    || 
+       coalesce('(' || character_maximum_length || ')', '') || 
+	   CASE 
+			WHEN STRPOS(data_type, 'int') = 0 AND numeric_precision IS NOT NULL AND numeric_scale IS NOT NUll 
+			THEN '(' || numeric_precision || ',' ||  numeric_scale || ')'
+			ELSE ''
+		END ||
+       CASE 
+			WHEN is_nullable = 'YES' THEN '' 
+			ELSE ' NOT NULL' 
+		END ||
+		CASE 
+			WHEN STRPOS(column_default, 'nextval') > 0 AND STRPOS(data_type, 'int') > 0
+			THEN ''
+			ELSE coalesce(' DEFAULT ' || column_default || ' ', '') 
+		END
+	 
+	AS column_expr
+  FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = '$table'
+  ORDER BY ordinal_position) column_list;
+PGSQL
+      )
     ) {
-      return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
+        return $r->fetch(\PDO::FETCH_ASSOC)['create_table'] ?? '';
+      }
     }
 
     return '';
@@ -972,9 +1086,23 @@ MYSQL
       }
 
       $st .= '  ' . $this->escape($name) . ' ';
-      if (!in_array($col['type'], self::$types)) {
-        if (isset(self::$interoperability[$col['type']])) {
-          $st .= self::$interoperability[$col['type']];
+      $col_type = $col['type'];
+
+      if (array_key_exists('default', $col) && strpos($col['default'], '::') !== FALSE) {
+        [$col['default']] = explode('::', $col['default']);
+      }
+
+      if ($col_type === 'USER-DEFINED' && !empty($col['udt_name'])) {
+        $col['type'] = $col['udt_name'];
+      }
+
+      if (!in_array($col_type, self::$types)) {
+        if (isset(self::$interoperability[$col_type])) {
+          $st      .= self::$interoperability[$col_type];
+          $col_type = self::$interoperability[$col_type];
+        }
+        else if ($col_type === 'USER-DEFINED') {
+          $st .= $col['type'];
         }
         else {
           throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
@@ -984,26 +1112,20 @@ MYSQL
         $st .= $col['type'];
       }
 
-      if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
-        if (empty($col['extra'])) {
-          throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
-        }
-
-        $st .= ' (' . $col['extra'] . ')';
-      }
-      elseif (!empty($col['maxlength'])) {
+      if (
+        !empty($col['maxlength']) && $col_type !== 'bytea' &&
+        (
+          (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
+          ||
+          !in_array($col_type, self::$numeric_types)
+        )
+      ) {
         $st .= '(' . $col['maxlength'];
         if (!empty($col['decimals'])) {
           $st .= ',' . $col['decimals'];
         }
 
         $st .= ')';
-      }
-
-      if (in_array($col['type'], self::$numeric_types)
-        && empty($col['signed'])
-      ) {
-        $st .= ' UNSIGNED';
       }
 
       if (empty($col['null'])) {
@@ -1020,13 +1142,14 @@ MYSQL
           || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
         ) {
           $st .= (string)$col['default'];
-        } else {
-          $st .= $col['default'];
+        }
+        else {
+          $st .= "'" . trim($col['default'], "'") . "'";
         }
       }
     }
 
-    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+    $st .= PHP_EOL . ')';
     return $st;
   }
 
@@ -1049,16 +1172,16 @@ MYSQL
 
       $i     = 0;
       foreach ($model['keys'] as $name => $key) {
-        $st .= '  ADD ';
         if (!empty($key['unique'])
           && isset($model['fields'][$key['columns'][0]])
           && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
         ) {
-          $st .= 'PRIMARY KEY';
+          $st .= 'ADD PRIMARY KEY';
         } elseif (!empty($key['unique'])) {
-          $st .= 'UNIQUE KEY ' . $this->escape($name);
+          $st .= 'ADD CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
         } else {
-          $st .= 'KEY ' . $this->escape($name);
+          $i++;
+          continue;
         }
 
         $st .= ' (' . implode(
@@ -1073,10 +1196,12 @@ MYSQL
       }
     }
 
-    return $st;
+    return trim($st, ',' . PHP_EOL);
   }
 
   /**
+   * Return SQL string for table creation.
+   *
    * @param string $table
    * @param array|null $model
    * @return string
@@ -1099,8 +1224,10 @@ MYSQL
       $end   = array_pop($lines);
       $st    = X::join($lines, PHP_EOL);
 
+      $indexes = [];
+
       foreach ($model['keys'] as $name => $key) {
-        $st .= ',' . PHP_EOL . '  ';
+        $separator = ',' . PHP_EOL . '  ';
         if (
           !empty($key['unique']) &&
           (count($key['columns']) === 1) &&
@@ -1108,11 +1235,17 @@ MYSQL
           isset($model['fields'][$key['columns'][0]]['key']) &&
           $model['fields'][$key['columns'][0]]['key'] === 'PRI'
         ) {
-          $st .= 'PRIMARY KEY';
+          $st .= $separator . 'PRIMARY KEY';
         } elseif (!empty($key['unique'])) {
-          $st .= 'UNIQUE KEY ' . $this->escape($name);
-        } else {
-          $st .= 'KEY ' . $this->escape($name);
+          $st .= $separator . 'CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
+        } elseif (!empty($key['ref_table']) && !empty($key['ref_column'])) {
+          continue;
+        }
+        else {
+          // Pgsql does not support creating normal indexes in the create table statement
+          // so will return it as another sql
+          $indexes[$name] = $key;
+          continue;
         }
 
         $st   .= ' (' . implode(
@@ -1139,6 +1272,21 @@ MYSQL
       }
 
       $st .= PHP_EOL . $end;
+
+      if (!empty($indexes)) {
+        $st .= ';' . PHP_EOL;
+        foreach ($indexes as $name => $index) {
+          $st   .= 'CREATE INDEX ' . $this->escape($name) . " ON $table";
+          $st   .= ' (' . implode(
+              ',', array_map(
+                function ($a) {
+                  return $this->escape($a);
+                }, $index['columns']
+              )
+            ) . ')';
+          $st .= ";" . PHP_EOL;
+        }
+      }
     }
 
     return $st;
@@ -1147,7 +1295,7 @@ MYSQL
   /**
    * Creates an index
    *
-   * @param null|string $table
+   * @param string $table
    * @param string|array $column
    * @param bool $unique
    * @param null $length
@@ -1157,9 +1305,6 @@ MYSQL
   public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
   {
     $column = (array)$column;
-    if ($length) {
-      $length = (array)$length;
-    }
 
     $name = Str::encodeFilename($table);
     if ($table = $this->tableFullName($table, true)) {
@@ -1170,14 +1315,11 @@ MYSQL
 
         $name      .= '_' . $c;
         $column[$i] = $this->escape($column[$i]);
-        if (isset($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
-          $column[$i] .= '(' . $length[$i] . ')';
-        }
       }
 
       $name = Str::cut($name, 50);
       return (bool)$this->rawQuery(
-        'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX `$name` ON $table ( " .
+        'CREATE ' . ($unique ? 'UNIQUE ' : '') . "INDEX $name ON $table ( " .
         implode(', ', $column) . ' )'
       );
     }
@@ -1188,20 +1330,193 @@ MYSQL
   /**
    * Deletes an index
    *
-   * @param null|string $table
+   * @param string $table
    * @param string $key
    * @return bool
    * @throws \Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {
-    if (($table = $this->tableFullName($table, true))
-      && Str::checkName($key)
-    ) {
-      return (bool)$this->rawQuery("ALTER TABLE $table DROP INDEX `$key`");
+    if (Str::checkName($key)) {
+      return (bool)$this->rawQuery("DROP INDEX $key CASCADE");
     }
 
     return false;
+  }
+
+  /**
+   * Returns a table's full name i.e. database.table
+   *
+   * @param string $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
+   * @return string|null
+   */
+  public function tableFullName(string $table, bool $escaped = false): ?string
+  {
+    if ($full = parent::tableFullName($table, $escaped)) {
+      return explode('.', $full)[1] ?? null;
+    }
+
+    return null;
+  }
+
+  public function getHexStatement(string $col_name): string
+  {
+    return "encode($col_name, 'hex')";
+  }
+
+  /**
+   * Generates a string for the insert from a cfg array.
+   * @param array $cfg The configuration array
+   * @return string
+   * @throws \Exception
+   */
+  public function getInsert(array $cfg): string
+  {
+    $fields_to_put = [
+      'values' => [],
+      'fields' => [],
+    ];
+    $i             = 0;
+    foreach ($cfg['fields'] as $alias => $f) {
+      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
+        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+        $csn    = $this->colSimpleName($f);
+        $is_uid = false;
+        //X::hdump('---------------', $idx, $f, $tables[$idx]['model']['fields'][$csn], $args['values'],
+        // $res['values'], '---------------');
+        if (isset($model['fields'][$csn])) {
+          $column = $model['fields'][$csn];
+          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
+            $is_uid = true;
+          }
+
+          $fields_to_put['fields'][] = $this->colSimpleName($f, true);
+          $fields_to_put['values'][] = '?';
+        }
+      } else {
+        $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+      }
+
+      $i++;
+    }
+
+    if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
+      return 'INSERT INTO ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL .
+        '(' . implode(', ', $fields_to_put['fields']) . ')' . PHP_EOL . ' VALUES (' .
+        implode(', ', $fields_to_put['values']) . ')' . PHP_EOL .
+        (!empty($cfg['ignore']) ? ' ON CONFLICT DO NOTHING' : '') . PHP_EOL;
+    }
+
+    return '';
+  }
+
+  /**
+   * @param array $cfg The configuration array
+   * @return string
+   * @throws \Exception
+   */
+  public function getUpdate(array $cfg): string
+  {
+    $res           = '';
+    $fields_to_put = [
+      'values' => [],
+      'fields' => [],
+    ];
+    foreach ($cfg['fields'] as $alias => $f) {
+      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
+        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+        $csn    = $this->colSimpleName($f);
+        $is_uid = false;
+        if (isset($model['fields'][$csn])) {
+          $column = $model['fields'][$csn];
+          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
+            $is_uid = true;
+          }
+
+          $fields_to_put['fields'][] = $this->colSimpleName($f, true);
+          $fields_to_put['values'][] = '?';
+        }
+      } else {
+        $this->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+      }
+    }
+
+    if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
+      $res .= 'UPDATE ' . $this->tableFullName(current($cfg['tables']), true) . ' SET ';
+      $last = count($fields_to_put['fields']) - 1;
+      foreach ($fields_to_put['fields'] as $i => $f) {
+        $res .= $f . ' = ' . $fields_to_put['values'][$i];
+        if ($i < $last) {
+          $res .= ',';
+        }
+
+        $res .= PHP_EOL;
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Return SQL code for row(s) DELETE.
+   *
+   * ```php
+   * X::dump($db->getDelete(['tables' => 'users']);
+   * // (string) DELETE FROM `db_example`.`table_users`
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   *
+   */
+  public function getDelete(array $cfg): string
+  {
+    $res = '';
+    if (count($cfg['tables']) === 1) {
+      $res = 'DELETE ' .
+        (count($cfg['join'] ?? []) ? current($cfg['tables']) . ' ' : '') .
+        'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
+    }
+
+    return $res;
+  }
+
+  /**
+   * Get a string starting with LIMIT with corresponding parameters to $where
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function getLimit(array $cfg): string
+  {
+    $res = '';
+    if (!empty($cfg['limit']) && Str::isInteger($cfg['limit'])) {
+      $res .= 'LIMIT ' . $cfg['limit'] . (!empty($cfg['start']) && Str::isInteger($cfg['start']) ? ' OFFSET ' .  $cfg['start'] : '');
+    }
+
+    return $res;
+  }
+
+  /**
+   * Returns a new instance of the class.
+   * Used when changing database since pgsql does not support it.
+   *
+   * @param array $cfg
+   * @return self
+   * @throws \Exception
+   */
+  private function newInstance(array $cfg): self
+  {
+    $instance = new self($cfg);
+
+    if ($this->_fancy) {
+      $instance->startFancyStuff();
+    } else {
+      $instance->stopFancyStuff();
+    }
+
+    return $instance;
   }
 
   public function __toString()

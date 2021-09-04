@@ -121,7 +121,9 @@ class SqliteTest extends TestCase
       "SELECT $field FROM $table WHERE $field = '$value'"
     );
 
-    $this->assertTrue(count($record->fetchAll()) > 0);
+    $this->assertTrue(
+      count($this->sqlite->fetchAllResults($record)) > 0
+    );
   }
 
 
@@ -131,7 +133,9 @@ class SqliteTest extends TestCase
       "SELECT $field FROM $table WHERE $field = '$value'"
     );
 
-    $this->assertTrue(count($record->fetchAll()) === 0);
+    $this->assertTrue(
+      count($this->sqlite->fetchAllResults($record)) === 0
+    );
   }
 
   /** @test */
@@ -488,9 +492,11 @@ class SqliteTest extends TestCase
   {
     $this->sqlite->disableKeys();
 
-    $result = $this->sqlite->rawQuery('PRAGMA foreign_keys')->fetchAll();
+    $result = $this->sqlite->fetchAllResults(
+      $this->sqlite->rawQuery('PRAGMA foreign_keys')
+    );
 
-    $this->assertSame(0, $result[0]['foreign_keys']);
+    $this->assertSame('0', $result[0]['foreign_keys']);
   }
 
   /** @test */
@@ -498,9 +504,11 @@ class SqliteTest extends TestCase
   {
     $this->sqlite->enableKeys();
 
-    $result = $this->sqlite->rawQuery('PRAGMA foreign_keys')->fetchAll();
+    $result = $this->sqlite->fetchAllResults(
+      $this->sqlite->rawQuery('PRAGMA foreign_keys')
+    );
 
-    $this->assertSame(1, $result[0]['foreign_keys']);
+    $this->assertSame('1', $result[0]['foreign_keys']);
   }
 
   /** @test */
@@ -2149,6 +2157,9 @@ CREATE INDEX \'key\' ON "users" ("username");';
     // Create the keys from the query from the other test that this one depends on
     // So that the modelize method can get table structure
     foreach (explode(';', $query) as $q) {
+      if (empty($q)) {
+        continue;
+      }
       $this->sqlite->rawQuery($q);
     }
 
@@ -4274,7 +4285,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
 
     $this->assertInstanceOf(\PDOStatement::class, $result);
 
-    $results = $result->fetchAll(\PDO::FETCH_ASSOC);
+    $results = $this->sqlite->fetchAllResults($result, \PDO::FETCH_ASSOC);
 
     $this->assertSame(
       [
@@ -7220,8 +7231,6 @@ GROUP BY "id"
   /** @test */
   public function fetch_method_returns_the_first_result_of_the_query_as_indexed_array_and_false_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7249,8 +7258,6 @@ GROUP BY "id"
   /** @test */
   public function fetchAll_method_returns_an_array_of_indexed_arrays_for_all_query_result_and_empty_array_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7298,8 +7305,6 @@ GROUP BY "id"
   /** @test */
   public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_result_set()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7332,8 +7337,6 @@ GROUP BY "id"
   /** @test */
   public function fetchObject_method_returns_the_first_result_from_query_as_object_and_false_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7944,7 +7947,8 @@ GROUP BY "id"
 
     $this->assertSame(
       [['username' => 'jdoe']],
-      $result->fetchAll(\PDO::FETCH_ASSOC)
+      $this->sqlite->fetchAllResults($result, \PDO::FETCH_ASSOC)
+
     );
 
     $result2 = $this->sqlite->query("SELECT username FROM users WHERE name = ?", 'Sam');
@@ -7953,7 +7957,7 @@ GROUP BY "id"
 
     $this->assertSame(
       [['username' => 'sdoe']],
-      $result2->fetchAll(\PDO::FETCH_ASSOC)
+      $this->sqlite->fetchAllResults($result2, \PDO::FETCH_ASSOC)
     );
 
     $this->sqlite->query("SELECT name FROM users WHERE username = ?", 'sdoe');

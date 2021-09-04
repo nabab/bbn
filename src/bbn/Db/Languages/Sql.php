@@ -104,7 +104,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /**
    * @var \PDO
    */
-  protected \PDO $pdo;
+  protected ?\PDO $pdo;
 
   /**
    * @var array $queries
@@ -1116,8 +1116,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             }
 
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
+
             if ($is_uid) {
-              $st = 'LOWER(HEX(' . $this->colFullName($csn, $cfg['available_fields'][$f], true) . '))';
+              if (method_exists($this, 'getHexStatement')) {
+                $st = 'LOWER(' . $this->getHexStatement($this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
+              }
+              else {
+                $st = 'LOWER(HEX(' . $this->colFullName($csn, $cfg['available_fields'][$f], true) . '))';
+              }
             }
             // For JSON fields
             elseif ($cfg['available_fields'][$f] === false) {
@@ -1264,7 +1270,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param array $cfg The configuration array
    * @return string
-   * TODO-testing: this method does not considering the WHERE clause
+   *
    */
   public function getDelete(array $cfg): string
   {
@@ -3679,12 +3685,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * }
    * ```
    *
-   * @param string|array    $table  The table's name or a configuration array
-   * @param string|array    $fields The fields' name
-   * @param array           $where  The "where" condition
-   * @param array | boolean $order  The "order" condition, default: false
-   * @param int             $start  The "start" condition, default: 0
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields' name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
    * @return null|\stdClass
+   * @throws \Exception
    */
   public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
   {
@@ -3721,13 +3728,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *        ]
    * ```
    *
-   * @param string|array    $table  The table's name or a configuration array
-   * @param string|array    $fields The fields' name
-   * @param array           $where  The "where" condition
-   * @param array | boolean $order  The "order" condition, default: false
-   * @param int             $limit  The "limit" condition, default: 0
-   * @param int             $start  The "start" condition, default: 0
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields' name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
    * @return null|array
+   * @throws \Exception
    */
   public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
@@ -3751,12 +3759,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *        ]
    * ```
    *
-   * @param string|array    $table  The table's name or a configuration array
-   * @param string|array    $fields The fields' name
-   * @param array           $where  The "where" condition
-   * @param array | boolean $order  The "order" condition, default: false
-   * @param int             $start  The "start" condition, default: 0
-   * @return array
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields' name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
+   * @return array|null
+   * @throws \Exception
    */
   public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
@@ -3788,13 +3797,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *        ]
    * ```
    *
-   * @param string|array  $table  The table's name or a configuration array
-   * @param string|array  $fields The fields's name
-   * @param array         $where  The "where" condition
-   * @param array|boolean $order The "order" condition, default: false
-   * @param int           $limit  The "limit" condition, default: 0
-   * @param int           $start  The "start" condition, default: 0
-   * @return array
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+   * @return array|null
+   * @throws \Exception
    */
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
@@ -3818,12 +3828,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *         ]
    * ```
    *
-   * @param string|array  $table  The table's name or a configuration array
-   * @param string|array  $fields The fields' name
-   * @param array         $where  The "where" condition
-   * @param array|boolean $order  The "order" condition, default: false
-   * @param int           $start  The "start" condition, default: 0
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields' name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
    * @return null|array
+   * @throws \Exception
    */
   public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
@@ -3854,13 +3865,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *        ]
    * ```
    *
-   * @param string|array    $table  The table's name or a configuration array
-   * @param string|array    $fields The fields' name
-   * @param array           $where  The "where" condition
-   * @param array | boolean $order  condition, default: false
-   * @param int             $limit  The "limit" condition, default: 0
-   * @param int             $start  The "start" condition, default: 0
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields' name
+   * @param array $where The "where" condition
+   * @param array $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
    * @return null|array
+   * @throws \Exception
    */
   public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
   {
@@ -3884,12 +3896,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *  (string) 'Michael'
    * ```
    *
-   * @param string|array    $table The table's name or a configuration array
-   * @param string          $field The field's name
-   * @param array           $where The "where" condition
-   * @param array | boolean $order The "order" condition, default: false
-   * @param int             $start The "start" condition, default: 0
+   * @param string|array $table The table's name or a configuration array
+   * @param null $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
    * @return mixed
+   * @throws \Exception
    */
   public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
   {
@@ -3956,13 +3969,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *      ]
    * ```
    *
-   * @param string|array  $table  The table's name or a configuration array
-   * @param array         $fields The fields's name
-   * @param array         $where  The "where" condition
-   * @param array|boolean $order  The "order" condition
-   * @param int           $limit  The $limit condition, default: 0
-   * @param int           $start  The $limit condition, default: 0
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @param int $limit The $limit condition, default: 0
+   * @param int $start The $limit condition, default: 0
    * @return array|null
+   * @throws \Exception
    */
   public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
@@ -3991,11 +4005,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * ]
    * ```
    *
-   * @param string|array $table  The table's name or a configuration array.
-   * @param string       $column The field's name.
-   * @param array        $where  The "where" condition.
-   * @param array        $order  The "order" condition.
+   * @param string $table The table's name or a configuration array.
+   * @param string $column The field's name.
+   * @param array $where The "where" condition.
+   * @param array $order The "order" condition.
    * @return array|null
+   * @throws \Exception
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
@@ -4139,7 +4154,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array|null $values The values to insert.
    * @param bool $ignore If true, controls if the row is already existing and ignores it.
    *
-   * @return int Number affected rows.
+   * @return int|null Number affected rows.
+   * @throws \Exception
    */
   public function insert($table, array $values = null, bool $ignore = false): ?int
   {
@@ -4200,7 +4216,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string|array $table The table name or the configuration array.
    * @param array|null $values The values to insert.
    *
-   * @return int The number of rows inserted or updated.
+   * @return int|null The number of rows inserted or updated.
+   * @throws \Exception
    */
   public function insertUpdate($table, array $values = null): ?int
   {
@@ -4277,7 +4294,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array|null $where The "where" condition.
    * @param boolean $ignore If IGNORE should be added to the statement
    *
-   * @return int The number of rows updated.
+   * @return int|null The number of rows updated.
+   * @throws \Exception
    */
   public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
   {
@@ -4302,7 +4320,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array|null $where The "where" condition.
    * @param bool $ignore default: false.
    *
-   * @return int The number of rows deleted.
+   * @return int|null The number of rows deleted.
+   * @throws \Exception
    */
   public function delete($table, array $where = null, bool $ignore = false): ?int
   {
@@ -4745,6 +4764,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       return $PDOStatement->_fetchAll(...$args);
     }
 
-    return  $PDOStatement->fetchAll(...$args);
+    return $PDOStatement->fetchAll(...$args);
   }
 }

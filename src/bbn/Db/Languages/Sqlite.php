@@ -785,9 +785,10 @@ class Sqlite extends Sql
   /**
    * Deletes an index
    *
-   * @param null|string $table
-   * @param string      $key
+   * @param string $table
+   * @param string $key
    * @return bool
+   * @throws \Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {
