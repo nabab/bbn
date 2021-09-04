@@ -854,7 +854,7 @@ PGSQL;
 
           $r[$f]      = [
             'position' => $row['ordinal_position'],
-            'type' => $row['data_type'],
+            'type' => $row['data_type'] === 'bytea' ? 'binary' : $row['data_type'],
             'udt_name' => $row['udt_name'],
             'null' => $row['is_nullable'] === 'NO' ? 0 : 1,
             'key' => in_array($row['column_name'], $primary_keys)
@@ -870,7 +870,7 @@ PGSQL;
             'virtual' => false,
             'generation' => $row['generation_expression'],
           ];
-          if (($row['column_default'] !== null) || ($row['is_nullable'] === 'YES')) {
+          if ($row['column_default'] !== null || $row['is_nullable'] === 'YES') {
             $r[$f]['default'] = \is_null($row['column_default']) ? 'NULL' : $row['column_default'];
           }
 
@@ -880,6 +880,9 @@ PGSQL;
           elseif ($row['numeric_precision'] !== null && $row['numeric_scale'] !== null) {
             $r[$f]['maxlength'] = $row['numeric_precision'];
             $r[$f]['decimals']  = $row['numeric_scale'];
+          }
+          elseif ($row['data_type'] === 'bytea') {
+            $r[$f]['maxlength'] = 16;
           }
         }
       }
@@ -1110,7 +1113,7 @@ PGSQL
       }
 
       if (
-        !empty($col['maxlength']) &&
+        !empty($col['maxlength']) && $col_type !== 'bytea' &&
         (
           (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
           ||
@@ -1292,7 +1295,7 @@ PGSQL
   /**
    * Creates an index
    *
-   * @param null|string $table
+   * @param string $table
    * @param string|array $column
    * @param bool $unique
    * @param null $length
@@ -1359,6 +1362,139 @@ PGSQL
   public function getHexStatement(string $col_name): string
   {
     return "encode($col_name, 'hex')";
+  }
+
+  /**
+   * Generates a string for the insert from a cfg array.
+   * @param array $cfg The configuration array
+   * @return string
+   * @throws \Exception
+   */
+  public function getInsert(array $cfg): string
+  {
+    $fields_to_put = [
+      'values' => [],
+      'fields' => [],
+    ];
+    $i             = 0;
+    foreach ($cfg['fields'] as $alias => $f) {
+      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
+        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+        $csn    = $this->colSimpleName($f);
+        $is_uid = false;
+        //X::hdump('---------------', $idx, $f, $tables[$idx]['model']['fields'][$csn], $args['values'],
+        // $res['values'], '---------------');
+        if (isset($model['fields'][$csn])) {
+          $column = $model['fields'][$csn];
+          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
+            $is_uid = true;
+          }
+
+          $fields_to_put['fields'][] = $this->colSimpleName($f, true);
+          $fields_to_put['values'][] = '?';
+        }
+      } else {
+        $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+      }
+
+      $i++;
+    }
+
+    if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
+      return 'INSERT INTO ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL .
+        '(' . implode(', ', $fields_to_put['fields']) . ')' . PHP_EOL . ' VALUES (' .
+        implode(', ', $fields_to_put['values']) . ')' . PHP_EOL .
+        (!empty($cfg['ignore']) ? ' ON CONFLICT DO NOTHING' : '') . PHP_EOL;
+    }
+
+    return '';
+  }
+
+  /**
+   * @param array $cfg The configuration array
+   * @return string
+   * @throws \Exception
+   */
+  public function getUpdate(array $cfg): string
+  {
+    $res           = '';
+    $fields_to_put = [
+      'values' => [],
+      'fields' => [],
+    ];
+    foreach ($cfg['fields'] as $alias => $f) {
+      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
+        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+        $csn    = $this->colSimpleName($f);
+        $is_uid = false;
+        if (isset($model['fields'][$csn])) {
+          $column = $model['fields'][$csn];
+          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
+            $is_uid = true;
+          }
+
+          $fields_to_put['fields'][] = $this->colSimpleName($f, true);
+          $fields_to_put['values'][] = '?';
+        }
+      } else {
+        $this->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+      }
+    }
+
+    if (count($fields_to_put['fields']) && (count($cfg['tables']) === 1)) {
+      $res .= 'UPDATE ' . $this->tableFullName(current($cfg['tables']), true) . ' SET ';
+      $last = count($fields_to_put['fields']) - 1;
+      foreach ($fields_to_put['fields'] as $i => $f) {
+        $res .= $f . ' = ' . $fields_to_put['values'][$i];
+        if ($i < $last) {
+          $res .= ',';
+        }
+
+        $res .= PHP_EOL;
+      }
+    }
+
+    return $res;
+  }
+
+  /**
+   * Return SQL code for row(s) DELETE.
+   *
+   * ```php
+   * X::dump($db->getDelete(['tables' => 'users']);
+   * // (string) DELETE FROM `db_example`.`table_users`
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   *
+   */
+  public function getDelete(array $cfg): string
+  {
+    $res = '';
+    if (count($cfg['tables']) === 1) {
+      $res = 'DELETE ' .
+        (count($cfg['join'] ?? []) ? current($cfg['tables']) . ' ' : '') .
+        'FROM ' . $this->tableFullName(current($cfg['tables']), true) . PHP_EOL;
+    }
+
+    return $res;
+  }
+
+  /**
+   * Get a string starting with LIMIT with corresponding parameters to $where
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function getLimit(array $cfg): string
+  {
+    $res = '';
+    if (!empty($cfg['limit']) && Str::isInteger($cfg['limit'])) {
+      $res .= 'LIMIT ' . $cfg['limit'] . (!empty($cfg['start']) && Str::isInteger($cfg['start']) ? ' OFFSET ' .  $cfg['start'] : '');
+    }
+
+    return $res;
   }
 
   /**

@@ -109,7 +109,11 @@ class Query extends \PDOStatement implements Actions
         if ($this->values && \is_array($this->values) && count($this->values)) {
           foreach ($this->values as $i => $v){
             if (bbn\Str::isBuid($v)) {
-              $this->bindValue($i + 1, $v);
+              if ($this->db->getEngine() === 'pgsql') {
+                $this->bindValue($i + 1, $v, \PDO::PARAM_LOB);
+              } else {
+                $this->bindValue($i + 1, $v);
+              }
             }
             else{
               if (\is_int($v)) {

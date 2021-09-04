@@ -7231,8 +7231,6 @@ GROUP BY "id"
   /** @test */
   public function fetch_method_returns_the_first_result_of_the_query_as_indexed_array_and_false_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7260,8 +7258,6 @@ GROUP BY "id"
   /** @test */
   public function fetchAll_method_returns_an_array_of_indexed_arrays_for_all_query_result_and_empty_array_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7309,8 +7305,6 @@ GROUP BY "id"
   /** @test */
   public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_result_set()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
@@ -7343,8 +7337,6 @@ GROUP BY "id"
   /** @test */
   public function fetchObject_method_returns_the_first_result_from_query_as_object_and_false_if_no_results()
   {
-    $this->setCacheExpectations();
-
     $this->createTable('users', function () {
       return 'name VARCHAR(255), email VARCHAR(255)';
     });
