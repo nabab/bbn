@@ -187,10 +187,10 @@ class Cms extends bbn\Models\Cls\Db
 
 		return [
 			'data' => $this->db->rselectAll($cfg),
+			'query' => $this->db->last(),
 			'total' => $total
 		];
 	}
-
 
 	public function getNext($limit, $start): array
 	{
