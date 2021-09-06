@@ -19,6 +19,7 @@
 namespace bbn\Mvc;
 
 use bbn;
+use bbn\Mvc;
 
 class View
 {
@@ -56,6 +57,18 @@ class View
   private $_component;
 
   /**
+   * The URL path to the plugin.
+   * @var null|string
+   */
+  private $_plugin;
+
+  /**
+   * The plugin name.
+   * @var null|string
+   */
+  private $_plugin_name;
+
+  /**
    * A JSON file for adding language to javascript.
    * @var null|string
    */
@@ -76,14 +89,17 @@ class View
   public function __construct(array $info)
   {
     if (!empty($info['mode']) && Router::isMode($info['mode'])) {
-      $this->_path      = $info['path'];
-      $this->_ext       = $info['ext'];
-      $this->_file      = $info['file'];
-      $this->_checkers  = $info['checkers'] ?? [];
-      $this->_lang_file = $info['i18n'] ?? null;
-      $this->_plugin    = $info['plugin'] ?? null;
-      $this->_component = $info['component'] ?? false;
+      $this->_path        = $info['path'];
+      $this->_ext         = $info['ext'];
+      $this->_file        = $info['file'];
+      $this->_checkers    = $info['checkers'] ?? [];
+      $this->_lang_file   = $info['i18n'] ?? null;
+      $this->_plugin      = $info['plugin'] ?? null;
+      $this->_plugin_name = $info['plugin_name'] ?? null;
+      $this->_component   = $info['component'] ?? null;
     }
+
+    $this->_mvc = Mvc::getInstance();
   }
 
 
@@ -161,26 +177,27 @@ JAVASCRIPT;
         case 'css':
           return $this->_content;
         case 'less':
-          $less = new \lessc();
+          $less = new \bbn\Compilers\Less();
           return $less->compile($this->_content);
         case 'scss':
-          $scss = new \Leafo\ScssPhp\Compiler();
+          $scss = new \ScssPhp\ScssPhp\Compiler();
           return $scss->compile($this->_content);
         case 'html':
           return empty($data) ? $this->_content : bbn\Tpl::render($this->_content, $data);
         case 'php':
           $dir = getcwd();
+          /** @todo explain why */
           chdir(dirname($this->_file));
-          if ($this->_plugin) {
-            $router = Router::getInstance();
-            if ($textDomain = $router->getLocaleDomain($this->_plugin)) {
-              $oldTextDomain = textdomain(null);
-              if ($textDomain !== $oldTextDomain) {
-                textdomain($textDomain);
-              }
-              else {
-                unset($oldTextDomain);
-              }
+          if ($this->_plugin &&
+              ($router = Router::getInstance()) &&
+              ($textDomain = $router->getLocaleDomain($this->_plugin_name))
+          ) {
+            $oldTextDomain = textdomain(null);
+            if ($textDomain !== $oldTextDomain) {
+              textdomain($textDomain);
+            }
+            else {
+              unset($oldTextDomain);
             }
           }
 

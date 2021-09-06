@@ -102,7 +102,7 @@ class Email extends bbn\Models\Cls\Basic
     $this->_init_class_cfg();
     $this->db   = $db;
     $this->user = $user ?: bbn\User::getInstance();
-    $this->pref = $preferences ?: bbn\User\Preferences::getInstance();;
+    $this->pref = $preferences ?: bbn\User\Preferences::getInstance();
   }
 
 

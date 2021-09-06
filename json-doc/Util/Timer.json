@@ -71,7 +71,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -80,7 +80,7 @@
                 {
                     "name": "from",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -114,7 +114,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -148,7 +148,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -182,7 +182,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -216,7 +216,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -252,7 +252,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -312,7 +312,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -372,7 +372,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "default",

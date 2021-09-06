@@ -341,15 +341,18 @@ class User extends Models\Cls\Basic
         }
 
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
-        // Verify that the code is correct
-        $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
-        if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
-          throw new \Exception(X::_('Invalid code'));
-        }
+        if (!$this->hasSkipVerification()) {
+          // Verify that the code is correct
+          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
-        if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
-          throw new \Exception(X::_('Invalid code'));
+          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
+            throw new \Exception(X::_('Invalid code'));
+          }
+
+          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
+            throw new \Exception(X::_('Invalid code'));
+          }
         }
 
         // Update verification code to null
@@ -705,21 +708,19 @@ class User extends Models\Cls\Basic
         if (($key !== $this->fields['id'])
             && ($key !== $this->fields['cfg'])
             && ($key !== 'auth')
+            && ($key !== 'admin')
+            && ($key !== 'dev')
             && ($key !== 'pass')
-            && \in_array($key, $this->fields)
         ) {
           $update[$key] = $val;
         }
       }
 
       if (\count($update) > 0) {
-        $r = (bool)$this->db->update(
-          $this->class_cfg['tables']['users'],
-          $update,
-          [$this->fields['id'] => $this->id]
-        );
+        $r = (bool)$this->update($this->getId(), $update, true);
         /** @todo Why did I do this?? */
         if ($r) {
+          /** @todo WTF?? */
           $this->setSession(['cfg' => false]);
           $this->_user_info();
         }
@@ -922,30 +923,31 @@ class User extends Models\Cls\Basic
   public function closeSession($with_session = false): self
   {
     if ($this->id) {
-      $p =& $this->class_cfg['arch']['sessions'];
-      $this->db->update(
-        $this->class_cfg['tables']['sessions'], [
-          $p['ip_address'] => $this->ip_address,
-          $p['user_agent'] => $this->user_agent,
-          $p['opened'] => 0,
-          $p['last_activity'] => date('Y-m-d H:i:s'),
-          $p['cfg'] => json_encode($this->sess_cfg)
-        ],[
-          $p['id_user'] => $this->id,
-          $p['sess_id'] => $this->session->getId()
-        ]
-      );
+      if ($this->session) {
+        $p =& $this->class_cfg['arch']['sessions'];
+        $this->db->update(
+          $this->class_cfg['tables']['sessions'], [
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 0,
+            $p['last_activity'] => date('Y-m-d H:i:s'),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ],[
+            $p['id_user'] => $this->id,
+            $p['sess_id'] => $this->session->getId()
+          ]
+        );
+        if ($with_session) {
+          $this->session->set([]);
+        }
+        else{
+          $this->session->set([], $this->userIndex);
+        }
+      }
       $this->auth     = false;
       $this->id       = null;
       $this->sess_cfg = null;
-      if ($with_session) {
-        $this->session->set([]);
-      }
-      else{
-        $this->session->set([], $this->userIndex);
-      }
     }
-
     return $this;
   }
 
@@ -1152,7 +1154,7 @@ class User extends Models\Cls\Basic
       $this->class_cfg['arch']['hotlinks']['id_user'],
       ],[
       $this->class_cfg['arch']['hotlinks']['id'] => $id,
-      [$this->class_cfg['arch']['hotlinks']['expire'], '>', Date('Y-m-d H:i:s')]
+      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]
       ]
     )
     ) {
@@ -1487,6 +1489,7 @@ class User extends Models\Cls\Basic
    */
   protected function setError($err): self
   {
+    $this->log([$err, $this->class_cfg['errors'][$err] ?? null]);
     if (!$this->error) {
       $this->error = $err;
     }
@@ -1645,7 +1648,19 @@ class User extends Models\Cls\Basic
   {
     if (is_null($this->_encryption_key)) {
       if ($this->auth) {
-        $this->_encryption_key = $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['enckey'], ['id' => $this->id]);
+        $this->_encryption_key = $this->db->selectOne(
+          $this->class_cfg['table'],
+          $this->class_cfg['arch']['users']['enckey'],
+          ['id' => $this->id]
+        );
+        if (!$this->_encryption_key) {
+          $this->_encryption_key = Str::genpwd(32, 16);
+          $this->db->update(
+            $this->class_cfg['table'],
+            [$this->class_cfg['arch']['users']['enckey'] => $this->_encryption_key],
+            ['id' => $this->id]
+          );
+        }
       }
     }
 
@@ -2118,17 +2133,15 @@ class User extends Models\Cls\Basic
     catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
       return false;
     }
-    if (!$phone->isValidNumber()) {
-      return false;
-    }
     $phone_number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
-    return $this->db->rselect(
+    $user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users'],
       [
         $this->class_cfg['arch']['users']['login'] => $phone_number
       ]
     );
+    return !empty($user) && !$this->hasSkipVerification($user[$this->class_cfg['arch']['users']['id']]) && !$phone->isValidNumber() ? false : $user;
   }
 
 
@@ -2174,7 +2187,7 @@ class User extends Models\Cls\Basic
       return false;
     }
     
-    if (!$phone->isValidNumber()) {
+    if (!$this->hasSkipVerification() && !$phone->isValidNumber()) {
       return false;
     }
 
@@ -2260,6 +2273,21 @@ class User extends Models\Cls\Basic
     return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [
       $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id
     ]);
+  }
+
+  public function hasSkipVerification(string $id = ''): bool
+  {
+    if ($cfg = $this->db->selectOne(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['cfg'],
+      [
+        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id
+      ]
+    )) {
+      $cfg = json_decode($cfg);
+      return !empty($cfg->skip_verification);
+    }
+    return false;
   }
 
   /**

@@ -9,6 +9,9 @@
 namespace bbn\Mvc;
 
 use bbn;
+use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
 
 trait Common
 {
@@ -35,7 +38,7 @@ trait Common
   {
     $ar = \func_get_args();
     foreach ($ar as $a){
-      $b = bbn\Str::parsePath($a, true);
+      $b = Str::parsePath($a, true);
       if (empty($b) && !empty($a)) {
         $this->error("The path $a is not an acceptable value");
         return false;
@@ -54,15 +57,15 @@ trait Common
   {
     $msg = "Error from ".\get_class($this).": ".$msg;
     $this->log($msg, 'mvc');
-    throw new \Exception(bbn\X::_($msg));
+    throw new \Exception(X::_($msg));
   }
 
 
   public function log()
   {
-    if (bbn\Mvc::getDebug()) {
+    if (Mvc::getDebug()) {
       $ar = \func_get_args();
-      bbn\X::log(\count($ar) > 1 ? $ar : $ar[0], 'mvc');
+      X::log(\count($ar) > 1 ? $ar : $ar[0], 'mvc');
     }
   }
 
@@ -151,55 +154,55 @@ trait Common
 
   public function appPath($raw = false): string
   {
-    return \bbn\Mvc::getAppPath($raw);
+    return Mvc::getAppPath($raw);
   }
 
 
   public function libPath(): string
   {
-    return \bbn\Mvc::getLibPath();
+    return Mvc::getLibPath();
   }
 
 
   public function dataPath(string $plugin = null): string
   {
-    return \bbn\Mvc::getDataPath().($plugin ? 'plugins/'.$plugin.'/' : '');
+    return Mvc::getDataPath().($plugin ? 'plugins/'.$plugin.'/' : '');
   }
 
 
   public function tmpPath(string $plugin = null): string
   {
-    return \bbn\Mvc::getTmpPath($plugin);
+    return Mvc::getTmpPath($plugin);
   }
 
 
   public function logPath(string $plugin = null): string
   {
-    return \bbn\Mvc::getLogPath($plugin);
+    return Mvc::getLogPath($plugin);
   }
 
 
   public function cachePath(string $plugin = null): string
   {
-    return \bbn\Mvc::getCachePath($plugin);
+    return Mvc::getCachePath($plugin);
   }
 
 
   public function contentPath(string $plugin = null): string
   {
-    return \bbn\Mvc::getContentPath($plugin);
+    return Mvc::getContentPath($plugin);
   }
 
 
   public function userTmpPath(string $id_user = null, string $plugin = null):? string
   {
-    return \bbn\Mvc::getUserTmpPath($id_user, $plugin);
+    return Mvc::getUserTmpPath($id_user, $plugin);
   }
 
 
   public function userDataPath(string $id_user = null, string $plugin = null):? string
   {
-    return \bbn\Mvc::getUserDataPath($id_user, $plugin);
+    return Mvc::getUserDataPath($id_user, $plugin);
   }
 
 }

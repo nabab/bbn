@@ -37,6 +37,7 @@ class Cms extends bbn\Models\Cls\Db
 					'id_parent' => 'id_parent',
 					'id_alias' => 'id_alias',
 					'id_type' => 'id_type',
+					'id_option' => 'id_option',
 					'private' => 'private',
 					'locked' => 'locked',
 					'pinned' => 'pinned',
@@ -130,6 +131,128 @@ class Cms extends bbn\Models\Cls\Db
 		
 	}
 
+
+	public function getLatest($limit, $start): array
+	{
+		$cfg = $this->_notes->getLastVersionCfg();
+		$cf = $this->_notes->getClassCfg();
+		$cf_ev = $this->_events->getClassCfg();
+		$cfg['fields'][] = $cf_ev['arch']['events']['start'];
+		$cfg['fields'][] = $cf_ev['arch']['events']['end'];
+		$cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);
+		$cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);
+		$cfg['join'][] = [
+			'table' => $cf['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf_ev['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf['tables']['url'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$total = $this->db->count($cfg);
+		$cfg['where'] = [
+			'conditions' => [
+				[
+					'field' => 'start',
+					'operator' => '<=',
+					'exp' => 'NOW()'
+				]
+			]
+		];
+
+		$cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
+		$cfg['limit'] = $limit;
+		$cfg['start'] = $start;
+
+		return [
+			'data' => $this->db->rselectAll($cfg),
+			'query' => $this->db->last(),
+			'total' => $total
+		];
+	}
+
+	public function getNext($limit, $start): array
+	{
+		$cfg = $this->_notes->getLastVersionCfg();
+		$cf = $this->_notes->getClassCfg();
+		$cf_ev = $this->_events->getClassCfg();
+		$cfg['fields'][] = $cf_ev['arch']['events']['start'];
+		$cfg['fields'][] = $cf_ev['arch']['events']['end'];
+		$cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);
+		$cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);
+		$cfg['join'][] = [
+			'table' => $cf['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf_ev['tables']['events'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
+					'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])
+				]
+			]
+		];
+
+		$cfg['join'][] = [
+			'table' => $cf['tables']['url'],
+			'on' => [
+				[
+					'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),
+					'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
+				]
+			]
+		];
+
+		$total = $this->db->count($cfg);
+		$cfg['where'] = [
+			'conditions' => [
+				[
+					'field' => 'start',
+					'operator' => '>',
+					'exp' => 'NOW()'
+				]
+			]
+		];
+
+		$cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
+		$cfg['limit'] = $limit;
+		$cfg['start'] = $start;
+
+		return [
+			'data' => $this->db->rselectAll($cfg),
+			'total' => $total
+		];
+	}
+
   /**
    * Returns the note with its url, start and end date of publication.
    *
@@ -160,29 +283,65 @@ class Cms extends bbn\Models\Cls\Db
    */
 	public function getAll(int $limit = 50, int $start = 0): array 
 	{
-		$pages = $this->_notes->getByType($this->_options->fromCode('pages', 'types', 'note', 'appui'), false, $limit, $start);
+		$cfg = $this->_notes->getLastVersionCfg();
+		$cfg['limit'] = $limit;
+		$cfg['start'] = $start >= 0 ? $start : 0;
+		$cfg['fields'][] = 'url';
+		$cfg['fields'][] = 'start';
+		$cfg['fields'][] = 'end';
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['notes_url'],
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+			]],
+		];
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['notes_events'],
+			'type' => 'left',
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+			]]
+		];
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['events'],
+			'type' => 'left',
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
+			]]
+		];
 
     return array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
-      $a['url']           = $this->_notes->hasUrl($a['id_note']) ? $this->_notes->getUrl($a['id_note']) : '';
-      $a['type']          = 'pages';
-      $a['start']         = $this->getStart($a['id_note']);
-      $a['end']           = $this->getEnd($a['id_note']);
       $a['files']         = $this->_notes->getMedias($a['id_note']) ?: [];
 
       return $a;
-    }, $pages);
+    }, $this->db->rselectAll($cfg));
 	}
 
+  /**
+   * Returns the number of all the notes of type 'pages'.
+   *
+   * @return int
+   */
+	public function countAll(): int
+	{
+		$id_pages = $this->_options->fromCode('pages', 'types', 'note', 'appui');
+		return $this->_notes->countByType($id_pages);
+	}
+
+	
  /**
  * If the given url correspond to a published note returns the id.
  * 
  * @param string $url
  * @return string|null
  */
-	public function getByUrl(string $url):? string
+	public function getByUrl(string $url, bool $force = false):? string
 	{
-		if (($id_note = $this->_notes->urlToId($url)) && $this->isPublished($id_note)){
+		if (($id_note = $this->_notes->urlToId($url)) && ($force || $this->isPublished($id_note))) {
       return $id_note;
 		}
 

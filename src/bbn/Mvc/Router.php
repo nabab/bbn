@@ -291,6 +291,7 @@ class Router
                 'file' => $fpath . '.' . $f,
                 'path' => str_replace('-', '/', $local_name),
                 'plugin' => $plugin_url,
+                'plugin_name' => $plugin,
                 'component' => true,
                 'ext' => $f,
                 'mode' => $mode,
@@ -351,9 +352,9 @@ class Router
    * @param string $subplugin
    * @return array|null
    */
-  public function routeSubplugin(string $path, string $mode, string $plugin, string $subplugin): ?array
+  public function routeSubplugin(string $path, string $mode, string $pluginName, string $subplugin): ?array
   {
-    if ($root = $this->_get_subplugin_root($mode, $plugin, $subplugin)) {
+    if ($root = $this->_get_subplugin_root($mode, $pluginName, $subplugin)) {
       foreach (self::$_filetypes[$mode] as $t) {
         if (is_file($root . $path . '.' . $t)) {
           $file = $root . $path . '.' . $t;
@@ -367,7 +368,8 @@ class Router
           'file' => $file,
           'path' => $path,
           'ext' => $t,
-          'plugin' => $plugin,
+          'plugin' => $this->pluginPath($pluginName),
+          'plugin_name' => $pluginName,
           'mode' => $mode,
           'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
           ], false
@@ -866,6 +868,7 @@ class Router
         'request' => $path,
         'mode' => $mode,
         'plugin' => $plugin ? $plugin['url'] : false,
+        'plugin_name' => $plugin ? $plugin['name'] : false,
         'args' => $args,
         ]
       );
@@ -985,11 +988,12 @@ class Router
         return $this->_get_known($path, $mode);
       }
 
-      $plugin     = $this->_find_plugin($path);
-      $plugin_url = $plugin ? $plugin['url'] : false;
-      $root       = $this->_get_classic_root($mode);
-      $file       = false;
-      $alt_root   = false;
+      $plugin      = $this->_find_plugin($path);
+      $plugin_url  = $plugin ? $plugin['url'] : false;
+      $plugin_name = $plugin ? $plugin['name'] : false;
+      $root        = $this->_get_classic_root($mode);
+      $file        = false;
+      $alt_root    = false;
       if ($plugin_url) {
         $p        = $this->_routes['root'][$plugin_url];
         $plugin   = $p['name'];
@@ -1016,6 +1020,7 @@ class Router
           'file' => $file,
           'path' => $path,
           'plugin' => $plugin_url,
+          'plugin_name' => $plugin_name,
           'ext' => $t,
           'mode' => $mode,
           'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
@@ -1064,7 +1069,9 @@ class Router
           $idx = file_get_contents($idx_file);
         }
 
+
         $textdomain = $name.$idx;
+
         bindtextdomain($textdomain, $lang_path);
         bind_textdomain_codeset($textdomain, 'UTF-8');
         $this->_textdomains[$name] = $textdomain;

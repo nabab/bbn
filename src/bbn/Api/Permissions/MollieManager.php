@@ -183,7 +183,7 @@ class MollieManager
     if (!$this->customerHasValidMandate(
       $customer_id,
       $mandate_id,
-      array_key_exists('testmode', $payment_data) ? ['test_mode' => $payment_data['testmode']] : [])
+      array_key_exists('testmode', $payment_data) ? ['testmode' => $payment_data['testmode']] : [])
     ) {
       // If the mandate is not valid then creates a new one by having
       // The customer performs a first payment: createPaymentFirstTime()
@@ -316,17 +316,14 @@ class MollieManager
    */
   public function refundPayment(string $payment_id, string $amount, array $params = []): array
   {
-    $payment = $this->mollie->payments->get($payment_id, $params);
-
+    $payment = $this->mollie->payments->get($payment_id, ['testmode' => !empty($params['testmode'])]);
     $params = array_merge([
       "amount" => [
         "currency" => $payment->amount->currency,
         "value"    => $amount
       ]
     ], $params);
-
     $refund = $payment->refund($params);
-
     return X::toArray($refund);
   }
 

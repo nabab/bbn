@@ -127,7 +127,7 @@
                 {
                     "name": "raw",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -556,7 +556,7 @@
                 {
                     "name": "bbn_inc_file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -565,7 +565,7 @@
                 {
                     "name": "model",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -677,7 +677,7 @@
                 {
                     "name": "url",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -711,7 +711,7 @@
                 {
                     "name": "root",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -830,7 +830,7 @@
                 {
                     "name": "dir",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -839,7 +839,7 @@
                 {
                     "name": "mode",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -873,7 +873,7 @@
                 {
                     "name": "bbn_inc_file",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -882,7 +882,7 @@
                 {
                     "name": "bbn_inc_content",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -983,7 +983,7 @@
                 {
                     "name": "state",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 1,
@@ -1017,7 +1017,7 @@
                 {
                     "name": "db",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1027,7 +1027,7 @@
                 {
                     "name": "routes",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1133,7 +1133,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1167,7 +1167,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1201,7 +1201,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1210,7 +1210,7 @@
                 {
                     "name": "raw",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1244,7 +1244,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1278,7 +1278,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1330,7 +1330,7 @@
                 {
                     "name": "root",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1577,7 +1577,7 @@
                 {
                     "name": "mode",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1637,7 +1637,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1646,7 +1646,7 @@
                 {
                     "name": "post",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1655,7 +1655,7 @@
                 {
                     "name": "arguments",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -2391,7 +2391,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2654,7 +2654,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2681,7 +2681,7 @@
                 {
                     "name": "ttl",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 10,
@@ -2715,7 +2715,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2767,7 +2767,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2776,7 +2776,7 @@
                 {
                     "name": "obj",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -2880,7 +2880,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      if ($this->check() && $this->controller) {\n          $obj = $this->controller->get();\n        if ($this->isCli()) {\n          if (isset($obj->content)) {\n            echo $obj->content;\n          }\n\n            exit();\n        }\n\n        if (\\is_array($obj)) {\n            $obj = X::toObject($obj);\n        }\n\n        if ((\\gettype($obj) !== 'object') || (\\get_class($obj) !== 'stdClass')) {\n            throw new \\Exception(X::__(\"Unexpected output: \".\\gettype($obj)));\n        }\n\n        if ($this->obj && X::countProperties($this->obj)) {\n            $obj = X::mergeObjects($obj, $this->obj);\n        }\n\n          $output = new Mvc\\Output($obj, $this->getMode());\n          $output->run();\n      } else {\n          header('HTTP\/1.0 404 Not Found');\n          exit();\n      }\n  }",
+            "code": "function()\n  {\n      if ($this->check() && $this->controller) {\n          $obj = $this->controller->get();\n        if ($this->isCli()) {\n          if (isset($obj->content)) {\n            echo $obj->content;\n          }\n\n            exit();\n        }\n\n        if (\\is_array($obj)) {\n            $obj = X::toObject($obj);\n        }\n\n        if ((\\gettype($obj) !== 'object') || (\\get_class($obj) !== 'stdClass')) {\n            throw new \\Exception(X::_(\"Unexpected output: \".\\gettype($obj)));\n        }\n\n        if ($this->obj && X::countProperties($this->obj)) {\n            $obj = X::mergeObjects($obj, $this->obj);\n        }\n\n          $output = new Mvc\\Output($obj, $this->getMode());\n          $output->run();\n      } else {\n          header('HTTP\/1.0 404 Not Found');\n          exit();\n      }\n  }",
             "startLine": 1342,
             "endLine": 1372,
             "isDeprecated": false,
@@ -2948,7 +2948,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3006,7 +3006,7 @@
                 {
                     "name": "type",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "root",
@@ -3120,7 +3120,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -3180,7 +3180,7 @@
                 {
                     "name": "raw",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,

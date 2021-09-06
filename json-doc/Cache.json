@@ -48,7 +48,7 @@
                 {
                     "name": "value",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -111,7 +111,7 @@
                 {
                     "name": "ttl",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -263,7 +263,7 @@
                 {
                     "name": "ttl",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -527,7 +527,7 @@
                 {
                     "name": "val",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -592,7 +592,7 @@
                 {
                     "name": "hash",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

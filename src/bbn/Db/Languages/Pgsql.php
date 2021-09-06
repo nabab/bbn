@@ -147,7 +147,7 @@ class Pgsql extends Sql
 
   /** @var string The quote character */
   public $qte = '';
-
+  
   /**
    * Constructor
    * @param array $cfg
@@ -255,7 +255,7 @@ class Pgsql extends Sql
 
     return $cfg;
   }
-
+  
   /*****************************************************************************************************************
    *                                                                                                                *
    *                                                                                                                *
@@ -1386,6 +1386,7 @@ PGSQL
    * @param string $table
    * @param string $key
    * @return bool
+   * @throws \Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {

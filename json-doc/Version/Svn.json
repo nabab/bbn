@@ -47,7 +47,7 @@
                 {
                     "name": "url",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -56,7 +56,7 @@
                 {
                     "name": "user",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -65,7 +65,7 @@
                 {
                     "name": "pass",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -99,7 +99,7 @@
                 {
                     "name": "to",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -108,7 +108,7 @@
                 {
                     "name": "rev",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -142,7 +142,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\/",
@@ -176,7 +176,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\/",
@@ -210,7 +210,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "\/",
@@ -219,7 +219,7 @@
                 {
                     "name": "num",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 5,

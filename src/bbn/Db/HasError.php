@@ -86,6 +86,7 @@ trait HasError
       }
     }
 
+
     $msg[] = self::getLogLine('BACKTRACE');
     $dbt   = array_reverse(debug_backtrace());
     array_walk(

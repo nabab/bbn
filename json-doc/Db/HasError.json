@@ -1,0 +1,294 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Db\\HasError",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/HasError.php",
+    "startLine": 9,
+    "endLine": 234,
+    "contentConstructor": null,
+    "methods": {
+        "error": {
+            "name": "error",
+            "summary": "Set an error and acts appropriately based oon the error mode",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\HasError",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($e)\n  {\n    $this->_has_error = true;\n    self::_set_has_error_all();\n    $msg = [\n      self::$LINE,\n      self::getLogLine('ERROR DB!'),\n      self::$LINE\n    ];\n    if (\\is_string($e)) {\n      $msg[] = self::getLogLine('USER MESSAGE');\n      $msg[] = $e;\n    }\n    elseif (method_exists($e, 'getMessage')) {\n      $msg[] = self::getLogLine('DB MESSAGE');\n      $msg[] = $e->getMessage();\n    }\n\n    $this->last_error = end($msg);\n    $msg[]            = self::getLogLine('QUERY');\n    $msg[]            = $this->last();\n\n    if (($last_real_params = $this->getRealLastParams()) && !empty($last_real_params['values'])) {\n      $msg[] = self::getLogLine('VALUES');\n      foreach ($last_real_params['values'] as $v){\n        if ($v === null) {\n          $msg[] = 'NULL';\n        }\n        elseif (\\is_bool($v)) {\n          $msg[] = $v ? 'TRUE' : 'FALSE';\n        }\n        elseif (\\is_string($v)) {\n          $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);\n        }\n        else{\n          $msg[] = $v;\n        }\n      }\n    }\n    \/*\n    if ($params = $this->getLastParams()) {\n      die(X::dump($params));\n      $msg[] = json_encode($params, JSON_PRETTY_PRINT);\n    }\n    *\/\n\n    $msg[] = self::getLogLine('BACKTRACE');\n    $dbt   = array_reverse(debug_backtrace());\n    array_walk(\n      $dbt, function ($a, $i) use (&$msg) {\n        if (isset($a['file'])) {\n          $msg[] = str_repeat(' ', $i).($i ? '->' : '').\"{$a['function']}  (\".basename(dirname($a['file'])).'\/'.basename($a['file']).\":{$a['line']})\";\n        }\n    }\n    );\n    $this->log(implode(PHP_EOL, $msg));\n    if ($this->on_error === Errors::E_DIE) {\n      throw new \\Exception(\n        \\defined('BBN_IS_DEV') && BBN_IS_DEV\n          ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'<\/pre>'\n          : 'Database error'\n      );\n    }\n  }",
+            "startLine": 49,
+            "endLine": 112,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "e",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getLogLine": {
+            "name": "getLogLine",
+            "summary": "Returns a string with the given text in the middle of a \"line\" of logs.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\HasError",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($text = '')\n  {\n    if ($text) {\n      $text = ' '.$text.' ';\n    }\n\n    $tot  = \\strlen(self::$LINE) - \\strlen($text);\n    $char = \\substr(self::$LINE, 0, 1);\n    return \\str_repeat($char, floor($tot \/ 2)).$text.\\str_repeat($char, ceil($tot \/ 2));\n  }",
+            "startLine": 130,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "log": {
+            "name": "log",
+            "summary": "Writes in data\/logs\/db.log.",
+            "description": "*\n```php\n$db->$db->log('test');\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$db->$db->log('test');"
+                }
+            ],
+            "file": "bbn\\Db\\HasError",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    $args = \\func_get_args();\n    foreach ($args as $a){\n      X::log($a, 'db');\n    }\n\n    return $this;\n  }",
+            "startLine": 150,
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setErrorMode": {
+            "name": "setErrorMode",
+            "summary": "Sets the error mode.",
+            "description": "*\n```php\n$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)"
+                }
+            ],
+            "file": "bbn\\Db\\HasError",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($mode)\n  {\n    $this->on_error = $mode;\n    return $this;\n  }",
+            "startLine": 171,
+            "endLine": 175,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getErrorMode": {
+            "name": "getErrorMode",
+            "summary": "Gets the error mode.",
+            "description": "*\n```php\nX::dump($db->getErrorMode());\n\/\/ (string) stop_all\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($db->getErrorMode());\n\/\/ (string) stop_all"
+                }
+            ],
+            "file": "bbn\\Db\\HasError",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->on_error;\n  }",
+            "startLine": 186,
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getLastError": {
+            "name": "getLastError",
+            "summary": "Returns the last error.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\HasError",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->last_error;\n  }",
+            "startLine": 196,
+            "endLine": 199,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks if the database is ready to process a query.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\HasError",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (!property_exists($this, 'current')) {\n      throw new \\Exception('Property current does not exist');\n    }\n\n    if ($this->current !== null) {\n      \/\/ if $on_error is set to E_CONTINUE returns true\n      if ($this->on_error === Errors::E_CONTINUE) {\n        return true;\n      }\n\n      \/\/ If any connection has an error with mode E_STOP_ALL\n      if (self::$_has_error_all && ($this->on_error === Errors::E_STOP_ALL)) {\n        return false;\n      }\n\n      \/\/ If this connection has an error with mode E_STOP or E_STOP_ALL\n      if ($this->_has_error && ($this->on_error === Errors::E_STOP || $this->on_error === Errors::E_STOP_ALL)) {\n        return false;\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "startLine": 207,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": {
+        "LINE": "---------------------------------------------------------------------------------",
+        "_has_error_all": false
+    },
+    "constants": null,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "LINE": "---------------------------------------------------------------------------------",
+        "_has_error_all": false,
+        "_has_error": false,
+        "last_error": null,
+        "on_error": "stop_all"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db",
+    "shortName": "HasError",
+    "summary": ""
+}

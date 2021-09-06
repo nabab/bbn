@@ -711,12 +711,12 @@ You can click the following link to access directly your account:<br>
           break;
         case 'creation':
           if ($path = bbn\Mvc::getPluginUrl('appui-core')) {
-            $this->messages[$message]['link'] = BBN_URL.$path.'/login/password/%s';
+            $this->messages[$message]['link'] = BBN_URL.$path.'/login/%s';
           }
           break;
         case 'password':
           if ($path = bbn\Mvc::getPluginUrl('appui-core')) {
-            $this->messages[$message]['link'] = BBN_URL.$path.'/login/password/%s';
+            $this->messages[$message]['link'] = BBN_URL.$path.'/login/%s';
           }
           break;
       }

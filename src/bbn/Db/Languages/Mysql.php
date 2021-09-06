@@ -101,7 +101,7 @@ class Mysql extends Sql
         'host' => BBN_DB_HOST,
         'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
         'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
-        'db' => defined('BBN_DATABASE') ? BBN_DATABASE : '',
+        'db'   => defined('BBN_DATABASE') ? BBN_DATABASE : '',
       ];
     }
 
@@ -902,7 +902,7 @@ MYSQL
     }
 
     return '';
-  }
+ }
 
   /**
    * @param string $table
