@@ -588,4 +588,17 @@ interface Engines
    * @return string
    */
   public function getConnectionCode();
+
+  /**
+   * Return the last config for this connection.
+   *
+   * @return array|null
+   */
+  public function getLastCfg(): ?array;
+
+  /**
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
+   */
+  public function getConnection(array $cfg = []): ?array;
 }

@@ -7998,4 +7998,56 @@ GROUP BY "id"
     $this->assertDatabaseHas('users', 'name', 'John');
     $this->assertDatabaseHas('users', 'username', 'John');
   }
+
+  /** @test */
+  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  {
+    $this->assertSame(
+      $this->getNonPublicProperty('last_cfg'),
+      $this->sqlite->getLastCfg()
+    );
+  }
+
+  /** @test */
+  public function renameTable_method_renames_the_given_table_to_the_new_given_name()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertTrue(
+      $this->sqlite->renameTable('users', 'users2')
+    );
+
+    $tables = $this->sqlite->getTables();
+
+    $this->assertTrue(in_array('users2', $tables));
+    $this->assertTrue(!in_array('users', $tables));
+  }
+
+  /** @test */
+  public function renameTable_method_returns_false_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertFalse(
+      $this->sqlite->renameTable('users', 'users')
+    );
+  }
+
+  /** @test */
+  public function renameTable_method_returns_false_when_the_given_table_names_are_not_valid()
+  {
+    $this->assertFalse(
+      $this->sqlite->renameTable('users**', 'users2')
+    );
+
+    $this->assertFalse(
+      $this->sqlite->renameTable('users', 'users2&&')
+    );
+
+    $this->assertFalse(
+      $this->sqlite->renameTable('users**', 'users2&&')
+    );
+  }
 }

@@ -109,6 +109,33 @@ class Sqlite extends Sql
       throw new \Exception('The SQLite driver for PDO is not installed...');
     }
 
+    $cfg = $this->getConnection($cfg);
+
+    try {
+      $this->cacheInit();
+      $this->current  = $cfg['db'];
+      $this->host     = $cfg['host'];
+      $this->connection_code = $cfg['host'];
+
+      $this->pdo = new \PDO(...$cfg['args']);
+      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->cfg = $cfg;
+      $this->setHash($cfg['args']);
+
+    } catch (\PDOException $e) {
+      $err = X::_("Impossible to create the connection").
+        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
+        .X::_("with the following error").$e->getMessage();
+      throw new \Exception($err);
+    }
+  }
+
+  /**
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
+   */
+  public function getConnection(array $cfg = []): ?array
+  {
     $cfg['engine'] = 'sqlite';
 
     if (!isset($cfg['db']) && \defined('BBN_DATABASE')) {
@@ -150,23 +177,7 @@ class Sqlite extends Sql
     $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];
     $cfg['db']   = 'main';
 
-    try {
-      $this->cacheInit();
-      $this->current  = $cfg['db'];
-      $this->host     = $cfg['host'];
-      $this->connection_code = $cfg['host'];
-
-      $this->pdo = new \PDO(...$cfg['args']);
-      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-      $this->cfg = $cfg;
-      $this->setHash($cfg['args']);
-
-    } catch (\PDOException $e) {
-      $err = X::_("Impossible to create the connection").
-        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
-        .X::_("with the following error").$e->getMessage();
-      throw new \Exception($err);
-    }
+    return $cfg;
   }
 
 
@@ -882,6 +893,31 @@ class Sqlite extends Sql
   public function getUsers(string $user = '', string $host = ''): ?array
   {
     return [];
+  }
+
+  /**
+   * Renames the given table to the new given name.
+   *
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool
+  {
+    if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
+      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+
+      $res = $this->rawQuery(sprintf("ALTER TABLE %s RENAME TO %s", $t1, $t2));
+      return !!$res;
+    }
+
+    return false;
+  }
+
+  public function getTableComment(string $table): string
+  {
+    return '';
   }
 
 

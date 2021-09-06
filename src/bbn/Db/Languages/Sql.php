@@ -276,6 +276,17 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return $this->current;
   }
 
+
+  /**
+   * Return the last config for this connection.
+   *
+   * @return array|null
+   */
+  public function getLastCfg(): ?array
+  {
+    return $this->last_cfg;
+  }
+
   /**
    * Changes the current database to the given one.
    *

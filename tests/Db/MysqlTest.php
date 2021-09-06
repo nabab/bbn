@@ -281,7 +281,12 @@ class MysqlTest extends TestCase
       array_merge($db_cfg, [
         'port'      => 3306,
         'code_db'   => $db_cfg['db'],
-        'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}"
+        'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}",
+        'args'      => ["mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
+          $db_cfg['user'],
+          $db_cfg['pass'],
+          [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+        ]
       ]),
       $this->getNonPublicProperty('cfg')
     );
@@ -362,7 +367,12 @@ class MysqlTest extends TestCase
       array_merge($db_cfg, [
         'port'      => 3306,
         'code_db'   => $db_cfg['db'],
-        'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}"
+        'code_host' => "{$db_cfg['user']}@{$db_cfg['host']}",
+        'args'      => ["mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
+          $db_cfg['user'],
+          $db_cfg['pass'],
+          [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+        ]
       ]),
       self::$mysql->getCfg()
     );
@@ -8549,6 +8559,82 @@ GROUP BY `id`
     $this->assertSame(
       $expected,
       self::$mysql->removeVirtual($cfg)
+    );
+  }
+
+  /** @test */
+  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  {
+    $this->assertSame(
+      $this->getNonPublicProperty('last_cfg'),
+      self::$mysql->getLastCfg()
+    );
+  }
+
+  /** @test */
+  public function renameTable_method_renames_the_given_table_to_the_new_given_name()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertTrue(
+      self::$mysql->renameTable('users', 'users2')
+    );
+
+    $tables = self::$mysql->getTables();
+
+    $this->assertTrue(in_array('users2', $tables));
+    $this->assertTrue(!in_array('users', $tables));
+  }
+
+  /** @test */
+  public function renameTable_method_returns_false_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertFalse(
+      self::$mysql->renameTable('users', 'users2')
+    );
+  }
+
+  /** @test */
+  public function renameTable_method_returns_false_when_the_given_table_names_are_not_valid()
+  {
+    $this->assertFalse(
+      self::$mysql->renameTable('users**', 'users2')
+    );
+
+    $this->assertFalse(
+      self::$mysql->renameTable('users', 'users2&&')
+    );
+
+    $this->assertFalse(
+      self::$mysql->renameTable('users**', 'users2**')
+    );
+  }
+
+  /** @test */
+  public function getTableComment_method_returns_the_comment_for_the_given_table()
+  {
+    self::$mysql->rawQuery("CREATE TABLE users (id INT) COMMENT 'Hello word!'");
+
+    $this->assertSame(
+      'Hello word!',
+      self::$mysql->getTableComment('users')
+    );
+  }
+
+  /** @test */
+  public function getTableComment_method_returns_empty_string_if_the_given_table_has_no_comment()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertSame(
+      "",
+      self::$mysql->getTableComment('users')
     );
   }
 }
