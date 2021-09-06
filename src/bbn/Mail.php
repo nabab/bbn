@@ -394,7 +394,12 @@ TEMPLATE;
       $ar['text'] = $renderer($ar);
       self::setContent($ar['text']);
       $this->mailer->msgHTML(self::$_content, $this->path, true);
-      $r = $this->mailer->send();
+      try {
+        $r = $this->mailer->send();
+      }
+      catch (\Exception $e) {
+        $this->log($e->getMessage());
+      }
       if ($r && !empty($this->imap_string)) {
         $mail_string = $this->mailer->getSentMIMEMessage();
         if (!is_resource($this->imap)) {
@@ -405,7 +410,9 @@ TEMPLATE;
         }
       }
       if (!$r) {
-        $this->log(\imap_last_error());
+        $err = \imap_last_error();
+        $this->log($err);
+        X::log($err);
       }
     }
     $this->mailer->ClearAllRecipients();

@@ -11,10 +11,12 @@
  */
 namespace bbn\Cdn;
 
-use bbn;
+use bbn\Models\Cls\Basic;
 use bbn\X;
-use JShrink;
+use bbn\Str;
+use JShrink\Minifier;
 use CssMin;
+use bbn\Compilers\Less;
 
 /**
  * Compile files into single files, using javascript to call CSS when needed.
@@ -26,7 +28,7 @@ use CssMin;
  * @license  https://opensource.org/licenses/mit-license.php MIT
  * @link     https://bbnio2.thomas.lan/bbn-php/doc/class/cdn/compiler
  */
-class Compiler extends bbn\Models\Cls\Basic
+class Compiler extends Basic
 {
   use Common;
 
@@ -69,7 +71,7 @@ class Compiler extends bbn\Models\Cls\Basic
     if ($st) {
       try {
         if ($lang === 'js') {
-          $tmp = JShrink\Minifier::minify($st, ['flaggedComments' => false]);
+          $tmp = Minifier::minify($st, ['flaggedComments' => false]);
         }
         elseif ($lang === 'css') {
           $tmp = CssMin::minify($st);
@@ -96,7 +98,7 @@ class Compiler extends bbn\Models\Cls\Basic
   public function getContent($file, $test = false)
   {
     if (is_array($file)) {
-      $ext      = bbn\Str::fileExt($file[0]);
+      $ext      = Str::fileExt($file[0]);
       $minified = false;
       $c        = '';
       foreach ($file as $f) {
@@ -129,10 +131,10 @@ class Compiler extends bbn\Models\Cls\Basic
       $file = $file[0];
     }
     else{
-      $ext      = bbn\Str::fileExt($file);
+      $ext      = Str::fileExt($file);
       $minified = false;
       if (!is_file($this->fpath.$file)) {
-        throw new \Exception(X::_("Impoossible to find the file").' '.$this->fpath.$file);
+        throw new \Exception(X::_("Impossible to find the file").' '.$this->fpath.$file);
         return false;
       }
 
@@ -171,7 +173,7 @@ class Compiler extends bbn\Models\Cls\Basic
           break;
 
         case 'less':
-          $less = new \lessc();
+          $less = new Less();
           $less->setImportDir([\dirname($this->fpath.$file)]);
           try {
             $c = $less->compile($c);
@@ -195,7 +197,7 @@ class Compiler extends bbn\Models\Cls\Basic
 
         case 'scss':
           try{
-            $scss = new \Leafo\ScssPhp\Compiler();
+            $scss = new \ScssPhp\ScssPhp\Compiler();
             $scss->setImportPaths([\dirname($this->fpath.$file)]);
             if (is_file(\dirname($this->fpath.$file).'/_def.scss')) {
               $c = file_get_contents((\dirname($this->fpath.$file).'/_def.scss')).$c;
@@ -308,7 +310,7 @@ JAVASCRIPT;
    * @param [type] $css
    * @return boolean
    */
-  public function hasLinks($css)
+  public function hasLinks(string $css)
   {
     return strpos($css, 'url(') || (strpos($css, '@import') !== false);
   }
@@ -526,8 +528,8 @@ JAVASCRIPT;
   public function cssContent(string $css): string
   {
     $css = str_replace('`', '\\``', str_replace('\\', '\\\\', $css));
-    //$css = bbn\Str::escapeSquotes($css);
-    $code  = bbn\Str::genpwd(25, 20);
+    //$css = Str::escapeSquotes($css);
+    $code  = Str::genpwd(25, 20);
     $head  = $code.'2';
     $style = $code.'3';
     return <<<JAVASCRIPT
@@ -562,7 +564,7 @@ JAVASCRIPT;
       // Mix of CSS and javascript: the JS adds the CSS to the head before executing
       foreach ($files as $f){
         if ($c = $this->getContent($f, $test)) {
-          $e = bbn\Str::fileExt($f);
+          $e = Str::fileExt($f);
           foreach (self::$types as $type => $exts){
             foreach ($exts as $ext){
               if ($ext === $e) {
@@ -602,7 +604,7 @@ JAVASCRIPT;
       /** @var array $codes Will contain the raw content of each files */
       // Mix of CSS and javascript: the JS adds the CSS to the head before executing
       if ($c = $this->getContent($files, $test)) {
-        $e = bbn\Str::fileExt($files[0]);
+        $e = Str::fileExt($files[0]);
         foreach (self::$types as $type => $exts){
           foreach ($exts as $ext){
             if ($ext === $e) {

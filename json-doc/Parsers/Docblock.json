@@ -45,7 +45,7 @@
                 {
                     "name": "mode",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -176,7 +176,7 @@
                 {
                     "name": "st",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

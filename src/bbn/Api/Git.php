@@ -105,7 +105,7 @@ class Git extends \Cz\Git\GitRepository
               $element['added'] = false;
             break;
             case 'R ':
-              $files = explode(' -> ', $file);
+              $files = explode(' -> ', $val);
               $element['action'] = 'renamed';
               $elemnt['old_file'] = $files[0];
               $elemnt['new_file'] = $files[1];
@@ -125,10 +125,12 @@ class Git extends \Cz\Git\GitRepository
             default:
               $element['other'] = $sigle === "A " ? "'A ' (Only added)" : $sigle;
           }
+
           $arr[]= $element;
         }
+
+        return $arr;
       }
-      return $arr;
     }
     return null;
 	}

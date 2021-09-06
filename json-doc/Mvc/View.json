@@ -84,7 +84,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data = NULL)\n  {\n    if ($this->check()) {\n      if (\\is_null($this->_content) && is_file($this->_file)) {\n        $this->_content = file_get_contents($this->_file);\n      }\n\n      if (empty($this->_content)) {\n        return '';\n      }\n\n      if ($this->_checkers) {\n        $st = '';\n        foreach ($this->_checkers as $chk){\n          if (is_file($chk)) {\n            $st .= file_get_contents($chk);\n          }\n        }\n\n        $this->_content = $st.$this->_content;\n      }\n\n      switch ($this->_ext){\n        case 'js':\n          \/\/ Language variables inclusions in the javascript files\n          if (!empty($this->_lang_file) && is_file($this->_lang_file)) {\n            $tmp  = json_decode(file_get_contents($this->_lang_file), true);\n            $path = $this->_plugin && !$this->_component ? substr($this->_path, \\strlen($this->_plugin) + 1) : $this->_path;\n            \/\/die(var_dump(count($tmp), 'components\/'.$this->path.'\/'.$this->path, $tmp));\n            $idx = $this->_component ? 'components\/' : 'mvc\/';\n            \/\/die(var_dump($idx.$path, $tmp));\n            \/\/die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));\n            \/\/die(var_dump($idx.$path, $tmp));\n            if ($translations = ($tmp[$idx.$path] ?? null)) {\n              $json           = json_encode($translations);\n              $tmp            = <<<JAVASCRIPT\n((data) => {\n  bbn.fn.autoExtend(\"lng\", $json)\n})();\nJAVASCRIPT;\n              $this->_content = $tmp.$this->_content;\n            }\n\n            unset($tmp, $translations, $json);\n          }\n\n          $tmp = false;\n          try {\n            if (!defined('BBN_IS_DEV') || !BBN_IS_DEV) {\n              $tmp = \\JShrink\\Minifier::minify($this->_content, ['flaggedComments' => false]);\n            }\n          }\n          catch (\\RuntimeException $e){\n            \\bbn\\X::log([$e->getMessage(), $this->_file], 'js_shrink');\n          }\n          return $tmp ?: $this->_content;\n        case 'css':\n          return $this->_content;\n        case 'less':\n          $less = new \\lessc();\n          return $less->compile($this->_content);\n        case 'scss':\n          $scss = new \\Leafo\\ScssPhp\\Compiler();\n          return $scss->compile($this->_content);\n        case 'html':\n          return empty($data) ? $this->_content : bbn\\Tpl::render($this->_content, $data);\n        case 'php':\n          $dir = getcwd();\n          chdir(dirname($this->_file));\n          if ($this->_plugin) {\n            $router = Router::getInstance();\n            if ($textDomain = $router->getLocaleDomain($this->_plugin)) {\n              $oldTextDomain = textdomain(null);\n              if ($textDomain !== $oldTextDomain) {\n                textdomain($textDomain);\n              }\n              else {\n                unset($oldTextDomain);\n              }\n            }\n          }\n\n          $r = bbn\\Mvc::includePhpView($this->_file, $this->_content, $data ?: []);\n          if (!empty($oldTextDomain)) {\n            textdomain($oldTextDomain);\n          }\n\n          chdir($dir);\n          return $r;\n      }\n    }\n\n    return false;\n  }",
+            "code": "function(array $data = NULL)\n  {\n    if ($this->check()) {\n      if (\\is_null($this->_content) && is_file($this->_file)) {\n        $this->_content = file_get_contents($this->_file);\n      }\n\n      if (empty($this->_content)) {\n        return '';\n      }\n\n      if ($this->_checkers) {\n        $st = '';\n        foreach ($this->_checkers as $chk){\n          if (is_file($chk)) {\n            $st .= file_get_contents($chk);\n          }\n        }\n\n        $this->_content = $st.$this->_content;\n      }\n\n      switch ($this->_ext){\n        case 'js':\n          \/\/ Language variables inclusions in the javascript files\n          if (!empty($this->_lang_file) && is_file($this->_lang_file)) {\n            $tmp  = json_decode(file_get_contents($this->_lang_file), true);\n            $path = $this->_plugin && !$this->_component ? substr($this->_path, \\strlen($this->_plugin) + 1) : $this->_path;\n            \/\/die(var_dump(count($tmp), 'components\/'.$this->path.'\/'.$this->path, $tmp));\n            $idx = $this->_component ? 'components\/' : 'mvc\/';\n            \/\/die(var_dump($idx.$path, $tmp));\n            \/\/die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));\n            \/\/die(var_dump($idx.$path, $tmp));\n            if ($translations = ($tmp[$idx.$path] ?? null)) {\n              $json           = json_encode($translations);\n              $tmp            = <<<JAVASCRIPT\n((data) => {\n  bbn.fn.autoExtend(\"lng\", $json)\n})();\nJAVASCRIPT;\n              $this->_content = $tmp.$this->_content;\n            }\n\n            unset($tmp, $translations, $json);\n          }\n\n          $tmp = false;\n          try {\n            if (!defined('BBN_IS_DEV') || !BBN_IS_DEV) {\n              $tmp = \\JShrink\\Minifier::minify($this->_content, ['flaggedComments' => false]);\n            }\n          }\n          catch (\\RuntimeException $e){\n            \\bbn\\X::log([$e->getMessage(), $this->_file], 'js_shrink');\n          }\n          return $tmp ?: $this->_content;\n        case 'css':\n          return $this->_content;\n        case 'less':\n          $less = new \\bbn\\Compilers\\Less();\n          return $less->compile($this->_content);\n        case 'scss':\n          $scss = new \\Leafo\\ScssPhp\\Compiler();\n          return $scss->compile($this->_content);\n        case 'html':\n          return empty($data) ? $this->_content : bbn\\Tpl::render($this->_content, $data);\n        case 'php':\n          $dir = getcwd();\n          chdir(dirname($this->_file));\n          if ($this->_plugin) {\n            $router = Router::getInstance();\n            if ($textDomain = $router->getLocaleDomain($this->_plugin)) {\n              $oldTextDomain = textdomain(null);\n              if ($textDomain !== $oldTextDomain) {\n                textdomain($textDomain);\n              }\n              else {\n                unset($oldTextDomain);\n              }\n            }\n          }\n\n          $r = bbn\\Mvc::includePhpView($this->_file, $this->_content, $data ?: []);\n          if (!empty($oldTextDomain)) {\n            textdomain($oldTextDomain);\n          }\n\n          chdir($dir);\n          return $r;\n      }\n    }\n\n    return false;\n  }",
             "startLine": 105,
             "endLine": 198,
             "isDeprecated": false,
@@ -162,7 +162,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -220,7 +220,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -254,7 +254,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -288,7 +288,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -297,7 +297,7 @@
                 {
                     "name": "raw",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -331,7 +331,7 @@
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -365,7 +365,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -471,7 +471,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -480,7 +480,7 @@
                 {
                     "name": "mode",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -489,7 +489,7 @@
                 {
                     "name": "root",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -586,7 +586,7 @@
                 {
                     "name": "raw",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,

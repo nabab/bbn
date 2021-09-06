@@ -457,7 +457,7 @@
                 {
                     "name": "row",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -493,7 +493,7 @@
                 {
                     "name": "row",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -536,7 +536,7 @@
                 {
                     "name": "dbs",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -545,7 +545,7 @@
                 {
                     "name": "sync_table",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -554,7 +554,7 @@
                 {
                     "name": "num_try",
                     "position": 3,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 0,

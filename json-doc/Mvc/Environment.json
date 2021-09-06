@@ -91,7 +91,7 @@
                 {
                     "name": "mode",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -212,7 +212,7 @@
                 {
                     "name": "path",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -294,7 +294,7 @@
                 {
                     "name": "url",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -303,7 +303,7 @@
                 {
                     "name": "post",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -312,7 +312,7 @@
                 {
                     "name": "arguments",
                     "position": 2,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -495,7 +495,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"MzK5jj55DOS4MXE85FOT6i\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"g1WU1OlYN01D99oem\"}"
     },
     "constants": null,
     "numMethods": 17,

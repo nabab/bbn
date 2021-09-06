@@ -47,7 +47,7 @@
                 {
                     "name": "hash",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -81,7 +81,7 @@
                 {
                     "name": "pair",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -90,7 +90,7 @@
                 {
                     "name": "replace",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 1,
@@ -124,7 +124,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -158,7 +158,7 @@
                 {
                     "name": "key",
                     "position": 0,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "",

@@ -1248,6 +1248,7 @@ MYSQL;
                   'line' => $primary_value,
                   'chrono' => microtime(true)
                 ];
+                self::$db->setLastInsertId($primary_value);
               }
               self::enable();
             }

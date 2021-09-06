@@ -52,6 +52,18 @@ class Model extends bbn\Models\Cls\Db
    */
   private $_checkers;
 
+  /**
+   * The URL path to the plugin.
+   * @var null|string
+   */
+  private $_plugin;
+
+  /**
+   * The plugin name.
+   * @var null|string
+   */
+  private $_plugin_name;
+
   public
     /**
      * The database connection instance
@@ -92,9 +104,11 @@ class Model extends bbn\Models\Cls\Db
       $this->_mvc  = $mvc;
       $this->inc = &$mvc->inc;
       if (is_file($info['file'])) {
-        $this->_path     = $info['path'];
-        $this->_file     = $info['file'];
-        $this->_checkers = $info['checkers'] ?? [];
+        $this->_path        = $info['path'];
+        $this->_file        = $info['file'];
+        $this->_checkers    = $info['checkers'] ?? [];
+        $this->_plugin_name = $info['plugin_name'] ?? null;
+        $this->_plugin      = $info['plugin'] ?? null;
       }
     }
     else{
@@ -198,7 +212,7 @@ class Model extends bbn\Models\Cls\Db
     $this->data = $data;
     if ($this->_plugin) {
       $router = Router::getInstance();
-      if ($textDomain = $router->getLocaleDomain($this->_plugin)) {
+      if ($textDomain = $router->getLocaleDomain($this->_plugin_name)) {
         $oldTextDomain = textdomain(null);
         if ($textDomain !== $oldTextDomain) {
           textdomain($textDomain);

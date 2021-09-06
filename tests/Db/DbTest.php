@@ -1067,6 +1067,7 @@ class DbTest extends TestCase
     $this->assertSame($result, $this->db->fetchAll($query));
   }
 
+  
   /** @test */
   public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_a_result_set()
   {
@@ -1078,6 +1079,7 @@ class DbTest extends TestCase
     $this->assertSame($result, $this->db->fetchColumn($query, 1));
   }
 
+  
   /** @test */
   public function fetchObject_method_()
   {
@@ -2048,6 +2050,7 @@ class DbTest extends TestCase
     $this->assertSame($result, $this->db->status('users'));
   }
 
+  
   /** @test */
   public function getUid_method_returns_a_uid()
   {
@@ -2256,7 +2259,6 @@ class DbTest extends TestCase
 
     $this->setNonPublicPropertyValue('language', new class {
     });
-
     $this->db->getRealLastParams();
   }
 

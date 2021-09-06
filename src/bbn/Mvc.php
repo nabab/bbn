@@ -528,8 +528,8 @@ class Mvc implements Mvc\Api
 
     public function setLocale(string $locale)
     {
-        $this->env->setLocale($locale);
-        $this->initLocaleDomain();
+      $this->env->setLocale($locale);
+      $this->initLocaleDomain($this->info ? $this->info['plugin_name'] : null);
     }
 
 
@@ -563,28 +563,29 @@ class Mvc implements Mvc\Api
                 $$bbn_inc_key = $bbn_inc_val;
               }
 
-                unset($bbn_inc_key, $bbn_inc_val);
+              unset($bbn_inc_key, $bbn_inc_val);
             }
+            unset($bbn_inc_data);
 
-              unset($bbn_inc_data);
-              /*
-              try {
-                eval('?>'.$bbn_inc_content);
-              }
-              catch (\Exception $e){
-                //error_log($e->getMessage());
-                X::logError($e->getCode(), , $bbn_inc_file, 1);
-              }
-              */
-              eval('use bbn\X as xx; use bbn\Str as st; ?>'.$bbn_inc_content);
+            /*
+            try {
+              eval('?>'.$bbn_inc_content);
+            }
+            catch (\Exception $e){
+              //error_log($e->getMessage());
+              X::logError($e->getCode(), , $bbn_inc_file, 1);
+            }
+            */
+            eval('use bbn\X as xx; use bbn\Str as st; ?>'.$bbn_inc_content);
 
-              $c = ob_get_contents();
-              ob_end_clean();
-              return $c;
+            $c = ob_get_contents();
+            ob_end_clean();
+            return $c;
           }
 
-            return '';
+          return '';
         };
+
         return $fn();
     }
 
@@ -652,16 +653,14 @@ class Mvc implements Mvc\Api
     }
 
 
-    private function initLocaleDomain()
+    private function initLocaleDomain(string $pluginName = null)
     {
       if ($this->router
           && $this->getLocale()
-          && ($textdomain = $this->router->getLocaleDomain())
+          && ($textdomain = $this->router->getLocaleDomain($pluginName))
       ) {
-          textdomain($textdomain);
+        textdomain($textdomain);
       }
-
-        return $this;
     }
 
 
@@ -700,9 +699,9 @@ class Mvc implements Mvc\Api
         }
       }
 
-        $this->initLocaleDomain();
-        $this->router = new Mvc\Router($this, $routes);
-        $this->route();
+      $this->initLocaleDomain();
+      $this->router = new Mvc\Router($this, $routes);
+      $this->route();
     }
 
 

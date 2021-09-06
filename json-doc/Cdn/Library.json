@@ -67,7 +67,7 @@
                 {
                     "name": "lang",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": "en",
@@ -168,7 +168,7 @@
                 {
                     "name": "res",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -223,7 +223,7 @@
                 {
                     "name": "has_dep",
                     "position": 1,
-                    "type": null,
+                    "type": "",
                     "required": false,
                     "has_default": true,
                     "default": 1,

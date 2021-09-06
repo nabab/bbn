@@ -281,6 +281,7 @@ class Db implements Db\Actions
     return $this->language->treatConditions($where, $full);
   }
 
+
   /**
    * @param array $cfg
    * @return array|null
@@ -314,7 +315,6 @@ class Db implements Db\Actions
   {
     return $this->language->check();
   }
-
 
   /**
    * Writes in data/logs/db.log.
