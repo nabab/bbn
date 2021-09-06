@@ -6,7 +6,6 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\X;
-use PHPMailer\PHPMailer\Exception;
 use PhpOffice\PhpWord\Element\PageBreakTest;
 
 /**
@@ -88,7 +87,7 @@ class Option extends bbn\Models\Cls\Db
    * X::dump($opt);
    * // (options)
    * ```
-   * @return options
+   * @return Option
    */
   public static function getOptions(): self
   {
@@ -104,8 +103,9 @@ class Option extends bbn\Models\Cls\Db
    * $opt = new bbn\Appui\Options($db);
    * ```
    *
-   * @param bbn\Db $db  a database connection object
-   * @param array  $cfg configuration array
+   * @param bbn\Db $db a database connection object
+   * @param array $cfg configuration array
+   * @throws \Exception
    */
   public function __construct(bbn\Db $db, array $cfg = [])
   {
@@ -128,7 +128,8 @@ class Option extends bbn\Models\Cls\Db
       $t          =& $this;
       $this->root = $this->cacheGetSet(
         function () use (&$t) {
-          return $t->db->selectOne('bbn_options', 'id', ['id_parent' => null, 'code' => 'root']);
+          return $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [
+            $t->fields['id_parent'] => null, $t->fields['code'] => 'root']);
         },
         'root',
         'root',
@@ -142,11 +143,11 @@ class Option extends bbn\Models\Cls\Db
         $this->default = $this->cacheGetSet(
           function () use (&$t) {
             $res = $t->db->selectOne(
-              'bbn_options',
-              'id',
+              $t->class_cfg['table'],
+              $t->fields['id'],
               [
-                'id_parent' => $this->root,
-                'code' => BBN_APP_NAME
+                $t->fields['id_parent'] => $this->root,
+                $t->fields['code'] => BBN_APP_NAME
               ]
             );
             if (!$res) {
@@ -164,7 +165,7 @@ class Option extends bbn\Models\Cls\Db
         $this->default = $this->root;
       }
 
-      $this->is_init;
+      $this->is_init = true;
     }
 
     return true;
@@ -180,11 +181,10 @@ class Option extends bbn\Models\Cls\Db
    * // This is chainable
    * // ->...
    * ```
-
-   * @param int     $id   The option's ID
+   * @param string|null $id The option's ID
    * @param boolean $deep If sets to true, children's cache will also be deleted
    * @param boolean $subs Used internally only for deleting children's cache without their parent
-   * @return options
+   * @return Option
    */
   public function deleteCache(string $id = null, $deep = false, $subs = false): self
   {

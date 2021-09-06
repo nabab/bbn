@@ -184,13 +184,13 @@ class Query extends \PDOStatement implements Actions
   {
     $this->execute();
     if ($ctor_args) {
-      $res = $this->fetchAll($fetch_style, $fetch_argument, $ctor_args);
+      $res = parent::fetchAll($fetch_style, $fetch_argument, $ctor_args);
     }
     elseif ($fetch_argument) {
-      $res = $this->fetchAll($fetch_style, $fetch_argument);
+      $res = parent::fetchAll($fetch_style, $fetch_argument);
     }
     else{
-      $res = $this->fetchAll($fetch_style);
+      $res = parent::fetchAll($fetch_style);
     }
 
     return bbn\Str::correctTypes($res);

@@ -62,10 +62,10 @@ class DbTest extends TestCase
   protected function getDbConfig()
   {
     return [
-      'engine'        => $this->mysql_mock,
-      'host'          => 'localhost',
-      'user'          => 'root',
-      'db'            => 'bbn_test'
+      'engine' => $this->mysql_mock,
+      'host' => 'localhost',
+      'user' => 'root',
+      'db' => 'bbn_test'
     ];
   }
 
@@ -246,7 +246,7 @@ class DbTest extends TestCase
         'exp' => '\`profiles_users\`.\`last_name\`'
       ]
     ];
-      $this->assertTrue(true);
+    $this->assertTrue(true);
 //    $this->assertSame($expected, $this->db->replaceTableInConditions($data, 'first_name', 'last_name'));
   }
 
@@ -445,7 +445,8 @@ class DbTest extends TestCase
   /** @test */
   public function setTrigger_method_applies_a_function_each_time_the_given_methods_are_called()
   {
-    $callback = function (){};
+    $callback = function () {
+    };
 
     $this->mysql_mock->shouldReceive('setTrigger')
       ->once()
@@ -679,9 +680,9 @@ class DbTest extends TestCase
       ->once()
       ->with($query = 'SELECT name,id_group FROM table_users')
       ->andReturn($result = [
-          'John'   => 1,
-         'Michael' => 1,
-         'Barbara' => 1
+        'John' => 1,
+        'Michael' => 1,
+        'Barbara' => 1
       ]);
 
     $this->assertSame($result, $this->db->getKeyVal($query));
@@ -703,17 +704,17 @@ class DbTest extends TestCase
   {
     $this->mysql_mock->shouldReceive('select')
       ->once()
-      ->with('table_users', ['name', 'surname'], [['id','>','2']], [], 0)
+      ->with('table_users', ['name', 'surname'], [['id', '>', '2']], [], 0)
       ->andReturn(
         $result = (object)[
-          'name'    => 'john',
+          'name' => 'john',
           'lastname' => 'doe'
         ]
       );
 
     $this->assertSame(
       $result,
-      $this->db->select('table_users', ['name', 'surname'], [['id','>','2']])
+      $this->db->select('table_users', ['name', 'surname'], [['id', '>', '2']])
     );
   }
 
@@ -724,15 +725,15 @@ class DbTest extends TestCase
       ->once()
       ->with("table_users", ["id", "name"], [["id", ">", 1]], ["id" => "ASC"], 2, 0)
       ->andReturn($result = [
-        (object) [
-          'id'   => '12',
+        (object)[
+          'id' => '12',
           'name' => 'john'
         ]
       ]);
 
     $this->assertSame(
       $result,
-      $this->db->selectAll("table_users", ["id", "name"],[["id", ">", 1]], ["id" => "ASC"], 2)
+      $this->db->selectAll("table_users", ["id", "name"], [["id", ">", 1]], ["id" => "ASC"], 2)
     );
   }
 
@@ -929,8 +930,8 @@ class DbTest extends TestCase
     $this->mysql_mock->shouldReceive('insert')
       ->with(
         "table_users", [
-          ["name" => "Ted"], ["surname" => "McLow"]
-        ], false
+        ["name" => "Ted"], ["surname" => "McLow"]
+      ], false
       )
       ->once()
       ->andReturn(1);
@@ -1046,7 +1047,7 @@ class DbTest extends TestCase
       ->with($query = 'SELECT name FROM users WHERE id = 10')
       ->andReturn($result = [
         'name' => 'john',
-        0      => 'john'
+        0 => 'john'
       ]);
 
     $this->assertSame($result, $this->db->fetch($query));
@@ -1065,6 +1066,7 @@ class DbTest extends TestCase
 
     $this->assertSame($result, $this->db->fetchAll($query));
   }
+
   
   /** @test */
   public function fetchColumn_method_returns_a_single_column_from_the_next_row_of_a_result_set()
@@ -1076,6 +1078,7 @@ class DbTest extends TestCase
 
     $this->assertSame($result, $this->db->fetchColumn($query, 1));
   }
+
   
   /** @test */
   public function fetchObject_method_()
@@ -1084,7 +1087,7 @@ class DbTest extends TestCase
       ->once()
       ->with($query = "SELECT id, name FROM users WHERE name = 'john'")
       ->andReturn($result = (object)[
-        'id'   => 1,
+        'id' => 1,
         'name' => 'john'
       ]);
 
@@ -1331,13 +1334,13 @@ class DbTest extends TestCase
       ->with('users')
       ->andReturn($result = [
         'id' => [
-          'position'  => 1,
-          'key'       => 'PRI',
-          'default'   => null,
-          'extra'     => 'auto_increment',
-          'signed'    => 0,
+          'position' => 1,
+          'key' => 'PRI',
+          'default' => null,
+          'extra' => 'auto_increment',
+          'signed' => 0,
           'maxlength' => '8',
-          'type'      => 'int',
+          'type' => 'int',
         ]
       ]);
 
@@ -1348,24 +1351,24 @@ class DbTest extends TestCase
   public function getKeys_method_returns_tables_keys_as_an_array_indexed_with_fields_names()
   {
     $this->mysql_mock->shouldReceive('getKeys')
-    ->once()
-    ->with('users')
-    ->andReturn($result = [
-      'keys' => [
-        'PRIMARY' => [
-          'columns' => ['id']
+      ->once()
+      ->with('users')
+      ->andReturn($result = [
+        'keys' => [
+          'PRIMARY' => [
+            'columns' => ['id']
+          ],
+          'ref_db' => null,
+          'ref_table' => null,
+          'ref_column' => null,
+          'unique' => 1
         ],
-        'ref_db'     => null,
-        'ref_table'  => null,
-        'ref_column' => null,
-        'unique'     => 1
-      ],
-      'cols' => [
-        'id' => [
-          'PRIMARY'
+        'cols' => [
+          'id' => [
+            'PRIMARY'
+          ]
         ]
-      ]
-    ]);
+      ]);
 
     $this->assertSame($result, $this->db->getKeys('users'));
   }
@@ -1378,9 +1381,9 @@ class DbTest extends TestCase
       ->with($conditions = [
         'conditions' => [
           [
-            'field'     => 'id',
-            'operator'  => '=',
-            'value'     => 12
+            'field' => 'id',
+            'operator' => '=',
+            'value' => 12
           ]
         ]
       ], [], false, 0)
@@ -1411,7 +1414,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getSelect(['foo' => 'bar']);
   }
@@ -1443,7 +1447,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getInsert(['foo' => 'bar']);
   }
@@ -1475,7 +1480,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getUpdate(['foo' => 'bar']);
   }
@@ -1506,7 +1512,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getDelete(['foo' => 'bar']);
   }
@@ -1517,12 +1524,12 @@ class DbTest extends TestCase
     $cfg = [
       'join' => [
         'table' => 'users',
-        'on'    => [
+        'on' => [
           'conditions' => [
             [
-              'field'    => 'id',
+              'field' => 'id',
               'operator' => '=',
-              'value'    => '1'
+              'value' => '1'
             ]
           ],
         ]
@@ -1543,7 +1550,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getJoin(['foo' => 'bar']);
   }
@@ -1570,7 +1578,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getWhere(['foo' => 'bar']);
   }
@@ -1579,7 +1588,7 @@ class DbTest extends TestCase
   public function getGroupBy_method_returns_sql_string_for_group_by_clause_if_exists_and_empty_otherwise()
   {
     $cfg = [
-      'group_by'         => ['id', 'name'],
+      'group_by' => ['id', 'name'],
       'available_fields' => ['id', 'name']
     ];
 
@@ -1597,7 +1606,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getGroupBy(['foo' => 'bar']);
   }
@@ -1606,9 +1616,9 @@ class DbTest extends TestCase
   public function getHaving_method_returns_sql_string_for_having_clause_if_exists_()
   {
     $cfg = [
-      'group_by'         => ['id', 'name'],
+      'group_by' => ['id', 'name'],
       'available_fields' => ['id', 'name'],
-      'having'           => ['id > 12']
+      'having' => ['id > 12']
     ];
 
     $this->mysql_mock->shouldReceive('getHaving')
@@ -1625,18 +1635,19 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getHaving(['foo' => 'bar']);
   }
-  
+
   /** @test */
   public function getOrder_method_returns_sql_string_for_order_clause()
   {
     $cfg = [
       'order' => ['id' => 'desc'],
       'available_fields' => ['id' => []],
-      'fields'           => ['id' => []]
+      'fields' => ['id' => []]
     ];
 
     $this->mysql_mock->shouldReceive('getOrder')
@@ -1653,7 +1664,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getOrder(['foo' => 'bar']);
   }
@@ -1661,7 +1673,7 @@ class DbTest extends TestCase
   /** @test */
   public function getLimit_method_returns_sql_string_for_limit_clause()
   {
-    $cfg = ['limit' => 12, 'start'  => 0];
+    $cfg = ['limit' => 12, 'start' => 0];
 
     $this->mysql_mock->shouldReceive('getLimit')
       ->once()
@@ -1677,7 +1689,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getLimit(['foo' => 'bar']);
   }
@@ -1699,7 +1712,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getCreate('foo');
   }
@@ -1721,7 +1735,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getCreateTable('foo');
   }
@@ -1743,7 +1758,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getCreateKeys('foo');
   }
@@ -1765,7 +1781,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getCreateConstraints('foo');
   }
@@ -1789,7 +1806,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->createIndex('users', 'id');
   }
@@ -1813,7 +1831,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->deleteIndex('users', 'id');
   }
@@ -1835,7 +1854,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getAlter('users', []);
   }
@@ -1857,7 +1877,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getAlterTable('users', []);
   }
@@ -1879,7 +1900,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getAlterColumn('users', []);
   }
@@ -1901,7 +1923,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getAlterKey('users', []);
   }
@@ -1934,7 +1957,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->createUser('foo', '12345');
   }
@@ -1956,7 +1980,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->deleteUser('foo');
   }
@@ -1981,7 +2006,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getUsers('john');
   }
@@ -2015,14 +2041,15 @@ class DbTest extends TestCase
       ->once()
       ->with('users', '')
       ->andReturn($result = [
-        'Name'        => 'users',
-        'Engine'      => 'innoDb',
-        'Version'     => '10',
+        'Name' => 'users',
+        'Engine' => 'innoDb',
+        'Version' => '10',
         'Data_length' => '1234'
       ]);
 
     $this->assertSame($result, $this->db->status('users'));
   }
+
   
   /** @test */
   public function getUid_method_returns_a_uid()
@@ -2090,7 +2117,7 @@ class DbTest extends TestCase
       ->with($query = 'SELECT id, name FROM table_users WHERE id > ?', 2)
       ->andReturn($result = [
         'name' => [
-         'john', 'smith'
+          'john', 'smith'
         ],
         'id' => [
           '12', '13'
@@ -2107,7 +2134,7 @@ class DbTest extends TestCase
       ->once()
       ->with($query = 'SELECT id, name FROM users WHERE id > ?', 2)
       ->andReturn($result = (object)[
-        'id'   => '3',
+        'id' => '3',
         'name' => 'john'
       ]);
 
@@ -2121,7 +2148,7 @@ class DbTest extends TestCase
       ->once()
       ->with($query = 'SELECT id, name FROM users WHERE id > ?', 2)
       ->andReturn($result = (object)[
-        'id'   => '3',
+        'id' => '3',
         'name' => 'john'
       ]);
 
@@ -2135,8 +2162,8 @@ class DbTest extends TestCase
       ->once()
       ->with($query = 'SELECT id, name FROM users WHERE id > ?', 2)
       ->andReturn($result = [
-        (object) ['id' => '3', 'name' => 'john'],
-        (object) ['id' => '4', 'name' => 'smith'],
+        (object)['id' => '3', 'name' => 'john'],
+        (object)['id' => '4', 'name' => 'smith'],
       ]);
 
     $this->assertSame($result, $this->db->getObjects($query, 2));
@@ -2181,7 +2208,8 @@ class DbTest extends TestCase
   {
     $this->mysql_mock->shouldNotReceive('enableLast');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->enableLast();
 
@@ -2204,7 +2232,8 @@ class DbTest extends TestCase
   {
     $this->mysql_mock->shouldNotReceive('disableLast');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->disableLast();
 
@@ -2228,8 +2257,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
-
+    $this->setNonPublicPropertyValue('language', new class {
+    });
     $this->db->getRealLastParams();
   }
 
@@ -2250,7 +2279,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->realLast();
   }
@@ -2272,7 +2302,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getLastParams();
   }
@@ -2294,7 +2325,8 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getLastValues();
   }
@@ -2316,8 +2348,53 @@ class DbTest extends TestCase
     $this->expectException(\Exception::class);
     $this->expectExceptionMessage('Method not found on the language class!');
 
-    $this->setNonPublicPropertyValue('language', new class {});
+    $this->setNonPublicPropertyValue('language', new class {
+    });
 
     $this->db->getQueryValues([]);
+  }
+
+  /** @test */
+  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  {
+    $this->mysql_mock->shouldReceive('getLastCfg')
+      ->once()
+      ->withNoArgs()
+      ->andReturn(['a' => 'b']);
+
+    $this->assertSame(['a' => 'b'], $this->db->getLastCfg());
+  }
+
+  /** @test */
+  public function getConnection_method_returns_connection_configuration()
+  {
+    $this->mysql_mock->shouldReceive('getConnection')
+      ->once()
+      ->with(['a' => 'b'])
+      ->andReturn(['c' => 'd']);
+
+    $this->assertSame(['c' => 'd'], $this->db->getConnection(['a' => 'b']));
+  }
+
+  /** @test */
+  public function renameTable_method_rename_the_given_table_to_the_given_new_name()
+  {
+    $this->mysql_mock->shouldReceive('renameTable')
+      ->once()
+      ->with('table_name', 'new_table_name')
+      ->andReturnTrue();
+
+    $this->assertTrue($this->db->renameTable('table_name', 'new_table_name'));
+  }
+
+  /** @test */
+  public function getTableComment_method_returns_the_comment_for_the_given_table()
+  {
+    $this->mysql_mock->shouldReceive('getTableComment')
+      ->once()
+      ->with('table_name')
+      ->andReturn('table_comment');
+
+    $this->assertSame('table_comment', $this->db->getTableComment('table_name'));
   }
 }

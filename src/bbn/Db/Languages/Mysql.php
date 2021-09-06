@@ -54,6 +54,44 @@ class Mysql extends Sql
       throw new \Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
+    $cfg = $this->getConnection($cfg);
+
+    try {
+      $this->cacheInit();
+      $this->current  = $cfg['db'] ?? null;
+      $this->host     = $cfg['host'] ?? '127.0.0.1';
+      $this->username = $cfg['user'] ?? null;
+      $this->connection_code = $cfg['code_host'];
+
+      $this->pdo = new \PDO(...$cfg['args']);
+      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->cfg = $cfg;
+      $this->setHash($cfg['args']);
+
+      if (!empty($cfg['cache_length'])) {
+        $this->cache_renewal = (int)$cfg['cache_length'];
+      }
+
+      if (isset($cfg['on_error'])) {
+        $this->on_error = $cfg['on_error'];
+      }
+
+      unset($cfg['pass']);
+    }
+    catch (\PDOException $e){
+      $err = X::_("Impossible to create the connection").
+        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
+             .X::_("with the following error").$e->getMessage();
+      throw new \Exception($err);
+    }
+  }
+
+  /**
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
+   */
+  public function getConnection(array $cfg = []): ?array
+  {
     if (!X::hasProps($cfg, ['host', 'user'])) {
       if (!defined('BBN_DB_HOST')) {
         throw new \Exception(X::_("No DB host defined"));
@@ -87,43 +125,16 @@ class Mysql extends Sql
 
     $cfg['code_db']   = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
-    $params           = ['mysql:host='
-        .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
-        .';port='.$cfg['port']
-        .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
+    $cfg['args']      = ['mysql:host='
+      .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
+      .';port='.$cfg['port']
+      .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
       $cfg['pass'],
       [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
     ];
 
-    try {
-      $this->cacheInit();
-      $this->current  = $cfg['db'] ?? null;
-      $this->host     = $cfg['host'] ?? '127.0.0.1';
-      $this->username = $cfg['user'] ?? null;
-      $this->connection_code = $cfg['code_host'];
-
-      $this->pdo = new \PDO(...$params);
-      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-      $this->cfg = $cfg;
-      $this->setHash($params);
-
-      if (!empty($cfg['cache_length'])) {
-        $this->cache_renewal = (int)$cfg['cache_length'];
-      }
-
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
-      unset($cfg['pass']);
-    }
-    catch (\PDOException $e){
-      $err = X::_("Impossible to create the connection").
-        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
-             .X::_("with the following error").$e->getMessage();
-      throw new \Exception($err);
-    }
+    return $cfg;
   }
 
   /**
@@ -323,6 +334,49 @@ MYSQL
     return null;
   }
 
+  /**
+   * Renames the given table to the new given name.
+   *
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool
+  {
+    if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
+      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
+      $res = $this->rawQuery(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
+      return !!$res;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    if ($tmp = $this->tableFullName($table)) {
+      $bits = X::split($tmp, '.');
+      return $this->getOne(
+        "SELECT table_comment
+        FROM INFORMATION_SCHEMA.TABLES 
+        WHERE table_schema = ?
+        AND table_name = ?",
+        $bits[0],
+        $bits[1]
+      ) ?? '';
+    }
+
+    return '';
+  }
 
   /**
    * Gets the size of a database
@@ -848,7 +902,7 @@ MYSQL
     }
 
     return '';
-  }
+ }
 
   /**
    * @param string $table

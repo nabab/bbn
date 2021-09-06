@@ -199,6 +199,30 @@ class Db implements Db\Actions
     return $this->language->getConnectionCode();
   }
 
+  /**
+   * Return the last config for this connection.
+   *
+   * ```php
+   * X::dump($db->getLastCfg());
+   * // (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)
+   * ```
+   *
+   * @return array|null
+   */
+  public function getLastCfg(): ?array
+  {
+    return $this->language->getLastCfg();
+  }
+
+  /**
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
+   */
+  public function getConnection(array $cfg = []): ?array
+  {
+    return $this->language->getConnection($cfg);
+  }
+
 
   /****************************************************************
    *                                                              *
@@ -257,6 +281,7 @@ class Db implements Db\Actions
     return $this->language->treatConditions($where, $full);
   }
 
+
   /**
    * @param array $cfg
    * @return array|null
@@ -290,7 +315,6 @@ class Db implements Db\Actions
   {
     return $this->language->check();
   }
-
 
   /**
    * Writes in data/logs/db.log.
@@ -2716,6 +2740,30 @@ class Db implements Db\Actions
     return $this->language->getUsers($user, $host);
   }
 
+
+  /**
+   * Renames the given table to the new given name.
+   *
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool
+  {
+    return $this->language->renameTable($table, $newName);
+  }
+
+  /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    return $this->language->getTableComment($table);
+  }
 
   /**
    * Gets the size of a database

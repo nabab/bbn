@@ -85,12 +85,7 @@ trait HasError
         }
       }
     }
-    /*
-    if ($params = $this->getLastParams()) {
-      die(X::dump($params));
-      $msg[] = json_encode($params, JSON_PRETTY_PRINT);
-    }
-    */
+
 
     $msg[] = self::getLogLine('BACKTRACE');
     $dbt   = array_reverse(debug_backtrace());

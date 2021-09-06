@@ -147,7 +147,7 @@ class Pgsql extends Sql
 
   /** @var string The quote character */
   public $qte = '';
-
+  
   /**
    * Constructor
    * @param array $cfg
@@ -158,47 +158,7 @@ class Pgsql extends Sql
       throw new \Exception('The PgSql driver for PDO is not installed...');
     }
 
-    if (!X::hasProps($cfg, ['host', 'user'])) {
-      if (!defined('BBN_DB_HOST')) {
-        throw new \Exception(X::_("No DB host defined"));
-      }
-
-      $cfg = [
-        'host' => BBN_DB_HOST,
-        'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
-        'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
-        'db'   => defined('BBN_DATABASE') ? BBN_DATABASE : '',
-      ];
-    }
-
-    $cfg['engine'] = 'pgsql';
-
-    if (empty($cfg['host'])) {
-      $cfg['host'] = '127.0.0.1';
-    }
-
-    if (empty($cfg['user'])) {
-      $cfg['user'] = 'root';
-    }
-
-    if (!isset($cfg['pass'])) {
-      $cfg['pass'] = '';
-    }
-
-    if (empty($cfg['port']) || !is_int($cfg['port'])) {
-      $cfg['port'] = 5432;
-    }
-
-    $cfg['code_db']   = $cfg['db'] ?? '';
-    $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
-    $params           = ['pgsql:host='
-      .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
-      .';port='.$cfg['port']
-      .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
-      $cfg['user'],
-      $cfg['pass'],
-      [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
-    ];
+    $cfg = $this->getConnection($cfg);
 
     try {
       $this->cacheInit();
@@ -207,10 +167,10 @@ class Pgsql extends Sql
       $this->username = $cfg['user'] ?? null;
       $this->connection_code = $cfg['code_host'];
 
-      $this->pdo = new \PDO(...$params);
+      $this->pdo = new \PDO(...$cfg['args']);
       $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
       $this->cfg = $cfg;
-      $this->setHash($params);
+      $this->setHash($cfg['args']);
 
       if (!empty($cfg['cache_length'])) {
         $this->cache_renewal = (int)$cfg['cache_length'];
@@ -244,6 +204,58 @@ class Pgsql extends Sql
   {
     return $this->connection_code;
   }
+
+  /**
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
+   */
+  public function getConnection(array $cfg = []): ?array
+  {
+    if (!X::hasProps($cfg, ['host', 'user'])) {
+      if (!defined('BBN_DB_HOST')) {
+        throw new \Exception(X::_("No DB host defined"));
+      }
+
+      $cfg = [
+        'host' => BBN_DB_HOST,
+        'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
+        'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
+        'db'   => defined('BBN_DATABASE') ? BBN_DATABASE : '',
+      ];
+    }
+
+    $cfg['engine'] = 'pgsql';
+
+    if (empty($cfg['host'])) {
+      $cfg['host'] = '127.0.0.1';
+    }
+
+    if (empty($cfg['user'])) {
+      $cfg['user'] = 'root';
+    }
+
+    if (!isset($cfg['pass'])) {
+      $cfg['pass'] = '';
+    }
+
+    if (empty($cfg['port']) || !is_int($cfg['port'])) {
+      $cfg['port'] = 5432;
+    }
+
+    $cfg['code_db']   = $cfg['db'] ?? '';
+    $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
+    $cfg['args']      = ['pgsql:host='
+      .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
+      .';port='.$cfg['port']
+      .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
+      $cfg['user'],
+      $cfg['pass'],
+      [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+    ];
+
+    return $cfg;
+  }
+  
   /*****************************************************************************************************************
    *                                                                                                                *
    *                                                                                                                *
@@ -475,6 +487,47 @@ PSQL
     return null;
   }
 
+  /**
+   * Renames the given table to the new given name.
+   *
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool
+  {
+    if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
+      $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
+      $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
+
+      $res = $this->rawQuery(sprintf("ALTER TABLE %s RENAME TO %s", $t1, $t2));
+      return !!$res;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string
+  {
+    if ($table = $this->tableFullName($table)) {
+      return $this->getOne(
+        "SELECT obj_description(oid)
+         FROM pg_class
+         WHERE relkind = 'r'
+         AND relname = ?",
+        $table
+      ) ?? '';
+    }
+
+    return '';
+  }
 
   /**
    * Gets the size of a database

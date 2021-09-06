@@ -50,4 +50,22 @@ interface SqlEngines
    * @return array
    */
   public function getUsers(string $user = '', string $host = ''): ?array;
+
+  /**
+   * Renames the given table to the new given name.
+   *
+   * @param string $table   The current table's name
+   * @param string $newName The new name.
+   * @return bool  True if it succeeded
+   */
+  public function renameTable(string $table, string $newName): bool;
+
+  /**
+   * Returns the comment (or an empty string if none) for a given table.
+   *
+   * @param string $table The table's name
+   *
+   * @return string The table's comment
+   */
+  public function getTableComment(string $table): string;
 }

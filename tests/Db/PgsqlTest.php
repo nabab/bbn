@@ -121,6 +121,7 @@ class PgsqlTest extends TestCase
       'user'          => getenv('pgsql_db_user'),
       'pass'          => getenv('pgsql_db_pass'),
       'db'            => getenv('pgsql_db_name'),
+      'port'          => getenv('pgsql_db_port'),
       'cache_length'  => 3000,
       'on_error'      => Errors::E_STOP,
       'force_host'    => true
@@ -285,7 +286,12 @@ class PgsqlTest extends TestCase
       array_merge($db_config, [
         'port' => 5432,
         'code_db'   => $db_config['db'],
-        'code_host' => "{$db_config['user']}@{$db_config['host']}"
+        'code_host' => "{$db_config['user']}@{$db_config['host']}",
+        'args'      => ["pgsql:host={$db_config['host']};port={$db_config['port']};dbname={$db_config['db']}",
+          $db_config['user'],
+          $db_config['pass'],
+          [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+        ]
       ]),
       $this->getNonPublicProperty('cfg')
     );
@@ -8982,6 +8988,86 @@ GROUP BY id
     $this->assertSame(
       'From the overridden method!',
       self::$pgsql->fetchAllResults($class)
+    );
+  }
+
+  /** @test */
+  public function getLastCfg_method_returns_the_last_config_for_the_connection()
+  {
+    $this->assertSame(
+      $this->getNonPublicProperty('last_cfg'),
+      self::$pgsql->getLastCfg()
+    );
+  }
+
+  /** @test */
+  public function renameTable_method_renames_the_given_table_to_the_new_given_name()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertTrue(
+      self::$pgsql->renameTable('users', 'users2')
+    );
+
+    $tables = self::$pgsql->getTables();
+
+    $this->assertTrue(in_array('users2', $tables));
+    $this->assertTrue(!in_array('users', $tables));
+  }
+
+  /** @test */
+  public function renameTable_method_returns_false_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertFalse(
+      self::$pgsql->renameTable('users', 'users2')
+    );
+  }
+
+  /** @test */
+  public function renameTable_method_returns_false_when_the_given_table_names_are_not_valid()
+  {
+    $this->assertFalse(
+      self::$pgsql->renameTable('users**', 'users2')
+    );
+
+    $this->assertFalse(
+      self::$pgsql->renameTable('users', 'users2**')
+    );
+
+    $this->assertFalse(
+      self::$pgsql->renameTable('users&&', 'users2**')
+    );
+  }
+
+  /** @test */
+  public function getTableComment_method_returns_the_comment_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id serial';
+    });
+
+    self::$pgsql->rawQuery("COMMENT ON TABLE users IS 'Hello world!'");
+
+    $this->assertSame(
+      'Hello world!',
+      self::$pgsql->getTableComment('users')
+    );
+  }
+
+  /** @test */
+  public function getTableComment_method_returns_empty_string_if_the_given_table_has_no_comment()
+  {
+    $this->createTable('users', function () {
+      return 'id serial';
+    });
+
+    $this->assertSame(
+      '',
+      self::$pgsql->getTableComment('users')
     );
   }
 }
