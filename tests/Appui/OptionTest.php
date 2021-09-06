@@ -447,6 +447,4 @@ class OptionTest extends TestCase
     );
   }
 
-  /** @test */
-  public function fromCode_method_gets_an_option_id_from_
 }
