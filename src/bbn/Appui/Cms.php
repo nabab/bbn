@@ -37,6 +37,7 @@ class Cms extends bbn\Models\Cls\Db
 					'id_parent' => 'id_parent',
 					'id_alias' => 'id_alias',
 					'id_type' => 'id_type',
+					'id_option' => 'id_option',
 					'private' => 'private',
 					'locked' => 'locked',
 					'pinned' => 'pinned',
@@ -282,8 +283,16 @@ class Cms extends bbn\Models\Cls\Db
    */
 	public function getAll(int $limit = 50, int $start = 0): array 
 	{
-		$id_pages = $this->_options->fromCode('pages', 'types', 'note', 'appui');
-		$pages = $this->_notes->getByType($id_pages, false, $limit, $start);
+		$cfg = $this->_notes->getLastVersionCfg();
+		$cfg['limit'] = $limit;
+		$cfg['start'] = $start >= 0 ? $start : 0;
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['url'],
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+			]]
+		];
 
     return array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
@@ -294,7 +303,7 @@ class Cms extends bbn\Models\Cls\Db
       $a['files']         = $this->_notes->getMedias($a['id_note']) ?: [];
 
       return $a;
-    }, $pages);
+    }, $this->db->rselectAll($cfg));
 	}
 
   /**

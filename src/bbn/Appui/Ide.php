@@ -1805,6 +1805,7 @@ class Ide
               $file_name = $filename;
               $moment    = strtotime(str_replace('_', ' ', $filename));
               $date      = date('d/m/Y', $moment);
+              $dir       = date('Y/m/d', $moment);
               $time      = date('H:i:s', $moment);
 
               if (($i = \bbn\X::find($history_ctrl['items'], ['text' => $date])) === null) {

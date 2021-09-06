@@ -1489,6 +1489,7 @@ class User extends Models\Cls\Basic
    */
   protected function setError($err): self
   {
+    $this->log([$err, $this->class_cfg['errors'][$err] ?? null]);
     if (!$this->error) {
       $this->error = $err;
     }
