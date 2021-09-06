@@ -286,20 +286,35 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg = $this->_notes->getLastVersionCfg();
 		$cfg['limit'] = $limit;
 		$cfg['start'] = $start >= 0 ? $start : 0;
+		$cfg['fields'][] = 'url';
+		$cfg['fields'][] = 'start';
+		$cfg['fields'][] = 'end';
 		$cfg['join'][] = [
-			'table' => $this->class_cfg['tables']['url'],
+			'table' => $this->class_cfg['tables']['notes_url'],
 			'on' => [[
-				'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
 				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+			]],
+		];
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['notes_events'],
+			'type' => 'left',
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+			]]
+		];
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['events'],
+			'type' => 'left',
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
 			]]
 		];
 
     return array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
-      $a['url']           = $this->_notes->hasUrl($a['id_note']) ? $this->_notes->getUrl($a['id_note']) : '';
-      $a['type']          = 'pages';
-      $a['start']         = $this->getStart($a['id_note']);
-      $a['end']           = $this->getEnd($a['id_note']);
       $a['files']         = $this->_notes->getMedias($a['id_note']) ?: [];
 
       return $a;
