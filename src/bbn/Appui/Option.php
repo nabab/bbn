@@ -364,6 +364,9 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @return string|null
+   */
   public function fromRootCode(): ?string
   {
     if ($this->check()) {
@@ -378,6 +381,12 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param array $value
+   * @param $id
+   * @return int|null
+   * @throws \Exception
+   */
   public function setValue(array $value, $id): ?int
   {
     if ($this->check() && $this->exists($id)) {
@@ -402,7 +411,7 @@ class Option extends bbn\Models\Cls\Db
    * // (int)0
    * ```
    *
-   * @return int
+   * @return string|null
    */
   public function getRoot(): ?string
   {
@@ -428,7 +437,7 @@ class Option extends bbn\Models\Cls\Db
    * // (int) 0
    * ```
    *
-   * @return int
+   * @return string|null
    */
   public function getDefault(): ?string
   {
@@ -465,7 +474,8 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param string $uid
-   * @return options
+   * @return Option
+   * @throws \Exception
    */
   public function setDefault($uid): self
   {
@@ -485,7 +495,7 @@ class Option extends bbn\Models\Cls\Db
    * // array [40, 41, 42, 44, 45, 43, 46, 47]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false array of IDs, sorted or false if option not found
    */
   public function items($code = null): ?array
@@ -561,6 +571,10 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param null $code
+   * @return array|null
+   */
   public function nativeOptions($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
@@ -594,7 +608,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false Row or false if the option cannot be found
    */
   public function rawOption($code = null): ?array
@@ -656,7 +670,7 @@ class Option extends bbn\Models\Cls\Db
    * Returns a hierarchical structure as stored in its original form in the database
    *
    * ```php
-   * X::dump($opt->native_raw_tree('77cea323f0ce11e897fd525400007196'));
+   * X::dump($opt->rawTree('77cea323f0ce11e897fd525400007196'));
    * /*
    * array [
    *   'id' => 12,
@@ -692,15 +706,14 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false Tree's array or false if the option cannot be found
    */
   public function rawTree($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($res = $this->rawOption($id)) {
-        $its = $this->items($id);
-        if (\count($its)) {
+        if ($its = $this->items($id)) {
           $res['items'] = [];
           foreach ($its as $it){
             $res['items'][] = $this->rawTree($it);
@@ -4094,8 +4107,8 @@ class Option extends bbn\Models\Cls\Db
 
   /**
    * Gets the first row from a result
-   * @param $where
-   * @return bool
+   * @param array $where
+   * @return array|null
    */
   protected function getRow(array $where): ?array
   {
