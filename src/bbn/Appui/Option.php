@@ -748,7 +748,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false The option array or false if the option cannot be found
    */
   public function optionNoAlias($code = null): ?array
@@ -764,6 +764,10 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param null $code
+   * @return array|null
+   */
   public function getValue($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
@@ -797,7 +801,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false The option array or false if the option cannot be found
    */
   public function option($code = null): ?array
@@ -807,7 +811,8 @@ class Option extends bbn\Models\Cls\Db
     ) {
       $this->_set_value($opt);
       $c =& $this->class_cfg['arch']['options'];
-      if (bbn\Str::isUid($opt[$c['id_alias']]) && ($opt['alias'] = $this->nativeOption($opt[$c['id_alias']]))) {
+      if (bbn\Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
+        $opt['alias'] = $alias;
         if ($opt[$c['id_alias']] === $id) {
           throw new \Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
         }
@@ -844,7 +849,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false The option array or false if the option cannot be found
    */
   public function opAlias($code = null): ?array
@@ -890,7 +895,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false An indexed array of id/text options or false if option not found
    */
   public function options($code = null): ?array
@@ -907,8 +912,8 @@ class Option extends bbn\Models\Cls\Db
         'fields' => [
           'id' => $this->class_cfg['table'].'.'.$cf['id'],
           'text' => 'IFNULL('.
-            $this->db->tfn($this->class_cfg['table'].'.'.$cf['text'], true).', '.
-            $this->db->tfn('alias.'.$cf['text'], true).
+            $this->db->cfn($cf['text'], $this->class_cfg['table'], true).', '.
+            $this->db->cfn($cf['text'], 'alias', true).
             ')'
         ],
         'join' => [
@@ -950,7 +955,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false An indexed array of code/text options or false if option not found
    */
   public function optionsByCode($code = null): ?array
@@ -1005,8 +1010,8 @@ class Option extends bbn\Models\Cls\Db
         }
 
         $res[$i] = [
-          'text' => $is_array ? $o['text'] : $o,
-          'value' => $is_array ? $o['id'] : $k
+          $text => $is_array ? $o['text'] : $o,
+          $value => $is_array ? $o['id'] : $k
         ];
         if (!empty($cfg['show_code'])) {
           $res[$i]['code'] = $o['code'];
@@ -1032,14 +1037,20 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function siblings(): ?array
   {
     if ($id = $this->fromCode(...func_get_args())) {
-      return array_filter(
-        $this->fullOptions($this->getIdParent($id)), function ($a) use ($id) {
-          return $a['id'] !== $id;
-        }
-      );
+      if (($id_parent = $this->getIdParent($id)) && ($full_options = $this->fullOptions($id_parent))) {
+        return array_filter(
+          $full_options, function ($a) use ($id) {
+            return $a['id'] !== $id;
+          }
+        );
+      }
     }
 
     return null;
@@ -1060,8 +1071,8 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false A list of parent if option not found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null A list of parent if option not found
    */
   public function fullOptions($code = null): ?array
   {
@@ -1100,17 +1111,18 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false A list of parent if option not found
    */
   public function fullOptionsRef($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $all = $this->fullOptions($id);
-      $aliases = $this->getAliases($id);
-      foreach ($aliases as $a) {
-        if ($tmp = $this->fullOptions($a['id'])) {
-          array_push($all, ...$tmp);
+      $all = $this->fullOptions($id) ?? [];
+      if ($aliases = $this->getAliases($id)) {
+        foreach ($aliases as $a) {
+          if ($tmp = $this->fullOptions($a['id'])) {
+            array_push($all, ...$tmp);
+          }
         }
       }
 
@@ -1972,8 +1984,8 @@ class Option extends bbn\Models\Cls\Db
    * // (int)25
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return int|false The parent's ID, null if no parent, or false if option cannot be found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return int|string The parent's ID, null if no parent, or false if option cannot be found
    */
   public function getIdParent($code = null): ?string
   {
