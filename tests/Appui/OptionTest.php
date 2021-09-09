@@ -110,8 +110,7 @@ class OptionTest extends TestCase
       ->shouldAllowMockingProtectedMethods()
       ->makePartial();
 
-    $this->setNonPublicPropertyValue('class_cfg', $this->class_cfg);
-    $this->setNonPublicPropertyValue('db', $this->db_mock);
+    $this->option->__construct($this->db_mock, $this->class_cfg);
 
     $this->getNonPublicMethod('cacheInit')
       ->invoke($this->option);
@@ -3021,6 +3020,1222 @@ class OptionTest extends TestCase
 
     $this->assertNull(
       $this->option->fullOptionsRef('list')
+    );
+  }
+
+  /** @test */
+  public function optionsRef_method_individual_option_plus_the_children_of_options_and_aliases()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [
+        [$this->item2 => 'text_2'],
+        [$this->item3 => 'text_3'],
+      ]);
+
+    $this->option->shouldReceive('getAliases')
+      ->once()
+      ->with($this->item)
+      ->andReturn([
+        ['id' => $this->item4],
+        ['id' => $this->item5]
+      ]);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item4)
+      ->andReturn([
+        $expected[] = [$this->item4 => 'text_4']
+      ]);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item5)
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->optionsRef('list')
+    );
+  }
+
+  /** @test */
+  public function optionsRef_method_returns_only_aliases_options_if_failed_to_retrieve_the_give_code_full_options()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->option->shouldReceive('getAliases')
+      ->once()
+      ->with($this->item)
+      ->andReturn([
+        ['id' => $this->item2]
+      ]);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected = [
+        ['1' => 'text']
+      ]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->optionsRef('list')
+    );
+  }
+
+  /** @test */
+  public function optionsRef_method_does_not_return_aliases_options_if_failed_to_retrieve_aliases_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [
+        [$this->item2 => 'text']
+      ]);
+
+    $this->option->shouldReceive('getAliases')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->optionsRef('list')
+    );
+  }
+
+  /** @test */
+  public function optionsRef_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->optionsRef('list')
+    );
+  }
+
+  /** @test */
+  public function itemsRef_method_returns_each_individual_options_plus_the_children_of_options_and_aliases()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [$this->item2, $this->item3]);
+
+    $this->option->shouldReceive('getAliases')
+      ->once()
+      ->with($this->item)
+      ->andReturn([
+        ['id' => $this->item4],
+        ['id' => $this->item5]
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with(['id' => $this->item4])
+      ->andReturn([
+        $expected[] = $this->item4,
+        $expected[] = $this->item5,
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with(['id' => $this->item5])
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->itemsRef('list')
+    );
+  }
+
+  /** @test */
+  public function itemsRef_method_returns_only_aliases_options_if_failed_to_retrieve_the_give_code_full_options()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->option->shouldReceive('getAliases')
+      ->once()
+      ->with($this->item)
+      ->andReturn([
+        ['id' => $this->item2]
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with(['id' => $this->item2])
+      ->andReturn([
+        $expected[] = $this->item3
+      ]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->itemsRef('list')
+    );
+  }
+
+  /** @test */
+  public function itemsRef_method_does_not_return_aliases_options_if_failed_to_retrieve_aliases_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [
+        $this->item2
+      ]);
+
+    $this->option->shouldReceive('getAliases')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->itemsRef('list')
+    );
+  }
+
+  /** @test */
+  public function itemsRef_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->itemsRef('list')
+    );
+  }
+
+  /** @test */
+  public function codeOptions_method_returns_an_array_of_full_options_arrays_for_the_given_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn($items = [$this->item2, $this->item3]);
+
+    $expected = [];
+    foreach ($items as $key => $item) {
+      $this->option->shouldReceive('option')
+        ->once()
+        ->with($item)
+        ->andReturn($expected["code_$key"] = [
+          'id' => $item,
+          'code' => "code_$key",
+          'text' => "text_$key"
+        ]);
+    }
+
+    $this->assertSame(
+      $expected,
+      $this->option->codeOptions('list')
+    );
+  }
+
+  /** @test */
+  public function codeOptions_method_returns_null_when_failed_to_retrieve_items()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->codeOptions('list')
+    );
+  }
+
+  /** @test */
+  public function codeOptions_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->codeOptions('list')
+    );
+  }
+
+  /** @test */
+  public function codeIds_method_returns_an_array_of_id_arrays_for_the_given_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn($items = [$this->item2, $this->item3]);
+
+    $expected = [];
+    foreach ($items as $key => $item) {
+      $this->option->shouldReceive('option')
+        ->once()
+        ->with($item)
+        ->andReturn($option = [
+          'id' => $item,
+          'code' => "code_$key",
+          'text' => "text_$key"
+        ]);
+
+      $expected[$option['code']] = $option['id'];
+    }
+
+    $this->assertSame(
+      $expected,
+      $this->option->codeIds('list')
+    );
+  }
+
+  /** @test */
+  public function codeIds_method_returns_null_when_failed_to_retrieve_items()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->codeIds('list')
+    );
+  }
+
+  /** @test */
+  public function codeIds_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->codeIds('list')
+    );
+  }
+
+  /** @test */
+  public function getAliases_method_returns_aliases_for_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        [],
+        [$this->arch['id_alias'] => $this->item]
+      )
+      ->andReturn([[
+        $this->arch['id'] => $this->item,
+        $this->arch['code'] => 'list',
+        $this->arch['text'] => 'list',
+        $this->arch['value'] => json_encode([
+          'prop1' => 'value1',
+          'prop2' => 'value2',
+          $this->arch['text'] => 'some_text'
+        ])
+      ]]);
+
+    $this->assertSame(
+      [[
+        $this->arch['id'] => $this->item,
+        $this->arch['code'] => 'list',
+        $this->arch['text'] => 'list',
+        'prop1' => 'value1',
+        'prop2' => 'value2'
+      ]],
+      $this->option->getAliases('list')
+    );
+  }
+
+  /** @test */
+  public function getAliases_method_returns_empty_array_when_failed_to_fetch_data_from_database()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        [],
+        [$this->arch['id_alias'] => $this->item]
+      )
+      ->andReturnNull();
+
+    $this->assertSame(
+      [],
+      $this->option->getAliases('list')
+    );
+  }
+
+  /** @test */
+  public function getAliases_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getAliases('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasItems_method_returns_an_array_alias_items_id_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasItems'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('getColumnValues')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['id'],
+        [$this->arch['id_alias'] => $this->item]
+      )
+      ->andReturn($expected = [$this->item2, $this->item3]);
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasItems',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getAliasItems('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasItems_method_returns_an_array_alias_items_id_for_the_given_code_from_the_cache()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasItems'
+      )
+      ->andReturn($expected = [$this->item2, $this->item3]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->getAliasItems('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasItems_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getAliasItems('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasOptions_method_returns_an_array_of_aliases_options_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasOptions'
+      )
+      ->andReturnFalse();
+
+    $this->option->shouldReceive('getAliasItems')
+      ->once()
+      ->with($this->item)
+      ->andReturn($alias_items = [$this->item2, $this->item3]);
+
+    $expected = [];
+    foreach ($alias_items as $key => $item) {
+      $this->option->shouldReceive('text')
+        ->once()
+        ->with($item)
+        ->andReturn($expected[$item] = "text_$key");
+    }
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasOptions',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getAliasOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasOptions_method_returns_an_array_of_aliases_options_for_the_given_code_from_cache()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+    ->once()
+    ->with(
+      $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasOptions'
+    )
+    ->andReturn($expected = [$this->item2 => 'some_text']);
+
+    $this->assertSame(
+      $expected,
+      $this->option->getAliasOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasOptions_method_returns_empty_array_when_no_alias_items_found()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasOptions'
+      )
+      ->andReturnFalse();
+
+    $this->option->shouldReceive('getAliasItems')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasOptions',
+        [],
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      [],
+      $this->option->getAliasOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasOptions_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getAliasOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasFullOptions_method_returns_alias_full_options_for_the_given_id()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasFullOptions'
+      )
+      ->andReturnFalse();
+
+    $this->option->shouldReceive('getAliasItems')
+      ->once()
+      ->with($this->item)
+      ->andReturn($alias_items = [$this->item2, $this->item3]);
+
+    $expected = [];
+    foreach ($alias_items as $key => $item) {
+      $this->option->shouldReceive('option')
+        ->once()
+        ->with($item)
+        ->andReturn($expected[] = [
+          'id' => $item,
+          'code' => "code_$key",
+          'text' => "text_$key"
+        ]);
+    }
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasFullOptions',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getAliasFullOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasFullOptions_method_returns_alias_full_options_for_the_given_id_from_cache()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasFullOptions'
+      )
+      ->andReturn($expected = [[
+        'id' => $this->item,
+        'code' => "some_code",
+        'text' => "some_text"
+      ]]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->getAliasFullOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasFullOptions_method_returns_empty_array_when_fails_to_retrieve_alias_items()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasFullOptions'
+      )
+      ->andReturnFalse();
+
+    $this->option->shouldReceive('getAliasItems')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getAliasFullOptions',
+        [],
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      [],
+      $this->option->getAliasFullOptions('list')
+    );
+  }
+
+  /** @test */
+  public function getAliasFullOptions_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getAliasFullOptions('list')
+    );
+  }
+
+  /** @test */
+  public function fullOptionsById_method_returns_an_id_indexed_array_of_full_options_for_a_given_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with(['list'])
+      ->andReturn([
+        $expected1 = [
+          $this->arch['id'] => $this->item2,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'some_code'
+        ],
+        $expected2 = [
+          $this->arch['id'] => $this->item3,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'some_code'
+        ],
+      ]);
+
+    $this->assertSame(
+      [
+        $expected1[$this->arch['id']] => $expected1,
+        $expected2[$this->arch['id']] => $expected2,
+      ],
+      $this->option->fullOptionsById('list')
+    );
+  }
+
+  /** @test */
+  public function fullOptionsById_method_returns_null_when_fails_to_retrieve_full_options()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullOptionsById('list')
+    );
+  }
+
+  /** @test */
+  public function fullOptionsByCode_method_returns_a_code_indexed_array_of_full_options_for_the_given_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with(['list'])
+      ->andReturn([
+        $expected1 = [
+          $this->arch['id'] => $this->item2,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_1'
+        ],
+        $expected2 = [
+          $this->arch['id'] => $this->item3,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_2'
+        ]
+      ]);
+
+    $this->assertSame(
+      [
+        $expected1[$this->arch['code']] => $expected1,
+        $expected2[$this->arch['code']] => $expected2
+      ],
+      $this->option->fullOptionsByCode('list')
+    );
+  }
+
+  /** @test */
+  public function fullOptionsByCode_method_returns_null_when_fails_to_retrieve_full_options()
+  {
+    $this->mockOptionClass();
+
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullOptionsByCode('list')
+    );
+  }
+
+  /** @test */
+  public function fullOptionsCfg_method_returns_an_array_of_full_option_with_config_for_the_given_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with($this->item)
+      ->andReturn($options = [
+        [
+          $this->arch['id'] => $this->item2,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_1'
+        ],
+        [
+          $this->arch['id'] => $this->item3,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_2'
+        ]
+      ]);
+
+    foreach ($options as $option) {
+      $this->option->shouldReceive('getCfg')
+        ->once()
+        ->with($option[$this->arch['id']])
+        ->andReturn([
+          'sortable' => true
+        ]);
+    }
+
+
+    $this->assertSame(
+      [
+        [
+          $this->arch['id'] => $this->item2,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_1',
+          $this->arch['cfg'] => [
+             'sortable' => true
+          ]
+        ],
+        [
+          $this->arch['id'] => $this->item3,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_2',
+          $this->arch['cfg'] => [
+            'sortable' => true
+          ]
+        ]
+      ],
+      $this->option->fullOptionsCfg('list')
+    );
+  }
+
+  /** @test */
+  public function fullOptionsCfg_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullOptionsCfg('list')
+    );
+  }
+
+  /** @test */
+  public function soptions_method_returns_an_id_indexed_array_of_options_in_the_form_of_text_for_the_give_grandparent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3, $this->item4]);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected = [
+        $this->item4 => 'text_1',
+        $this->item5 => 'text_2',
+      ]);
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item3)
+      ->andReturnNull();
+
+    $this->option->shouldReceive('options')
+      ->once()
+      ->with($this->item4)
+      ->andReturn($expected2 = [
+        $this->item => 'text_3',
+        $this->item2 => 'text_4',
+      ]);
+
+    $this->assertSame(
+      array_merge($expected, $expected2),
+      $this->option->soptions('list')
+    );
+  }
+
+  /** @test */
+  public function soptions_method_returns_empty_array_when_no_items_found_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertSame(
+      [],
+      $this->option->soptions('list')
+    );
+  }
+
+  /** @test */
+  public function soptions_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertnull(
+      $this->option->soptions('list')
+    );
+  }
+
+  /** @test */
+  public function fullSoptions_method_returns_an_array_of_full_options_for_the_given_grand_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3, $this->item4]);
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected1 = [
+        [
+          $this->arch['id'] => $this->item4,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_1'
+        ],
+        [
+          $this->arch['id'] => $this->item5,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_2'
+        ]
+      ]);
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($expected2 = [
+        [
+          $this->arch['id'] => $this->item3,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_3'
+        ],
+        [
+          $this->arch['id'] => $this->item4,
+          $this->arch['id_parent'] => $this->item,
+          $this->arch['code'] => 'code_4'
+        ]
+      ]);
+
+    $this->option->shouldReceive('fullOptions')
+      ->once()
+      ->with($this->item4)
+      ->andReturnNull();
+
+    $this->assertSame(
+      array_merge($expected1, $expected2),
+      $this->option->fullSoptions('list')
+    );
+  }
+
+  /** @test */
+  public function fullSoptions_method_returns_empty_array_when_no_items_found_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertSame(
+      [],
+      $this->option->fullSoptions('list')
+    );
+  }
+
+  /** @test */
+  public function fullSoptions_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullSoptions('list')
+    );
+  }
+
+  /** @test */
+  public function treeIds_method_an_array_of_all_ids_found_in_a_hierarchical_structure()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('check')
+      ->times(4)
+      ->andReturnTrue();
+
+    // First call
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    // Second recursive call
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item2)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item2)
+      ->andReturnNull();
+
+    // Third recursive call
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item3)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item3)
+      ->andReturn([$this->item4]);
+
+    // Fourth recursive call
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item4)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item4)
+      ->andReturn([]);
+
+    $this->assertSame(
+      [$this->item, $this->item2, $this->item3, $this->item4],
+      $this->option->treeIds($this->item)
+    );
+  }
+
+  /** @test */
+  public function treeIds_method_returns_null_when_the_given_id_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldreceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->option->shouldreceive('exists')
+      ->once()
+      ->with($this->item)
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->option->treeIds($this->item)
+    );
+  }
+
+  /** @test */
+  public function treeIds_method_returns_null_when_check_method_returns_false()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldreceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->option->treeIds($this->item)
     );
   }
 }

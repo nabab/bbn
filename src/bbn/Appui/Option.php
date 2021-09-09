@@ -339,11 +339,12 @@ class Option extends bbn\Models\Cls\Db
       }
 
       $c =& $this->class_cfg;
+      $f =& $this->fields;
       /** @var int|false $tmp */
       if (!$tmp && ($tmp = $this->db->selectOne(
-        $c['table'], $c['arch']['options']['id'], [
-          [$c['arch']['options']['id_parent'], '=', $id_parent],
-          [$c['arch']['options']['code'], '=', $true_code]
+        $c['table'], $f['id'], [
+          [$f['id_parent'], '=', $id_parent],
+          [$f['code'], '=', $true_code]
         ]
       ))
       ) {
@@ -391,11 +392,12 @@ class Option extends bbn\Models\Cls\Db
   {
     if ($this->check() && $this->exists($id)) {
       $c =& $this->class_cfg;
+      $f =& $this->fields;
       $this->cacheDelete($id);
       return $this->db->update(
         $c['table'],
-        [$c['arch']['options']['value'] => json_encode($value)],
-        [$c['arch']['options']['id'] => $id]
+        [$f['value'] => json_encode($value)],
+        [$f['id'] => $id]
       );
     }
 
@@ -491,12 +493,12 @@ class Option extends bbn\Models\Cls\Db
    * Returns an array of the children's IDs of the given option sorted by order or text
    *
    * ```php
-   * X::dump($opt->treeIds(12));
+   * X::dump($opt->items(12));
    * // array [40, 41, 42, 44, 45, 43, 46, 47]
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false array of IDs, sorted or false if option not found
+   * @return array|null array of IDs, sorted or false if option not found
    */
   public function items($code = null): ?array
   {
@@ -509,19 +511,19 @@ class Option extends bbn\Models\Cls\Db
       if ($cfg || $this->exists($id)) {
         // If not sortable returning an array ordered by text
         $order = empty($cfg['sortable']) ? [
-            $this->class_cfg['arch']['options']['text'] => 'ASC',
-            $this->class_cfg['arch']['options']['code'] => 'ASC',
-            $this->class_cfg['arch']['options']['id'] => 'ASC',
+            $this->fields['text'] => 'ASC',
+            $this->fields['code'] => 'ASC',
+            $this->fields['id'] => 'ASC',
           ] : [
-            $this->class_cfg['arch']['options']['num'] => 'ASC',
-            $this->class_cfg['arch']['options']['text'] => 'ASC',
-            $this->class_cfg['arch']['options']['code'] => 'ASC',
-            $this->class_cfg['arch']['options']['id'] => 'ASC',
+            $this->fields['num'] => 'ASC',
+            $this->fields['text'] => 'ASC',
+            $this->fields['code'] => 'ASC',
+            $this->fields['id'] => 'ASC',
           ];
         $res   = $this->db->getColumnValues(
           $this->class_cfg['table'],
-          $this->class_cfg['arch']['options']['id'], [
-          $this->class_cfg['arch']['options']['id_parent'] => $id,
+          $this->fields['id'], [
+          $this->fields['id_parent'] => $id,
           ], $order
         );
         $this->cacheSet($id, __FUNCTION__, $res);
@@ -559,7 +561,7 @@ class Option extends bbn\Models\Cls\Db
       }
 
       $tab = $this->db->tsn($this->class_cfg['table']);
-      $cfn = $this->db->cfn($this->class_cfg['arch']['options']['id'], $tab);
+      $cfn = $this->db->cfn($this->fields['id'], $tab);
       $opt = $this->getRow([$cfn => $id]);
       if ($opt) {
         $this->cacheSet($id, __FUNCTION__, $opt);
@@ -614,7 +616,7 @@ class Option extends bbn\Models\Cls\Db
   public function rawOption($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      return $this->db->rselect($this->class_cfg['table'], [], [$this->class_cfg['arch']['options']['id'] => $id]);
+      return $this->db->rselect($this->class_cfg['table'], [], [$this->fields['id'] => $id]);
     }
 
     return null;
@@ -655,7 +657,7 @@ class Option extends bbn\Models\Cls\Db
       $res = [];
       if ($its = $this->items($id)) {
         foreach ($its as $it) {
-          $res[] = $this->db->rselect($this->class_cfg['table'], [], [$this->class_cfg['arch']['options']['id'] => $it]);
+          $res[] = $this->db->rselect($this->class_cfg['table'], [], [$this->fields['id'] => $it]);
         }
       }
 
@@ -772,10 +774,10 @@ class Option extends bbn\Models\Cls\Db
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($opt = $this->nativeOption($id))
-        && !empty($opt[$this->class_cfg['arch']['options']['value']])
-        && bbn\Str::isJson($opt[$this->class_cfg['arch']['options']['value']])
+        && !empty($opt[$this->fields['value']])
+        && bbn\Str::isJson($opt[$this->fields['value']])
     ) {
-      return json_decode($opt[$this->class_cfg['arch']['options']['value']], true);
+      return json_decode($opt[$this->fields['value']], true);
     }
 
     return null;
@@ -906,7 +908,7 @@ class Option extends bbn\Models\Cls\Db
         return $r;
       }
 
-      $cf  =& $this->class_cfg['arch']['options'];
+      $cf  =& $this->fields;
       $res = $this->db->selectAllByKeys([
         'tables' => [$this->class_cfg['table']],
         'fields' => [
@@ -967,9 +969,9 @@ class Option extends bbn\Models\Cls\Db
 
       $opt = $this->db->selectAllByKeys(
         $this->class_cfg['table'],
-        [$this->class_cfg['arch']['options']['code'], $this->class_cfg['arch']['options']['text']],
-        [$this->class_cfg['arch']['options']['id_parent'] => $id],
-        [$this->class_cfg['arch']['options']['text'] => 'ASC']
+        [$this->fields['code'], $this->fields['text']],
+        [$this->fields['id_parent'] => $id],
+        [$this->fields['text'] => 'ASC']
       );
       $this->cacheSet($id, __FUNCTION__, $opt);
       return $opt;
@@ -1101,7 +1103,7 @@ class Option extends bbn\Models\Cls\Db
    * Returns each individual full option plus the children of options having this as alias.
    *
    * ```php
-   * X::dump($opt->optionsRef('type', 'media', 'note', 'appui'));
+   * X::dump($opt->fullOptionsRef('type', 'media', 'note', 'appui'));
    * /*
    * array [
    *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
@@ -1137,27 +1139,28 @@ class Option extends bbn\Models\Cls\Db
    * Returns each individual option plus the children of options having this as alias.
    *
    * ```php
-   * X::dump($opt->fullOptions(12));
+   * X::dump($opt->optionsRef(12));
    * /*
    * array [
-   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
-   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
-   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
-   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   *   [21 => "My option 21"],
+   *   [22 => "My option 22"],
+   *   [25 => "My option 25"],
+   *   [27 => "My option 27"]
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false A list of parent if option not found
    */
   public function optionsRef($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $all = $this->options($id);
-      $aliases = $this->getAliases($id);
-      foreach ($aliases as $a) {
-        if ($tmp = $this->options($a['id'])) {
-          $all = array_merge($all, $tmp);
+      $all = $this->options($id) ?? [];
+      if ($aliases = $this->getAliases($id)) {
+        foreach ($aliases as $a) {
+          if ($tmp = $this->options($a['id'])) {
+            $all = array_merge($all, $tmp);
+          }
         }
       }
 
@@ -1169,30 +1172,31 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns each individual option plus the children of options having this as alias.
+   * Returns each individual item plus the children of items having this as alias.
    *
    * ```php
-   * X::dump($opt->fullOptions(12));
+   * X::dump($opt->itemsRef(12));
    * /*
    * array [
-   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
-   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
-   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
-   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   *   [21],
+   *   [22],
+   *   [25],
+   *   [26]
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false A list of parent if option not found
    */
   public function itemsRef($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $all = $this->items($id);
-      $aliases = $this->getAliases($id);
-      foreach ($aliases as $a) {
-        if ($items = $this->items($a)) {
-          array_push($all, ...$items);
+      $all = $this->items($id) ?? [];
+      if ($aliases = $this->getAliases($id)) {
+        foreach ($aliases as $a) {
+          if ($items = $this->items($a)) {
+            array_push($all, ...$items);
+          }
         }
       }
 
@@ -1207,13 +1211,19 @@ class Option extends bbn\Models\Cls\Db
    * Returns an array of full options arrays for a given parent
    *
    * ```php
-   * X::dump($opt->fullOptions(12));
+   * X::dump($opt->codeOptions(12));
    * /*
    * array [
-   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
-   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
-   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
-   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   *   'code_1' => [
+   *       'id' => 21,
+   *       'code' => 'code_1',
+   *       'text' => 'text_1'
+   *   ],
+   *   'code_2' => [
+   *       'id' => 22,
+   *       'code' => 'code_2',
+   *       'text' => 'text_2'
+   *   ],
    * ]
    * ```
    *
@@ -1243,6 +1253,21 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   *   * Returns an array of ids for a given parent
+   *
+   * ```php
+   * X::dump($opt->codeIds(12));
+   * /*
+   * array [
+   *   'code_1' => 21,
+   *   'code_2' => 22,
+   * ]
+   * ```
+   *
+   * @param null $code
+   * @return array|null
+   */
   public function codeIds($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
@@ -1262,14 +1287,20 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param null $code
+   * @return array|null
+   */
   public function getAliases($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
       $cf = $this->getClassCfg();
-      foreach ($this->db->rselectAll($cf['table'], [], ['id_alias' => $id]) as $d) {
-        $this->_set_value($d);
-        $r[] = $d;
+      if ($results = $this->db->rselectAll($cf['table'], [], [$this->fields['id_alias'] => $id])) {
+        foreach ($results as $d) {
+          $this->_set_value($d);
+          $r[] = $d;
+        }
       }
 
       return $r;
@@ -1279,6 +1310,10 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param null $code
+   * @return array|null
+   */
   public function getAliasItems($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
@@ -1286,11 +1321,12 @@ class Option extends bbn\Models\Cls\Db
         return $res;
       }
 
-      $cf = $this->getClassCfg();
+      $cf  = $this->getClassCfg();
+      $f   = $this->getFields();
       $res = $this->db->getColumnValues(
         $cf['table'],
-        $cf['arch']['options']['id'],
-        [$cf['arch']['options']['id_alias'] => $id]
+        $f['id'],
+        [$f['id_alias'] => $id]
       );
 
       $this->cacheSet($id, __FUNCTION__, $res);
@@ -1301,6 +1337,10 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param null $code
+   * @return array|null
+   */
   public function getAliasOptions($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
@@ -1310,7 +1350,6 @@ class Option extends bbn\Models\Cls\Db
 
       $res = [];
       if ($items = $this->getAliasItems($id)) {
-        $cf = $this->getClassCfg();
         foreach ($items as $it) {
           $res[$it] = $this->text($it);
         }
@@ -1324,6 +1363,11 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param null $code
+   * @return array|null
+   * @throws \Exception
+   */
   public function getAliasFullOptions($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
@@ -1333,7 +1377,9 @@ class Option extends bbn\Models\Cls\Db
 
       $res = [];
       if ($items = $this->getAliasItems($id)) {
-        $res[] = $this->option($it);
+        foreach ($items as $it) {
+          $res[] = $this->option($it);
+        }
       }
 
       $this->cacheSet($id, __FUNCTION__, $res);
@@ -1348,7 +1394,7 @@ class Option extends bbn\Models\Cls\Db
    * Returns an id-indexed array of full options arrays for a given parent
    *
    * ```php
-   * X::dump($opt->fullOptions(12));
+   * X::dump($opt->fullOptionsById(12));
    * /*
    * array [
    *   21 => ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
@@ -1358,16 +1404,16 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false A list of parent if option not found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null A list of parent if option not found
    */
   public function fullOptionsById($code = null): ?array
   {
     $res = [];
     if ($opt = $this->fullOptions(\func_get_args())) {
-      $cf = $this->getClassCfg();
+      $cf = $this->getFields();
       foreach ($opt as $o){
-        $res[$o[$cf['arch']['options']['id']]] = $o;
+        $res[$o[$cf['id']]] = $o;
       }
     }
 
@@ -1376,38 +1422,38 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an id-indexed array of full options arrays for a given parent
+   * Returns code-indexed array of full options arrays for a given parent
    *
    * ```php
-   * X::dump($opt->fullOptions(12));
+   * X::dump($opt->fullOptionsByCode(12));
    * /*
    * array [
-   *   21 => ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
-   *   22 => ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
-   *   25 => ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
-   *   27 => ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   *   'code_1' => ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
+   *   'code_2' => ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
+   *   'code_3' => ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
+   *   'code_4' => ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false A list of parent if option not found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null A list of parent if option not found
    */
   public function fullOptionsByCode($code = null): ?array
   {
     $res = [];
     if ($opt = $this->fullOptions(\func_get_args())) {
-      $cf = $this->getClassCfg();
+      $cf = $this->getFields();
       foreach ($opt as $o){
-        $res[$o[$cf['arch']['options']['code']]] = $o;
+        $res[$o[$cf['code']]] = $o;
       }
     }
 
-    return $opt === null ?: $res;
+    return $opt === null ? $opt : $res;
   }
 
 
   /**
-   * Returns an id-indexed array of full options with the config in arrays for a given parent
+   * Returns an array of full options with the config in arrays for a given parent
    *
    * ```php
    * X::dump($opt->fullOptionsCfg(12));
@@ -1420,7 +1466,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false A list of parent if option not found
    */
   public function fullOptionsCfg($code = null): ?array
@@ -1429,7 +1475,7 @@ class Option extends bbn\Models\Cls\Db
       $o =& $this;
       return $this->map(
         function ($a) use ($o) {
-          $a['cfg'] = $o->getCfg($a['id']);
+          $a[$this->fields['cfg']] = $o->getCfg($a[$this->fields['id']]);
           return $a;
         }, $id
       );
@@ -1457,15 +1503,15 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false indexed on id/text options or false if parent not found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null indexed on id/text options or false if parent not found
    */
   public function soptions($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
-      if ($ids = $this->items($id)) {
-        foreach ($ids as $i => $txt){
+      if ($list = $this->items($id)) {
+        foreach ($list as $i){
           $o = $this->options($i);
           if (\is_array($o)) {
             $r = X::mergeArrays($r, $o);
@@ -1481,7 +1527,7 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an id-indexed array of full options arrays for a given parent
+   * Returns an array of full options arrays for a given grandparent
    *
    * ```php
    * X::dump($opt->fullSoptions(12));
@@ -1498,12 +1544,12 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false A list of options or false if parent not found
    */
   public function fullSoptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode($code))) {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
       if ($ids = $this->items($id)) {
         foreach ($ids as $id){
@@ -1537,13 +1583,13 @@ class Option extends bbn\Models\Cls\Db
   public function treeIds($id, &$res = []): ?array
   {
     if ($this->check() && $this->exists($id)) {
+      $res[] = $id;
       if ($its = $this->items($id)) {
         foreach ($its as $it){
           $this->treeIds($it, $res);
         }
       }
 
-      $res[] = $id;
       return $res;
     }
 
@@ -1768,7 +1814,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false The formatted array or false if the option cannot be found
    */
   public function getCfg($code = null): ?array
@@ -3751,8 +3797,8 @@ class Option extends bbn\Models\Cls\Db
    * @todo Usage example
    * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}
    * @param int|array $id   The options'ID on which children the function should be applied
-   * @param boolean   $deep If set to true the function will be applied to all children's levels
-   * @return array|int The new array with the function applied
+   * @param boolean|int   $deep If set to true the function will be applied to all children's levels
+   * @return array The new array with the function applied
    */
   public function map(callable $f, $id, $deep = false)
   {
