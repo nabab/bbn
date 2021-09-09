@@ -1199,7 +1199,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "float"
+                "float",
+                null
             ],
             "parent": false,
             "arguments": [
