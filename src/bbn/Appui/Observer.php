@@ -379,10 +379,11 @@ class Observer extends bbn\Models\Cls\Db
    */
   public function get($id): ?array
   {
-    if ( $this->check() ){
-      $d = $this->db->rselect('bbn_observers', [], [
-        'id' => $id
-      ]);
+    if ($this->check() &&
+        ($d = $this->db->rselect('bbn_observers', [], [
+          'id' => $id
+        ]))
+    ) {
       if ( !$d['id_alias'] ){
         return $d;
       }
@@ -395,6 +396,7 @@ class Observer extends bbn\Models\Cls\Db
         return $alias;
       }
     }
+
     return null;
   }
 
