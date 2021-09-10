@@ -897,7 +897,7 @@ class OptionTest extends TestCase
 
     $this->assertSame(
       $this->item,
-      $this->option->fromCode(['id' => $this->item])
+      $this->option->fromCode([$this->arch['id'] => $this->item])
     );
   }
 
@@ -950,7 +950,7 @@ class OptionTest extends TestCase
   /** @test */
   public function fromCode_method_returns_the_given_id_if_it_is_uid_and_its_corresponding_parent_id_is_provided()
   {
-    $this->option = \Mockery::mock(Option::class)->makePartial();
+    $this->mockOptionClass();
 
     $this->option->shouldReceive('check')
       ->andReturnTrue();
@@ -4211,11 +4211,11 @@ class OptionTest extends TestCase
   {
     $this->mockOptionClass();
 
-    $this->option->shouldreceive('check')
+    $this->option->shouldReceive('check')
       ->once()
       ->andReturnTrue();
 
-    $this->option->shouldreceive('exists')
+    $this->option->shouldReceive('exists')
       ->once()
       ->with($this->item)
       ->andReturnFalse();
@@ -4230,12 +4230,630 @@ class OptionTest extends TestCase
   {
     $this->mockOptionClass();
 
-    $this->option->shouldreceive('check')
+    $this->option->shouldReceive('check')
       ->once()
       ->andReturnFalse();
 
     $this->assertNull(
       $this->option->treeIds($this->item)
+    );
+  }
+
+  /** @test */
+  public function nativeTree_method_returns_a_hierarchical_structure_as_stored_in_its_original_form_in_database()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [
+        'id' => $this->item,
+        'code' => 'code_1',
+        'text' => 'text_1'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    // Second recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item2])
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected['items'][] = [
+        'id' => $this->item2,
+        'code' => 'code_2',
+        'text' => 'text_2'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item2)
+      ->andReturn([$this->item4]);
+
+    // Third recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item4])
+      ->andReturn($this->item4);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item4)
+      ->andReturn($expected['items'][0]['items'][] = [
+        'id' => $this->item4,
+        'code' => 'code_4',
+        'text' => 'text_4'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item4)
+      ->andReturnNull();
+
+    // Fourth recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item3])
+      ->andReturn($this->item3);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($expected['items'][] = [
+        'id' => $this->item3,
+        'code' => 'code_3',
+        'text' => 'text_3'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item3)
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->nativeTree('list')
+    );
+  }
+
+  /** @test */
+  public function nativeTree_method_returns_null_when_no_native_options_found()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->nativeTree('list')
+    );
+  }
+
+  /** @test */
+  public function nativeTree_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->nativeTree('list')
+    );
+  }
+
+  /** @test */
+  public function tree_method_returns_a_simple_hierarchical_structure_with_just_text_and_id_and_items()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('text')
+      ->once()
+      ->with($this->item)
+      ->andReturn('text_1');
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    // Second recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item2])
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('text')
+      ->once()
+      ->with($this->item2)
+      ->andReturn('text_2');
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item2)
+      ->andReturnNull();
+
+    // Third recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item3])
+      ->andReturn($this->item3);
+
+    $this->option->shouldReceive('text')
+      ->once()
+      ->with($this->item3)
+      ->andReturn('text_3');
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item3)
+      ->andReturn([$this->item4]);
+
+    // Fourth recursive call
+    $this->option->shouldReceive('fromCode')
+    ->once()
+    ->with([$this->item4])
+    ->andReturn($this->item4);
+
+    $this->option->shouldReceive('text')
+      ->once()
+      ->with($this->item4)
+      ->andReturn('text_4');
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item4)
+      ->andReturnNull();
+
+    $expected = [
+      'id' => $this->item,
+      'text' => 'text_1',
+      'items' => [
+        [
+          'id' => $this->item2,
+          'text' => 'text_2'
+        ],
+        [
+          'id' => $this->item3,
+          'text' => 'text_3',
+          'items' => [
+            [
+              'id' => $this->item4,
+              'text' => 'text_4'
+            ]
+          ]
+        ]
+      ]
+    ];
+
+    $this->assertSame(
+      $expected,
+      $this->option->tree('list')
+    );
+  }
+
+  /** @test */
+  public function tree_method_returns_null_when_fails_to_retrieve_text()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('text')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->tree('list')
+    );
+  }
+
+  /** @test */
+  public function tree_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->tree('list')
+    );
+  }
+
+  /** @test */
+  public function fullTree_method_returns_a_full_hierarchical_structure_of_options_from_a_given_option()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [
+        'id' => $this->item,
+        'code' => 'list',
+        'text' => 'some_text',
+        'property' => 'value'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    // First recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item2])
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected['items'][] = [
+        'id' => $this->item2,
+        'code' => 'list_2',
+        'text' => 'some_text_2',
+        'property' => 'value_2'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item2)
+      ->andReturn([$this->item4]);
+
+    // Second recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item4])
+      ->andReturn($this->item4);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item4)
+      ->andReturn($expected['items'][0]['items'][] = [
+        $this->arch['id'] => $this->item4,
+        $this->arch['code'] => 'list_4',
+        $this->arch['text'] => 'some_text_4',
+        'property' => 'value_4'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item4)
+      ->andReturnNull();
+
+    // Third recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$this->item3])
+      ->andReturn($this->item3);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($expected['items'][] = [
+        $this->arch['id'] => $this->item3,
+        $this->arch['code'] => 'list_3',
+        $this->arch['text'] => 'some_text_3',
+        'property' => 'value_3'
+      ]);
+
+    $this->option->shouldReceive('items')
+      ->once()
+      ->with($this->item3)
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->fullTree('list')
+    );
+  }
+
+  /** @test */
+  public function fullTree_method_returns_null_when_fails_to_retrive_option_content()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullTree('list')
+    );
+  }
+
+  /** @test */
+  public function fullTree_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullTree('list')
+    );
+  }
+
+  /** @test */
+  public function fullTreeRef_method_returns_a_full_hierarchical_of_options_plus_aliases_from_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item)
+      ->andReturn($expected = [
+        $this->arch['id'] => $this->item,
+        $this->arch['code'] => 'code_1',
+        $this->arch['text'] => 'text_1'
+      ]);
+
+    $this->option->shouldReceive('fullOptionsRef')
+      ->once()
+      ->with($this->item)
+      ->andReturn([
+        $item2_arr = [$this->arch['id'] => $this->item2, $this->arch['code'] => 'code_2'],
+        $item3_arr = [$this->arch['id'] => $this->item3, $this->arch['code'] => 'code_3']
+      ]);
+
+    // First recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$item2_arr])
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected['items'][] = [
+        $this->arch['id'] => $this->item2,
+        $this->arch['code'] => 'code_2',
+        $this->arch['text'] => 'text_2'
+      ]);
+
+    $this->option->shouldReceive('fullOptionsRef')
+      ->once()
+      ->with($this->item2)
+      ->andReturn([
+        $item4_arr = [$this->arch['id'] => $this->item4, $this->arch['code'] => 'code_4']
+      ]);
+
+    // Second recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$item4_arr])
+      ->andReturn($this->item4);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item4)
+      ->andReturn($expected['items'][0]['items'][] = [
+        $this->arch['id'] => $this->item4,
+        $this->arch['code'] => 'code_4',
+        $this->arch['text'] => 'text_4'
+      ]);
+
+    $this->option->shouldReceive('fullOptionsRef')
+      ->once()
+      ->with($this->item4)
+      ->andReturnNull();
+
+    // Third recursive call
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with([$item3_arr])
+      ->andReturn($this->item3);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($expected['items'][] = [
+        $this->arch['id'] => $this->item3,
+        $this->arch['code'] => 'code_4',
+        $this->arch['text'] => 'text_4'
+      ]);
+
+    $this->option->shouldReceive('fullOptionsRef')
+      ->once()
+      ->with($this->item3)
+      ->andReturnNull();
+
+    $this->assertSame(
+      $expected,
+      $this->option->fullTreeRef('list')
+    );
+  }
+
+  /** @test */
+  public function fullTreeRef_method_returns_null_when_fails_to_retrieve_full_option_content_for_the_given_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullTreeRef('list')
+    );
+  }
+
+  /** @test */
+  public function fullTreeRef_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->fullTreeRef('list')
+    );
+  }
+
+  /** @test */
+  public function getRawCfg_method_returns_raw_config_column_of_the_given_option()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn($expected = "{'sortable':true, 'cascade': true}");
+
+    $this->assertSame(
+      $expected,
+      $this->option->getRawCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getRawCfg_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getRawCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getParentCfg_method_returns_a_formatted_content_of_the_config_column_as_array_from_the_given_option_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('getCfg')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected = [
+        'sortable' => true,
+        'cascade' => true
+      ]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->getParentCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getParentCfg_method_returns_null_when_fails_to_retrieve_parent_id()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getParentCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getParentCfg_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getParentCfg('list')
     );
   }
 }

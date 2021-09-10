@@ -274,8 +274,8 @@ class Option extends bbn\Models\Cls\Db
       }
 
       // If we get an option array as param
-      if (isset($args['id'])) {
-        return $args['id'];
+      if (isset($args[$this->fields['id']])) {
+        return $args[$this->fields['id']];
       }
 
       $num = \count($args);
@@ -551,7 +551,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false Row or false if the option cannot be found
+   * @return array|null Row or null if the option cannot be found
    */
   public function nativeOption($code = null): ?array
   {
@@ -611,7 +611,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false Row or false if the option cannot be found
+   * @return array|null Row or false if the option cannot be found
    */
   public function rawOption($code = null): ?array
   {
@@ -649,7 +649,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false Row or false if the option cannot be found
+   * @return array|null Row or false if the option cannot be found
    */
   public function rawOptions($code = null): ?array
   {
@@ -709,7 +709,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false Tree's array or false if the option cannot be found
+   * @return array|null Tree's array or false if the option cannot be found
    */
   public function rawTree($code = null): ?array
   {
@@ -751,7 +751,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false The option array or false if the option cannot be found
+   * @return array|null The option array or false if the option cannot be found
    */
   public function optionNoAlias($code = null): ?array
   {
@@ -804,7 +804,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false The option array or false if the option cannot be found
+   * @return array|null The option array or false if the option cannot be found
    */
   public function option($code = null): ?array
   {
@@ -852,7 +852,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false The option array or false if the option cannot be found
+   * @return array|null The option array or false if the option cannot be found
    */
   public function opAlias($code = null): ?array
   {
@@ -898,7 +898,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false An indexed array of id/text options or false if option not found
+   * @return array|null An indexed array of id/text options or false if option not found
    */
   public function options($code = null): ?array
   {
@@ -958,7 +958,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false An indexed array of code/text options or false if option not found
+   * @return array|null An indexed array of code/text options or false if option not found
    */
   public function optionsByCode($code = null): ?array
   {
@@ -1114,7 +1114,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false A list of parent if option not found
+   * @return array|null A list of parent if option not found
    */
   public function fullOptionsRef($code = null): ?array
   {
@@ -1150,7 +1150,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false A list of parent if option not found
+   * @return array|null A list of parent if option not found
    */
   public function optionsRef($code = null): ?array
   {
@@ -1186,7 +1186,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false A list of parent if option not found
+   * @return array|null A list of parent if option not found
    */
   public function itemsRef($code = null): ?array
   {
@@ -1228,7 +1228,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false A list of parent if option not found
+   * @return array|null A list of parent if option not found
    */
   public function codeOptions($code = null): ?array
   {
@@ -1545,7 +1545,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false A list of options or false if parent not found
+   * @return array|null A list of options or false if parent not found
    */
   public function fullSoptions($code = null): ?array
   {
@@ -1578,7 +1578,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @param int   $id  The end/target of the path
    * @param array $res The resulting array
-   * @return array|bool
+   * @return array|null
    */
   public function treeIds($id, &$res = []): ?array
   {
@@ -1637,15 +1637,15 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false Tree's array or false if the option cannot be found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null Tree's array or false if the option cannot be found
    */
   public function nativeTree($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($res = $this->nativeOption($id)) {
         $its = $this->items($id);
-        if (\count($its)) {
+        if (!empty($its)) {
           $res['items'] = [];
           foreach ($its as $it){
             $res['items'][] = $this->nativeTree($it);
@@ -1676,8 +1676,8 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|bool
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null
    */
   public function tree($code = null): ?array
   {
@@ -1743,24 +1743,21 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false Tree's array or false if the option cannot be found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null Tree's array or false if the option cannot be found
    */
   public function fullTree($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($res = $this->option($id))
     ) {
-      $res['items'] = [];
       if ($opts = $this->items($id)) {
+        $res['items'] = [];
         foreach ($opts as $o){
           if ($t = $this->fullTree($o)) {
             $res['items'][] = $t;
           }
         }
-      }
-      else{
-        unset($res['items']);
       }
 
       return $res;
@@ -1770,7 +1767,7 @@ class Option extends bbn\Models\Cls\Db
   }
 
   /**
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @returns array|null
    */
   public function fullTreeRef($code = null): ?array
@@ -1778,16 +1775,13 @@ class Option extends bbn\Models\Cls\Db
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($res = $this->option($id))
     ) {
-      $res['items'] = [];
       if ($opts = $this->fullOptionsRef($id)) {
+        $res['items'] = [];
         foreach ($opts as $o){
           if ($t = $this->fullTreeRef($o)) {
             $res['items'][] = $t;
           }
         }
-      }
-      else{
-        unset($res['items']);
       }
 
       return $res;
@@ -1900,23 +1894,20 @@ class Option extends bbn\Models\Cls\Db
    * Returns the raw content of the cfg column for the given option.
    *
    * ```php
-   * X::dump($opt->getCfg(25));
-   * /*
-   * array [
-   *   'sortable' => true,
-   *   'cascade' => true,
-   *   'id_alias' => null,
-   * ]
+   * X::dump($opt->getRawCfg(25));
+   * // (string) "{'sortable':true, 'cascade': true}"
+   *
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false The formatted array or false if the option cannot be found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return string|null The formatted array or null if the option cannot be found
    */
   public function getRawCfg($code = null): ?string
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $c =& $this->class_cfg;
-      return $this->db->selectOne($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
+      $f =& $this->fields;
+      return $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
     }
 
     return null;
@@ -1936,15 +1927,15 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false config or false if the option cannot be found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null config or null if the option cannot be found
    */
   public function getParentCfg($code = null): ?array
   {
-    $id        = $this->fromCode(\func_get_args());
-    $id_parent = $this->getIdParent($id);
-    if ($id_parent !== false) {
-      return $this->getCfg($id_parent);
+    if ($id = $this->fromCode(\func_get_args())) {
+      if ($id_parent = $this->getIdParent($id)) {
+        return $this->getCfg($id_parent);
+      }
     }
 
     return null;
