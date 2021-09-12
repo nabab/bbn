@@ -4754,6 +4754,569 @@ class OptionTest extends TestCase
   }
 
   /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_first_test()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn(json_encode([
+        'sortable' => true,
+        'show_alias' => true,
+        'show_icon' => true,
+        'desc' => 'some description',
+        'default_value' => 'some value'
+      ]));
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn($parents = [$this->item2, $this->item3]);
+
+    foreach ($parents as $parent) {
+      $this->db_mock->shouldReceive('selectOne')
+        ->once()
+        ->with(
+          $this->class_cfg['table'],
+          $this->arch['cfg'],
+          [$this->arch['id'] => $parent]
+        )
+        ->andReturn(json_encode([
+          'scfg' => ['a' => 'b']
+        ]));
+    }
+
+    $expected = [
+      'sortable' => 1,
+      'show_alias' => 1,
+      'show_icon' => 1,
+      'desc' => 'some description',
+      'default_value' => 'some value',
+      'a' => 'b',
+      'inherit_from' => $this->item2,
+      'frozen' => 1,
+      'show_code' => 0,
+      'show_value' => 0,
+      'allow_children' => 0,
+      'inheritance' => '',
+      'permissions' => '',
+      'controller' => null,
+      'schema' => null,
+      'form' => null
+    ];
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_second_test()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn(json_encode([
+        'sortable' => true,
+        'allow_children' => true,
+        'show_icon' => true,
+        'permissions' => 'some permissions',
+        'form' => 'some form'
+      ]));
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item3]
+      )
+      ->andReturn(json_encode([
+        'scfg' => ['c' => 'd'],
+        'inheritance' => 'cascade'
+      ]));
+
+    $expected = [
+      'sortable' => 1,
+      'allow_children' => 1,
+      'show_icon' => 1,
+      'permissions' => 'some permissions',
+      'form' => 'some form',
+      'c' => 'd',
+      'inherit_from' => $this->item3,
+      'frozen' => 1,
+      'show_code' => 0,
+      'show_alias' => 0,
+      'show_value' => 0,
+      'desc' => '',
+      'inheritance' => '',
+      'controller' => null,
+      'schema' => null,
+      'default_value' => null
+    ];
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_third_test()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn(json_encode([
+        'sortable' => false
+      ]));
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item3]
+      )
+      ->andReturn(json_encode([
+        'scfg' => ['c' => 'd', 'inheritance' => 'children']
+      ]));
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item2]
+      )
+      ->andReturn(json_encode([
+        'scfg' => ['a' => 'b']
+      ]));
+
+    $expected = [
+      'sortable' => 0,
+      'a' => 'b',
+      'inherit_from' => $this->item2,
+      'frozen' => 1,
+      'show_code' => 0,
+      'show_alias' => 0,
+      'show_value' => 0,
+      'show_icon' => 0,
+      'allow_children' => 0,
+      'desc' => '',
+      'inheritance' => '',
+      'permissions' => '',
+      'controller' => null,
+      'schema' => null,
+      'form' => null,
+      'default_value' => null,
+    ];
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_fourth_test()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn(json_encode([
+        'sortable' => false
+      ]));
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item2]
+      )
+      ->andReturn(json_encode([
+        'scfg' => ['c' => 'd', 'inheritance' => 'children']
+      ]));
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item3]
+      )
+      ->andReturn(json_encode([
+        'scfg' => ['a' => 'b']
+      ]));
+
+    $expected = [
+      'sortable' => 0,
+      'c' => 'd',
+      'inheritance' => 'children',
+      'inherit_from' => $this->item2,
+      'frozen' => 1,
+      'show_code' => 0,
+      'show_alias' => 0,
+      'show_value' => 0,
+      'show_icon' => 0,
+      'allow_children' => 0,
+      'desc' => '',
+      'permissions' => '',
+      'controller' => null,
+      'schema' => null,
+      'form' => null,
+      'default_value' => null,
+    ];
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_fifth_test()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn([]);
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item2]
+      )
+      ->andReturn(json_encode(['c' => 'd']));
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item3]
+      )
+      ->andReturn(json_encode(['a' => 'b']));
+
+    $expected = [
+      'show_code' => 0,
+      'show_alias' => 0,
+      'show_value' => 0,
+      'show_icon' => 0,
+      'sortable' => 0,
+      'allow_children' => 0,
+      'frozen' => 0,
+      'desc' => '',
+      'inheritance' => '',
+      'permissions' => '',
+      'controller' => null,
+      'schema' => null,
+      'form' => null,
+      'default_value' => null,
+    ];
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_sixth_test()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item]
+      )
+      ->andReturn([]);
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3]);
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item2]
+      )
+      ->andReturn(json_encode(['c' => 'd']));
+
+    $this->db_mock->shouldReceive('selectOne')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        $this->arch['cfg'],
+        [$this->arch['id'] => $this->item3]
+      )
+      ->andReturn(json_encode([
+        'scfg' => ['inheritance' => 'default']
+      ]));
+
+    $expected = [
+      'inheritance' => 'default',
+      'inherit_from' => $this->item3,
+      'show_code' => 0,
+      'show_alias' => 0,
+      'show_value' => 0,
+      'show_icon' => 0,
+      'sortable' => 0,
+      'allow_children' => 0,
+      'frozen' => 0,
+      'desc' => '',
+      'permissions' => '',
+      'controller' => null,
+      'schema' => null,
+      'form' => null,
+      'default_value' => null,
+    ];
+
+    $this->cache_mock->shouldReceive('set')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg',
+        $expected,
+        0
+      )
+      ->andReturnTrue();
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_formatted_content_of_the_cfg_column_as_an_array_from_cache()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->cache_mock->shouldReceive('get')
+      ->once()
+      ->with(
+        $this->getCachePrefix() . $this->getUidCacheName($this->item) . '/getCfg'
+      )
+      ->andReturn($expected = [
+        'show_code' => 0,
+        'show_alias' => 0,
+        'show_value' => 0,
+        'show_icon' => 0,
+        'sortable' => 0,
+        'allow_children' => 0,
+        'frozen' => 0,
+        'desc' => '',
+        'inheritance' => '',
+        'permissions' => '',
+        'controller' => null,
+        'schema' => null,
+        'form' => null,
+        'default_value' => null,
+      ]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
+  public function getCfg_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getCfg('list')
+    );
+  }
+
+  /** @test */
   public function getRawCfg_method_returns_raw_config_column_of_the_given_option()
   {
     $this->mockOptionClass();
@@ -4854,6 +5417,484 @@ class OptionTest extends TestCase
 
     $this->assertNull(
       $this->option->getParentCfg('list')
+    );
+  }
+
+  /** @test */
+  public function parents_method_returns_an_array_of_id_parents_from_the_given_option_to_the_root()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($this->item3);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($this->item4);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item4)
+      ->andReturn($this->item2);
+
+    $this->assertSame(
+      [$this->item2, $this->item3, $this->item4],
+      $this->option->parents('list')
+    );
+  }
+
+  /** @test */
+  public function parents_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->parent('list')
+    );
+  }
+
+  /** @test */
+  public function sequence_method_returns_an_array_of_id_parents_from_the_selected_root_to_the_given_id_option()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item4)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3, $this->item4]);
+
+    $this->assertSame(
+      [$this->item4, $this->item3, $this->item2, $this->item],
+      $this->option->sequence($this->item, $this->item4)
+    );
+  }
+
+  /** @test */
+  public function sequence_method_returns_an_array_of_id_parents_from_the_selected_root_to_the_default_id_option_if_not_provided()
+  {
+    $this->mockOptionClass();
+
+    $default_root = 'c88846c3bff511e7b7d5000c29703ca2';
+
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($default_root)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturn([$this->item2, $this->item3, $default_root]);
+
+    $this->assertSame(
+      [$default_root, $this->item3, $this->item2, $this->item],
+      $this->option->sequence($this->item)
+    );
+  }
+
+  /** @test */
+  public function sequence_method_returns_null_when_the_given_id_option_does_not_have_parents()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item4)
+      ->andReturnTrue();
+
+    $this->option->shouldReceive('parents')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->sequence($this->item, $this->item4)
+    );
+  }
+
+  /** @test */
+  public function sequence_method_returns_null_when_the_given_root_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('exists')
+      ->once()
+      ->with($this->item4)
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->option->sequence($this->item, $this->item4)
+    );
+  }
+
+  /** @test */
+  public function getIdParent_method_returns_the_parent_of_the_given_option()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item)
+      ->andReturn([
+        $this->arch['id'] => $this->item,
+        $this->arch['code'] => 'some code',
+        $this->arch['id_parent'] => $this->item4
+      ]);
+
+    $this->assertSame(
+      $this->item4,
+      $this->option->getIdParent('list')
+    );
+  }
+
+  /** @test */
+  public function getIdParent_method_returns_null_when_fails_to_retrieve_code_full_option()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('nativeOption')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getIdParent('list')
+    );
+  }
+
+  /** @test */
+  public function getIdParent_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->getIdParent('list')
+    );
+  }
+
+  /** @test */
+  public function parent_method_returns_the_parent_option()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturn($this->item2);
+
+    $this->option->shouldReceive('option')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($expected = [
+        'id' => $this->item2,
+        'code' => 'list',
+        'text' => 'some text'
+      ]);
+
+    $this->assertSame(
+      $expected,
+      $this->option->parent('list')
+    );
+  }
+
+  /** @test */
+  public function parent_method_returns_null_when_fails_to_retrieve_the_given_code_parent()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->parent('list')
+    );
+  }
+
+  /** @test */
+  public function parent_method_returns_null_when_the_given_code_does_not_exist()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->option->parent('list')
+    );
+  }
+
+  /** @test */
+  public function isParent_method_returns_true_if_row_with_the_given_id_parent_is_parent_at_any_level_of_row_with_the_given_id()
+  {
+    $this->mockOptionClass();
+
+    // First loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturn($this->item2);
+
+    // Second loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($this->item3);
+
+    // Third loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($this->item4);
+
+    $this->assertTrue(
+      $this->option->isParent($this->item, $this->item4)
+    );
+  }
+
+  /** @test */
+  public function isParent_method_returns_false_if_row_with_the_given_id_parent_is_not_parent_at_any_level_of_row_with_the_given_id()
+  {
+    $this->mockOptionClass();
+
+    // First loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturn($this->item2);
+
+    // Second loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($this->item3);
+
+    // Third loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item3)
+      ->andReturnNull();
+
+    $this->assertFalse(
+      $this->option->isParent($this->item, $this->item4)
+    );
+  }
+
+  /** @test */
+  public function isParent_method_returns_false_if_there_are_duplicate_paretns_returned()
+  {
+    $this->mockOptionClass();
+
+    // First loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item)
+      ->andReturn($this->item2);
+
+    // Second loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item2)
+      ->andReturn($this->item3);
+
+    // Third loop
+    $this->option->shouldReceive('getIdParent')
+      ->once()
+      ->with($this->item3)
+      ->andReturn($this->item2);
+
+    $this->assertFalse(
+      $this->option->isParent($this->item, $this->item4)
+    );
+  }
+
+  /** @test */
+  public function isParent_method_returns_false_when_the_given_id_is_not_uid()
+  {
+    $this->assertFalse(
+      $this->option->isParent('1122', $this->item)
+    );
+
+    $this->assertFalse(
+      $this->option->isParent($this->item, '1122')
+    );
+
+    $this->assertFalse(
+      $this->option->isParent('44422', '1122')
+    );
+  }
+
+  /** @test */
+  public function getCodes_method_returns_an_array_of_options_if_the_form_of_id_and_code_sorted_by_num()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+
+    $this->option->shouldReceive('isSortable')
+      ->once()
+      ->with($this->item)
+      ->andReturnTrue();
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        [$this->arch['id'], $this->arch['code']],
+        [$this->arch['id_parent'] => $this->item],
+        [$this->arch['num'] => 'ASC']
+      )
+      ->andReturn([
+        [$this->arch['id'] => $this->item2, $this->arch['code'] => 'option_1'],
+        [$this->arch['id'] => $this->item3, $this->arch['code'] => 'option_2'],
+      ]);
+
+    $this->assertSame(
+      [
+        $this->item2 => 'option_1',
+        $this->item3 => 'option_2',
+      ],
+      $this->option->getCodes('list')
+    );
+  }
+
+  /** @test */
+  public function getCodes_method_returns_an_array_of_options_if_the_form_of_id_and_code_sorted_by_code()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+
+    $this->option->shouldReceive('isSortable')
+      ->once()
+      ->with($this->item)
+      ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        [$this->arch['id'], $this->arch['code']],
+        [$this->arch['id_parent'] => $this->item],
+        [$this->arch['code'] => 'ASC']
+      )
+      ->andReturn([
+        [$this->arch['id'] => $this->item2, $this->arch['code'] => 'option_1'],
+        [$this->arch['id'] => $this->item3, $this->arch['code'] => 'option_2'],
+      ]);
+
+    $this->assertSame(
+      [
+        $this->item2 => 'option_1',
+        $this->item3 => 'option_2',
+      ],
+      $this->option->getCodes('list')
+    );
+  }
+
+  /** @test */
+  public function getCodes_method_returns_empty_array_when_no_results_found_in_database()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturn($this->item);
+
+    $this->option->shouldReceive('isSortable')
+    ->once()
+    ->with($this->item)
+    ->andReturnFalse();
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with(
+        $this->class_cfg['table'],
+        [$this->arch['id'], $this->arch['code']],
+        [$this->arch['id_parent'] => $this->item],
+        [$this->arch['code'] => 'ASC']
+      )
+      ->andReturn([]);
+
+    $this->assertSame(
+      [],
+      $this->option->getCodes('list')
+    );
+  }
+
+  /** @test */
+  public function getCodes_method_returns_empty_array_when_the_given_code_is_not_valid()
+  {
+    $this->mockOptionClass();
+
+    $this->option->shouldReceive('fromCode')
+      ->once()
+      ->with(['list'])
+      ->andReturnNull();
+
+    $this->assertSame(
+      [],
+      $this->option->getCodes('list')
     );
   }
 }

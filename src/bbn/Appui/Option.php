@@ -1809,7 +1809,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false The formatted array or false if the option cannot be found
+   * @return array|null The formatted array or false if the option cannot be found
    */
   public function getCfg($code = null): ?array
   {
@@ -1819,14 +1819,15 @@ class Option extends bbn\Models\Cls\Db
       }
 
       $c   =& $this->class_cfg;
-      $cfg = $this->db->selectOne($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
+      $f   =& $this->fields;
+      $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
       $cfg = bbn\Str::isJson($cfg) ? json_decode($cfg, true) : [];
       $perm = $cfg['permissions'] ?? false;
       // Looking for parent with inheritance
       $parents = array_reverse($this->parents($id));
       $last    = \count($parents) - 1;
       foreach ($parents as $i => $p){
-        $parent_cfg = $this->db->selectOne($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $p]);
+        $parent_cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $p]);
         $parent_cfg = bbn\Str::isJson($parent_cfg) ? json_decode($parent_cfg, true) : [];
         if (!empty($parent_cfg['scfg']) && ($i === $last)) {
           $cfg                 = array_merge((array)$cfg, $parent_cfg['scfg']);
@@ -1839,12 +1840,12 @@ class Option extends bbn\Models\Cls\Db
           if (
               (($i === $last)
               && (
-              ($parent_cfg['inheritance'] === 'children')
-              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'children')))
+              (($parent_cfg['inheritance'] ?? null) === 'children')
+              || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'children')))
               )
               || (
-              ($parent_cfg['inheritance'] === 'cascade')
-              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'cascade'))
+              (($parent_cfg['inheritance'] ?? null) === 'cascade')
+              || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'cascade'))
             )
           ) {
             // Keeping in the option cfg properties which don't exist in the parent
@@ -1854,8 +1855,8 @@ class Option extends bbn\Models\Cls\Db
             break;
           }
           elseif (!count($cfg)
-              && (($parent_cfg['inheritance'] === 'default')
-              || (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'default'))              )
+              && ((($parent_cfg['inheritance'] ?? null) === 'default')
+              || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'default'))              )
           ) {
             $cfg                 = $parent_cfg['scfg'] ?? $parent_cfg;
             $cfg['inherit_from'] = $p;
@@ -1950,8 +1951,8 @@ class Option extends bbn\Models\Cls\Db
    * // array [25, 12, 0]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|false The array of parents' ids, an empty array if no parent (root case), and false if it can't find the option
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option
    */
   public function parents($code = null): ?array
   {
@@ -1991,7 +1992,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @param string      $id_option
    * @param string|null $id_root
-   * @return array|null The array of parents' ids, an empty array if no parent (root case), and false if it can't find the option
+   * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option
    */
   public function sequence(string $id_option, string $id_root = null): ?array
   {
@@ -2022,12 +2023,12 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return int|string The parent's ID, null if no parent, or false if option cannot be found
+   * @return string|null The parent's ID, null if no parent or if option cannot be found.
    */
   public function getIdParent($code = null): ?string
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args())) && ($o = $this->nativeOption($id))) {
-      return $o['id_parent'];
+      return $o[$this->fields['id_parent']];
     }
 
     return null;
@@ -2050,7 +2051,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false
    */
   public function parent($code = null): ?array
@@ -2083,7 +2084,7 @@ class Option extends bbn\Models\Cls\Db
   {
     // Preventing infinite loop
     $done = [$id];
-    if (bbn\Str::isUid($id, $id_parent)) {
+    if (bbn\Str::isUid($id) && bbn\Str::isUid($id_parent)) {
       while ($id = $this->getIdParent($id)){
         if ($id === $id_parent) {
           return true;
@@ -2116,13 +2117,13 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|false Options' array
    */
   public function getCodes($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $c   =& $this->class_cfg['arch']['options'];
+      $c   =& $this->fields;
       $opt = $this->db->rselectAll($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id], [($this->isSortable($id) ? $c['num'] : $c['code']) => 'ASC']);
       $res = [];
       foreach ($opt as $r){
