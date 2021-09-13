@@ -184,7 +184,7 @@ class Grid extends bbn\Models\Cls\Cache
         else{
           $db_cfg['count'] = true;
           $this->count_cfg = $this->db->processCfg($db_cfg);
-          //die(\X::dump($this->count_cfg));
+          //die(X::dump($this->count_cfg));
         }
         if ( !empty($cfg['num']) ){
           $this->num = $cfg['num'];
@@ -317,7 +317,7 @@ class Grid extends bbn\Models\Cls\Cache
       return $this->num ?: 0;
     }
     else if ( $this->count_cfg ){
-      //\X::log($this->count_cfg, 'mirko');
+      //X::log($this->count_cfg, 'mirko');
       //die(X::dump($this->count_cfg));
       $this->chrono->start();
       $this->num = $this->db->selectOne($this->count_cfg);
@@ -401,7 +401,7 @@ class Grid extends bbn\Models\Cls\Cache
    */
   public function toExcel(array $data = []): array
   {
-    $path = \X::makeStoragePath(\bbn\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
+    $path = X::makeStoragePath(\bbn\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
     $cfg = $this->getExcel();
     $dates = array_values(array_filter($cfg['fields'], function($c){
       return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));
@@ -411,14 +411,14 @@ class Grid extends bbn\Models\Cls\Cache
         if ( \is_string($r) ){
           $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;
         }
-        if ( (($k = \X::find($dates, ['field' => $i])) !== null ) ){
+        if ( (($k = X::find($dates, ['field' => $i])) !== null ) ){
           if ( !empty($dates[$k]['format']) && !empty($r) ){
             $r = date($dates[$k]['format'], strtotime($r));
           }
           $row[$i] = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
         }
         if (
-          (($idx = \X::find($cfg['fields'], ['field' => $i])) === null ) ||
+          (($idx = X::find($cfg['fields'], ['field' => $i])) === null ) ||
           !!$cfg['fields'][$idx]['hidden']
         ){
           unset($row[$i]);
@@ -429,7 +429,7 @@ class Grid extends bbn\Models\Cls\Cache
     $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){
       return empty($c['hidden']);
     }));
-    if ( \X::toExcel($data, $path, true, $cfg) ){
+    if ( X::toExcel($data, $path, true, $cfg) ){
       return ['file' => $path];
     }
     return ['error' => X::_('Error')];
