@@ -1047,7 +1047,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               $idxs[] = $this->colSimpleName($cfg['aliases'][$g] ?? $g, true);
             } else {
               $indexes[] = $g;
-              $idxs[]    = $g;
+              $idxs[]    = $idxs[] = $cfg['aliases'][$g] ?? $g;
             }
           }
 
