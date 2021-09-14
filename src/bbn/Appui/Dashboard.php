@@ -709,7 +709,7 @@ class Dashboard
               'field' => $this->archPref['id_option'],
               'value' => $this->idList
             ], [
-              'field' => $this->archPref['cfg'] . '->>"$.code"',
+              'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, \'$.code\'))',
               'value' => $code
             ], [
               'logic' => 'OR',
