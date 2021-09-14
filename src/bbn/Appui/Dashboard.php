@@ -744,19 +744,11 @@ class Dashboard
       throw new \Exception(_('A wrong argument value is passed'));
     }
 
-    if (Str::isUid($id)) {
-      if ($id_alias = $this->db->selectOne($this->cfgPref['tables']['user_options'], $this->archPref['id_alias'], [$this->archPref['id'] => $id])) {
-        $id = $id_alias;
-      }
-
-      return $this->db->selectOne(
-        $this->cfgPref['tables']['user_options'],
-        $this->archPref['cfg'] . '->>"$.code"',
-        [$this->archPref['id'] => $id]
-      );
+    if ($pref = $this->pref->get($id)) {
+      return $pref['code'] ?? null;
     }
 
-    return $id;
+    return null;
   }
 
 
