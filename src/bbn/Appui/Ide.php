@@ -1409,8 +1409,8 @@ class Ide
               $arch['id_option'],
               $arch['cfg'],
               $arch['text'],
-              'date' => 'bbn_users_options_bits.cfg->"$.last_date"',
-              'num' => 'bbn_users_options_bits.cfg->"$.number"'
+              'date' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->db->csn($arch['cfg'], true).', "$.last_date"))',
+              'num' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->db->csn($arch['cfg'], true).', "$.number"))'
             ],
             'where' => [
               'conditions' => [[
