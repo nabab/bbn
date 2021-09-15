@@ -1,23 +1,4 @@
-<p align="center">
-  <svg viewBox="0 0 120 40" preserveAspectRatio="xMinYMin" xmlns="http://www.w3.org/2000/svg">
-    <path fill="color"
-          d="m18 28 6-6-6-6-4 4-2-2 4-4.1-8-8L0 14l10 10 2-2z"></path>
-    <path fill="#000000"
-          d="m18 16-4 4-2-2L29.9 0l8 8L24 22zM10 24l2-2 6 6-2.1 2z"></path>
-    <text x="36%"
-          y="23"
-          :fill="black ? '#000000' : '#FFFFFF'"
-          style="font-size:16px;font-family:Montserrat;font-weight:800"
-          transform="matrix(.85 0 0 1 1 1)">BBN
-    </text>
-    <text x="72%"
-          y="23"
-          fill="#ff5722"
-          style="font-size:16px;font-family:Montserrat;font-weight:800"
-          transform="matrix(.85 0 0 1 1 1)"
-          v-text="name"/>PHP
-  </svg>
-</p>
+<p align="center"><img alt="BBN PHP" src="https://bbn.io/bbn/php-title-black.png" style="max-width: 40%; height: auto"></p>
 
 bbn
 ===
