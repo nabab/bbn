@@ -812,7 +812,7 @@ class Option extends bbn\Models\Cls\Db
         && ($opt = $this->nativeOption($id))
     ) {
       $this->_set_value($opt);
-      $c =& $this->class_cfg['arch']['options'];
+      $c =& $this->fields;
       if (bbn\Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
         $opt['alias'] = $alias;
         if ($opt[$c['id_alias']] === $id) {
@@ -860,7 +860,7 @@ class Option extends bbn\Models\Cls\Db
         && ($opt = $this->nativeOption($id))
     ) {
       $this->_set_value($opt);
-      $c =& $this->class_cfg['arch']['options'];
+      $c =& $this->fields;
       if (bbn\Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
         if ($opt[$c['id_alias']] === $id) {
           throw new \Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
@@ -2118,9 +2118,9 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false Options' array
+   * @return array Options' array
    */
-  public function getCodes($code = null): ?array
+  public function getCodes($code = null): array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $c   =& $this->fields;
@@ -2146,14 +2146,14 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param string $id The options' ID
-   * @return string|null|false The code value, null is none, false if option not found
+   * @return string|null The code value, null is none, false if option not found
    */
   public function code(string $id): ?string
   {
     if ($this->check() && bbn\Str::isUid($id)) {
       return $this->db->selectOne(
-        $this->class_cfg['table'], $this->class_cfg['arch']['options']['code'], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->class_cfg['table'], $this->fields['code'], [
+        $this->fields['id'] => $id
         ]
       );
     }
@@ -2172,15 +2172,15 @@ class Option extends bbn\Models\Cls\Db
    * // (string) BBN's own IDE
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return string Text of the option
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return string|null Text of the option
    */
   public function text($code = null): ?string
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       return $this->db->selectOne(
-        $this->class_cfg['table'], $this->class_cfg['arch']['options']['text'], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->class_cfg['table'], $this->fields['text'], [
+        $this->fields['id'] => $id
         ]
       );
     }
@@ -2192,15 +2192,15 @@ class Option extends bbn\Models\Cls\Db
   /**
    * Returns the id_alias relative to the given id_option
    *
-   * @param string $uid
+   * @param string $id
    * @return string|null
    */
   public function alias(string $id): ?string
   {
     if ($this->check() && bbn\Str::isUid($id)) {
       return $this->db->selectOne(
-        $this->class_cfg['table'], $this->class_cfg['arch']['options']['id_alias'], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->class_cfg['table'], $this->fields['id_alias'], [
+        $this->fields['id'] => $id
         ]
       );
     }
@@ -2220,15 +2220,15 @@ class Option extends bbn\Models\Cls\Db
    * // (string) L'IDE de BBN
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return string Text of the option
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return string|null Text of the option
    */
   public function itext($code = null): ?string
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $val = $this->db->selectOne(
-        $this->class_cfg['table'], $this->class_cfg['arch']['options']['text'], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->class_cfg['table'], $this->fields['text'], [
+        $this->fields['id'] => $id
         ]
       );
       if ($val) {
@@ -2248,13 +2248,13 @@ class Option extends bbn\Models\Cls\Db
    * // (int) 4
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return int|false The number of children or false if option not found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return int|null The number of children or null if option not found
    */
   public function count($code = null): ?int
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      return $this->db->count($this->class_cfg['table'], [$this->class_cfg['arch']['options']['id_parent'] => $id]);
+      return $this->db->count($this->class_cfg['table'], [$this->fields['id_parent'] => $id]);
     }
 
     return null;
@@ -2274,14 +2274,14 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
-   * @return array|bool
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
+   * @return array|null
    */
   public function optionsByAlias($code = null): ?array
   {
     $id_alias = $this->fromCode(\func_get_args());
     if (bbn\Str::isUid($id_alias)) {
-      $where = [$this->class_cfg['arch']['options']['id_alias'] => $id_alias];
+      $where = [$this->fields['id_alias'] => $id_alias];
       $list  = $this->getRows($where);
       if (\is_array($list)) {
         $res = [];
@@ -2307,14 +2307,14 @@ class Option extends bbn\Models\Cls\Db
    * // (bool) true
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return bool
    */
   public function isSortable($code = null): ?bool
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $cfg = $this->getCfg($id);
-      return empty($cfg['sortable']) ? false : true;
+      return !empty($cfg['sortable']);
     }
 
     return null;
@@ -2329,9 +2329,9 @@ class Option extends bbn\Models\Cls\Db
    * // array ["path", "to", "my", "option"]
    * ```
    *
-   * @param int $id   The end/target of the path
-   * @param int $root The start/origin of the path, {@link get_default()} if is null
-   * @return array|bool
+   * @param string $id The end/target of the path
+   * @param null $root The start/origin of the path, {@link getDefault()} if is null
+   * @return array|null
    */
   public function getPathArray(string $id, $root = null): ?array
   {
@@ -2367,7 +2367,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @param string      $path   The path made of a concatenation of path and $sep until the target
    * @param string      $sep    The separator
-   * @param null|string $parent An optional id_parent, {@link get_default()} otherwise
+   * @param null|string $parent An optional id_parent, {@link fromCode()} otherwise
    * @return null|string
    */
   public function fromPath(string $path, string $sep = '|', $parent = null): ?string
@@ -2398,17 +2398,17 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Concatenates the codes and separator $sep of a a line of options
+   * Concatenates the codes and separator $sep of a line of options
    *
    * ```php
    * X::dump($opt->toPath(48, '|', 12)
    * // (string) path|to|my|option
    * ```
    *
-   * @param int    $id     The end/target of the path
-   * @param string $sep    The separator
-   * @param int    $parent The start/origin of the path
-   * @return string|false The path concatenated with the separator or false if no path
+   * @param string $id The end/target of the path
+   * @param string $sep The separator
+   * @param string|null $parent The start/origin of the path
+   * @return string|null The path concatenated with the separator or null if no path
    */
   public function toPath(string $id, string $sep = '|', string $parent = null): ?string
   {
@@ -2461,6 +2461,7 @@ class Option extends bbn\Models\Cls\Db
    * @param array   $it         The option configuration
    * @param boolean $force      Determines if the option should be updated if it already exists
    * @param boolean $return_num If set to true the function will return the number of rows inserted otherwise the ID of the newly created option
+   * @param bool $with_id
    * @return int|string|false
    */
   public function add(array $it, $force = false, $return_num = false, $with_id = false)
@@ -2578,9 +2579,9 @@ class Option extends bbn\Models\Cls\Db
    * // (int) 1
    * ```
    *
-   * @param int   $id
+   * @param string   $id
    * @param array $data
-   * @return bool|int
+   * @return int
    */
   public function set($id, array $data)
   {
@@ -2589,7 +2590,7 @@ class Option extends bbn\Models\Cls\Db
         unset($data['id']);
       }
 
-      $c =& $this->class_cfg['arch']['options'];
+      $c =& $this->fields;
       // id_parent cannot be edited this way
       if ($res = $this->db->update(
         $this->class_cfg['table'],
@@ -2614,10 +2615,10 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Updates an option's row (without changing cfg)
+   * Updates an option's row by merging the data and cfg.
    *
    * ```php
-   * X::dump($opt->set(12, [
+   * X::dump($opt->merge(12, [
    *   'id_parent' => $opt->fromCode('bbn_ide'),
    *   'text' => 'My new option',
    *   'code' => 'new_opt',
@@ -2630,18 +2631,21 @@ class Option extends bbn\Models\Cls\Db
    * // (int) 1
    * ```
    *
-   * @param int   $id
+   * @param string $id
    * @param array $data
-   * @return bool|int
+   * @param array|null $cfg
+   * @return int|null
+   * @throws \Exception
    */
   public function merge(string $id, array $data, array $cfg = null)
   {
     if ($this->check()
         && ($o = $this->option($id))
     ) {
+      $c =& $this->fields;
+
       if (!empty($data)) {
         $data = array_merge($o, $data);
-        $c    =& $this->class_cfg['arch']['options'];
         $this->_prepare($data);
         if (isset($data[$c['id']])) {
           unset($data[$c['id']]);
@@ -2650,7 +2654,7 @@ class Option extends bbn\Models\Cls\Db
 
       if ($cfg) {
         $ocfg        = $this->getRawCfg($id);
-        $data['cfg'] = json_encode(array_merge($ocfg ? json_decode($ocfg, true) : [], $cfg));
+        $data[$c['cfg']] = json_encode(array_merge($ocfg ? json_decode($ocfg, true) : [], $cfg));
       }
 
       // id_parent cannot be edited this way
@@ -4256,7 +4260,7 @@ class Option extends bbn\Models\Cls\Db
   private function _prepare(array &$it): bool
   {
     // The table's columns
-    $c =& $this->class_cfg['arch']['options'];
+    $c =& $this->fields;
 
     // If id_parent is undefined it uses the default
     if (!isset($it[$c['id_parent']])) {
@@ -4384,7 +4388,7 @@ class Option extends bbn\Models\Cls\Db
         }
       }
 
-      $is_sortable = $this->isSortable($parent['id']);
+      $is_sortable = $this->isSortable($parent[$c['id']]);
       // If parent is sortable and order is not defined we define it as last
       if (isset($it[$c['num']]) && !$is_sortable) {
         unset($it[$c['num']]);
@@ -4411,8 +4415,8 @@ class Option extends bbn\Models\Cls\Db
    */
   private function _set_value(array &$opt): ?array
   {
-    if (!empty($opt[$this->class_cfg['arch']['options']['value']]) && bbn\Str::isJson($opt[$this->class_cfg['arch']['options']['value']])) {
-      $val = json_decode($opt[$this->class_cfg['arch']['options']['value']], true);
+    if (!empty($opt[$this->fields['value']]) && bbn\Str::isJson($opt[$this->fields['value']])) {
+      $val = json_decode($opt[$this->fields['value']], true);
       if (X::isAssoc($val)) {
         foreach ($val as $k => $v){
           if (!isset($opt[$k])) {
@@ -4420,10 +4424,10 @@ class Option extends bbn\Models\Cls\Db
           }
         }
 
-        unset($opt[$this->class_cfg['arch']['options']['value']]);
+        unset($opt[$this->fields['value']]);
       }
       else{
-        $opt[$this->class_cfg['arch']['options']['value']] = $val;
+        $opt[$this->fields['value']] = $val;
       }
     }
 
