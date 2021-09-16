@@ -550,7 +550,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|null Row or null if the option cannot be found
    */
   public function nativeOption($code = null): ?array
@@ -734,10 +734,10 @@ class Option extends bbn\Models\Cls\Db
    * Returns an option's full content as an array without its values changed by id_alias
    *
    * ```php
-   * X::dump($opt->option(25));
-   * X::dump($opt->option('bbn_ide'));
-   * X::dump($opt->option('TEST', 58));
-   * X::dump($opt->option('test3', 'users', 'bbn_ide'));
+   * X::dump($opt->optionNoAlias(25));
+   * X::dump($opt->optionNoAlias('bbn_ide'));
+   * X::dump($opt->optionNoAlias('TEST', 58));
+   * X::dump($opt->optionNoAlias('test3', 'users', 'bbn_ide'));
    * /* Each would return an array of this form
    * array [
    *   'id' => 31,
@@ -2682,11 +2682,11 @@ class Option extends bbn\Models\Cls\Db
    * X::dump($opt->remove(12));
    * // (int) 12 Number of options deleted
    * X::dump($opt->remove(12));
-   * // (bool) false The option doesn't exist anymore
+   * // (null) The option doesn't exist anymore
    * ```
    *
-   * @param string $code Any option(s) accepted by {@link from_code()}
-   * @return bool|int The number of affected rows or false if option not found
+   * @param string $code Any option(s) accepted by {@link fromCode()}
+   * @return int|null The number of affected rows or null if option not found
    */
   public function remove($code)
   {
@@ -2705,7 +2705,7 @@ class Option extends bbn\Models\Cls\Db
       $this->deleteCache($id);
       $num += (int)$this->db->delete(
         $this->class_cfg['table'], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->fields['id'] => $id
         ]
       );
       if ($this->isSortable($id_parent)) {
@@ -2720,17 +2720,17 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Deletes a row from the options table, deletes the cache and fix order if needed
+   * Deletes an option row with all it's hierarchical structure from the options table and deletes the cache.
    *
    * ```php
-   * X::dump($opt->remove(12));
+   * X::dump($opt->removeFull(12));
    * // (int) 12 Number of options deleted
-   * X::dump($opt->remove(12));
-   * // (bool) false The option doesn't exist anymore
+   * X::dump($opt->removeFull(12));
+   * // (null) The option doesn't exist anymore
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()} or the uid
-   * @return bool|int The number of affected rows or false if option not found
+   * @param mixed $code Any option(s) accepted by {@link fromCode()} or the uid
+   * @return int|null The number of affected rows or null if option not found
    */
   public function removeFull($code)
   {
@@ -2748,11 +2748,10 @@ class Option extends bbn\Models\Cls\Db
           $res += (int)$this->db->delete('bbn_history_uids', ['bbn_uid' => $a]);
         }
         else{
-          $res += (int)$this->db->delete($this->class_cfg['table'], [$this->class_cfg['arch']['options']['id'] => $a]);
+          $res += (int)$this->db->delete($this->class_cfg['table'], [$this->fields['id'] => $a]);
         }
       }
 
-      $this->deleteCache($id);
       return $res;
     }
 
@@ -2768,8 +2767,8 @@ class Option extends bbn\Models\Cls\Db
    * // (int) 1
    * ```
    *
-   * @param int      $id    The ID of the option to be updated
-   * @param int|null $alias The alias' option ID
+   * @param string      $id    The ID of the option to be updated
+   * @param string|null $alias The alias' option ID
    * @return int The number of affected rows
    */
   public function setAlias($id, $alias = null)
@@ -2778,9 +2777,9 @@ class Option extends bbn\Models\Cls\Db
     if ($this->check()) {
       $res = $this->db->updateIgnore(
         $this->class_cfg['table'], [
-        $this->class_cfg['arch']['options']['id_alias'] => $alias ?: null
+        $this->fields['id_alias'] => $alias ?: null
         ], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->fields['id'] => $id
         ]
       );
       if ($res) {
@@ -2810,9 +2809,9 @@ class Option extends bbn\Models\Cls\Db
     if ($this->check()) {
       $res = $this->db->updateIgnore(
         $this->class_cfg['table'], [
-        $this->class_cfg['arch']['options']['text'] => $text
+        $this->fields['text'] => $text
         ], [
-          $this->class_cfg['arch']['options']['id'] => $id
+          $this->fields['id'] => $id
         ]
       );
       if ($res) {
@@ -2832,18 +2831,18 @@ class Option extends bbn\Models\Cls\Db
    * // (int) 1
    * ```
    *
-   * @param int    $id   The ID of the option to be updated
-   * @param string $code The new code
-   * @return int The number of affected rows
+   * @param int $id The ID of the option to be updated
+   * @param string|null $code The new code
+   * @return int|null The number of affected rows
    */
   public function setCode($id, string $code = null)
   {
     if ($this->check()) {
       return $this->db->updateIgnore(
         $this->class_cfg['table'], [
-        $this->class_cfg['arch']['options']['code'] => $code ?: null
+        $this->fields['code'] => $code ?: null
         ], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->fields['id'] => $id
         ]
       );
     }
@@ -2869,8 +2868,8 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param int $id  The ID of the option to update
-   * @param int $pos The new position
-   * @return int|false The new or existing order of the option or false if not found or not sortable
+   * @param int|null $pos The new position
+   * @return int|null The new or existing order of the option or null if not found or not sortable
    */
   public function order($id, int $pos = null)
   {
@@ -2880,8 +2879,8 @@ class Option extends bbn\Models\Cls\Db
     ) {
       $cf  = $this->class_cfg;
       $old = $this->db->selectOne(
-        $cf['table'], $cf['arch']['options']['num'], [
-        $cf['arch']['options']['id'] => $id
+        $cf['table'], $this->fields['num'], [
+        $this->fields['id'] => $id
         ]
       );
       if ($pos && ($old != $pos)) {
@@ -2893,25 +2892,25 @@ class Option extends bbn\Models\Cls\Db
           $upd = false;
           // Fixing order problem
           if ($past_old && !$past_new) {
-            $upd = [$cf['arch']['options']['num'] => $p - 1];
+            $upd = [$this->fields['num'] => $p - 1];
           }
           elseif (!$past_old && $past_new) {
-            $upd = [$cf['arch']['options']['num'] => $p + 1];
+            $upd = [$this->fields['num'] => $p + 1];
           }
 
           if ($id === $id_option) {
-            $upd      = [$cf['arch']['options']['num'] => $pos];
+            $upd      = [$this->fields['num'] => $pos];
             $past_old = 1;
           }
           elseif ($p === $pos) {
-            $upd      = [$cf['arch']['options']['num'] => $p + ($pos > $old ? -1 : 1)];
+            $upd      = [$this->fields['num'] => $p + ($pos > $old ? -1 : 1)];
             $past_new = 1;
           }
 
           if ($upd) {
             $this->db->update(
               $cf['table'], $upd, [
-              $cf['arch']['options']['id'] => $id_option
+              $this->fields['id'] => $id_option
               ]
             );
           }
@@ -2936,7 +2935,7 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Updates option's properties derivated from the value column
+   * Updates option's properties derived from the value column
    *
    * ```php
    * X::dump($opt->setProp(12, 'myProperty', "78%"));
@@ -2971,7 +2970,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @param int          $id   The option to update's ID
    * @param array|string $prop An array of properties and values, or a string with the property's name adding as next argument the new value
-   * @return int|false the number of affected rows or false if no argument or option not found
+   * @return int|null the number of affected rows or null if no argument or option not found
    */
   public function setProp($id, $prop)
   {
@@ -2985,13 +2984,11 @@ class Option extends bbn\Models\Cls\Db
         X::log([$o, $prop], "set_prop");
         $change = false;
         foreach ($prop as $k => $v){
-          //if ( !\in_array($k, $this->class_cfg['arch']['options']) ){
           if (!isset($o[$k]) || ($o[$k] !== $v)) {
             $change = true;
             $o[$k]  = $v;
           }
 
-          //}
         }
 
         if ($change) {
@@ -3018,7 +3015,7 @@ class Option extends bbn\Models\Cls\Db
    * // (string) "78%"
    * ```
    *
-   * @param int    $id   The option from which getting the property
+   * @param string|int    $id   The option from which getting the property
    * @param string $prop The property's name
    * @return mixed|false The property's value, false if not found
    */
@@ -3066,9 +3063,9 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param int          $id   The option to update's ID
+   * @param string       $id   The option to update's ID
    * @param array|string $prop An array of properties and values, or a string with the property's name adding as next argument the new value
-   * @return int|false the number of affected rows or false if no argument or option not found
+   * @return int|null the number of affected rows or null if no argument or option not found
    */
   public function unsetProp($id, $prop)
   {
@@ -3080,7 +3077,7 @@ class Option extends bbn\Models\Cls\Db
       if (\is_array($prop)) {
         $change = false;
         foreach ($prop as $k){
-          if (!\in_array($k, $this->class_cfg['arch']['options'], true)) {
+          if (!\in_array($k, $this->fields, true) && array_key_exists($k, $o)) {
             $change = true;
             unset($o[$k]);
           }
@@ -3111,9 +3108,9 @@ class Option extends bbn\Models\Cls\Db
    * // array ['desc' => "I am a cool option", 'sortable' => true];
    * ```
    *
-   * @param int   $id  The option ID
-   * @param array $cfg The config value
-   * @return int|false number of affected rows
+   * @param string|int   $id  The option ID
+   * @param array       $cfg The config value
+   * @return int|null number of affected rows
    */
   public function setCfg($id, array $cfg, bool $merge = false): ?int
   {
@@ -3122,8 +3119,8 @@ class Option extends bbn\Models\Cls\Db
         unset($cfg['inherited_from']);
       }
 
-      if (isset($cfg['id'])) {
-        unset($cfg['id']);
+      if (isset($cfg[$this->fields['id']])) {
+        unset($cfg[$this->fields['id']]);
       }
 
       if (isset($cfg['permissions']) && !in_array($cfg['permissions'], ['single', 'cascade', 'all', 'children'])) {
@@ -3137,13 +3134,13 @@ class Option extends bbn\Models\Cls\Db
       $c =& $this->class_cfg;
       if ($res = $this->db->update(
         $c['table'], [
-        $c['arch']['options']['cfg'] => $cfg ? json_encode($cfg) : null
+        $this->fields['cfg'] => $cfg ? json_encode($cfg) : null
         ], [
-        $c['arch']['options']['id'] => $id
+          $this->fields['id'] => $id
         ]
       )
       ) {
-        if (($old_cfg['inheritance'] ?? null) !== ($cfg['inheritance'] ?? null)) {
+        if (isset($old_cfg['inheritance'], $cfg['inheritance']) && $old_cfg['inheritance'] !== $cfg['inheritance']) {
           $this->deleteCache($id, true);
         }
         else{
@@ -3168,8 +3165,8 @@ class Option extends bbn\Models\Cls\Db
    * // array ['desc' => "I am a cool option", 'sortable' => true];
    * ```
    *
-   * @param int $id The option ID
-   * @return int|boolean Number of affected rows or false if not found
+   * @param string|int $id The option ID
+   * @return int|false Number of affected rows or false if not found
    */
   public function unsetCfg($id)
   {
@@ -3177,9 +3174,9 @@ class Option extends bbn\Models\Cls\Db
     if ($this->check() && $this->exists($id)) {
       $res = $this->db->update(
         $this->class_cfg['table'], [
-        $this->class_cfg['arch']['options']['cfg'] => null
+        $this->fields['cfg'] => null
         ], [
-        $this->class_cfg['arch']['options']['id'] => $id
+        $this->fields['id'] => $id
         ]
       );
       if ($res) {
