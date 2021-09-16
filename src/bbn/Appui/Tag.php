@@ -79,7 +79,19 @@ class Tag extends bbn\Models\Cls\Db
   {
     $table = $this->class_cfg['table'];
     $cf = $this->class_cfg['arch']['tags'];
-    return $this->db->rselectAll($table, [], [$cf['tag'] => $tag, $cf['lang'] => $lang ?: $this->lang]);
+    return $this->db->rselect($table, [], [$cf['tag'] => $tag, $cf['lang'] => $lang ?: $this->lang]);
+  }
+
+
+  public function getById(string $id, bool $full = false)
+  {
+    $table = $this->class_cfg['table'];
+    $cf = $this->class_cfg['arch']['tags'];
+    if ($full) {
+      return $this->db->rselect($table, [], [$cf['id'] => $id]);
+    }
+
+    return $this->db->selectOne($table, 'tag', [$cf['id'] => $id]);
   }
 
 

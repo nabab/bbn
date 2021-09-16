@@ -25,7 +25,12 @@ class Note extends bbn\Models\Cls\Db
 
   use bbn\Models\Tts\Dbconfig;
 
+  use bbn\Models\Tts\Tagger;
+
   private $medias;
+
+  /** @var string The default language used */
+  protected $lang;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -38,6 +43,7 @@ class Note extends bbn\Models\Cls\Db
       'versions' => 'bbn_notes_versions',
       'nmedias' => 'bbn_notes_medias',
       'medias' => 'bbn_medias',
+      'tags' => 'bbn_notes_tags',
       'url' => 'bbn_notes_url',
       'events' => 'bbn_notes_events'
     ],
@@ -87,6 +93,10 @@ class Note extends bbn\Models\Cls\Db
         'id_note' => 'id_note',
         'id_event' => 'id_event',
       ],
+      'tags' => [
+        'id_note' => 'id_note',
+        'id_tag' => 'id_tag',
+      ],
       'url' => [
         'url' => 'url',
         'id_note' => 'id_note',
@@ -107,11 +117,32 @@ class Note extends bbn\Models\Cls\Db
    * @param bbn\Db $db
    * @throws \Exception
    */
-  public function __construct(bbn\Db $db)
+  public function __construct(bbn\Db $db, string $lang = null)
   {
     parent::__construct($db);
     self::_init_class_cfg(self::$default_class_cfg);
     self::optionalInit();
+    $this->taggerInit(
+      $this->class_cfg['tables']['tags'],
+      [
+        'id_tag' => $this->class_cfg['arch']['tags']['id_tag'],
+        'id_element' => $this->class_cfg['arch']['tags']['id_note']
+      ]
+    );
+    $this->lang = $lang ?: (defined('BBN_LANG') ? BBN_LANG : 'en');
+  }
+
+
+  public function setLang($lang): self
+  {
+    $this->lang = $lang;
+    return $this;
+  }
+
+
+  public function getLang(): string
+  {
+    return $this->lang;
   }
 
 
