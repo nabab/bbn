@@ -19,6 +19,8 @@ trait Dbconfig
   /** @var array */
   protected $fields;
 
+  protected $class_cfg;
+
   /** @var string */
   protected $class_table;
 
