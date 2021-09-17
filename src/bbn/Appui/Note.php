@@ -669,7 +669,7 @@ class Note extends bbn\Models\Cls\Db
   {
     $cf  = &$this->class_cfg;
     return [
-      'table' => $cf['table'],
+      'tables' => [$cf['table']],
       'fields' => [
         'versions1.' . $cf['arch']['versions']['id_note'],
         'versions1.' . $cf['arch']['versions']['version'],

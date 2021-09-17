@@ -109,6 +109,18 @@ trait Tagger
   }
 
 
+  public function removeTags(string $id_element): int
+  {
+    $this->taggerInit();
+    return $this->db->delete(
+      $this->taggerTable,
+      [
+        $this->taggerCols['id_element'] => $id_element,
+      ]
+    );
+  }
+
+
   public function addTag(string $id_element, string $tag, string $lang = null, string $description = ''): int
   {
     $this->taggerInit();
