@@ -60,14 +60,11 @@ class Tag extends bbn\Models\Cls\Db
     if (!$this->all || $force) {
       $table = $this->class_cfg['table'];
       $cf = $this->class_cfg['arch']['tags'];
-      $this->all = $this->db->rselectAll(
+      $this->all = $this->db->getColumnValues(
         $table,
-        [
-          'value' => $cf['id'],
-          'text' => $cf['tag']
-        ], [], [
-          'tag' => 'ASC'
-        ]
+        $cf['tag'],
+        [],
+        ['tag' => 'ASC']
       );
     }
 
