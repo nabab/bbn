@@ -624,7 +624,7 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an option's items  as stored in its original form in the database, including cfg
+   * Returns an option's items as stored in its original form in the database, including cfg
    *
    * ```php
    * X::dump($opt->rawOptions('database', 'appui'));
@@ -648,7 +648,7 @@ class Option extends bbn\Models\Cls\Db
    * ]
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|null Row or false if the option cannot be found
    */
   public function rawOptions($code = null): ?array
@@ -1012,11 +1012,11 @@ class Option extends bbn\Models\Cls\Db
         }
 
         $res[$i] = [
-          $text => $is_array ? $o['text'] : $o,
-          $value => $is_array ? $o['id'] : $k
+          $text => $is_array ? $o[$this->fields['text']] : $o,
+          $value => $is_array ? $o[$this->fields['id']] : $k
         ];
         if (!empty($cfg['show_code'])) {
-          $res[$i]['code'] = $o['code'];
+          $res[$i][$this->fields['code']] = $o[$this->fields['code']];
         }
 
         /*
@@ -1049,7 +1049,7 @@ class Option extends bbn\Models\Cls\Db
       if (($id_parent = $this->getIdParent($id)) && ($full_options = $this->fullOptions($id_parent))) {
         return array_filter(
           $full_options, function ($a) use ($id) {
-            return $a['id'] !== $id;
+            return $a[$this->fields['id']] !== $id;
           }
         );
       }
@@ -1122,7 +1122,7 @@ class Option extends bbn\Models\Cls\Db
       $all = $this->fullOptions($id) ?? [];
       if ($aliases = $this->getAliases($id)) {
         foreach ($aliases as $a) {
-          if ($tmp = $this->fullOptions($a['id'])) {
+          if ($tmp = $this->fullOptions($a[$this->fields['id']])) {
             array_push($all, ...$tmp);
           }
         }
@@ -1158,7 +1158,7 @@ class Option extends bbn\Models\Cls\Db
       $all = $this->options($id) ?? [];
       if ($aliases = $this->getAliases($id)) {
         foreach ($aliases as $a) {
-          if ($tmp = $this->options($a['id'])) {
+          if ($tmp = $this->options($a[$this->fields['id']])) {
             $all = array_merge($all, $tmp);
           }
         }
@@ -1238,10 +1238,10 @@ class Option extends bbn\Models\Cls\Db
         $res = [];
         foreach ($list as $i){
           $o               = $this->option($i);
-          $res[$o['code']] = [
-            'id' => $o['id'],
-            'code' => $o['code'],
-            'text' => $o['text']
+          $res[$o[$this->fields['code']]] = [
+            $this->fields['id'] => $o[$this->fields['id']],
+            $this->fields['code'] => $o[$this->fields['code']],
+            $this->fields['text'] => $o[$this->fields['text']]
           ];
         }
 
@@ -1276,7 +1276,7 @@ class Option extends bbn\Models\Cls\Db
         $res = [];
         foreach ($list as $i){
           $o               = $this->option($i);
-          $res[$o['code']] = $o['id'];
+          $res[$o[$this->fields['code']]] = $o[$this->fields['id']];
         }
 
         return $res;
@@ -2462,7 +2462,7 @@ class Option extends bbn\Models\Cls\Db
    * @param boolean $force      Determines if the option should be updated if it already exists
    * @param boolean $return_num If set to true the function will return the number of rows inserted otherwise the ID of the newly created option
    * @param bool $with_id
-   * @return int|string|false
+   * @return int|string|null
    */
   public function add(array $it, $force = false, $return_num = false, $with_id = false)
   {
@@ -2478,7 +2478,7 @@ class Option extends bbn\Models\Cls\Db
       }
 
       if ($it) {
-        $c =& $this->class_cfg['arch']['options'];
+        $c =& $this->fields;
         if ($it[$c['code']]) {
           $id = $this->db->selectOne(
             $this->class_cfg['table'],
@@ -2530,8 +2530,8 @@ class Option extends bbn\Models\Cls\Db
           $values[$c['id']] = $it[$c['id']];
         }
 
-        if (!empty($it['id']) && $with_id) {
-          $values['id'] = $it['id'];
+        if (!empty($it[$c['id']]) && $with_id) {
+          $values[$c['id']] = $it[$c['id']];
         }
 
         if (!$id
@@ -2546,7 +2546,7 @@ class Option extends bbn\Models\Cls\Db
 
         if ($items && bbn\Str::isUid($id)) {
           foreach ($items as $item){
-            $item['id_parent'] = $id;
+            $item[$c['id_parent']] = $id;
             $res              += (int)$this->add($item, $force, $return_num, $with_id);
           }
         }
@@ -3216,36 +3216,37 @@ class Option extends bbn\Models\Cls\Db
       $o_src  = $this->option($src);
       $o_dest = $this->option($dest);
       $num    = 0;
-      $cf     =& $this->class_cfg['arch']['options'];
+      $cf     =& $this->fields;
       if ($o_dest && $o_src) {
         $o_final = X::mergeArrays($o_src, $o_dest);
         // Order remains the dest one
         $o_final[$cf['num']] = $o_dest[$cf['num']];
-        $tables              = $this->db->getForeignKeys($this->class_cfg['arch']['options']['id'], $this->class_cfg['table']);
+        $tables              = $this->db->getForeignKeys($cf['id'], $this->class_cfg['table']);
         foreach ($tables as $table => $cols){
           foreach ($cols as $c){
             $num += (int)$this->db->update($table, [$c => $dest], [$c => $src]);
           }
         }
 
-        $opt = $this->options($src);
-        // Moving children
-        foreach ($opt as $id => $text){
-          $num += (int)$this->move($id, $dest);
+        if ($opt = $this->options($src)) {
+          // Moving children
+          foreach ($opt as $id => $text){
+            $num += (int)$this->move($id, $dest);
+          }
         }
 
         $num += (int)$this->set($dest, $o_final);
         $num += (int)$this->remove($src);
 
-        $this->deleteCache($o_final['id_parent'], true);
-        $this->deleteCache($o_src['id_parent'], true);
+        $this->deleteCache($o_final[$cf['id_parent']], true);
+        $this->deleteCache($o_src[$cf['id_parent']], true);
 
-        if ($this->isSortable($o_src['id_parent'])) {
-          $this->fixOrder($o_src['id_parent']);
+        if ($this->isSortable($o_src[$cf['id_parent']])) {
+          $this->fixOrder($o_src[$cf['id_parent']]);
         }
 
-        if ($this->isSortable($o_final['id_parent'])) {
-          $this->fixOrder($o_final['id_parent']);
+        if ($this->isSortable($o_final[$cf['id_parent']])) {
+          $this->fixOrder($o_final[$cf['id_parent']]);
         }
       }
 
@@ -3270,7 +3271,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @param int $id        The option's ID
    * @param int $id_parent The new id_parent
-   * @return int|false
+   * @return int|null
    */
   public function move($id, $id_parent)
   {
@@ -3278,19 +3279,19 @@ class Option extends bbn\Models\Cls\Db
     if (($o = $this->option($id))
         && ($target = $this->option($id_parent))
     ) {
-      $upd = [$this->class_cfg['arch']['options']['id_parent'] => $id_parent];
+      $upd = [$this->fields['id_parent'] => $id_parent];
       if ($this->isSortable($id_parent)) {
-        $upd[$this->class_cfg['arch']['options']['num']] = empty($target['num_children']) ? 1 : $target['num_children'] + 1;
+        $upd[$this->fields['num']] = empty($target['num_children']) ? 1 : $target['num_children'] + 1;
       }
 
       $res = $this->db->update(
         $this->class_cfg['table'], $upd, [
-        'id' => $id
+        $this->fields['id'] => $id
         ]
       );
       $this->deleteCache($id_parent);
       $this->deleteCache($id);
-      $this->deleteCache($o['id_parent']);
+      $this->deleteCache($o[$this->fields['id_parent']]);
     }
 
     return $res;
@@ -3298,14 +3299,7 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * Sets the order configuration for each options of a sortable given parent
-   *
-   * ```php
-   * X::dump($opt->items(12));
-   * // array [20, 22, 25, 27]
-   * X::dump($opt->fixOrder(12)->items(12));
-   * // array [25, 22, 27, 20]
-   * ```
+   * Sets the order configuration for each option of a sortable given parent
    *
    * @param int     $id
    * @param boolean $deep
@@ -3313,25 +3307,24 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fixOrder($id, $deep = false)
   {
-    if ($this->check() && $this->isSortable($id)) {
+    if ($this->check() && $this->isSortable($id) && $its = $this->fullOptions($id)) {
       $cf  =& $this->class_cfg;
-      $its = $this->fullOptions($id);
       $p   = 1;
-      foreach ($its as $it){
-        if ($it['num'] !== $p) {
+      foreach ($its as $it) {
+        if ($it[$this->fields['num']] !== $p) {
           $this->db->update(
             $cf['table'], [
-            $cf['arch']['options']['num'] => $p
+            $this->fields['num'] => $p
             ], [
-            $cf['arch']['options']['id'] => $it[$cf['arch']['options']['id']]
+            $this->fields['id'] => $it[$this->fields['id']]
             ]
           );
-          $this->deleteCache($it[$cf['arch']['options']['id']]);
+          $this->deleteCache($it[$this->fields['id']]);
         }
 
         $p++;
         if ($deep) {
-          $this->fixOrder($it[$cf['arch']['options']['id']]);
+          $this->fixOrder($it[$this->fields['id']]);
         }
       }
     }
@@ -3340,18 +3333,22 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param $id
+   * @return array|null
+   */
   public function getCodePath($id)
   {
     $args = func_get_args();
     $res  = [];
     while ($o = $this->nativeOption(...$args)) {
-      if ($o['code']) {
-        $res[] = $o['code'];
-        if ($o['id_parent'] === $this->default) {
+      if ($o[$this->fields['code']]) {
+        $res[] = $o[$this->fields['code']];
+        if ($o[$this->fields['id_parent']] === $this->default) {
           break;
         }
 
-        $args = [$o['id_parent']];
+        $args = [$o[$this->fields['id_parent']]];
       }
       else {
         return null;
@@ -3366,23 +3363,36 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param array $options
+   * @param array $results
+   * @return array|null
+   */
   public function analyzeOut(array $options, array &$results = [])
   {
     if ($this->check()) {
+
+      if (isset($options[0]) && is_array($options[0])) {
+        foreach ($options as $option) {
+          $this->analyzeOut($option, $results);
+        }
+        return $results;
+      }
+
       if (empty($results)) {
         $results['options'] = [];
         $results['ids']     = [];
         $results['aliases'] = [];
       }
 
-      if (!empty($options['id'])) {
-        $results['ids'][$options['id']] = null;
+      if (!empty($options[$this->fields['id']])) {
+        $results['ids'][$options[$this->fields['id']]] = null;
       }
 
-      if (!empty($options['id_alias'])) {
-        $results['aliases'][$options['id_alias']] = [
+      if (!empty($options[$this->fields['id_alias']])) {
+        $results['aliases'][$options[$this->fields['id_alias']]] = [
           'id' => null,
-          'codes' => $this->getCodePath($options['id_alias'])
+          'codes' => $this->getCodePath($options[$this->fields['id_alias']])
         ];
       }
 
@@ -3406,6 +3416,12 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string $id
+   * @param string $mode
+   * @return array|null
+   * @throws \Exception
+   */
   public function export(string $id, string $mode = 'single'): ?array
   {
     $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];
@@ -3443,7 +3459,7 @@ class Option extends bbn\Models\Cls\Db
         $opt =& $this;
         $fn  = function ($o) use (&$opt) {
 
-          $cfg = $opt->getCfg($o['id']);
+          $cfg = $opt->getCfg($o[$this->fields['id']]);
           if (!is_array($cfg) || !empty($cfg['inherit_from'])) {
             $cfg = [];
           }
@@ -3477,10 +3493,10 @@ class Option extends bbn\Models\Cls\Db
           }
 
           if (!empty($cfg)) {
-            $o['cfg'] = $cfg;
+            $o[$this->fields['cfg']] = $cfg;
           }
 
-          unset($o['id_parent']);
+          unset($o[$this->fields['id_parent']]);
           if (isset($o['num_children'])) {
             unset($o['num_children']);
           }
@@ -3495,13 +3511,13 @@ class Option extends bbn\Models\Cls\Db
             }
           }
 
-          if (!empty($o['id_alias'])
-              && ($codes = $opt->getCodePath($o['id_alias']))
+          if (!empty($o[$this->fields['id_alias']])
+              && ($codes = $opt->getCodePath($o[$this->fields['id_alias']]))
           ) {
-            $o['id_alias'] = $codes;
+            $o[$this->fields['id_alias']] = $codes;
           }
           else {
-            unset($o['id_alias']);
+            unset($o[$this->fields['id_alias']]);
           }
 
           return $o;
@@ -3513,7 +3529,6 @@ class Option extends bbn\Models\Cls\Db
             break;
           case 'schildren':
             $o = X::map($fn, $o, 'items');
-            $simple = true;
             break;
           case 'sfull':
             $o = $fn($o);
@@ -3540,7 +3555,7 @@ class Option extends bbn\Models\Cls\Db
    * @param int     $id     The ID of the option to clone
    * @param boolean $deep   If set to true children will be included
    * @param boolean $return If set to true the resulting array will be returned
-   * @return array|false
+   * @return array|string|null
    */
   public function exportDb($id, bool $deep = false, bool $return = false, bool $aliases = false)
   {
@@ -3550,23 +3565,23 @@ class Option extends bbn\Models\Cls\Db
       $done = [];
       $max  = 3;
       foreach ($ret['options'] as $i => $o) {
-        if (!$i || in_array($o['id_parent'], $done, true)) {
-          if (empty($o['id_alias'])) {
+        if (!$i || in_array($o[$this->fields['id_parent']], $done, true)) {
+          if (empty($o[$this->fields['id_alias']])) {
             $res[]  = $o;
-            $done[] = $o['id'];
+            $done[] = $o[$this->fields['id']];
           }
         }
       }
 
       while ($max && (count($res) < count($ret['options']))) {
         foreach ($ret['options'] as $i => $o) {
-          if (!empty($o['id_alias'])
-              && !in_array($o['id'], $done, true)
-              && in_array($o['id_parent'], $done, true)
-              && in_array($o['id_alias'], $done, true)
+          if (!empty($o[$this->fields['id_alias']])
+              && !in_array($o[$this->fields['id']], $done, true)
+              && in_array($o[$this->fields['id_parent']], $done, true)
+              && in_array($o[$this->fields['id_alias']], $done, true)
           ) {
             $res[]  = $o;
-            $done[] = $o['id'];
+            $done[] = $o[$this->fields['id']];
           }
         }
 
@@ -3575,24 +3590,22 @@ class Option extends bbn\Models\Cls\Db
 
       if (count($res) < count($ret['options'])) {
         foreach ($ret['options'] as $i => $o) {
-          if (!in_array($o['id_parent'], $done, true)) {
-            $o['id_parent'] = $this->getCodePath($o['id_parent']);
+          if (!in_array($o[$this->fields['id_parent']], $done, true)) {
+            $o[$this->fields['id_parent']] = $this->getCodePath($o[$this->fields['id_parent']]);
           }
 
-          if (!empty($o['id_alias'])
-              && !in_array($o['id'], $done, true)
+          if (!empty($o[$this->fields['id_alias']])
+              && !in_array($o[$this->fields['id']], $done, true)
           ) {
-            if (!in_array($o['id_alias'], $done, true)) {
-              $code_path     = $this->getCodePath($o['id_alias']);
-              $o['id_alias'] = $code_path ?: $o['id_alias'];
+            if (!in_array($o[$this->fields['id_alias']], $done, true)) {
+              $code_path     = $this->getCodePath($o[$this->fields['id_alias']]);
+              $o[$this->fields['id_alias']] = $code_path ?: $o[$this->fields['id_alias']];
             }
 
             $res[]  = $o;
-            $done[] = $o['id'];
+            $done[] = $o[$this->fields['id']];
           }
         }
-
-        $max--;
       }
 
       return $return ? $res : var_export($res, 1);
@@ -3610,7 +3623,8 @@ class Option extends bbn\Models\Cls\Db
    *
    * @todo Usage example
    * @param array    $options   An array of option(s) as export returns it
-   * @param int|null $id_parent The option target, if not specified {@link default}
+   * @param array|string|int|null $id_parent The option target, if not specified {@link default}
+   * @param array|null $todo
    * @return int The number of affected rows
    */
   public function import(array $options, $id_parent = null, array &$todo = null)
@@ -3623,7 +3637,7 @@ class Option extends bbn\Models\Cls\Db
     }
 
     if (!empty($options) && $this->check() && $this->exists($id_parent)) {
-      $c       =& $this->class_cfg['arch']['options'];
+      $c       =& $this->fields;
       $num     = 0;
       $is_root = false;
       if ($todo === null) {
@@ -3719,19 +3733,19 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @todo Usage example
-   * @param int     $id     The source option's ID
-   * @param int     $target The destination option's ID
-   * @param boolean $deep   If set to true, children will also be duplicated
-   * @param boolean $force  If set to true and option exists it will be merged
-   * @return bool|int The number of affected rows or false if option not found
+   * @param int|string  $id     The source option's ID
+   * @param int|string  $target The destination option's ID
+   * @param boolean     $deep   If set to true, children will also be duplicated
+   * @param boolean     $force  If set to true and option exists it will be merged
+   * @return int|null The number of affected rows or null if option not found
    */
   public function duplicate($id, $target, $deep = false, $force = false, $return_num = false)
   {
     $res    = null;
     $target = $this->fromCode($target);
     if (bbn\Str::isUid($target)) {
-      if ($opt = $this->export($id, $deep, 1)) {
-        $res = $this->import($opt, $target, $force, $return_num);
+      if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {
+        $res = $this->import($opt, $target);
         $this->deleteCache($target);
       }
     }
@@ -3748,11 +3762,12 @@ class Option extends bbn\Models\Cls\Db
    *
    * @todo Usage example
    * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}
-   * @param int|array $id   The options'ID on which children the function should be applied
+   * @param int|array $id   The options' ID on which children the function should be applied
    * @param boolean   $deep If set to true the function will be applied to all children's levels
-   * @return bool|int The number of affected rows or false if option not found
+   * @param boolean   $force If set to true it will update the row in db without checking with $originals
+   * @return int|null The number of affected rows or null if option not found
    */
-  public function apply(callable $f, $id, $deep = false)
+  public function apply(callable $f, $id, $deep = false, bool $force = false)
   {
     if ($this->check()) {
       $originals = \is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );
@@ -3764,12 +3779,12 @@ class Option extends bbn\Models\Cls\Db
       if (\is_array($opts)) {
         $changes = 0;
         foreach ($opts as $i => $o){
-          if ($originals[$i] !== $o) {
-            $changes += (int)$this->set($o['id'], $o);
+          if ($force || $originals[$i] !== $o) {
+            $changes += (int)$this->set($o[$this->fields['id']], $o);
           }
 
-          if ($deep && $o['num_children']) {
-            $this->apply($f, $o, 1);
+          if ($deep && !empty($o['num_children']) && !empty($o['items'])) {
+            $changes += (int)$this->apply($f, $o, 1, true);
           }
         }
 
@@ -3789,7 +3804,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @todo Usage example
    * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}
-   * @param int|array $id   The options'ID on which children the function should be applied
+   * @param int|array $id   The options' ID on which children the function should be applied
    * @param boolean|int   $deep If set to true the function will be applied to all children's levels
    * @return array The new array with the function applied
    */
@@ -3828,7 +3843,7 @@ class Option extends bbn\Models\Cls\Db
    * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}
    * @param int|array $id   The options'ID on which children the function should be applied
    * @param boolean   $deep If set to true the function will be applied to all children's levels
-   * @return array|int The new array with the function applied
+   * @return array The new array with the function applied
    */
   public function mapCfg(callable $f, $id, $deep = false)
   {
@@ -3840,10 +3855,10 @@ class Option extends bbn\Models\Cls\Db
     $res = [];
     if (\is_array($opts)) {
       foreach ($opts as $i => $o){
-        $o['cfg'] = $this->getCfg($o['id']);
+        $o[$this->fields['cfg']] = $this->getCfg($o[$this->fields['id']]);
         $opts[$i] = $f($o);
         if ($deep && $opts[$i] && !empty($opts[$i]['items'])) {
-          $opts[$i]['items'] = $this->map($f, $opts[$i]['items'], 1);
+          $opts[$i]['items'] = $this->mapCfg($f, $opts[$i]['items'], 1);
         }
 
         if (\is_array($opts[$i])) {
@@ -3890,26 +3905,26 @@ class Option extends bbn\Models\Cls\Db
   /**
    * Retourne toutes les caractéristiques des options d'une catégorie donnée dans un tableau indexé sur leur `id`
    *
-   * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function fullCategories()
   {
-    $opts = $this->fullOptions(false);
-    foreach ($opts as $k => $o){
-      if (!empty($o['default'])) {
-        $opts[$k]['fdefault'] = $this->text($o['default']);
+    if ($opts = $this->fullOptions(false)) {
+      foreach ($opts as $k => $o){
+        if (!empty($o['default'])) {
+          $opts[$k]['default'] = $this->text($o['default']);
+        }
       }
     }
 
-    return $opts;
+    return $opts ?? [];
   }
 
 
   /**
    * Retourne toutes les caractéristiques des options d'une catégorie donnée dans un tableau indexé sur leur `id`
    *
-   * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
+   * @param null $id
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function jsCategories($id = null)
@@ -3924,8 +3939,8 @@ class Option extends bbn\Models\Cls\Db
     if ($cats = $this->fullOptions($id ?: false)) {
       foreach ($cats as $cat){
         if (!empty($cat['tekname'])) {
-          $res[$cat['tekname']]          = $this->textValueOptions($cat['id']);
-          $res['categories'][$cat['id']] = $cat['tekname'];
+          $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']]);
+          $res['categories'][$cat[$this->fields['id']]] = $cat['tekname'];
         }
       }
     }
@@ -3943,7 +3958,7 @@ class Option extends bbn\Models\Cls\Db
    * // (bool) true
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return bool
    */
   public function hasPermission($code = null)
@@ -4251,8 +4266,9 @@ class Option extends bbn\Models\Cls\Db
 
   /**
    * Transforms an array of parameters into valid option array
-   * @param $it
+   * @param array $it
    * @return bool
+   * @throws \Exception
    */
   private function _prepare(array &$it): bool
   {

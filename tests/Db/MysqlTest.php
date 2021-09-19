@@ -5089,6 +5089,28 @@ GROUP BY `id`
     $this->assertEmpty(
       self::$mysql->selectAllByKeys('users', [], [], [], 1, 33)
     );
+
+    $this->assertSame(
+      [
+        'jdoe' => ['t_id' => 1, 't_name' => 'John Doe'],
+        'sdoe' => ['t_id' => 2, 't_name' => 'Smith Doe']
+      ],
+      self::$mysql->selectAllByKeys([
+        'tables' => ['users'],
+        'fields' => ['t_username' => 'username', 't_id' => 'id', 't_name' => 'name']
+      ])
+    );
+
+    $this->assertSame(
+      [
+        'jdoe' => 1,
+        'sdoe' => 2
+      ],
+      self::$mysql->selectAllByKeys([
+        'tables' => ['users'],
+        'fields' => ['t_username' => 'username', 't_id' => 'id']
+      ])
+    );
   }
 
   /** @test */
