@@ -1467,7 +1467,7 @@ class Option extends bbn\Models\Cls\Db
    * ```
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
-   * @return array|false A list of parent if option not found
+   * @return array|null A list of parent if option not found
    */
   public function fullOptionsCfg($code = null): ?array
   {
@@ -3977,14 +3977,14 @@ class Option extends bbn\Models\Cls\Db
    *
    * ```php
    * X::dump($opt->findPermissions());
-   * /* Returns a full treeof permissions for all options
+   * /* Returns a full tree of permissions for all options
    * array []
    * ```
    *
    * @todo Returned comments to add
    * @param int|null $id   The origin's ID
    * @param boolean  $deep If set to true the children will also be searched
-   * @return array|boolean An array of permissions if there are, false otherwise
+   * @return array|null An array of permissions if there are, null otherwise
    */
   public function findPermissions($id = null, $deep = false)
   {
@@ -3996,18 +3996,19 @@ class Option extends bbn\Models\Cls\Db
       $cfg = $this->getCfg($id);
       if (!empty($cfg['permissions'])) {
         $perms = [];
-        $opts  = $this->fullOptionsCfg($id);
-        foreach ($opts as $opt){
-          $o = [
-            'icon' => $opt['icon'] ?? 'nf nf-fa-cog',
-            'text' => $opt['text'],
-            'id' => $opt['id']
-          ];
-          if ($deep && !empty($opt['cfg']['permissions'])) {
-            $o['items'] = $this->findPermissions($opt['id'], true);
-          }
+        if ($opts  = $this->fullOptionsCfg($id)) {
+          foreach ($opts as $opt){
+            $o = [
+              'icon' => $opt[$this->fields['cfg']]['icon'] ?? 'nf nf-fa-cog',
+              'text' => $opt[$this->fields['text']],
+              'id' => $opt[$this->fields['id']]
+            ];
+            if ($deep && !empty($opt[$this->fields['cfg']]['permissions'])) {
+              $o['items'] = $this->findPermissions($opt[$this->fields['id']], true);
+            }
 
-          $perms[] = $o;
+            $perms[] = $o;
+          }
         }
 
         return $perms;
@@ -4018,22 +4019,25 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @return int|null
+   */
   public function updatePlugins(): ?int
   {
     if (defined('BBN_APPUI')
         && ($ids = $this->items('plugins', 'templates', 'option', 'appui'))
     ) {
       $res = 0;
-      $all = $this->items('plugins');
-      foreach ($this->fullOptions('appui') as $a) {
+      $all = $this->items('plugins') ?? [];
+      foreach ($this->fullOptions('appui') ?? [] as $a) {
         if (!empty($a['plugin'])) {
-          $all[] = $a['id'];
+          $all[] = $a[$this->fields['id']];
         }
       }
 
       foreach ($ids as $id) {
         if ($export = $this->export($id, 'sfull')) {
-          $export['id_alias'] = $this->getCodePath($id);
+          $export[$this->fields['id_alias']] = $this->getCodePath($id);
           foreach ($all as $plugin) {
             $res += (int)$this->import($export, $plugin);
           }
@@ -4047,19 +4051,22 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param string|null $id
+   * @return int|null
+   */
   public function updateTemplate(string $id = null): ?int
   {
-
     if (defined('BBN_APPUI') && $this->exists($id)) {
       $res = 0;
-      // All the options refering to this template
+      // All the options referring to this template
       $all = $this->getAliases($id);
       if (!empty($all)
           && ($export = $this->export($id, 'sfull'))
           && !empty($export['items'])
       ) {
         foreach ($all as $a) {
-          $res += (int)$this->import($export['items'], $a['id']);
+          $res += (int)$this->import($export['items'], $a[$this->fields['id']]);
         }
       }
 
@@ -4070,13 +4077,16 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @return int|null
+   */
   public function updateAllTemplates(): ?int
   {
     if (defined('BBN_APPUI')
         && ($id = $this->fromCode('list', 'templates', 'option', 'appui'))
     ) {
       $res = 0;
-      foreach ($this->itemsRef($id) as $a) {
+      foreach ($this->itemsRef($id) ?? [] as $a) {
         $res += (int)$this->updateTemplate($a);
       }
 
@@ -4088,7 +4098,11 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * returns an array containing all options that have the property i18n set
+   * Returns an array containing all options that have the property i18n set
+   *
+   * @param null $id
+   * @param bool $items
+   * @return array
    */
   public function findI18n($id = null, $items = true)
   {
@@ -4098,35 +4112,37 @@ class Option extends bbn\Models\Cls\Db
         [
           'tables' => [$this->class_cfg['table']],
           'fields' => [
-            $this->class_cfg['arch']['options']['id'],
-            $this->class_cfg['arch']['options']['id_parent'],
-            $this->class_cfg['arch']['options']['code'],
-            $this->class_cfg['arch']['options']['text'],
-            'language' => 'JSON_EXTRACT('.$this->class_cfg['arch']['options']['cfg'].', "$.i18n")'
+            $this->fields['id'],
+            $this->fields['id_parent'],
+            $this->fields['code'],
+            $this->fields['text'],
+            'language' => 'JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n")'
           ],
           'where' => [
             [
-              'field' => 'JSON_EXTRACT('.$this->class_cfg['arch']['options']['cfg'].', "$.i18n")',
+              'field' => 'JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n")',
               'operator' => 'isnotnull'
             ]
           ]
         ]
       );
 
-      foreach ($opts as $opt){
-        if (!empty($items)) {
-          $res[] = array_merge(
-            $opt, ['items' => array_values(
-              array_filter(
-                $opts, function ($o) use ($opt) {
-                  return $o['id_parent'] === $opt['id'];
+      if ($opts) {
+        foreach ($opts as $opt){
+          if (!empty($items)) {
+            $res[] = array_merge(
+              $opt, ['items' => array_values(
+                array_filter(
+                  $opts, function ($o) use ($opt) {
+                  return $o[$this->fields['id_parent']] === $opt[$this->fields['id']];
                 }
-              )
-            )]
-          );
-        }
-        else {
-          $res[] = $opt;
+                )
+              )]
+            );
+          }
+          else {
+            $res[] = $opt;
+          }
         }
       }
     }
@@ -4136,7 +4152,11 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
-   * returns an array containing the option (having the property i18n setted) corresponding to the given id
+   * returns an array containing the option (having the property i18n set) corresponding to the given id
+   *
+   * @param $id
+   * @param bool $items
+   * @return array
    */
   public function findI18nOption($id, $items = true)
   {
@@ -4144,22 +4164,21 @@ class Option extends bbn\Models\Cls\Db
     if ($this->check()) {
       if ($opt = $this->db->rselect(
         $this->class_cfg['table'], [
-          $this->class_cfg['arch']['options']['id'],
-          $this->class_cfg['arch']['options']['id_parent'],
-          $this->class_cfg['arch']['options']['text'],
-          $this->class_cfg['arch']['options']['cfg']
-        ], [$this->class_cfg['arch']['options']['id'] => $id]
+          $this->fields['id'],
+          $this->fields['id_parent'],
+          $this->fields['text'],
+          $this->fields['cfg']
+        ], [$this->fields['id'] => $id]
       )
       ) {
-        $opts = $this->fullOptions($id);
-        $cfg  = json_decode($opt['cfg']);
+        $cfg  = json_decode($opt[$this->fields['cfg']]);
         if (!empty($cfg->i18n)) {
           $opt['language'] = $cfg->i18n;
         }
 
-        unset($opt['cfg']);
+        unset($opt[$this->fields['cfg']]);
         if (!empty($items)) {
-          $res[] = array_merge($opt, $opts);
+          $res[] = array_merge($opt, ['items' => $this->fullOptions($id) ?? []]);
         }
         else {
           $res[] = $opt;
@@ -4173,6 +4192,7 @@ class Option extends bbn\Models\Cls\Db
 
   /**
    * Gets the first row from a result
+   *
    * @param array $where
    * @return array|null
    */
@@ -4192,13 +4212,13 @@ class Option extends bbn\Models\Cls\Db
    * @param array $where The where config for the database query
    * @param int   $limit Max number of rows
    * @param int   $start Where to start the query (only if limit is > 1)
-   * @return array|false An array of rows, empty if not found, false if there is an error in the where config
+   * @return array|null An array of rows, empty if not found, null if there is an error in the where config
    */
   protected function getRows(array $where = [], int $limit = 0, int $start = 0): ?array
   {
     $db  =& $this->db;
     $tab = $this->class_cfg['table'];
-    $c   =& $this->class_cfg['arch']['options'];
+    $c   =& $this->fields;
     /** @todo Checkout */
     $cols = [];
     foreach ($c AS $k => $col){
@@ -4208,7 +4228,7 @@ class Option extends bbn\Models\Cls\Db
       }
     }
 
-    $cols['num_children'] = 'COUNT('.$db->escape($db->cfn($this->class_cfg['arch']['options']['id'], $tab.'2', true)).')';
+    $cols['num_children'] = 'COUNT('.$db->escape($db->cfn($c['id'], $tab.'2', true)).')';
     $todo                 = [$c['id'], $c['id_parent'], $c['id_alias']];
     foreach ($todo as $to){
       if (!empty($where[$to]) && !\bbn\Str::isBuid($where[$to])) {
@@ -4252,12 +4272,20 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * @param $name
+   * @param $val
+   */
   private function _set_local_cache($name, $val): void
   {
     $this->_local_cache[$name] = $val;
   }
 
 
+  /**
+   * @param $name
+   * @return string|null
+   */
   private function _get_local_cache($name): ?string
   {
     return isset($this->_local_cache[$name]) ? $this->_local_cache[$name] : null;
@@ -4310,14 +4338,13 @@ class Option extends bbn\Models\Cls\Db
       unset($it[$c['id']]);
     }
 
-    $cfg = null;
     if (isset($it[$c['cfg']])) {
-      if (!is_array($it[$c['cfg']])) {
+      if (!is_array($it[$c['cfg']]) && bbn\Str::isJson($it[$c['cfg']])) {
         $it[$c['cfg']] = json_decode($it[$c['cfg']], true);
       }
 
       $cfg =& $it[$c['cfg']];
-      if (!empty($cfg['id_root_alias'])) {
+      if (is_array($cfg) && !empty($cfg['id_root_alias'])) {
         if (is_array($cfg['id_root_alias'])) {
           if ($id_root_alias = $this->fromCode(...$cfg['id_root_alias'])) {
             $cfg['id_root_alias'] = $id_root_alias;
@@ -4345,7 +4372,7 @@ class Option extends bbn\Models\Cls\Db
         $it[$c['code']] = null;
       }
 
-      // If code is empty it MUST be null
+      // If text is empty it MUST be null
       if (empty($it[$c['text']])) {
         $it[$c['text']] = null;
       }
@@ -4379,7 +4406,7 @@ class Option extends bbn\Models\Cls\Db
       if (!empty($value)) {
         $it[$c['value']] = json_encode($value);
       }
-      else{
+      else {
         if (empty($it[$c['value']])) {
           $it[$c['value']] = null;
         }
@@ -4407,7 +4434,7 @@ class Option extends bbn\Models\Cls\Db
         unset($it[$c['num']]);
       }
       elseif ($is_sortable && empty($it[$c['num']])) {
-        $it[$c['num']] = $parent['num_children'] + 1;
+        $it[$c['num']] = ($parent['num_children'] ?? 0) + 1;
       }
 
       return true;
