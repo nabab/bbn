@@ -4927,6 +4927,43 @@ GROUP BY `id`
     $this->assertEmpty(
       self::$mysql->rselectAll('users', [], [], [], 1, 33)
     );
+
+    $this->createTable('test', function () {
+      return 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              cfg JSON';
+    });
+
+    $this->insertMany('test',[
+      $expected = [
+        'created_at' => date('Y-m-d H:i:s', strtotime('-2 HOUR')),
+        'cfg' => json_encode(['timeout' => 60])
+      ],
+      [
+        'cfg' => json_encode(['timeout' => 120])
+      ],
+    ]);
+
+    $this->assertSame(
+      [$expected],
+      self::$mysql->rselectAll([
+        'table' => 'test',
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'NOW()',
+            'operator' => '>',
+            'exp' => "DATE_ADD(created_at, INTERVAL cfg->'$.timeout' SECOND)"
+          ]]
+        ],
+        'order' => [[
+          'field' => 'priority',
+          'dir' => 'ASC'
+        ], [
+          'field' => 'next',
+          'dir' => 'ASC'
+        ]]
+      ])
+    );
   }
 
   /** @test */

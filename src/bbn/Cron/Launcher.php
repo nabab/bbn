@@ -22,7 +22,7 @@ class Launcher extends bbn\Models\Cls\Basic {
   /**
    * Constructor
    *
-   * @param string $exe_path
+   * @param bbn\Cron $cron
    */
   public function __construct(bbn\Cron $cron)
   {
@@ -36,9 +36,9 @@ class Launcher extends bbn\Models\Cls\Basic {
    * Launch a parallel process
    *
    * @param array $cfg
-   * @return string
+   * @return string|null
    */
-  public function launch(array $cfg): string
+  public function launch(array $cfg): ?string
   {
     if ($this->exe_path) {
       $cfg['exe_path'] = $this->exe_path;
@@ -49,19 +49,28 @@ class Launcher extends bbn\Models\Cls\Basic {
         bbn\Str::escapeDquotes(json_encode($cfg)),
         $log
       ));
+
       return $log;
     }
+
     return null;
   }
 
+  /**
+   * @return string|null
+   */
   public function launchPoll(): ?string
   {
     if ($this->isPollActive()) {
       return $this->launch(['type' => 'poll']);
     }
+
     return null;
   }
 
+  /**
+   * @return string|null
+   */
   public function launchTaskSystem(): ?string
   {
     if ($this->isCronActive()) {

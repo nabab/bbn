@@ -103,17 +103,16 @@ trait Common {
 
 
   /**
-   * cron constructor.
-   * @param bbn\Mvc\Controller $ctrl
    * @param array $cfg
    */
-  public function init(array $cfg = []){
-    //if ( defined('BBN_DATA_PATH') ){
-    $this->path = bbn\Mvc::getDataPath('appui-cron');
+  public function init(array $cfg = [])
+  {
+    $this->path = $cfg['data_path'] ?? bbn\Mvc::getDataPath('appui-cron');
   }
 
   /**
-   * Returns the $data property.
+   * Returns the $path property.
+   *
    * @return array|null
    */
   public function getPath(): ?string
@@ -121,10 +120,19 @@ trait Common {
     return $this->path;
   }
 
-  public function getStatusPath($type): ?string {
+  /**
+   * @param $type
+   * @return string|null
+   */
+  public function getStatusPath($type): ?string
+  {
     return $this->path && $type ? $this->path.'status/.'.$type : null;
   }
 
+  /**
+   * @param array $cfg
+   * @return string|null
+   */
   public function getPidPath(array $cfg): ?string
   {
     if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {
@@ -133,6 +141,12 @@ trait Common {
     return null;
   }
 
+  /**
+   * @param array $cfg
+   * @param bool $error
+   * @param bool $no_path
+   * @return string|null
+   */
   public function getLogPath(array $cfg, bool $error = false, bool $no_path = false): ?string
   {
     $path = null;
@@ -150,6 +164,7 @@ trait Common {
         $path = \bbn\X::makeStoragePath($path);
       }
     }
+
     return $path;
   }
 
@@ -265,6 +280,7 @@ trait Common {
 
   /**
    * Returns true if the file data_folder/.active exists, false otherwise.
+   *
    * @return bool
    */
   public function isActive(): bool
@@ -272,11 +288,13 @@ trait Common {
     if ( $this->check() ){
       return file_exists($this->getStatusPath('active'));
     }
+
     return false;
   }
 
   /**
    * Returns true if the file data_folder/.cron exists, false otherwise.
+   *
    * @return bool
    */
   public function isCronActive(): bool
@@ -284,11 +302,13 @@ trait Common {
     if ( $this->check() ){
       return file_exists($this->getStatusPath('cron'));
     }
+
     return false;
   }
 
   /**
    * Returns true if the file data_folder/.poll exists, false otherwise.
+   *
    * @return bool
    */
   public function isPollActive(): bool
@@ -296,6 +316,7 @@ trait Common {
     if ( $this->check() ){
       return file_exists($this->getStatusPath('poll'));
     }
+
     return false;
   }
 

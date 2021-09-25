@@ -7,6 +7,7 @@
 namespace bbn\Cron;
 
 use bbn;
+use bbn\Db\Enums\Errors;
 use bbn\X;
 
 /**
@@ -18,15 +19,16 @@ class Manager extends bbn\Models\Cls\Basic
 
   use Common;
 
+  protected ?string $table = null;
 
   /**
-   * Cron constructor.
-   * @param bbn\Mvc\Controller $ctrl
-   * @param array              $cfg
+   * Manager constructor.
+   *
+   * @param bbn\Db $db
+   * @param array $cfg
    */
   public function __construct(bbn\Db $db, array $cfg = [])
   {
-    //if ( defined('BBN_DATA_PATH') ){
     if (bbn\Mvc::getDataPath() && $db->check()) {
       // It must be called from a plugin (appui-cron actually)
       //$this->path = BBN_DATA_PATH.'plugins/appui-cron/';
@@ -37,15 +39,19 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
+  /**
+   * @return bool
+   */
   public function check(): bool
   {
-      return (bool)($this->db && $this->db->check());
+    return (bool)($this->db && $this->db->check());
   }
 
 
   /**
    * Returns the full row as an indexed array for the given CRON ID.
-   * @param $id
+   *
+   * @param string $id
    * @return null|array
    */
   public function getCron(string $id): ?array
@@ -63,7 +69,7 @@ class Manager extends bbn\Models\Cls\Basic
    * @param $id_cron
    * @return bool
    */
-  public function isTimeout($id_cron)
+  public function isTimeout($id_cron): bool
   {
     if ($this->check()
         && ($cron = $this->getCron($id_cron))
@@ -80,7 +86,8 @@ class Manager extends bbn\Models\Cls\Basic
 
   /**
    * Writes in the given CRON row the next start time, the current as previous, and the new running status.
-   * @param $id_cron
+   *
+   * @param string $id_cron
    * @return bool
    */
   public function start(string $id_cron): bool
@@ -120,9 +127,10 @@ class Manager extends bbn\Models\Cls\Basic
 
   /**
    * Writes in the given CRON row the duration and the new finished status.
-   * @param $id
+   *
+   * @param string $id_cron
    * @param string $res
-   * @return bool|int
+   * @return bool
    */
   public function finish(string $id_cron, $res = '')
   {
@@ -136,7 +144,7 @@ class Manager extends bbn\Models\Cls\Basic
 
       $enable   = false;
       $err_mode = $this->db->getErrorMode();
-      $this->db->setErrorMode('continue');
+      $this->db->setErrorMode(Errors::E_CONTINUE);
       if ($this->db->isTriggerEnabled()) {
         $this->db->disableTrigger();
         $enable = true;
@@ -156,7 +164,7 @@ class Manager extends bbn\Models\Cls\Basic
         $res = true;
       }
 
-      if ($err_mode !== 'continue') {
+      if ($err_mode !== Errors::E_CONTINUE) {
         $this->db->setErrorMode($err_mode);
       }
 
@@ -171,13 +179,14 @@ class Manager extends bbn\Models\Cls\Basic
 
   /**
    * Returns a SQL date for the next event given a frequency and a time to count from (now if 0).
+   *
    * @param  string $frequency A string made of 1 letter (i, h, d, w, m, or y) and a number.
    * @param  int    $from_time A SQL formatted date which will be the base of the operation.
    * @return null|string
    */
   public function getNextDate(string $frequency, int $from_time = 0): ?string
   {
-    if (\is_string($frequency) && (\strlen($frequency) >= 2)) {
+    if ((\strlen($frequency) >= 2)) {
       $letter  = bbn\Str::changeCase(substr($frequency, 0, 1), 'lower');
       $number  = (int)substr($frequency, 1);
       $letters = ['y', 'm', 'w', 'd', 'h', 'i', 's'];
@@ -249,6 +258,7 @@ class Manager extends bbn\Models\Cls\Basic
 
   /**
    * Returns the whole row for the next CRON to be executed from now if there is any.
+   *
    * @param null $id_cron
    * @return null|array
    */
@@ -299,6 +309,10 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function getRunningRows(): ?array
   {
     if ($this->check()) {
@@ -333,6 +347,12 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
+  /**
+   * @param int $limit
+   * @param int $sec
+   * @return array|null
+   * @throws \Exception
+   */
   public function getNextRows(int $limit = 10, int $sec = 0): ?array
   {
     if ($limit === 0) {
@@ -382,6 +402,10 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
+  /**
+   * @return array|null
+   * @throws \Exception
+   */
   public function getFailed(): ?array
   {
     if ($this->check()) {
