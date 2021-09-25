@@ -61,7 +61,7 @@ trait Dbconfig
   /**
    * Returns the fields of the main table.
    *
-   * @return void
+   * @return array
    */
   public function getFields()
   {
