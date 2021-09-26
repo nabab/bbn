@@ -2,9 +2,11 @@
 
 namespace Cron;
 
+use bbn\Appui\Notification;
 use bbn\Cron\Manager;
 use bbn\Db;
 use bbn\Db\Enums\Errors;
+use bbn\X;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
 use tests\Reflectable;
@@ -1121,6 +1123,462 @@ class ManagerTest extends TestCase
 
     $this->assertNull(
       $this->manager->getFailed()
+    );
+  }
+
+  /** @test */
+  public function notifyFailed_method_inserts_into_notification_table_and_update_cron_notification_field_when_failed()
+  {
+    $this->mockManagerClass();
+
+    $this->manager->shouldReceive('getFailed')
+      ->once()
+      ->withNoArgs()
+      ->andReturn([
+        ['id' => '123', 'notification' => time(), 'file' => 'file_1'],
+        ['id' => '321', 'notification' => null, 'file' => 'file_2'],
+      ]);
+
+    $notification_mock = \Mockery::mock(Notification::class);
+
+    $notification_mock->shouldReceive('insertByOption')
+      ->once()
+      ->with(
+        'CRON task failed',
+        'The task file_2 failed.',
+        'cron/task_failed',
+        true
+      )
+      ->andReturnTrue();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->andReturn(1);
+
+    $this->manager->notifyFailed($notification_mock);
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function notifyFailed_method_does_not_the_notification_field_of_fails_to_insert_to_notification_table()
+  {
+    $this->mockManagerClass();
+
+    $this->manager->shouldReceive('getFailed')
+      ->once()
+      ->withNoArgs()
+      ->andReturn([
+        ['id' => '321', 'notification' => null, 'file' => 'file_2'],
+      ]);
+
+    $notification_mock = \Mockery::mock(Notification::class);
+
+    $notification_mock->shouldReceive('insertByOption')
+      ->once()
+      ->with(
+        'CRON task failed',
+        'The task file_2 failed.',
+        'cron/task_failed',
+        true
+      )
+      ->andReturnFalse();
+
+    $this->db_mock->shouldNotReceive('update');
+
+    $this->manager->notifyFailed($notification_mock);
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function isRunning_method_checks_whether_the_given_cron_id_is_running_or_not()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('check')
+      ->twice()
+      ->andReturnTrue();
+
+    $this->db_mock->shouldReceive('count')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        [['id' => '123'], ['pid', 'isnotnull']]
+      )
+      ->andReturn(1);
+
+    $this->assertTrue(
+      $this->manager->isRunning('123')
+    );
+
+    // Another test
+    $this->db_mock->shouldReceive('count')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        [['id' => '123'], ['pid', 'isnotnull']]
+      )
+      ->andReturn(0);
+
+    $this->assertFalse(
+      $this->manager->isRunning('123')
+    );
+  }
+
+  /** @test */
+  public function isRunning_method_returns_false_when_check_method_returns_false()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertFalse(
+      $this->manager->isRunning('123')
+    );
+  }
+
+  /** @test */
+  public function activate_method_sets_the_active_field_to_one_for_the_given_cron_id()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        ['active' => 1],
+        ['id' => '123']
+      )
+      ->andReturn(1);
+
+    $this->assertSame(1, $this->manager->activate('123'));
+  }
+
+  /** @test */
+  public function deactivate_method_sets_the_active_field_to_zero_for_the_given_cron_id()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        ['active' => 0],
+        ['id' => '123']
+      )
+      ->andReturn(1);
+
+    $this->assertSame(1, $this->manager->deactivate('123'));
+  }
+
+  /** @test */
+  public function setPid_method_sets_the_pid_field_to_the_given_value_for_the_given_cron_id()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        ['pid' => 'pid_value'],
+        ['id' => '123']
+      )
+      ->andReturn(1);
+
+      $this->assertSame(1, $this->manager->setPid('123', 'pid_value'));
+  }
+
+  /** @test */
+  public function unsetPid_method_sets_the_pid_and_notification_fields_to_null_for_the_given_cron_id()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        ['pid' => null, 'notification' => null],
+        ['id' => '123']
+      )
+      ->andReturn(1);
+
+    $this->assertSame(1, $this->manager->unsetPid('123'));
+  }
+
+  /** @test */
+  public function add_method_adds_a_new_row_to_cron_tables_from_given_data()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'), $expected = [
+          'file' => 'file_value',
+          'description' => '',
+          'next' => date('Y-m-d H:i:s'),
+          'priority' => 'priority_value',
+          'cfg' => json_encode([
+            'frequency' => 'frequency_value',
+            'timeout' => 'timeout_value'
+          ]),
+          'active' => 1
+        ]
+      )
+      ->andReturn(1);
+
+    $this->db_mock->shouldReceive('lastId')
+      ->once()
+      ->andReturn('123');
+
+    $cfg = [
+      'file' => 'file_value',
+      'priority' => 'priority_value',
+      'frequency' => 'frequency_value',
+      'timeout' => 'timeout_value'
+    ];
+
+    $this->assertSame(
+      array_merge($expected, ['id' => '123']),
+      $this->manager->add($cfg)
+    );
+  }
+
+  /** @test */
+  public function add_method_returns_null_when_fails_to_insert_a_new_cron()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->db_mock->shouldReceive('insert')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'), [
+        'file' => 'file_value',
+        'description' => 'description_value',
+        'next' => '2021-09-26 00:00:00',
+        'priority' => 'priority_value',
+        'cfg' => json_encode([
+          'frequency' => 'frequency_value',
+          'timeout' => 'timeout_value'
+        ]),
+        'active' => 1
+      ]
+      )
+      ->andReturnNull();
+
+    $this->db_mock->shouldNotReceive('lastId');
+
+    $cfg = [
+      'file' => 'file_value',
+      'priority' => 'priority_value',
+      'frequency' => 'frequency_value',
+      'timeout' => 'timeout_value',
+      'description' => 'description_value',
+      'next' => '2021-09-26 00:00:00'
+    ];
+
+    $this->assertNull(
+      $this->manager->add($cfg)
+    );
+  }
+
+  /** @test */
+  public function add_method_returns_null_the_given_data_misses_some_parameters()
+  {
+    $this->init();
+
+    $this->db_mock->shouldNotReceive('check')
+      ->times(4)
+      ->andReturnTrue();
+
+    $this->assertNull(
+      $this->manager->add([
+        'file' => 'file_value',
+        'priority' => 'priority_value',
+        'frequency' => 'frequency_value'
+      ])
+    );
+
+    $this->assertNull(
+      $this->manager->add([
+        'file' => 'file_value',
+        'priority' => 'priority_value'
+      ])
+    );
+
+    $this->assertNull(
+      $this->manager->add([
+        'file' => '',
+        'priority' => '',
+        'frequency' => '',
+        'timeout' => '',
+      ])
+    );
+
+    $this->assertNull(
+      $this->manager->add([])
+    );
+  }
+
+  /** @test */
+  public function add_method_returs_null_when_check_method_returns_false()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->manager->add([
+        'file' => 'file_value',
+        'priority' => 'priority_value',
+        'frequency' => 'frequency_value',
+        'timeout' => 'timeout_value'
+      ])
+    );
+  }
+
+  /** @test */
+  public function edit_method_updates_the_given_cron_id_with_the_given_values()
+  {
+    $this->mockManagerClass();
+
+    $this->manager->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->manager->shouldReceive('getCron')
+      ->once()
+      ->with('123')
+      ->andReturn([
+        'file' => 'old_file',
+        'description' => 'old_description',
+        'next' => 'old_next',
+        'priority' => 'old_priority',
+        'frequency' => 'old_frequency',
+        'timeout' => 'old_timeout'
+      ]);
+
+    $cfg = [
+      'file' => 'new_file',
+      'description' => 'new_description',
+      'next' => 'new_next',
+      'priority' => 'new_priority',
+      'frequency' => 'new_frequency',
+      'timeout' => 'new_timeout'
+    ];
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        $expected = [
+          'file' => 'new_file',
+          'description' => 'new_description',
+          'next' => 'new_next',
+          'priority' => 'new_priority',
+          'cfg' => json_encode([
+            'frequency' => 'new_frequency',
+            'timeout' => 'new_timeout'
+          ]),
+          'active' => 1
+      ],
+      ['id' => '123'])
+      ->andReturn(1);
+
+    $this->assertSame(
+      array_merge($expected, ['id' => '123']),
+      $this->manager->edit('123', $cfg)
+    );
+  }
+
+  /** @test */
+  public function edit_method_returns_null_when_fails_to_update_the_given_cron_id()
+  {
+    $this->mockManagerClass();
+
+    $this->manager->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->manager->shouldReceive('getCron')
+      ->with('123')
+      ->once()
+      ->andReturn([
+        'file' => 'old_file',
+        'description' => 'old_description',
+        'next' => 'old_next',
+        'priority' => 'old_priority',
+        'frequency' => 'old_frequency',
+        'timeout' => 'old_timeout'
+      ]);
+
+    $this->db_mock->shouldReceive('update')
+      ->once()
+      ->with(
+        $this->getNonPublicProperty('table'),
+        [
+          'file' => 'old_file',
+          'description' => 'old_description',
+          'next' => 'old_next',
+          'priority' => 'old_priority',
+          'cfg' => json_encode([
+            'frequency' => 'old_frequency',
+            'timeout' => 'old_timeout'
+          ]),
+          'active' => 1
+        ],
+        ['id' => '123']
+      )
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->manager->edit('123', [])
+    );
+  }
+
+  /** @test */
+  public function edit_method_returns_null_when_the_given_id_does_not_exist()
+  {
+    $this->mockManagerClass();
+
+    $this->manager->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->manager->shouldReceive('getCron')
+      ->once()
+      ->with('123')
+      ->andReturnNull();
+
+    $this->assertNull(
+      $this->manager->edit('123', [])
+    );
+  }
+
+  /** @test */
+  public function edit_method_returns_null_when_check_method_returns_false()
+  {
+    $this->init();
+
+    $this->db_mock->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->assertNull(
+      $this->manager->edit('123', [])
     );
   }
 }

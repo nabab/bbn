@@ -210,6 +210,11 @@ class MysqlTest extends TestCase
     $query = "INSERT INTO `$table` SET ";
 
     foreach ($params as $column => $value) {
+      if (is_null($value)) {
+        $query .= "`$column` = NULL, ";
+        continue;
+      }
+
       $query .= "`$column` = '$value', ";
     }
 
@@ -5046,6 +5051,50 @@ GROUP BY `id`
 
     $this->assertSame(2, self::$mysql->count([
       'tables' => ['users']
+    ]));
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              role_id INT(11) DEFAULT NULL';
+    });
+
+    $this->insertMany('users',[
+      ['id' => 1, 'role_id' => 12],
+      ['id' => 2,'role_id' => null],
+      ['id' => 3,'role_id' => null]
+    ]);
+
+    $this->assertSame(1, self::$mysql->count('users', [
+      ['role_id' => 'isnotnull'],
+      'id' => 2
+    ]));
+
+    $this->assertSame(1, self::$mysql->count('users', [
+      ['id' => 2],
+      ['role_id', 'isnotnull']
+    ]));
+
+    $this->assertSame(1, self::$mysql->count('users', [
+      ['role_id', 'isnotnull'],
+      ['id' => 2]
+    ]));
+
+    // This does not work
+    $this->assertSame(0, self::$mysql->count('users', [
+      ['id', '>=', 2],
+      ['role_id', 'isnotnull']
+    ]));
+
+    // Also this does not work
+    $this->assertSame(0, self::$mysql->count('users', [
+      'id' => 2,
+      ['role_id', 'isnotnull']
+    ]));
+
+    // Also this does not work
+    $this->assertSame(3, self::$mysql->count('users', [
+      ['role_id' => 'isnotnull'],
+      ['id' => 2]
     ]));
   }
 

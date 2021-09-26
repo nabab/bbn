@@ -7,6 +7,7 @@
 namespace bbn\Cron;
 
 use bbn;
+use bbn\Appui\Notification;
 use bbn\Db\Enums\Errors;
 use bbn\X;
 
@@ -450,9 +451,13 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
-  public function notifyFailed()
+  /**
+   * @param Notification|null $notification
+   * @throws \Exception
+   */
+  public function notifyFailed(?Notification $notification = null)
   {
-    $notifications = new \bbn\Appui\Notification($this->db);
+    $notifications = $notification ?? new Notification($this->db);
     if ($failed = $this->getFailed()) {
       foreach ($failed as $f) {
         $content = X::_('The task')." $f[file] ".X::_('failed.');
@@ -467,14 +472,14 @@ class Manager extends bbn\Models\Cls\Basic
 
 
   /**
-   * @param $id_cron
+   * @param string $id_cron
    * @return bool
    */
   public function isRunning(string $id_cron)
   {
     return (bool)( $this->check() && $this->db->count(
       $this->table, [
-      'id' => $id_cron,
+      ['id' => $id_cron],
       ['pid', 'isnotnull']
       ]
     ));
@@ -483,8 +488,9 @@ class Manager extends bbn\Models\Cls\Basic
 
   /**
    * Sets the active column to 1 for the given CRON ID.
+   *
    * @param $id_cron
-   * @return mixed
+   * @return int|null
    */
   public function activate($id_cron)
   {
@@ -494,8 +500,9 @@ class Manager extends bbn\Models\Cls\Basic
 
   /**
    * Sets the active column to 0 for the given CRON ID.
+   *
    * @param $id_cron
-   * @return mixed
+   * @return int|null
    */
   public function deactivate($id_cron)
   {
@@ -504,9 +511,10 @@ class Manager extends bbn\Models\Cls\Basic
 
 
   /**
-   * Sets the active column to 1 for the given CRON ID.
+   * Sets the pid' column to the given value for the given CRON ID.
+   *
    * @param $id_cron
-   * @return mixed
+   * @return int|null
    */
   public function setPid($id_cron, $pid)
   {
@@ -515,9 +523,10 @@ class Manager extends bbn\Models\Cls\Basic
 
 
   /**
-   * Sets the active column to 0 for the given CRON ID.
+   * Sets the pid and notification columns to null for the given CRON ID.
+   *
    * @param $id_cron
-   * @return mixed
+   * @return int|null
    */
   public function unsetPid($id_cron)
   {
@@ -530,6 +539,10 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
+  /**
+   * @param $cfg
+   * @return array|null
+   */
   public function add($cfg): ?array
   {
     if ($this->check()
@@ -585,20 +598,25 @@ class Manager extends bbn\Models\Cls\Basic
   }
 
 
+  /**
+   * @param string $id
+   * @param array $cfg
+   * @return array|null
+   */
   public function edit(string $id, array $cfg): ?array
   {
     if ($this->check()
         && ($cron = $this->getCron($id))
     ) {
       $d = [
-        'file' => $cfg['file'] ?: $cron['file'],
-        'description' => $cfg['description'] ?: $cron['description'],
-        'next' => $cfg['next'] ?: $cron['next'],
-        'priority' => $cfg['priority'] ?: $cron['priority'],
+        'file' => $cfg['file'] ?? $cron['file'],
+        'description' => $cfg['description'] ?? $cron['description'],
+        'next' => $cfg['next'] ?? $cron['next'],
+        'priority' => $cfg['priority'] ?? $cron['priority'],
         'cfg' => json_encode(
           [
-          'frequency' => $cfg['frequency'] ?: $cron['frequency'],
-          'timeout' => $cfg['timeout'] ?: $cron['timeout']
+          'frequency' => $cfg['frequency'] ?? $cron['frequency'],
+          'timeout' => $cfg['timeout'] ?? $cron['timeout']
           ]
         ),
         'active' => 1
