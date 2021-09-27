@@ -937,6 +937,10 @@ class Controller implements Api
 
         if (!empty($tmp['html'])) {
           $v              = new View($tmp['html']);
+          if (!$data) {
+            $data = [];
+          }
+          $data['componentName'] = $name;
           $res['content'] = $v->get($data);
         }
 

@@ -293,6 +293,7 @@ class Router
                 'plugin' => $plugin_url,
                 'plugin_name' => $plugin,
                 'component' => true,
+                'component_name' => $name,
                 'ext' => $f,
                 'mode' => $mode,
                 'i18n' => $mode === 'js' ? $this->_find_translation($plugin ?? null) : null,

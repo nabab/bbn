@@ -57,6 +57,12 @@ class View
   private $_component;
 
   /**
+   * true of the view is part of a Vue component
+   * @var bool
+   */
+  private $_component_name;
+
+  /**
    * The URL path to the plugin.
    * @var null|string
    */
@@ -89,14 +95,15 @@ class View
   public function __construct(array $info)
   {
     if (!empty($info['mode']) && Router::isMode($info['mode'])) {
-      $this->_path        = $info['path'];
-      $this->_ext         = $info['ext'];
-      $this->_file        = $info['file'];
-      $this->_checkers    = $info['checkers'] ?? [];
-      $this->_lang_file   = $info['i18n'] ?? null;
-      $this->_plugin      = $info['plugin'] ?? null;
-      $this->_plugin_name = $info['plugin_name'] ?? null;
-      $this->_component   = $info['component'] ?? null;
+      $this->_path           = $info['path'];
+      $this->_ext            = $info['ext'];
+      $this->_file           = $info['file'];
+      $this->_checkers       = $info['checkers'] ?? [];
+      $this->_lang_file      = $info['i18n'] ?? null;
+      $this->_plugin         = $info['plugin'] ?? null;
+      $this->_plugin_name    = $info['plugin_name'] ?? null;
+      $this->_component      = $info['component'] ?? null;
+      $this->_component_name = $info['component_name'] ?? null;
     }
 
     $this->_mvc = Mvc::getInstance();
@@ -177,6 +184,10 @@ JAVASCRIPT;
         case 'css':
           return $this->_content;
         case 'less':
+          if ($this->_component_name) {
+            $this->_content = '@componentName: '.$this->_component_name.';'.PHP_EOL.$this->_content;
+          }
+
           $less = new \bbn\Compilers\Less();
           return $less->compile($this->_content);
         case 'scss':
