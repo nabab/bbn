@@ -104,6 +104,7 @@ class User extends Models\Cls\Basic
         'creation' => 'creation',
         'last' => 'last',
         'device_uid' => 'device_uid',
+        'device_platform' => 'device_platform',
         'device_lang' => 'device_lang',
         'notifications_token' => 'notifications_token'
       ],
