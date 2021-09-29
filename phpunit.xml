@@ -32,5 +32,6 @@
     <const name="BBN_ADMIN_EMAIL" value="admin@test.com" />
     <const name="BBN_DEFAULT_MODE" value="public" />
     <const name="BBN_CUR_PATH" value="/" />
+    <const name="BBN_TESTING_EVN" value="true" />
   </php>
 </phpunit>
