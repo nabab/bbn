@@ -1266,6 +1266,10 @@ OUTPUT
   /** @test */
   public function run_method_test_when_the_pid_file_exists()
   {
+    if (!defined('BBN_PID')) {
+      define('BBN_PID', '12345');
+    }
+
     $this->mockRunnerClass();
 
     $this->runner->shouldReceive('check')
