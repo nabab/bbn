@@ -68,8 +68,15 @@ class Runner extends bbn\Models\Cls\Basic
            @unlink($pid);
         }
         */
-        $this->log("GETTING OUT of $type BECAUSE one of the manual files is missing");
-        exit("GETTING OUT of $type BECAUSE one of the manual files is missing");
+        $message = "GETTING OUT of $type BECAUSE one of the manual files is missing";
+
+        $this->log($message);
+
+        if ($this->isTestingEnvironment()) {
+          throw new \Exception($message);
+        }
+
+        exit($message);
       }
       // Loooking for a running PID
       if (is_file($pid_file)
@@ -91,6 +98,9 @@ class Runner extends bbn\Models\Cls\Basic
         }
       }
       // We create the PID file corresponding to the current process
+      if (!is_dir(dirname($pid_file))) {
+        mkdir(dirname($pid_file), 0777, true);
+      }
       if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
         // Shutdown function, will be always executed, except if the server is stopped
         register_shutdown_function([$this, 'shutdown']);
@@ -113,7 +123,9 @@ class Runner extends bbn\Models\Cls\Basic
         }
       }
     }
-    exit();
+    if (!$this->isTestingEnvironment()) {
+      exit();
+    }
   }
 
   /**

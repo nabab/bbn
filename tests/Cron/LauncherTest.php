@@ -20,6 +20,11 @@ class LauncherTest extends TestCase
     $this->cron_mock = \Mockery::mock(Cron::class);
   }
 
+  protected function tearDown(): void
+  {
+    \Mockery::close();
+  }
+
 
   protected function init()
   {
@@ -159,11 +164,6 @@ class LauncherTest extends TestCase
   public function launchTaskSystem_method_returns_null_when_cron_file_does_not_exist()
   {
     $this->launcher = \Mockery::mock(Launcher::class)->makePartial();
-
-    $this->launcher->shouldReceive('launch')
-      ->once()
-      ->with(['type' => 'cron'])
-      ->andReturnFalse();
 
     $this->assertNull(
       $this->launcher->launchTaskSystem()

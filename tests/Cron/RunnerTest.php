@@ -59,7 +59,7 @@ class RunnerTest extends TestCase
   protected function tearDown(): void
   {
     \Mockery::close();
-//    $this->cleanTestingDir();
+    $this->cleanTestingDir();
   }
 
   public function getInstance()
@@ -98,13 +98,13 @@ class RunnerTest extends TestCase
     }
   }
 
-  protected function mockRunnerClass()
+  protected function mockRunnerClass(?array $cfg = null)
   {
     $this->runner = \Mockery::mock(Runner::class)->makePartial();
 
     $this->setConstructorExpectations();
 
-    $this->runner->__construct($this->cron_mock, $this->cfg);
+    $this->runner->__construct($this->cron_mock, $cfg ?? $this->cfg);
 
     if ($this->getNonPublicProperty('timer')) {
       $this->setNonPublicPropertyValue('timer', $this->timer_mock);
@@ -1165,8 +1165,235 @@ OUTPUT
   }
 
   /** @test */
-  public function run_method_test()
+  public function run_method_test_when_type_is_cron_and_id_does_not_exist()
   {
+    if (!defined('BBN_PID')) {
+      define('BBN_PID', '12345');
+    }
 
+    $this->mockRunnerClass();
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isCronActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('runTaskSystem')
+      ->once();
+
+    $this->runner->run();
+
+    $this->assertFileExists(
+      $this->getTestingDirName() . "{$this->plugin_path}pid/.cron"
+    );
+  }
+
+  /** @test */
+  public function run_method_test_when_type_is_cron_and_id_exists()
+  {
+    if (!defined('BBN_PID')) {
+      define('BBN_PID', '12345');
+    }
+
+    $this->mockRunnerClass($cfg = [
+      'type' => 'cron',
+      'id' => '54321'
+    ]);
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isCronActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('runTask')
+      ->with($cfg)
+      ->once();
+
+    $this->runner->run();
+
+    $this->assertFileExists(
+      $this->getTestingDirName() . "{$this->plugin_path}pid/.54321"
+    );
+  }
+
+  /** @test */
+  public function run_method_test_when_type_is_poll()
+  {
+    if (!defined('BBN_PID')) {
+      define('BBN_PID', '12345');
+    }
+
+    $this->mockRunnerClass([
+      'type' => 'poll'
+    ]);
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isPollActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('poll')
+      ->once();
+
+    $this->runner->run();
+
+    $this->assertFileExists(
+      $this->getTestingDirName() . "{$this->plugin_path}pid/.poll"
+    );
+  }
+
+  /** @test */
+  public function run_method_test_when_the_pid_file_exists()
+  {
+    $this->mockRunnerClass();
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isCronActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('runTaskSystem')
+      ->once();
+
+    // Create the pid file
+    $this->createDir($dir = "{$this->plugin_path}pid");
+    $pid_file = $this->createFile('.cron', $old_content = 'old_pid|old_time', $dir);
+
+    $this->expectOutputString(<<<OUTPUT
+  "Dead process": "old_pid",
+
+OUTPUT
+);
+
+    $this->runner->run();
+
+    $this->assertFileExists($pid_file);
+    // Content should be changed
+    $this->assertNotSame($old_content, file_get_contents($pid_file));
+  }
+
+  /** @test */
+  public function run_method_throws_an_exception_when_active_file_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+    $this->mockRunnerClass();
+
+    $this->runner->shouldReveive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnFalse();
+
+    $this->runner->run();
+  }
+
+  /** @test */
+  public function run_method_throws_an_exception_when_type_is_cron_and_active_cron_file_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+    $this->mockRunnerClass();
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isCronActive')
+      ->once()
+      ->andReturnFalse();
+
+    $this->runner->run();
+  }
+
+  /** @test */
+  public function run_method_throws_an_exception_when_type_is_poll_and_active_poll_file_does_not_exist()
+  {
+    $this->expectException(\Exception::class);
+    $this->mockRunnerClass([
+      'type' => 'poll'
+    ]);
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isActive')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldReceive('isPollActive')
+      ->once()
+      ->andReturnFalse();
+
+    $this->runner->run();
+  }
+
+  /** @test */
+  public function run_method_does_not_process_when_type_is_not_defined()
+  {
+    $this->mockRunnerClass();
+
+    $this->setNonPublicPropertyValue('data', ['id' => '123']);
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnTrue();
+
+    $this->runner->shouldNotReceive('getPidPath');
+    $this->runner->shouldNotReceive('isActive');
+
+    $this->runner->run();
+
+    $this->assertTrue(true);
+  }
+
+  /** @test */
+  public function run_method_does_not_process_when_check_method_returns_false()
+  {
+    $this->mockRunnerClass();
+
+    $this->runner->shouldReceive('check')
+      ->once()
+      ->andReturnFalse();
+
+    $this->runner->shouldNotReceive('getPidPath');
+    $this->runner->shouldNotReceive('isActive');
+
+    $this->runner->run();
+
+    $this->assertTrue(true);
   }
 }
