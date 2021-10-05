@@ -52,6 +52,7 @@ trait Tagger
         $res[] = $tmp;
       }
       elseif (!$force) {
+        X::log([$ids, $this->db->last()]);
         throw new Exception(X::_("Impossible to find the tag %s", $id));
       }
     }
