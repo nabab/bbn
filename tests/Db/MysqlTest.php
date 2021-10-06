@@ -8935,12 +8935,12 @@ GROUP BY `id`
       'created_at' => '`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'
     ];
 
-   foreach ($cols as $col_name => $col) {
-     $this->assertSame(
-       $expected[$col_name],
-       trim($method->invoke(self::$mysql, $col_name, $col))
-     );
-   }
+    foreach ($cols as $col_name => $col) {
+      $this->assertSame(
+        $expected[$col_name],
+        trim($method->invoke(self::$mysql, $col_name, $col))
+      );
+    }
   }
 
   /** @test */

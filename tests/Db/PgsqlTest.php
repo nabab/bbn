@@ -9070,4 +9070,225 @@ GROUP BY id
       self::$pgsql->getTableComment('users')
     );
   }
+
+  /** @test */
+  public function createColumn_method_creates_the_given_column_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertTrue(
+      self::$pgsql->createColumn('users', 'username', [
+        'type' => 'varchar',
+        'null' => false,
+        'after' => 'id',
+        'maxlength' => 255
+      ])
+    );
+
+    $this->assertTrue(
+      self::$pgsql->createColumn('users', 'created_at', [
+        'type' => 'timestamp',
+        'null' => false,
+        'after' => 'id',
+        'default' => 'CURRENT_TIMESTAMP',
+      ])
+    );
+
+    $this->assertTrue(
+      self::$pgsql->createColumn('users', 'balance', [
+        'type' => 'decimal',
+        'null' => false,
+        'default' => 0,
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true
+      ])
+    );
+
+    $structure = $this->getTableStructure('users');
+
+    $this->assertArrayHasKey('username', $structure = $structure['fields']);
+    $this->assertSame([
+      'position' => 2,
+      'type' => 'character varying',
+      'udt_name' => 'varchar',
+      'null' => 0,
+      'key' => null,
+      'extra' => '',
+      'signed' => false,
+      'virtual' => false,
+      'generation' => null,
+      'maxlength' => 255
+    ], $structure['username']);
+
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertSame([
+      'position' => 3,
+      'type' => 'timestamp without time zone',
+      'udt_name' => 'timestamp',
+      'null' => 0,
+      'key' => null,
+      'extra' => '',
+      'signed' => false,
+      'virtual' => false,
+      'generation' => null,
+      'default' => 'CURRENT_TIMESTAMP'
+    ], $structure['created_at']);
+
+    $this->assertArrayHasKey('balance', $structure);
+    $this->assertSame([
+      'position' => 4,
+      'type' => 'numeric',
+      'udt_name' => 'numeric',
+      'null' => 0,
+      'key' => null,
+      'extra' => '',
+      'signed' => true,
+      'virtual' => false,
+      'generation' => null,
+      'default' => 0,
+      'maxlength' => 10,
+      'decimals' => 2
+    ], $structure['balance']);
+  }
+
+  /** @test */
+  public function createColumn_method_returns_false_when_the_given_column_is_not_a_valid_name()
+  {
+    $this->assertFalse(
+      self::$pgsql->createColumn('users', 'username**', [])
+    );
+  }
+
+  /** @test */
+  public function createColumn_method_throws_an_exception_when_a_field_type_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$pgsql->createColumn('users', 'balance', ['type' => 'number']);
+  }
+
+  /** @test */
+  public function dropColumn_method_drops_the_given_column_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT, username VARCHAR(20), name VARCHAR(2)';
+    });
+
+    $this->assertTrue(
+      self::$pgsql->dropColumn('users', 'username')
+    );
+
+    $this->assertTrue(
+      self::$pgsql->dropColumn('users', 'name')
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayNotHasKey('username', $structure);
+    $this->assertArrayNotHasKey('name', $structure);
+  }
+
+  /** @test */
+  public function dropColumn_method_returns_false_when_the_given_column_is_a_not_valid_name()
+  {
+    $this->assertFalse(
+      self::$pgsql->dropColumn('users', 'id**')
+    );
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_returns_sql_statement_of_column_definition()
+  {
+    $method = $this->getNonPublicMethod('getColumnDefinitionStatement');
+
+    $cols = [
+      'id' => [
+        'type' => 'binary'
+      ],
+      'username' => [
+        'type' => 'varchar',
+        'maxlength' => 255
+      ],
+      'profile_id' => [
+        'type' => 'bigint',
+        'maxlength' => 32
+      ],
+      'user_role' => [
+        'type' => 'USER-DEFINED',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user',
+        'udt_name' => 'role',
+        'USER-DEFINED' => true
+      ],
+      'user_permission' => [
+        'type' => 'USER-DEFINED',
+        'extra' => "'read','write'",
+        'default' => 'NULL',
+        'udt_name' => 'permission',
+        'null' => true
+      ],
+      'balance' => [
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL'
+      ],
+      'balance_before' => [
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ],
+      'created_at' => [
+        'type' => 'datetime',
+        'default' => 'CURRENT_TIMESTAMP'
+      ],
+      'updated_at' => [
+        'type' => 'time',
+        'default' => 'CURRENT_TIME'
+      ]
+    ];
+
+    $expected = [
+      'id' => 'id bytea NOT NULL',
+      'username' => 'username varchar(255) NOT NULL',
+      'profile_id' => "profile_id bigint NOT NULL",
+      'user_role' => "user_role role NOT NULL DEFAULT 'user'",
+      'user_permission' => 'user_permission permission DEFAULT NULL',
+      'balance_before' => 'balance_before real NOT NULL DEFAULT 0',
+      'balance' => 'balance decimal(10,2) DEFAULT NULL',
+      'created_at' => 'created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP',
+      'updated_at' => 'updated_at time NOT NULL DEFAULT CURRENT_TIME'
+    ];
+
+    foreach ($cols as $col_name => $col) {
+      $this->assertSame(
+        $expected[$col_name],
+        trim($method->invoke(self::$pgsql, $col_name, $col))
+      );
+    }
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_throws_an_exception_when_column_type_is_not_provided()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$pgsql, 'username', ['maxlength' => 32]);
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_throws_an_exception_when_a_field_type_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$pgsql, 'balance', ['type' => 'number']);
+  }
 }
