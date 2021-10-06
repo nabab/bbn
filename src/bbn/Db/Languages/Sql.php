@@ -1542,6 +1542,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return 0;
   }
 
+  public function dropColumn(string $table, string $column): bool
+  {
+    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
+      return (bool)$this->rawQuery("ALTER TABLE $table DROP COLUMN $column");
+    }
+
+    return false;
+  }
+
   /**
    * @param array $where
    * @param bool  $full

@@ -637,35 +637,7 @@ class Sqlite extends Sql
         $st .= ',' . PHP_EOL;
       }
 
-      $st .= '  ' . $this->escape($name) . ' ';
-
-      if (!in_array(strtolower($col['type']), self::$types)) {
-        if (isset(self::$interoperability[strtolower($col['type'])])) {
-          $st .= self::$interoperability[strtolower($col['type'])];
-        }
-        // No error: no type is fine
-      }
-      else {
-        $st .= $col['type'];
-      }
-
-      if (empty($col['null'])) {
-        $st .= ' NOT NULL';
-      }
-
-      if (array_key_exists('default', $col) && $col['default'] !== null) {
-        $st .= ' DEFAULT ';
-        if (($col['default'] === 'NULL')
-            || bbn\Str::isNumber($col['default'])
-            || strpos($col['default'], '(')
-            || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
-        ) {
-          $st .= (string)$col['default'];
-        }
-        else {
-          $st .= "'" . trim($col['default'], "'") . "'";
-        }
-      }
+      $st .= $this->getColumnDefinitionStatement($name, $col);
     }
 
     if (isset($model['keys']['PRIMARY'])) {
@@ -1111,6 +1083,63 @@ class Sqlite extends Sql
     }
 
     return [];
+  }
+
+
+  public function createColumn(string $table, string $column, array $model): bool
+  {
+    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
+      $column_definition = $this->getColumnDefinitionStatement($column, $model);
+
+      return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns a statement for column definition.
+   *
+   * @param string $name
+   * @param array $col
+   * @return string
+   * @throws \Exception
+   */
+  protected function getColumnDefinitionStatement(string $name, array $col): string
+  {
+    $st = '  ' . $this->escape($name) . ' ';
+
+    if (!empty($col['type'])) {
+      if (!in_array(strtolower($col['type']), self::$types)) {
+        if (isset(self::$interoperability[strtolower($col['type'])])) {
+          $st .= self::$interoperability[strtolower($col['type'])];
+        }
+        // No error: no type is fine
+      }
+      else {
+        $st .= $col['type'];
+      }
+    }
+
+    if (empty($col['null'])) {
+      $st .= ' NOT NULL';
+    }
+
+    if (array_key_exists('default', $col) && $col['default'] !== null) {
+      $st .= ' DEFAULT ';
+      if (($col['default'] === 'NULL')
+        || bbn\Str::isNumber($col['default'])
+        || strpos($col['default'], '(')
+        || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+      ) {
+        $st .= (string)$col['default'];
+      }
+      else {
+        $st .= "'" . trim($col['default'], "'") . "'";
+      }
+    }
+
+    return $st;
   }
 
   public function getCfg(): array

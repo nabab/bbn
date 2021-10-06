@@ -2061,6 +2061,13 @@ AND roles.email LIKE ?";
         'created_at' => [
           'type' => 'datetime',
           'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'num' => [
+          'default' => 0,
+          'type' => 'foo'
+        ],
+        'login' => [
+          'null' => false
         ]
       ]
     ];
@@ -2075,7 +2082,9 @@ AND roles.email LIKE ?";
   "permission" text NOT NULL DEFAULT \'read\',
   "balance" real DEFAULT NULL,
   "balance_before" real NOT NULL DEFAULT 0,
-  "created_at" text NOT NULL DEFAULT CURRENT_TIMESTAMP
+  "created_at" text NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "num"  NOT NULL DEFAULT 0,
+  "login"  NOT NULL
 )';
 
     $this->assertSame(trim($expected), trim($result));
@@ -8049,5 +8058,189 @@ GROUP BY "id"
     $this->assertFalse(
       $this->sqlite->renameTable('users**', 'users2&&')
     );
+  }
+
+  /** @test */
+  public function createColumn_method_creates_the_given_column_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertTrue(
+      $this->sqlite->createColumn('users', 'username', [
+        'type' => 'varchar',
+        'null' => false,
+        'after' => 'id',
+        'maxlength' => 255
+      ])
+    );
+
+    $this->assertTrue(
+      $this->sqlite->createColumn('users', 'created_at', [
+        'type' => 'timestamp',
+        'null' => false,
+        'after' => 'id',
+        'default' => 'CURRENT_TIMESTAMP',
+      ])
+    );
+
+    $this->assertTrue(
+      $this->sqlite->createColumn('users', 'balance', [
+        'type' => 'decimal',
+        'null' => false,
+        'default' => 0,
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true
+      ])
+    );
+
+    $structure = $this->getTableStructure('users');
+
+    $this->assertArrayHasKey('username', $structure = $structure['fields']);
+
+    $this->assertSame([
+      'position' => 2,
+      'null' => 0,
+      'key' => null,
+      'default' => null,
+      'extra' => null,
+      'maxlength' => null,
+      'signed' => 1,
+      'type' => 'TEXT',
+    ], $structure['username']);
+
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertSame([
+      'position' => 3,
+      'null' => 0,
+      'key' => null,
+      'default' => 'CURRENT_TIMESTAMP',
+      'extra' => null,
+      'maxlength' => null,
+      'signed' => 1,
+      'type' => 'INTEGER'
+    ], $structure['created_at']);
+
+    $this->assertArrayHasKey('balance', $structure);
+    $this->assertSame([
+      'position' => 4,
+      'null' => 0,
+      'key' => null,
+      'default' => 0,
+      'extra' => null,
+      'maxlength' => null,
+      'signed' => 1,
+      'type' => 'REAL'
+    ], $structure['balance']);
+  }
+
+  /** @test */
+  public function createColumn_method_returns_false_when_the_given_column_is_not_a_valid_name()
+  {
+    $this->assertFalse(
+      $this->sqlite->createColumn('users', 'username**', [])
+    );
+  }
+
+  /** @test */
+  public function dropColumn_method_drops_the_given_column_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT, username VARCHAR(20), name VARCHAR(2)';
+    });
+
+    $this->assertTrue(
+      $this->sqlite->dropColumn('users', 'username')
+    );
+
+    $this->assertTrue(
+      $this->sqlite->dropColumn('users', 'name')
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayNotHasKey('username', $structure);
+    $this->assertArrayNotHasKey('name', $structure);
+  }
+
+  /** @test */
+  public function dropColumn_method_returns_false_when_the_given_column_is_a_not_valid_name()
+  {
+    $this->assertFalse(
+      $this->sqlite->dropColumn('users', 'id**')
+    );
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_returns_sql_statement_of_column_definition()
+  {
+    $method = $this->getNonPublicMethod('getColumnDefinitionStatement');
+
+    $cols = [
+      'id' => [
+        'type' => 'binary',
+        'maxlength' => 32
+      ],
+      'username' => [
+        'type' => 'varchar',
+        'maxlength' => 255
+      ],
+      'role' => [
+        'type' => 'enum',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ],
+      'permission' => [
+        'type' => 'set',
+        'extra' => "'read','write'",
+        'default' => 'read'
+      ],
+      'balance' => [
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL'
+      ],
+      'balance_before' => [
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ],
+      'created_at' => [
+        'type' => 'datetime',
+        'default' => 'CURRENT_TIMESTAMP'
+      ],
+      'num' => [
+        'default' => 0,
+        'type' => 'foo'
+      ],
+      'login' => [
+        'null' => false
+      ]
+    ];
+
+    $expected = [
+      'id' => '"id" blob NOT NULL',
+      'username' => '"username" text NOT NULL',
+      'role' => '"role" text NOT NULL DEFAULT \'user\'',
+      'permission' => '"permission" text NOT NULL DEFAULT \'read\'',
+      'balance' => '"balance" real DEFAULT NULL',
+      'balance_before' => '"balance_before" real NOT NULL DEFAULT 0',
+      'created_at' => '"created_at" text NOT NULL DEFAULT CURRENT_TIMESTAMP',
+      'num' => '"num"  NOT NULL DEFAULT 0',
+      'login' => '"login"  NOT NULL'
+    ];
+
+    foreach ($cols as $col_name => $col) {
+      $this->assertSame(
+        $expected[$col_name],
+        trim($method->invoke($this->sqlite, $col_name, $col))
+      );
+  }
   }
 }

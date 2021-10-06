@@ -1129,22 +1129,6 @@ MYSQL
   }
 
   /**
-   * Drops the given column for the given table.
-   *
-   * @param string $table
-   * @param string $column
-   * @return bool
-   */
-  public function dropColumn(string $table, string $column): bool
-  {
-    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      return (bool)$this->rawQuery("ALTER TABLE $table DROP COLUMN $column");
-    }
-
-    return false;
-  }
-
-  /**
    * Returns a statement for column definition.
    *
    * @param string $name

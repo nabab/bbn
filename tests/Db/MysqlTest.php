@@ -8942,4 +8942,34 @@ GROUP BY `id`
      );
    }
   }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_throws_an_exception_when_column_type_is_not_provided()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$mysql, 'username', ['maxlength' => 32]);
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_throws_an_exception_when_a_field_type_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$mysql, 'balance', ['type' => 'number']);
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_throws_an_exception_when_a_provided_field_is_enum_or_set_and_the_extra_field_is_not_provided()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$mysql, 'permission', [
+        'type' => 'set',
+        'default' => 'read'
+      ]);
+  }
 }
