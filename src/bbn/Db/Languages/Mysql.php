@@ -58,8 +58,8 @@ class Mysql extends Sql
 
     try {
       $this->cacheInit();
-      $this->current  = $cfg['db'] ?? null;
-      $this->host     = $cfg['host'] ?? '127.0.0.1';
+      $this->current = $cfg['db'] ?? null;
+      $this->host = $cfg['host'] ?? '127.0.0.1';
       $this->username = $cfg['user'] ?? null;
       $this->connection_code = $cfg['code_host'];
 
@@ -77,11 +77,10 @@ class Mysql extends Sql
       }
 
       unset($cfg['pass']);
-    }
-    catch (\PDOException $e){
-      $err = X::_("Impossible to create the connection").
-        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
-             .X::_("with the following error").$e->getMessage();
+    } catch (\PDOException $e) {
+      $err = X::_("Impossible to create the connection") .
+        " {$cfg['engine']}/Connection " . $this->getEngine() . " to {$this->host} "
+        . X::_("with the following error") . $e->getMessage();
       throw new \Exception($err);
     }
   }
@@ -101,7 +100,7 @@ class Mysql extends Sql
         'host' => BBN_DB_HOST,
         'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
         'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
-        'db'   => defined('BBN_DATABASE') ? BBN_DATABASE : '',
+        'db' => defined('BBN_DATABASE') ? BBN_DATABASE : '',
       ];
     }
 
@@ -123,12 +122,12 @@ class Mysql extends Sql
       $cfg['port'] = 3306;
     }
 
-    $cfg['code_db']   = $cfg['db'] ?? '';
-    $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
-    $cfg['args']      = ['mysql:host='
-      .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
-      .';port='.$cfg['port']
-      .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
+    $cfg['code_db'] = $cfg['db'] ?? '';
+    $cfg['code_host'] = $cfg['user'] . '@' . $cfg['host'];
+    $cfg['args'] = ['mysql:host='
+      . (in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
+      . ';port=' . $cfg['port']
+      . (empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
       $cfg['pass'],
       [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
@@ -227,13 +226,12 @@ class Mysql extends Sql
   {
     if ($this->check()) {
       if (!Str::checkName($database)) {
-        throw new \Exception(X::_("Wrong database name")." $database");
+        throw new \Exception(X::_("Wrong database name") . " $database");
       }
 
       try {
         $this->rawQuery("DROP DATABASE `$database`");
-      }
-      catch (\Exception $e) {
+      } catch (\Exception $e) {
         return false;
       }
     }
@@ -258,8 +256,8 @@ class Mysql extends Sql
     }
 
     if (($db = $this->escape($db))
-        && bbn\Str::checkName($user, $db)
-        && (strpos($pass, "'") === false)
+      && bbn\Str::checkName($user, $db)
+      && (strpos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
         <<<MYSQL
@@ -320,7 +318,7 @@ WHERE 1
 $cond
 MYSQL
       );
-      $q  = [];
+      $q = [];
       foreach ($us as $u) {
         $gs = $this->getColArray("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
         foreach ($gs as $g) {
@@ -337,7 +335,7 @@ MYSQL
   /**
    * Renames the given table to the new given name.
    *
-   * @param string $table   The current table's name
+   * @param string $table The current table's name
    * @param string $newName The new name.
    * @return bool  True if it succeeded
    */
@@ -346,7 +344,7 @@ MYSQL
     if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
       $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
-dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
+      dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
       $res = $this->rawQuery(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
       return !!$res;
     }
@@ -366,13 +364,13 @@ dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
     if ($tmp = $this->tableFullName($table)) {
       $bits = X::split($tmp, '.');
       return $this->getOne(
-        "SELECT table_comment
+          "SELECT table_comment
         FROM INFORMATION_SCHEMA.TABLES 
         WHERE table_schema = ?
         AND table_name = ?",
-        $bits[0],
-        $bits[1]
-      ) ?? '';
+          $bits[0],
+          $bits[1]
+        ) ?? '';
     }
 
     return '';
@@ -394,7 +392,7 @@ dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
       $this->change($database);
     }
 
-    $q    = $this->query('SHOW TABLE STATUS');
+    $q = $this->query('SHOW TABLE STATUS');
     $size = 0;
     while ($row = $q->getRow()) {
       if (!$type || ($type === 'data')) {
@@ -498,7 +496,7 @@ dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
   public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
   {
     $lines = [];
-    $sql   = '';
+    $sql = '';
     foreach ($columns as $n => $c) {
       $name = $c['name'] ?? $n;
       if (isset($c['type']) && bbn\Str::checkName($name)) {
@@ -711,9 +709,9 @@ dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
 
     $r = [];
     if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
+      $t = explode('.', $full);
       [$db, $table] = $t;
-      $sql          = <<<MYSQL
+      $sql = <<<MYSQL
         SELECT *
         FROM `information_schema`.`COLUMNS`
         WHERE `TABLE_NAME` LIKE ?
@@ -723,11 +721,11 @@ MYSQL;
       if ($rows = $this->getRows($sql, $table, $db)) {
         $p = 1;
         foreach ($rows as $row) {
-          $f          = $row['COLUMN_NAME'];
+          $f = $row['COLUMN_NAME'];
           $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
             && (stripos($row['DATA_TYPE'], 'blob') === false)
             && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
-          $r[$f]      = [
+          $r[$f] = [
             'position' => $p++,
             'type' => $row['DATA_TYPE'],
             'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
@@ -748,7 +746,7 @@ MYSQL;
               && ($matches[1][0][0] === "'")
             ) {
               $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
-              $r[$f]['extra']  = $matches[1][0];
+              $r[$f]['extra'] = $matches[1][0];
             } else {
               $r[$f]['values'] = [];
             }
@@ -759,7 +757,7 @@ MYSQL;
               }
             } else {
               $r[$f]['maxlength'] = (int)$matches[1][0];
-              $r[$f]['decimals']  = (int)$matches[2][1];
+              $r[$f]['decimals'] = (int)$matches[2][1];
             }
           }
         }
@@ -806,12 +804,12 @@ MYSQL;
 
     $r = [];
     if ($full = $this->tableFullName($table)) {
-      $t            = explode('.', $full);
+      $t = explode('.', $full);
       [$db, $table] = $t;
-      $r            = [];
-      $indexes      = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
-      $keys         = [];
-      $cols         = [];
+      $r = [];
+      $indexes = $this->getRows('SHOW INDEX FROM ' . $this->tableFullName($full, 1));
+      $keys = [];
+      $cols = [];
       foreach ($indexes as $i => $index) {
         $a = $this->getRow(
           <<<MYSQL
@@ -872,7 +870,7 @@ MYSQL
           ];
         } else {
           $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
-          $keys[$index['Key_name']]['ref_db']    = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
+          $keys[$index['Key_name']]['ref_db'] = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
         }
 
         if (!isset($cols[$index['Column_name']])) {
@@ -902,7 +900,7 @@ MYSQL
     }
 
     return '';
- }
+  }
 
   /**
    * @param string $table
@@ -916,72 +914,20 @@ MYSQL
       $model = $this->modelize($table);
     }
 
-    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
+    $st = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
     $done = false;
     foreach ($model['fields'] as $name => $col) {
       if (!$done) {
         $done = true;
-      }
-      else {
+      } else {
         $st .= ',' . PHP_EOL;
       }
 
-      $st .= '  ' . $this->escape($name) . ' ';
-      if (!in_array($col['type'], self::$types)) {
-        if (isset(self::$interoperability[$col['type']])) {
-          $st .= self::$interoperability[$col['type']];
-        }
-        else {
-          throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
-        }
-      }
-      else {
-        $st .= $col['type'];
-      }
-
-      if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
-        if (empty($col['extra'])) {
-          throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
-        }
-
-        $st .= ' (' . $col['extra'] . ')';
-      }
-      elseif (!empty($col['maxlength'])) {
-        $st .= '(' . $col['maxlength'];
-        if (!empty($col['decimals'])) {
-          $st .= ',' . $col['decimals'];
-        }
-
-        $st .= ')';
-      }
-
-      if (in_array($col['type'], self::$numeric_types)
-        && empty($col['signed'])
-      ) {
-        $st .= ' UNSIGNED';
-      }
-
-      if (empty($col['null'])) {
-        $st .= ' NOT NULL';
-      }
-
-      if (!empty($col['virtual'])) {
-        $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
-      } elseif (array_key_exists('default', $col)) {
-        $st .= ' DEFAULT ';
-        if (($col['default'] === 'NULL')
-          || Str::isNumber($col['default'])
-          || strpos($col['default'], '(')
-          || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
-        ) {
-          $st .= (string)$col['default'];
-        } else {
-          $st .= "'" . trim($col['default'], "'") . "'";
-        }
-      }
+      $st .= $this->getColumnDefinitionStatement($name, $col);
     }
 
     $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+
     return $st;
   }
 
@@ -999,10 +945,10 @@ MYSQL
     }
 
     if ($model && !empty($model['keys'])) {
-      $st   .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
-      $last  = count($model['keys']) - 1;
+      $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $last = count($model['keys']) - 1;
 
-      $i     = 0;
+      $i = 0;
       foreach ($model['keys'] as $name => $key) {
         $st .= '  ADD ';
         if (!empty($key['unique'])
@@ -1051,8 +997,8 @@ MYSQL
       }
 
       $lines = X::split($st, PHP_EOL);
-      $end   = array_pop($lines);
-      $st    = X::join($lines, PHP_EOL);
+      $end = array_pop($lines);
+      $st = X::join($lines, PHP_EOL);
 
       foreach ($model['keys'] as $name => $key) {
         $st .= ',' . PHP_EOL . '  ';
@@ -1070,7 +1016,7 @@ MYSQL
           $st .= 'KEY ' . $this->escape($name);
         }
 
-        $st   .= ' (' . implode(
+        $st .= ' (' . implode(
             ',', array_map(
               function ($a) {
                 return $this->escape($a);
@@ -1081,11 +1027,11 @@ MYSQL
 
       // For avoiding constraint names conflicts
       $keybase = strtolower(Str::genpwd(8, 4));
-      $i       = 1;
+      $i = 1;
       foreach ($model['keys'] as $name => $key) {
         if (!empty($key['ref_table']) && !empty($key['ref_column'])) {
           $st .= ',' . PHP_EOL . '  ' .
-            'CONSTRAINT ' . $this->escape($keybase.$i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
+            'CONSTRAINT ' . $this->escape($keybase . $i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
             'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
             (!empty($key['delete']) ? ' ON DELETE ' . $key['delete'] : '') .
             (!empty($key['update']) ? ' ON UPDATE ' . $key['update'] : '');
@@ -1123,7 +1069,7 @@ MYSQL
           $this->error("Illegal column $c");
         }
 
-        $name      .= '_' . $c;
+        $name .= '_' . $c;
         $column[$i] = $this->escape($column[$i]);
         if (isset($length[$i]) && \is_int($length[$i]) && $length[$i] > 0) {
           $column[$i] .= '(' . $length[$i] . ')';
@@ -1156,6 +1102,102 @@ MYSQL
     }
 
     return false;
+  }
+
+  /**
+   * Creates the given column for the given table.
+   *
+   * @param string $table
+   * @param string $column
+   * @param array $model
+   * @return bool
+   * @throws \Exception
+   */
+  public function createColumn(string $table, string $column, array $model): bool
+  {
+    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
+      $column_definition = $this->getColumnDefinitionStatement($column, $model);
+
+      if (!empty($model['after']) && is_string($model['after'])) {
+        $column_definition .= " AFTER {$model['after']}";
+      }
+
+      return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns a statement for column definition.
+   *
+   * @param string $name
+   * @param array $col
+   * @return string
+   * @throws \Exception
+   */
+  protected function getColumnDefinitionStatement(string $name, array $col): string
+  {
+    $st = '  ' . $this->escape($name) . ' ';
+
+    if (empty($col['type'])) {
+      throw new \Exception(X::_('Column type is not provided'));
+    }
+
+    if (!in_array($col['type'], self::$types)) {
+      if (isset(self::$interoperability[$col['type']])) {
+        $st .= self::$interoperability[$col['type']];
+      }
+      else {
+        throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
+      }
+    }
+    else {
+      $st .= $col['type'];
+    }
+
+    if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
+      if (empty($col['extra'])) {
+        throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
+      }
+
+      $st .= ' (' . $col['extra'] . ')';
+    }
+    elseif (!empty($col['maxlength'])) {
+      $st .= '(' . $col['maxlength'];
+      if (!empty($col['decimals'])) {
+        $st .= ',' . $col['decimals'];
+      }
+
+      $st .= ')';
+    }
+
+    if (in_array($col['type'], self::$numeric_types)
+      && empty($col['signed'])
+    ) {
+      $st .= ' UNSIGNED';
+    }
+
+    if (empty($col['null'])) {
+      $st .= ' NOT NULL';
+    }
+
+    if (!empty($col['virtual'])) {
+      $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
+    } elseif (array_key_exists('default', $col)) {
+      $st .= ' DEFAULT ';
+      if (($col['default'] === 'NULL')
+        || Str::isNumber($col['default'])
+        || strpos($col['default'], '(')
+        || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+      ) {
+        $st .= (string)$col['default'];
+      } else {
+        $st .= "'" . trim($col['default'], "'") . "'";
+      }
+    }
+
+    return $st;
   }
 
   public function __toString()

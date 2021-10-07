@@ -68,4 +68,23 @@ interface SqlEngines
    * @return string The table's comment
    */
   public function getTableComment(string $table): string;
+
+  /**
+   * Creates the given column for the given table.
+   *
+   * @param string $table
+   * @param string $column
+   * @param array $model
+   * @return bool
+   */
+  public function createColumn(string $table, string $column, array $model): bool;
+
+  /**
+   * Drops the given column for the given table.
+   *
+   * @param string $table
+   * @param string $column
+   * @return bool
+   */
+  public function dropColumn(string $table, string $column): bool;
 }

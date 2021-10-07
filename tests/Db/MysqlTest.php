@@ -210,6 +210,11 @@ class MysqlTest extends TestCase
     $query = "INSERT INTO `$table` SET ";
 
     foreach ($params as $column => $value) {
+      if (is_null($value)) {
+        $query .= "`$column` = NULL, ";
+        continue;
+      }
+
       $query .= "`$column` = '$value', ";
     }
 
@@ -4927,6 +4932,43 @@ GROUP BY `id`
     $this->assertEmpty(
       self::$mysql->rselectAll('users', [], [], [], 1, 33)
     );
+
+    $this->createTable('test', function () {
+      return 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              cfg JSON';
+    });
+
+    $this->insertMany('test',[
+      $expected = [
+        'created_at' => date('Y-m-d H:i:s', strtotime('-2 HOUR')),
+        'cfg' => json_encode(['timeout' => 60])
+      ],
+      [
+        'cfg' => json_encode(['timeout' => 120])
+      ],
+    ]);
+
+    $this->assertSame(
+      [$expected],
+      self::$mysql->rselectAll([
+        'table' => 'test',
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'NOW()',
+            'operator' => '>',
+            'exp' => "DATE_ADD(created_at, INTERVAL cfg->'$.timeout' SECOND)"
+          ]]
+        ],
+        'order' => [[
+          'field' => 'priority',
+          'dir' => 'ASC'
+        ], [
+          'field' => 'next',
+          'dir' => 'ASC'
+        ]]
+      ])
+    );
   }
 
   /** @test */
@@ -5009,6 +5051,50 @@ GROUP BY `id`
 
     $this->assertSame(2, self::$mysql->count([
       'tables' => ['users']
+    ]));
+
+    $this->createTable('users', function () {
+      return 'id INT(11) PRIMARY KEY AUTO_INCREMENT, 
+              role_id INT(11) DEFAULT NULL';
+    });
+
+    $this->insertMany('users',[
+      ['id' => 1, 'role_id' => 12],
+      ['id' => 2,'role_id' => null],
+      ['id' => 3,'role_id' => null]
+    ]);
+
+    $this->assertSame(1, self::$mysql->count('users', [
+      ['role_id' => 'isnotnull'],
+      'id' => 2
+    ]));
+
+    $this->assertSame(1, self::$mysql->count('users', [
+      ['id' => 2],
+      ['role_id', 'isnotnull']
+    ]));
+
+    $this->assertSame(1, self::$mysql->count('users', [
+      ['role_id', 'isnotnull'],
+      ['id' => 2]
+    ]));
+
+    // This does not work
+    $this->assertSame(0, self::$mysql->count('users', [
+      ['id', '>=', 2],
+      ['role_id', 'isnotnull']
+    ]));
+
+    // Also this does not work
+    $this->assertSame(0, self::$mysql->count('users', [
+      'id' => 2,
+      ['role_id', 'isnotnull']
+    ]));
+
+    // Also this does not work
+    $this->assertSame(3, self::$mysql->count('users', [
+      ['role_id' => 'isnotnull'],
+      ['id' => 2]
     ]));
   }
 
@@ -8658,5 +8744,232 @@ GROUP BY `id`
       "",
       self::$mysql->getTableComment('users')
     );
+  }
+
+  /** @test */
+  public function createColumn_method_creates_the_given_column_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT';
+    });
+
+    $this->assertTrue(
+      self::$mysql->createColumn('users', 'username', [
+        'type' => 'varchar',
+        'null' => false,
+        'after' => 'id',
+        'maxlength' => 255
+      ])
+    );
+
+    $this->assertTrue(
+      self::$mysql->createColumn('users', 'created_at', [
+        'type' => 'timestamp',
+        'null' => false,
+        'after' => 'id',
+        'default' => 'CURRENT_TIMESTAMP',
+      ])
+    );
+
+    $this->assertTrue(
+      self::$mysql->createColumn('users', 'balance', [
+        'type' => 'decimal',
+        'null' => false,
+        'default' => 0,
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true
+      ])
+    );
+
+    $structure = $this->getTableStructure('users');
+
+    $this->assertArrayHasKey('username', $structure = $structure['fields']);
+    $this->assertSame([
+      'position' => 3,
+      'type' => 'varchar',
+      'null' => 0,
+      'key' => null,
+      'extra' => '',
+      'signed' => true,
+      'virtual' => false,
+      'generation' => '',
+      'maxlength' => 255
+    ], $structure['username']);
+
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertSame([
+      'position' => 2,
+      'type' => 'timestamp',
+      'null' => 0,
+      'key' => null,
+      'extra' => 'DEFAULT_GENERATED',
+      'signed' => true,
+      'virtual' => false,
+      'generation' => '',
+      'default' => 'CURRENT_TIMESTAMP'
+    ], $structure['created_at']);
+
+    $this->assertArrayHasKey('balance', $structure);
+    $this->assertSame([
+      'position' => 4,
+      'type' => 'decimal',
+      'null' => 0,
+      'key' => null,
+      'extra' => '',
+      'signed' => true,
+      'virtual' => false,
+      'generation' => '',
+      'default' => 0.0,
+      'maxlength' => 10,
+      'decimals' => 2
+    ], $structure['balance']);
+  }
+
+  /** @test */
+  public function createColumn_method_returns_false_when_the_given_column_is_not_a_valid_name()
+  {
+    $this->assertFalse(
+      self::$mysql->createColumn('users', 'username**', [])
+    );
+  }
+
+  /** @test */
+  public function createColumn_method_throws_an_exception_when_a_field_type_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->createColumn('users', 'balance', ['type' => 'number']);
+  }
+
+  /** @test */
+  public function createColumn_throws_an_exception_when_a_provided_field_is_enum_or_set_and_the_extra_field_is_not_provided()
+  {
+    $this->expectException(\Exception::class);
+
+    self::$mysql->createColumn('users', 'permission', [
+      'type' => 'set', 'default' => 'read'
+    ]);
+  }
+
+  /** @test */
+  public function dropColumn_method_drops_the_given_column_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'id INT, username VARCHAR(20), name VARCHAR(2)';
+    });
+
+    $this->assertTrue(
+      self::$mysql->dropColumn('users', 'username')
+    );
+
+    $this->assertTrue(
+      self::$mysql->dropColumn('users', 'name')
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayNotHasKey('username', $structure);
+    $this->assertArrayNotHasKey('name', $structure);
+  }
+
+  /** @test */
+  public function dropColumn_method_returns_false_when_the_given_column_is_a_not_valid_name()
+  {
+    $this->assertFalse(
+      self::$mysql->dropColumn('users', 'id**')
+    );
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_returns_sql_statement_of_column_definition()
+  {
+    $method = $this->getNonPublicMethod('getColumnDefinitionStatement');
+
+    $cols = [
+      'id' => [
+        'type' => 'binary',
+        'maxlength' => 32
+      ],
+      'username' => [
+        'type' => 'varchar',
+        'maxlength' => 255
+      ],
+      'role' => [
+        'type' => 'enum',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ],
+      'permission' => [
+        'type' => 'set',
+        'extra' => "'read','write'",
+        'default' => 'read'
+      ],
+      'balance' => [
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL'
+      ],
+      'balance_before' => [
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ],
+      'created_at' => [
+        'type' => 'datetime',
+        'default' => 'CURRENT_TIMESTAMP'
+      ]
+    ];
+
+    $expected = [
+      'id' => '`id` binary(32) NOT NULL',
+      'username' => '`username` varchar(255) NOT NULL',
+      'role' => "`role` enum ('super_admin','admin','user') NOT NULL DEFAULT 'user'",
+      'permission' => "`permission` set ('read','write') NOT NULL DEFAULT 'read'",
+      'balance' => '`balance` decimal(10,2) UNSIGNED DEFAULT NULL',
+      'balance_before' => '`balance_before` decimal(10,2) NOT NULL DEFAULT 0',
+      'created_at' => '`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'
+    ];
+
+    foreach ($cols as $col_name => $col) {
+      $this->assertSame(
+        $expected[$col_name],
+        trim($method->invoke(self::$mysql, $col_name, $col))
+      );
+    }
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_throws_an_exception_when_column_type_is_not_provided()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$mysql, 'username', ['maxlength' => 32]);
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_method_throws_an_exception_when_a_field_type_is_not_valid()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$mysql, 'balance', ['type' => 'number']);
+  }
+
+  /** @test */
+  public function getColumnDefinitionStatement_throws_an_exception_when_a_provided_field_is_enum_or_set_and_the_extra_field_is_not_provided()
+  {
+    $this->expectException(\Exception::class);
+
+    $this->getNonPublicMethod('getColumnDefinitionStatement')
+      ->invoke(self::$mysql, 'permission', [
+        'type' => 'set',
+        'default' => 'read'
+      ]);
   }
 }

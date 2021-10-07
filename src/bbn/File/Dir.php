@@ -501,7 +501,7 @@ class Dir extends bbn\Models\Cls\Basic
 							mkdir($path);
 						}
 						catch (\Exception $e) {
-							\bbn\X::error_log($e->getMessage());
+							\bbn\X::log($e->getMessage(), 'errors');
 						}
 					}
 					if (!is_dir($path)) {
@@ -512,7 +512,7 @@ class Dir extends bbn\Models\Cls\Basic
 							chmod($path, $chmod);
 						}
 						catch (\Exception $e) {
-							\bbn\X::error_log($e->getMessage());
+							\bbn\X::log($e->getMessage(), 'errors');
 						}
 					}
 				}

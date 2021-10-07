@@ -26,8 +26,22 @@ class Runner extends bbn\Models\Cls\Basic
   protected $timer;
 
   /**
+   * @var bbn\Cron
+   */
+  protected bbn\Cron $cron;
+
+  /**
+   * @var string|null
+   */
+  protected $log_file;
+
+  /**
+   * @var string
+   */
+  protected $type;
+
+  /**
    * The script as executed by the CLI in which the real task will come executed.
-   * @param string $type
    */
   private function _run(): void
   {
@@ -54,8 +68,15 @@ class Runner extends bbn\Models\Cls\Basic
            @unlink($pid);
         }
         */
-        $this->log("GETTING OUT of $type BECAUSE one of the manual files is missing");
-        exit("GETTING OUT of $type BECAUSE one of the manual files is missing");
+        $message = "GETTING OUT of $type BECAUSE one of the manual files is missing";
+
+        $this->log($message);
+
+        if ($this->isTestingEnvironment()) {
+          throw new \Exception($message);
+        }
+
+        exit($message);
       }
       // Loooking for a running PID
       if (is_file($pid_file)
@@ -77,6 +98,9 @@ class Runner extends bbn\Models\Cls\Basic
         }
       }
       // We create the PID file corresponding to the current process
+      if (!is_dir(dirname($pid_file))) {
+        mkdir(dirname($pid_file), 0777, true);
+      }
       if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
         // Shutdown function, will be always executed, except if the server is stopped
         register_shutdown_function([$this, 'shutdown']);
@@ -99,12 +123,15 @@ class Runner extends bbn\Models\Cls\Basic
         }
       }
     }
-    exit();
+    if (!$this->isTestingEnvironment()) {
+      exit();
+    }
   }
 
   /**
-   * cron constructor.
-   * @param bbn\Cron $ctrl
+   * Runner constructor.
+   *
+   * @param bbn\Cron $cron
    * @param array $cfg
    */
   public function __construct(bbn\Cron $cron, array $cfg)
@@ -124,13 +151,18 @@ class Runner extends bbn\Models\Cls\Basic
     }
   }
 
+  /**
+   * @param string|bool $name
+   * @param mixed $log
+   */
   public function output($name = '', $log = ''): void
   {
+    $output = '';
     if ($name === false) {
-      echo '}' . PHP_EOL;
+      $output = '}' . PHP_EOL;
     }
     else if ($name === true) {
-      echo '{' . PHP_EOL;
+      $output = '{' . PHP_EOL;
     }
     else if ($name) {
       $is_number = bbn\Str::isNumber($log);
@@ -142,14 +174,17 @@ class Runner extends bbn\Models\Cls\Basic
       else if ($is_boolean) {
         $log = $log ? 'true' : 'false';
       }
-      echo '  "' .
+      $output = '  "' .
         bbn\Str::escapeDquotes($name) .
         '": ' . ($is_string ? '"' : '') .
         ($is_string ? bbn\Str::escapeDquotes($log) : $log) .
         ($is_string ? '"' : '') . ',' .
         PHP_EOL;
     }
-    if (ob_get_length()) {
+
+    if (!empty($output)) {
+      ob_start();
+      echo $output;
       ob_end_flush();
     }
   }
@@ -205,6 +240,7 @@ class Runner extends bbn\Models\Cls\Basic
 
   /**
    * Returns the $data property.
+   *
    * @return array|null
    */
   public function getData(): ?array
@@ -212,6 +248,9 @@ class Runner extends bbn\Models\Cls\Basic
     return $this->data;
   }
 
+  /**
+   * @return bool
+   */
   public function check()
   {
     return (bool) $this->type;
@@ -224,16 +263,17 @@ class Runner extends bbn\Models\Cls\Basic
 
   /**
    * Returns the $data property.
-   * @return array|null
+   *
+   * @param bbn\Appui\Observer|null $observer
+   * @return void
    */
-
-  public function poll()
+  public function poll(?bbn\Appui\Observer $observer = null)
   {
     if ($this->check()) {
       $this->timer->start('timeout');
       $this->timer->start('users');
       $this->timer->start('cron_check');
-      $obs = new bbn\Appui\Observer($this->db);
+      $obs = $observer ?? new bbn\Appui\Observer($this->db);
       //$this->output(X::_('Starting poll'), Date('Y-m-d H:i:s'));
       /*
       foreach ( $admin->get_old_tokens() as $t ){
@@ -267,7 +307,9 @@ class Runner extends bbn\Models\Cls\Basic
             }
           }
         }
-        sleep(1);
+        if (!$this->isTestingEnvironment()) {
+          sleep(1);
+        }
         if ($this->timer->measure('users') > self::$user_timeout) {
           echo '?';
           //$admin->clean_tokens();
@@ -284,7 +326,7 @@ class Runner extends bbn\Models\Cls\Basic
           $this->timer->start('cron_check');
         }
       }
-      $this->output(X::_('Ending poll process'), Date('Y-m-d H:i:s'));
+      $this->output(X::_('Ending poll process'), date('Y-m-d H:i:s'));
     }
   }
 
@@ -311,6 +353,9 @@ class Runner extends bbn\Models\Cls\Basic
               $this->cron->getManager()->unsetPid($r['id']);
             }
           }
+          if ($this->isTestingEnvironment()) {
+            return;
+          }
           exit();
         }
         if ($rows = $this->cron->getManager()->getNextRows(0)) {
@@ -325,11 +370,17 @@ class Runner extends bbn\Models\Cls\Basic
             $this->cron->getLauncher()->launch($param);
           }
         }
-        sleep(10);
+        if (!$this->isTestingEnvironment()) {
+          sleep(10);
+        }
       }
     }
   }
 
+  /**
+   * @param array $cfg
+   * @throws \Exception
+   */
   public function runTask(array $cfg)
   {
     if (X::hasProps($cfg, ['id', 'file', 'log_file'], true) && $this->check()) {
@@ -359,7 +410,7 @@ class Runner extends bbn\Models\Cls\Basic
         }
         elseif ($logs = file_get_contents($json_file)) {
           try {
-            $logs = json_decode($logs, true);
+            $logs = json_decode($logs, true, 512, JSON_THROW_ON_ERROR);
           }
           catch (\Exception $e) {
             $logs = [];
@@ -385,19 +436,22 @@ class Runner extends bbn\Models\Cls\Basic
 
         $logs[$idx]['end'] = date('Y-m-d H:i:s');
         file_put_contents($json_file, Json_encode($logs, JSON_PRETTY_PRINT));
+
+        $default_month_data = [
+          'total' => 0,
+          'content' => 0,
+          'first' => $logs[$idx]['start'],
+          'last' => null,
+          'dates' => [],
+          'duration' => 0,
+          'duration_content' => 0
+        ];
+
         if (!is_file($month_file)) {
-          $mlogs = [
-            'total' => 0,
-            'content' => 0,
-            'first' => $logs[$idx]['start'],
-            'last' => null,
-            'dates' => [],
-            'duration' => 0,
-            'duration_content' => 0
-          ];
+          $mlogs = $default_month_data;
         }
         else {
-          $mlogs = json_decode(file_get_contents($month_file), true);
+          $mlogs = json_decode(file_get_contents($month_file), true) ?? $default_month_data;
         }
         $mlogs['total']++;
         $mlogs['duration'] += $logs[$idx]['duration'];
@@ -410,19 +464,22 @@ class Runner extends bbn\Models\Cls\Basic
           $mlogs['dates'][] = $day;
         }
         file_put_contents($month_file, Json_encode($mlogs, JSON_PRETTY_PRINT));
+
+        $default_year_data = [
+          'total' => 0,
+          'content' => 0,
+          'first' => $logs[$idx]['start'],
+          'last' => null,
+          'month' => [],
+          'duration' => 0,
+          'duration_content' => 0
+        ];;
+
         if (!is_file($year_file)) {
-          $ylogs = [
-            'total' => 0,
-            'content' => 0,
-            'first' => $logs[$idx]['start'],
-            'last' => null,
-            'month' => [],
-            'duration' => 0,
-            'duration_content' => 0
-          ];
+          $ylogs = $default_year_data;
         }
         else {
-          $ylogs = json_decode(file_get_contents($year_file), true);
+          $ylogs = json_decode(file_get_contents($year_file), true) ?? $default_year_data;
         }
         $ylogs['total']++;
         $ylogs['duration'] += $logs[$idx]['duration'];
@@ -437,12 +494,15 @@ class Runner extends bbn\Models\Cls\Basic
         file_put_contents($year_file, Json_encode($ylogs, JSON_PRETTY_PRINT));
       }
     }
-    exit();
+
+    if (!$this->isTestingEnvironment()) {
+      exit();
+    }
   }
 
 
   /**
-   * @return bool|int
+   * @return int
    */
   public function runAll()
   {
@@ -458,5 +518,10 @@ class Runner extends bbn\Models\Cls\Basic
       array_push($done, $cron['id']);
     }
     return $time;
+  }
+
+  private function isTestingEnvironment(): bool
+  {
+    return defined('BBN_TESTING_EVN') && BBN_TESTING_EVN === true;
   }
 }

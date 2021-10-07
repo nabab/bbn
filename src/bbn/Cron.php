@@ -27,10 +27,21 @@ class Cron extends Models\Cls\Basic
 
   protected $log_file;
 
+  protected $table;
 
+  /**
+   * @var Util\Timer
+   */
+  protected $timer;
+
+
+  /**
+   * @param Db $db
+   * @param Mvc\Controller|null $ctrl
+   * @param array $cfg
+   */
   public function __construct(Db $db, Mvc\Controller $ctrl = null, array $cfg = [])
   {
-    //if ( defined('BBN_DATA_PATH') ){
     if ($db->check()) {
       $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');
       $this->db = $db;
@@ -58,6 +69,9 @@ class Cron extends Models\Cls\Basic
   }
 
 
+  /**
+   * @return Cron\Launcher|null
+   */
   public function getLauncher(): ?Cron\Launcher
   {
     if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {
@@ -68,6 +82,10 @@ class Cron extends Models\Cls\Basic
   }
 
 
+  /**
+   * @param array $cfg
+   * @return Cron\Runner|null
+   */
   public function getRunner(array $cfg = []): ?Cron\Runner
   {
     if ($this->check() && $this->controller) {
@@ -78,6 +96,10 @@ class Cron extends Models\Cls\Basic
   }
 
 
+  /**
+   * @param array $cfg
+   * @return Mvc\Controller|null
+   */
   public function getController(array $cfg = []): ?Mvc\Controller
   {
     if ($this->check() && $this->controller) {
@@ -88,6 +110,9 @@ class Cron extends Models\Cls\Basic
   }
 
 
+  /**
+   * @return Cron\Manager|null
+   */
   public function getManager(): ?Cron\Manager
   {
     if (!$this->_manager && $this->check() && $this->controller) {
@@ -98,43 +123,59 @@ class Cron extends Models\Cls\Basic
   }
 
 
+  /**
+   * @return bool
+   */
   public function check(): bool
   {
     return $this->db->check();
   }
 
+  /**
+   * @return string|null
+   */
   public function getExePath()
   {
     return $this->exe_path;
   }
 
+  /**
+   * @return string|null
+   */
   public function getLogFile()
   {
     return $this->log_file;
   }
 
+  /**
+   * @return string|null
+   */
   public function getPath(): ?string
   {
     return $this->path;
   }
 
+  /**
+   * @return string|null
+   */
   public function launchPoll()
   {
     if ($launcher = $this->getLauncher()) {
       return $launcher->launch(['type' => 'poll']);
     }
+
     return null;
   }
 
+  /**
+   * @return string|null
+   */
   public function launchTaskSystem()
   {
     if ($launcher = $this->getLauncher()) {
       return $launcher->launch(['type' => 'cron']);
     }
+
     return null;
   }
-
-
-
-
 }

@@ -29,9 +29,9 @@ class Enc
   /**
    * @param string $s
    * @param string $key
-   * @return string
+   * @return string|null
    */
-  public static function crypt(string $s, string $key=''): string
+  public static function crypt(string $s, string $key=''): ?string
   {
     $key = self::_get_key($key);
     return self::encryptOpenssl($s, $key);
@@ -40,28 +40,40 @@ class Enc
   /**
    * @param string $s
    * @param string $key
-   * @return string
+   * @return string|null
    */
-  public static function decrypt(string $s, string $key=''): string
+  public static function decrypt(string $s, string $key=''): ?string
   {
     $key = self::_get_key($key);
     return self::decryptOpenssl($s, $key);
   }
 
+  /**
+   * @param string $s
+   * @param string $key
+   * @return string
+   */
   public static function crypt64(string $s, string $key=''): string
   {
     return base64_encode(self::crypt($s, $key));
   }
 
-  public static function decrypt64(string $s, string $key=''): string
+  /**
+   * @param string $s
+   * @param string $key
+   * @return string|null
+   */
+  public static function decrypt64(string $s, string $key=''): ?string
   {
     return self::decrypt(base64_decode($s), $key);
   }
 
   /**
    * Encrypt string using openSSL module
+   *
    * @param string $s
-   * @param string $key      Any random secure SALT string for your website
+   * @param string|null $key Any random secure SALT string for your website
+   * @param string|null $method
    * @param string $password User's optional password
    * @return null|string
    */
@@ -73,25 +85,28 @@ class Enc
     if (!$key) {
       $key = self::$salt;
     }
-    if ($length = openssl_cipher_iv_length($method ?: self::$method)) {
+    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {
       $iv = substr(md5(self::$prefix.$password), 0, $length);
       $res = null;
-      try{
+      try {
         $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);
       }
       catch (\Exception $e) {
         X::log("Impossible to decrypt");
       }
+
       return $res;
     }
+
     return null;
   }
 
   /**
    * Decrypt string using openSSL module.
-   * 
+   *
    * @param string $s
-   * @param string $key      Any random secure SALT string for your website
+   * @param string|null $key Any random secure SALT string for your website
+   * @param string|null $method
    * @param string $password User's optional password
    * @return null|string
    */
@@ -103,7 +118,7 @@ class Enc
     if (!$key) {
       $key = self::$salt;
     }
-    if ($length = openssl_cipher_iv_length($method ?: self::$method)) {
+    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {
       $iv = substr(md5(self::$prefix.$password), 0, $length);
       try {
         $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);
@@ -111,10 +126,12 @@ class Enc
       catch (\Exception $e){
         X::log($e->getMessage(), 'decryptOpenssl');
       }
-      if ($res) {
+
+      if (!empty($res)) {
         return $res;
       }
     }
+
     return null;
   }
 
@@ -132,7 +149,7 @@ class Enc
     $res = false;
     if (is_dir(X::dirname($path))
         && !file_exists($path.'_rsa')
-        && in_array($algo, Hash_algos(), true)
+        && in_array($algo, hash_algos(), true)
         && ($key = self::generateCert($algo, $key_bits))
     ) {
       if (is_dir($path) && (substr($path, -1) !== '/')) {
@@ -146,9 +163,15 @@ class Enc
         $res = true;
       }
     }
+
     return $res;
   }
 
+  /**
+   * @param string $algo
+   * @param int $key_bits
+   * @return array|null
+   */
   public static function generateCert(string $algo = 'sha512', int $key_bits = 4096): ?array
   {
     $res = null;
@@ -174,23 +197,38 @@ class Enc
     return $res;
   }
 
-  private static function _get_key($key = '')
+  /**
+   * @param string $key
+   * @return false|string
+   */
+  private static function _get_key(string $key = '')
   {
     if (empty($key)) {
       $key = \defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : self::$salt;
     }
+
     return hash('sha256', $key);
   }
 
+  /**
+   * @param $privKey
+   * @return string
+   */
   private static function _sshEncodePublicKey($privKey)
   {
     $keyInfo = openssl_pkey_get_details($privKey);
+
     $buffer  = pack("N", 7) . "ssh-rsa" .
       self::_sshEncodeBuffer($keyInfo['rsa']['e']) .
       self::_sshEncodeBuffer($keyInfo['rsa']['n']);
+
     return "ssh-rsa " . base64_encode($buffer);
   }
 
+  /**
+   * @param $buffer
+   * @return false|string
+   */
   private static function _sshEncodeBuffer($buffer)
   {
     $len = strlen($buffer);
@@ -198,6 +236,7 @@ class Enc
       $len++;
       $buffer = "\x00" . $buffer;
     }
+
     return pack("Na*", $len, $buffer);
   }
 }

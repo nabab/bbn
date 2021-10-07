@@ -1138,68 +1138,7 @@ PGSQL
         $st .= ',' . PHP_EOL;
       }
 
-      $st .= '  ' . $this->escape($name) . ' ';
-      $col_type = $col['type'];
-
-      if (array_key_exists('default', $col) && strpos($col['default'], '::') !== FALSE) {
-        [$col['default']] = explode('::', $col['default']);
-      }
-
-      if ($col_type === 'USER-DEFINED' && !empty($col['udt_name'])) {
-        $col['type'] = $col['udt_name'];
-      }
-
-      if (!in_array($col_type, self::$types)) {
-        if (isset(self::$interoperability[$col_type])) {
-          $st      .= self::$interoperability[$col_type];
-          $col_type = self::$interoperability[$col_type];
-        }
-        else if ($col_type === 'USER-DEFINED') {
-          $st .= $col['type'];
-        }
-        else {
-          throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
-        }
-      }
-      else {
-        $st .= $col['type'];
-      }
-
-      if (
-        !empty($col['maxlength']) && $col_type !== 'bytea' &&
-        (
-          (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
-          ||
-          !in_array($col_type, self::$numeric_types)
-        )
-      ) {
-        $st .= '(' . $col['maxlength'];
-        if (!empty($col['decimals'])) {
-          $st .= ',' . $col['decimals'];
-        }
-
-        $st .= ')';
-      }
-
-      if (empty($col['null'])) {
-        $st .= ' NOT NULL';
-      }
-
-      if (!empty($col['virtual'])) {
-        $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
-      } elseif (array_key_exists('default', $col)) {
-        $st .= ' DEFAULT ';
-        if (($col['default'] === 'NULL')
-          || Str::isNumber($col['default'])
-          || strpos($col['default'], '(')
-          || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
-        ) {
-          $st .= (string)$col['default'];
-        }
-        else {
-          $st .= "'" . trim($col['default'], "'") . "'";
-        }
-      }
+      $st .= $this->getColumnDefinitionStatement($name, $col);
     }
 
     $st .= PHP_EOL . ')';
@@ -1395,6 +1334,106 @@ PGSQL
     }
 
     return false;
+  }
+
+  /**
+   * Creates the given column for the given table.
+   *
+   * @param string $table
+   * @param string $column
+   * @param array $model
+   * @return bool
+   * @throws \Exception
+   */
+  public function createColumn(string $table, string $column, array $model): bool
+  {
+    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
+      $column_definition = $this->getColumnDefinitionStatement($column, $model);
+
+      return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns a statement for column definition.
+   *
+   * @param string $name
+   * @param array $col
+   * @return string
+   */
+  public function getColumnDefinitionStatement(string $name, array $col): string
+  {
+    $st       = '  ' . $this->escape($name) . ' ';
+
+    if (empty($col['type'])) {
+      throw new \Exception(X::_('Column type is not provided'));
+    }
+
+    $col_type = $col['type'];
+
+    if (array_key_exists('default', $col) && strpos($col['default'], '::') !== FALSE) {
+      [$col['default']] = explode('::', $col['default']);
+    }
+
+    if ($col_type === 'USER-DEFINED' && !empty($col['udt_name'])) {
+      $col['type'] = $col['udt_name'];
+    }
+
+    if (!in_array($col_type, self::$types)) {
+      if (isset(self::$interoperability[$col_type])) {
+        $st      .= self::$interoperability[$col_type];
+        $col_type = self::$interoperability[$col_type];
+      }
+      else if ($col_type === 'USER-DEFINED') {
+        $st .= $col['type'];
+      }
+      else {
+        throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
+      }
+    }
+    else {
+      $st .= $col['type'];
+    }
+
+    if (
+      !empty($col['maxlength']) && $col_type !== 'bytea' &&
+      (
+        (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
+        ||
+        !in_array($col_type, self::$numeric_types)
+      )
+    ) {
+      $st .= '(' . $col['maxlength'];
+      if (!empty($col['decimals'])) {
+        $st .= ',' . $col['decimals'];
+      }
+
+      $st .= ')';
+    }
+
+    if (empty($col['null'])) {
+      $st .= ' NOT NULL';
+    }
+
+    if (!empty($col['virtual'])) {
+      $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
+    } elseif (array_key_exists('default', $col)) {
+      $st .= ' DEFAULT ';
+      if (($col['default'] === 'NULL')
+        || Str::isNumber($col['default'])
+        || strpos($col['default'], '(')
+        || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+      ) {
+        $st .= (string)$col['default'];
+      }
+      else {
+        $st .= "'" . trim($col['default'], "'") . "'";
+      }
+    }
+
+    return $st;
   }
 
   /**
