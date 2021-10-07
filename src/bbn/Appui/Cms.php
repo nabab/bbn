@@ -321,7 +321,7 @@ class Cms extends bbn\Models\Cls\Db
 				'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
 			]]
 		];
-		$cfg['where']['id_type'] = ;
+		$cfg['where']['id_type'] = $this->getNoteType();
 
     return array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
@@ -353,8 +353,7 @@ class Cms extends bbn\Models\Cls\Db
    */
 	public function countAll(): int
 	{
-		$id_pages = $this->opt->fromCode('pages', 'types', 'note', 'appui');
-		return $this->note->countByType($id_pages);
+		return $this->note->countByType($this->getNoteType());
 	}
 
 	
