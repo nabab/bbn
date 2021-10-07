@@ -7,6 +7,7 @@ use bbn\Cache;
 use bbn\Db;
 use bbn\Mvc;
 use bbn\User;
+use Opis\Closure\SerializableClosure;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
 use tests\Reflectable;
@@ -19,8 +20,6 @@ class SearchTest extends TestCase
   protected Search $search;
 
   protected $db_mock;
-
-  protected $cache_mock;
 
   protected $user_mock;
 
@@ -66,6 +65,8 @@ class SearchTest extends TestCase
     ]
   ];
 
+  private $search_string = 'foo';
+
   public function getInstance()
   {
     return $this->search;
@@ -99,7 +100,6 @@ class SearchTest extends TestCase
     }
 
     $this->db_mock    = \Mockery::mock(Db::class);
-    $this->cache_mock = \Mockery::mock(Cache::class);
     $this->user_mock  = \Mockery::mock(User::class);
 
     ReflectionHelpers::setNonPublicPropertyValue(
@@ -110,84 +110,164 @@ class SearchTest extends TestCase
       'retriever_instance', User::class, $this->user_mock
     );
 
-    ReflectionHelpers::setNonPublicPropertyValue(
-      'is_init', Cache::class, 1
-    );
-
-    ReflectionHelpers::setNonPublicPropertyValue(
-      'engine', Cache::class, $this->cache_mock
-    );
 
     // Create plugins dirs and contents
     $this->createDir($plugin_dir = 'plugins/appui-search/src/mvc/model');
    $this->createFile('users_search.php', <<<CONTENT
-<?php return [
-'score' => 4,
-'cfg' => ['a' => 'b'] 
-];
+<?php 
+use Opis\Closure\SerializableClosure;
+
+\$function = function (\$search) {
+  return [
+    'score' => 30,
+    'cfg' => [
+      'tables' => ['members'],
+      'fields' => ['id', 'name'],
+      'where' => ['name' => \$search]
+    ],
+    'alternates' => [
+      [
+        'where' => [['name', 'contains', \$search]],
+        'score' => 10
+      ]
+    ]
+  ];
+};
+
+\$wrapper = new SerializableClosure(\$function);
+
+return serialize(\$wrapper);
+
 CONTENT
 , $plugin_dir);
 
     $this->createFile('profiles_search.php', <<<CONTENT
-<?php return [
-'score' => 6,
-'cfg' => ['c' => 'd'] 
+<?php 
+use Opis\Closure\SerializableClosure;
+
+\$function = function (\$search) {
+return [
+  'score' => 50,
+  'regex' => '/^d+$/',
+  'cfg' => [
+    'tables' => ['members'],
+    'fields' => ['id', 'name'],
+    'where' => ['id' => \$search]
+  ],
+  'alternates' => [
+    [
+      'where' => [['id', 'contains', \$search]],
+      'score' => 15
+    ]
+  ]
 ];
+};
+
+\$wrapper = new SerializableClosure(\$function);
+
+return serialize(\$wrapper);
+
 CONTENT
       , $plugin_dir);
 
     $this->createDir($plugin_dir_2 = 'plugins/appui-plugin-1/src/mvc/model');
     $this->createFile('users_search.php', <<<CONTENT
-<?php return [
-'score' => 4,
-'cfg' => ['a' => 'b'] 
+<?php 
+ use Opis\Closure\SerializableClosure;
+ 
+ \$function = function () use (\$model) {
+return [
+  'score' => 40,
+  'type' => 'url',
+  'cfg' => [
+    'tables' => ['members'],
+    'fields' => ['id', 'name'],
+    'where' => ['id' => \$model->data['search']]
+  ]
 ];
+};
+
+\$wrapper = new SerializableClosure(\$function);
+
+return serialize(\$wrapper);
+
 CONTENT
       , $plugin_dir_2);
-
-    $this->createFile('profiles_search.php', <<<CONTENT
-<?php return [
-'score' => 6,
-'cfg' => ['c' => 'd'] 
-];
-CONTENT
-      , $plugin_dir);
-
-    $this->createDir($plugin_dir_2 = 'plugins/appui-plugin-2/src/mvc/model');
-    $this->createFile('users_search.php', <<<CONTENT
-<?php return [
-'score' => 1,
-'cfg' => ['a' => 'b'] 
-];
-CONTENT
-      , $plugin_dir_2);
-
-    $this->createFile('profiles_search.php', <<<CONTENT
-<?php return [
-'score' => 6,
-'cfg' => ['c' => 'd'] 
-];
-CONTENT
-      , $plugin_dir);
-
-    // Cache expectations when calling getSearchCfg in constructor
-    $this->cache_mock->shouldReceive('get')
-      ->once()
-      ->andReturnNull();
-
-    $this->cache_mock->shouldReceive('set')
-      ->once()
-      ->andReturnTrue();
 
     $this->ctrl   = new Mvc\Controller(self::$mvc, []);
-    $this->search = new Search($this->ctrl, $this->cfg);
+    $this->init();
     $this->arch   = $this->cfg['arch'];
+  }
+
+  protected function init(?string $search = null)
+  {
+    $this->search = new Search(
+      $this->ctrl, $search ?? $this->search_string, $this->cfg
+    );
   }
 
   protected function tearDown(): void
   {
     \Mockery::close();
 //    $this->cleanTestingDir();
+  }
+
+  /**
+   * Returns the expected extracted search config throughout the tests.
+   *
+   * @param string|null $search
+   * @return array
+   */
+  protected function getExpectedSearchCfg(?string $search = null)
+  {
+    $search = $search ?? $this->search_string;
+
+    return [
+      [
+        'score' => 50,
+        'regex' => '/^d+$/',
+        'cfg' => [
+          'tables' => ['members'],
+          'fields' => ['id', 'name'],
+          'where' => ['id' => $search]
+        ],
+        'alternates' => [
+          [
+            'where' => [['id', 'contains', $search]],
+            'score' => 15
+          ]
+        ],
+        'file' => BBN_DATA_PATH . "plugins/appui-search/src/mvc/model/profiles_search.php",
+        'num' => 0
+      ],
+//      [
+//        'score' => 40,
+//        'type' => 'url',
+//        'cfg' => [
+//          'tables' => ['members'],
+//          'fields' => ['id', 'name'],
+//          'where' => ['id' => $search]
+//        ],
+//        'file' => BBN_DATA_PATH . "plugins/appui-plugin-1/src/mvc/model/users_search.php",
+//        'num' => 1
+//      ],
+       [
+        'score' => 30,
+        'cfg' => [
+          'tables' => ['members'],
+          'fields' => ['id', 'name'],
+          'where' => ['name' => $search]
+        ],
+        'alternates' => [
+          [
+            'where' => [['name', 'contains', $search]],
+            'score' => 10
+          ]
+        ],
+         'file' => BBN_DATA_PATH . "plugins/appui-search/src/mvc/model/users_search.php",
+         'num' => 1
+      ]
+    ];
   }
 
 
@@ -204,49 +284,33 @@ CONTENT
       $this->search->getClassCfg()
     );
 
-    $this->assertSame(
-      $this->cache_mock,
-      $this->getNonPublicProperty('cache_engine')
-    );
 
     $this->assertSame(
       'bbn/Appui/Search/',
       $this->getNonPublicProperty('_cache_prefix')
     );
 
-    $this->assertSame([
-      [
-        'path' => BBN_DATA_PATH . "plugins/appui-search/src/mvc/model/profiles_search.php",
-        'score' => $this->search_cfg['profiles_search']['score'],
-        'cfg' => $this->search_cfg['profiles_search']['cfg']
-      ],
-      [
-        'path' => BBN_DATA_PATH . "plugins/appui-search/src/mvc/model/users_search.php",
-        'score' => $this->search_cfg['users_search']['score'],
-        'cfg' => $this->search_cfg['users_search']['cfg']
-      ]
-    ], $this->getNonPublicProperty('search_cfg'));
+
+    $this->assertSame(
+      $this->getExpectedSearchCfg(), $this->getNonPublicProperty('search_cfg')
+    );
   }
 
   /** @test */
   public function getSearchCfg_method_returns_search_config_from_cache_when_exists()
   {
+    $this->cleanTestingDir(BBN_APP_PATH . BBN_DATA_PATH . 'plugins');
     $method = $this->getNonPublicMethod('getSearchCfg');
 
-    $this->cache_mock->shouldReceive('get')
-      ->with(
-        $this->getNonPublicProperty('_cache_prefix')
-        . $this->getNonPublicProperty('cache_name')
-        . '/getSearchCfg'
-      )
-      ->andReturn($expected = [[
-        'score' => 2,
-        'cfg' => ['a' => 'b']
-      ]]);
+    $this->assertSame(
+      $this->getExpectedSearchCfg(), $method->invoke($this->search)
+    );
+
+    // Another test with different string
+    $this->init('bar');
 
     $this->assertSame(
-      $expected,
-      $method->invoke($this->search)
+      $this->getExpectedSearchCfg('bar'), $method->invoke($this->search)
     );
   }
   
@@ -255,37 +319,15 @@ CONTENT
   {
     $method = $this->getNonPublicMethod('getSearchCfg');
 
-    $this->cache_mock->shouldReceive('get')
-      ->once()
-      ->andReturnNull();
+    $this->assertSame(
+      $this->getExpectedSearchCfg(), $method->invoke($this->search)
+    );
 
-    $expected = [
-      [
-        'path' => BBN_DATA_PATH . "plugins/appui-search/src/mvc/model/profiles_search.php",
-        'score' => $this->search_cfg['profiles_search']['score'],
-        'cfg' => $this->search_cfg['profiles_search']['cfg']
-      ],
-      [
-        'path' => BBN_DATA_PATH . "plugins/appui-search/src/mvc/model/users_search.php",
-        'score' => $this->search_cfg['users_search']['score'],
-        'cfg' => $this->search_cfg['users_search']['cfg']
-      ]
-    ];
-
-    $this->cache_mock->shouldReceive('set')
-      ->once()
-      ->with(
-        $this->getNonPublicProperty('_cache_prefix')
-        . $this->getNonPublicProperty('cache_name')
-        . '/getSearchCfg',
-        $expected,
-        0
-      )
-      ->andReturnTrue();
-
+    // Another test with different search string
+    $this->init('bar');
 
     $this->assertSame(
-      $expected,
+      $this->getExpectedSearchCfg('bar'),
       $method->invoke($this->search)
     );
   }

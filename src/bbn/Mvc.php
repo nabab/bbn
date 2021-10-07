@@ -408,6 +408,12 @@ class Mvc implements Mvc\Api
           ob_start();
           $d = include $bbn_inc_file;
           ob_end_clean();
+
+        // Adding support for returning serialized objects
+        if (is_string($d) && ($obj = @unserialize($d)) && is_object($obj)) {
+          return $d;
+        }
+
         if (\is_object($d)) {
             $d = X::toArray($d);
         }
@@ -1169,6 +1175,23 @@ class Mvc implements Mvc\Api
       }
 
         return [];
+    }
+
+  /**
+   * @param $path
+   * @param array $data
+   * @param Mvc\Controller $ctrl
+   * @return string|null
+   * @throws \Exception
+   */
+    public function getSerialzedModel($path, array $data, Mvc\Controller $ctrl): ?string
+    {
+      if (($path = Router::parse($path)) && ($route = $this->router->route($path, 'model'))) {
+        $model = new Mvc\Model($this->db, $route, $ctrl, $this);
+        return $model->getSerialized($data);
+      }
+
+      return null;
     }
 
 

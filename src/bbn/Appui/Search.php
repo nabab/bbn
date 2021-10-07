@@ -10,6 +10,7 @@ use bbn\Mvc;
 use bbn\Mvc\Controller;
 use bbn\User;
 use bbn\X;
+use Opis\Closure\SerializableClosure;
 
 class Search
 {
@@ -18,6 +19,8 @@ class Search
   protected Db $db;
 
   protected User $user;
+
+  protected string $search;
 
   protected Controller $ctrl;
 
@@ -53,11 +56,12 @@ class Search
   protected ?array $class_cfg;
 
 
-  public function __construct(Controller $ctrl, array $cfg = [])
+  public function __construct(Controller $ctrl, string $search, array $cfg = [])
   {
-    $this->ctrl = $ctrl;
-    $this->db   = Db::getInstance();
-    $this->user = User::getInstance();
+    $this->ctrl   = $ctrl;
+    $this->search = $search;
+    $this->db     = Db::getInstance();
+    $this->user   = User::getInstance();
 
     $this->_init_class_cfg($cfg);
     $this->cacheInit();
@@ -71,7 +75,7 @@ class Search
   protected function getSearchCfg(): ?array
   {
     if ($cached_data = $this->cacheGet($this->cache_name, __FUNCTION__)) {
-      return $cached_data;
+      return $this->getContent($cached_data);
     }
 
     $result = [];
@@ -88,7 +92,7 @@ class Search
       $this->cacheSet($this->cache_name, __FUNCTION__, $result);
     }
 
-    return $result;
+    return $this->getContent($result);
   }
 
   /**
@@ -107,21 +111,19 @@ class Search
 
     $result = [];
 
-    foreach ($files as $file) {
+    foreach ($files as $i => $file) {
       if (is_file($file)) {
         $model = Mvc::getPluginUrl('appui-search') . '/' . basename($file, '.php');
-        if ($content = $this->ctrl->getModel($model)) {
-          $result[] = array_merge(['path' => $file], $content);
+        if ($content = $this->ctrl->getSerializedModel($model)) {
+          $result[$file] = $content;
         }
       }
     }
 
-    X::sortBy($result, 'score', 'DESC');
-
     return $result;
   }
 
-  protected function getPluginsSearchCfg()
+  protected function getPluginsSearchCfg(): array
   {
     $result = [];
 
@@ -136,11 +138,45 @@ class Search
     return $result;
   }
 
-  public function get(string $search_value)
+  /**
+   * Returns the content of the given serialized strings array.
+   *
+   * @param $serialized_strings $content
+   * @return array
+   */
+  protected function getContent(array $serialized_strings): array
+  {
+    $result = [];
+    $i      = 0;
+
+    foreach ($serialized_strings as $file => $string) {
+      if (($wrapper = @unserialize($string)) && $wrapper instanceof SerializableClosure) {
+        // Extract the closure object
+        $closure = $wrapper->getClosure();
+
+        // Invoke the closure with the search string
+        $content =  $closure($this->search);
+
+        if (is_array($result)) {
+          $result[] = array_merge($content, [
+            'file' => $file,
+            'num' => $i
+          ]);
+        }
+        $i++;
+      }
+    }
+
+    X::sortBy($result, 'score', 'DESC');
+
+    return $result;
+  }
+
+  public function get()
   {
     $result = [];
     // Check if the search valus has been done by the user before
-    if ($previous_search_id = $this->getPreviousSearchId($search_value)) {
+    if ($previous_search_id = $this->getPreviousSearchId()) {
      if ($previous_search_results = $this->getPreviousSearchResults($previous_search_id)) {
        $results_arch = $this->class_cfg['arch']['search_results'];
 
@@ -167,7 +203,7 @@ class Search
     }
     else {
       // If not then save the search
-      $id_search = $this->saveSearch($search_value);
+      $id_search = $this->saveSearch();
 
       // Execute the query here
 
@@ -177,7 +213,7 @@ class Search
     }
   }
 
-  protected function getPreviousSearchId(string $search_value)
+  protected function getPreviousSearchId()
   {
     return $this->db->selectOne([
       'table' => $this->class_table,
@@ -191,17 +227,17 @@ class Search
         [
           'field' => $this->fields['value'],
           'operator' => '=',
-          'value' => $search_value
+          'value' => $this->search
         ]
       ]
     ]);
   }
 
-  protected function saveSearch(string $search_value)
+  protected function saveSearch()
   {
     $insert = $this->db->insert($this->class_table, [
       $this->fields['id_user'] => $this->user->getId(),
-      $this->fields['value'] => $search_value,
+      $this->fields['value'] => $this->search,
       $this->fields['num'] => 1,
       $this->fields['last'] => date('Y-m-d H:i:s')
     ]);
