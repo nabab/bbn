@@ -109,7 +109,7 @@ class Search
 
     $result = [];
 
-    foreach ($files as $i => $file) {
+    foreach ($files as $file) {
       if (is_file($file)) {
         $model = Mvc::getPluginUrl('appui-search') . '/' . basename($file, '.php');
         if ($content = $this->ctrl->getSerializedModel($model)) {
@@ -155,13 +155,13 @@ class Search
         // Invoke the closure with the search string
         $content =  $closure($this->search);
 
-        if (is_array($result)) {
+        if (is_array($content)) {
           $result[] = array_merge($content, [
             'file' => $file,
             'num' => $i
           ]);
+          $i++;
         }
-        $i++;
       }
     }
 
