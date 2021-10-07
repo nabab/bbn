@@ -11,6 +11,8 @@
 
 
 namespace bbn\Compilers;
+use bbn\X;
+
 /**
  * The LESS compiler and parser.
  *
@@ -139,7 +141,7 @@ class Less {
 			}
 		}
 
-		$pi = pathinfo($realPath);
+		$pi = X::pathinfo($realPath);
 		$dir = $pi["dirname"];
 
 		list($top, $bottom) = $this->sortProps($root->props, true);
@@ -1910,7 +1912,7 @@ class Less {
 			throw new \Exception('load error: failed to find '.$fname);
 		}
 
-		$pi = pathinfo($fname);
+		$pi = X::pathinfo($fname);
 
 		$oldImport = $this->importDir;
 

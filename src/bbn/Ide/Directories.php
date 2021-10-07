@@ -1317,7 +1317,7 @@ class Directories {
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
-      $pi = pathinfo($path);
+      $pi = X::pathinfo($path);
       $files = [];
       if ( $pi['filename'] !== $new ){
         if ( !empty($cfg['tabs']) ){
@@ -1454,7 +1454,7 @@ class Directories {
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
-      $pi = pathinfo($src);
+      $pi = X::pathinfo($src);
       $pi['dirname'] = $pi['dirname'] === '.' ? '' : $pi['dirname'];
       $files = [];
       if ( $pi['dirname'] !== $dest ){
@@ -1579,7 +1579,7 @@ class Directories {
       !empty($file) &&
       file_exists($file)
     ){
-      $pi = pathinfo($file);
+      $pi = X::pathinfo($file);
       $new = $pi['dirname'].'/'.$pi['filename'].'.'.$ext;
       bbn\File\Dir::move($file, $new, true);
       return [

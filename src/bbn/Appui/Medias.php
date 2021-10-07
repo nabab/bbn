@@ -673,7 +673,7 @@ class Medias extends bbn\Models\Cls\Db
           $id_media, $newName, $title, [
             'path' => $media['path'],
             'size' => $fs->filesize($full_path),
-            'extension' => pathinfo($full_path, PATHINFO_EXTENSION)
+            'extension' => X::pathinfo($full_path, PATHINFO_EXTENSION)
           ]
         )
         ) {
