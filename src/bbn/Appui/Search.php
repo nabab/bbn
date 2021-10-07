@@ -53,8 +53,6 @@ class Search
 
   protected array $search_cfg = [];
 
-  protected ?array $class_cfg;
-
 
   public function __construct(Controller $ctrl, string $search, array $cfg = [])
   {
