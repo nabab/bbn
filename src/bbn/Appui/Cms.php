@@ -297,6 +297,9 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg['fields'][] = 'url';
 		$cfg['fields'][] = 'start';
 		$cfg['fields'][] = 'end';
+		$cfg['where']['id_type'] = $this->getNoteType();
+		$total = $this->db->count($cfg);
+
 		$cfg['join'][] = [
 			'table' => $this->class_cfg['tables']['notes_url'],
 			'type' => 'left',
@@ -321,14 +324,18 @@ class Cms extends bbn\Models\Cls\Db
 				'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
 			]]
 		];
-		$cfg['where']['id_type'] = $this->getNoteType();
 
-    return array_map(function($a){
+    $data = array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
       $a['files']         = $this->note->getMedias($a['id_note']) ?: [];
 
       return $a;
     }, $this->db->rselectAll($cfg));
+
+		return [
+			'data' => $data,
+			'total' => $total
+		];
 	}
 
 
