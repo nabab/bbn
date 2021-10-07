@@ -2,6 +2,7 @@
 
 namespace bbn\Ide;
 use bbn;
+use bbn\X;
 
 class Directories {
 
@@ -644,7 +645,7 @@ class Directories {
         if ( is_file($real) ){
           return $this->error("The file already exists");
         }
-        if ( !bbn\File\Dir::createPath(dirname($real)) ){
+        if ( !bbn\File\Dir::createPath(X::dirname($real)) ){
           return $this->error("Impossible to create the container directory");
         }
         if ( !file_put_contents($real, $default) ){
@@ -731,7 +732,7 @@ class Directories {
       /** @var string $ext The file's extension */
       $ext = bbn\Str::fileExt($file);
       /** @var string $path The file's path without file's name  */
-      $path = dirname($file) !== '.' ? dirname($file) . '/' : '';
+      $path = X::dirname($file) !== '.' ? X::dirname($file) . '/' : '';
       $url = $dir . $path . $name;
 
       $r = $this->getTab($url, $cfg['title'], $cfg);
@@ -780,7 +781,7 @@ class Directories {
           $ext = bbn\Str::fileExt($cfg['fixed']);
           foreach ( $cfg['extensions'] as $e ){
             if ( $e['ext'] === $ext ){
-              $file = dirname($file) . '/' . $cfg['fixed'];
+              $file = X::dirname($file) . '/' . $cfg['fixed'];
               $real_file = $root_path . $file;
               $mode = $e['mode'];
               $r['file'] = $real_file;
@@ -901,7 +902,7 @@ class Directories {
                 // Remove file's options
                 $this->options->remove($this->options->fromCode($id_file, $this->_files_pref()));
                 // Remove ide backups
-                bbn\File\Dir::delete(dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
+                bbn\File\Dir::delete(X::dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
               }
               return [
                 'deleted' => 1
@@ -912,12 +913,12 @@ class Directories {
       }
       if ( is_file($real) && $id_file ){
         $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];
-        $backup = dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
-        bbn\File\Dir::createPath(dirname($backup));
+        $backup = X::dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
+        bbn\File\Dir::createPath(X::dirname($backup));
         rename($real, $backup);
       }
-      else if ( !is_dir(dirname($real)) ){
-        bbn\File\Dir::createPath(dirname($real));
+      else if ( !is_dir(X::dirname($real)) ){
+        bbn\File\Dir::createPath(X::dirname($real));
       }
       file_put_contents($real, $code);
       if ( $pref && $id_user ){
@@ -1047,8 +1048,8 @@ class Directories {
         }
       }
       foreach ($files as $s => $d ){
-        if ( !file_exists(dirname($d)) ){
-          if ( !bbn\File\Dir::createPath(dirname($d)) ){
+        if ( !file_exists(X::dirname($d)) ){
+          if ( !bbn\File\Dir::createPath(X::dirname($d)) ){
             $this->error("Impossible to create the path $d");
             return false;
           }
@@ -1068,7 +1069,7 @@ class Directories {
           $dir_perms = function($fd) use(&$dir_perms){
             foreach ( $fd as $f ){
               if ( is_file($f) &&
-                (basename($f) !== '_ctrl.php')
+                (X::basename($f) !== '_ctrl.php')
               ){
                 self::createPermByReal($f);
               }
@@ -1109,8 +1110,8 @@ class Directories {
         foreach ( $cfg['tabs'] as $t ){
           if ( empty($t['fixed']) ){
             $real = $root . $t['path'];
-            if ( dirname($path) !== '.' ){
-              $real .= dirname($path) . '/';
+            if ( X::dirname($path) !== '.' ){
+              $real .= X::dirname($path) . '/';
             }
             if ( $is_file ){
               foreach ( $t['extensions'] as $e ){
@@ -1197,8 +1198,8 @@ class Directories {
         foreach ( $cfg['tabs'] as $t ){
           if ( empty($t['fixed']) ){
             $real = $t['path'];
-            if ( dirname($path) !== '.' ){
-              $real .= dirname($path) . '/';
+            if ( X::dirname($path) !== '.' ){
+              $real .= X::dirname($path) . '/';
             }
             if ( $is_file ){
               foreach ( $t['extensions'] as $e ){
@@ -1237,8 +1238,8 @@ class Directories {
       }
       foreach ( $files as $f ){
         if ( $f['is_file'] ){
-          if ( !bbn\File\Dir::createPath(dirname($f['dest'])) ){
-            $this->error("Impossible to create the path " . dirname($f['dest']));
+          if ( !bbn\File\Dir::createPath(X::dirname($f['dest'])) ){
+            $this->error("Impossible to create the path " . X::dirname($f['dest']));
             return false;
           }
         }
@@ -1718,8 +1719,8 @@ class Directories {
       !$this->realToPerm($file_new, $type)
     ){
       $is_file = $type === 'file';
-      $code = $is_file ? bbn\Str::fileExt(basename($file_new), 1)[0] : basename($file_new).'/';
-      if ( ($id_parent = $this->createPermByReal(dirname($file_new).'/', 'dir'))
+      $code = $is_file ? bbn\Str::fileExt(X::basename($file_new), 1)[0] : X::basename($file_new).'/';
+      if ( ($id_parent = $this->createPermByReal(X::dirname($file_new).'/', 'dir'))
       ){
         $this->options->setProp($id_opt, ['code' => $code]);
         $this->options->move($id_opt, $id_parent);

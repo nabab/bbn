@@ -4,7 +4,8 @@
  */
 namespace bbn\File;
 use bbn;
-use boo\test;
+use bbn\X;
+use bbn\Str;
 
 /**
  * File Transfer Protocol Class
@@ -131,7 +132,7 @@ class Ftp extends bbn\Models\Cls\Basic
       {
         $ele = [
           'name' => $file,
-          'basename' => basename($file),
+          'basename' => X::basename($file),
         ];
         if ( @ftp_chdir($this->cn, $path.'/'.$ele['basename']) ){
           $num = ftp_nlist($this->cn, '.');
@@ -140,7 +141,7 @@ class Ftp extends bbn\Models\Cls\Basic
           @ftp_cdup($this->cn);
         }
         else{
-          $ele['type'] = bbn\Str::fileExt($file);
+          $ele['type'] = Str::fileExt($file);
         }
         $res[] = $ele;
       }
@@ -390,9 +391,9 @@ class Ftp extends bbn\Models\Cls\Basic
    */
   public function exists(string $path){
     if ( !empty($path) ){
-      $dir = dirname($path);
-      $ext = \bbn\Str::fileExt($path);
-      $file = basename($path);
+      $dir = X::dirname($path);
+      $ext = Str::fileExt($path);
+      $file = X::basename($path);
       if ( \is_array($files = $this->listFiles($dir)) ){
         foreach ( $files as $f ){
           if ( $f['basename'] === $file ){

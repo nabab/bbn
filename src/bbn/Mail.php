@@ -309,7 +309,7 @@ TEMPLATE;
   {
     if (is_file($file)) {
       $this->template = file_get_contents($file);
-      $this->path = dirname($file);
+      $this->path = X::dirname($file);
     }
     else {
       $this->template = $file;

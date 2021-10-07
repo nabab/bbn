@@ -580,7 +580,7 @@ class I18n extends bbn\Models\Cls\Cache
         $dirs = \bbn\File\Dir::getDirs($locale_dir) ?: [];
         if (!empty($dirs)) {
           foreach ($dirs as $l){
-            $languages[] = basename($l);
+            $languages[] = X::basename($l);
           }
         }
       }
@@ -669,7 +669,7 @@ class I18n extends bbn\Models\Cls\Cache
       $dirs       = \bbn\File\Dir::getDirs($locale_dir) ?: [];
       $languages  = array_map(
         function ($a) {
-          return basename($a);
+          return X::basename($a);
         }, $dirs
       ) ?: [];
       if (!empty($languages)) {
@@ -749,9 +749,10 @@ class I18n extends bbn\Models\Cls\Cache
         $current_dirs = array_values(
           array_filter(
             $to_explore_dirs, function ($a) {
-              if(( strpos(basename($a), 'locale') !== 0 )
-                  && ( strpos(basename($a), 'data') !== 0 )
-                  && ( strpos(basename($a), '.') !== 0 )
+              $basename = X::basename($a);
+              if(( strpos($basename, 'locale') !== 0 )
+                  && ( strpos($basename, 'data') !== 0 )
+                  && ( strpos($basename, '.') !== 0 )
               ) {
                 return $a;
               }
@@ -767,7 +768,7 @@ class I18n extends bbn\Models\Cls\Cache
         /** @var (array) $languages based on locale dirs found in the path*/
         $languages = array_map(
           function ($a) {
-            return basename($a);
+            return X::basename($a);
           }, \bbn\File\Dir::getDirs($locale_dir)
         ) ?: [];
       }
@@ -892,7 +893,7 @@ class I18n extends bbn\Models\Cls\Cache
 
       $languages = array_map(
         function ($a) {
-          return basename($a);
+          return X::basename($a);
         }, \bbn\File\Dir::getDirs($locale_dir)
       ) ?: [];
 
@@ -987,13 +988,13 @@ class I18n extends bbn\Models\Cls\Cache
       $locale_dir = $this->getLocaleDirPath($id_option);
       $languages  = array_map(
         function ($a) {
-          return basename($a);
-        }, \bbn\File\Dir::getDirs($locale_dir)
+          return X::basename($a);
+        }, bbn\File\Dir::getDirs($locale_dir)
       ) ?: [];
 
       $i       = 0;
       $res     = [];
-      $project = new bbn\Appui\Project($this->db, $id_project);
+      $project = new Project($this->db, $id_project);
 
       $errors = [];
       if (!empty($languages)) {

@@ -102,7 +102,7 @@ class Project extends bbn\Models\Cls\Db
 
     if (!empty($envs)) {
       foreach ($envs as $env) {
-        if ($env['app_path'] === dirname($appPath) . '/') {
+        if ($env['app_path'] === X::dirname($appPath) . '/') {
           return $env;
         }
       }

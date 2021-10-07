@@ -263,7 +263,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function getEngine()
   {
     $class = static::class;
-    return strtolower(basename(str_replace('\\', '/', $class)));
+    return strtolower(X::basename(str_replace('\\', '/', $class)));
   }
 
   /**
@@ -2213,7 +2213,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     $r = false;
     if ($this->getEngine() === 'sqlite') {
-      $h = md5($this->getHost().dirname($this->getCurrent()));
+      $h = md5($this->getHost().X::dirname($this->getCurrent()));
     }
     else {
       $h = str_replace('/', '-', $this->getConnectionCode());

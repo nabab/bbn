@@ -349,7 +349,7 @@ class Controller implements Api
   public function getCurrentDir(): ?string
   {
     if ($this->_path) {
-      $p = dirname($this->_path);
+      $p = X::dirname($this->_path);
       if ($p === '.') {
         return '';
       }
@@ -431,7 +431,7 @@ class Controller implements Api
   public function incl($file_name)
   {
     if ($this->exists()) {
-      $d = dirname($this->_file).'/';
+      $d = X::dirname($this->_file).'/';
       if (substr($file_name, -4) !== '.php') {
         $file_name .= '.php';
       }
@@ -1277,7 +1277,7 @@ class Controller implements Api
   ): self
   {
     if (empty($path)) {
-      $basename = basename($this->_file, '.php');
+      $basename = X::basename($this->_file, '.php');
       if (X::indexOf(['index', 'home'], $basename) > -1) {
         $bits = X::split($this->_path, '/');
         if ((count($bits) === 1) && ($bits[0] === '.')) {

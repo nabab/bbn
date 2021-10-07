@@ -19,6 +19,7 @@
 namespace bbn\Mvc;
 
 use bbn;
+use bbn\X;
 use bbn\Mvc;
 
 class View
@@ -198,7 +199,7 @@ JAVASCRIPT;
         case 'php':
           $dir = getcwd();
           /** @todo explain why */
-          chdir(dirname($this->_file));
+          chdir(X::dirname($this->_file));
           if ($this->_plugin &&
               ($router = Router::getInstance()) &&
               ($textDomain = $router->getLocaleDomain($this->_plugin_name))

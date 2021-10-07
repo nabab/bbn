@@ -80,7 +80,7 @@ class Enc
         $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);
       }
       catch (\Exception $e) {
-        bbn\X::log("Impossible to decrypt");
+        X::log("Impossible to decrypt");
       }
       return $res;
     }
@@ -130,7 +130,7 @@ class Enc
   public static function generateCertFiles(string $path, string $algo = 'sha512', int $key_bits = 4096): bool
   {
     $res = false;
-    if (is_dir(dirname($path))
+    if (is_dir(X::dirname($path))
         && !file_exists($path.'_rsa')
         && in_array($algo, Hash_algos(), true)
         && ($key = self::generateCert($algo, $key_bits))

@@ -255,7 +255,7 @@ class Config extends bbn\Models\Cls\Basic
             $dir = false;
             foreach ($res[$cp] as $type => $files) {
               if (!$dir && count($files)) {
-                $dir = $this->fpath.\dirname($files[0]);
+                $dir = $this->fpath.X::dirname($files[0]);
               }
               $this->cfg['num'] += \count($files);
             }
@@ -411,7 +411,7 @@ class Config extends bbn\Models\Cls\Basic
     foreach ($files as $f) {
       if (is_file($f)) {
         $ext = bbn\Str::fileExt($f);
-        $file = basename($f);
+        $file = X::basename($f);
         if ($file !== '_def.less') {
           foreach (self::$types as $type => $extensions) {
             if (\in_array($ext, $extensions, true) ){
