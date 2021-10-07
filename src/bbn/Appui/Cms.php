@@ -291,6 +291,7 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg['fields'][] = 'end';
 		$cfg['join'][] = [
 			'table' => $this->class_cfg['tables']['notes_url'],
+			'type' => 'left',
 			'on' => [[
 				'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
 				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])

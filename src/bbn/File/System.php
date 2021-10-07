@@ -1211,7 +1211,7 @@ class System extends bbn\Models\Cls\Basic
                     $tmp['file'] = $f['type'] !== 'dir';
                   }
 
-                  if ($has_extension) {
+                  if ($has_ext) {
                     $tmp['ext'] = $f['type'] === 'dir' ? '' : Str::fileExt($f['name']);
                   }
 
