@@ -1445,6 +1445,46 @@ class Controller implements Api
     return $m;
   }
 
+  /**
+   * This will get the Serialized model. There is no order for the arguments.
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   * @return string|null A serialized data model
+   * @throws \Exception
+   */
+  public function getSerializedModel(): ?string
+  {
+    $args = \func_get_args();
+    $die  = false;
+    foreach ($args as $a){
+      if (\is_string($a)) {
+        $path = $a;
+      }
+      elseif (\is_array($a)) {
+        $data = $a;
+      }
+      elseif (\is_bool($a)) {
+        $die = $a;
+      }
+    }
+
+    if (empty($path)) {
+      $path = $this->_path;
+      if (($this->getMode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))) {
+        $path .= '/index';
+      }
+    }
+    elseif (strpos($path, './') === 0) {
+      $path = $this->getCurrentDir().substr($path, 1);
+    }
+
+    if (!isset($data)) {
+      $data = $this->data;
+    }
+
+    return $this->_mvc->getSerialzedModel($path, $data, $this);
+  }
 
   /**
    * This will get the cached model. There is no order for the arguments.
