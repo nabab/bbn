@@ -18,14 +18,11 @@ class Masks extends bbn\Models\Cls\Db
 
   protected $notes;
 
-  protected $o;
-
   public function __construct(bbn\Db $db)
   {
     parent::__construct($db);
-    self::optionalInit();
+    $this->initOptional();
     $this->notes = new Note($this->db);
-    $this->o = bbn\Appui\Option::getInstance();
   }
 
   public function count($id_type = null)
@@ -49,7 +46,7 @@ class Masks extends bbn\Models\Cls\Db
     ) {
       $data['default'] = $mask['def'];
       $data['id_type'] = $mask['id_type'];
-      $data['type'] = $this->o->text($mask['id_type']);
+      $data['type'] = $this->options->text($mask['id_type']);
       $data['name'] = $mask['name'];
       return $data;
     }
@@ -153,8 +150,8 @@ class Masks extends bbn\Models\Cls\Db
     if (!bbn\Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
-    if ($this->o->exists($id_type) 
-        && ($id_note = $this->notes->insert($title, $content, $this->o->fromCode('masks', 'types', 'note', 'appui')))
+    if ($this->options->exists($id_type) 
+        && ($id_note = $this->notes->insert($title, $content, $this->options->fromCode('masks', 'types', 'note', 'appui')))
     ) {
       $data = [
         'id_note' => $id_note,
@@ -229,7 +226,7 @@ class Masks extends bbn\Models\Cls\Db
   public function get_st($id){
     $this->_init_option();
     if ( $a = $this->get($id) ){
-      $a['categorie'] = $this->o->title($a['categorie']);
+      $a['categorie'] = $this->options->title($a['categorie']);
       return $a;
     }
     return false;

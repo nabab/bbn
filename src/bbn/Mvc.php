@@ -1011,7 +1011,7 @@ class Mvc implements Mvc\Api
         $view = null;
       if ($this->hasView($full_path, $mode)) {
           $view = self::$_loaded_views[$mode][$full_path];
-      } elseif ($info = $this->router->route(basename($full_path), 'free-'.$mode, \dirname($full_path))) {
+      } elseif ($info = $this->router->route(X::basename($full_path), 'free-'.$mode, X::dirname($full_path))) {
           $view = new Mvc\View($info);
           $this->addToViews($full_path, $mode, $view);
       }

@@ -271,7 +271,7 @@ class System extends bbn\Models\Cls\Basic
   {
     if ($this->check()) {
       while (strpos($path, '../') === 0) {
-        $tmp = dirname($this->current);
+        $tmp = X::dirname($this->current);
         if ($tmp !== $this->current) {
           $path = substr($path, 3);
         } else {
@@ -476,13 +476,13 @@ class System extends bbn\Models\Cls\Basic
    */
   public function putContents(string $file, string $content, bool $append = false): bool
   {
-    $path = dirname($file);
+    $path = X::dirname($file);
     if ($this->check() && $this->isDir($path)) {
       $real = $this->getRealPath($path) . '/';
       if ($append && $this->exists($file)) {
-        return (bool)file_put_contents($real . basename($file), $content, FILE_APPEND);
+        return (bool)file_put_contents($real . X::basename($file), $content, FILE_APPEND);
       } else {
-        return (bool)file_put_contents($real . basename($file), $content);
+        return (bool)file_put_contents($real . X::basename($file), $content);
       }
     }
 
@@ -577,12 +577,13 @@ class System extends bbn\Models\Cls\Basic
           $nfs = &$fs;
         }
 
-        if ($this->exists($source) && $nfs->exists(dirname($dest))) {
+        if ($this->exists($source) && $nfs->exists(X::dirname($dest))) {
           if ($nfs->exists($dest)) {
             $dest_is_dir = $nfs->isDir($dest);
             if ($dest_is_dir && $this->isFile($source)) {
-              $dest .= '/' . basename($source);
-            } elseif ((!$dest_is_dir && !$overwrite)
+              $dest .= '/' . X::basename($source);
+            }
+            elseif ((!$dest_is_dir && !$overwrite)
               || ($dest_is_dir && (count($nfs->getFiles($dest, true, true)) > 0) && !$overwrite)
             ) {
               return false;
@@ -611,12 +612,12 @@ class System extends bbn\Models\Cls\Basic
   public function rename(string $file, $name, bool $overwrite = false): bool
   {
     if ($this->exists($file) && (strpos($name, '/') === false)) {
-      $path = $this->getRealPath(dirname($file));
+      $path = $this->getRealPath(X::dirname($file));
       if ($this->_exists($path . '/' . $name) && (!$overwrite || !$this->_delete($path . '/' . $name))) {
         return false;
       }
 
-      return $this->_rename($path . '/' . basename($file), $path . '/' . $name);
+      return $this->_rename($path . '/' . X::basename($file), $path . '/' . $name);
     }
 
     return false;
@@ -634,7 +635,7 @@ class System extends bbn\Models\Cls\Basic
   public function move(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ($this->check() && $this->exists($source)) {
-      $name = basename($source);
+      $name = X::basename($source);
       if ($fs) {
         if (
           $fs->check()
@@ -904,7 +905,7 @@ class System extends bbn\Models\Cls\Basic
     $dirs = self::getDirs($dir, $hidden);
     if (\is_array($dirs)) {
       foreach ($dirs as $d) {
-        if (basename($d) !== $exclude) {
+        if (X::basename($d) !== $exclude) {
           $x        = [
             'name' => $d,
             'type' => 'dir',
@@ -1188,7 +1189,7 @@ class System extends bbn\Models\Cls\Basic
       if (($this->mode === 'ftp') && ($detailed || ($type !== 'both'))) {
         if ($fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix)))) {
           foreach ($fs as $f) {
-            if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0))) {
+            if (($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(X::basename($f['name']), '.') !== 0))) {
               if ($this->_check_filter($f['name'], $type)) {
                 if ($detailed) {
                   $tmp = [
@@ -1239,7 +1240,7 @@ class System extends bbn\Models\Cls\Basic
       } else {
         $fs = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach ($fs as $f) {
-          if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0))) {
+          if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {
             $file = $path . '/' . $f;
             if ($this->_check_filter($file, $type)) {
               $is_dir = is_dir($path . '/' . $f);
@@ -1477,7 +1478,7 @@ class System extends bbn\Models\Cls\Basic
         return copy($source, $dest);
       } elseif ($this->_is_dir($source) && $this->_mkdir($dest)) {
         foreach ($this->_get_items($source, 'both', true) as $it) {
-          $this->_copy($it, $dest . '/' . basename($it));
+          $this->_copy($it, $dest . '/' . X::basename($it));
         }
 
         return true;

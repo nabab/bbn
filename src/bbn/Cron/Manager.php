@@ -432,7 +432,7 @@ class Manager extends bbn\Models\Cls\Basic
           ], [
             'field' => 'NOW()',
             'operator' => '>',
-            'exp' => "DATE_ADD(prev, INTERVAL cfg->'$.timeout' SECOND)"
+            'exp' => "DATE_ADD(prev, INTERVAL JSON_EXTRACT(cfg, '$.timeout') SECOND)"
           ]]
           ],
           'order' => [[

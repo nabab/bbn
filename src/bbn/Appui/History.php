@@ -706,7 +706,7 @@ MYSQL;
    * @param null $column
    * @return float|null
    */
-  public static function getLastDate(string $table, string $id, $column = null): float
+  public static function getLastDate(string $table, string $id, $column = null): ?float
   {
     if ( $db = self::_get_db() ){
       if (

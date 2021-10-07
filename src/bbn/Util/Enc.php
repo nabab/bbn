@@ -147,7 +147,7 @@ class Enc
   public static function generateCertFiles(string $path, string $algo = 'sha512', int $key_bits = 4096): bool
   {
     $res = false;
-    if (is_dir(dirname($path))
+    if (is_dir(X::dirname($path))
         && !file_exists($path.'_rsa')
         && in_array($algo, hash_algos(), true)
         && ($key = self::generateCert($algo, $key_bits))

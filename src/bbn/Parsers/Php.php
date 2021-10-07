@@ -2,6 +2,9 @@
 namespace bbn\Parsers;
 
 use bbn;
+use bbn\X;
+use bbn\Str;
+use bbn\File\System;
 
 class Php extends bbn\Models\Cls\Basic
 {
@@ -13,7 +16,7 @@ class Php extends bbn\Models\Cls\Basic
   public function __construct()
   {
     $this->docParser = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
-    $this->parser    = new \bbn\Parsers\Doc('', 'php');
+    $this->parser    = new Parsers\Doc('', 'php');
   }
 
 
@@ -196,7 +199,7 @@ class Php extends bbn\Models\Cls\Basic
       if (($doc = $this->parseClassComments($comments))
           && ($extracted = $this->_extract_description($doc['description']))
       ) {
-        $res = \bbn\X::mergeArrays($res, $extracted);
+        $res = X::mergeArrays($res, $extracted);
       }
 
       return $res;
@@ -216,15 +219,15 @@ class Php extends bbn\Models\Cls\Basic
     if (!empty($path)
         && !empty($namespace)
     ) {
-      $fs = new \bbn\File\System();
+      $fs = new System();
       if ($fs->cd($path)) {
         $files = $fs->scan('.', '.php', false);
         $arr   = [];
         if (is_array($files) && count($files)) {
           foreach ($files as $file){
-            $bits  = \bbn\X::split($file, '/');
-            $name  = basename(array_pop($bits), '.php');
-            $class = $namespace.'\\'.(empty($bits) ? '' : \bbn\X::join($bits, '\\').'\\').$name;
+            $bits  = X::split($file, '/');
+            $name  = X::basename(array_pop($bits), '.php');
+            $class = $namespace.'\\'.(empty($bits) ? '' : X::join($bits, '\\').'\\').$name;
             if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {
               try {
                 $arr[$file] = $this->analyzeCLass($class);
@@ -398,7 +401,7 @@ class Php extends bbn\Models\Cls\Basic
                 // Contains \phpDocumentor\Reflection\DocBlock\Description object
                 $res['description_obj'] = $docblock->getDescription();
                 foreach ( $tags as $i => $t ){
-                  \bbn\X::hdump($i, (string)$t->getType(), $t->getName);
+                  X::hdump($i, (string)$t->getType(), $t->getName);
                   $desc = $t->getDescription()->render();
                   var_dump($desc);
                 }
@@ -408,11 +411,11 @@ class Php extends bbn\Models\Cls\Basic
               }
             }
           }
-          \bbn\X::hdump("HEY??", count($node['stmts']));
+          X::hdump("HEY??", count($node['stmts']));
         }
       }
-      \bbn\X::hdump(count($arr[0]['stmts']));
-      \bbn\X::hdump($arr[0]['stmts']);
+      X::hdump(count($arr[0]['stmts']));
+      X::hdump($arr[0]['stmts']);
     }
     catch (PhpParser\Error $e) {
         echo 'Parse Error: ', $e->getMessage();
@@ -440,7 +443,7 @@ class Php extends bbn\Models\Cls\Basic
     }
 
     if ($ok) {
-      $fs   = new bbn\File\System();
+      $fs   = new System();
       $tmp  = $ref->getFileName();
       $file = $tmp && $fs->isFile($tmp) ? $tmp : null;
       $arr  = [
@@ -529,7 +532,7 @@ class Php extends bbn\Models\Cls\Basic
       if (!empty($arr['methods']['private'])) {
         foreach ($arr['methods']['private'] as $name => $priv){
           $str = ($priv['static'] ? '::' : '->').$name;
-          if (\bbn\X::indexOf($fs->getContents($arr['file']), $str) === -1) {
+          if (X::indexOf($fs->getContents($arr['file']), $str) === -1) {
             $arr['unused'][] = $arr['name'].'::'.$priv['name'];
           }
         }
@@ -713,7 +716,7 @@ class Php extends bbn\Models\Cls\Basic
         }
         catch (\ReflectionException $e) {
           // No default
-          \bbn\X::log([$rfx->getName(), $e->getMessage()], 'phpParser');
+          X::log([$rfx->getName(), $e->getMessage()], 'phpParser');
         }
       }
 
@@ -862,7 +865,7 @@ class Php extends bbn\Models\Cls\Basic
     if (($doc = $this->parseMethodComments($comments))
         && ($extracted = $this->_extract_description(is_array($doc['description']) ? $doc['description']['description'] : $doc['description']))
     ) {
-      $ar = \bbn\X::mergeArrays($ar, $extracted);
+      $ar = X::mergeArrays($ar, $extracted);
     }
 
     if ($doc && !empty($doc['params'])) {
@@ -887,11 +890,11 @@ class Php extends bbn\Models\Cls\Basic
   private function _extract_description(string $desc): array
   {
     $ar   = [];
-    $bits = \bbn\X::split($desc, PHP_EOL);
+    $bits = X::split($desc, PHP_EOL);
     if (!empty($bits)) {
       $ar['summary'] = trim(array_shift($bits));
       if (!empty($bits)) {
-        $ar['description'] = trim(\bbn\X::join($bits, PHP_EOL));
+        $ar['description'] = trim(X::join($bits, PHP_EOL));
         $num_matches       = preg_match_all('/```php([^```]+)```/', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
         $len               = strlen($ar['description']);
         $start             = 0;
@@ -903,7 +906,7 @@ class Php extends bbn\Models\Cls\Basic
               ) {
                 $ar['description_parts'][] = [
                   'type' => 'text',
-                  'content' => \bbn\Str::markdown2html($tmp)
+                  'content' => Str::markdown2html($tmp)
                 ];
               }
 
@@ -927,7 +930,7 @@ class Php extends bbn\Models\Cls\Basic
         else {
           $ar['description_parts'][] = [
             'type' => 'text',
-            'content' => \bbn\Str::markdown2html($ar['description'])
+            'content' => Str::markdown2html($ar['description'])
           ];
         }
       }

@@ -3,6 +3,8 @@
 
 namespace bbn\Ide;
 use bbn;
+use bbn\X;
+
 
 if ( !\defined('BBN_DATA_PATH') ){
   die("Your constant BBN_DATA_PATH is not defined");
@@ -69,11 +71,11 @@ class Actions {
         if ( is_file($new_path) ){
           $backup = BBN_DATA_PATH.'users/'.$_SESSION[BBN_APP_NAME]['user']['id'].'/ide/backup/'.date('Y-m-d His').' - Save/'.$dir.'/'.$path;
           //die(bbn\X::dump($f, $new_path, $backup, $dir ));
-          bbn\File\Dir::createPath(dirname($backup));
+          bbn\File\Dir::createPath(X::dirname($backup));
           rename($new_path, $backup);
         }
-        else if ( !is_dir(dirname($new_path)) ){
-          bbn\File\Dir::createPath(dirname($new_path));
+        else if ( !is_dir(X::dirname($new_path)) ){
+          bbn\File\Dir::createPath(X::dirname($new_path));
         }
         file_put_contents($new_path, $data['code']);
         return ['path' => $new_path];
@@ -251,7 +253,7 @@ class Actions {
         $cfg =& $dirs[$data['dir']];
         $src = $data['src'];
         $type = is_dir($cfg['files'][0]['fpath'].$src) ? 'dir' : 'file';
-        $dir_src = dirname($src).'/';
+        $dir_src = X::dirname($src).'/';
         if ( $dir_src === './' ){
           $dir_src = '';
         }
@@ -325,7 +327,7 @@ class Actions {
         else {
           $type = is_dir($cfg['root_path'].$spath) ? 'dir' : 'file';
         }
-        $dir = dirname($spath).'/';
+        $dir = X::dirname($spath).'/';
         if ( $dir === './' ){
           $dir = '';
         }
@@ -398,7 +400,7 @@ class Actions {
         else {
           $type = is_dir($cfg['root_path'].$path) ? 'dir' : 'file';
         }
-        $dir = dirname($path).'/';
+        $dir = X::dirname($path).'/';
         if ( $dir === './' ){
           $dir = '';
         }
@@ -410,7 +412,7 @@ class Actions {
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
               $src = $f['fpath'].$src_file;
-              $dest = dirname($src).'/'.$data['name'];
+              $dest = X::dirname($src).'/'.$data['name'];
               if ( $type === 'file' ){
                 $src .= '.'.$f['ext'];
                 $dest .= '.'.$f['ext'];
@@ -432,7 +434,7 @@ class Actions {
           $dest_file= $dir.bbn\Str::fileExt($data['name'], 1)[0];
           $ext = bbn\Str::fileExt($data['path']);
           $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.$ext : '');
-          $dest = dirname($src).'/'.bbn\Str::fileExt($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
+          $dest = X::dirname($src).'/'.bbn\Str::fileExt($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
           $is_dir = ($type === 'dir') && is_dir($src);
           $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
           if ( $is_dir || $is_file ){
@@ -485,8 +487,8 @@ class Actions {
               $path = substr($data['path'], 0, Strrpos($data['path'], $ext));
               $file = $f['fpath'].$path.$f['ext'];
               if ( file_exists($file) ){
-                if ( !bbn\File\Dir::createPath($dest.dirname($data['path'])) ){
-                  return $this->error("Impossible to create the path ".$dest.dirname($data['path']));
+                if ( !bbn\File\Dir::createPath($dest.X::dirname($data['path'])) ){
+                  return $this->error("Impossible to create the path ".$dest.X::dirname($data['path']));
                 }
                 if ( !bbn\File\Dir::copy($file, $dest.$path.$f['ext']) ){
                   return $this->error('Impossible to export the file '.$path.$f['ext']);

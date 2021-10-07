@@ -5,6 +5,8 @@
 namespace bbn\File;
 
 use bbn;
+use bbn\X;
+use bbn\Str;
 
 /**
  * Image Class
@@ -144,12 +146,12 @@ class Image extends bbn\File
       $img->readImage($pdf);
       $img->setFormat('jpg');
       if (empty($jpg)) {
-        $dir = dirname($pdf);
+        $dir = X::dirname($pdf);
         if (!empty($dir)) {
           $dir .= '/';
         }
 
-        $f   = bbn\Str::fileExt($pdf, 1);
+        $f   = Str::fileExt($pdf, 1);
         $jpg = $dir.$f[0].'.jpg';
       }
 
@@ -162,8 +164,8 @@ class Image extends bbn\File
       }
       else {
         $pages_number = $img->getNumberImages();
-        $f            = bbn\Str::fileExt($jpg, 1);
-        $dir          = dirname($jpg);
+        $f            = Str::fileExt($jpg, 1);
+        $dir          = X::dirname($jpg);
         $r            = [];
         if (!empty($dir)) {
           $dir .= '/';
@@ -1041,7 +1043,7 @@ class Image extends bbn\File
   public function thumbs($dest = '.', $sizes = null, $mask = '_%s', $crop = false, $bigger = false)
   {
     if ($this->test() && is_dir($dest)) {
-      if (bbn\Str::isInteger($sizes)) {
+      if (Str::isInteger($sizes)) {
         $sizes = [[$sizes, false]];
       }
       elseif (!is_array($sizes)) {
@@ -1057,7 +1059,7 @@ class Image extends bbn\File
         $file = ($dest === '.' ? '' : $dest.'/').$this->title;
         //die(var_dump($mask));
         foreach ($sizes as $s){
-          if (bbn\Str::isInteger($s)) {
+          if (Str::isInteger($s)) {
             $s = [$s, false];
           }
 

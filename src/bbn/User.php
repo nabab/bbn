@@ -104,6 +104,7 @@ class User extends Models\Cls\Basic
         'creation' => 'creation',
         'last' => 'last',
         'device_uid' => 'device_uid',
+        'device_platform' => 'device_platform',
         'device_lang' => 'device_lang',
         'notifications_token' => 'notifications_token'
       ],
@@ -1385,9 +1386,9 @@ class User extends Models\Cls\Basic
       $fs   = new File\System();
       $path = $this->getTmpDir().microtime(true).'/';
       if ($fs->isFile($file) && $fs->createPath($path)) {
-        $dest = $path.($name ?: basename($file));
+        $dest = $path.($name ?: X::basename($file));
         if ($move) {
-          if ($fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))) {
+          if ($fs->move($file, X::dirname($dest)) && $fs->rename(X::dirname($dest).'/'.X::basename($file), X::basename($dest))) {
             return $dest;
           }
         }

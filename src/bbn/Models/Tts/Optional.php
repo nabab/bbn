@@ -9,8 +9,10 @@
 
 namespace bbn\Models\Tts;
 
-use bbn;
+use Exception;
 use bbn\X;
+use bbn\Str;
+use bbn\Appui\Option;
 
 trait Optional
 {
@@ -30,6 +32,9 @@ trait Optional
    */
   protected static $option_appui_id;
 
+  /**
+   * @var Option The Option object
+   */
   protected $options;
 
 
@@ -41,9 +46,9 @@ trait Optional
   protected static function optionalInit(array $path = null)
   {
     if (!self::$optional_is_init) {
-      $opt = bbn\Appui\Option::getInstance();
+      $opt = Option::getInstance();
       if (!$opt) {
-        throw new \Exception(X::_("There is no options object as needed by").' '.__CLASS__);
+        throw new Exception(X::_("There is no options object as needed by").' '.__CLASS__);
       }
 
       if (!\defined("BBN_APPUI")) {
@@ -72,7 +77,7 @@ trait Optional
       self::$option_root_id = $opt->fromCode(...$path);
       //if ( !self::$option_appui_id || !self::$option_root_id ){
       if (!self::$option_root_id) {
-        throw new \Exception("Impossible to find the option $cls for ".__CLASS__);
+        throw new Exception("Impossible to find the option $cls for ".__CLASS__);
       }
 
       self::$optional_is_init = true;
@@ -83,11 +88,11 @@ trait Optional
   /**
    * Sets only once all the constants used by the class.
    *
-   * @param bbn\Appui\Option $opt
+   * @param Option $opt
    * @param array             $path
    * @return void
    */
-  protected static function initOptionalGlobal(bbn\Appui\Option $opt, array $path = null)
+  protected static function initOptionalGlobal(Option $opt, array $path = null)
   {
     if (!self::$optional_is_init) {
       if (!\defined("BBN_APPUI")) {
@@ -133,9 +138,9 @@ trait Optional
    */
   protected function initOptional(array $path = null)
   {
-    $this->options = bbn\Appui\Option::getInstance();
+    $this->options = Option::getInstance();
     if (!$this->options) {
-      throw new \Exception(X::_("There is no options object as needed by").' '.__CLASS__);
+      throw new Exception(X::_("There is no options object as needed by").' '.__CLASS__);
     }
 
     self::initOptionalGlobal($this->options, $path);
@@ -156,11 +161,11 @@ trait Optional
   }
 
 
-  public static function getOptionsObject(): bbn\Appui\Option
+  public static function getOptionsObject(): Option
   {
-    $o = bbn\Appui\Option::getInstance();
+    $o = Option::getInstance();
     if (!$o) {
-      throw new \Exception(X::_("Impossible to get the options object from class").' '.__CLASS__);
+      throw new Exception(X::_("Impossible to get the options object from class").' '.__CLASS__);
     }
 
     return $o;
@@ -268,7 +273,7 @@ trait Optional
 
   protected static function _treat_args(array $args, $appui = false): array
   {
-    if ((count($args) > 1) || !\bbn\Str::isUid($args[0] ?? null)) {
+    if ((count($args) > 1) || !Str::isUid($args[0] ?? null)) {
       self::optionalInit();
       $args[] = $appui ? self::$option_appui_id : self::$option_root_id;
     }

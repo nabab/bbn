@@ -301,7 +301,7 @@ class Runner extends bbn\Models\Cls\Basic
             ]);
             foreach ($sessions as $sess) {
               $file = $this->controller->userDataPath($id_user, 'appui-core')."poller/queue/{$sess->id}/observer-$time.json";
-              if (bbn\File\Dir::createPath(\dirname($file))) {
+              if (bbn\File\Dir::createPath(X::dirname($file))) {
                 file_put_contents($file, Json_encode(['observers' => $o]));
               }
             }
@@ -400,11 +400,11 @@ class Runner extends bbn\Models\Cls\Basic
         $path_elements = array_splice($bits, -5, 3);
         //$path_bits = array_splice($bits, -5);
         //$path = X::join($path_bits, '/');
-        $json_file = dirname(dirname(dirname($cfg['log_file']))).'/'.X::join($path_elements, '-').'.json';
+        $json_file = X::dirname(X::dirname(X::dirname($cfg['log_file']))).'/'.X::join($path_elements, '-').'.json';
         array_pop($path_elements);
-        $month_file = dirname(dirname($json_file)).'/'.X::join($path_elements, '-').'.json';
+        $month_file = X::dirname(X::dirname($json_file)).'/'.X::join($path_elements, '-').'.json';
         array_pop($path_elements);
-        $year_file = dirname(dirname($month_file)).'/'.X::join($path_elements, '-').'.json';
+        $year_file = X::dirname(X::dirname($month_file)).'/'.X::join($path_elements, '-').'.json';
         if (!is_file($json_file)) {
           $logs = [];
         }

@@ -208,23 +208,23 @@ class Medias extends bbn\Models\Cls\Db
    * @throws \Exception
    */
   public function insert(
-      string $name,
+      string $file,
       array $content = null,
       string $title = '',
-      string $type='file',
+      string $type = 'file',
       bool $private = false,
       string $excerpt = null
   ): ?string
   {
     $cf =& $this->class_cfg;
-    if (!empty($name)
+    if (!empty($file)
         && ($id_type = $this->opt->fromCode($type, $this->opt_id))
-        && ($ext = Str::fileExt($name))
+        && ($ext = Str::fileExt($file))
     ) {
       $content = null;
       $fs = new bbn\File\System();
-      if (!$fs->isFile($name)) {
-        throw new \Exception(X::_("Impossible to find the file %s", $name));
+      if (!$fs->isFile($file)) {
+        throw new \Exception(X::_("Impossible to find the file %s", $file));
       }
 
       if ($private) {
@@ -241,15 +241,15 @@ class Medias extends bbn\Models\Cls\Db
       $root   .= 'media/';
       $path    = bbn\X::makeStoragePath($root, '', 0, $fs);
       $dpath   = substr($path, strlen($root));
-      $file    = basename($name);
-      $mime    = mime_content_type($name) ?: null;
+      $name    = X::basename($file);
+      $mime    = mime_content_type($file) ?: null;
       $content = [
         'path' => $dpath,
-        'size' => $fs->filesize($name),
+        'size' => $fs->filesize($file),
         'extension' => $ext
       ];
       if (empty($title)) {
-        $title = str_replace('-', ' ', str_replace('_', ' ', basename($file, ".$ext")));
+        $title = str_replace('-', ' ', str_replace('_', ' ', X::basename($file, ".$ext")));
       }
 
       if (!$this->db->insert(
@@ -260,7 +260,7 @@ class Medias extends bbn\Models\Cls\Db
           $cf['arch']['medias']['mimetype'] => $mime,
           $cf['arch']['medias']['title'] => $title,
           $cf['arch']['medias']['excerpt'] => $excerpt,
-          $cf['arch']['medias']['name'] => $file ?? null,
+          $cf['arch']['medias']['name'] => $name ?? null,
           $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,
           $cf['arch']['medias']['private'] => $private ? 1 : 0,
           $cf['arch']['medias']['created'] => date('Y-m-d H:i:s')
@@ -272,10 +272,10 @@ class Medias extends bbn\Models\Cls\Db
       $id = $this->db->lastId();
       if ($fs->createPath($path.$id)) {
         $fs->move(
-          $name,
+          $file,
           $path.$id
         );
-        $new_file = $path.$id.'/'.basename($name);
+        $new_file = $path.$id.'/'.X::basename($file);
         if (strpos($mime, 'image/') === 0) {
           $image = new \bbn\File\Image($new_file, $fs);
           $image->thumbs($path.$id, $this->thumbs_sizes);
@@ -322,7 +322,7 @@ class Medias extends bbn\Models\Cls\Db
   {
     if (\bbn\Str::isUid($id)
       && ($path = $this->getMediaPath($id))
-      && ($list = \bbn\File\Dir::getFiles(dirname($path)))
+      && ($list = \bbn\File\Dir::getFiles(X::dirname($path)))
       && (count($list) > 1)
     ) {
       $sizes = [];
@@ -437,7 +437,7 @@ class Medias extends bbn\Models\Cls\Db
       $fs    = new bbn\File\System();
 
       if ($media
-          && ($path = dirname($media['file']))
+          && ($path = X::dirname($media['file']))
           && is_file($media['file'])
           && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])
       ) {
@@ -529,7 +529,7 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     if (is_array($medias)
-        && \bbn\File\Dir::createPath(dirname($dest))
+        && \bbn\File\Dir::createPath(X::dirname($dest))
         && ($zip = new \ZipArchive())
         && ((        is_file($dest)
         && ($zip->open($dest, \ZipArchive::OVERWRITE) === true))
@@ -537,7 +537,7 @@ class Medias extends bbn\Models\Cls\Db
     ) {
       foreach ($medias as $media){
         if ($file = $this->getMedia($media)) {
-          $zip->addFile($file, basename($file));
+          $zip->addFile($file, X::basename($file));
         }
       }
 
@@ -664,7 +664,7 @@ class Medias extends bbn\Models\Cls\Db
           if ($this->isImage($full_path)) {
             $image = new \bbn\File\Image($full_path);
             $this->removeThumbs($old_path);
-            $image->thumbs(dirname($full_path), $this->thumbs_sizes, '_%s', true);
+            $image->thumbs(X::dirname($full_path), $this->thumbs_sizes, '_%s', true);
             $media['is_image'] = true;
           }
         }
@@ -673,7 +673,7 @@ class Medias extends bbn\Models\Cls\Db
           $id_media, $newName, $title, [
             'path' => $media['path'],
             'size' => $fs->filesize($full_path),
-            'extension' => pathinfo($full_path, PATHINFO_EXTENSION)
+            'extension' => X::pathinfo($full_path, PATHINFO_EXTENSION)
           ]
         )
         ) {

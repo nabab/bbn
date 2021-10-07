@@ -679,7 +679,7 @@ SQL;
         $dir   = $cdir . date('Y-m-d', $moment);
         $files = \bbn\File\Dir::getFiles($dir);
         foreach ($files as $file){
-          $time = round((float)basename($file, '.msg'), 4);
+          $time = round((float)X::basename($file, '.msg'), 4);
           if (X::compareFloats($time, $moment, '<') && ($st = file_get_contents($file))) {
             return true;
           }
@@ -687,7 +687,7 @@ SQL;
 
         $dirs = \bbn\File\Dir::getDirs($cdir);
         foreach ($dirs as $d){
-          if ((basename($d) < date('Y-m-d', $moment)) && !empty(\bbn\File\Dir::getFiles($d))) {
+          if ((X::basename($d) < date('Y-m-d', $moment)) && !empty(\bbn\File\Dir::getFiles($d))) {
             return true;
           }
         }
@@ -922,7 +922,7 @@ SQL;
         $res['success'] = true;
         $files          = bbn\File\Dir::getFiles($dir);
         foreach ($files as $file){
-          $time = (float)basename($file, '.msg');
+          $time = (float)X::basename($file, '.msg');
           if ((!$last || X::compareFloats($time, $last, '>')) && ($st = file_get_contents($file))) {
             $res['messages'][] = json_decode(bbn\Util\Enc::decrypt($st), true);
           }
@@ -1003,7 +1003,7 @@ SQL;
         break;
       }
 
-      $ftime = round((float)basename($file, '.msg'), 4);
+      $ftime = round((float)X::basename($file, '.msg'), 4);
       if (X::compareFloats($ftime, $time, $comparator)
           && ($st = file_get_contents($file))
       ) {
@@ -1032,9 +1032,9 @@ SQL;
             }
 
             if (((($comparator === '<')
-                && (basename($d) < date('Y-m-d', $moment)))
+                && (X::basename($d) < date('Y-m-d', $moment)))
                 || (($comparator === '>')
-                && (basename($d) > date('Y-m-d', $moment))))
+                && (X::basename($d) > date('Y-m-d', $moment))))
                 && ($files = bbn\File\Dir::getFiles($d))
             ) {
               $this->_scan_files($files, $moment, $comparator, $res, $num);

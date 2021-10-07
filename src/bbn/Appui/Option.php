@@ -1597,6 +1597,24 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  public function flatOptions($code = null): array
+  {
+    if (!bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      throw new \Exception(X::_("Impossible to find the option requested in flatOptions"));
+    }
+
+    return $this->db->rselectAll(
+      $this->class_cfg['table'],
+      [
+        $this->class_cfg['arch']['options']['id'],
+        $this->class_cfg['arch']['options']['text']
+      ],
+      [$this->class_cfg['arch']['options']['id'] => $this->treeIds($id)],
+      [$this->class_cfg['arch']['options']['text'] => 'ASC']
+    );
+  }
+
+
   /**
    * Returns a hierarchical structure as stored in its original form in the database
    *

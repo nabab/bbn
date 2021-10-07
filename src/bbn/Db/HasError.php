@@ -92,7 +92,11 @@ trait HasError
     array_walk(
       $dbt, function ($a, $i) use (&$msg) {
         if (isset($a['file'])) {
-          $msg[] = str_repeat(' ', $i).($i ? '->' : '')."{$a['function']}  (".basename(dirname($a['file'])).'/'.basename($a['file']).":{$a['line']})";
+          $msg[] = str_repeat(' ', $i).
+            ($i ? '->' : '').
+            "{$a['function']}  (".
+            X::basename(X::dirname($a['file'])).'/'.
+            X::basename($a['file']).":{$a['line']})";
         }
     }
     );

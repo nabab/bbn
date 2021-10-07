@@ -4,6 +4,7 @@
 		*/
 namespace bbn\File;
 use bbn;
+use bbn\X;
 
 /**
 	* A class for dealing with directories (folders)
@@ -103,7 +104,7 @@ class Dir extends bbn\Models\Cls\Basic
     if ( $dir === './' ){
       $dir = '.';
 		}
-    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){
+    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){
 			$dirs = [];
 			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );
 			foreach ( $fs as $f ){
@@ -146,7 +147,7 @@ class Dir extends bbn\Models\Cls\Basic
     if ( $dir === './' ){
       $dir = '.';
     }
-    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){
+    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){
 			$files = [];
 			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );
       //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
@@ -158,7 +159,7 @@ class Dir extends bbn\Models\Cls\Basic
             $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
           }
           */
-          if ( $hidden || (strpos(basename($f), '.') !== 0) ){
+          if ( $hidden || (strpos(X::basename($f), '.') !== 0) ){
             if ( $including_dirs ){
               $files[] = self::cur($dir.'/').$f;
             }
@@ -488,8 +489,8 @@ class Dir extends bbn\Models\Cls\Basic
 		//clearstatcache();
 		$path = self::clean($dir);
     while ( $path && !is_dir($path) ){
-			$bits[] = basename($path);
-			$path = dirname($path);
+			$bits[] = X::basename($path);
+			$path = X::dirname($path);
 		}
 		if (is_dir($path)) {
 			foreach (array_reverse($bits) as $b) {
@@ -542,7 +543,7 @@ class Dir extends bbn\Models\Cls\Basic
 		*/
 	public static function move($orig, $dest, $st = '_v', $length = 0): bool
 	{
-    if ( file_exists($orig) && self::createPath(\dirname($dest)) ){
+    if ( file_exists($orig) && self::createPath(X::dirname($dest)) ){
       if ( file_exists($dest) ){
         if ( $st === true ){
           self::delete($dest);
@@ -550,7 +551,7 @@ class Dir extends bbn\Models\Cls\Basic
         else{
           $i = 1;
           while ( $i ){
-            $dir = \dirname($dest).'/';
+            $dir = X::dirname($dest).'/';
             $file_name = bbn\Str::fileExt($dest, 1);
             $file = $file_name[0].$st;
             if ( $length > 0 ){
@@ -599,10 +600,10 @@ class Dir extends bbn\Models\Cls\Basic
       $files = self::getFiles($src);
       $dirs = self::getDirs($src);
       foreach ( $files as $f ){
-        copy($f, $dst.'/'.basename($f));
+        copy($f, $dst.'/'.X::basename($f));
       }
       foreach ( $dirs as $f ){
-        self::copy($f, $dst.'/'.basename($f));
+        self::copy($f, $dst.'/'.X::basename($f));
       }
       return true;
     }

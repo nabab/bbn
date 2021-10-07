@@ -147,7 +147,7 @@ class Sqlite extends Sql
     }
 
     if (is_file($cfg['db'])) {
-      $info        = pathinfo($cfg['db']);
+      $info        = X::pathinfo($cfg['db']);
       $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
       $cfg['db']   = $info['basename'];
     }
@@ -163,7 +163,7 @@ class Sqlite extends Sql
       }
     }
     else{
-      $info = pathinfo($cfg['db']);
+      $info = X::pathinfo($cfg['db']);
       if (is_writable($info['dirname'])) {
         $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
         $cfg['db']   = isset($info['extension']) ? $info['basename'] : $info['basename'].'.sqlite';
@@ -213,7 +213,7 @@ class Sqlite extends Sql
       $db .= '.sqlite';
     }
 
-    $info = pathinfo($db);
+    $info = X::pathinfo($db);
     if (($info['filename'] !== $this->getCurrent()) && file_exists($this->host.$db) && strpos($db, $this->qte) === false) {
       $this->rawQuery("ATTACH '".$this->host.$db."' AS ".$info['filename']);
       $this->current = $info['filename'];
@@ -321,7 +321,7 @@ class Sqlite extends Sql
     $fs = bbn\File\Dir::scan($this->host);
     foreach ($fs as $f){
       if (is_file($f)) {
-        $x[] = pathinfo($f, PATHINFO_FILENAME);
+        $x[] = X::pathinfo($f, PATHINFO_FILENAME);
       }
     }
 

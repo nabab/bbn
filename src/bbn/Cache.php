@@ -70,7 +70,7 @@ class Cache
   private static function _dir(string $dir, string $path, $parent = true): string
   {
     if ($parent) {
-      $dir = dirname($dir);
+      $dir = X::dirname($dir);
     }
 
     if (empty($dir)) {
@@ -101,7 +101,7 @@ class Cache
    */
   private static function _file(string $item, string $path): string
   {
-    return self::_dir($item, $path).'/'.self::_sanitize(basename($item)).'.bbn.cache';
+    return self::_dir($item, $path).'/'.self::_sanitize(X::basename($item)).'.bbn.cache';
   }
 
 
@@ -430,7 +430,7 @@ class Cache
           );
         case 'files':
           $file = self::_file($item, $this->path);
-          if ($this->fs->createPath(dirname($file))) {
+          if ($this->fs->createPath(X::dirname($file))) {
             $value = [
               'timestamp' => microtime(1),
               'hash' => $hash,
@@ -491,7 +491,7 @@ class Cache
       case 'files':
         $file = self::_file($item, $this->path);
         if (!$this->fs->isFile($file)) {
-          $tmp_file = dirname($file).'/_'.basename($file);
+          $tmp_file = X::dirname($file).'/_'.X::basename($file);
           if ($this->fs->isFile($tmp_file)) {
             $num = 0;
             while (!$this->fs->isFile($file) && ($num < self::$max_wait)) {
@@ -561,12 +561,12 @@ class Cache
         if (!$tmp) {
           $file = self::_file($item, $this->path);
           // Temporary file will be created to tell other processes the cache is being created
-          $tmp_file = dirname($file).'/_'.basename($file);
+          $tmp_file = X::dirname($file).'/_'.X::basename($file);
           // Will become true if the cache should be created
           $do = false;
           // If the temporary file doesn't exist we create one
           if (!$this->fs->isFile($tmp_file)) {
-            $this->fs->createPath(dirname($tmp_file));
+            $this->fs->createPath(X::dirname($tmp_file));
             $this->fs->putContents($tmp_file, ' ');
             // If the original file exists we delete it
             if ($this->fs->isFile($file)) {
@@ -674,7 +674,7 @@ class Cache
           $list  = array_filter(
             array_map(
               function ($a) use ($dir) {
-                return ( $dir ? $dir.'/' : '' ).basename($a, '.bbn.cache');
+                return ( $dir ? $dir.'/' : '' ).X::basename($a, '.bbn.cache');
               }, $this->fs->getFiles($this->path.($dir ? '/'.$dir : ''))
             ),
             function ($a) use ($cache) {
@@ -685,7 +685,7 @@ class Cache
           $dirs  = $this->fs->getDirs($this->path.($dir ? '/'.$dir : ''));
           if (\count($dirs)) {
             foreach ($dirs as $d){
-              $res = $this->items($dir ? $dir.'/'.basename($d) : basename($d));
+              $res = $this->items($dir ? $dir.'/'.X::basename($d) : X::basename($d));
               foreach ($res as $r){
                 array_push($list, $r);
               }

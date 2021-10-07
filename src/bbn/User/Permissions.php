@@ -1234,7 +1234,7 @@ class Permissions extends bbn\Models\Cls\Basic
     $mvc = Mvc::getInstance();
     if (!empty($a['num'])
       || ((substr($a['name'], -4) === '.php')
-          && (basename($a['name']) !== '_ctrl.php'))
+          && (X::basename($a['name']) !== '_ctrl.php'))
     ) {
       if (!$mvc->isAuthorizedRoute($a['path'])) {
         return true;
@@ -1249,8 +1249,8 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     $res = [];
     foreach ($tree as $i => $t){
-      $code      = $t['type'] === 'dir' ? basename($t['name']).'/' : basename($t['name'], '.php');
-      $text      = $t['type'] === 'dir' ? basename($t['name']) : basename($t['name'], '.php');
+      $code      = $t['type'] === 'dir' ? X::basename($t['name']).'/' : X::basename($t['name'], '.php');
+      $text      = $t['type'] === 'dir' ? X::basename($t['name']) : X::basename($t['name'], '.php');
       $o         = [
         'code' => $code,
         'text' => $text

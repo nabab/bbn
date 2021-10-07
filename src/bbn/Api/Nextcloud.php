@@ -222,7 +222,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function getFile(string $file): ?bbn\File
   {
     if ( $this->isFile($file) ){
-      return new \bbn\File(\bbn\Mvc::getTmpPath().basename($file));
+      return new \bbn\File(\bbn\Mvc::getTmpPath().X::basename($file));
     }
   }
 
@@ -238,12 +238,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $res = $this->obj->request('GET', $this->getRealPath($file));
       if ( !empty($res) && !empty($res['body']) ){
         //the tmp file destination
-        $dest = \bbn\Mvc::getTmpPath().basename($file);
+        $dest = \bbn\Mvc::getTmpPath().X::basename($file);
         // the tmp file created
         if ( $tmp = file_put_contents($dest, $res['body']) ){
           // instantiates the new file to the class \bbn\File
           //$file_istance = new \bbn\File($dest);
-          $dest = \bbn\Mvc::getTmpPath().basename($file);;
+          $dest = \bbn\Mvc::getTmpPath().X::basename($file);;
           //return the content of the tmp file
           //$file_istance->download();
           /* deletes the tmp file
@@ -282,7 +282,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
             'path' => str_replace(self::prefix, '', $i),
             'dir' => empty($c['{DAV:}getcontenttype']) ? true : false,
             'file' => empty($c['{DAV:}getcontenttype']) ? false : true,
-            'name' => basename($i),
+            'name' => X::basename($i),
           ];
           //if details has to be included on the item
           if ( !empty($detailed) ){

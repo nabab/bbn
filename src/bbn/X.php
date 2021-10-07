@@ -100,7 +100,7 @@ class X
   {
     if (!self::$_textdomain) {
       $td = 'bbn';
-      $f = dirname(__DIR__).'/version.txt';
+      $f = self::dirname(__DIR__).'/version.txt';
       if (is_file($f)) {
         $td .= file_get_contents($f);
       }
@@ -527,7 +527,7 @@ class X
       if (!$fs->getNumFiles($path) && $fs->delete($path)) {
         $limit--;
         $res++;
-        $path = dirname($path);
+        $path = self::dirname($path);
       }
       else{
         break;
@@ -1174,6 +1174,118 @@ class X
   public static function adump(): void
   {
     self::isCli() ? self::dump(...\func_get_args()) : self::hdump(...\func_get_args());
+  }
+
+
+  /**
+   * Returns the pathinfo, working with multibytes strings.
+   *
+   * @param string $file
+   * @param string $options
+   * @return string
+   */
+  public static function pathinfo(string $path, $options = null)
+  {
+    $ret = ['dirname' => '', 'basename' => '', 'extension' => '', 'filename' => ''];
+    $pathinfo = [];
+    if (preg_match('#^(.*?)[\\\\/]*(([^/\\\\]*?)(\.([^.\\\\/]+?)|))[\\\\/.]*$#m', $path, $pathinfo)) {
+      if (array_key_exists(1, $pathinfo)) {
+        $ret['dirname'] = $pathinfo[1];
+      }
+
+      if (array_key_exists(2, $pathinfo)) {
+        $ret['basename'] = $pathinfo[2];
+      }
+
+      if (array_key_exists(5, $pathinfo)) {
+        $ret['extension'] = $pathinfo[5];
+      }
+
+      if (array_key_exists(3, $pathinfo)) {
+        $ret['filename'] = $pathinfo[3];
+      }
+    }
+    switch ($options) {
+      case PATHINFO_DIRNAME:
+      case 'dirname':
+        return $ret['dirname'];
+      case PATHINFO_BASENAME:
+      case 'basename':
+        return $ret['basename'];
+      case PATHINFO_EXTENSION:
+      case 'extension':
+        return $ret['extension'];
+      case PATHINFO_FILENAME:
+      case 'filename':
+        return $ret['filename'];
+      default:
+        return $ret;
+    }
+  }
+
+
+  /**
+   * Returns the basename, working with multibytes strings.
+   *
+   * @param string $file
+   * @param string $suffix
+   * @return string
+   */
+  public static function basename(string $path, string $suffix = ''): string
+  {
+    $res = '';
+    // works both in windows and unix
+    if (preg_match('@^.*[\\\\/]([^\\\\/]+)$@s', $path, $matches)) {
+      $res = $matches[1];
+    }
+    else if (preg_match('@^([^\\\\/]+)$@s', $path, $matches)) {
+      $res = $matches[1];
+    }
+
+    if ($res && $suffix && (substr($res, - strlen($suffix)) === $suffix)) {
+      return substr($res, 0, - strlen($suffix));
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Returns the dirname, working with multibytes strings.
+   *
+   * @param string $file
+   * @param string $suffix
+   * @return string
+   */
+  public static function dirname(string $path): string
+  {
+    return self::pathinfo($path, 'dirname');
+  }
+
+
+  /**
+   * Returns the extension of a path, working with multibytes strings.
+   *
+   * @param string $file
+   * @param string $suffix
+   * @return string
+   */
+  public static function extension(string $path): string
+  {
+    return self::pathinfo($path, 'extension');
+  }
+
+
+  /**
+   * Returns the filename, working with multibytes strings.
+   *
+   * @param string $file
+   * @param string $suffix
+   * @return string
+   */
+  public static function filename(string $path): string
+  {
+    return self::pathinfo($path, 'filename');
   }
 
 
@@ -2611,7 +2723,7 @@ class X
     }
 
     if ($can_save
-        && \bbn\File\Dir::createPath(dirname($file))
+        && \bbn\File\Dir::createPath(self::dirname($file))
     ) {
       $ow->save($file);
       return \is_file($file);

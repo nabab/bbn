@@ -4,6 +4,10 @@
  */
 namespace bbn\File;
 use bbn;
+use bbn\X;
+use bbn\Str;
+use bbn\Mvc;
+use bbn\File\Dir;
 
 /**
  * This class generates PDF with the mPDF class
@@ -91,7 +95,7 @@ EOF
   }
 
   public static function setDefault(array $cfg){
-    self::$default_cfg = bbn\X::mergeArrays(self::$default_cfg, $cfg);
+    self::$default_cfg = X::mergeArrays(self::$default_cfg, $cfg);
   }
 
   public function __construct($cfg = null){
@@ -113,22 +117,22 @@ EOF
   
   public function getConfig(array $cfg = null){
     if ( \is_array($cfg) ){
-      return bbn\X::mergeArrays($this->cfg, $this->fixCfg($cfg));
+      return X::mergeArrays($this->cfg, $this->fixCfg($cfg));
     }
     return $this->cfg;
   }
   
   public function resetConfig($cfg){
     if ( \is_array($cfg) ){
-      $this->cfg = bbn\X::mergeArrays(self::$default_cfg, $this->fixCfg($cfg));
+      $this->cfg = X::mergeArrays(self::$default_cfg, $this->fixCfg($cfg));
     }
     else{
       $this->cfg = self::$default_cfg;
     }
     if (
       empty($this->cfg['tempDir']) &&
-      ($tmp = bbn\Mvc::getTmpPath()) &&
-      ($path = bbn\File\Dir::createPath($tmp))
+      ($tmp = Mvc::getTmpPath()) &&
+      ($path = Dir::createPath($tmp))
     ){
       $this->cfg['tempDir'] = $path;
     }
@@ -231,8 +235,8 @@ EOF
 
   public function save($filename){
     if ( $this->check() ){
-      $filename = bbn\Str::parsePath($filename, true);
-      if ( !is_dir(dirname($filename)) ){
+      $filename = Str::parsePath($filename, true);
+      if ( !is_dir(X::dirname($filename)) ){
         die("Error! No destination directory");
       }
       $this->pdf->Output($filename, \Mpdf\Output\Destination::FILE);
@@ -298,10 +302,10 @@ EOF
       foreach ( $fs as $i => $v ){
         if ( !empty($v) ){
           // check if file exists in mpdf/ttfonts directory
-          if ( !is_file(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . basename($v)) ){
-            \bbn\File\Dir::copy($v, BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . basename($v));
+          if ( !is_file(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . X::basename($v)) ){
+            Dir::copy($v, BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . X::basename($v));
           }
-          $fs[$i] = basename($v);
+          $fs[$i] = X::basename($v);
           if ( $i === 'R' ){
             array_push($this->pdf->available_unifonts, $f);
           }

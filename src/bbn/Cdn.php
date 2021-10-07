@@ -624,9 +624,9 @@ JS;
 
             if (!empty($c['lang'])
                 && !empty($cp['lang'])
-                && \in_array(\dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
+                && \in_array(X::dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
             ) {
-              $lang = file_get_contents($this->fpath.\dirname($js)."/$name.$c[lang].lang");
+              $lang = file_get_contents($this->fpath.X::dirname($js)."/$name.$c[lang].lang");
               if ($lang) {
                 //$lang = json_decode($lang, true);
                 $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }".PHP_EOL.$codes[$i]['js'];

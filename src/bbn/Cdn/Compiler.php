@@ -174,7 +174,7 @@ class Compiler extends Basic
 
         case 'less':
           $less = new Less();
-          $less->setImportDir([\dirname($this->fpath.$file)]);
+          $less->setImportDir([X::dirname($this->fpath.$file)]);
           try {
             $c = $less->compile($c);
           }
@@ -198,9 +198,9 @@ class Compiler extends Basic
         case 'scss':
           try{
             $scss = new \ScssPhp\ScssPhp\Compiler();
-            $scss->setImportPaths([\dirname($this->fpath.$file)]);
-            if (is_file(\dirname($this->fpath.$file).'/_def.scss')) {
-              $c = file_get_contents((\dirname($this->fpath.$file).'/_def.scss')).$c;
+            $scss->setImportPaths([X::dirname($this->fpath.$file)]);
+            if (is_file(X::dirname($this->fpath.$file).'/_def.scss')) {
+              $c = file_get_contents((X::dirname($this->fpath.$file).'/_def.scss')).$c;
             }
 
             $c = $scss->compile($c);
@@ -334,13 +334,13 @@ JAVASCRIPT;
       $dir         = null;
       foreach ($files as $f) {
         if (is_file($this->fpath.$f)) {
-          $tmp = dirname($f);
+          $tmp = X::dirname($f);
           if (is_null($dir)) {
             $dir = $tmp.'/';
           }
           elseif (strpos($dir, $tmp) !== 0) {
             $old_tmp = null;
-            while ($tmp = dirname($tmp) && ($tmp !== $old_tmp)) {
+            while ($tmp = X::dirname($tmp) && ($tmp !== $old_tmp)) {
               $old_tmp = $tmp;
               if ($tmp === $dir) {
                 break;
@@ -348,7 +348,7 @@ JAVASCRIPT;
             }
 
             if ($tmp !== $dir) {
-              $bits    = \bbn\X::split(dirname($f), '/');
+              $bits    = \bbn\X::split(X::dirname($f), '/');
               $new_dir = '';
               foreach ($bits as $b) {
                 if (!empty($b)) {
@@ -439,11 +439,11 @@ JAVASCRIPT;
             $dirs[$root][] = substr($file, strlen($root));
           }
           else {
-            if (!isset($dirs[\dirname($file)])) {
-              $dirs[\dirname($file)] = [];
+            if (!isset($dirs[X::dirname($file)])) {
+              $dirs[X::dirname($file)] = [];
             }
 
-            $dirs[\dirname($file)][] = basename($file);
+            $dirs[X::dirname($file)][] = X::basename($file);
           }
         }
         else{
@@ -576,8 +576,8 @@ JAVASCRIPT;
 
           $codes[$mode ?? $e][] = [
             'code' => $c,
-            'file' => \basename($f),
-            'dir' => \dirname($f)
+            'file' => X::basename($f),
+            'dir' => X::dirname($f)
           ];
         }
         else{
@@ -616,8 +616,8 @@ JAVASCRIPT;
 
         $codes[$mode ?? $e][] = [
           'code' => $c,
-          'file' => basename(end($files)),
-          'dir' => \dirname(end($files))
+          'file' => X::basename(end($files)),
+          'dir' => X::dirname(end($files))
         ];
       }
       else{

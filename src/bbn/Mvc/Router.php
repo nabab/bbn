@@ -293,6 +293,7 @@ class Router
                 'plugin' => $plugin_url,
                 'plugin_name' => $plugin,
                 'component' => true,
+                'component_name' => $name,
                 'ext' => $f,
                 'mode' => $mode,
                 'i18n' => $mode === 'js' ? $this->_find_translation($plugin ?? null) : null,
@@ -667,15 +668,15 @@ class Router
         $s['checkers'] = [];
         $tmp           = $path;
         // There should be a new property fullPath
-        if ((basename($o['file']) === 'index.php') && (basename($o['path']) !== 'index')) {
+        if ((X::basename($o['file']) === 'index.php') && (X::basename($o['path']) !== 'index')) {
           $tmp .= '/index';
         }
         // Going backwards in the tree, so adding reversely to the array (prepending)
         while (\strlen($tmp) > 0) {
-          $tmp     = self::parse(\dirname($tmp));
+          $tmp     = self::parse(X::dirname($tmp));
           $checker = ($tmp === '.' ? '' : $tmp . '/') . $checker_file;
           if (!empty($o['plugin'])) {
-            $plugin_path = self::parse(\dirname($plugin_path));
+            $plugin_path = self::parse(X::dirname($plugin_path));
             $alt_ctrl    = $plugin_root . ($plugin_path === '.' ? '' : $plugin_path . '/') . $checker_file;
             if (is_file($alt_ctrl) && !\in_array($alt_ctrl, $s['checkers'], true)) {
               array_unshift($s['checkers'], $alt_ctrl);
@@ -835,10 +836,10 @@ class Router
         break;
       }
 
-      array_unshift($args, basename($tmp));
+      array_unshift($args, X::basename($tmp));
       $tmp = strpos($tmp, '/') === false ? '' : substr($tmp, 0, strrpos($tmp, '/'));
       if ($plugin) {
-        $plugin_path = strpos($plugin_path, '/') === false ? '' : dirname($plugin_path);
+        $plugin_path = strpos($plugin_path, '/') === false ? '' : X::dirname($plugin_path);
       }
 
       if (empty($tmp) && ($mode === 'dom')) {
@@ -864,7 +865,7 @@ class Router
         [
         'file' => $file,
         'path' => $real_path,
-        'root' => \dirname($root, 2) . '/',
+        'root' => X::dirname($root, 2) . '/',
         'request' => $path,
         'mode' => $mode,
         'plugin' => $plugin ? $plugin['url'] : false,
@@ -1058,7 +1059,7 @@ class Router
       if (!X::hasProp($this->_textdomains, $name)) {
         $idx_file  = $lang_path.'/index.txt';
         if (!is_file($idx_file)) {
-          if (is_dir(dirname($idx_file))) {
+          if (is_dir(X::dirname($idx_file))) {
             $idx = '';
           }
           else {
@@ -1077,7 +1078,7 @@ class Router
         $this->_textdomains[$name] = $textdomain;
       }
 
-      //$lang_path = \dirname($this->_routes['root'][$plugin]['path']).'/src/locale';
+      //$lang_path = X::dirname($this->_routes['root'][$plugin]['path']).'/src/locale';
       return $this->_textdomains[$name];
     }
 
