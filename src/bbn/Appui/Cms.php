@@ -284,21 +284,34 @@ class Cms extends bbn\Models\Cls\Db
   /**
    * Returns all the notes of type 'pages'.
    *
-   * @param int $limit
-   * @param int $start
+   * @param bool  $with_content
+   * @param array $filter
+   * @param int   $limit
+   * @param int   $start
    * @return array
    * @throws \Exception
    */
-	public function getAll(int $limit = 50, int $start = 0): array 
+	public function getAll(bool $with_content = false, array $filter = [], int $limit = 50, int $start = 0): array 
 	{
 		$cfg = $this->note->getLastVersionCfg();
+		if (!$with_content) {
+			array_pop($cfg['fields']);
+		}
+
 		$cfg['limit'] = $limit;
 		$cfg['start'] = $start >= 0 ? $start : 0;
 		$cfg['fields'][] = 'url';
 		$cfg['fields'][] = 'start';
 		$cfg['fields'][] = 'end';
 		$cfg['where']['id_type'] = $this->getNoteType();
-		$total = $this->db->count($cfg);
+		if (!empty($filter)) {
+			$cfg['where'] = [
+				'conditions' => [
+					['conditions' => $cfg['where']],
+					['conditions' => $filter]
+				]
+			];
+		}
 
 		$cfg['join'][] = [
 			'table' => $this->class_cfg['tables']['notes_url'],
@@ -325,6 +338,7 @@ class Cms extends bbn\Models\Cls\Db
 			]]
 		];
 
+		$total = $this->db->count($cfg);
     $data = array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
       $a['files']         = $this->note->getMedias($a['id_note']) ?: [];

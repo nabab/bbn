@@ -674,9 +674,9 @@ class Note extends bbn\Models\Cls\Db
         'versions1.' . $cf['arch']['versions']['id_note'],
         'versions1.' . $cf['arch']['versions']['version'],
         'versions1.' . $cf['arch']['versions']['title'],
-        'versions1.' . $cf['arch']['versions']['content'],
         'versions1.' . $cf['arch']['versions']['id_user'],
         'versions1.' . $cf['arch']['versions']['creation'],
+        'versions1.' . $cf['arch']['versions']['content']
       ],
       'join' => [[
         'table' => $cf['tables']['versions'],
