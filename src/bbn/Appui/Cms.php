@@ -303,6 +303,7 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg['fields'][] = 'url';
 		$cfg['fields'][] = 'start';
 		$cfg['fields'][] = 'end';
+		$cfg['fields']['num_medias'] = 'COUNT('.$this->db->cfn($this->class_cfg['arch']['notes_media']['id_note'], $this->class_cfg['tables']['notes_media'], true).')';
 		$cfg['where']['id_type'] = $this->getNoteType();
 		if (!empty($filter)) {
 			$cfg['where'] = [
@@ -335,6 +336,14 @@ class Cms extends bbn\Models\Cls\Db
 			'on' => [[
 				'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
 				'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
+			]]
+		];
+		$cfg['join'][] = [
+			'table' => $this->class_cfg['tables']['notes_media'],
+			'type' => 'left',
+			'on' => [[
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_media']['id_note'], $this->class_cfg['tables']['notes_media']),
+				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
 			]]
 		];
 
