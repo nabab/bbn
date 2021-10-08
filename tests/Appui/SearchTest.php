@@ -3,10 +3,10 @@
 namespace Appui;
 
 use bbn\Appui\Search;
-use bbn\Cache;
 use bbn\Db;
 use bbn\Mvc;
 use bbn\User;
+use bbn\Util\Timer;
 use Opis\Closure\SerializableClosure;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
@@ -115,8 +115,6 @@ class SearchTest extends TestCase
     $this->createDir($plugin_dir = 'plugins/appui-search/src/mvc/model');
    $this->createFile('users_search.php', <<<CONTENT
 <?php 
-use Opis\Closure\SerializableClosure;
-
 \$function = function (\$search) {
   return [
     'score' => 30,
@@ -134,17 +132,16 @@ use Opis\Closure\SerializableClosure;
   ];
 };
 
-\$wrapper = new SerializableClosure(\$function);
+return [
+'myFunction' => \$function
+];
 
-return serialize(\$wrapper);
 
 CONTENT
 , $plugin_dir);
 
     $this->createFile('profiles_search.php', <<<CONTENT
 <?php 
-use Opis\Closure\SerializableClosure;
-
 \$function = function (\$search) {
 return [
   'score' => 50,
@@ -163,9 +160,9 @@ return [
 ];
 };
 
-\$wrapper = new SerializableClosure(\$function);
-
-return serialize(\$wrapper);
+return [
+'closure' => \$function
+];
 
 CONTENT
       , $plugin_dir);
@@ -173,8 +170,6 @@ CONTENT
     $this->createDir($plugin_dir_2 = 'plugins/appui-plugin-1/src/mvc/model');
     $this->createFile('users_search.php', <<<CONTENT
 <?php 
- use Opis\Closure\SerializableClosure;
- 
  \$function = function () use (\$model) {
 return [
   'score' => 40,
@@ -187,23 +182,16 @@ return [
 ];
 };
 
-\$wrapper = new SerializableClosure(\$function);
-
-return serialize(\$wrapper);
+return [
+'func' => \$function
+];
 
 CONTENT
       , $plugin_dir_2);
 
     $this->ctrl   = new Mvc\Controller(self::$mvc, []);
-    $this->init();
+    $this->search = new Search($this->ctrl, $this->cfg);
     $this->arch   = $this->cfg['arch'];
-  }
-
-  protected function init(?string $search = null)
-  {
-    $this->search = new Search(
-      $this->ctrl, $search ?? $this->search_string, $this->cfg
-    );
   }
 
   protected function tearDown(): void
@@ -291,44 +279,289 @@ CONTENT
     );
 
 
-    $this->assertSame(
-      $this->getExpectedSearchCfg(), $this->getNonPublicProperty('search_cfg')
+    $this->assertIsArray(
+      $search_cfg = $this->getNonPublicProperty('search_cfg')
     );
+
+    $this->assertNotEmpty($search_cfg);
+
+    foreach ($search_cfg as $item) {
+      $this->assertNotFalse(@unserialize($item));
+    }
   }
 
   /** @test */
   public function getSearchCfg_method_returns_search_config_from_cache_when_exists()
   {
     $this->cleanTestingDir(BBN_APP_PATH . BBN_DATA_PATH . 'plugins');
-    $method = $this->getNonPublicMethod('getSearchCfg');
 
-    $this->assertSame(
-      $this->getExpectedSearchCfg(), $method->invoke($this->search)
-    );
+    $this->setNonPublicPropertyValue('search_cfg', []);
 
-    // Another test with different string
-    $this->init('bar');
+    $result = $this->getNonPublicMethod('getSearchCfg')
+      ->invoke($this->search);
 
-    $this->assertSame(
-      $this->getExpectedSearchCfg('bar'), $method->invoke($this->search)
-    );
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+
+    foreach ($result as $item) {
+      $this->assertNotFalse(@unserialize($item));
+    }
   }
   
   /** @test */
   public function getSearchCfg_method_returns_search_config_and_save_it_in_cache()
   {
-    $method = $this->getNonPublicMethod('getSearchCfg');
+    $this->cleanTestingDir($this->getTestingDirName() . 'cache');
 
-    $this->assertSame(
-      $this->getExpectedSearchCfg(), $method->invoke($this->search)
+    $this->setNonPublicPropertyValue('search_cfg', []);
+
+    $cache_get_method = $this->getNonPublicMethod('cacheGet');
+
+    $this->assertFalse(
+      $cache_get_method->invoke(
+        $this->search, $this->getNonPublicProperty('cfg_cache_name'), 'getSearchCfg'
+      )
     );
 
-    // Another test with different search string
-    $this->init('bar');
+    $result = $this->getNonPublicMethod('getSearchCfg')
+      ->invoke($this->search);
 
+    $this->assertIsArray($result);
+    $this->assertNotEmpty($result);
+
+    foreach ($result as $item) {
+      $this->assertNotFalse(@unserialize($item));
+    }
+
+   $this->assertNotFalse(
+     $cache_get_method->invoke(
+       $this->search,
+       $this->getNonPublicProperty('cfg_cache_name'),
+       'getSearchCfg'
+     )
+   );
+  }
+
+  /** @test */
+  public function executeFunctions_method_executes_all_functions_in_the_search_cfg_using_the_given_search_string()
+  {
+    $method = $this->getNonPublicMethod('executeFunctions');
+
+    $this->assertSame(
+      $this->getExpectedSearchCfg(), $method->invoke($this->search, 'foo')
+    );
+
+    // Another test with different string
     $this->assertSame(
       $this->getExpectedSearchCfg('bar'),
-      $method->invoke($this->search)
+      $method->invoke($this->search, 'bar')
     );
+  }
+
+  /** @test */
+  public function get_method_launches_the_search_with_the_given_search_string_and_save_it_in_cache_for_the_user()
+  {
+    $this->user_mock->shouldReceive('getId')
+      ->andReturn($user_id = '634a2c70bcac11eba47652540000cfaa');
+
+//    $this->db_mock->shouldReceive('selectOne')
+//      ->twice()
+//      ->andReturnNull();
+//
+//    $this->db_mock->shouldReceive('insert')
+//      ->twice()
+//      ->andReturn(1);
+//
+//    $this->db_mock->shouldReceive('lastId')
+//      ->twice()
+//      ->andReturn('123');
+
+    // Query expectations for the first method call
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['id' => 'foo']
+      ])
+      ->andReturn([
+        $expected[] = ['id' => 'foo', 'name' => 'name_1']
+      ]);
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['name' => 'foo']
+      ])
+      ->andReturn([
+        $expected[] = ['id' => 12, 'name' => 'foo']
+      ]);
+
+    $cache_get_method = $this->getNonPublicMethod('cacheGet');
+
+    $this->assertFalse(
+      $cache_get_method->invoke(
+        $this->search,
+        $user_id,
+        $cache_name = sprintf(
+          $this->getNonPublicProperty('search_cache_name'), 'foo'
+        )
+      )
+    );
+
+    $results = $this->search->get('foo');
+
+    $this->assertArrayHasKey('data', $results);
+    $this->assertSame($expected, $results['data']);
+
+    // Clear the models to make sure they're not being read again
+    $this->cleanTestingDir($this->getTestingDirName() . 'plugins');
+
+    $this->assertNotFalse(
+      $cache_get_method->invoke(
+        $this->search, $user_id, $cache_name
+      )
+    );
+
+    // Query expectations for the second method call
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['id' => 'foo']
+      ])
+      ->andReturn([
+        $expected_2[] = ['id' => 'foo', 'name' => 'name_1']
+      ]);
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['name' => 'foo']
+      ])
+      ->andReturn([
+        $expected_2[] = ['id' => 12, 'name' => 'foo']
+      ]);
+
+    $results_2 = $this->search->get('foo');
+
+    $this->assertArrayHasKey('data', $results);
+    $this->assertSame($expected_2, $results_2['data']);
+  }
+
+  /** @test */
+  public function get_method_returns_the_next_step_when_query_time_limit_is_passed()
+  {
+    $this->user_mock->shouldReceive('getId')
+      ->andReturn('634a2c70bcac11eba47652540000cfaa');
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['id' => 'bar']
+      ])
+      ->andReturn([
+        $expected[] = ['id' => 'bar', 'name' => 'name_1']
+      ]);
+
+    $timer_mock = \Mockery::mock(Timer::class);
+
+    $timer_mock->shouldReceive('start')
+      ->once()
+      ->andReturnTrue();
+
+    // First loop timer measure expectations to pass time limit
+    $timer_mock->shouldReceive('measure')
+      ->with('search')
+      ->once()
+      ->andReturn(
+        $this->getNonPublicProperty('time_limit') + 4
+      );
+
+
+    $timer_mock->shouldReceive('stop')
+      ->once()
+      ->andReturnTrue();
+
+    $this->setNonPublicPropertyValue('timer', $timer_mock);
+
+    $result = $this->search->get('bar');
+
+    $this->assertArrayHasKey('data', $result);
+    $this->assertArrayHasKey('next_step', $result);
+
+    $this->assertSame($expected, $result['data']);
+    $this->assertSame(1, $result['next_step']);
+  }
+
+  /** @test */
+  public function get_method_does_not_return_the_next_step_if_time_out_has_passed_but_there_is_not_other_steps_remaining()
+  {
+    $this->user_mock->shouldReceive('getId')
+      ->andReturn('634a2c70bcac11eba47652540000cfaa');
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['id' => 'bar']
+      ])
+      ->andReturn([
+        $expected[] = ['id' => 'bar', 'name' => 'name_1']
+      ]);
+
+    $this->db_mock->shouldReceive('rselectAll')
+      ->once()
+      ->with([
+        'tables' => ['members'],
+        'fields' => ['id', 'name'],
+        'where' => ['name' => 'bar']
+      ])
+      ->andReturn([
+        $expected[] = ['id' => 12, 'name' => 'bar']
+      ]);
+
+    $timer_mock = \Mockery::mock(Timer::class);
+
+    $timer_mock->shouldReceive('start')
+      ->once()
+      ->andReturnTrue();
+
+    // First loop timer measure expectations to not pass time limit
+    $timer_mock->shouldReceive('measure')
+      ->with('search')
+      ->once()
+      ->andReturn(
+        $this->getNonPublicProperty('time_limit') - 4
+      );
+
+    // Second loop timer measure expectations to pass time limit but no steps remaining
+    $timer_mock->shouldReceive('measure')
+      ->with('search')
+      ->once()
+      ->andReturn(
+        $this->getNonPublicProperty('time_limit') + 4
+      );
+
+
+    $timer_mock->shouldReceive('stop')
+      ->once()
+      ->andReturnTrue();
+
+    $this->setNonPublicPropertyValue('timer', $timer_mock);
+
+    $result = $this->search->get('bar');
+
+    $this->assertArrayHasKey('data', $result);
+    $this->assertArrayNotHasKey('next_step', $result);
+    $this->assertSame($expected, $result['data']);
   }
 }

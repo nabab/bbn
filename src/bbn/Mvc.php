@@ -1177,24 +1177,6 @@ class Mvc implements Mvc\Api
         return [];
     }
 
-  /**
-   * @param $path
-   * @param array $data
-   * @param Mvc\Controller $ctrl
-   * @return string|null
-   * @throws \Exception
-   */
-    public function getSerialzedModel($path, array $data, Mvc\Controller $ctrl): ?string
-    {
-      if (($path = Router::parse($path)) && ($route = $this->router->route($path, 'model'))) {
-        $model = new Mvc\Model($this->db, $route, $ctrl, $this);
-        return $model->getSerialized($data);
-      }
-
-      return null;
-    }
-
-
     /**
      * An alias for customPluginModel()
      *

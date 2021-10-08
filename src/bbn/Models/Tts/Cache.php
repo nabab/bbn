@@ -56,4 +56,8 @@ trait Cache
     return $this->cacheGet($uid, $method) ? true : false;
   }
 
+  protected function serializeFunction(callable $function)
+  {
+    return $this->cache_engine->serializeFunction($function);
+  }
 }
