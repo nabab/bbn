@@ -258,7 +258,7 @@ class Cms extends bbn\Models\Cls\Db
 			$cfg['where'] = [
 				'conditions' => [
 					['conditions' => $cfg['where']],
-					['conditions' => $filter]
+					$filter
 				]
 			];
 		}
