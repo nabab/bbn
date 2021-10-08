@@ -106,7 +106,7 @@ class Grid extends bbn\Models\Cls\Cache
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
         'join' => $cfg['join'] ?? [],
         'group_by' => $cfg['group_by'] ?? [],
-        'having' => $cfg['having'] ?? [],
+        'having' => !empty($post['having']) && !empty($post['having']['conditions']) ? $post['having'] : [],
         'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),
         'start' => $post['start'] ?? 0,
         'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
