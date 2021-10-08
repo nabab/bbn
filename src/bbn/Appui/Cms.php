@@ -309,6 +309,7 @@ class Cms extends bbn\Models\Cls\Db
     }, $this->db->rselectAll($cfg));
 
 		return [
+			'query' => $this->db->last(),
 			'data' => $data,
 			'total' => $total
 		];
