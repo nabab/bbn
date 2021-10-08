@@ -106,10 +106,10 @@ class Grid extends bbn\Models\Cls\Cache
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
         'join' => $cfg['join'] ?? [],
         'group_by' => $cfg['group_by'] ?? [],
-        'having' => !empty($post['having']) && !empty($post['having']['conditions']) ? $post['having'] : [],
+        'having' => !empty($post['having']) ? $post['having'] : [],
         'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),
         'start' => $post['start'] ?? 0,
-        'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
+        'where' => !empty($post['filters']) ? $post['filters'] : []
       ];
       if ( !empty($post['excel']) ){
         $this->excel = $post['excel'];
@@ -165,6 +165,21 @@ class Grid extends bbn\Models\Cls\Cache
           'conditions' => [
             $db_cfg['where'],
             $prefilters
+          ]
+        ];
+      }
+      // The (pre)having set server-side are mandatory and are added to the client-side having if any
+      if ( !empty($cfg['having']) ){
+        $prehaving = isset($cfg['having']['conditions']) ? $cfg['having'] : [
+          'logic' => 'AND',
+          'conditions' => $cfg['having']
+        ];
+        // They either become the where or are added as a new root condition
+        $db_cfg['having'] = empty($db_cfg['having']) ? $prehaving : [
+          'logic' => 'AND',
+          'conditions' => [
+            $db_cfg['having'],
+            $prehaving
           ]
         ];
       }
