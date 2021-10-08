@@ -374,7 +374,7 @@ class Cms extends bbn\Models\Cls\Db
 	}
 
 
-  /**
+	/**
    * Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note.
    *
    * @param string $id_note
@@ -396,6 +396,7 @@ class Cms extends bbn\Models\Cls\Db
 
 		return $success;
 	}
+
 
 	/**
 	 * Removes the url corresponding to the given id_note from bbn_notes_url.

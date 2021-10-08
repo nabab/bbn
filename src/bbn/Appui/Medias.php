@@ -297,6 +297,26 @@ class Medias extends bbn\Models\Cls\Db
    * @return int|null
    * @throws \Exception
    */
+  public function getByUrl(string $url)
+  {
+    $cf =& $this->class_cfg;
+    return $this->db->selectOne(
+      $cf['tables']['medias_url'],
+      $cf['arch']['medias_url']['id_media'],
+      [
+        $cf['arch']['medias_url']['url'] => $url
+      ]
+    );
+  }
+
+
+  /**
+   * @param string $id_media
+   * @param string $url
+   * @param int $shared
+   * @return int|null
+   * @throws \Exception
+   */
   public function setUrl(string $id_media, string $url, int $shared = 0)
   {
     if ($this->exists($id_media)) {
@@ -313,6 +333,7 @@ class Medias extends bbn\Models\Cls\Db
 
     return null;
   }
+
 
   /**
    * @param string $id
