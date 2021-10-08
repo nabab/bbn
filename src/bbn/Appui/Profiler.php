@@ -53,7 +53,7 @@ class Profiler extends bbn\Models\Cls\Db
   {
     parent::__construct($db);
     $this->chrono = new \bbn\Util\Timer();
-    self::_init_class_cfg(self::$default_class_cfg);
+    $this->_init_class_cfg(self::$default_class_cfg);
   }
 
 

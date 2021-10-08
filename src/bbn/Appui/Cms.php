@@ -13,8 +13,6 @@ use bbn\X;
 
 class Cms extends bbn\Models\Cls\Db
 {
-	use bbn\Models\Tts\Dbconfig;
-
 	/** @var Note A Note instance. */
 	protected $note;
 
@@ -30,58 +28,6 @@ class Cms extends bbn\Models\Cls\Db
 	/** @var string The option's ID of the type of notes for CMS (pages) */
 	protected $noteType;
 	
-	protected static  
-		$default_class_cfg = [
-			'table' => 'bbn_events',
-			'tables' => [
-				'notes' => 'bbn_notes',
-				'versions' => 'bbn_notes_versions',
-				'events' => 'bbn_events',
-				'notes_url' => 'bbn_notes_url',
-				'notes_events' => 'bbn_notes_events'
-			],
-			'arch' => [
-				'notes' => [
-					'id' => 'id',
-					'id_parent' => 'id_parent',
-					'id_alias' => 'id_alias',
-					'id_type' => 'id_type',
-					'id_option' => 'id_option',
-					'private' => 'private',
-					'locked' => 'locked',
-					'pinned' => 'pinned',
-					'creator' => 'creator',
-					'active' => 'active'
-				],
-				'versions' => [
-					'id_note' => 'id_note',
-					'version' => 'version',
-					'title' => 'title',
-					'content' => 'content',
-					'id_user' => 'id_user',
-					'creation' => 'creation'
-				],
-				'events' => [
-          'id' => 'id',
-          'id_parent' => 'id_parent',
-          'id_type' => 'id_type',
-					'start' => 'start',
-          'end' => 'end',
-          'name' => 'name',
-          'recurring' => 'recurring',
-					'cfg' => 'cfg'
-				],
-				'notes_events' => [
-					'id_note' => 'id_note',
-					'id_event' => 'id_event',
-				],
-				'notes_url' => [
-					'id_note' => 'id_note',
-					'url' => 'url',
-				]
-			]
-		];
-
 	private static $_id_event;
 
 	/**
@@ -123,20 +69,23 @@ class Cms extends bbn\Models\Cls\Db
 	public function __construct(bbn\Db $db, Note $note = null)
 	{
 		parent::__construct($db);
-		$this->_init_class_cfg();
 		$this->event = new Event($this->db);
 		$this->opt = Option::getInstance();
 		if (!self::$_id_event) {
 			$id = $this->opt->fromCode('publication', 'event', 'appui');
 			self::_set_id_event($id);
 		}
-		if ( $notes === null ){
+		if (!$note) {
 			$this->note = new Note($this->db);
 		}
 		else {
 			$this->note = $note;
 		}
-		
+
+		$this->class_cfg = X::mergeArrays(
+			$this->note->getClassCfg(),
+			$this->event->getClassCfg()
+		);
 	}
 
 
@@ -303,7 +252,7 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg['fields'][] = 'url';
 		$cfg['fields'][] = 'start';
 		$cfg['fields'][] = 'end';
-		$cfg['fields']['num_medias'] = 'COUNT('.$this->db->cfn($this->class_cfg['arch']['notes_media']['id_note'], $this->class_cfg['tables']['notes_media'], true).')';
+		$cfg['fields']['num_medias'] = 'COUNT('.$this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true).')';
 		$cfg['where']['id_type'] = $this->getNoteType();
 		if (!empty($filter)) {
 			$cfg['where'] = [
@@ -315,10 +264,10 @@ class Cms extends bbn\Models\Cls\Db
 		}
 
 		$cfg['join'][] = [
-			'table' => $this->class_cfg['tables']['notes_url'],
+			'table' => $this->class_cfg['tables']['url'],
 			'type' => 'left',
 			'on' => [[
-				'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
+				'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),
 				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
 			]],
 		];
