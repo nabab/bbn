@@ -288,10 +288,10 @@ class Cms extends bbn\Models\Cls\Db
 			]]
 		];
 		$cfg['join'][] = [
-			'table' => $this->class_cfg['tables']['notes_media'],
+			'table' => $this->class_cfg['tables']['notes_medias'],
 			'type' => 'left',
 			'on' => [[
-				'field' => $this->db->cfn($this->class_cfg['arch']['notes_media']['id_note'], $this->class_cfg['tables']['notes_media']),
+				'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),
 				'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
 			]]
 		];
