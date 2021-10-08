@@ -303,8 +303,6 @@ class Cms extends bbn\Models\Cls\Db
 		$total = $this->db->count($cfg);
     $data = array_map(function($a){
       $a['is_published']  = $this->isPublished($a['id_note']);
-      $a['files']         = $this->note->getMedias($a['id_note']) ?: [];
-
       return $a;
     }, $this->db->rselectAll($cfg));
 
