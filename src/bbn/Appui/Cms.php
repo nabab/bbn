@@ -240,7 +240,7 @@ class Cms extends bbn\Models\Cls\Db
    * @return array
    * @throws \Exception
    */
-	public function getAll(bool $with_content = false, array $filter = [], int $limit = 50, int $start = 0): array 
+	public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0): array 
 	{
 		$cfg = $this->note->getLastVersionCfg();
 		if (!$with_content) {
@@ -261,6 +261,10 @@ class Cms extends bbn\Models\Cls\Db
 					['conditions' => $filter]
 				]
 			];
+		}
+
+		if (!empty($order)) {
+			$cfg['order'] = $order;
 		}
 
 		$cfg['join'][] = [
