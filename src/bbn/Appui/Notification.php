@@ -114,6 +114,7 @@ class Notification extends bbn\Models\Cls\Db
                     ) ) {
                       $this->lastId = $this->db->lastId();
                     }
+
                     $this->db->setLastInsertId($this->lastDbId);
                   }
                 }
@@ -362,6 +363,24 @@ class Notification extends bbn\Models\Cls\Db
       );
     }
 
+    return null;
+  }
+
+
+  public function getIdContent(string $id): ?string
+  {
+    if (bbn\Str::isUid($id)) {
+      return $this->db->selectOne([
+        'table' => $this->class_table,
+        'fields' => [$this->fields['id_content']],
+        'where' => [
+          'conditions' => [[
+            'field' => $this->db->colFullName($this->fields['id'], $this->class_table),
+            'value' => $id
+          ]]
+        ]
+      ]);
+    }
     return null;
   }
 
