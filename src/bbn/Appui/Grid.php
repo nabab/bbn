@@ -282,7 +282,12 @@ class Grid extends bbn\Models\Cls\Cache
       $this->chrono->start();
       if ( $this->query ){
         $this->sql = $this->getQuery();
-        $q = $this->db->query($this->sql, $this->db->getQueryValues($this->cfg));
+        $q = $this->db->query($this->sql, \array_map(function($v){
+          if (\bbn\Str::isUid($v)) {
+            $v = hex2bin($v);
+          }
+          return $v;
+        }, $this->db->getQueryValues($this->cfg)));
         $rows = $q->getRows();
       }
       else {
@@ -315,7 +320,12 @@ class Grid extends bbn\Models\Cls\Cache
           $this->count.PHP_EOL.
             $this->db->getWhere($this->cfg).
             $this->db->getGroupBy($this->cfg),
-          $this->db->getQueryValues($this->cfg)
+            \array_map(function($v){
+              if (\bbn\Str::isUid($v)) {
+                $v = hex2bin($v);
+              }
+              return $v;
+            }, $this->db->getQueryValues($this->cfg))
         );
       }
       else if ( is_array($this->count) ){
