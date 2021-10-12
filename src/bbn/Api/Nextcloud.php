@@ -286,11 +286,16 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         $has_dir = in_array($type, ['both', 'dir']);
         $has_file = in_array($type, ['both', 'file']);
         foreach ( $collection as $i => $c ){
+          $npath = $name = str_replace(self::prefix, '', $i);
+          if (empty($c['{DAV:}getcontenttype'])) {
+            $name = substr($npath, 0, -1);
+          }
+
           $tmp = [
-            'path' => str_replace(self::prefix, '', $i),
+            'path' => $npath,
             'dir' => empty($c['{DAV:}getcontenttype']) ? true : false,
             'file' => empty($c['{DAV:}getcontenttype']) ? false : true,
-            'name' => X::basename($i),
+            'name' => X::basename($name),
           ];
           //if details has to be included on the item
           if ( !empty($detailed) ){
