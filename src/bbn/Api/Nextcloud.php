@@ -41,9 +41,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     $size = null;
     $tmp = $path;
     $path = $this->getRealPath($path);
-    return $this->obj->propFind($tmp, array( 
+    return $this->obj->propFind($tmp, array(
       '{http://owncloud.org/ns}size'
-    ));
+    ))?[0] : null;
   }
   
   /**
