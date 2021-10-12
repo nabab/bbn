@@ -287,6 +287,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         $has_file = in_array($type, ['both', 'file']);
         foreach ( $collection as $i => $c ){
           $npath = $name = str_replace(self::prefix, '', $i);
+          if (!$npath) {
+            continue;
+          }
+
           if (empty($c['{DAV:}getcontenttype'])) {
             $name = substr($npath, 0, -1);
           }
