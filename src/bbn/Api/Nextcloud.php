@@ -281,7 +281,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $collection = $this->obj->propFind($path, $props, 1);
       if ( !empty($collection) ){
         //arrayt_shift to remove the parent included in the array
-        die(var_dump(array_shift($collection), $collection));
+        die(var_dump(array_shift($collection), $collection, X::basename('hello_world.pdf')));
         $dirs = [];
         $files = [];
         foreach ( $collection as $i => $c ){
