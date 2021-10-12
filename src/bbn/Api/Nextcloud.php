@@ -285,12 +285,15 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         $files = [];
         $has_dir = in_array($type, ['both', 'dir']);
         $has_file = in_array($type, ['both', 'file']);
+        $num = 0;
         foreach ( $collection as $i => $c ){
-          $npath = $name = urldecode(str_replace(self::prefix, '', $i));
-          if (!$npath) {
+          $num++;
+          // The 2 first child are .. and .
+          if ($num < 3) {
             continue;
           }
 
+          $npath = $name = urldecode(str_replace(self::prefix, '', $i));
           if (empty($c['{DAV:}getcontenttype'])) {
             $name = substr($npath, 0, -1);
           }
