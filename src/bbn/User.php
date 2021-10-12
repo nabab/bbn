@@ -883,7 +883,6 @@ class User extends Models\Cls\Basic
   public function saveSession(bool $force = false): self
   {
     $id_session = $this->getIdSession();
-
     if ($this->check()) {
       if ($id_session) {
         $p =& $this->class_cfg['arch']['sessions'];
@@ -1820,10 +1819,12 @@ class User extends Models\Cls\Basic
         'last_renew' => time()
       ];
 
+      $id_session = $this->session->getId();
+
       // Inserting the session in the database
       if ($this->db->insert(
         $this->class_cfg['tables']['sessions'], [
-        $p['sess_id'] => $this->session->getId(),
+        $p['sess_id'] => $id_session,
         $p['ip_address'] => $this->ip_address,
         $p['user_agent'] => $this->user_agent,
         $p['opened'] => 1,
@@ -1834,15 +1835,20 @@ class User extends Models\Cls\Basic
       )
       ) {
         // Setting the session with its ID
-        $id_session = $this->db->lastId();
+        $id = $this->db->lastId();
+        if (!$id) {
+          throw new \Exception(X::_("No session ID, check if your tables have the indexes defined"));
+        }
+
         $this->session->set(
           [
           'fingerprint' => $fingerprint,
           'tokens' => [],
-          'id_session' => $id_session,
+          'id_session' => $id,
           'salt' => $salt
            ], $this->sessIndex
         );
+
         $this->saveSession();
       }
       else{

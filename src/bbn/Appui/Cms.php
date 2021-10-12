@@ -255,12 +255,7 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg['fields']['num_medias'] = 'COUNT('.$this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true).')';
 		$cfg['where']['id_type'] = $this->getNoteType();
 		if (!empty($filter)) {
-			$cfg['where'] = [
-				'conditions' => [
-					['conditions' => $cfg['where']],
-					$filter
-				]
-			];
+			$cfg['having'] = $filter;
 		}
 
 		if (!empty($order)) {
