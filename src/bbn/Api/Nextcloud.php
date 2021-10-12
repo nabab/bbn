@@ -24,7 +24,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         'userName' => $cfg['user'],
         'password' => $cfg['pass']
       ]);
-      X::log($this->obj->options(), 'dav');
     }
     if ( !$this->obj ){
       $this->error = X::_("Missing parameters");
@@ -42,23 +41,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     $size = null;
     $tmp = $path;
     $path = $this->getRealPath($path);
-    
-    $type = $this->obj->propFind($tmp, array( 
-  	  '{DAV:}resourcetype',
+    return $this->obj->propFind($tmp, array( 
+      '{http://owncloud.org/ns}size'
     ));
-    //case of files
-    if ( $this->isFile($path) ){
-      $size = $this->obj->propFind($tmp, [
-        '{DAV:}getcontentlength'
-      ])['{DAV:}getcontentlength'];
-    }
-    //case of folder
-    else {
-      $size = $this->obj->propFind($tmp, [
-        '{DAV:}quota-used-bytes'
-      ])['{DAV:}quota-used-bytes'];
-    }
-    return $size;
   }
   
   /**
