@@ -286,7 +286,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         $has_dir = in_array($type, ['both', 'dir']);
         $has_file = in_array($type, ['both', 'file']);
         foreach ( $collection as $i => $c ){
-          $npath = $name = str_replace(self::prefix, '', $i);
+          $npath = $name = urldecode(str_replace(self::prefix, '', $i));
           if (!$npath) {
             continue;
           }
