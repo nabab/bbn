@@ -36,14 +36,19 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $path
    * @return void
    */
-  public function getSize($path = '')
+  public function getSize($path = ''): ?int
   {
-    $size = null;
     $tmp = $path;
     $path = $this->getRealPath($path);
-    return $this->obj->propFind($tmp, array(
+    $size = $this->obj->propFind($tmp, array(
       '{http://owncloud.org/ns}size'
-    ))?[0] : null;
+    ));
+    if ($size) {
+      X::log($size, 'nextcloud');
+      return $size[0];
+    }
+
+    return null;
   }
   
   /**
