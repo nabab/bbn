@@ -103,6 +103,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       }
     }
 
+    if ($this->error) {
+      throw new \Exception($this->error);
+    }
+
     return false;
   }
   
