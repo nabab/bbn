@@ -92,14 +92,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         return true;
       }
     }
-    catch ( \Exception $e ){
-      if ( $e->getResponse()->getStatus() === 404 ){
-        return false;
-      }
-      else{
+    catch (\Sabre\HTTP\ClientException $e) {
+      if ( $e->getResponse()->getStatus() !== 404 ){
         $this->error = $e->getResponse()->getStatusText();
       }
     }
+
     return false;
   }
   
