@@ -24,6 +24,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         'userName' => $cfg['user'],
         'password' => $cfg['pass']
       ]);
+      X::log($this->obj->options(), 'dav');
     }
     if ( !$this->obj ){
       $this->error = X::_("Missing parameters");
@@ -76,6 +77,34 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $success;
   }
   
+  protected function getProps($path): ?array
+  {
+    try {
+      if ( $this->obj->propFind($path, [
+        '{DAV:}resourcetype',
+        '{DAV:}getcontenttype'
+      ], 0) ){
+        return true;
+      }
+    }
+    catch (\Sabre\HTTP\ClientException $e) {
+      if (isset($e->getResponse) && is_callable($e->getResponse)) {
+        if ( $e->getResponse()->getStatus() !== 404 ){
+          $this->error = $e->getResponse()->getStatusText();
+        }
+      }
+      else {
+        $this->error = $e->getMessage();
+      }
+    }
+
+    if ($this->error) {
+      throw new \Exception($this->error);
+    }
+
+    return false;
+  }
+
   /**
    * Returns true if the given $path exists
    *
@@ -195,6 +224,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function isDir(string $path)
   {
+
     if ( $this->exists($path) && empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){
       return true;
     }
