@@ -281,9 +281,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $collection = $this->obj->propFind($path, $props, 1);
       if ( !empty($collection) ){
         //arrayt_shift to remove the parent included in the array
-        die(var_dump(array_shift($collection), $collection, X::basename('hello_world.pdf')));
         $dirs = [];
         $files = [];
+        $has_dir = in_array($type, ['both', 'dir']);
+        $has_file = in_array($type, ['both', 'file']);
         foreach ( $collection as $i => $c ){
           $tmp = [
             'path' => str_replace(self::prefix, '', $i),
@@ -296,31 +297,24 @@ class Nextcloud extends bbn\Models\Cls\Basic{
             $tmp['mtime'] = $this->filemtime($i);
             $tmp['size'] = $this->getSize($i);
           }
-          if ($type === 'both'){
-           
-            if ($tmp['dir']) {
-              $dirs[] = $tmp;
-            }
-            else{
-              $files[] = $tmp ;
-            }
-          }
-          else if ( $tmp['file'] && ($type === 'file') ){
-            $files[] = $tmp;
-          }
-          else if ( $tmp['dir'] && ($type === 'dir') ){
+          if ($has_dir && $tmp['dir']) {
             $dirs[] = $tmp;
+          }
+          else if ($has_file && $tmp['file']) {
+            $files[] = $tmp ;
           }
         }
         
-        if ( $type === 'dir' ){
+        if ($type === 'dir') {
           return $dirs;
         }
-        else if ( $type === 'file' ){
+        
+        if ($type === 'file') {
           return $files;
         }
 
         // both
+        X::log([...$dirs, ...$files]);
         return [...$dirs, ...$files];
       }  
     }
