@@ -44,8 +44,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       '{http://owncloud.org/ns}size'
     ));
     if ($size) {
-      X::log($size, 'nextcloud');
-      return $size[0];
+      return (int)array_values($size)[0];
     }
 
     return null;
