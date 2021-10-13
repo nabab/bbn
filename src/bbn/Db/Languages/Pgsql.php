@@ -1285,6 +1285,27 @@ PGSQL
   }
 
   /**
+   * @param string $table
+   * @param array $cfg
+   * @return int
+   */
+  public function alter(string $table, array $cfg): int
+  {
+    return 0;
+  }
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
+  public function getAlter(string $table, array $cfg): string
+  {
+    return '';
+  }
+
+  /**
    * Creates an index
    *
    * @param string $table
@@ -1341,14 +1362,14 @@ PGSQL
    *
    * @param string $table
    * @param string $column
-   * @param array $model
+   * @param array $col
    * @return bool
    * @throws \Exception
    */
-  public function createColumn(string $table, string $column, array $model): bool
+  public function createColumn(string $table, string $column, array $col): bool
   {
     if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      $column_definition = $this->getColumnDefinitionStatement($column, $model);
+      $column_definition = $this->getColumnDefinitionStatement($column, $col);
 
       return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
     }

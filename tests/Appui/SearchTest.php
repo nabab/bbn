@@ -705,12 +705,12 @@ CONTENT
     $this->db->insert($this->cfg['table'], [
       [
         $this->arch['search']['id_user'] => $user_id,
-        $this->arch['search']['value'] => 'foo'
+        $this->arch['search']['value'] => 'fo'
       ]
     ]);
 
     $id_search = $this->db->lastId();
-    $signature = $this->getExpectedSearchCfg()[2]['signature'];
+    $signature = $this->getExpectedSearchCfg()[0]['signature'];
 
     $this->db->insert($this->cfg['tables']['search_results'], [
       [
@@ -726,7 +726,7 @@ CONTENT
     ]);
 
 
-    $results = $this->search->get('foo');
+    $results = $this->search->get('fo');
 
     $this->assertArrayHasKey('data', $results);
     $this->assertSame([$member1, $member3, $member4], $results['data']);

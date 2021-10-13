@@ -1046,6 +1046,76 @@ MYSQL
   }
 
   /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
+  public function getAlter(string $table, array $cfg): string
+  {
+    if (empty($cfg['fields'])) {
+      throw new \Exception(X::_('Fields are not specified'));
+    }
+
+    $st   = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+    $done = false;
+
+    $alter_types = ['add', 'modify', 'drop'];
+
+    foreach ($cfg['fields'] as $name => $col) {
+      if (!$done) {
+        $done = true;
+      } else {
+        $st .= ',' . PHP_EOL;
+      }
+
+      if (!empty($col['alter_type']) && in_array(strtolower($col['alter_type']), $alter_types)) {
+        $alter_type = strtoupper($col['alter_type']);
+      }
+      else {
+        $alter_type = 'ADD';
+      }
+
+      if ($alter_type === 'MODIFY' && !empty($col['new_name'])) {
+        $st .= "CHANGE COLUMN ";
+        $st .= $this->escape($name) . ' ' . $this->escape($col['new_name']) . ' ';
+        $st .= $this->getColumnDefinitionStatement($name, $col, false);
+      }
+      elseif ($alter_type === 'DROP') {
+        $st .= "DROP COLUMN $name";
+      }
+      else {
+        $st .= $alter_type . ' ' . $this->getColumnDefinitionStatement($name, $col);
+      }
+
+      if ($alter_type !== 'DROP') {
+        if (!empty($col['after']) && is_string($col['after'])) {
+          $st .= " AFTER " . $this->escape($col['after']);
+        }
+      }
+
+    }
+
+    return $st;
+  }
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return int
+   * @throws \Exception
+   */
+  public function alter(string $table, array $cfg): int
+  {
+    if ($st = $this->getAlter($table, $cfg)) {
+      dump($st);
+      return (bool)$this->rawQuery($st);
+    }
+
+    return 0;
+  }
+
+  /**
    * Creates an index
    *
    * @param null|string $table
@@ -1109,17 +1179,17 @@ MYSQL
    *
    * @param string $table
    * @param string $column
-   * @param array $model
+   * @param array $col
    * @return bool
    * @throws \Exception
    */
-  public function createColumn(string $table, string $column, array $model): bool
+  public function createColumn(string $table, string $column, array $col): bool
   {
     if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      $column_definition = $this->getColumnDefinitionStatement($column, $model);
+      $column_definition = $this->getColumnDefinitionStatement($column, $col);
 
-      if (!empty($model['after']) && is_string($model['after'])) {
-        $column_definition .= " AFTER {$model['after']}";
+      if (!empty($col['after']) && is_string($col['after'])) {
+        $column_definition .= " AFTER " . $this->escape($col['after']);
       }
 
       return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
@@ -1133,12 +1203,17 @@ MYSQL
    *
    * @param string $name
    * @param array $col
+   * @param bool $include_col_name
    * @return string
    * @throws \Exception
    */
-  protected function getColumnDefinitionStatement(string $name, array $col): string
+  protected function getColumnDefinitionStatement(string $name, array $col, bool $include_col_name = true): string
   {
-    $st = '  ' . $this->escape($name) . ' ';
+    $st = '';
+
+    if ($include_col_name) {
+      $st .= '  ' . $this->escape($name) . ' ';
+    }
 
     if (empty($col['type'])) {
       throw new \Exception(X::_('Column type is not provided'));

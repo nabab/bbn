@@ -1492,15 +1492,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return $st;
   }
 
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlter(string $table, array $cfg): string
-  {
-    return '';
-  }
 
   /**
    * @param string $table
@@ -1533,15 +1524,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
   /**
-   * @param $table
-   * @param $cfg
-   * @return int
+   * @param string $table
+   * @param string $column
+   * @return bool
    */
-  public function alter($table, $cfg): int
-  {
-    return 0;
-  }
-
   public function dropColumn(string $table, string $column): bool
   {
     if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {

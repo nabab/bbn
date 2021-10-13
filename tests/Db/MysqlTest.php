@@ -8890,4 +8890,195 @@ GROUP BY `id`
         'default' => 'read'
       ]);
   }
+
+  /** @test */
+  public function getAlter_method_returns_sql_string_for_alter_statement()
+  {
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'enum',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'alter_type' => 'modify',
+          'new_name' => 'username',
+          'after' => 'role'
+        ],
+        'permission' => [
+          'type' => 'set',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'decimal',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'null' => true,
+          'default' => 'NULL',
+          'alter_type' => 'modify',
+          'after' => 'id'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $expected = <<<SQL
+ALTER TABLE `users`
+ADD   `id` binary(32) NOT NULL,
+ADD   `role` enum ('super_admin','admin','user') NOT NULL DEFAULT 'user',
+CHANGE COLUMN `name` `username` varchar(255) NOT NULL AFTER `role`,
+ADD   `permission` set ('read','write') NOT NULL DEFAULT 'read',
+MODIFY   `balance` decimal(10,2) UNSIGNED DEFAULT NULL AFTER `id`,
+ADD   `balance_before` decimal(10,2) NOT NULL DEFAULT 0,
+ADD   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DROP COLUMN role_id
+SQL;
+
+
+    $this->assertSame(
+      $expected, self::$mysql->getAlter('users', $cfg)
+    );
+  }
+
+  /** @test */
+  public function getAlter_method_throws_an_exception_if_the_fields_property_is_missing()
+  {
+    $this->expectException(\Exception::class);
+    self::$mysql->getAlter('users', ['a' => 'b']);
+  }
+
+  /** @test */
+  public function alter_method_alters_the_given_cfg_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'balance int(11) SIGNED NOT NULL,
+              role_id INT(11) DEFAULT 0,
+              name TEXT';
+    });
+
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'enum',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'alter_type' => 'modify',
+          'new_name' => 'username',
+          'after' => 'role'
+        ],
+        'permission' => [
+          'type' => 'set',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'decimal',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'null' => true,
+          'default' => 'NULL',
+          'alter_type' => 'modify',
+          'after' => 'id'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $this->assertSame(
+      1, self::$mysql->alter('users', $cfg)
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayHasKey('id', $structure);
+    $this->assertArrayHasKey('balance', $structure);
+    $this->assertArrayHasKey('role', $structure);
+    $this->assertArrayHasKey('username', $structure);
+    $this->assertArrayHasKey('permission', $structure);
+    $this->assertArrayHasKey('balance_before', $structure);
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertArrayNotHasKey('name', $structure);
+    $this->assertArrayNotHasKey('role_id', $structure);
+
+    $this->assertSame('binary', $structure['id']['type']);
+    $this->assertSame(32, $structure['id']['maxlength']);
+    $this->assertSame(0, $structure['id']['null']);
+    $this->assertSame(1, $structure['id']['position']);
+
+    $this->assertSame('decimal', $structure['balance']['type']);
+    $this->assertSame(10, $structure['balance']['maxlength']);
+    $this->assertSame(2, $structure['balance']['decimals']);
+    $this->assertSame(2, $structure['balance']['position']);
+
+    $this->assertSame('enum', $structure['role']['type']);
+    $this->assertSame("'super_admin','admin','user'", $structure['role']['extra']);
+    $this->assertSame('user', $structure['role']['default']);
+    $this->assertSame(3, $structure['role']['position']);
+
+    $this->assertSame('varchar', $structure['username']['type']);
+    $this->assertSame(255, $structure['username']['maxlength']);
+    $this->assertSame(0, $structure['username']['null']);
+    $this->assertSame(4, $structure['username']['position']);
+
+    $this->assertSame('set', $structure['permission']['type']);
+    $this->assertSame("'read','write'", $structure['permission']['extra']);
+    $this->assertSame('read', $structure['permission']['default']);
+    $this->assertSame(0, $structure['permission']['null']);
+    $this->assertSame(5, $structure['permission']['position']);
+
+    $this->assertSame('decimal', $structure['balance_before']['type']);
+    $this->assertSame(6, $structure['balance_before']['position']);
+    $this->assertSame(0, $structure['balance_before']['null']);
+    $this->assertSame(0.0, $structure['balance_before']['default']);
+    $this->assertSame(true, $structure['balance_before']['signed']);
+    $this->assertSame(10, $structure['balance_before']['maxlength']);
+    $this->assertSame(2, $structure['balance_before']['decimals']);
+
+    $this->assertSame('datetime', $structure['created_at']['type']);
+    $this->assertSame('CURRENT_TIMESTAMP', $structure['created_at']['default']);
+    $this->assertSame(7, $structure['created_at']['position']);
+    $this->assertSame(0, $structure['created_at']['null']);
+  }
 }
