@@ -1046,6 +1046,46 @@ MYSQL
   }
 
   /**
+   * Return a string for alter table sql statement.
+   *
+   * ```php
+   * $cfg = [
+   *  'fields' => [
+   *    'id' => [
+   *      'type' => 'binary',
+   *      'maxlength' => 32
+   *    ],
+   *    'name' => [
+   *      'type' => 'varchar',
+   *      'maxlength' => 255,
+   *      'alter_type' => 'modify',
+   *      'new_name' => 'username',
+   *      'after' => 'id'
+   *    ],
+   *    'balance' => [
+   *      'type' => 'decimal',
+   *      'maxlength' => 10,
+   *      'decimals' => 2,
+   *      'null' => true,
+   *      'default' => 0
+   *      'alter_type' => 'modify',
+   *      'after' => 'id'
+   *    ],
+   *    'role_id' => [
+   *      'alter_type' => 'drop'
+   *    ]
+   *  ]
+   * ];
+   * X::dump($db->getAlterTable('users', $cfg);
+   *
+   * // (string) ALTER TABLE `users`
+   * // ADD `id` binary(32) NOT NULL,
+   * // CHANGE COLUMN `name` `username` varchar(255) NOT NULL AFTER `id`,
+   * // MODIFY `balance` decimal(10,2) UNSIGNED DEFAULT 0 AFTER `id`,
+   * // DROP COLUMN `role_id`
+   *
+   * ```
+   *
    * @param string $table
    * @param array $cfg
    * @return string
@@ -1061,8 +1101,6 @@ MYSQL
       $st   = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
       $done = false;
 
-      $alter_types = ['add', 'modify', 'drop'];
-
       foreach ($cfg['fields'] as $name => $col) {
         if (!$done) {
           $done = true;
@@ -1070,46 +1108,73 @@ MYSQL
           $st .= ',' . PHP_EOL;
         }
 
-        if (!empty($col['alter_type']) && in_array(strtolower($col['alter_type']), $alter_types)) {
-          $alter_type = strtoupper($col['alter_type']);
-        }
-        else {
-          $alter_type = 'ADD';
-        }
-
-        if ($alter_type === 'MODIFY' && !empty($col['new_name'])) {
-          $st .= "CHANGE COLUMN ";
-          $st .= $this->escape($name) . ' ' . $this->escape($col['new_name']) . ' ';
-          $st .= $this->getColumnDefinitionStatement($name, $col, false);
-        }
-        elseif ($alter_type === 'DROP') {
-          $st .= "DROP COLUMN " . $this->escape($name);
-        }
-        else {
-          $st .= $alter_type . ' ' . $this->getColumnDefinitionStatement($name, $col);
-        }
-
-        if ($alter_type !== 'DROP') {
-          if (!empty($col['after']) && is_string($col['after'])) {
-            $st .= " AFTER " . $this->escape($col['after']);
-          }
-        }
+        $st .= $this->getAlterColumn($table, array_merge($col, [
+          'col_name' => $name,
+          'no_table_exp' => true
+        ]));
       }
     }
-
 
     return $st ?? '';
   }
 
 
   /**
+   * Return a string for alter column statement.
+   *
+   * ```php
+   * $cfg = [
+   *  'col_name' => 'id',
+   *  'type' => 'binary',
+   *  'maxlength' => 32
+   * ];
+   * X::dump($db->getAlterColumn('users', $cfg);
+   *
+   * // (string) ALTER TABLE `users` ADD `id` binary(32) NOT NULL
+   *
+   * ```
+   *
    * @param string $table
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getAlterColumn(string $table, array $cfg): string
   {
-    return '';
+    $alter_types = ['add', 'modify', 'drop'];
+
+    if (!empty($cfg['alter_type']) && in_array(strtolower($cfg['alter_type']), $alter_types)) {
+      $alter_type = strtoupper($cfg['alter_type']);
+    }
+    else {
+      $alter_type = 'ADD';
+    }
+
+    $st = '';
+
+    if (empty($cfg['no_table_exp'])) {
+      $st = 'ALTER TABLE '. $this->escape($table) . PHP_EOL;
+    }
+
+    if ($alter_type === 'MODIFY' && !empty($cfg['new_name'])) {
+      $st .= "CHANGE COLUMN ";
+      $st .= $this->escape($cfg['col_name']) . ' ' . $this->escape($cfg['new_name']) . ' ';
+      $st .= $this->getColumnDefinitionStatement($cfg['col_name'], $cfg, false);
+    }
+    elseif ($alter_type === 'DROP') {
+      $st .= "DROP COLUMN " . $this->escape($cfg['col_name']);
+    }
+    else {
+      $st .= $alter_type . ' ' . $this->getColumnDefinitionStatement($cfg['col_name'], $cfg);
+    }
+
+    if ($alter_type !== 'DROP') {
+      if (!empty($cfg['after']) && is_string($cfg['after'])) {
+        $st .= " AFTER " . $this->escape($cfg['after']);
+      }
+    }
+
+    return $st;
   }
 
   /**

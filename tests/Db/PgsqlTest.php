@@ -9488,4 +9488,88 @@ SQL;
     $this->assertSame(8, $structure['created_at']['position']);
     $this->assertSame(0, $structure['created_at']['null']);
   }
+
+  /** @test */
+  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  {
+    $this->assertSame(
+      'ALTER TABLE users
+ADD COLUMN   id bytea NOT NULL',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'id',
+        'type' => 'binary',
+        'maxlength' => 32
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ADD COLUMN   role role NOT NULL DEFAULT \'user\'',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'role',
+        'type' => 'USER-DEFINED',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ALTER COLUMN name TYPE varchar(255)',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'name',
+        'type' => 'varchar',
+        'maxlength' => 255,
+        'alter_type' => 'modify',
+        'null' => true
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ALTER COLUMN balance TYPE decimal(10,2),
+ALTER COLUMN balance SET DEFAULT NULL',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL',
+        'alter_type' => 'modify'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ADD COLUMN   balance real NOT NULL DEFAULT 0',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+DROP COLUMN balance',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'alter_type' => 'drop'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+RENAME COLUMN name TO username',
+    self::$pgsql->getAlterColumn('users', [
+      'col_name' => 'name',
+      'new_name' =>  'username',
+      'alter_type' => 'modify'
+    ])
+    );
+  }
 }

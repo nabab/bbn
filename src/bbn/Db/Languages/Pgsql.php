@@ -1315,9 +1315,6 @@ PGSQL
       $st   = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
       $done = false;
 
-      $alter_types = ['add', 'modify', 'drop'];
-      $to_rename   = [];
-
       foreach ($cfg['fields'] as $name => $col) {
         if (!$done) {
           $done = true;
@@ -1325,24 +1322,10 @@ PGSQL
           $st .= ',' . PHP_EOL;
         }
 
-        if (!empty($col['alter_type']) && in_array(strtolower($col['alter_type']), $alter_types)) {
-          $alter_type = strtoupper($col['alter_type']);
-        }
-        else {
-          $alter_type = 'ADD';
-        }
-
-        if ($alter_type === 'MODIFY') {
-          $st .= "ALTER COLUMN ";
-          $st .= $this->escape($name) . ' TYPE ';
-          $st .= $this->getColumnDefinitionStatement($name, $col, false, true);
-        }
-        elseif ($alter_type === 'DROP') {
-          $st .= "DROP COLUMN " . $this->escape($name);
-        }
-        else {
-          $st .= $alter_type . ' COLUMN ' . $this->getColumnDefinitionStatement($name, $col);
-        }
+        $st .= $this->getAlterColumn($table, array_merge($col, [
+          'col_name' => $name,
+          'no_table_exp' => true
+        ]));
       }
     }
 
@@ -1350,18 +1333,47 @@ PGSQL
   }
 
 
-
   /**
    * @param string $table
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getAlterColumn(string $table, array $cfg): string
   {
-//    $st .= "RENAME COLUMN ";
-//    $st .= $this->escape($name) . ' TO ' . $this->escape($col['new_name']) . ' ';
-//    $st .= ';' . PHP_EOL;
-    return '';
+    $alter_types = ['add', 'modify', 'drop'];
+
+    if (!empty($cfg['alter_type']) && in_array(strtolower($cfg['alter_type']), $alter_types)) {
+      $alter_type = strtoupper($cfg['alter_type']);
+    }
+    else {
+      $alter_type = 'ADD';
+    }
+
+    $st = '';
+
+    if (empty($cfg['no_table_exp'])) {
+      $st = 'ALTER TABLE '. $this->escape($table) . PHP_EOL;
+    }
+
+    if ($alter_type === 'MODIFY') {
+      if (!empty($cfg['new_name'])) {
+        $st .= "RENAME COLUMN ";
+        $st .= $this->escape($cfg['col_name']) . ' TO ' . $this->escape($cfg['new_name']);
+      } else {
+        $st .= "ALTER COLUMN ";
+        $st .= $this->escape($cfg['col_name']) . ' TYPE ';
+        $st .= $this->getColumnDefinitionStatement($cfg['col_name'], $cfg, false, true);
+      }
+    }
+    elseif ($alter_type === 'DROP') {
+      $st .= "DROP COLUMN " . $this->escape($cfg['col_name']);
+    }
+    else {
+      $st .= $alter_type . ' COLUMN ' . $this->getColumnDefinitionStatement($cfg['col_name'], $cfg);
+    }
+
+    return $st;
   }
 
   /**

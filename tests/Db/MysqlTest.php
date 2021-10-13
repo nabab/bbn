@@ -9095,4 +9095,80 @@ SQL;
     $this->assertSame(7, $structure['created_at']['position']);
     $this->assertSame(0, $structure['created_at']['null']);
   }
+
+  /** @test */
+  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  {
+    $this->assertSame(
+      'ALTER TABLE `users`
+ADD   `id` binary(32)',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'id',
+        'type' => 'binary',
+        'maxlength' => 32,
+        'null' => true
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE `users`
+CHANGE COLUMN `name` `username` varchar(255) NOT NULL AFTER `role`',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'name',
+        'type' => 'varchar',
+        'maxlength' => 255,
+        'alter_type' => 'modify',
+        'new_name' => 'username',
+        'after' => 'role'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE `users`
+ADD   `balance` decimal(10,2) NOT NULL DEFAULT 0',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ])
+    );
+
+    $this->assertSame(
+      "ALTER TABLE `users`
+ADD   `role` enum ('super_admin','admin','user') NOT NULL DEFAULT 'user'",
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'role',
+        'type' => 'enum',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ])
+    );
+
+    $this->assertSame(
+      "ALTER TABLE `users`
+MODIFY   `balance` decimal(10,2) UNSIGNED DEFAULT NULL AFTER `id`",
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL',
+        'alter_type' => 'modify',
+        'after' => 'id'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE `users`
+DROP COLUMN `name`',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'name',
+        'alter_type' => 'drop'
+      ])
+    );
+  }
 }
