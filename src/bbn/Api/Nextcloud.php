@@ -198,6 +198,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function isFile(string $path): bool
   {
+    X::log(
+      "isFile?? $path / ".urlencode($path)." / ".self::fixURL($path),
+      'nextcloud');
     return !empty(
       $this->_propFind(
         self::fixURL($path),
@@ -259,6 +262,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function download(string $file): void
   {
+    X::log("DOWNLOAD?", 'nextcloud');
     if ($this->isFile($file)) {
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
