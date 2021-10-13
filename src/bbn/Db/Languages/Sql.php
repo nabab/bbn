@@ -1492,37 +1492,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return $st;
   }
 
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlterTable(string $table, array $cfg): string
-  {
-    return '';
-  }
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlterColumn(string $table, array $cfg): string
-  {
-    return '';
-  }
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
-  public function getAlterKey(string $table, array $cfg): string
-  {
-    return '';
-  }
-
   /**
    * @param string $table
    * @param string $column

@@ -1838,29 +1838,6 @@ class DbTest extends TestCase
   }
 
   /** @test */
-  public function getAlter_method_returns_sql_string_for_alter_statement()
-  {
-    $this->mysql_mock->shouldReceive('getAlter')
-      ->with('user', [])
-      ->once()
-      ->andReturn($result = 'ALTER TABLE ...');
-
-    $this->assertSame($result, $this->db->getAlter('user', []));
-  }
-
-  /** @test */
-  public function getAlter_method_throws_an_exception_if_method_not_found_on_language_class()
-  {
-    $this->expectException(\Exception::class);
-    $this->expectExceptionMessage('Method not found on the language class!');
-
-    $this->setNonPublicPropertyValue('language', new class {
-    });
-
-    $this->db->getAlter('users', []);
-  }
-
-  /** @test */
   public function getAlterTable_method_returns_sql_string_for_alter_statement()
   {
     $this->mysql_mock->shouldReceive('getAlterTable')

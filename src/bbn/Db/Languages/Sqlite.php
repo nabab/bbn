@@ -718,6 +718,7 @@ class Sqlite extends Sql
     return $st;
   }
 
+
   /**
    * @param string $table
    * @param array $cfg
@@ -728,16 +729,39 @@ class Sqlite extends Sql
     return 0;
   }
 
+
   /**
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
    */
-  public function getAlter(string $table, array $cfg): string
+  public function getAlterTable(string $table, array $cfg): string
   {
     return '';
   }
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterColumn(string $table, array $cfg): string
+  {
+    return '';
+  }
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterKey(string $table, array $cfg): string
+  {
+    return '';
+  }
+
 
   /**
    * Creates an index

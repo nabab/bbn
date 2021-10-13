@@ -1288,9 +1288,14 @@ PGSQL
    * @param string $table
    * @param array $cfg
    * @return int
+   * @throws \Exception
    */
   public function alter(string $table, array $cfg): int
   {
+    if ($st = $this->getAlterTable($table, $cfg)) {
+      return (bool)$this->rawQuery($st);
+    }
+
     return 0;
   }
 
@@ -1300,7 +1305,71 @@ PGSQL
    * @return string
    * @throws \Exception
    */
-  public function getAlter(string $table, array $cfg): string
+  public function getAlterTable(string $table, array $cfg): string
+  {
+    if (empty($cfg['fields'])) {
+      throw new \Exception(X::_('Fields are not specified'));
+    }
+
+    if ($this->check() && Str::checkName($table)) {
+      $st   = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $done = false;
+
+      $alter_types = ['add', 'modify', 'drop'];
+      $to_rename   = [];
+
+      foreach ($cfg['fields'] as $name => $col) {
+        if (!$done) {
+          $done = true;
+        } else {
+          $st .= ',' . PHP_EOL;
+        }
+
+        if (!empty($col['alter_type']) && in_array(strtolower($col['alter_type']), $alter_types)) {
+          $alter_type = strtoupper($col['alter_type']);
+        }
+        else {
+          $alter_type = 'ADD';
+        }
+
+        if ($alter_type === 'MODIFY') {
+          $st .= "ALTER COLUMN ";
+          $st .= $this->escape($name) . ' TYPE ';
+          $st .= $this->getColumnDefinitionStatement($name, $col, false, true);
+        }
+        elseif ($alter_type === 'DROP') {
+          $st .= "DROP COLUMN " . $this->escape($name);
+        }
+        else {
+          $st .= $alter_type . ' COLUMN ' . $this->getColumnDefinitionStatement($name, $col);
+        }
+      }
+    }
+
+    return $st ?? '';
+  }
+
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterColumn(string $table, array $cfg): string
+  {
+//    $st .= "RENAME COLUMN ";
+//    $st .= $this->escape($name) . ' TO ' . $this->escape($col['new_name']) . ' ';
+//    $st .= ';' . PHP_EOL;
+    return '';
+  }
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   */
+  public function getAlterKey(string $table, array $cfg): string
   {
     return '';
   }
@@ -1382,11 +1451,23 @@ PGSQL
    *
    * @param string $name
    * @param array $col
+   * @param bool $include_col_name
+   * @param bool $for_alter
    * @return string
+   * @throws \Exception
    */
-  public function getColumnDefinitionStatement(string $name, array $col): string
+  public function getColumnDefinitionStatement(
+    string $name,
+    array $col,
+    bool $include_col_name = true,
+    bool $for_alter = false
+  ): string
   {
-    $st       = '  ' . $this->escape($name) . ' ';
+    $st = '';
+
+    if ($include_col_name) {
+      $st .= '  ' . $this->escape($name) . ' ';
+    }
 
     if (empty($col['type'])) {
       throw new \Exception(X::_('Column type is not provided'));
@@ -1398,8 +1479,13 @@ PGSQL
       [$col['default']] = explode('::', $col['default']);
     }
 
-    if ($col_type === 'USER-DEFINED' && !empty($col['udt_name'])) {
-      $col['type'] = $col['udt_name'];
+    if ($col_type === 'USER-DEFINED') {
+      if (!empty($col['udt_name'])) {
+        $col['type'] = $col['udt_name'];
+      }
+      else {
+        $col['type'] = $name;
+      }
     }
 
     if (!in_array($col_type, self::$types)) {
@@ -1435,13 +1521,28 @@ PGSQL
     }
 
     if (empty($col['null'])) {
-      $st .= ' NOT NULL';
+      if ($for_alter) {
+        $st .= ',' . PHP_EOL;
+        $st .= 'ALTER COLUMN ' . $this->escape($name);
+        $st .= ' SET NOT NULL,' . PHP_EOL;
+      }
+      else {
+        $st .= ' NOT NULL';
+      }
     }
 
     if (!empty($col['virtual'])) {
       $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
     } elseif (array_key_exists('default', $col)) {
-      $st .= ' DEFAULT ';
+      if ($for_alter) {
+        $st .= ',' . PHP_EOL;
+        $st .= 'ALTER COLUMN ' . $this->escape($name);
+        $st .= ' SET DEFAULT ';
+      }
+      else {
+        $st .= ' DEFAULT ';
+      }
+
       if (($col['default'] === 'NULL')
         || Str::isNumber($col['default'])
         || strpos($col['default'], '(')
@@ -1454,7 +1555,7 @@ PGSQL
       }
     }
 
-    return $st;
+    return rtrim($st, ',' . PHP_EOL);
   }
 
   /**

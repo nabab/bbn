@@ -8892,7 +8892,7 @@ GROUP BY `id`
   }
 
   /** @test */
-  public function getAlter_method_returns_sql_string_for_alter_statement()
+  public function getAlterTable_method_returns_sql_string_for_alter_statement()
   {
     $cfg = [
       'fields' => [
@@ -8952,20 +8952,34 @@ ADD   `permission` set ('read','write') NOT NULL DEFAULT 'read',
 MODIFY   `balance` decimal(10,2) UNSIGNED DEFAULT NULL AFTER `id`,
 ADD   `balance_before` decimal(10,2) NOT NULL DEFAULT 0,
 ADD   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-DROP COLUMN role_id
+DROP COLUMN `role_id`
 SQL;
 
 
     $this->assertSame(
-      $expected, self::$mysql->getAlter('users', $cfg)
+      $expected, self::$mysql->getAlterTable('users', $cfg)
     );
   }
 
   /** @test */
-  public function getAlter_method_throws_an_exception_if_the_fields_property_is_missing()
+  public function getAlterTable_method_returns_empty_string_when_the_given_table_name_is_not_valid()
+  {
+    $this->assertSame('', self::$mysql->getAlterTable('user**', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertSame('', self::$mysql->getAlterTable('users', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_throws_an_exception_if_the_fields_property_is_missing()
   {
     $this->expectException(\Exception::class);
-    self::$mysql->getAlter('users', ['a' => 'b']);
+    self::$mysql->getAlterTable('users', ['a' => 'b']);
   }
 
   /** @test */
