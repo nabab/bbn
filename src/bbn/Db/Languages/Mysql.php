@@ -344,7 +344,7 @@ MYSQL
     if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
       $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
-      dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
+
       $res = $this->rawQuery(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
       return !!$res;
     }
@@ -1108,7 +1108,6 @@ MYSQL
   public function alter(string $table, array $cfg): int
   {
     if ($st = $this->getAlter($table, $cfg)) {
-      dump($st);
       return (bool)$this->rawQuery($st);
     }
 
