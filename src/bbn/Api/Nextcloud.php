@@ -463,7 +463,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         if (!$bit) {
           $fpath .= '/';
         }
-        elseif ($bit !== '.') {
+        else {
           $fpath .= urlencode($bit);
           if ($i < $num -1) {
             $fpath .= '/';          
