@@ -198,7 +198,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function isFile(string $path): bool
   {
-    X::log("isFile?? $path");
+    X::log("isFile?? $path / ".urlencode($path), 'nextcloud');
     return !empty(
       $this->obj->propFind(
         $path,
