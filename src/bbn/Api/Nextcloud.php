@@ -199,11 +199,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function isFile(string $path): bool
   {
     X::log(
-      "isFile?? $path / ".urlencode($path)." / ".self::fixURL($path),
+      "isFile?? $path / ".self::fixURL($path),
       'nextcloud');
     return !empty(
-      $this->_propFind(
-        self::fixURL($path),
+      $this->_propFind($path,
         ['{DAV:}getcontenttype']
       )
     );
