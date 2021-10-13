@@ -203,7 +203,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       'nextcloud');
     return !empty(
       $this->obj->propFind(
-        $path,
+        self::fixURL($path),
         ['{DAV:}getcontenttype'],
         0
       )
