@@ -40,7 +40,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   {
     $tmp = $path;
     $path = $this->getRealPath($path);
-    $size = $this->obj->propFind($tmp, array(
+    $size = $this->_propFind($tmp, array(
       '{http://owncloud.org/ns}size'
     ));
     if ($size) {
@@ -69,7 +69,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   protected function getProps($path): ?array
   {
     try {
-      if ( $this->obj->propFind($path, [
+      if ( $this->_propFind($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
       ], 0) ){
@@ -103,7 +103,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function exists($path)
   {
     try {
-      if ( $this->obj->propFind($path, [
+      if ( $this->_propFind($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
       ], 0) ){
@@ -198,14 +198,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function isFile(string $path): bool
   {
-    X::log(
-      "isFile?? $path / ".urlencode($path)." / ".self::fixURL($path),
-      'nextcloud');
     return !empty(
-      $this->obj->propFind(
+      $this->_propFind(
         self::fixURL($path),
-        ['{DAV:}getcontenttype'],
-        0
+        ['{DAV:}getcontenttype']
       )
     );
   }
@@ -220,10 +216,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
     return $this->exists($path) &&
         empty(
-          $this->obj->propFind(
+          $this->_propFind(
             $path,
-            ['{DAV:}getcontenttype'],
-            0
+            ['{DAV:}getcontenttype']
           )
         );
   }
@@ -235,7 +230,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function filemtime(string $path)
   {
     if ( $this->exists($path) ){
-      $mtime = $this->obj->propFind($path, [
+      $mtime = $this->_propFind($path, [
         '{DAV:}getlastmodified'
       ]);
       if ( !empty($mtime['{DAV:}getlastmodified']) ){
@@ -264,7 +259,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function download(string $file): void
   {
-    X::log("DOWNLOAD?", 'nextcloud');
     if ($this->isFile($file)) {
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
@@ -304,7 +298,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    // $path = $this->getSystemPath($path);
     if ( $this->exists($path) && $this->isDir($path) ){
       $props = ['{DAV:}getcontenttype'];
-      $collection = $this->obj->propFind($path, $props, 1);
+      $collection = $this->_propFind($path, $props, 1);
       if ( !empty($collection) ){
         //arrayt_shift to remove the parent included in the array
         $dirs = [];
@@ -442,7 +436,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
           // wanted to put '%' instead of ' ' in the filename but not accepted
           $full_name =  $path . (($path !== '') ? '/' : '' ) . str_replace(' ', '_',$f['name']);
           if (!$this->exists($full_name) ){
-            if ( $this->obj->request('PUT', $full_name, $content) ){
+            if ( $this->obj->request('PUT', self::fixURL($full_name), $content) ){
               return $success = true;
             }
           }
@@ -450,6 +444,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       }
     }
     return $success;
+  }
+
+
+  private function _propFind(string $path, array $props, int $deep = 0): array
+  {
+    return $this->obj->propFind(self::fixURL($path), $props, $deep);
   }
 
   private static function fixURL(string $path): string
