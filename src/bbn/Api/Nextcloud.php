@@ -256,27 +256,22 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * Download the given file
    * @param string $file
    */
-  public function download(string $file):String
+  public function download(string $file): void
   {
-    if ( $this->exists($file) && $this->isFile($file) ){
-      $dest = '';
+    if ($this->isFile($file)) {
+      //the tmp file destination
+      $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
       $res = $this->obj->request('GET', $this->getRealPath($file));
-      if ( !empty($res) && !empty($res['body']) ){
-        //the tmp file destination
-        $dest = \bbn\Mvc::getTmpPath().X::basename($file);
+      if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
-        if ( $tmp = file_put_contents($dest, $res['body']) ){
+        if (file_put_contents($dest, $res['body'])) {
           // instantiates the new file to the class \bbn\File
-          //$file_istance = new \bbn\File($dest);
-          $dest = \bbn\Mvc::getTmpPath().X::basename($file);;
-          //return the content of the tmp file
-          //$file_istance->download();
-          /* deletes the tmp file
-          unlink($dest);*/
+          $tmp = new \bbn\File($dest);
+          $tmp->download();
+          unlink($dest);
         } 
       }
-      return $dest;
     }
   }
   
