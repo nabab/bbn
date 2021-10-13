@@ -464,7 +464,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
           $fpath .= '/';
         }
         else {
-          $fpath .= urlencode($bit);
+          $fpath .= rawurlencode($bit);
           if ($i < $num -1) {
             $fpath .= '/';          
           }
