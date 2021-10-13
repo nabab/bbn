@@ -366,7 +366,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function getRealPath(string $path): string
   {
-    $path = urlencode($path);
+    //$path = urlencode($path);
     if ( strpos($path, self::prefix) !== 0 ){
       return self::prefix.$path;
     }
