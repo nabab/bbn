@@ -267,7 +267,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       X::log("DEST: $dest", 'nextcloud');
       //gets the content of the file
-      $path = urlencode($this->getRealPath($file));
+      $path = $this->getRealPath($file);
       X::log("SRC: $path", 'nextcloud');
       $res = $this->obj->request('GET', $path);
       if (!empty($res) && !empty($res['body'])) {
@@ -365,6 +365,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function getRealPath(string $path): string
   {
+    $path = urlencode($path);
     if ( strpos($path, self::prefix) !== 0 ){
       return self::prefix.$path;
     }
