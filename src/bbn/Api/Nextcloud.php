@@ -196,14 +196,15 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $path
    * @return Boolean
    */
-  public function isFile(string $path)
+  public function isFile(string $path): bool
   {
-    if ( $this->exists($path) && !empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){
-      return true;
-    }
-    else {
-      return false;
-    }
+    return !empty(
+      $this->obj->propFind(
+        $path,
+        ['{DAV:}getcontenttype'],
+        0
+      )
+    );
   }
   
   /**
@@ -211,15 +212,17 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $path
    * @return Boolean
    */
-  public function isDir(string $path)
+  public function isDir(string $path): bool
   {
 
-    if ( $this->exists($path) && empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){
-      return true;
-    }
-    else {
-      return false;
-    }
+    return $this->exists($path) &&
+        empty(
+          $this->obj->propFind(
+            $path,
+            ['{DAV:}getcontenttype'],
+            0
+          )
+        );
   }
   
   /**
