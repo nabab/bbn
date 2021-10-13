@@ -198,7 +198,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function isFile(string $path): bool
   {
-    X::log("isFile?? $path / ".urlencode($path), 'nextcloud');
+    X::log(
+      "isFile?? $path / ".urlencode($path)." / ".self::fixURL($path),
+      'nextcloud');
     return !empty(
       $this->obj->propFind(
         $path,
@@ -448,6 +450,31 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       }
     }
     return $success;
+  }
+
+  private static function fixURL(string $path): string
+  {
+    if ( strpos($path, self::prefix) === 0 ){
+      $path = substr($path, strlen(self::prefix));
+      $fpath = self::prefix;
+      $bits = X::split($path, '/');
+      $num = count($bits);
+      foreach ($bits as $i => $bit) {
+        if (!$bit) {
+          $fpath .= '/';
+        }
+        elseif ($bit !== '.') {
+          $fpath .= urlencode($bit);
+          if ($i < $num -1) {
+            $fpath .= '/';          
+          }
+        }
+      }
+
+      return $fpath;
+    }
+
+
   }
 
 }
