@@ -223,8 +223,11 @@ class System extends bbn\Models\Cls\Basic
    */
   public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
-    if ($this->check() && $this->isDir($path)) {
-      if ($this->mode !== 'nextcloud') {
+    if ($this->check()) {
+      if ($this->mode === 'nextcloud') {
+        return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
+      }
+      else {
         $is_absolute = strpos($path, '/') === 0;
         $fs          = &$this;
         clearstatcache();
@@ -240,8 +243,6 @@ class System extends bbn\Models\Cls\Basic
           },
           $this->_get_items($this->getRealPath($path), $filter ?: $type, $hidden, $detailed)
         );
-      } else {
-        return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
       }
     }
 
@@ -257,7 +258,7 @@ class System extends bbn\Models\Cls\Basic
    */
   public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
-    if ($this->check() && $this->isDir($path)) {
+    if ($this->check()) {
       $is_absolute = strpos($path, '/') === 0;
       $fs          = &$this;
       clearstatcache();

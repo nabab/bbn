@@ -8,7 +8,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   
   private $obj;
   private $path;
-  private $_prefix;
   
   private const prefix = '/remote.php/webdav/';
   /**
@@ -25,9 +24,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         'userName' => $cfg['user'],
         'password' => $cfg['pass']
       ]);
-      $this->_prefix = 'files/'.$cfg['user'].'/';
     }
-
     if ( !$this->obj ){
       $this->error = X::_("Missing parameters");
     }
@@ -43,7 +40,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   {
     $tmp = $path;
     $path = $this->getRealPath($path);
-    $size = $this->obj->propFind($tmp, array(
+    $size = $this->getProps($tmp, array(
       '{http://owncloud.org/ns}size'
     ));
     if ($size) {
@@ -69,15 +66,14 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $success;
   }
   
-  protected function getProps($path): ?array
+  protected function getProps($path, array $props = null, int $depth = 0): ?array
   {
     try {
-      if ( $this->obj->propFind($path, [
+      $res = $this->obj->propFind(self::fixURL($path), $props ?: [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
-      ], 0) ){
-        return true;
-      }
+      ], $depth);
+      return $res ?: null;
     }
     catch (\Sabre\HTTP\ClientException $e) {
       if (isset($e->getResponse) && is_callable($e->getResponse)) {
@@ -94,7 +90,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       throw new \Exception($this->error);
     }
 
-    return false;
+    return null;
   }
 
   /**
@@ -106,7 +102,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function exists($path)
   {
     try {
-      if ( $this->obj->propFind($path, [
+      if ( $this->getProps($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
       ], 0) ){
@@ -202,7 +198,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function isFile(string $path): bool
   {
     return !empty(
-      $this->obj->propFind(
+      $this->getProps(
         $path,
         ['{DAV:}getcontenttype'],
         0
@@ -220,7 +216,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
     return $this->exists($path) &&
         empty(
-          $this->obj->propFind(
+          $this->getProps(
             $path,
             ['{DAV:}getcontenttype'],
             0
@@ -235,7 +231,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function filemtime(string $path)
   {
     if ( $this->exists($path) ){
-      $mtime = $this->obj->propFind($path, [
+      $mtime = $this->getProps($path, [
         '{DAV:}getlastmodified'
       ]);
       if ( !empty($mtime['{DAV:}getlastmodified']) ){
@@ -264,13 +260,11 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function download(string $file): void
   {
-    X::log("IS FILE? $file");
     if ($this->isFile($file)) {
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
-      X::log($this->path.self::fixURL($this->getSystemPath($file)));
-      $res = $this->obj->request('GET', $this->path.self::fixURL($this->getSystemPath($file)));
+      $res = $this->obj->request('GET', $this->path.self::fixURL($file));
       if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
@@ -298,9 +292,18 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $path = self::prefix;
     }
    // $path = $this->getSystemPath($path);
-    if ( $this->exists($path) && $this->isDir($path) ){
+    if ($this->isDir($path)) {
       $props = ['{DAV:}getcontenttype'];
-      $collection = $this->obj->propFind($path, $props, 1);
+      if ($detailed) {
+        if (strpos($detailed, 's')) {
+          $props[] = '{http://owncloud.org/ns}size';
+        }
+        if (strpos($detailed, 'm')) {
+          $props[] = '{DAV:}getlastmodified';
+        }
+      }
+
+      $collection = $this->getProps($path, $props, 1);
       if ( !empty($collection) ){
         //arrayt_shift to remove the parent included in the array
         $dirs = [];
@@ -315,7 +318,8 @@ class Nextcloud extends bbn\Models\Cls\Basic{
             continue;
           }
 
-          $npath = $name = urldecode(str_replace(self::prefix, '', $i));
+          $npath = $name = str_replace(self::prefix, '', $i);
+          // removing trailing slash
           if (empty($c['{DAV:}getcontenttype'])) {
             $name = substr($npath, 0, -1);
           }
@@ -324,13 +328,17 @@ class Nextcloud extends bbn\Models\Cls\Basic{
             'path' => $npath,
             'dir' => empty($c['{DAV:}getcontenttype']) ? true : false,
             'file' => empty($c['{DAV:}getcontenttype']) ? false : true,
-            'name' => X::basename($name),
+            'name' => urldecode(X::basename($name)),
           ];
-          //if details has to be included on the item
-          if ( !empty($detailed) ){
-            $tmp['mtime'] = $this->filemtime($i);
-            $tmp['size'] = $this->getSize($i);
+          if ($detailed) {
+            if (strpos($detailed, 's')) {
+              $tmp['size'] = $c['{http://owncloud.org/ns}size'];
+            }
+            if (strpos($detailed, 'm')) {
+              $props['mtime'] = $c['{DAV:}getlastmodified'];
+            }
           }
+
           if ($has_dir && $tmp['dir']) {
             $dirs[] = $tmp;
           }
@@ -348,7 +356,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         }
 
         // both
-        X::log([...$dirs, ...$files]);
         return [...$dirs, ...$files];
       }  
     }
@@ -447,27 +454,24 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $success;
   }
 
-  private function _propFind(string $path, array $props, int $deep = 0): array
-  {
-    return $this->obj->propFind(self::fixURL($path), $props, $deep);
-  }
-
   private static function fixURL(string $path): string
   {
+    if ( strpos($path, self::prefix) === 0 ){
+      $path = substr($path, strlen(self::prefix));
+    }
     $fpath = '';
     $bits = X::split($path, '/');
     $num = count($bits);
     foreach ($bits as $i => $bit) {
-      if (!$bit) {
-        $fpath .= '/';
-      }
-      else {
+      if ($bit) {
         $fpath .= rawurlencode($bit);
         if ($i < $num -1) {
           $fpath .= '/';          
         }
       }
     }
+
+    //X::log([$path, $fpath], 'nextcloud');
 
     return $fpath;
 
