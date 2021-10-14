@@ -8,6 +8,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   
   private $obj;
   private $path;
+  private $_prefix;
   
   private const prefix = '/remote.php/webdav/';
   /**
@@ -24,7 +25,9 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         'userName' => $cfg['user'],
         'password' => $cfg['pass']
       ]);
+      $this->_prefix = self::prefix.'files/'.$cfg['user'].'/';
     }
+
     if ( !$this->obj ){
       $this->error = X::_("Missing parameters");
     }
@@ -265,7 +268,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
-      $res = $this->obj->request('GET', $this->getRealPath($file));
+      $res = $this->obj->request('GET', $this->_prefix.$this->getSystemPath($file));
       if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
