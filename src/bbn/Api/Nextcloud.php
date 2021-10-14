@@ -460,7 +460,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   {
     if ( strpos($path, self::prefix) === 0 ){
       $path = substr($path, strlen(self::prefix));
-      $fpath = self::prefix;
+      $fpath = self::prefix.'/files/qr';
       $bits = X::split($path, '/');
       $num = count($bits);
       foreach ($bits as $i => $bit) {
