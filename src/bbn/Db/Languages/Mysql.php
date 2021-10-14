@@ -1178,13 +1178,110 @@ MYSQL
   }
 
   /**
+   * Returns a string for alter keys statement.
+   *
+   * ```php
+   * $cfg = [
+   *   'keys' => [
+   *    'drop' => [
+   *      'primary' => [
+   *      'unique' => true,
+   *      'columns' => ['email']
+   *       ],
+   *      'unique_key' => [
+   *         'unique' => true,
+   *        'columns' => ['id']
+   *       ],
+   *      'username_key' => [
+   *          'columns' => ['username']
+   *        ]
+   *      ],
+   *     'add' => [
+   *       'primary' => [
+   *        'unique' => true,
+   *        'columns' => ['id']
+   *        ],
+   *        'unique_key' => [
+   *          'unique' => true,
+   *          'columns' => ['email']
+   *        ],
+   *        'username_key' => [
+   *          'columns' => ['username']
+   *        ]
+   *      ]
+   *    ],
+   *    'fields' => [
+   *      'drop' => [
+   *        'email' => [
+   *          'key' => 'PRI'
+   *          ]
+   *        ],
+   *      'add' => [
+   *        'id' => [
+   *        'key' => 'PRI'
+   *        ]
+   *      ]
+   *   ]
+   * ];
+   *
+   * X::dump($db->getAlterKey('users', $cfg);
+   *
+   * // (string)
+   * // ALTER TABLE `users`
+   * // DROP PRIMARY KEY,
+   * // DROP  KEY `unique_key`,
+   * // DROP KEY `username_key`,
+   * // ADD PRIMARY KEY (`id`),
+   * // ADD UNIQUE KEY `unique_key` (`email`),
+   * // ADD KEY `username_key` (`username`);
+   * ```
+   *
    * @param string $table
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getAlterKey(string $table, array $cfg): string
   {
-    return '';
+    $st = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+
+    if ($cfg['keys'] && !empty($cfg['keys'])) {
+      $types = ['drop', 'add'];
+
+      foreach ($types as $type) {
+        if (!empty($cfg['keys'][$type]) && is_array($cfg['keys'][$type])) {
+          foreach ($cfg['keys'][$type] as $name => $key) {
+            $st .= ' ' . strtoupper($type) . ' ';
+
+            if (!empty($key['unique'])
+              && isset($cfg['fields'][$type][$key['columns'][0]])
+              && ($cfg['fields'][$type][$key['columns'][0]]['key'] === 'PRI')
+            ) {
+              $st .= 'PRIMARY KEY';
+            } elseif (!empty($key['unique'])) {
+              $st  .= ($type !== 'drop' ? 'UNIQUE' : '') . ' KEY ';
+              $st .= $this->escape($name);
+            } else {
+              $st .= 'KEY ' . $this->escape($name);
+            }
+
+            if ($type !== 'drop') {
+              $st .= ' (' . implode(
+                  ',', array_map(
+                    function ($a) {
+                      return $this->escape($a);
+                    }, $key['columns']
+                  )
+                ) . ')';
+            }
+
+            $st .= ',' . PHP_EOL;
+          }
+        }
+      }
+    }
+
+    return rtrim($st, ',' . PHP_EOL) . ';' . PHP_EOL;
   }
 
 

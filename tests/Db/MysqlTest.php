@@ -9171,4 +9171,83 @@ DROP COLUMN `name`',
       ])
     );
   }
+
+  /** @test */
+  public function getAlterKey_returns_string_of_alter_key_statement()
+  {
+    $cfg = [
+      'keys' => [
+        'drop' => [
+          'primary' => [
+            'unique' => true,
+            'columns' => ['email']
+          ],
+          'unique_key' => [
+            'unique' => true,
+            'columns' => ['id']
+          ],
+          'username_key' => [
+            'columns' => ['username']
+          ]
+        ],
+        'add' => [
+          'primary' => [
+            'unique' => true,
+            'columns' => ['id']
+          ],
+          'unique_key' => [
+            'unique' => true,
+            'columns' => ['email']
+          ],
+          'username_key' => [
+            'columns' => ['username']
+          ]
+        ]
+      ],
+      'fields' => [
+        'drop' => [
+          'email' => [
+            'key' => 'PRI'
+          ]
+        ],
+        'add' => [
+          'id' => [
+            'key' => 'PRI'
+          ]
+        ]
+      ]
+    ];
+
+    $this->createTable('users', function () {
+      return 'id INT(11) UNIQUE,
+              email VARCHAR(255) PRIMARY KEY,
+              username VARCHAR(255),
+              KEY `username_key` (`username`),
+              UNIQUE KEY `unique_key` (`id`)';
+    });
+
+    $result   = self::$mysql->getAlterKey('users', $cfg);
+    $expected = 'ALTER TABLE `users`
+ DROP PRIMARY KEY,
+ DROP  KEY `unique_key`,
+ DROP KEY `username_key`,
+ ADD PRIMARY KEY (`id`),
+ ADD UNIQUE KEY `unique_key` (`email`),
+ ADD KEY `username_key` (`username`);';
+
+    $this->assertSame($expected, trim($result));
+
+    self::$mysql->rawQuery($result);
+
+    $keys = $this->getTableStructure('users')['keys'];
+
+    $this->assertArrayHasKey('PRIMARY', $keys);
+    $this->assertSame('id', $keys['PRIMARY']['columns'][0]);
+
+    $this->assertArrayHasKey('unique_key', $keys);
+    $this->assertSame('email', $keys['unique_key']['columns'][0]);
+
+    $this->assertArrayHasKey('username_key', $keys);
+    $this->assertSame('username', $keys['username_key']['columns'][0]);
+  }
 }
