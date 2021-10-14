@@ -264,7 +264,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function download(string $file): void
   {
-    X::log("IS FILE $file");
+    X::log("IS FILE? $file");
     if ($this->isFile($file)) {
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
@@ -364,7 +364,12 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function getRealPath(string $path): string
   {
-    return str_replace('//', '/', str_replace('/./', '/', $path));
+    if ( strpos($path, self::prefix) !== 0 ){
+      return self::prefix.$path;
+    }
+    else {
+      return $path;
+    }
   }
 
 
@@ -380,7 +385,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       return substr($file, strlen(self::prefix) + ($is_absolute ? 0 : 1) -1 );
     }
     else {
-      return $file;
+      return $path;
     }
   }
 
@@ -453,7 +458,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     $bits = X::split($path, '/');
     $num = count($bits);
     foreach ($bits as $i => $bit) {
-      if ($bit) {
+      if (!$bit) {
+        $fpath .= '/';
+      }
+      else {
         $fpath .= rawurlencode($bit);
         if ($i < $num -1) {
           $fpath .= '/';          
