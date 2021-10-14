@@ -272,6 +272,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $res = $this->obj->request('GET', $path);
       if (!empty($res) && !empty($res['body'])) {
         X::log("RES OK!", 'nextcloud');
+        X::log($res, 'nextcloud');
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
           X::log("CONTENT!", 'nextcloud');
