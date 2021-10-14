@@ -87,6 +87,17 @@ class System extends bbn\Models\Cls\Basic
           $this->obj  = new \bbn\Api\Nextcloud($cfg);
         }
         break;
+      case 'webdav':
+        if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
+          $this->mode = 'webdav';
+          $this->prefix = 'https://'.$cfg['host'].self::prefix;
+          $this->obj  = new \Sabre\DAV\Client([
+            'baseUri' => $this->path,
+            'userName' => $cfg['user'],
+            'password' => $cfg['pass']
+          ]);
+        }
+        break;
       case 'local':
         $this->mode    = $type;
         $this->current = getcwd();
@@ -139,12 +150,15 @@ class System extends bbn\Models\Cls\Basic
   public function getRealPath(string $path): string
   {
     $path = $this->cleanPath($path);
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->getRealPath($path);
-    } else {
-      return $this->prefix . (strpos($path, '/') === 0 ? $path : (
-          ($this->current ? $this->current . ($path ? '/' : '') : '') .
-          (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
+    switch ($this->mode) {
+      case 'nextcloud':
+        return $this->obj->getRealPath($path);
+      case 'webdav':
+        return $path;
+      default:
+        return $this->prefix . (strpos($path, '/') === 0 ? $path : (
+            ($this->current ? $this->current . ($path ? '/' : '') : '') .
+            (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
     }
   }
 
@@ -157,16 +171,18 @@ class System extends bbn\Models\Cls\Basic
   public function getSystemPath(string $file, bool $is_absolute = true): string
   {
     // The full path without the obj prefix, and if it's not absolute we remove the initial slash
-    if ($this->mode === 'nextcloud') {
-      $file = $this->obj->getSystemPath($file, $is_absolute);
-    } else {
-      $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
-      if (!$is_absolute && $this->current) {
-        $file = substr($file, strlen($this->current));
-      }
+    switch ($this->mode) {
+      case 'nextcloud':
+        return $this->obj->getSystemPath($file, $is_absolute);
+      case 'webdav':
+        return $file;
+      default:
+        $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
+        if (!$is_absolute && $this->current) {
+          $file = substr($file, strlen($this->current));
+        }
+        return $file;
     }
-
-    return $file;
   }
 
 
