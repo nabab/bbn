@@ -268,7 +268,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
-      $res = $this->obj->request('GET', $this->_prefix.$this->getSystemPath($file));
+      $res = $this->obj->request('GET', $this->_prefix.self::fixURL($this->getSystemPath($file)));
       if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
@@ -452,10 +452,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
   private static function fixURL(string $path): string
   {
-    if ( strpos($path, self::prefix) === 0 ){
-      $path = substr($path, strlen(self::prefix));
-    }
-    $fpath = self::prefix;
+    $fpath = '';
     $bits = X::split($path, '/');
     $num = count($bits);
     foreach ($bits as $i => $bit) {
