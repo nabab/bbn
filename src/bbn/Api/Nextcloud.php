@@ -268,6 +268,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
+      X::log($this->_prefix.self::fixURL($this->getSystemPath($file)));
       $res = $this->obj->request('GET', $this->_prefix.self::fixURL($this->getSystemPath($file)));
       if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
