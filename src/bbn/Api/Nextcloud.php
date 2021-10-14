@@ -40,7 +40,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   {
     $tmp = $path;
     $path = $this->getRealPath($path);
-    $size = $this->_propFind($tmp, array(
+    $size = $this->obj->propFind($tmp, array(
       '{http://owncloud.org/ns}size'
     ));
     if ($size) {
@@ -69,7 +69,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   protected function getProps($path): ?array
   {
     try {
-      if ( $this->_propFind($path, [
+      if ( $this->obj->propFind($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
       ], 0) ){
@@ -103,7 +103,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function exists($path)
   {
     try {
-      if ( $this->_propFind($path, [
+      if ( $this->obj->propFind($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
       ], 0) ){
@@ -198,12 +198,11 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function isFile(string $path): bool
   {
-    X::log(
-      "isFile?? $path / ".self::fixURL($path),
-      'nextcloud');
     return !empty(
-      $this->_propFind($path,
-        ['{DAV:}getcontenttype']
+      $this->obj->propFind(
+        $path,
+        ['{DAV:}getcontenttype'],
+        0
       )
     );
   }
@@ -218,9 +217,10 @@ class Nextcloud extends bbn\Models\Cls\Basic{
 
     return $this->exists($path) &&
         empty(
-          $this->_propFind(
+          $this->obj->propFind(
             $path,
-            ['{DAV:}getcontenttype']
+            ['{DAV:}getcontenttype'],
+            0
           )
         );
   }
@@ -232,7 +232,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function filemtime(string $path)
   {
     if ( $this->exists($path) ){
-      $mtime = $this->_propFind($path, [
+      $mtime = $this->obj->propFind($path, [
         '{DAV:}getlastmodified'
       ]);
       if ( !empty($mtime['{DAV:}getlastmodified']) ){
@@ -261,21 +261,14 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function download(string $file): void
   {
-    X::log("DOWNLOAD?", 'nextcloud');
     if ($this->isFile($file)) {
       //the tmp file destination
       $dest = \bbn\Mvc::getTmpPath().X::basename($file);
-      X::log("DEST: $dest", 'nextcloud');
       //gets the content of the file
-      $path = self::prefix.'/files/qr/'.$this->getSystemPath($file);
-      X::log("SRC: $path", 'nextcloud');
-      $res = $this->obj->request('GET', $path);
+      $res = $this->obj->request('GET', $this->getRealPath($file));
       if (!empty($res) && !empty($res['body'])) {
-        X::log("RES OK!", 'nextcloud');
-        X::log($res, 'nextcloud');
         // the tmp file created
         if (file_put_contents($dest, $res['body'])) {
-          X::log("CONTENT!", 'nextcloud');
           // instantiates the new file to the class \bbn\File
           $tmp = new \bbn\File($dest);
           $tmp->download();
@@ -302,7 +295,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    // $path = $this->getSystemPath($path);
     if ( $this->exists($path) && $this->isDir($path) ){
       $props = ['{DAV:}getcontenttype'];
-      $collection = $this->_propFind($path, $props, 1);
+      $collection = $this->obj->propFind($path, $props, 1);
       if ( !empty($collection) ){
         //arrayt_shift to remove the parent included in the array
         $dirs = [];
@@ -366,7 +359,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    */
   public function getRealPath(string $path): string
   {
-    //$path = urlencode($path);
     if ( strpos($path, self::prefix) !== 0 ){
       return self::prefix.$path;
     }
@@ -440,7 +432,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
           // wanted to put '%' instead of ' ' in the filename but not accepted
           $full_name =  $path . (($path !== '') ? '/' : '' ) . str_replace(' ', '_',$f['name']);
           if (!$this->exists($full_name) ){
-            if ( $this->obj->request('PUT', self::fixURL($full_name), $content) ){
+            if ( $this->obj->request('PUT', $full_name, $content) ){
               return $success = true;
             }
           }
@@ -449,7 +441,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     }
     return $success;
   }
-
 
   private function _propFind(string $path, array $props, int $deep = 0): array
   {
@@ -479,7 +470,6 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $fpath;
 
   }
-
 }
 
 
