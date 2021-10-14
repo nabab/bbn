@@ -737,9 +737,12 @@ class System extends bbn\Models\Cls\Basic
         if ($this->_is_dir($rpath)) {
           return $this->_dirsize($rpath);
         }
-      } else {
+      }
+      else {
         return $this->obj->getSize($rpath);
       }
+
+      return null;
     }
   }
 
