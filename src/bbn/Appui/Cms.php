@@ -253,7 +253,7 @@ class Cms extends bbn\Models\Cls\Db
 		$cfg['fields'][] = 'start';
 		$cfg['fields'][] = 'end';
 		$cfg['fields']['num_medias'] = 'COUNT('.$this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true).')';
-		$cfg['where']['id_type'] = $this->getNoteType();
+		$cfg['where']['mime'] = 'json/bbn-cms';
 		if (!empty($filter)) {
 			$cfg['having'] = $filter;
 		}
