@@ -126,15 +126,16 @@ trait Tagger
   {
     $this->taggerInit();
     $lang = $this->taggerGetLang($lang);
-    if (!($id_tag = $this->taggerObject->get($tag, $lang))) {
+    if ($tmp = $this->taggerObject->get($tag, $lang)) {
+      $id_tag = $tmp['id'];
+    }
+    else {
       $id_tag = $this->taggerObject->add($tag, $lang, $description);
     }
 
     if (!$id_tag) {
       throw new Exception(X::_("Impossible to create the tag %s", $tag));
     }
-
-    X::log([$id_element, $id_tag], 'tags');
 
     return $this->db->insert(
       $this->taggerTable,
