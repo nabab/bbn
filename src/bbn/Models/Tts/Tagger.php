@@ -134,6 +134,8 @@ trait Tagger
       throw new Exception(X::_("Impossible to create the tag %s", $tag));
     }
 
+    X::log([$id_element, $id_tag], 'tags');
+
     return $this->db->insert(
       $this->taggerTable,
       [
