@@ -1043,11 +1043,8 @@ class Image extends bbn\File
   public function thumbs($dest = '.', $sizes = null, $mask = '_%s', $crop = false, $bigger = false)
   {
     if ($this->test() && is_dir($dest)) {
-      if (Str::isInteger($sizes)) {
-        $sizes = [[$sizes, false]];
-      }
-      elseif (!is_array($sizes)) {
-        $sizes = self::$defaultThumbSizes;
+      if (!is_array($sizes)) {
+        $sizes = Str::isInteger($sizes) ? [[$sizes, false]] : self::$defaultThumbSizes;
       }
 
       $this->getExtension();
