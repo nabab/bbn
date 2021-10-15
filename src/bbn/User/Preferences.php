@@ -91,9 +91,10 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * preferences constructor.
-   * @param bbn\Db $db
-   * @param array  $cfg
+   * Preferences constructor.
+   * 
+   * @param bbn\Db $db  The database connection object
+   * @param array  $cfg A configuration array for tha tables' structure
    */
   public function __construct(bbn\Db $db, array $cfg = [])
   {
@@ -111,6 +112,8 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns an array describing the structures of the tables for the class.
+   * 
    * @return array
    */
   public function getClassCfg(): array
@@ -120,7 +123,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns preferences' IDs from the option's ID
+   * Returns preferences' IDs from the option's ID.
    *
    * @param null|string $id_option
    * @return null|array
@@ -132,7 +135,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns preferences' IDs from the option's ID and the given user ID
+   * Returns preferences' IDs from the option's ID and the given user ID.
    *
    * @param null|string $id_option
    * @param string      $id_user
@@ -149,7 +152,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns preferences' IDs from the option's ID and the given group ID
+   * Returns preferences' IDs from the option's ID and the given group ID.
    *
    * @param null|string $id_option
    * @param string      $id_group
@@ -179,7 +182,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns true if the current user can access a preference, false otherwise
+   * Returns true if the current user can access a preference, false otherwise.
    *
    * @param string|null $id_option
    * @param bool        $force
@@ -196,7 +199,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Checks if a user has the given preference
+   * Checks if a user has the given preference.
    *
    * @param string $id_option
    * @param string $id_user
@@ -209,7 +212,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Checks if a group has the given preference
+   * Checks if a group has the given preference.
    *
    * @param string $id_option
    * @param string $id_group
@@ -267,7 +270,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Gets the cfg array, normalized either from the DB or from the $cfg argument
+   * Gets the cfg array, normalized either from the DB or from the $cfg argument.
    *
    * @param string     $id
    * @param null|array $cfg
@@ -303,7 +306,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Gets the cfg array, normalized either from the DB or from the $cfg argument
+   * Gets the cfg array, normalized either from the DB or from the $cfg argument.
    *
    * @param string     $id
    * @param null|array $cfg
@@ -332,7 +335,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Gets the preferences which have the option's $id as id_link
+   * Gets the preferences which have the option's $id as id_link.
    *
    * @param string $id
    * @return array|null
@@ -344,7 +347,8 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns the current user's preference based on the given id, his own profile and his group
+   * Returns the current user's preference based on the given id, his own profile and his group.
+   * 
    * @param string $id
    * @param bool   $with_config
    * @return array|null
@@ -417,7 +421,8 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an array of the current user's preferences based on the given id_option, his own profile and his group's
+   * Returns an array of the current user's preferences based on the given id_option, his own profile and his group's.
+   * 
    * @param null|string $id_option
    * @param bool        $with_config
    * @return array|null
@@ -501,9 +506,10 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option
+   * Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option.
+   * 
    * @param null|string $id_option
-   * @param bool        $with_config
+   * @param bool        $with_config Adds the `cfg` field in the result if true
    * @return array|null
    */
   public function getAllNotMine(string $id_option = null, bool $with_config = true): ?array

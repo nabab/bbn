@@ -956,6 +956,29 @@ You can click the following link to access directly your account:<br>
   }
 
 
+  public function groupEdit(string $id, array $data): bool
+  {
+    $g = $this->class_cfg['arch']['groups'];
+    if (!empty($data[$g['group']])) {
+      if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {
+        $data[$g['cfg']] = json_encode($data[$g['cfg']]);
+      }
+
+      return (bool)$this->db->update(
+        $this->class_cfg['tables']['groups'],
+        [
+          $g['group'] => $data[$g['group']],
+          $g['code'] => $data[$g['code']] ?? null,
+          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'
+        ],
+        [$g['id'] => $id]
+      );
+    }
+
+    return false;
+  }
+
+
   public function groupRename(string $id, string $name): bool
   {
     $g = $this->class_cfg['arch']['groups'];

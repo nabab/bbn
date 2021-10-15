@@ -79,31 +79,34 @@ class Virtualmin {
         $this->last_action = $cmd_name;
         //Defining  the $url_part and the command to be executed
         $url_part = $cmd_name;
-
-        $cmd = $this->commands[$cmd_name];
-        if ( !empty($arguments[0]) ){
-          //Prepping, processing and validating the create user parameters
-          $args = $this->processParameters($arguments[0]);
-          foreach ( $cmd['args'] as $k => $v ){
-            if ( !empty($v['mandatory']) && !isset($args[$k]) ){
-              if ( (strpos($k, 'pass') === false) &&
-                (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))
-              ){
-                var_dump("Parameter $k mandatory for $name!");
-                return false;
-              }
-            }
-            if ( isset($args[$k]) ){
-              if ( $v['binary'] && $args[$k] ){
-                $url_part .= "&$k";
-              }
-              else if ( \is_array($v) && $v['multiple'] ){
-                foreach ( $args[$k] as $w ){
-                  $url_part .= "&$k=$w";
+        if (\is_array($this->commands)) {
+          $cmd = $this->commands[$cmd_name];
+          if ( !empty($arguments[0]) ){
+            //Prepping, processing and validating the create user parameters
+            $args = $this->processParameters($arguments[0]);
+            if (!empty($cmd['args'])) {
+              foreach ( $cmd['args'] as $k => $v ){
+                if ( !empty($v['mandatory']) && !isset($args[$k]) ){
+                  if ( (strpos($k, 'pass') === false) &&
+                    (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))
+                  ){
+                    var_dump("Parameter $k mandatory for $name!");
+                    return false;
+                  }
                 }
-              }
-              else{
-                $url_part .= "&$k=".$args[$k];
+                if ( isset($args[$k]) ){
+                  if ( $v['binary'] && $args[$k] ){
+                    $url_part .= "&$k";
+                  }
+                  else if ( \is_array($v) && $v['multiple'] ){
+                    foreach ( $args[$k] as $w ){
+                      $url_part .= "&$k=$w";
+                    }
+                  }
+                  else{
+                    $url_part .= "&$k=".$args[$k];
+                  }
+                }
               }
             }
           }
