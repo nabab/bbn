@@ -1044,7 +1044,7 @@ class Image extends bbn\File
   {
     if ($this->test() && is_dir($dest)) {
       if (!is_array($sizes)) {
-        $sizes = Str::isInteger($sizes) ? [$sizes, false] : self::$defaultThumbSizes;
+        $sizes = Str::isInteger($sizes) ? [[$sizes, false]] : self::$defaultThumbSizes;
       }
 
       $this->getExtension();
