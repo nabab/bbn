@@ -14,7 +14,7 @@ trait MysqlDbSetup
       $db_cfg = self::getDbConfig();
 
       self::$connection = new \PDO(
-        "mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
+        "mysql:host={$db_cfg['host']};port={$db_cfg['port']};}",
         $db_cfg['user'],
         $db_cfg['pass'],
         [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
@@ -22,9 +22,16 @@ trait MysqlDbSetup
 
       self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-      self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
-
       self::$connection->query("CREATE DATABASE IF NOT EXISTS {$db_cfg['db']}");
+
+      self::$connection = new \PDO(
+        "mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
+        $db_cfg['user'],
+        $db_cfg['pass'],
+        [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
+      );
+
+      self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
 
     } catch (\PDOException $e) {
       throw new \Exception("Unable to establish db connection for testing: " . $e->getMessage());

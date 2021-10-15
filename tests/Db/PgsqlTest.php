@@ -1049,7 +1049,7 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
               role_id bigint,
               username VARCHAR(255) UNIQUE NOT NULL,
               balance NUMERIC(10,2) DEFAULT 0,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              created_at TIMESTAMP DEFAULT NOW(),
               profile_id bytea,
               is_active boolean DEFAULT true,
               role role_enum DEFAULT \'User\'
@@ -1068,6 +1068,7 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'virtual' => false,
         'generation' => null,
         'default' => "nextval('users_id_seq'::regclass)",
+        'defaultExpression' => false,
         'maxlength' => 64,
         'decimals' => 0
       ],
@@ -1082,6 +1083,7 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'virtual' => false,
         'generation' => null,
         'default' => 'NULL',
+        'defaultExpression' => false,
         'maxlength' => 64,
         'decimals' => 0
       ],
@@ -1108,6 +1110,7 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'virtual' => false,
         'generation' => null,
         'default' => 0,
+        'defaultExpression' => false,
         'maxlength' => 10,
         'decimals' => 2
       ],
@@ -1121,7 +1124,8 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'signed' => false,
         'virtual' => false,
         'generation' => null,
-        'default' => 'CURRENT_TIMESTAMP'
+        'default' => 'now()',
+        'defaultExpression' => true,
       ],
       'profile_id' => [
         'position' => 6,
@@ -1134,6 +1138,7 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'virtual' => false,
         'generation' => null,
         'default' => 'NULL',
+        'defaultExpression' => false,
         'maxlength' => 16
       ],
       'is_active' => [
@@ -1146,7 +1151,8 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'signed' => false,
         'virtual' => false,
         'generation' => null,
-        'default' => 'true'
+        'default' => 'true',
+        'defaultExpression' => false,
       ],
       'role' => [
         'position' => 8,
@@ -1158,7 +1164,8 @@ balance numeric(10,2) NOT NULL DEFAULT '0'
         'signed' => false,
         'virtual' => false,
         'generation' => null,
-        'default' => '\'User\'::role_enum'
+        'default' => '\'User\'::role_enum',
+        'defaultExpression' => false,
       ]
     ];
 
@@ -4271,6 +4278,7 @@ first_name ASC';
           'virtual' => false,
           'generation' => null,
           'default' => "nextval('users_id_seq'::regclass)",
+          'defaultExpression' => false,
           'maxlength' => 32,
           'decimals' => 0
         ],
@@ -4564,7 +4572,8 @@ first_name ASC';
           'signed' => FALSE,
           'virtual' => false,
           'generation'  => NULL,
-          'default' => 'CURRENT_TIMESTAMP'
+          'default' => 'CURRENT_TIMESTAMP',
+          'defaultExpression' => true
         ],
         'role_id' => [
           'position' => 5,
@@ -4612,6 +4621,7 @@ first_name ASC';
           'virtual' => false,
           'generation'  => null,
           'default' => "nextval('roles_id_seq'::regclass)",
+          'defaultExpression' => false,
           'maxlength' => 32,
           'decimals' => 0,
         ],
@@ -4626,6 +4636,7 @@ first_name ASC';
           'virtual' => false,
           'generation'  => null,
           'default' => 'NULL',
+          'defaultExpression' => false,
           'maxlength' => 25
         ]
       ]
@@ -8914,6 +8925,7 @@ GROUP BY id
         'virtual'   => false,
         'generation'  => null,
         'default' => "nextval('users_id_seq'::regclass)",
+        'defaultExpression' => false,
         'maxlength' => 32,
         'decimals' => 0,
         'name' => 'id',
@@ -8940,7 +8952,8 @@ GROUP BY id
         'signed'    => false,
         'virtual'   => false,
         'generation'  => null,
-        'default'    => 'NULL::character varying',
+        'default'    => 'NULL',
+        'defaultExpression' => false,
         'maxlength' => 255,
         'name' => 'username',
         'keys' => [
@@ -9134,7 +9147,8 @@ GROUP BY id
       'signed' => false,
       'virtual' => false,
       'generation' => null,
-      'default' => 'CURRENT_TIMESTAMP'
+      'default' => 'CURRENT_TIMESTAMP',
+      'defaultExpression' => true
     ], $structure['created_at']);
 
     $this->assertArrayHasKey('balance', $structure);
@@ -9149,6 +9163,7 @@ GROUP BY id
       'virtual' => false,
       'generation' => null,
       'default' => 0,
+      'defaultExpression' => false,
       'maxlength' => 10,
       'decimals' => 2
     ], $structure['balance']);

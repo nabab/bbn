@@ -400,6 +400,16 @@ class Sqlite extends Sql
             'maxlength' => null,
             'signed' => 1
           ];
+
+          if ($row['dflt_value'] !== '') {
+            $r[$f]['defaultExpression'] = false;
+          }
+
+          if (in_array($row['dflt_value'], ['CURRENT_TIME', 'CURRENT_DATE', 'CURRENT_TIMESTAMP'], true)) {
+            $r[$f]['defaultExpression'] = true;
+          }
+
+
           $type  = strtolower($row['type']);
           if (strpos($type, 'blob') !== false) {
             $r[$f]['type'] = 'BLOB';

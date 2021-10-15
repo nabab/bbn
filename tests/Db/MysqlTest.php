@@ -8375,7 +8375,8 @@ GROUP BY `id`
           'signed' => true,
           'virtual' => false,
           'generation'  => '',
-          'default' => 'CURRENT_TIMESTAMP'
+          'default' => 'CURRENT_TIMESTAMP',
+          'defaultExpression' => true
         ],
         'role_id' => [
           'position' => 5,
@@ -8429,6 +8430,7 @@ GROUP BY `id`
           'virtual' => false,
           'generation'  => '',
           'default' => 'NULL',
+          'defaultExpression' => false,
           'maxlength' => 25
         ]
       ]

@@ -736,7 +736,8 @@ MYSQL;
             'generation' => $row['GENERATION_EXPRESSION'],
           ];
           if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
-            $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
+            $r[$f]['default']           = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
+            $r[$f]['defaultExpression'] = $row['EXTRA'] === 'DEFAULT_GENERATED';
           }
 
           if (($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set')) {

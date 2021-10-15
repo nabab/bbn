@@ -610,14 +610,14 @@ class SqliteTest extends TestCase
   public function getColumns_method_returns_the_columns_configuration_for_the_given_table()
   {
     $this->createTable('users', function () {
-      return 'id UNSIGNED BIGINT PRIMARY KEY,
+      return "id UNSIGNED BIGINT PRIMARY KEY,
               email VARCHAR(20) UNIQUE NOT NULL,
               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               parent_id BLOB(32) NOT NULL,
               active BOOL DEFAULT false,
               balance UNSIGNED FLOAT NOT NULL DEFAULT 0,
               temp_balance UNSIGNED REAL NOT NULL DEFAULT 0
-              ';
+              ";
     });
 
     $this->assertSame(
@@ -650,6 +650,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => true,
           'type' => 'INTEGER'
         ],
         'parent_id' => [
@@ -670,6 +671,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'INTEGER'
         ],
         'balance' => [
@@ -3524,6 +3526,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => true,
           'type' => 'INTEGER',
         ],
         'role_id' => [
@@ -3621,7 +3624,8 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
               'signed' => 1,
               'type' => 'INTEGER'
             ]
-          ]
+          ],
+          3600
         ],
         $this->getNonPublicProperty('cache_renewal')
       )
@@ -8120,6 +8124,7 @@ GROUP BY "id"
       'extra' => null,
       'maxlength' => null,
       'signed' => 1,
+      'defaultExpression' => true,
       'type' => 'INTEGER'
     ], $structure['created_at']);
 

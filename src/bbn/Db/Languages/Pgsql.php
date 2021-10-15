@@ -924,7 +924,15 @@ PGSQL;
             'generation' => $row['generation_expression'],
           ];
           if ($row['column_default'] !== null || $row['is_nullable'] === 'YES') {
-            $r[$f]['default'] = \is_null($row['column_default']) ? 'NULL' : $row['column_default'];
+            $r[$f]['default'] = \is_null($row['column_default']) || strpos($row['column_default'], 'NULL') !== false
+              ? 'NULL'
+              : $row['column_default'];
+
+            $r[$f]['defaultExpression'] = false;
+
+             if (in_array(strtoupper($row['column_default']), ['CURRENT_TIME', 'CURRENT_DATE', 'CURRENT_TIMESTAMP', 'NOW()'])) {
+               $r[$f]['defaultExpression'] = true;
+             }
           }
 
           if ($row['character_maximum_length'] !== null) {
