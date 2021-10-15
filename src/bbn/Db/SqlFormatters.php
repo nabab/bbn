@@ -130,14 +130,6 @@ interface SqlFormatters
    * @param array $cfg
    * @return string
    */
-  public function getAlter(string $table, array $cfg): string;
-
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   */
   public function getAlterTable(string $table, array $cfg): string;
 
 

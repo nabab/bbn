@@ -9,18 +9,17 @@ use bbn\Db\Query;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
 use tests\Files;
+use tests\MysqlDbSetup;
 use tests\Reflectable;
 use tests\ReflectionHelpers;
 
 class MysqlTest extends TestCase
 {
-  use Reflectable, Files;
+  use Reflectable, Files, MysqlDbSetup;
 
   protected static Mysql $mysql;
 
   protected static $real_params_default;
-
-  protected static $connection;
 
   protected static $cache_mock;
 
@@ -54,29 +53,7 @@ class MysqlTest extends TestCase
 
   public static function setUpBeforeClass(): void
   {
-    $env_file = getcwd() . '/tests/.env.test';
-
-    if (strpos($env_file, '/tests/Db/') !== false) {
-      $env_file = str_ireplace('/tests/Db/', '/', $env_file);
-    }
-
-    if (!file_exists($env_file)) {
-      throw new \Exception(
-        'env file does not exist, please create the file in the tests dir, @see .env.test.example'
-      );
-    }
-
-    $env = file_get_contents($env_file);
-
-    foreach (explode(PHP_EOL, $env) as $item) {
-      $res = explode('=', $item);
-      $key  = $res[0];
-      $value = $res[1] ?? "";
-      if (empty($key) || empty($value)) {
-        continue;
-      }
-      @putenv("$key=$value");
-    }
+    self::parseEnvFile();
 
     self::$cache_mock = \Mockery::mock(Cache::class);
 
@@ -103,68 +80,9 @@ class MysqlTest extends TestCase
     );
   }
 
-  protected static function createTestingDatabase()
-  {
-    try {
-      $db_cfg = self::getDbConfig();
-
-      self::$connection = new \PDO(
-        "mysql:host={$db_cfg['host']};port={$db_cfg['port']};dbname={$db_cfg['db']}",
-        $db_cfg['user'],
-        $db_cfg['pass'],
-        [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8']
-      );
-
-      self::$connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-      self::$connection->query("SET FOREIGN_KEY_CHECKS=0;");
-
-      self::$connection->query("CREATE DATABASE IF NOT EXISTS {$db_cfg['db']}");
-
-    } catch (\PDOException $e) {
-      throw new \Exception("Unable to establish db connection for testing: " . $e->getMessage());
-    }
-  }
-
-  protected static function getDbConfig()
-  {
-    return array(
-      'engine'        => 'mysql',
-      'host'          => getenv('db_host'),
-      'user'          => getenv('db_user'),
-      'pass'          => getenv('db_pass'),
-      'db'            => getenv('db_name'),
-      'port'          => getenv('db_port'),
-      'cache_length'  => 3000,
-      'on_error'      => Errors::E_STOP,
-      'force_host'    => true
-    );
-  }
-
   public function getInstance()
   {
     return self::$mysql;
-  }
-
-  protected function createTable(string $table, callable $callback)
-  {
-    $this->dropTableIfExists($table);
-
-    $structure = $callback();
-
-    self::$connection->query("CREATE TABLE `$table` (
-  $structure
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 collate utf8mb4_unicode_ci");
-  }
-
-  protected function dropTableIfExists(string $table)
-  {
-    self::$connection->query("DROP TABLE IF EXISTS $table");
-  }
-
-  protected function dropDatabaseIfExists(string $database)
-  {
-    self::$connection->query("DROP DATABASE IF EXISTS $database");
   }
 
   protected function dropAllTables()
@@ -8971,5 +8889,365 @@ GROUP BY `id`
         'type' => 'set',
         'default' => 'read'
       ]);
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_sql_string_for_alter_statement()
+  {
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'enum',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'alter_type' => 'modify',
+          'new_name' => 'username',
+          'after' => 'role'
+        ],
+        'permission' => [
+          'type' => 'set',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'decimal',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'null' => true,
+          'default' => 'NULL',
+          'alter_type' => 'modify',
+          'after' => 'id'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $expected = <<<SQL
+ALTER TABLE `users`
+ADD   `id` binary(32) NOT NULL,
+ADD   `role` enum ('super_admin','admin','user') NOT NULL DEFAULT 'user',
+CHANGE COLUMN `name` `username` varchar(255) NOT NULL AFTER `role`,
+ADD   `permission` set ('read','write') NOT NULL DEFAULT 'read',
+MODIFY   `balance` decimal(10,2) UNSIGNED DEFAULT NULL AFTER `id`,
+ADD   `balance_before` decimal(10,2) NOT NULL DEFAULT 0,
+ADD   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DROP COLUMN `role_id`
+SQL;
+
+
+    $this->assertSame(
+      $expected, self::$mysql->getAlterTable('users', $cfg)
+    );
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_the_given_table_name_is_not_valid()
+  {
+    $this->assertSame('', self::$mysql->getAlterTable('user**', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertSame('', self::$mysql->getAlterTable('users', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_throws_an_exception_if_the_fields_property_is_missing()
+  {
+    $this->expectException(\Exception::class);
+    self::$mysql->getAlterTable('users', ['a' => 'b']);
+  }
+
+  /** @test */
+  public function alter_method_alters_the_given_cfg_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'balance int(11) SIGNED NOT NULL,
+              role_id INT(11) DEFAULT 0,
+              name TEXT';
+    });
+
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'enum',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'alter_type' => 'modify',
+          'new_name' => 'username',
+          'after' => 'role'
+        ],
+        'permission' => [
+          'type' => 'set',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'decimal',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'null' => true,
+          'default' => 'NULL',
+          'alter_type' => 'modify',
+          'after' => 'id'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $this->assertSame(
+      1, self::$mysql->alter('users', $cfg)
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayHasKey('id', $structure);
+    $this->assertArrayHasKey('balance', $structure);
+    $this->assertArrayHasKey('role', $structure);
+    $this->assertArrayHasKey('username', $structure);
+    $this->assertArrayHasKey('permission', $structure);
+    $this->assertArrayHasKey('balance_before', $structure);
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertArrayNotHasKey('name', $structure);
+    $this->assertArrayNotHasKey('role_id', $structure);
+
+    $this->assertSame('binary', $structure['id']['type']);
+    $this->assertSame(32, $structure['id']['maxlength']);
+    $this->assertSame(0, $structure['id']['null']);
+    $this->assertSame(1, $structure['id']['position']);
+
+    $this->assertSame('decimal', $structure['balance']['type']);
+    $this->assertSame(10, $structure['balance']['maxlength']);
+    $this->assertSame(2, $structure['balance']['decimals']);
+    $this->assertSame(2, $structure['balance']['position']);
+
+    $this->assertSame('enum', $structure['role']['type']);
+    $this->assertSame("'super_admin','admin','user'", $structure['role']['extra']);
+    $this->assertSame('user', $structure['role']['default']);
+    $this->assertSame(3, $structure['role']['position']);
+
+    $this->assertSame('varchar', $structure['username']['type']);
+    $this->assertSame(255, $structure['username']['maxlength']);
+    $this->assertSame(0, $structure['username']['null']);
+    $this->assertSame(4, $structure['username']['position']);
+
+    $this->assertSame('set', $structure['permission']['type']);
+    $this->assertSame("'read','write'", $structure['permission']['extra']);
+    $this->assertSame('read', $structure['permission']['default']);
+    $this->assertSame(0, $structure['permission']['null']);
+    $this->assertSame(5, $structure['permission']['position']);
+
+    $this->assertSame('decimal', $structure['balance_before']['type']);
+    $this->assertSame(6, $structure['balance_before']['position']);
+    $this->assertSame(0, $structure['balance_before']['null']);
+    $this->assertSame(0.0, $structure['balance_before']['default']);
+    $this->assertSame(true, $structure['balance_before']['signed']);
+    $this->assertSame(10, $structure['balance_before']['maxlength']);
+    $this->assertSame(2, $structure['balance_before']['decimals']);
+
+    $this->assertSame('datetime', $structure['created_at']['type']);
+    $this->assertSame('CURRENT_TIMESTAMP', $structure['created_at']['default']);
+    $this->assertSame(7, $structure['created_at']['position']);
+    $this->assertSame(0, $structure['created_at']['null']);
+  }
+
+  /** @test */
+  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  {
+    $this->assertSame(
+      'ALTER TABLE `users`
+ADD   `id` binary(32)',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'id',
+        'type' => 'binary',
+        'maxlength' => 32,
+        'null' => true
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE `users`
+CHANGE COLUMN `name` `username` varchar(255) NOT NULL AFTER `role`',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'name',
+        'type' => 'varchar',
+        'maxlength' => 255,
+        'alter_type' => 'modify',
+        'new_name' => 'username',
+        'after' => 'role'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE `users`
+ADD   `balance` decimal(10,2) NOT NULL DEFAULT 0',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ])
+    );
+
+    $this->assertSame(
+      "ALTER TABLE `users`
+ADD   `role` enum ('super_admin','admin','user') NOT NULL DEFAULT 'user'",
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'role',
+        'type' => 'enum',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ])
+    );
+
+    $this->assertSame(
+      "ALTER TABLE `users`
+MODIFY   `balance` decimal(10,2) UNSIGNED DEFAULT NULL AFTER `id`",
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL',
+        'alter_type' => 'modify',
+        'after' => 'id'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE `users`
+DROP COLUMN `name`',
+      self::$mysql->getAlterColumn('users', [
+        'col_name' => 'name',
+        'alter_type' => 'drop'
+      ])
+    );
+  }
+
+  /** @test */
+  public function getAlterKey_returns_string_of_alter_key_statement()
+  {
+    $cfg = [
+      'keys' => [
+        'drop' => [
+          'primary' => [
+            'unique' => true,
+            'columns' => ['email']
+          ],
+          'unique_key' => [
+            'unique' => true,
+            'columns' => ['id']
+          ],
+          'username_key' => [
+            'columns' => ['username']
+          ]
+        ],
+        'add' => [
+          'primary' => [
+            'unique' => true,
+            'columns' => ['id']
+          ],
+          'unique_key' => [
+            'unique' => true,
+            'columns' => ['email']
+          ],
+          'username_key' => [
+            'columns' => ['username']
+          ]
+        ]
+      ],
+      'fields' => [
+        'drop' => [
+          'email' => [
+            'key' => 'PRI'
+          ]
+        ],
+        'add' => [
+          'id' => [
+            'key' => 'PRI'
+          ]
+        ]
+      ]
+    ];
+
+    $this->createTable('users', function () {
+      return 'id INT(11) UNIQUE,
+              email VARCHAR(255) PRIMARY KEY,
+              username VARCHAR(255),
+              KEY `username_key` (`username`),
+              UNIQUE KEY `unique_key` (`id`)';
+    });
+
+    $result   = self::$mysql->getAlterKey('users', $cfg);
+    $expected = 'ALTER TABLE `users`
+ DROP PRIMARY KEY,
+ DROP  KEY `unique_key`,
+ DROP KEY `username_key`,
+ ADD PRIMARY KEY (`id`),
+ ADD UNIQUE KEY `unique_key` (`email`),
+ ADD KEY `username_key` (`username`);';
+
+    $this->assertSame($expected, trim($result));
+
+    self::$mysql->rawQuery($result);
+
+    $keys = $this->getTableStructure('users')['keys'];
+
+    $this->assertArrayHasKey('PRIMARY', $keys);
+    $this->assertSame('id', $keys['PRIMARY']['columns'][0]);
+
+    $this->assertArrayHasKey('unique_key', $keys);
+    $this->assertSame('email', $keys['unique_key']['columns'][0]);
+
+    $this->assertArrayHasKey('username_key', $keys);
+    $this->assertSame('username', $keys['username_key']['columns'][0]);
   }
 }

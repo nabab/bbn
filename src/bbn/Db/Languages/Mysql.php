@@ -344,7 +344,7 @@ MYSQL
     if ($this->check() && Str::checkName($table) && Str::checkName($newName)) {
       $t1 = strpos($table, '.') ? $this->tableFullName($table, true) : $this->tableSimpleName($table, true);
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
-      dump(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
+
       $res = $this->rawQuery(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
       return !!$res;
     }
@@ -1046,6 +1046,262 @@ MYSQL
   }
 
   /**
+   * Return a string for alter table sql statement.
+   *
+   * ```php
+   * $cfg = [
+   *  'fields' => [
+   *    'id' => [
+   *      'type' => 'binary',
+   *      'maxlength' => 32
+   *    ],
+   *    'name' => [
+   *      'type' => 'varchar',
+   *      'maxlength' => 255,
+   *      'alter_type' => 'modify',
+   *      'new_name' => 'username',
+   *      'after' => 'id'
+   *    ],
+   *    'balance' => [
+   *      'type' => 'decimal',
+   *      'maxlength' => 10,
+   *      'decimals' => 2,
+   *      'null' => true,
+   *      'default' => 0
+   *      'alter_type' => 'modify',
+   *      'after' => 'id'
+   *    ],
+   *    'role_id' => [
+   *      'alter_type' => 'drop'
+   *    ]
+   *  ]
+   * ];
+   * X::dump($db->getAlterTable('users', $cfg);
+   *
+   * // (string) ALTER TABLE `users`
+   * // ADD `id` binary(32) NOT NULL,
+   * // CHANGE COLUMN `name` `username` varchar(255) NOT NULL AFTER `id`,
+   * // MODIFY `balance` decimal(10,2) UNSIGNED DEFAULT 0 AFTER `id`,
+   * // DROP COLUMN `role_id`
+   *
+   * ```
+   *
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
+  public function getAlterTable(string $table, array $cfg): string
+  {
+    if (empty($cfg['fields'])) {
+      throw new \Exception(X::_('Fields are not specified'));
+    }
+
+    if ($this->check() && Str::checkName($table)) {
+      $st   = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $done = false;
+
+      foreach ($cfg['fields'] as $name => $col) {
+        if (!$done) {
+          $done = true;
+        } else {
+          $st .= ',' . PHP_EOL;
+        }
+
+        $st .= $this->getAlterColumn($table, array_merge($col, [
+          'col_name' => $name,
+          'no_table_exp' => true
+        ]));
+      }
+    }
+
+    return $st ?? '';
+  }
+
+
+  /**
+   * Return a string for alter column statement.
+   *
+   * ```php
+   * $cfg = [
+   *  'col_name' => 'id',
+   *  'type' => 'binary',
+   *  'maxlength' => 32
+   * ];
+   * X::dump($db->getAlterColumn('users', $cfg);
+   *
+   * // (string) ALTER TABLE `users` ADD `id` binary(32) NOT NULL
+   *
+   * ```
+   *
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
+  public function getAlterColumn(string $table, array $cfg): string
+  {
+    $alter_types = ['add', 'modify', 'drop'];
+
+    if (!empty($cfg['alter_type']) && in_array(strtolower($cfg['alter_type']), $alter_types)) {
+      $alter_type = strtoupper($cfg['alter_type']);
+    }
+    else {
+      $alter_type = 'ADD';
+    }
+
+    $st = '';
+
+    if (empty($cfg['no_table_exp'])) {
+      $st = 'ALTER TABLE '. $this->escape($table) . PHP_EOL;
+    }
+
+    if ($alter_type === 'MODIFY' && !empty($cfg['new_name'])) {
+      $st .= "CHANGE COLUMN ";
+      $st .= $this->escape($cfg['col_name']) . ' ' . $this->escape($cfg['new_name']) . ' ';
+      $st .= $this->getColumnDefinitionStatement($cfg['col_name'], $cfg, false);
+    }
+    elseif ($alter_type === 'DROP') {
+      $st .= "DROP COLUMN " . $this->escape($cfg['col_name']);
+    }
+    else {
+      $st .= $alter_type . ' ' . $this->getColumnDefinitionStatement($cfg['col_name'], $cfg);
+    }
+
+    if ($alter_type !== 'DROP') {
+      if (!empty($cfg['after']) && is_string($cfg['after'])) {
+        $st .= " AFTER " . $this->escape($cfg['after']);
+      }
+    }
+
+    return $st;
+  }
+
+  /**
+   * Returns a string for alter keys statement.
+   *
+   * ```php
+   * $cfg = [
+   *   'keys' => [
+   *    'drop' => [
+   *      'primary' => [
+   *      'unique' => true,
+   *      'columns' => ['email']
+   *       ],
+   *      'unique_key' => [
+   *         'unique' => true,
+   *        'columns' => ['id']
+   *       ],
+   *      'username_key' => [
+   *          'columns' => ['username']
+   *        ]
+   *      ],
+   *     'add' => [
+   *       'primary' => [
+   *        'unique' => true,
+   *        'columns' => ['id']
+   *        ],
+   *        'unique_key' => [
+   *          'unique' => true,
+   *          'columns' => ['email']
+   *        ],
+   *        'username_key' => [
+   *          'columns' => ['username']
+   *        ]
+   *      ]
+   *    ],
+   *    'fields' => [
+   *      'drop' => [
+   *        'email' => [
+   *          'key' => 'PRI'
+   *          ]
+   *        ],
+   *      'add' => [
+   *        'id' => [
+   *        'key' => 'PRI'
+   *        ]
+   *      ]
+   *   ]
+   * ];
+   *
+   * X::dump($db->getAlterKey('users', $cfg);
+   *
+   * // (string)
+   * // ALTER TABLE `users`
+   * // DROP PRIMARY KEY,
+   * // DROP  KEY `unique_key`,
+   * // DROP KEY `username_key`,
+   * // ADD PRIMARY KEY (`id`),
+   * // ADD UNIQUE KEY `unique_key` (`email`),
+   * // ADD KEY `username_key` (`username`);
+   * ```
+   *
+   * @param string $table
+   * @param array $cfg
+   * @return string
+   * @throws \Exception
+   */
+  public function getAlterKey(string $table, array $cfg): string
+  {
+    $st = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+
+    if ($cfg['keys'] && !empty($cfg['keys'])) {
+      $types = ['drop', 'add'];
+
+      foreach ($types as $type) {
+        if (!empty($cfg['keys'][$type]) && is_array($cfg['keys'][$type])) {
+          foreach ($cfg['keys'][$type] as $name => $key) {
+            $st .= ' ' . strtoupper($type) . ' ';
+
+            if (!empty($key['unique'])
+              && isset($cfg['fields'][$type][$key['columns'][0]])
+              && ($cfg['fields'][$type][$key['columns'][0]]['key'] === 'PRI')
+            ) {
+              $st .= 'PRIMARY KEY';
+            } elseif (!empty($key['unique'])) {
+              $st  .= ($type !== 'drop' ? 'UNIQUE' : '') . ' KEY ';
+              $st .= $this->escape($name);
+            } else {
+              $st .= 'KEY ' . $this->escape($name);
+            }
+
+            if ($type !== 'drop') {
+              $st .= ' (' . implode(
+                  ',', array_map(
+                    function ($a) {
+                      return $this->escape($a);
+                    }, $key['columns']
+                  )
+                ) . ')';
+            }
+
+            $st .= ',' . PHP_EOL;
+          }
+        }
+      }
+    }
+
+    return rtrim($st, ',' . PHP_EOL) . ';' . PHP_EOL;
+  }
+
+
+  /**
+   * @param string $table
+   * @param array $cfg
+   * @return int
+   * @throws \Exception
+   */
+  public function alter(string $table, array $cfg): int
+  {
+    if ($st = $this->getAlterTable($table, $cfg)) {
+      return (bool)$this->rawQuery($st);
+    }
+
+    return 0;
+  }
+
+
+  /**
    * Creates an index
    *
    * @param null|string $table
@@ -1109,17 +1365,17 @@ MYSQL
    *
    * @param string $table
    * @param string $column
-   * @param array $model
+   * @param array $col
    * @return bool
    * @throws \Exception
    */
-  public function createColumn(string $table, string $column, array $model): bool
+  public function createColumn(string $table, string $column, array $col): bool
   {
     if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      $column_definition = $this->getColumnDefinitionStatement($column, $model);
+      $column_definition = $this->getColumnDefinitionStatement($column, $col);
 
-      if (!empty($model['after']) && is_string($model['after'])) {
-        $column_definition .= " AFTER {$model['after']}";
+      if (!empty($col['after']) && is_string($col['after'])) {
+        $column_definition .= " AFTER " . $this->escape($col['after']);
       }
 
       return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
@@ -1133,12 +1389,17 @@ MYSQL
    *
    * @param string $name
    * @param array $col
+   * @param bool $include_col_name
    * @return string
    * @throws \Exception
    */
-  protected function getColumnDefinitionStatement(string $name, array $col): string
+  protected function getColumnDefinitionStatement(string $name, array $col, bool $include_col_name = true): string
   {
-    $st = '  ' . $this->escape($name) . ' ';
+    $st = '';
+
+    if ($include_col_name) {
+      $st .= '  ' . $this->escape($name) . ' ';
+    }
 
     if (empty($col['type'])) {
       throw new \Exception(X::_('Column type is not provided'));

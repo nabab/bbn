@@ -74,10 +74,10 @@ interface SqlEngines
    *
    * @param string $table
    * @param string $column
-   * @param array $model
+   * @param array $col
    * @return bool
    */
-  public function createColumn(string $table, string $column, array $model): bool;
+  public function createColumn(string $table, string $column, array $col): bool;
 
   /**
    * Drops the given column for the given table.

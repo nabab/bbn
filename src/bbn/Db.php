@@ -2610,20 +2610,6 @@ class Db implements Db\Actions
    * @return string
    * @throws \Exception
    */
-  public function getAlter(string $table, array $cfg): string
-  {
-    $this->ensureLanguageMethodExists(__FUNCTION__);
-
-    return $this->language->getAlter($table, $cfg);
-  }
-
-
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return string
-   * @throws \Exception
-   */
   public function getAlterTable(string $table, array $cfg): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);

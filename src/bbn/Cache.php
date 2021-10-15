@@ -696,5 +696,14 @@ class Cache
     }
   }
 
-
+  /**
+   * @param callable $function
+   * @return string
+   */
+  public function serializeFunction(callable $function): string
+  {
+    return serialize(
+      new \Opis\Closure\SerializableClosure($function)
+    );
+  }
 }

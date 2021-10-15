@@ -232,35 +232,6 @@ class Model extends bbn\Models\Cls\Db
   }
 
   /**
-   * @param array|null $data
-   * @return array|null
-   */
-  public function getSerialized(array $data = null): ?string
-  {
-    $this->data = $data ?? [];
-
-    if ($this->_plugin) {
-      $router = Router::getInstance();
-      if ($textDomain = $router->getLocaleDomain($this->_plugin_name)) {
-        $oldTextDomain = textdomain(null);
-        if ($textDomain !== $oldTextDomain) {
-          textdomain($textDomain);
-        }
-        else {
-          unset($oldTextDomain);
-        }
-      }
-    }
-
-    $res = bbn\Mvc::includeModel($this->_file, $this);
-    if (!empty($oldTextDomain)) {
-      textdomain($oldTextDomain);
-    }
-
-    return is_string($res) && @unserialize($res) ? $res : null;
-  }
-
-  /**
    * This will get a the content of a file located within the controller data path.
    *
    * @return string|false

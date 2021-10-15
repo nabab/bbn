@@ -9291,4 +9291,285 @@ GROUP BY id
     $this->getNonPublicMethod('getColumnDefinitionStatement')
       ->invoke(self::$pgsql, 'balance', ['type' => 'number']);
   }
+
+  /** @test */
+  public function getAlterTable_method_returns_sql_string_for_alter_statement()
+  {
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'USER-DEFINED',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'alter_type' => 'modify',
+          'null' => true
+        ],
+        'permission' => [
+          'type' => 'USER-DEFINED',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'decimal',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'null' => true,
+          'default' => 'NULL',
+          'alter_type' => 'modify'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $expected = <<<SQL
+ALTER TABLE users
+ADD COLUMN   id bytea NOT NULL,
+ADD COLUMN   role role NOT NULL DEFAULT 'user',
+ALTER COLUMN name TYPE varchar(255),
+ADD COLUMN   permission permission NOT NULL DEFAULT 'read',
+ALTER COLUMN balance TYPE decimal(10,2),
+ALTER COLUMN balance SET DEFAULT NULL,
+ADD COLUMN   balance_before real NOT NULL DEFAULT 0,
+ADD COLUMN   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DROP COLUMN role_id
+SQL;
+
+
+    $this->assertSame(
+      $expected, self::$pgsql->getAlterTable('users', $cfg)
+    );
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_the_given_table_name_is_not_valid()
+  {
+    $this->assertSame('', self::$pgsql->getAlterTable('user**', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertSame('', self::$pgsql->getAlterTable('users', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function alter_method_alters_the_given_cfg_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'balance int NOT NULL,
+              role_id INT DEFAULT 0,
+              name TEXT';
+    });
+
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'USER-DEFINED',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'type' => 'varchar',
+          'maxlength' => 255,
+          'alter_type' => 'modify',
+          'null' => true
+        ],
+        'permission' => [
+          'type' => 'USER-DEFINED',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'decimal',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'null' => true,
+          'default' => 'NULL',
+          'alter_type' => 'modify'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    self::$pgsql->rawQuery('DROP TYPE IF EXISTS role');
+    self::$pgsql->rawQuery('DROP TYPE IF EXISTS permission');
+    self::$pgsql->rawQuery("CREATE TYPE role AS ENUM ('super_admin', 'admin', 'user')");
+    self::$pgsql->rawQuery("CREATE TYPE permission AS ENUM ('read', 'write')");
+
+    $this->assertSame(
+      1, self::$pgsql->alter('users', $cfg)
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayHasKey('id', $structure);
+    $this->assertArrayHasKey('balance', $structure);
+    $this->assertArrayHasKey('role', $structure);
+    $this->assertArrayHasKey('name', $structure);
+    $this->assertArrayHasKey('permission', $structure);
+    $this->assertArrayHasKey('balance_before', $structure);
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertArrayNotHasKey('role_id', $structure);
+
+    $this->assertSame('numeric', $structure['balance']['type']);
+    $this->assertSame(10, $structure['balance']['maxlength']);
+    $this->assertSame(2, $structure['balance']['decimals']);
+    $this->assertSame(1, $structure['balance']['position']);
+
+    $this->assertSame('character varying', $structure['name']['type']);
+    $this->assertSame(255, $structure['name']['maxlength']);
+    $this->assertSame(1, $structure['name']['null']);
+    $this->assertSame(3, $structure['name']['position']);
+
+    $this->assertSame('binary', $structure['id']['type']);
+    $this->assertSame(16, $structure['id']['maxlength']);
+    $this->assertSame(0, $structure['id']['null']);
+    $this->assertSame(4, $structure['id']['position']);
+
+    $this->assertSame('USER-DEFINED', $structure['role']['type']);
+    $this->assertSame('role', $structure['role']['udt_name']);
+    $this->assertSame("'user'::role", $structure['role']['default']);
+    $this->assertSame(5, $structure['role']['position']);
+
+    $this->assertSame('USER-DEFINED', $structure['permission']['type']);
+    $this->assertSame('permission', $structure['permission']['udt_name']);
+    $this->assertSame("'read'::permission", $structure['permission']['default']);
+    $this->assertSame(0, $structure['permission']['null']);
+    $this->assertSame(6, $structure['permission']['position']);
+
+    $this->assertSame('real', $structure['balance_before']['type']);
+    $this->assertSame(7, $structure['balance_before']['position']);
+    $this->assertSame(0, $structure['balance_before']['null']);
+    $this->assertSame(0, $structure['balance_before']['default']);
+    $this->assertSame(true, $structure['balance_before']['signed']);
+
+    $this->assertSame('timestamp without time zone', $structure['created_at']['type']);
+    $this->assertSame('CURRENT_TIMESTAMP', $structure['created_at']['default']);
+    $this->assertSame(8, $structure['created_at']['position']);
+    $this->assertSame(0, $structure['created_at']['null']);
+  }
+
+  /** @test */
+  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  {
+    $this->assertSame(
+      'ALTER TABLE users
+ADD COLUMN   id bytea NOT NULL',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'id',
+        'type' => 'binary',
+        'maxlength' => 32
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ADD COLUMN   role role NOT NULL DEFAULT \'user\'',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'role',
+        'type' => 'USER-DEFINED',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ALTER COLUMN name TYPE varchar(255)',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'name',
+        'type' => 'varchar',
+        'maxlength' => 255,
+        'alter_type' => 'modify',
+        'null' => true
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ALTER COLUMN balance TYPE decimal(10,2),
+ALTER COLUMN balance SET DEFAULT NULL',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'decimal',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'null' => true,
+        'default' => 'NULL',
+        'alter_type' => 'modify'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+ADD COLUMN   balance real NOT NULL DEFAULT 0',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+DROP COLUMN balance',
+      self::$pgsql->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'alter_type' => 'drop'
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE users
+RENAME COLUMN name TO username',
+    self::$pgsql->getAlterColumn('users', [
+      'col_name' => 'name',
+      'new_name' =>  'username',
+      'alter_type' => 'modify'
+    ])
+    );
+  }
 }
