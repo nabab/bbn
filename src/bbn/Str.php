@@ -634,7 +634,11 @@ class Str
   {
     $args = \func_get_args();
     foreach ($args as $a){
-      if (\is_string($a) || (abs($a) > PHP_INT_MAX)) {
+      if (!is_string($a) && !is_int($a) && !is_float($a)) {
+        return false;
+      }
+
+      if (is_string($a)) {
         if (!preg_match('/^-?(\d+)$/', (string)$a)) {
           return false;
         }
