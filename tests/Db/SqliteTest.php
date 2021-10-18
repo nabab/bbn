@@ -215,7 +215,7 @@ class SqliteTest extends TestCase
       'engine' => 'sqlite',
       'host' => $expected_host,
       'args' => [
-        "sqlite:{$expected_host}db.sqlite"
+        "sqlite:{$expected_host}db"
       ]
     ], $this->getNonPublicProperty('cfg', $sqlite));
 
@@ -630,6 +630,7 @@ class SqliteTest extends TestCase
         'extra' => null,
         'maxlength' => null,
         'signed' => 0,
+        'defaultExpression' => false,
         'type' => 'INTEGER'
       ],
         'email' => [
@@ -640,6 +641,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => 20,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT'
         ],
         'created_at' => [
@@ -661,6 +663,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => 32,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'BLOB'
         ],
         'active' => [
@@ -682,6 +685,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => null,
           'signed' => 0,
+          'defaultExpression' => false,
           'type' => 'REAL'
         ],
         'temp_balance' => [
@@ -692,6 +696,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => null,
           'signed' => 0,
+          'defaultExpression' => false,
           'type' => 'REAL'
         ]
       ],
@@ -718,6 +723,7 @@ class SqliteTest extends TestCase
           'extra' => 'auto_increment',
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'INTEGER'
         ],
         'email' => [
@@ -728,6 +734,7 @@ class SqliteTest extends TestCase
           'extra' => null,
           'maxlength' => 20,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT'
         ]
       ],
@@ -2078,12 +2085,12 @@ AND roles.email LIKE ?";
 
     $expected = '
   CREATE TABLE "users" (
-  "id" blob NOT NULL,
-  "username" text NOT NULL,
+  "id" blob(32) NOT NULL,
+  "username" text(255) NOT NULL,
   "role" text NOT NULL DEFAULT \'user\',
   "permission" text NOT NULL DEFAULT \'read\',
-  "balance" real DEFAULT NULL,
-  "balance_before" real NOT NULL DEFAULT 0,
+  "balance" real(10) DEFAULT NULL,
+  "balance_before" real(10) NOT NULL DEFAULT 0,
   "created_at" text NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "num"  NOT NULL DEFAULT 0,
   "login"  NOT NULL
@@ -2122,15 +2129,15 @@ AND roles.email LIKE ?";
   {
     $cfg = [
       'keys' => [
-        'primary' => [
+        'id_unique' => [
           'unique' => true,
           'columns' => ['id']
         ],
-        'unique' => [
+        'email_unique' => [
           'unique' => true,
           'columns' => ['email']
         ],
-        'key' => [
+        'username_key' => [
           'columns' => ['username']
         ]
       ],
@@ -2142,9 +2149,9 @@ AND roles.email LIKE ?";
     ];
 
     $result   = $this->sqlite->getCreateKeys('users', $cfg);
-    $expected = 'CREATE UNIQUE INDEX \'primary\' ON "users" ("id");
-CREATE UNIQUE INDEX \'unique\' ON "users" ("email");
-CREATE INDEX \'key\' ON "users" ("username");';
+    $expected = 'CREATE UNIQUE INDEX \'id_unique\' ON "users" ("id");
+CREATE UNIQUE INDEX \'email_unique\' ON "users" ("email");
+CREATE INDEX \'username_key\' ON "users" ("username");';
 
     $this->assertSame(trim($expected), trim($result));
 
@@ -2184,9 +2191,9 @@ CREATE INDEX \'key\' ON "users" ("username");';
       ->andReturnTrue();
 
     $result = $this->sqlite->getCreateKeys('users');
-    $expected = 'CREATE INDEX \'key\' ON "users" ("username");
-CREATE UNIQUE INDEX \'unique\' ON "users" ("email");
-CREATE UNIQUE INDEX \'primary\' ON "users" ("id");';
+    $expected = 'CREATE INDEX \'username_key\' ON "users" ("username");
+CREATE UNIQUE INDEX \'email_unique\' ON "users" ("email");
+CREATE UNIQUE INDEX \'id_unique\' ON "users" ("id");';
 
     $this->assertSame(trim($expected), trim($result));
   }
@@ -2250,9 +2257,9 @@ CREATE UNIQUE INDEX \'primary\' ON "users" ("id");';
 
     $result   = $this->sqlite->getCreate('users', $cfg);
     $expected = 'CREATE TABLE "users" (
-  "id" blob NOT NULL,
-  "email" text NOT NULL,
-  "username" text NOT NULL
+  "id" blob(32) NOT NULL,
+  "email" text(255) NOT NULL,
+  "username" text(255) NOT NULL
 );
 CREATE UNIQUE INDEX \'primary\' ON "users" ("id");
 CREATE UNIQUE INDEX \'unique\' ON "users" ("email");
@@ -2275,7 +2282,7 @@ CREATE INDEX \'key\' ON "users" ("username");';
 
     $result   = $this->sqlite->getCreate('users', $cfg);
     $expected = 'CREATE TABLE "users" (
-  "email" text NOT NULL
+  "email" text(255) NOT NULL
 );';
 
     $this->assertSame(trim($expected), trim($result));
@@ -3235,6 +3242,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'INTEGER'
         ],
         'email' => [
@@ -3245,6 +3253,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => 20,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT'
         ]
       ]
@@ -3300,7 +3309,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
   public function get_cache_method_returns_table_structure_from_cache_property_when_exists()
   {
     $this->setNonPublicPropertyValue('cache', [
-      'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/users'
+      'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/users'
       => [
         'foo' => 'bar'
       ]
@@ -3407,22 +3416,22 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
     $method = $this->getNonPublicMethod('_db_cache_name');
 
     $this->assertSame(
-      'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/users',
+      'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/users',
       $method->invoke($this->sqlite, 'users', 'columns')
     );
 
     $this->assertSame(
-      'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/table_name',
+      'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/table_name',
       $method->invoke($this->sqlite, 'table_name', 'tables')
     );
 
     $this->assertSame(
-      'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/main',
+      'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/main',
       $method->invoke($this->sqlite, '', 'tables')
     );
 
     $this->assertSame(
-      'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/_bbn-database',
+      'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/_bbn-database',
       $method->invoke($this->sqlite, '', 'databases')
     );
   }
@@ -3496,6 +3505,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => 16,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT',
         ],
         'name' => [
@@ -3506,6 +3516,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => 25,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT',
         ],
         'username' => [
@@ -3516,6 +3527,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => 50,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT',
         ],
         'created_at' => [
@@ -3537,6 +3549,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'INTEGER',
 
         ]
@@ -3570,6 +3583,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => null,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'INTEGER',
         ],
         'name' => [
@@ -3580,6 +3594,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
           'extra' => null,
           'maxlength' => 25,
           'signed' => 1,
+          'defaultExpression' => false,
           'type' => 'TEXT',
         ]
       ]
@@ -3609,7 +3624,7 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
       ->once()
       ->with(
         Str::encodeFilename(str_replace('\\', '/', \get_class($this->sqlite)), true).'/' .
-        'sqlite/' . md5(BBN_DATA_PATH . 'db/'.dirname('main')) . '/users',
+        'sqlite/' . md5(BBN_DATA_PATH . 'db/') . '/users',
         $expected = [
           'keys' => [],
           'cols' => [],
@@ -3622,10 +3637,10 @@ CREATE UNIQUE INDEX \'email\' ON "users" ("email");
               'extra' => null,
               'maxlength' => 11,
               'signed' => 1,
+              'defaultExpression' => false,
               'type' => 'INTEGER'
             ]
           ],
-          3600
         ],
         $this->getNonPublicProperty('cache_renewal')
       )
@@ -7673,6 +7688,7 @@ GROUP BY "id"
         'extra'     => 'auto_increment',
         'maxlength'     => null,
         'signed'    => 1,
+        'defaultExpression' => false,
         'type'      => 'INTEGER',
         'name' => 'id',
         'keys' => [
@@ -7696,6 +7712,7 @@ GROUP BY "id"
         'extra'     => null,
         'maxlength' => 255,
         'signed'    => 1,
+        'defaultExpression' => false,
         'type'      => 'TEXT',
         'name' => 'username',
         'keys' => [
@@ -8110,8 +8127,9 @@ GROUP BY "id"
       'key' => null,
       'default' => null,
       'extra' => null,
-      'maxlength' => null,
+      'maxlength' => 255,
       'signed' => 1,
+      'defaultExpression' => false,
       'type' => 'TEXT',
     ], $structure['username']);
 
@@ -8135,8 +8153,9 @@ GROUP BY "id"
       'key' => null,
       'default' => 0,
       'extra' => null,
-      'maxlength' => null,
+      'maxlength' => 10,
       'signed' => 1,
+      'defaultExpression' => false,
       'type' => 'REAL'
     ], $structure['balance']);
   }
@@ -8230,12 +8249,12 @@ GROUP BY "id"
     ];
 
     $expected = [
-      'id' => '"id" blob NOT NULL',
-      'username' => '"username" text NOT NULL',
+      'id' => '"id" blob(32) NOT NULL',
+      'username' => '"username" text(255) NOT NULL',
       'role' => '"role" text NOT NULL DEFAULT \'user\'',
       'permission' => '"permission" text NOT NULL DEFAULT \'read\'',
-      'balance' => '"balance" real DEFAULT NULL',
-      'balance_before' => '"balance_before" real NOT NULL DEFAULT 0',
+      'balance' => '"balance" real(10) DEFAULT NULL',
+      'balance_before' => '"balance_before" real(10) NOT NULL DEFAULT 0',
       'created_at' => '"created_at" text NOT NULL DEFAULT CURRENT_TIMESTAMP',
       'num' => '"num"  NOT NULL DEFAULT 0',
       'login' => '"login"  NOT NULL'
@@ -8246,6 +8265,226 @@ GROUP BY "id"
         $expected[$col_name],
         trim($method->invoke($this->sqlite, $col_name, $col))
       );
+    }
   }
+
+  /** @test */
+  public function getAlterTable_method_returns_sql_string_for_alter_statement()
+  {
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'enum',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'permission' => [
+          'type' => 'set',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $expected = <<<SQL
+ALTER TABLE "users" ADD   "id" blob(32) NOT NULL;
+ALTER TABLE "users" ADD   "role" text NOT NULL DEFAULT 'user';
+ALTER TABLE "users" ADD   "permission" text NOT NULL DEFAULT 'read';
+ALTER TABLE "users" ADD   "balance" real(10) NOT NULL DEFAULT 0;
+ALTER TABLE "users" ADD   "created_at" text NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE "users" DROP COLUMN "role_id";
+
+SQL;
+
+
+    $this->assertSame(
+      $expected, $this->sqlite->getAlterTable('users', $cfg)
+    );
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_the_given_table_name_is_not_valid()
+  {
+    $this->assertSame('', $this->sqlite->getAlterTable('user**', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_returns_empty_string_when_check_method_returns_false()
+  {
+    $this->setNonPublicPropertyValue('current', null);
+
+    $this->assertSame('', $this->sqlite->getAlterTable('users', ['fields' => ['a' => 'b']]));
+  }
+
+  /** @test */
+  public function getAlterTable_method_throws_an_exception_if_the_fields_property_is_missing()
+  {
+    $this->expectException(\Exception::class);
+    $this->sqlite->getAlterTable('users', ['a' => 'b']);
+  }
+
+  /** @test */
+  public function alter_method_alters_the_given_cfg_for_the_given_table()
+  {
+    $this->createTable('users', function () {
+      return 'balance int(11) NOT NULL,
+              role_id INT(11) DEFAULT 0,
+              name TEXT';
+    });
+
+    $cfg = [
+      'fields' => [
+        'id' => [
+          'type' => 'binary',
+          'maxlength' => 32
+        ],
+        'role' => [
+          'type' => 'enum',
+          'extra' => "'super_admin','admin','user'",
+          'default' => 'user'
+        ],
+        'name' => [
+          'alter_type' => 'modify',
+          'new_name' => 'username'
+        ],
+        'permission' => [
+          'type' => 'set',
+          'extra' => "'read','write'",
+          'default' => 'read'
+        ],
+        'balance_before' => [
+          'type' => 'real',
+          'maxlength' => 10,
+          'decimals' => 2,
+          'signed' => true,
+          'default' => 0
+        ],
+        'created_at' => [
+          'type' => 'datetime',
+          'default' => 'CURRENT_TIMESTAMP'
+        ],
+        'role_id' => [
+          'alter_type' => 'drop'
+        ]
+      ]
+    ];
+
+    $this->assertSame(
+      1, $this->sqlite->alter('users', $cfg)
+    );
+
+    $structure = $this->getTableStructure('users')['fields'];
+
+    $this->assertArrayHasKey('id', $structure);
+    $this->assertArrayHasKey('role', $structure);
+    $this->assertArrayHasKey('permission', $structure);
+    $this->assertArrayHasKey('balance_before', $structure);
+    $this->assertArrayHasKey('created_at', $structure);
+    $this->assertArrayNotHasKey('name', $structure);
+    $this->assertArrayNotHasKey('role_id', $structure);
+
+    $this->assertSame('BLOB', $structure['id']['type']);
+    $this->assertSame(32, $structure['id']['maxlength']);
+    $this->assertSame(0, $structure['id']['null']);
+    $this->assertSame(3, $structure['id']['position']);
+
+    $this->assertSame('TEXT', $structure['role']['type']);
+    $this->assertSame('user', $structure['role']['default']);
+    $this->assertSame(4, $structure['role']['position']);
+
+    $this->assertSame('TEXT', $structure['permission']['type']);
+    $this->assertSame('read', $structure['permission']['default']);
+    $this->assertSame(0, $structure['permission']['null']);
+    $this->assertSame(5, $structure['permission']['position']);
+
+    $this->assertSame('REAL', $structure['balance_before']['type']);
+    $this->assertSame(6, $structure['balance_before']['position']);
+    $this->assertSame(0, $structure['balance_before']['null']);
+    $this->assertSame(0, $structure['balance_before']['default']);
+    $this->assertSame(1, $structure['balance_before']['signed']);
+    $this->assertSame(10, $structure['balance_before']['maxlength']);
+
+    $this->assertSame('TEXT', $structure['created_at']['type']);
+    $this->assertSame('CURRENT_TIMESTAMP', $structure['created_at']['default']);
+    $this->assertSame(7, $structure['created_at']['position']);
+    $this->assertSame(0, $structure['created_at']['null']);
+  }
+
+  /** @test */
+  public function getAlterColumn_method_returns_sql_string_for_alter_column()
+  {
+    $this->assertSame(
+      'ALTER TABLE "users"
+ADD   "id" blob(32)',
+      $this->sqlite->getAlterColumn('users', [
+        'col_name' => 'id',
+        'type' => 'binary',
+        'maxlength' => 32,
+        'null' => true
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE "users"
+RENAME COLUMN "name" TO "username" ',
+      $this->sqlite->getAlterColumn('users', [
+        'col_name' => 'name',
+        'alter_type' => 'modify',
+        'new_name' => 'username',
+      ])
+    );
+
+
+    $this->assertSame(
+      'ALTER TABLE "users"
+ADD   "balance" real(10) NOT NULL DEFAULT 0',
+      $this->sqlite->getAlterColumn('users', [
+        'col_name' => 'balance',
+        'type' => 'real',
+        'maxlength' => 10,
+        'decimals' => 2,
+        'signed' => true,
+        'default' => 0
+      ])
+    );
+
+    $this->assertSame(
+      'ALTER TABLE "users"
+ADD   "role" text NOT NULL DEFAULT \'user\'',
+      $this->sqlite->getAlterColumn('users', [
+        'col_name' => 'role',
+        'type' => 'enum',
+        'extra' => "'super_admin','admin','user'",
+        'default' => 'user'
+      ])
+    );
+
+
+    $this->assertSame(
+      'ALTER TABLE "users"
+DROP COLUMN "name"',
+      $this->sqlite->getAlterColumn('users', [
+        'col_name' => 'name',
+        'alter_type' => 'drop'
+      ])
+    );
   }
 }

@@ -393,7 +393,12 @@ class Sqlite extends Sql
             'position' => $p++,
             'null' => $row['notnull'] == 0 ? 1 : 0,
             'key' => $row['pk'] == 1 ? 'PRI' : null,
-            'default' => $row['dflt_value'],
+            'default' => is_string($row['dflt_value'])
+              ? rtrim(
+                ltrim($row['dflt_value'], "'"),
+                "'"
+              )
+              : $row['dflt_value'],
             // INTEGER PRIMARY KEY is a ROWID
             // https://www.sqlite.org/autoinc.html
             'extra' => $row['type'] === 'INTEGER' && $row['pk'] == 1 ? 'auto_increment' :  null,
@@ -736,18 +741,93 @@ class Sqlite extends Sql
    */
   public function alter(string $table, array $cfg): int
   {
+    if ($st = $this->getAlterTable($table, $cfg)) {
+      // Sqlite does not support multiple alter statements in one query
+      // So we will use begin a transaction then execute all queries one by one
+      $this->pdo->beginTransaction();
+
+      foreach (explode(';' . PHP_EOL, $st) as $query) {
+        $this->rawQuery($query);
+      }
+
+      return (int)$this->pdo->commit();
+    }
+
     return 0;
   }
 
 
   /**
+   * Return a string for alter table sql statement.
+   *
+   * ```php
+   * $cfg = [
+   *    'fields' => [
+   *      'id' => [
+   *        'type' => 'binary',
+   *        'maxlength' => 32
+   *      ],
+   *      'role' => [
+   *        'type' => 'enum',
+   *        'default' => 'user'
+   *      ],
+   *      'permission' => [
+   *        'type' => 'set,
+   *        'default' => 'read'
+   *      ],
+   *      'balance' => [
+   *        'type' => 'real',
+   *        'maxlength' => 10,
+   *        'signed' => true,
+   *        'default' => 0
+   *      ],
+   *      'created_at' => [
+   *        'type' => 'datetime',
+   *        'default' => 'CURRENT_TIMESTAMP'
+   *      ],
+   *      'role_id' => [
+   *         'alter_type' => 'drop'
+   *      ]
+   *    ]
+   * ];
+   * X::dump($db->getAlterTable('users', $cfg);
+   *
+   * // (string) ALTER TABLE "users" ADD   "id" blob(32) NOT NULL;
+   * // ALTER TABLE "users" ADD   "role" text NOT NULL DEFAULT "user";
+   * // ALTER TABLE "users" ADD   "permission" text NOT NULL DEFAULT 'read';
+   * // ALTER TABLE "users" ADD   "balance" real(10) NOT NULL DEFAULT 0;
+   * // ALTER TABLE "users" ADD   "created_at" real NOT NULL DEFAULT CURRENT_TIMESTAMP;
+   * // ALTER TABLE "users" DROP COLUMN "role_id";
+   *
+   * ```
+   *
    * @param string $table
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getAlterTable(string $table, array $cfg): string
   {
-    return '';
+    if (empty($cfg['fields'])) {
+      throw new \Exception(X::_('Fields are not specified'));
+    }
+
+    if ($this->check() && Str::checkName($table)) {
+      $st = '';
+
+      foreach ($cfg['fields'] as $name => $col) {
+        $st .= 'ALTER TABLE ' . $this->escape($table) . ' ';
+
+        $st .= $this->getAlterColumn($table, array_merge($col, [
+          'col_name' => $name,
+          'no_table_exp' => true
+        ]));
+
+        $st .= ";" . PHP_EOL;
+      }
+    }
+
+    return $st ?? '';
   }
 
 
@@ -755,10 +835,38 @@ class Sqlite extends Sql
    * @param string $table
    * @param array $cfg
    * @return string
+   * @throws \Exception
    */
   public function getAlterColumn(string $table, array $cfg): string
   {
-    return '';
+    $alter_types = ['add', 'modify', 'drop'];
+
+    if (!empty($cfg['alter_type']) && in_array(strtolower($cfg['alter_type']), $alter_types)) {
+      $alter_type = strtoupper($cfg['alter_type']);
+    }
+    else {
+      $alter_type = 'ADD';
+    }
+
+    $st = '';
+
+    if (empty($cfg['no_table_exp'])) {
+      $st = 'ALTER TABLE '. $this->escape($table) . PHP_EOL;
+    }
+
+    if ($alter_type === 'MODIFY' && !empty($cfg['new_name'])) {
+      // Sqlite does not support modifying column types, only renaming
+      $st .= "RENAME COLUMN ";
+      $st .= $this->escape($cfg['col_name']) . ' TO ' . $this->escape($cfg['new_name']) . ' ';
+    }
+    elseif ($alter_type === 'DROP') {
+      $st .= "DROP COLUMN " . $this->escape($cfg['col_name']);
+    }
+    else {
+      $st .= $alter_type . ' ' . $this->getColumnDefinitionStatement($cfg['col_name'], $cfg);
+    }
+
+    return $st;
   }
 
 
@@ -769,6 +877,7 @@ class Sqlite extends Sql
    */
   public function getAlterKey(string $table, array $cfg): string
   {
+    // Sqlite does not support altering keys
     return '';
   }
 
@@ -1180,6 +1289,10 @@ class Sqlite extends Sql
       else {
         $st .= $col['type'];
       }
+    }
+
+    if (!empty($col['maxlength'])) {
+      $st .= '('.$col['maxlength'].')';
     }
 
     if (empty($col['null'])) {

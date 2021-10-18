@@ -3424,6 +3424,7 @@ GROUP BY `id`
       "virtual" => false,
       "generation" => "",
       "default" => 0.0,
+      'defaultExpression' => false,
       "maxlength" => 10,
       "decimals" => 2,
     ], $result['balance']);
@@ -3439,6 +3440,7 @@ GROUP BY `id`
       "virtual" => false,
       "generation" => "",
       "default" => "User",
+      'defaultExpression' => false,
       "values" => [
         "Admin", "User"
       ],
@@ -3889,6 +3891,7 @@ GROUP BY `id`
         'virtual'   => false,
         'generation'  => '',
         'default'    => 'NULL',
+        'defaultExpression' => false,
         'maxlength' => 255,
         'name' => 'username',
         'keys' => [
@@ -8476,7 +8479,8 @@ GROUP BY `id`
               'signed' => true,
               'virtual' => false,
               'generation' => '',
-              'default' => 'NULL'
+              'default' => 'NULL',
+              'defaultExpression' => false
             ]
           ]
         ],
@@ -8727,7 +8731,8 @@ GROUP BY `id`
       'signed' => true,
       'virtual' => false,
       'generation' => '',
-      'default' => 'CURRENT_TIMESTAMP'
+      'default' => 'CURRENT_TIMESTAMP',
+      'defaultExpression' => true
     ], $structure['created_at']);
 
     $this->assertArrayHasKey('balance', $structure);
@@ -8741,6 +8746,7 @@ GROUP BY `id`
       'virtual' => false,
       'generation' => '',
       'default' => 0.0,
+      'defaultExpression' => false,
       'maxlength' => 10,
       'decimals' => 2
     ], $structure['balance']);
