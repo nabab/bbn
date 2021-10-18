@@ -125,7 +125,7 @@ class Query extends \PDOStatement implements Actions
               elseif ($v === null) {
                 $param = \PDO::PARAM_NULL;
               }
-              else{
+              else {
                 $param = \PDO::PARAM_STR;
               }
 

@@ -521,7 +521,7 @@ class Mailing extends bbn\Models\Cls\Db
           $res++;
         }
       }
-      if ($version === $mailing['version']) {
+      if (!empty($mailing['medias']) && ($version === $mailing['version'])) {
         foreach ($mailing['medias'] as $med) {
           if ($medias->delete($med['id'])) {
             $res++;

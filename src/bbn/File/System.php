@@ -1257,7 +1257,8 @@ class System extends bbn\Models\Cls\Basic
         } else {
           X::log(error_get_last(), 'filesystem');
         }
-      } else {
+      }
+      elseif (is_dir($path)) {
         $fs = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach ($fs as $f) {
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {

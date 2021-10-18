@@ -73,7 +73,7 @@ class Virtualmin {
   public function __call($name, $arguments){
     if ( $this->checked ){
       $cmd_name = str_replace('_', '-', $name);
-      if ( isset($this->commands[$cmd_name]) || ($name === 'info')){
+      if ( isset($this->commands[$cmd_name])){
 
         //Setting the last action performed
         $this->last_action = $cmd_name;
@@ -276,6 +276,7 @@ class Virtualmin {
     //Executing the shell_exec
     //die(var_dump($this->mode, $request));
     if ( $result = shell_exec($request) ){
+      \bbn\X::log($request, 'mirko');
       //Decoding the json result into an array
       $result_array = json_decode($result, TRUE);
       if ( isset($result_array['error']) ){
