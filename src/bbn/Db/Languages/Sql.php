@@ -2177,7 +2177,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     $r = false;
     if ($this->getEngine() === 'sqlite') {
-      $h = md5($this->getHost().X::dirname($this->getCurrent()));
+      $h = md5($this->getHost().X::dirname($this->getCurrent() ?? ''));
     }
     else {
       $h = str_replace('/', '-', $this->getConnectionCode());
