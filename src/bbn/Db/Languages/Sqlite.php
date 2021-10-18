@@ -790,7 +790,7 @@ class Sqlite extends Sql
    *      ]
    *    ]
    * ];
-   * X::dump($db->getAlterTable('users', $cfg);
+   * X::dump($db->getAlterTable('users', $cfg));
    *
    * // (string) ALTER TABLE "users" ADD   "id" blob(32) NOT NULL;
    * // ALTER TABLE "users" ADD   "role" text NOT NULL DEFAULT "user";
