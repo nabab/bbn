@@ -149,6 +149,7 @@ class Medias extends bbn\Models\Cls\Db
       $grid = new Grid($this->db, $cfg, [
         'table' => $cf['table'],
         'fields' => [],
+        'join' => $cfg['join'] ?? null,
         'limit' => $cfg['limit'] ?? $limit,
         'start' => $cfg['start'] ?? $start
       ]);
@@ -171,6 +172,24 @@ class Medias extends bbn\Models\Cls\Db
       }
     }
     return null;
+  }
+
+
+  public function browseByGroup(string $idGroup, array $cfg, int $limit = 20, int $start = 0): ?array
+  {
+    $cfg['join'] = [[
+      'table' => 'bbn_medias_groups_medias',
+      'on' => [
+        'conditions' => [[
+          'field' => 'bbn_medias_groups_medias.id_media',
+          'exp' => 'bbn_medias.id'
+        ], [
+          'field' => 'bbn_medias_groups_medias.id_group',
+          'value' => $idGroup
+        ]]
+      ]
+    ]];
+    return $this->browse($cfg, $limit, $start);
   }
 
 

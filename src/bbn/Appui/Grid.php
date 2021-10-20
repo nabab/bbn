@@ -104,7 +104,7 @@ class Grid extends bbn\Models\Cls\Cache
         'fields' => !empty($cfg['fields']) ? (array)$cfg['fields'] : [],
         'ofields' => !empty($cfg['ofields']) ? (array)$cfg['ofields'] : [],
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
-        'join' => $cfg['join'] ?? [],
+        'join' => $cfg['join'] ?? ($post['join'] ?? []),
         'group_by' => $cfg['group_by'] ?? [],
         'having' => !empty($post['having']) ? $post['having'] : [],
         'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),

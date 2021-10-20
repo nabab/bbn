@@ -989,11 +989,11 @@ class Preferences extends bbn\Models\Cls\Db
       $res = [];
       // Replacing regular num values by user's values if any
       foreach ($items as $i => $it){
-        $res[] = ['id' => $it, 'num' => $i + 1];
-        if (($tmp = $this->get($it))
-            && (isset($tmp['num']))
-        ) {
-          $res[$i]['num'] = $tmp['num'];
+        if ($tmp = $this->get($it)) {
+          $res[] = ['id' => $it, 'num' => $i + 1];
+          if (isset($tmp['num'])) {
+            $res[$i]['num'] = $tmp['num'];
+          }
         }
       }
       // Reordering the array based on num
@@ -1008,6 +1008,7 @@ class Preferences extends bbn\Models\Cls\Db
 
     return $items;
   }
+
 
   /**
      * Returns all children of the given code with they own attributes.

@@ -545,9 +545,6 @@ class Note extends bbn\Models\Cls\Db
     }
 
     $cf = &$this->class_cfg;
-    if (substr($url, 0, 1) !== '/') {
-      $url = '/' . $url;
-    }
 
     $res = $this->db->selectOne($cf['tables']['url'], $cf['arch']['url']['id_note'], [$cf['arch']['url']['url'] => $url]);
 
@@ -1049,11 +1046,12 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
-   * @param $cfg
+   * @param array $cfg
+   * @param bool $with_content
    * @return array|null
    * @throws \Exception
    */
-  public function browse($cfg): ?array
+  public function browse(array $cfg, bool $with_content = false): ?array
   {
     if (isset($cfg['limit']) && ($user = bbn\User::getInstance())) {
       /** @var bbn\Db $db */
@@ -1076,7 +1074,6 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($cf['arch']['notes']['active'], $cf['table']),
           'first_version.' . $cf['arch']['versions']['creation'],
           'last_version.' . $cf['arch']['versions']['title'],
-          //'last_version.'.$cf['arch']['versions']['content'],
           'last_version.' . $cf['arch']['versions']['id_user'],
           'last_edit' => 'last_version.' . $cf['arch']['versions']['creation'],
         ],
@@ -1139,6 +1136,10 @@ class Note extends bbn\Models\Cls\Db
           'operator' => '=',
           'value' => 1,
         ], [
+          'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
+          'operator' => '=',
+          'value' => 0,
+        ], [
           'field' => 'test_version.' . $cf['arch']['versions']['version'],
           'operator' => 'isnull',
         ]],
@@ -1156,6 +1157,10 @@ class Note extends bbn\Models\Cls\Db
       if (!empty($cfg['join'])) {
         $grid_cfg['join'] = bbn\X::mergeArrays($grid_cfg['join'], $cfg['join']);
         unset($cfg['join']);
+      }
+
+      if ($with_content) {
+        $grid_cfg['fields']['content'] = 'last_version.'.$cf['arch']['versions']['content'];
       }
 
       $grid = new Grid($this->db, $cfg, $grid_cfg);
@@ -1327,54 +1332,6 @@ class Note extends bbn\Models\Cls\Db
     return $notes;
   }
 
-
-  /**
-   * Removes the row corresponding to the given arguments from bbn_notes_events.
-   *
-   * @param string $id_note
-   * @param string $id_event
-   * @return bool
-   */
-  public function _remove_note_events(string $id_note, string $id_event): bool
-  {
-    return !!$this->db->delete(
-      $this->class_cfg['tables']['notes_events'],
-      [
-        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
-        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
-      ]
-    );
-  }
-
-
-  /**
-   * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
-   *
-   * @param string $id_note
-   * @param string $id_event
-   * @return bool
-   */
-  public function _insert_notes_events(string $id_note, string $id_event): bool
-  {
-    if (!$this->db->count(
-      $this->class_cfg['tables']['notes_events'],
-      [
-        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
-        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event
-      ]
-    )) {
-      return !!$this->db->insert(
-        $this->class_cfg['tables']['notes_events'],
-        [
-          $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
-          $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
-        ]
-      );
-    }
-
-    return false;
-  }
-
   /**
    * Returns event id for the given note.
    *
@@ -1426,6 +1383,54 @@ class Note extends bbn\Models\Cls\Db
     } else {
       return true;
     }
+    return false;
+  }
+
+
+  /**
+   * Removes the row corresponding to the given arguments from bbn_notes_events.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  private function _remove_note_event(string $id_note, string $id_event): bool
+  {
+    return !!$this->db->delete(
+      $this->class_cfg['tables']['notes_events'],
+      [
+        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+      ]
+    );
+  }
+
+
+  /**
+   * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  private function _insert_note_event(string $id_note, string $id_event): bool
+  {
+    if (!$this->db->count(
+      $this->class_cfg['tables']['notes_events'],
+      [
+        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event
+      ]
+    )) {
+      return !!$this->db->insert(
+        $this->class_cfg['tables']['notes_events'],
+        [
+          $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+          $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+        ]
+      );
+    }
+
     return false;
   }
 }
