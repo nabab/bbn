@@ -705,18 +705,19 @@ class Php extends bbn\Models\Cls\Basic
     $default = '88888888888888888888888888888888';
     $i       = 0;
     foreach($rfx->getParameters() as $p){
-      $type = $p->getType();
       $arg = '';
-      if (method_exists($type, 'getName')) {
-        $arg .= $type->getName().' ';
-      }
-      elseif (method_exists($type, 'getTypes')) {
-        $tmp = [];
-        foreach ($type->getTypes as $t) {
-          $tmp[] = $t->getName();
+      if ($type = $p->getType()) {
+        if (method_exists($type, 'getName')) {
+          $arg .= $type->getName().' ';
         }
+        elseif (method_exists($type, 'getTypes')) {
+          $tmp = [];
+          foreach ($type->getTypes as $t) {
+            $tmp[] = $t->getName();
+          }
 
-        $arg .= X::join($tmp, '|').' ';
+          $arg .= X::join($tmp, '|').' ';
+        }
       }
 
       $args[] = $arg.($p->isPassedByReference() ? '&' : '').'$'.$p->name;

@@ -1,5 +1,7 @@
 <?php
 
+namespace bbn\Api;
+
 use GuzzleHttp\Client;
 
 class Prosody

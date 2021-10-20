@@ -214,7 +214,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($debug)\n  {\n    $this->debug = $debug;\n  }",
+            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "startLine": 142,
             "endLine": 145,
             "isDeprecated": false,
