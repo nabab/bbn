@@ -156,9 +156,10 @@ class System extends bbn\Models\Cls\Basic
       case 'webdav':
         return $path;
       default:
-        return $this->prefix . (strpos($path, '/') === 0 ? $path : (
-            ($this->current ? $this->current . ($path ? '/' : '') : '') .
-            (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
+        return $this->prefix . (strpos($path, '/') === 0 ?
+          $path : (($this->current ?
+            $this->current . ($path ? '/' : '') : ''
+          ) . (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
     }
   }
 

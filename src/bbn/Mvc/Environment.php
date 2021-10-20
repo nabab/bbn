@@ -42,7 +42,13 @@ class Environment
   private $_mode;
 
   /**
-   * The request sent to the server to get the actual controller.
+   * The original request address sent to the server.
+   * @var null|string
+   */
+  private $_request;
+
+  /**
+   * The URL as it will be given to the controller.
    * @var null|string
    */
   private $_url;
@@ -178,6 +184,8 @@ class Environment
     }
 
     $this->_url = implode('/', $this->_params ?: []);
+    // This won't be changed after a reroute
+    $this->_request = $this->_url;
     if (!$this->_locale) {
       $this->setLocale();
     }
@@ -570,15 +578,13 @@ class Environment
 
 
   /**
+   * Returns the original request sent to the server.
+   * 
    * @return string|null
    */
   public function getRequest(): ?string
   {
-    if (self::$_initiated) {
-      return $this->_url;
-    }
-
-    return null;
+    return $this->_request;
   }
 
 
