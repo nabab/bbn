@@ -369,7 +369,7 @@ class Cms extends bbn\Models\Cls\Db
 					)
 			){
 				//if the event is not in bbn_notes_events it inserts the row
-				$this->note->_insert_notes_events($id_note, $id_event);
+				$this->note->insertNoteEvent($id_note, $id_event);
 				$event['id_note'] = $id_note;
 				return $event;
 			}
@@ -649,7 +649,7 @@ class Cms extends bbn\Models\Cls\Db
           $fields['start']   => $cfg['start'],
 					$fields['end']     => $cfg['end'] ?? null
 				])){
-					return $this->note->_insert_notes_events($id_note, $id_event);
+					return $this->note->insertNoteEvent($id_note, $id_event);
 				}
 			} else {
 				return $this->updateEvent($id_note, $cfg);

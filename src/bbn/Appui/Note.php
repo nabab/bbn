@@ -1368,6 +1368,32 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
+   * Removes the row corresponding to the given arguments from bbn_notes_events.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  public function removeNoteEvent(string $id_note, string $id_event): bool
+  {
+    return $this->_remove_note_event($id_note, $id_event);
+  }
+
+
+  /**
+   * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  public function insertNoteEvent(string $id_note, string $id_event): bool
+  {
+    return $this->_insert_note_event($id_note, $id_event);
+  }
+
+
+  /**
    * If a date is given for $end checks if it's after the start date.
    *
    * @param string|null $start

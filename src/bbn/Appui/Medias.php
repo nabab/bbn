@@ -18,7 +18,9 @@ class Medias extends bbn\Models\Cls\Db
       'tables' => [
         'medias' => 'bbn_medias',
         'medias_tags' => 'bbn_medias_tags',
-        'medias_url' => 'bbn_medias_url'
+        'medias_url' => 'bbn_medias_url',
+        'medias_groups' => 'bbn_medias_groups',
+        'medias_groups_medias' => 'bbn_medias_groups_medias'
       ],
       'arch' => [
         'medias' => [
@@ -43,6 +45,17 @@ class Medias extends bbn\Models\Cls\Db
         'medias_tags' => [
           'id_media' => 'id_media',
           'id_tag' => 'id_tag'
+        ],
+        'medias_groups' => [
+          'id' => 'id',
+          'id_parent' => 'id_parent',
+          'text' => 'text',
+          'cfg' => 'cfg'
+        ],
+        'medias_groups_medias' => [
+          'id_media' => 'id_media',
+          'id_group' => 'id_group',
+          'position' => 'position'
         ]
       ]
     ];
@@ -177,18 +190,27 @@ class Medias extends bbn\Models\Cls\Db
 
   public function browseByGroup(string $idGroup, array $cfg, int $limit = 20, int $start = 0): ?array
   {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups_medias'];
     $cfg['join'] = [[
-      'table' => 'bbn_medias_groups_medias',
+      'table' => $t,
       'on' => [
         'conditions' => [[
-          'field' => 'bbn_medias_groups_medias.id_media',
-          'exp' => 'bbn_medias.id'
+          'field' => $this->db->cfn('id_media', $t),
+          'exp' => $this->db->cfn('id', $cf['tables']['medias'])
         ], [
-          'field' => 'bbn_medias_groups_medias.id_group',
+          'field' => $this->db->cfn('id_group', $t),
           'value' => $idGroup
         ]]
       ]
     ]];
+    if (empty($cfg['order']) || !\is_array($cfg['order'])) {
+      $cfg['order'] = [];
+    }
+    $cfg['order'][] = [
+      'field' => $this->db->cfn('position', $t),
+      'dir' => 'ASC'
+    ];
     return $this->browse($cfg, $limit, $start);
   }
 
