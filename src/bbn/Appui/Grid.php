@@ -104,12 +104,12 @@ class Grid extends bbn\Models\Cls\Cache
         'fields' => !empty($cfg['fields']) ? (array)$cfg['fields'] : [],
         'ofields' => !empty($cfg['ofields']) ? (array)$cfg['ofields'] : [],
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
-        'join' => $cfg['join'] ?? [],
+        'join' => $cfg['join'] ?? ($post['join'] ?? []),
         'group_by' => $cfg['group_by'] ?? [],
-        'having' => $cfg['having'] ?? [],
+        'having' => !empty($post['having']) ? $post['having'] : [],
         'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),
         'start' => $post['start'] ?? 0,
-        'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
+        'where' => !empty($post['filters']) ? $post['filters'] : []
       ];
       if ( !empty($post['excel']) ){
         $this->excel = $post['excel'];
@@ -165,6 +165,21 @@ class Grid extends bbn\Models\Cls\Cache
           'conditions' => [
             $db_cfg['where'],
             $prefilters
+          ]
+        ];
+      }
+      // The (pre)having set server-side are mandatory and are added to the client-side having if any
+      if ( !empty($cfg['having']) ){
+        $prehaving = isset($cfg['having']['conditions']) ? $cfg['having'] : [
+          'logic' => 'AND',
+          'conditions' => $cfg['having']
+        ];
+        // They either become the where or are added as a new root condition
+        $db_cfg['having'] = empty($db_cfg['having']) ? $prehaving : [
+          'logic' => 'AND',
+          'conditions' => [
+            $db_cfg['having'],
+            $prehaving
           ]
         ];
       }
@@ -267,7 +282,12 @@ class Grid extends bbn\Models\Cls\Cache
       $this->chrono->start();
       if ( $this->query ){
         $this->sql = $this->getQuery();
-        $q = $this->db->query($this->sql, $this->db->getQueryValues($this->cfg));
+        $q = $this->db->query($this->sql, \array_map(function($v){
+          if (\bbn\Str::isUid($v)) {
+            $v = hex2bin($v);
+          }
+          return $v;
+        }, $this->db->getQueryValues($this->cfg)));
         $rows = $q->getRows();
       }
       else {
@@ -300,7 +320,12 @@ class Grid extends bbn\Models\Cls\Cache
           $this->count.PHP_EOL.
             $this->db->getWhere($this->cfg).
             $this->db->getGroupBy($this->cfg),
-          $this->db->getQueryValues($this->cfg)
+            \array_map(function($v){
+              if (\bbn\Str::isUid($v)) {
+                $v = hex2bin($v);
+              }
+              return $v;
+            }, $this->db->getQueryValues($this->cfg))
         );
       }
       else if ( is_array($this->count) ){

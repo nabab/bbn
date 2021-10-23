@@ -5,6 +5,7 @@
 namespace bbn\User;
 
 use bbn;
+use Error;
 
 /**
  * A session management object for asynchronous PHP tasks
@@ -42,29 +43,36 @@ class Session
 
   public function __construct(array $defaults = null)
   {
-    if (!self::singletonExists()) {
-      /*
-      if (defined('BBN_DATA_PATH') && !$this->isOpened()) {
-        session_save_path(BBN_DATA_PATH.'sessions');
-      }
-      */
-      self::singletonInit($this);
-
-      if ($id = session_id()) {
-        $this->was_opened = true;
-        $this->once_opened = true;
-      }
-
-      $this->open();
-      if ($this->id = session_id()) {
-        if (!isset($_SESSION[self::$name])) {
-          $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
-        }
-
-        $this->data = $_SESSION[self::$name];
-        $this->close();
-      }
+    if (self::singletonExists()) {
+      throw new \Exception("Impossible to create a new session, one already exists");
     }
+    /*
+    if (defined('BBN_DATA_PATH') && !$this->isOpened()) {
+      session_save_path(BBN_DATA_PATH.'sessions');
+    }
+    */
+    self::singletonInit($this);
+
+    if ($id = session_id()) {
+      $this->was_opened = true;
+      $this->once_opened = true;
+    }
+    else {
+      $this->open();
+      $id = session_id();
+    }
+
+    if (!$id) {
+      throw new \Exception("Impossible to retrieve the session's ID");
+    }
+
+    $this->id = $id;
+    if (!isset($_SESSION[self::$name])) {
+      $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
+    }
+
+    $this->data = $_SESSION[self::$name];
+    $this->close();
   }
 
   public static function destroyInstance()

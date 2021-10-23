@@ -15,7 +15,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
     "startLine": 20,
-    "endLine": 203,
+    "endLine": 242,
     "contentConstructor": null,
     "methods": {
         "crypt": {
@@ -27,7 +27,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::encryptOpenssl($s, $key);\n  }",
+            "code": "function(string $s, string $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::encryptOpenssl($s, $key);\n  }",
             "startLine": 34,
             "endLine": 38,
             "isDeprecated": false,
@@ -39,7 +39,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": [
@@ -72,7 +73,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::decryptOpenssl($s, $key);\n  }",
+            "code": "function(string $s, string $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::decryptOpenssl($s, $key);\n  }",
             "startLine": 45,
             "endLine": 49,
             "isDeprecated": false,
@@ -84,7 +85,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": [
@@ -117,9 +119,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $key = '')\n  {\n    return base64_encode(self::crypt($s, $key));\n  }",
-            "startLine": 51,
-            "endLine": 54,
+            "code": "function(string $s, string $key = '')\n  {\n    return base64_encode(self::crypt($s, $key));\n  }",
+            "startLine": 56,
+            "endLine": 59,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -162,9 +164,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $key = '')\n  {\n    return self::decrypt(base64_decode($s), $key);\n  }",
-            "startLine": 56,
-            "endLine": 59,
+            "code": "function(string $s, string $key = '')\n  {\n    return self::decrypt(base64_decode($s), $key);\n  }",
+            "startLine": 66,
+            "endLine": 69,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -174,7 +176,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string"
+                "string",
+                null
             ],
             "parent": false,
             "arguments": [
@@ -207,9 +210,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $key = NULL, $method = NULL, $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try{\n        $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e) {\n        bbn\\X::log(\"Impossible to decrypt\");\n      }\n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 68,
-            "endLine": 88,
+            "code": "function(string $s, string $key = NULL, string $method = NULL, string $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try {\n        $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e) {\n        X::log(\"Impossible to decrypt\");\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 80,
+            "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -231,7 +234,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Any random secure SALT string for your website"
                 },
                 {
                     "name": "key",
@@ -240,8 +244,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any random secure SALT string for your website"
+                    "default_name": ""
                 },
                 {
                     "name": "method",
@@ -273,9 +276,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $key = NULL, $method = NULL, $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e){\n        X::log($e->getMessage(), 'decryptOpenssl');\n      }\n      if ($res) {\n        return $res;\n      }\n    }\n    return null;\n  }",
-            "startLine": 98,
-            "endLine": 119,
+            "code": "function(string $s, string $key = NULL, string $method = NULL, string $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e){\n        X::log($e->getMessage(), 'decryptOpenssl');\n      }\n\n      if (!empty($res)) {\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 113,
+            "endLine": 136,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -297,7 +300,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Any random secure SALT string for your website"
                 },
                 {
                     "name": "key",
@@ -306,8 +310,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Any random secure SALT string for your website"
+                    "default_name": ""
                 },
                 {
                     "name": "method",
@@ -339,9 +342,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($path, $algo = 'sha512', $key_bits = 4096)\n  {\n    $res = false;\n    if (is_dir(dirname($path))\n        && !file_exists($path.'_rsa')\n        && in_array($algo, Hash_algos(), true)\n        && ($key = self::generateCert($algo, $key_bits))\n    ) {\n      if (is_dir($path) && (substr($path, -1) !== '\/')) {\n        $path .= '\/';\n      }\n      $public = $path.'_rsa.pub';\n      $private = $path.'_rsa';\n      if (\\file_put_contents($public, $key['public'])\n          && \\file_put_contents($private, $key['private'])\n      ) {\n        $res = true;\n      }\n    }\n    return $res;\n  }",
-            "startLine": 130,
-            "endLine": 150,
+            "code": "function(string $path, string $algo = 'sha512', int $key_bits = 4096)\n  {\n    $res = false;\n    if (is_dir(X::dirname($path))\n        && !file_exists($path.'_rsa')\n        && in_array($algo, hash_algos(), true)\n        && ($key = self::generateCert($algo, $key_bits))\n    ) {\n      if (is_dir($path) && (substr($path, -1) !== '\/')) {\n        $path .= '\/';\n      }\n      $public = $path.'_rsa.pub';\n      $private = $path.'_rsa';\n      if (\\file_put_contents($public, $key['public'])\n          && \\file_put_contents($private, $key['private'])\n      ) {\n        $res = true;\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 147,
+            "endLine": 168,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -394,9 +397,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($algo = 'sha512', $key_bits = 4096)\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ) {\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
-            "startLine": 152,
-            "endLine": 175,
+            "code": "function(string $algo = 'sha512', int $key_bits = 4096)\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ) {\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
+            "startLine": 175,
+            "endLine": 198,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -427,7 +430,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 4096,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "bits"
                 }
             ]
         }

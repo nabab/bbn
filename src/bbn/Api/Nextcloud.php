@@ -36,28 +36,18 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $path
    * @return void
    */
-  public function getSize($path = '')
+  public function getSize($path = ''): ?int
   {
-    $size = null;
     $tmp = $path;
     $path = $this->getRealPath($path);
-    
-    $type = $this->obj->propFind($tmp, array( 
-  	  '{DAV:}resourcetype',
+    $size = $this->getProps($tmp, array(
+      '{http://owncloud.org/ns}size'
     ));
-    //case of files
-    if ( $this->isFile($path) ){
-      $size = $this->obj->propFind($tmp, [
-        '{DAV:}getcontentlength'
-      ])['{DAV:}getcontentlength'];
+    if ($size) {
+      return (int)array_values($size)[0];
     }
-    //case of folder
-    else {
-      $size = $this->obj->propFind($tmp, [
-        '{DAV:}quota-used-bytes'
-      ])['{DAV:}quota-used-bytes'];
-    }
-    return $size;
+
+    return null;
   }
   
   /**
@@ -76,6 +66,33 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $success;
   }
   
+  protected function getProps($path, array $props = null, int $depth = 0): ?array
+  {
+    try {
+      $res = $this->obj->propFind(self::fixURL($path), $props ?: [
+        '{DAV:}resourcetype',
+        '{DAV:}getcontenttype'
+      ], $depth);
+      return $res ?: null;
+    }
+    catch (\Sabre\HTTP\ClientException $e) {
+      if (isset($e->getResponse) && is_callable($e->getResponse)) {
+        if ( $e->getResponse()->getStatus() !== 404 ){
+          $this->error = $e->getResponse()->getStatusText();
+        }
+      }
+      else {
+        $this->error = $e->getMessage();
+      }
+    }
+
+    if ($this->error) {
+      throw new \Exception($this->error);
+    }
+
+    return null;
+  }
+
   /**
    * Returns true if the given $path exists
    *
@@ -85,21 +102,28 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function exists($path)
   {
     try {
-      if ( $this->obj->propFind($path, [
+      if ( $this->getProps($path, [
         '{DAV:}resourcetype',
         '{DAV:}getcontenttype'
       ], 0) ){
         return true;
       }
     }
-    catch ( \Exception $e ){
-      if ( $e->getResponse()->getStatus() === 404 ){
-        return false;
+    catch (\Sabre\HTTP\ClientException $e) {
+      if (isset($e->getResponse) && is_callable($e->getResponse)) {
+        if ( $e->getResponse()->getStatus() !== 404 ){
+          $this->error = $e->getResponse()->getStatusText();
+        }
       }
-      else{
-        $this->error = $e->getResponse()->getStatusText();
+      else {
+        $this->error = $e->getMessage();
       }
     }
+
+    if ($this->error) {
+      throw new \Exception($this->error);
+    }
+
     return false;
   }
   
@@ -171,14 +195,15 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $path
    * @return Boolean
    */
-  public function isFile(string $path)
+  public function isFile(string $path): bool
   {
-    if ( $this->exists($path) && !empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){
-      return true;
-    }
-    else {
-      return false;
-    }
+    return !empty(
+      $this->getProps(
+        $path,
+        ['{DAV:}getcontenttype'],
+        0
+      )
+    );
   }
   
   /**
@@ -186,14 +211,17 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $path
    * @return Boolean
    */
-  public function isDir(string $path)
+  public function isDir(string $path): bool
   {
-    if ( $this->exists($path) && empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){
-      return true;
-    }
-    else {
-      return false;
-    }
+
+    return $this->exists($path) &&
+        empty(
+          $this->getProps(
+            $path,
+            ['{DAV:}getcontenttype'],
+            0
+          )
+        );
   }
   
   /**
@@ -203,7 +231,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
   public function filemtime(string $path)
   {
     if ( $this->exists($path) ){
-      $mtime = $this->obj->propFind($path, [
+      $mtime = $this->getProps($path, [
         '{DAV:}getlastmodified'
       ]);
       if ( !empty($mtime['{DAV:}getlastmodified']) ){
@@ -230,27 +258,22 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * Download the given file
    * @param string $file
    */
-  public function download(string $file):String
+  public function download(string $file): void
   {
-    if ( $this->exists($file) && $this->isFile($file) ){
-      $dest = '';
+    if ($this->isFile($file)) {
+      //the tmp file destination
+      $dest = \bbn\Mvc::getTmpPath().X::basename($file);
       //gets the content of the file
-      $res = $this->obj->request('GET', $this->getRealPath($file));
-      if ( !empty($res) && !empty($res['body']) ){
-        //the tmp file destination
-        $dest = \bbn\Mvc::getTmpPath().X::basename($file);
+      $res = $this->obj->request('GET', $this->path.self::fixURL($file));
+      if (!empty($res) && !empty($res['body'])) {
         // the tmp file created
-        if ( $tmp = file_put_contents($dest, $res['body']) ){
+        if (file_put_contents($dest, $res['body'])) {
           // instantiates the new file to the class \bbn\File
-          //$file_istance = new \bbn\File($dest);
-          $dest = \bbn\Mvc::getTmpPath().X::basename($file);;
-          //return the content of the tmp file
-          //$file_istance->download();
-          /* deletes the tmp file
-          unlink($dest);*/
+          $tmp = new \bbn\File($dest);
+          $tmp->download();
+          //unlink($dest);
         } 
       }
-      return $dest;
     }
   }
   
@@ -269,53 +292,71 @@ class Nextcloud extends bbn\Models\Cls\Basic{
       $path = self::prefix;
     }
    // $path = $this->getSystemPath($path);
-    if ( $this->exists($path) && $this->isDir($path) ){
+    if ($this->isDir($path)) {
       $props = ['{DAV:}getcontenttype'];
-      $collection = $this->obj->propFind($path, $props, 1);
+      if ($detailed) {
+        if (strpos($detailed, 's')) {
+          $props[] = '{http://owncloud.org/ns}size';
+        }
+        if (strpos($detailed, 'm')) {
+          $props[] = '{DAV:}getlastmodified';
+        }
+      }
+
+      $collection = $this->getProps($path, $props, 1);
       if ( !empty($collection) ){
         //arrayt_shift to remove the parent included in the array
-        array_shift($collection);
         $dirs = [];
         $files = [];
+        $has_dir = in_array($type, ['both', 'dir']);
+        $has_file = in_array($type, ['both', 'file']);
+        $num = 0;
         foreach ( $collection as $i => $c ){
+          $num++;
+          // The 2 first child are .. and .
+          if ($num < 3) {
+            continue;
+          }
+
+          $npath = $name = str_replace(self::prefix, '', $i);
+          // removing trailing slash
+          if (empty($c['{DAV:}getcontenttype'])) {
+            $name = substr($npath, 0, -1);
+          }
+
           $tmp = [
-            'path' => str_replace(self::prefix, '', $i),
+            'path' => $npath,
             'dir' => empty($c['{DAV:}getcontenttype']) ? true : false,
             'file' => empty($c['{DAV:}getcontenttype']) ? false : true,
-            'name' => X::basename($i),
+            'name' => urldecode(X::basename($name)),
           ];
-          //if details has to be included on the item
-          if ( !empty($detailed) ){
-            $tmp['mtime'] = $this->filemtime($i);
-            $tmp['size'] = $this->getSize($i);
-          }
-          if ($type === 'both'){
-           
-            if ($tmp['dir']) {
-              $dirs[] = $tmp;
+          if ($detailed) {
+            if (strpos($detailed, 's')) {
+              $tmp['size'] = $c['{http://owncloud.org/ns}size'];
             }
-            else{
-              $files[] = $tmp ;
+            if (strpos($detailed, 'm')) {
+              $props['mtime'] = $c['{DAV:}getlastmodified'];
             }
           }
-          else if ( $tmp['file'] && ($type === 'file') ){
-            $files[] = $tmp;
-          }
-          else if ( $tmp['dir'] && ($type === 'dir') ){
+
+          if ($has_dir && $tmp['dir']) {
             $dirs[] = $tmp;
+          }
+          else if ($has_file && $tmp['file']) {
+            $files[] = $tmp ;
           }
         }
         
-        if ( $type === 'dir' ){
+        if ($type === 'dir') {
           return $dirs;
         }
-        else if ( $type === 'file' ){
+        
+        if ($type === 'file') {
           return $files;
         }
-        else {
-          die(var_dump($type));
-          return array_merge($dirs, $files);
-        }
+
+        // both
+        return [...$dirs, ...$files];
       }  
     }
     else {
@@ -413,6 +454,28 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $success;
   }
 
+  private static function fixURL(string $path): string
+  {
+    if ( strpos($path, self::prefix) === 0 ){
+      $path = substr($path, strlen(self::prefix));
+    }
+    $fpath = '';
+    $bits = X::split($path, '/');
+    $num = count($bits);
+    foreach ($bits as $i => $bit) {
+      if ($bit) {
+        $fpath .= rawurlencode($bit);
+        if ($i < $num -1) {
+          $fpath .= '/';          
+        }
+      }
+    }
+
+    //X::log([$path, $fpath], 'nextcloud');
+
+    return $fpath;
+
+  }
 }
 
 

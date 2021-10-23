@@ -772,14 +772,26 @@
         "plugin": true,
         "items": [
           {
-            "text": "Publication",
-            "code": "publication",
-            "icon": "nf nf-fa-leanpub"
-          },
-          {
-            "text": "Work schedule",
-            "code": "wp",
-            "icon": "nf nf-mdi-calendar_multiple_check"
+            "text": "Types",
+            "code": "types",
+            "icon": "nf nf-fa-shapes",
+            "cfg": {
+              "show_code": 1,
+              "show_icon": 1,
+              "allow_children": 1
+            },
+            "items": [
+              {
+                "text": "Publication",
+                "code": "publication",
+                "icon": "nf nf-fa-leanpub"
+              },
+              {
+                "text": "Work schedule",
+                "code": "wp",
+                "icon": "nf nf-mdi-calendar_multiple_check"
+              }
+            ]
           }
         ]
       },

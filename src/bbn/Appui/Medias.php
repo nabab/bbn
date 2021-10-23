@@ -18,7 +18,9 @@ class Medias extends bbn\Models\Cls\Db
       'tables' => [
         'medias' => 'bbn_medias',
         'medias_tags' => 'bbn_medias_tags',
-        'medias_url' => 'bbn_medias_url'
+        'medias_url' => 'bbn_medias_url',
+        'medias_groups' => 'bbn_medias_groups',
+        'medias_groups_medias' => 'bbn_medias_groups_medias'
       ],
       'arch' => [
         'medias' => [
@@ -43,6 +45,17 @@ class Medias extends bbn\Models\Cls\Db
         'medias_tags' => [
           'id_media' => 'id_media',
           'id_tag' => 'id_tag'
+        ],
+        'medias_groups' => [
+          'id' => 'id',
+          'id_parent' => 'id_parent',
+          'text' => 'text',
+          'cfg' => 'cfg'
+        ],
+        'medias_groups_medias' => [
+          'id_media' => 'id_media',
+          'id_group' => 'id_group',
+          'position' => 'position'
         ]
       ]
     ];
@@ -149,6 +162,7 @@ class Medias extends bbn\Models\Cls\Db
       $grid = new Grid($this->db, $cfg, [
         'table' => $cf['table'],
         'fields' => [],
+        'join' => $cfg['join'] ?? null,
         'limit' => $cfg['limit'] ?? $limit,
         'start' => $cfg['start'] ?? $start
       ]);
@@ -171,6 +185,33 @@ class Medias extends bbn\Models\Cls\Db
       }
     }
     return null;
+  }
+
+
+  public function browseByGroup(string $idGroup, array $cfg, int $limit = 20, int $start = 0): ?array
+  {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups_medias'];
+    $cfg['join'] = [[
+      'table' => $t,
+      'on' => [
+        'conditions' => [[
+          'field' => $this->db->cfn('id_media', $t),
+          'exp' => $this->db->cfn('id', $cf['tables']['medias'])
+        ], [
+          'field' => $this->db->cfn('id_group', $t),
+          'value' => $idGroup
+        ]]
+      ]
+    ]];
+    if (empty($cfg['order']) || !\is_array($cfg['order'])) {
+      $cfg['order'] = [];
+    }
+    $cfg['order'][] = [
+      'field' => $this->db->cfn('position', $t),
+      'dir' => 'ASC'
+    ];
+    return $this->browse($cfg, $limit, $start);
   }
 
 
@@ -297,6 +338,26 @@ class Medias extends bbn\Models\Cls\Db
    * @return int|null
    * @throws \Exception
    */
+  public function getByUrl(string $url)
+  {
+    $cf =& $this->class_cfg;
+    return $this->db->selectOne(
+      $cf['tables']['medias_url'],
+      $cf['arch']['medias_url']['id_media'],
+      [
+        $cf['arch']['medias_url']['url'] => $url
+      ]
+    );
+  }
+
+
+  /**
+   * @param string $id_media
+   * @param string $url
+   * @param int $shared
+   * @return int|null
+   * @throws \Exception
+   */
   public function setUrl(string $id_media, string $url, int $shared = 0)
   {
     if ($this->exists($id_media)) {
@@ -313,6 +374,7 @@ class Medias extends bbn\Models\Cls\Db
 
     return null;
   }
+
 
   /**
    * @param string $id

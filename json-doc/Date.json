@@ -283,7 +283,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($date, $firstweekday = 'monday')\n  {\n    $cut = substr($date, 0, 8);\n    $daylen = 86400;\n    $timestamp = strtotime($date);\n    $first = strtotime($cut . \"00\");\n    $elapsed = ($timestamp - $first) \/ $daylen;\n    $weeks = 1;\n    for ( $i = 1; $i <= $elapsed; $i++ ){\n      $dayfind = $cut . (strlen($i) < 2 ? '0' . $i : $i);\n      $daytimestamp = strtotime($dayfind);\n      $day = strtolower(date(\"l\", $daytimestamp));\n      if ( $day === strtolower($firstweekday) ){\n        $weeks++;\n      }\n    }\n    return $weeks;\n  }",
+            "code": "function(string $date, string $firstweekday = 'monday')\n  {\n    $cut = substr($date, 0, 8);\n    $daylen = 86400;\n    $timestamp = strtotime($date);\n    $first = strtotime($cut . \"00\");\n    $elapsed = ($timestamp - $first) \/ $daylen;\n    $weeks = 1;\n    for ( $i = 1; $i <= $elapsed; $i++ ){\n      $dayfind = $cut . (strlen($i) < 2 ? '0' . $i : $i);\n      $daytimestamp = strtotime($dayfind);\n      $day = strtolower(date(\"l\", $daytimestamp));\n      if ( $day === strtolower($firstweekday) ){\n        $weeks++;\n      }\n    }\n    return $weeks;\n  }",
             "startLine": 157,
             "endLine": 174,
             "isDeprecated": false,

@@ -41,11 +41,11 @@ class Note extends bbn\Models\Cls\Db
     'tables' => [
       'notes' => 'bbn_notes',
       'versions' => 'bbn_notes_versions',
-      'nmedias' => 'bbn_notes_medias',
+      'notes_medias' => 'bbn_notes_medias',
       'medias' => 'bbn_medias',
-      'tags' => 'bbn_notes_tags',
+      'notes_tags' => 'bbn_notes_tags',
       'url' => 'bbn_notes_url',
-      'events' => 'bbn_notes_events'
+      'notes_events' => 'bbn_notes_events'
     ],
     'arch' => [
       'notes' => [
@@ -71,7 +71,7 @@ class Note extends bbn\Models\Cls\Db
         'id_user' => 'id_user',
         'creation' => 'creation',
       ],
-      'nmedias' => [
+      'notes_medias' => [
         'id' => 'id',
         'id_media' => 'id_media',
         'id_note' => 'id_note',
@@ -89,11 +89,11 @@ class Note extends bbn\Models\Cls\Db
         'content' => 'content',
         'private' => 'private',
       ],
-      'events' => [
+      'notes_events' => [
         'id_note' => 'id_note',
         'id_event' => 'id_event',
       ],
-      'tags' => [
+      'notes_tags' => [
         'id_note' => 'id_note',
         'id_tag' => 'id_tag',
       ],
@@ -120,13 +120,13 @@ class Note extends bbn\Models\Cls\Db
   public function __construct(bbn\Db $db, string $lang = null)
   {
     parent::__construct($db);
-    self::_init_class_cfg(self::$default_class_cfg);
+    $this->_init_class_cfg(self::$default_class_cfg);
     self::optionalInit();
     $this->taggerInit(
-      $this->class_cfg['tables']['tags'],
+      $this->class_cfg['tables']['notes_tags'],
       [
-        'id_tag' => $this->class_cfg['arch']['tags']['id_tag'],
-        'id_element' => $this->class_cfg['arch']['tags']['id_note']
+        'id_tag' => $this->class_cfg['arch']['notes_tags']['id_tag'],
+        'id_element' => $this->class_cfg['arch']['notes_tags']['id_note']
       ]
     );
     $this->lang = $lang ?: (defined('BBN_LANG') ? BBN_LANG : 'en');
@@ -442,11 +442,11 @@ class Note extends bbn\Models\Cls\Db
         unset($res[$cf['arch']['versions']['content']]);
       } else {
         if ($medias = $this->db->getColumnValues(
-          $cf['tables']['nmedias'],
-          $cf['arch']['nmedias']['id_media'],
+          $cf['tables']['notes_medias'],
+          $cf['arch']['notes_medias']['id_media'],
           [
-            $cf['arch']['nmedias']['id_note'] => $id,
-            $cf['arch']['nmedias']['version'] => $version,
+            $cf['arch']['notes_medias']['id_note'] => $id,
+            $cf['arch']['notes_medias']['version'] => $version,
           ]
         )) {
           $media         = $this->getMediaInstance();
@@ -545,9 +545,6 @@ class Note extends bbn\Models\Cls\Db
     }
 
     $cf = &$this->class_cfg;
-    if (substr($url, 0, 1) !== '/') {
-      $url = '/' . $url;
-    }
 
     $res = $this->db->selectOne($cf['tables']['url'], $cf['arch']['url']['id_note'], [$cf['arch']['url']['url'] => $url]);
 
@@ -674,9 +671,9 @@ class Note extends bbn\Models\Cls\Db
         'versions1.' . $cf['arch']['versions']['id_note'],
         'versions1.' . $cf['arch']['versions']['version'],
         'versions1.' . $cf['arch']['versions']['title'],
-        'versions1.' . $cf['arch']['versions']['content'],
         'versions1.' . $cf['arch']['versions']['id_user'],
         'versions1.' . $cf['arch']['versions']['creation'],
+        'versions1.' . $cf['arch']['versions']['content']
       ],
       'join' => [[
         'table' => $cf['tables']['versions'],
@@ -764,11 +761,11 @@ class Note extends bbn\Models\Cls\Db
       $notes = $db->rselectAll($cfg);
       foreach ($notes as $note) {
         if ($medias = $db->getColumnValues(
-          $cf['tables']['nmedias'],
-          $cf['arch']['nmedias']['id_media'],
+          $cf['tables']['notes_medias'],
+          $cf['arch']['notes_medias']['id_media'],
           [
-            $cf['arch']['nmedias']['id_note'] => $note[$cf['arch']['versions']['id_note']],
-            $cf['arch']['nmedias']['version'] => $note[$cf['arch']['versions']['version']],
+            $cf['arch']['notes_medias']['id_note'] => $note[$cf['arch']['versions']['id_note']],
+            $cf['arch']['notes_medias']['version'] => $note[$cf['arch']['versions']['version']],
           ]
         )) {
           $note['medias'] = [];
@@ -917,13 +914,13 @@ class Note extends bbn\Models\Cls\Db
       $cf = &$this->class_cfg;
 
       return $this->db->insert(
-        $cf['tables']['nmedias'],
+        $cf['tables']['notes_medias'],
         [
-          $cf['arch']['nmedias']['id_note'] => $id_note,
-          $cf['arch']['nmedias']['version'] => $version,
-          $cf['arch']['nmedias']['id_media'] => $id_media,
-          $cf['arch']['nmedias']['id_user'] => $usr->getId(),
-          $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s'),
+          $cf['arch']['notes_medias']['id_note'] => $id_note,
+          $cf['arch']['notes_medias']['version'] => $version,
+          $cf['arch']['notes_medias']['id_media'] => $id_media,
+          $cf['arch']['notes_medias']['id_user'] => $usr->getId(),
+          $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
         ]
       );
     }
@@ -947,16 +944,16 @@ class Note extends bbn\Models\Cls\Db
       && $this->exists($id_note)
     ) {
       $filter = [
-        $cf['arch']['nmedias']['id_note'] => $id_note,
-        $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
-        $cf['arch']['nmedias']['id_media'] => $id_media,
+        $cf['arch']['notes_medias']['id_note'] => $id_note,
+        $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
+        $cf['arch']['notes_medias']['id_media'] => $id_media,
       ];
 
       if ($version === true) {
-        unset($filter[$cf['arch']['nmedias']['version']]);
+        unset($filter[$cf['arch']['notes_medias']['version']]);
       }
 
-      return $this->db->delete($cf['tables']['nmedias'], $filter);
+      return $this->db->delete($cf['tables']['notes_medias'], $filter);
     }
 
     return null;
@@ -978,13 +975,13 @@ class Note extends bbn\Models\Cls\Db
       $this->db->selectOne($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media]) &&
       $this->exists($id_note) &&
       $this->db->insert(
-        $cf['tables']['nmedias'],
+        $cf['tables']['notes_medias'],
         [
-          $cf['arch']['nmedias']['id_note'] => $id_note,
-          $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
-          $cf['arch']['nmedias']['id_media'] => $id_media,
-          $cf['arch']['nmedias']['id_user'] => \bbn\User::getInstance()->getId(),
-          $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s'),
+          $cf['arch']['notes_medias']['id_note'] => $id_note,
+          $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
+          $cf['arch']['notes_medias']['id_media'] => $id_media,
+          $cf['arch']['notes_medias']['id_user'] => \bbn\User::getInstance()->getId(),
+          $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
         ]
       );
   }
@@ -1004,14 +1001,14 @@ class Note extends bbn\Models\Cls\Db
     $cf    = &$this->class_cfg;
     if ($this->exists($id_note)) {
       $filter = [
-        $cf['arch']['nmedias']['id_note'] => $id_note,
-        $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
+        $cf['arch']['notes_medias']['id_note'] => $id_note,
+        $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
       ];
       if ($version === true) {
-        unset($filter[$cf['arch']['nmedias']['version']]);
+        unset($filter[$cf['arch']['notes_medias']['version']]);
       }
 
-      if ($medias = $this->db->getColumnValues($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], $filter)) {
+      if ($medias = $this->db->getColumnValues($cf['tables']['notes_medias'], $cf['arch']['notes_medias']['id_media'], $filter)) {
         foreach ($medias as $m) {
           $ret[] = $media->getMedia($m, true);
         }
@@ -1034,14 +1031,14 @@ class Note extends bbn\Models\Cls\Db
     $cf = &$this->class_cfg;
     if ($this->exists($id_note)) {
       $where = [
-        $cf['arch']['nmedias']['id_note'] => $id_note,
-        $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
+        $cf['arch']['notes_medias']['id_note'] => $id_note,
+        $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
       ];
       if (!empty($id_media) && Str::isUid($id_media)) {
-        $where[$cf['arch']['nmedias']['id_media']] = $id_media;
+        $where[$cf['arch']['notes_medias']['id_media']] = $id_media;
       }
 
-      return (bool)$this->db->count($cf['tables']['nmedias'], $where);
+      return (bool)$this->db->count($cf['tables']['notes_medias'], $where);
     }
 
     return null;
@@ -1049,11 +1046,12 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
-   * @param $cfg
+   * @param array $cfg
+   * @param bool $with_content
    * @return array|null
    * @throws \Exception
    */
-  public function browse($cfg): ?array
+  public function browse(array $cfg, bool $with_content = false): ?array
   {
     if (isset($cfg['limit']) && ($user = bbn\User::getInstance())) {
       /** @var bbn\Db $db */
@@ -1076,7 +1074,6 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($cf['arch']['notes']['active'], $cf['table']),
           'first_version.' . $cf['arch']['versions']['creation'],
           'last_version.' . $cf['arch']['versions']['title'],
-          //'last_version.'.$cf['arch']['versions']['content'],
           'last_version.' . $cf['arch']['versions']['id_user'],
           'last_edit' => 'last_version.' . $cf['arch']['versions']['creation'],
         ],
@@ -1139,6 +1136,10 @@ class Note extends bbn\Models\Cls\Db
           'operator' => '=',
           'value' => 1,
         ], [
+          'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
+          'operator' => '=',
+          'value' => 0,
+        ], [
           'field' => 'test_version.' . $cf['arch']['versions']['version'],
           'operator' => 'isnull',
         ]],
@@ -1156,6 +1157,10 @@ class Note extends bbn\Models\Cls\Db
       if (!empty($cfg['join'])) {
         $grid_cfg['join'] = bbn\X::mergeArrays($grid_cfg['join'], $cfg['join']);
         unset($cfg['join']);
+      }
+
+      if ($with_content) {
+        $grid_cfg['fields']['content'] = 'last_version.'.$cf['arch']['versions']['content'];
       }
 
       $grid = new Grid($this->db, $cfg, $grid_cfg);
@@ -1305,13 +1310,13 @@ class Note extends bbn\Models\Cls\Db
     $notes = [];
     $cms   = new \bbn\Appui\Cms($this->db);
     $ids   = $this->db->rselectAll(
-      $this->class_cfg['tables']['nmedias'],
+      $this->class_cfg['tables']['notes_medias'],
       [
-        $this->class_cfg['arch']['nmedias']['id_note'],
-        $this->class_cfg['arch']['nmedias']['version'],
+        $this->class_cfg['arch']['notes_medias']['id_note'],
+        $this->class_cfg['arch']['notes_medias']['version'],
       ],
       [
-        $this->class_cfg['arch']['nmedias']['id_media'] => $id_media,
+        $this->class_cfg['arch']['notes_medias']['id_media'] => $id_media,
       ]
     );
 
@@ -1327,54 +1332,6 @@ class Note extends bbn\Models\Cls\Db
     return $notes;
   }
 
-
-  /**
-   * Removes the row corresponding to the given arguments from bbn_notes_events.
-   *
-   * @param string $id_note
-   * @param string $id_event
-   * @return bool
-   */
-  public function _remove_note_events(string $id_note, string $id_event): bool
-  {
-    return !!$this->db->delete(
-      $this->class_cfg['tables']['events'],
-      [
-        $this->class_cfg['arch']['events']['id_event'] => $id_event,
-        $this->class_cfg['arch']['events']['id_note'] => $id_note,
-      ]
-    );
-  }
-
-
-  /**
-   * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
-   *
-   * @param string $id_note
-   * @param string $id_event
-   * @return bool
-   */
-  public function _insert_notes_events(string $id_note, string $id_event): bool
-  {
-    if (!$this->db->count(
-      $this->class_cfg['tables']['events'],
-      [
-        $this->class_cfg['arch']['events']['id_note'] => $id_note,
-        $this->class_cfg['arch']['events']['id_event'] => $id_event
-      ]
-    )) {
-      return !!$this->db->insert(
-        $this->class_cfg['tables']['events'],
-        [
-          $this->class_cfg['arch']['events']['id_note'] => $id_note,
-          $this->class_cfg['arch']['events']['id_event'] => $id_event,
-        ]
-      );
-    }
-
-    return false;
-  }
-
   /**
    * Returns event id for the given note.
    *
@@ -1384,10 +1341,10 @@ class Note extends bbn\Models\Cls\Db
   public function getEventIdFromNote(string $id_note)
   {
     return $this->db->selectOne(
-      $this->class_cfg['tables']['events'],
-      $this->class_cfg['arch']['events']['id_event'],
+      $this->class_cfg['tables']['notes_events'],
+      $this->class_cfg['arch']['notes_events']['id_event'],
       [
-        $this->class_cfg['arch']['events']['id_note'] => $id_note
+        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note
       ]
     );
   }
@@ -1401,12 +1358,38 @@ class Note extends bbn\Models\Cls\Db
   public function getNoteIdFromEvent(string $id_event)
   {
     return $this->db->selectOne(
-      $this->class_cfg['tables']['events'],
-      $this->class_cfg['arch']['events']['id_note'],
+      $this->class_cfg['tables']['notes_events'],
+      $this->class_cfg['arch']['notes_events']['id_note'],
       [
-        $this->class_cfg['arch']['events']['id_event'] => $id_event
+        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event
       ]
     );
+  }
+
+
+  /**
+   * Removes the row corresponding to the given arguments from bbn_notes_events.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  public function removeNoteEvent(string $id_note, string $id_event): bool
+  {
+    return $this->_remove_note_event($id_note, $id_event);
+  }
+
+
+  /**
+   * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  public function insertNoteEvent(string $id_note, string $id_event): bool
+  {
+    return $this->_insert_note_event($id_note, $id_event);
   }
 
 
@@ -1426,6 +1409,54 @@ class Note extends bbn\Models\Cls\Db
     } else {
       return true;
     }
+    return false;
+  }
+
+
+  /**
+   * Removes the row corresponding to the given arguments from bbn_notes_events.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  private function _remove_note_event(string $id_note, string $id_event): bool
+  {
+    return !!$this->db->delete(
+      $this->class_cfg['tables']['notes_events'],
+      [
+        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+      ]
+    );
+  }
+
+
+  /**
+   * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
+   *
+   * @param string $id_note
+   * @param string $id_event
+   * @return bool
+   */
+  private function _insert_note_event(string $id_note, string $id_event): bool
+  {
+    if (!$this->db->count(
+      $this->class_cfg['tables']['notes_events'],
+      [
+        $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+        $this->class_cfg['arch']['notes_events']['id_event'] => $id_event
+      ]
+    )) {
+      return !!$this->db->insert(
+        $this->class_cfg['tables']['notes_events'],
+        [
+          $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+          $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+        ]
+      );
+    }
+
     return false;
   }
 }

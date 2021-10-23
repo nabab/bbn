@@ -7,6 +7,7 @@ namespace bbn\User;
 
 use bbn;
 use bbn\X;
+use Exception;
 
 /**
  * A user's preference system linked to options and user classes
@@ -90,11 +91,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * preferences constructor.
-   * @param bbn\Db $db
-   * @param array  $cfg
-   */
+    /**
+     * Preferences constructor.
+     *
+     * @param bbn\Db $db The database connection object
+     * @param array $cfg A configuration array for tha tables' structure
+     * @throws Exception
+     */
   public function __construct(bbn\Db $db, array $cfg = [])
   {
       parent::__construct($db);
@@ -111,6 +114,43 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns an array describing the structures of the tables for the class.
+   *
+   * ```
+   * $pref->getClassCfg();
+   *
+   * // (array) = [
+   * //   "table" => "bbn_users_options",
+   * //   "tables" => [
+   * //     "user_options" => "bbn_users_options",
+   * //     "user_options_bits" => "bbn_users_options_bits"
+   * //   ],
+   * //   "arch" => [
+   * //     "user_options" => [
+   * //       "id" => "id",
+   * //       "id_option" => "id_option",
+   * //       "num" => "num",
+   * //       "id_user" => "id_user",
+   * //       "id_group" => "id_group",
+   * //       "id_alias" => "id_alias",
+   * //       "public" => "public",
+   * //       "id_link" => "id_link",
+   * //       "text" => "text",
+   * //       "cfg" => "cfg"
+   * //     ],
+   * //     "user_options_bits" => [
+   * //       "id" => "id",
+   * //       "id_user_option" => "id_user_option",
+   * //       "id_parent" => "id_parent",
+   * //       "id_option" => "id_option",
+   * //       "num" => "num",
+   * //       "text" => "text",
+   * //       "cfg" => "cfg"
+   * //     ]
+   * //   ]
+   * // ];
+   * ```
+   *
    * @return array
    */
   public function getClassCfg(): array
@@ -119,25 +159,67 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns preferences' IDs from the option's ID
-   *
-   * @param null|string $id_option
-   * @return null|array
-   */
+    /**
+     * Returns all preferences' IDs from the option's ID.
+     *
+     *```
+     * $pref->retrieveIds("944190af24ef11eca47652540000cfbe");
+     *
+     * // (array) = [
+     * //   "8380126d2b4d11eca47652540000cfbe",
+     * //   "309f8a1c2c2f11eca47652540000cfbe",
+     * //   "ef2cefe52c2f11eca47652540000cfbe",
+     * //   "042b29722c2f11eca47652540000cfbe",
+     * //   "eac3729c2b6c11eca47652540000cfbe",
+     * //   "d38e7e692cd011eca47652540000cfbe",
+     * //   "26e3dd9a2c2611eca47652540000cfbe",
+     * //   "3ef413ad2b6b11eca47652540000cfbe",
+     * //   "f47d188b2b5911eca47652540000cfbe",
+     * //   "179d85a0284911eca47652540000cfbe",
+     * //   "7238e8932c0e11eca47652540000cfbe",
+     * //   "89ceab0b2aa111eca47652540000cfbe",
+     * //   "96203fbb2b5911eca47652540000cfbe",
+     * // ]
+     *```
+     *
+     * @param null|string $id_option
+     * @return null|array
+     * @throws Exception
+     */
   public function retrieveIds(string $id_option = null): ?array
   {
     return $this->_retrieve_ids($id_option, $this->id_user, $this->id_group);
   }
 
 
-  /**
-   * Returns preferences' IDs from the option's ID and the given user ID
-   *
-   * @param null|string $id_option
-   * @param string      $id_user
-   * @return array|null
-   */
+    /**
+     * Returns preferences' IDs from the option's ID and the given user ID.
+     *
+     *```
+     * $pref->retrieveUserIds('944190af24ef11eca47652540000cfbe');
+     *
+     * // (array) = [
+     * //   "8380126d2b4d11eca47652540000cfbe",
+     * //   "309f8a1c2c2f11eca47652540000cfbe",
+     * //   "ef2cefe52c2f11eca47652540000cfbe",
+     * //   "042b29722c2f11eca47652540000cfbe",
+     * //   "eac3729c2b6c11eca47652540000cfbe",
+     * //   "d38e7e692cd011eca47652540000cfbe",
+     * //   "26e3dd9a2c2611eca47652540000cfbe",
+     * //   "3ef413ad2b6b11eca47652540000cfbe",
+     * //   "f47d188b2b5911eca47652540000cfbe",
+     * //   "179d85a0284911eca47652540000cfbe",
+     * //   "7238e8932c0e11eca47652540000cfbe",
+     * //   "89ceab0b2aa111eca47652540000cfbe",
+     * //   "96203fbb2b5911eca47652540000cfbe",
+     * // ]
+     *```
+     *
+     * @param null|string $id_option
+     * @param string|null $id_user
+     * @return array|null
+     * @throws Exception
+     */
   public function retrieveUserIds(string $id_option = null, string $id_user = null): ?array
   {
     if (!$id_user) {
@@ -148,13 +230,18 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns preferences' IDs from the option's ID and the given group ID
-   *
-   * @param null|string $id_option
-   * @param string      $id_group
-   * @return array|null
-   */
+    /**
+     * Returns preferences' IDs from the option's ID and the given group ID.
+     *
+     * ```
+     * $pref->retrieveGroupIdsIds('944190af24ef11eca47652540000cfbe', '930ac00324ef11eca47652540000cfbe');
+     * ```
+     *
+     * @param null|string $id_option
+     * @param string|null $id_group
+     * @return array|null
+     * @throws Exception
+     */
   public function retrieveGroupIds(string $id_option = null, string $id_group = null): ?array
   {
     if (!$id_group) {
@@ -165,26 +252,43 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Checks if the given user or the current user is authorized to access a user_option.
-   *
-   * @param string $id_user_option
-   *
-   * @return bool
-   */
-  public function isAuthorized(string $id_user_option)
+    /**
+     * Checks if the given user or the current user is authorized to access a user_option.
+     *
+     * ```
+     * $pref->isAuthorized("930ac00324ef11eca47652540000cfbe");
+     *
+     * // (bool) = false;
+     *
+     * $pref->isAuthorized("eac3729c2b6c11eca47652540000cfbe");
+     *
+     * // (bool) = true;
+     * ````
+     *
+     * @param string $id_user_option
+     * @return bool
+     * @throws Exception
+     */
+  public function isAuthorized(string $id_user_option): bool
   {
     return (bool)$this->get($id_user_option, false);
   }
 
 
-  /**
-   * Returns true if the current user can access a preference, false otherwise
-   *
-   * @param string|null $id_option
-   * @param bool        $force
-   * @return bool
-   */
+    /**
+     * Returns true if the current user can access a preference, false otherwise.
+     *
+     * ```
+     * $pref->has('9439491824ef11eca47652540000cfbe');
+     *
+     * // (bool) = true;
+     * ```
+     *
+     * @param string|null $id_option
+     * @param bool $force
+     * @return bool
+     * @throws Exception
+     */
   public function has(string $id_option = null, bool $force = false): bool
   {
     if (!$force && $this->user->isDev()) {
@@ -195,26 +299,39 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Checks if a user has the given preference
-   *
-   * @param string $id_option
-   * @param string $id_user
-   * @return bool
-   */
+    /**
+     * Checks if a user has the given preference.
+     *
+     * ```
+     * $pref->userHas('042b29722c2f11eca47652540000cfbe');
+     *
+     * // (bool) = false;
+     * ```
+     *
+     * @param string $id_option
+     * @param string|null $id_user
+     * @return bool
+     * @throws Exception
+     */
   public function userHas(string $id_option, string $id_user = null): bool
   {
     return (bool)$this->_retrieve_ids($id_option, $id_user);
   }
 
 
-  /**
-   * Checks if a group has the given preference
-   *
-   * @param string $id_option
-   * @param string $id_group
-   * @return bool
-   */
+    /**
+     * Checks if a group has the given preference.
+     *
+     * ```
+     * $pref->groupHas('042b29722c2f11eca47652540000cfbe', $pref->getGroup());
+     *
+     * // (bool) = false;
+     * ```
+     * @param string $id_option
+     * @param string $id_group
+     * @return bool
+     * @throws Exception
+     */
   public function groupHas(string $id_option, string $id_group): bool
   {
     return (bool)$this->_retrieve_ids($id_option, null, $id_group);
@@ -222,6 +339,14 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns the Id of the current user.
+   *
+   * ```
+   * $pref->getUser();
+   *
+   * //(string) = "980dd074514ef11eca56895680000cers";
+   * ```
+   *
    * @return null|string
    */
   public function getUser(): ?string
@@ -231,6 +356,14 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns the Id of the current group.
+   *
+   * ```
+   * $pref->getGroup();
+   *
+   * //(string) = "980dd074514ef11eca56895680000cers";
+   * ```
+   *
    * @return null|string
    */
   public function getGroup(): ?string
@@ -240,6 +373,15 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
+   * Changes the current user and return the changed preferences class.
+   *
+   * ```
+   * $pref->setUser($ctrl->inc->user);
+   *
+   * //(bbn\User\Preferences) = $pref;
+   *
+   * ```
+   *
    * @param bbn\User $user
    * @return preferences
    */
@@ -251,7 +393,13 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Sets the given group.
+   * Changes the current group and return the changed preferences class.
+   *
+   * ```
+   * $pref->setGroup('930ac00324ef11eca47652540000cfbe');
+   *
+   * // (bbn\User\Preferences) = $pref;
+   * ```
    *
    * @param string $id_group
    * @return preferences
@@ -267,9 +415,9 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Gets the cfg array, normalized either from the DB or from the $cfg argument
+   * Gets the cfg array, normalized either from the DB or from the $cfg argument.
    *
-   * @param string     $id
+   * @param string|null $id
    * @param null|array $cfg
    * @return null|array
    */
@@ -302,13 +450,19 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Gets the cfg array, normalized either from the DB or from the $cfg argument
-   *
-   * @param string     $id
-   * @param null|array $cfg
-   * @return null|array
-   */
+    /**
+     * Gets the cfg array, normalized either from the DB or from the $cfg argument.
+     *
+     * ```
+     * $pref->getCfgByOption("9439491824ef11eca47652540000cfbe");
+     *
+     * (array) = [];
+     * ```
+     *
+     * @param string $id_option
+     * @param string|null $id_user
+     * @return null|array
+     */
   public function getCfgByOption(string $id_option, string $id_user = null): ?array
   {
     if (($cfg = $this->db->selectOne(
@@ -331,24 +485,33 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Gets the preferences which have the option's $id as id_link
-   *
-   * @param string $id
-   * @return array|null
-   */
+    /**
+     * Gets the preferences which have the option's $id as id_link.
+     *
+     * ```
+     * $pref->getLinks("9439491824ef11eca47652540000cfbe");
+     *
+     * //(array) = [];
+     *
+     * ```
+     * @param string $id
+     * @return array|null
+     * @throws Exception
+     */
   public function getLinks(string $id): ?array
   {
     return $this->_get_links($id, $this->id_user, $this->id_group);
   }
 
 
-  /**
-   * Returns the current user's preference based on the given id, his own profile and his group
-   * @param string $id
-   * @param bool   $with_config
-   * @return array|null
-   */
+    /**
+     * Returns the current user's preference based on the given id, his own profile and his group.
+     * 
+     * @param string $id
+     * @param bool $with_config
+     * @return array|null
+     * @throws Exception
+     */
   public function get(string $id, bool $with_config = true): ?array
   {
     if (bbn\Str::isUid($id)) {
@@ -416,12 +579,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns an array of the current user's preferences based on the given id_option, his own profile and his group's
-   * @param null|string $id_option
-   * @param bool        $with_config
-   * @return array|null
-   */
+    /**
+     * Returns an array of the current user's preferences based on the given id_option, his own profile and his group's.
+     *
+     * @param null|string $id_option
+     * @param bool $with_config
+     * @return array|null
+     * @throws Exception
+     */
   public function getAll(string $id_option = null, bool $with_config = true): ?array
   {
     if ($id_option = $this->_get_id_option($id_option)) {
@@ -500,12 +665,20 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option
-   * @param null|string $id_option
-   * @param bool        $with_config
-   * @return array|null
-   */
+    /**
+     * Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option.
+     *
+     * ```
+     * $pref->getAllNotMine('9439491824ef11eca47652540000cfbe', true);
+     *
+     * // (array) = [];
+     * ```
+     *
+     * @param null|string $id_option
+     * @param bool $with_config Adds the `cfg` field in the result if true
+     * @return array|null
+     * @throws Exception
+     */
   public function getAllNotMine(string $id_option = null, bool $with_config = true): ?array
   {
     if ($id_option = $this->_get_id_option($id_option)) {
@@ -581,6 +754,50 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
+  /**
+     * Returns the current user's preference and the config if second parameter set to true, based on the given option id, his own profile and his group.
+     *
+     *```
+     * $pref->getByOption('944190af24ef11eca47652540000cfbe', true);
+     *
+     * // (array) = [
+     * //  "path" => "/",
+     * //  "host" => "",
+     * //  "user" => "",
+     * //  "type" => "local",
+     * //  "id" => "8380126d2b4d11eca47652540000cfbe",
+     * //  "id_option" => "944190af24ef11eca47652540000cfbe",
+     * //  "num" => null,
+     * //  "id_user" => "930cc07724ef11eca47652540000cfbe",
+     * //  "id_group" => null,
+     * //  "id_alias" => null,
+     * //  "public" => 0,
+     * //  "id_link" => null,
+     * //  "text" => 1
+     * // ];
+     *
+     * $pref->getByOption('944190af24ef11eca47652540000cfbe', false);
+     *
+     * // (array) = [
+     * //   "id" => "8380126d2b4d11eca47652540000cfbe",
+     * //   "id_option" => "944190af24ef11eca47652540000cfbe",
+     * //   "num" => null,
+     * //   "id_user" => "930cc07724ef11eca47652540000cfbe",
+     * //   "id_group" => null,
+     * //   "id_alias" => null,
+     * //   "public" => 0,
+     * //   "id_link" => null,
+     * //   "text" => 1,
+     * //   "cfg" => "{"path":"\/","host":"","user":"","type":"local"}"
+     * // ]
+     *```
+     *
+     * @param string $id_option
+     * @param bool $with_config
+     * @return array|null
+     * @throws Exception
+     */
+
   public function getByOption(string $id_option, bool $with_config = true): ?array
   {
     if ($id = $this->retrieveUserIds($id_option, $this->id_user)) {
@@ -590,7 +807,10 @@ class Preferences extends bbn\Models\Cls\Db
     return null;
   }
 
-
+  /**
+     * @return array|null
+     * @throws Exception
+     */
   public function option(): ?array
   {
     if ($o = $this->opt->option(\func_get_args())) {
@@ -604,7 +824,135 @@ class Preferences extends bbn\Models\Cls\Db
     return null;
   }
 
+  /**
+   * Returns all the children IDs of the given code with their property and their preferences.
+   *
+   * ```
+   * //[
+   * // [
+   * //   "id" => "943d955824ef11eca47652540000cfbe",
+   * //   "id_parent" => "9439491824ef11eca47652540000cfbe",
+   * //   "id_alias" => null,
+   * //   "num" => null,
+   * //   "text" => "Favourites",
+   * //   "code" => "favourites",
+   * //   "value" => null,
+   * //   "num_children" => 0,
+   * //   "items" => [
+   * //   ]
+   * // ],
+   * // [
+   * //   "id" => "9c57439824ef11eca47652540000cfbe",
+   * //   "id_parent" => "9439491824ef11eca47652540000cfbe",
+   * //   "id_alias" => "9891c4d624ef11eca47652540000cfbe",
+   * //   "num" => null,
+   * //   "text" => "Permissions",
+   * //   "code" => "permissions",
+   * //   "num_children" => 3,
+   * //   "icon" => "nf nf-fa-key",
+   * //   "alias" => [
+   * //     "id" => "9891c4d624ef11eca47652540000cfbe",
+   * //     "id_parent" => "988d97ee24ef11eca47652540000cfbe",
+   * //     "id_alias" => null,
+   * //     "num" => null,
+   * //     "text" => "Permissions",
+   * //     "code" => "permissions",
+   * //     "num_children" => 3,
+   * //     "icon" => "nf nf-fa-key"
+   * //   ],
+   * //   "items" => [
+   * //   ]
+   * // ],
+   * // [
+   * //   "id" => "9ee7450224ef11eca47652540000cfbe",
+   * //   "id_parent" => "9439491824ef11eca47652540000cfbe",
+   * //   "id_alias" => "98a3dfca24ef11eca47652540000cfbe",
+   * //   "num" => null,
+   * //   "text" => "Plugins",
+   * //   "code" => "plugins",
+   * //   "num_children" => 0,
+   * //   "icon" => "nf nf-mdi-puzzle",
+   * //   "alias" => [
+   * //     "id" => "98a3dfca24ef11eca47652540000cfbe",
+   * //     "id_parent" => "988d97ee24ef11eca47652540000cfbe",
+   * //     "id_alias" => null,
+   * //     "num" => null,
+   * //     "text" => "Plugins",
+   * //     "code" => "plugins",
+   * //     "num_children" => 0,
+   * //     "icon" => "nf nf-mdi-puzzle"
+   * //   ],
+   * //   "items" => [
+   * //   ]
+   * // ],
+   * // [
+   * //   "id" => "944190af24ef11eca47652540000cfbe",
+   * //   "id_parent" => "9439491824ef11eca47652540000cfbe",
+   * //   "id_alias" => null,
+   * //   "num" => null,
+   * //   "text" => "Sources",
+   * //   "code" => "sources",
+   * //   "value" => null,
+   * //   "num_children" => 0,
+   * //   "items" => [
+   * //     [
+   * //       "path" => "/home/",
+   * //       "host" => "185.142.53.114",
+   * //       "pass" => "******",
+   * //       "user" => "root",
+   * //       "type" => "ssh",
+   * //       "id" => "042b29722c2f11eca47652540000cfbe",
+   * //       "id_option" => "944190af24ef11eca47652540000cfbe",
+   * //       "num" => null,
+   * //       "id_user" => "930cc07724ef11eca47652540000cfbe",
+   * //       "id_group" => null,
+   * //       "id_alias" => null,
+   * //       "public" => 0,
+   * //       "id_link" => null,
+   * //       "text" => "inova"
+   * //     ],
+   * //     [
+   * //       "path" => "",
+   * //       "host" => "qr.dev.bbn.io",
+   * //       "user" => "qr",
+   * //       "type" => "ssh",
+   * //       "id" => "179d85a0284911eca47652540000cfbe",
+   * //       "id_option" => "944190af24ef11eca47652540000cfbe",
+   * //       "num" => null,
+   * //       "id_user" => "930cc07724ef11eca47652540000cfbe",
+   * //       "id_group" => null,
+   * //       "id_alias" => null,
+   * //       "public" => 0,
+   * //       "id_link" => null,
+   * //       "text" => "quentin"
+   * //     ],
+   * //   ]
+   * // ]
+   * //];
+   * ```
+   *
+   * @param $code
+   * @return array|null
+   * @throws Exception
+   */
+  public function fullOptions($code): ?array
+  {
+    if ($ops = $this->opt->fullOptions(\func_get_args())) {
+      foreach ($ops as &$o){
+        $o['items'] = $this->getAll($o['id']);
+      }
 
+      return $ops;
+    }
+
+    return null;
+  }
+
+  /**
+     * @param string $id_option
+     * @return mixed|null
+     * @throws Exception
+     */
   public function text(string $id_option)
   {
     if ($id_option = $this->_get_id_option($id_option)) {
@@ -614,21 +962,43 @@ class Preferences extends bbn\Models\Cls\Db
     return null;
   }
 
-
+  /**
+     * Return all the IDs of the children of the given option in the user's order.
+     *
+     * ```
+     * $pref->items('finder', 'appui');
+     *
+     * // (array) = [
+     * //   "943d955824ef11eca47652540000cfbe",
+     * //   "9c57439824ef11eca47652540000cfbe",
+     * //   "9ee7450224ef11eca47652540000cfbe",
+     * //   "944190af24ef11eca47652540000cfbe",
+     * // ]
+     * ```
+     *
+     * @param $code
+     * @return array|null
+     * @throws Exception
+     * @todo Review the way user's num replaces default one
+     */
   public function items($code)
   {
+    // Gets the Ids of the corresponding options in their natural order (num or text)
     if ($items = $this->opt->items(\func_get_args())) {
+      // Creating an array based on the user's order
       $res = [];
+      // Replacing regular num values by user's values if any
       foreach ($items as $i => $it){
         $res[] = ['id' => $it, 'num' => $i + 1];
-        if (($tmp = $this->get($it))
-            && (isset($tmp['num']))
-        ) {
-          $res[$i]['num'] = $tmp['num'];
+        if ($tmp = $this->get($it)) {
+          if (isset($tmp['num'])) {
+            $res[$i]['num'] = $tmp['num'];
+          }
         }
       }
-
-      \bbn\X::sortBy($res, 'num');
+      // Reordering the array based on num
+      X::sortBy($res, 'num');
+      // Returns a simple array with only the IDs
       return array_map(
         function ($a) {
           return $a['id'];
@@ -640,8 +1010,87 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
+  /**
+     * Returns all children of the given code with they own attributes.
+     *
+     * ```
+     * $pref->options('finder', 'appui');
+     *
+     * // (array)  = [
+     * //     [
+     * //       "id" => "943d955824ef11eca47652540000cfbe",
+     * //       "id_parent" => "9439491824ef11eca47652540000cfbe",
+     * //       "id_alias" => null,
+     * //       "num" => null,
+     * //       "text" => "Favourites",
+     * //       "code" => "favourites",
+     * //       "value" => null,
+     * //       "num_children" => 0,
+     * //       "items" => null
+     * //     ],
+     * //     [
+     * //       "id" => "9c57439824ef11eca47652540000cfbe",
+     * //       "id_parent" => "9439491824ef11eca47652540000cfbe",
+     * //       "id_alias" => "9891c4d624ef11eca47652540000cfbe",
+     * //       "num" => null,
+     * //       "text" => "Permissions",
+     * //       "code" => "permissions",
+     * //       "num_children" => 3,
+     * //       "icon" => "nf nf-fa-key",
+     * //       "alias" => [
+     * //         "id" => "9891c4d624ef11eca47652540000cfbe",
+     * //         "id_parent" => "988d97ee24ef11eca47652540000cfbe",
+     * //         "id_alias" => null,
+     * //         "num" => null,
+     * //         "text" => "Permissions",
+     * //         "code" => "permissions",
+     * //         "num_children" => 3,
+     * //         "icon" => "nf nf-fa-key"
+     * //       ],
+     * //       "items" => null
+     * //     ],
+     * //     [
+     * //       "id" => "9ee7450224ef11eca47652540000cfbe",
+     * //       "id_parent" => "9439491824ef11eca47652540000cfbe",
+     * //       "id_alias" => "98a3dfca24ef11eca47652540000cfbe",
+     * //       "num" => null,
+     * //       "text" => "Plugins",
+     * //       "code" => "plugins",
+     * //       "num_children" => 0,
+     * //       "icon" => "nf nf-mdi-puzzle",
+     * //       "alias" => [
+     * //         "id" => "98a3dfca24ef11eca47652540000cfbe",
+     * //         "id_parent" => "988d97ee24ef11eca47652540000cfbe",
+     * //         "id_alias" => null,
+     * //         "num" => null,
+     * //         "text" => "Plugins",
+     * //         "code" => "plugins",
+     * //         "num_children" => 0,
+     * //         "icon" => "nf nf-mdi-puzzle"
+     * //       ],
+     * //       "items" => null
+     * //     ],
+     * //     [
+     * //       "id" => "944190af24ef11eca47652540000cfbe",
+     * //       "id_parent" => "9439491824ef11eca47652540000cfbe",
+     * //       "id_alias" => null,
+     * //       "num" => null,
+     * //       "text" => "Sources",
+     * //       "code" => "sources",
+     * //       "value" => null,
+     * //       "num_children" => 0,
+     * //       "items" => null
+     * //     ]
+     * //   ];
+     * ```
+     *
+     * @param $code
+     * @return array|null
+     * @throws Exception
+     */
   public function options($code): ?array
   {
+    // List of the options' id corresponding to the given code
     if ($list = $this->items(\func_get_args())) {
       $res = [];
       foreach ($list as $i => $li){
@@ -656,23 +1105,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  public function fullOptions($code): ?array
-  {
-    if ($ops = $this->opt->fullOptions(\func_get_args())) {
-      foreach ($ops as &$o){
-        $o['items'] = $this->getAll($o['id']);
-      }
-
-      return $ops;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @todo What does it do???
-   */
+    /**
+     * @param $id_option
+     * @param int $index
+     * @param bool $upd
+     * @return array|void
+     * @throws Exception
+     */
   public function order($id_option, int $index, bool $upd = false)
   {
     $id_parent = $this->opt->getIdParent($id_option);
@@ -686,7 +1125,7 @@ class Preferences extends bbn\Models\Cls\Db
           $this->fields['num'] => $i + 1
         ];
         if ($cfg = $this->get($it)) {
-          $res[$i] = \bbn\X::mergeArrays($res[$i], $cfg);
+          $res[$i] = X::mergeArrays($res[$i], $cfg);
         }
 
         if ($it === $id_option) {
@@ -716,20 +1155,24 @@ class Preferences extends bbn\Models\Cls\Db
           }
         }
 
-        \bbn\X::sortBy($res, $this->fields['num']);
+        X::sortBy($res, $this->fields['num']);
         return $res;
       }
     }
   }
 
 
-  /**
-   * Sets the permission row for the current user by the option's ID
-   *
-   * @param string $id_option
-   * @param array  $cfg
-   * @return int
-   */
+    /**
+     * Sets the preference row for the current user by the option's ID
+     *
+     * ```
+     * ```
+     *
+     * @param string $id_option
+     * @param array $cfg
+     * @return int
+     * @throws Exception
+     */
   public function setByOption(string $id_option, array $cfg): int
   {
     if ($id = $this->retrieveUserIds($id_option, $this->id_user)) {
@@ -741,10 +1184,10 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Sets the permission config for the current user by the preference's ID
+   * Sets the preference config for the current user by the preference's ID
    *
    * @param string $id
-   * @param array  $cfg
+   * @param array|null $cfg
    * @return int
    */
   public function set(string $id, array $cfg = null): int
@@ -760,7 +1203,7 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
-   * Sets the permission row for the current user by the preference's ID
+   * Sets the preference row for the current user by the preference's ID
    *
    * @param string $id
    * @param array  $cfg
@@ -782,7 +1225,12 @@ class Preferences extends bbn\Models\Cls\Db
     );
   }
 
-
+    /**
+     * @param string $id_option
+     * @param array $cfg
+     * @return int
+     * @throws Exception
+     */
   public function updateByOption(string $id_option, array $cfg): int
   {
     if ($id = $this->retrieveUserIds($id_option, $this->id_user)) {
@@ -793,13 +1241,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Adds a new preference for the given option for the current user.
-   *
-   * @param null|string $id_option
-   * @param array       $cfg
-   * @return null|string
-   */
+    /**
+     * Adds a new preference for the given option for the current user.
+     *
+     * @param null|string $id_option
+     * @param array $cfg
+     * @return null|string
+     * @throws Exception
+     */
   public function add(string $id_option = null, array $cfg): ?string
   {
     if (($id_option = $this->_get_id_option($id_option))
@@ -812,13 +1261,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Adds a new preference for the given option for the current user.
-   *
-   * @param null|string $id_option
-   * @param array       $cfg
-   * @return null|string
-   */
+    /**
+     * Adds a new preference for the given option for the current user.
+     *
+     * @param null|string $id_option
+     * @param array $cfg
+     * @return null|string
+     * @throws Exception
+     */
   public function addToGroup(string $id_option = null, array $cfg): ?string
   {
     if (($id_option = $this->_get_id_option($id_option))
@@ -871,13 +1321,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Deletes all the given or current user's permissions for the given option
-   *
-   * @param null|string $id_option
-   * @param null|string $id_user
-   * @return null|int
-   */
+    /**
+     * Deletes all the given or current user's preferences for the given option
+     *
+     * @param null|string $id_option
+     * @param null|string $id_user
+     * @return null|int
+     * @throws Exception
+     */
   public function deleteUserOption(string $id_option, string $id_user = null): ?int
   {
     if ($id_option = $this->_get_id_option($id_option)) {
@@ -893,13 +1344,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Deletes all the given group's permissions for the given option
-   *
-   * @param null|string $id_option
-   * @param string      $id_group
-   * @return int|null
-   */
+    /**
+     * Deletes all the given group's preferences for the given option
+     *
+     * @param null|string $id_option
+     * @param string $id_group
+     * @return int|null
+     * @throws Exception
+     */
   public function deleteGroupOption(string $id_option, string $id_group): ?int
   {
     if ($id_option = $this->_get_id_option($id_option)) {
@@ -915,13 +1367,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Sets (or unsets) the cfg field of a given preference based on its ID
-   *
-   * @param string     $id
-   * @param null|array $cfg
-   * @return int
-   */
+    /**
+     * Sets (or unsets) the cfg field of a given preference based on its ID
+     *
+     * @param string|null $id
+     * @param null|array $cfg
+     * @return int
+     */
   public function setCfg(string $id = null, array $cfg = null): int
   {
     if (null !== $cfg) {
@@ -961,13 +1413,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Sets (or unsets) the id_link field of the given preference and returns the result of the executed query
-   *
-   * @param string $id
-   * @param string $id_link
-   * @return null|int
-   */
+    /**
+     * Sets (or unsets) the id_link field of the given preference and returns the result of the executed query
+     *
+     * @param string $id
+     * @param string|null $id_link
+     * @return null|int
+     */
   public function setLink(string $id, string $id_link = null): ?int
   {
     return $this->db->update(
@@ -1044,13 +1496,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Makes (or unmakes) the given preference public.
-   *
-   * @param string $id
-   * @param bool   $cancel
-   * @return int|null
-   */
+    /**
+     * Makes (or unmakes) the given preference public.
+     *
+     * @param string $id
+     * @param bool $cancel
+     * @return int|null
+     * @throws Exception
+     */
   public function makePublic(string $id, bool $cancel = false): ?int
   {
     if ($cfg = $this->get($id)) {
@@ -1065,14 +1518,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Shares (or unshares) the given preference to the given group.
-   *
-   * @param string $id
-   * @param string $id_group
-   * @param bool   $cancel
-   * @return int|null
-   */
+    /**
+     * Shares (or unshares) the given preference to the given group.
+     *
+     * @param string $id
+     * @param string $id_group
+     * @param bool $cancel
+     * @return int|null
+     * @throws Exception
+     */
   public function shareWithGroup(string $id, string $id_group, bool $cancel = false): ?int
   {
     if ($cfg = $this->get($id)) {
@@ -1102,14 +1556,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Shares (or unshares) the given preference to the given user
-   *
-   * @param string $id
-   * @param string $id_user
-   * @param bool   $cancel
-   * @return int|null
-   */
+    /**
+     * Shares (or unshares) the given preference to the given user
+     *
+     * @param string $id
+     * @param string $id_user
+     * @param bool $cancel
+     * @return int|null
+     * @throws Exception
+     */
   public function shareWithUser(string $id, string $id_user, bool $cancel = false): ?int
   {
     if ($cfg = $this->get($id)) {
@@ -1139,13 +1594,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Adds a bit to a preference
-   *
-   * @param string $id_user_option The preference's ID
-   * @param array  $cfg            The bit's values
-   * @return string|null
-   */
+    /**
+     * Adds a bit to a preference
+     *
+     * @param string $id_user_option The preference's ID
+     * @param array $cfg The bit's values
+     * @return string|null
+     * @throws Exception
+     */
   public function addBit(string $id_user_option, array $cfg): ?string
   {
     if (($id_user_option = $this->_get_id_option($id_user_option))
@@ -1215,12 +1671,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Deletes all bits from a preference
-   *
-   * @param string The bit's ID
-   * @return int|null
-   */
+    /**
+     * Deletes all bits from a preference
+     *
+     * @param string The bit's ID
+     * @return int|null
+     * @throws Exception
+     */
   public function deleteBits(string $id_user_option): ?int
   {
     if (\bbn\Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
@@ -1236,14 +1693,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Updates a preference's bit
-   *
-   * @param string                 $id The bit's ID
-   * @param array The bit's values
-   * @return int|null
-   */
-  public function updateBit(string $id, array $cfg, $merge_config = false): ?int
+    /**
+     * Updates a preference's bit
+     *
+     * @param string $id The bit's ID
+     * @param array The bit's values
+     * @param bool $merge_config
+     * @return int|null
+     */
+  public function updateBit(string $id, array $cfg, $merge_config): ?int
   {
     if (\bbn\Str::isUid($id)) {
       $c = $this->class_cfg['arch']['user_options_bits'];
@@ -1298,12 +1756,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns a single preference's bit
-   *
-   * @param string $id The bit's ID
-   * @return array
-   */
+    /**
+     * Returns a single preference's bit
+     *
+     * @param string $id The bit's ID
+     * @param bool $with_config
+     * @return array
+     * @throws Exception
+     */
   public function getBit(string $id, bool $with_config = true): array
   {
     if (\bbn\Str::isUid($id)
@@ -1326,13 +1786,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns the bits list of a preference
-   *
-   * @param string      $id        The preference's ID
-   * @param null|string $id_parent The bits'parent ID
-   * @return array
-   */
+    /**
+     * Returns the bits list of a preference
+     *
+     * @param string $id_user_option
+     * @param bool $id_parent The bits'parent ID
+     * @param bool $with_config
+     * @return array
+     * @throws Exception
+     */
   public function getBits(string $id_user_option, $id_parent = false, bool $with_config = true): array
   {
     if ($this->isAuthorized($id_user_option)) {
@@ -1380,13 +1842,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns the bits list of an option's id
-   *
-   * @param string      $id        The id_options
-   * @param null|string $id_parent The bits'parent ID
-   * @return array
-   */
+    /**
+     * Returns the bits list of an option's id
+     *
+     * @param string $id_opt
+     * @param bool $id_parent The bits'parent ID
+     * @param bool $with_config
+     * @return array
+     * @throws Exception
+     */
   public function getBitsByIdOption(string $id_opt, $id_parent = false, bool $with_config = true): ?array
   {
     $c     = $this->class_cfg['arch']['user_options_bits'];
@@ -1428,14 +1892,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns the hierarchical bits list of a preference
-   *
-   * @param string $id_user_option The preference's ID
-   * @param string $id_parent      The parent's ID of a bit. Default: null
-   * @param bool   $with_config    Set it to false if you don't want the preference's cfg field values on the results.
-   * @return array
-   */
+    /**
+     * Returns the hierarchical bits list of a preference
+     *
+     * @param string $id_user_option The preference's ID
+     * @param string|null $id_parent The parent's ID of a bit. Default: null
+     * @param bool $with_config Set it to false if you don't want the preference's cfg field values on the results.
+     * @return array
+     * @throws Exception
+     */
   public function getFullBits(string $id_user_option, string $id_parent = null, bool $with_config = true): array
   {
     if ($this->isAuthorized($id_user_option)) {
@@ -1472,9 +1937,11 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   *
-   */
+    /**
+     * @param string $id_user_option
+     * @return array|null
+     * @throws Exception
+     */
   public function getBitsOrder(string $id_user_option): ?array
   {
     if ($this->isAuthorized($id_user_option)) {
@@ -1491,12 +1958,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns a preference and its hierarchical bits list
-   *
-   * @param string $id          The preference's ID
-   * @param bool   $with_config Set it to false if you don't want the preference's cfg field values on the results.
-   */
+    /**
+     * Returns a preference and its hierarchical bits list
+     *
+     * @param string $id The preference's ID
+     * @param bool $with_config Set it to false if you don't want the preference's cfg field values on the results.
+     * @throws Exception
+     */
   public function getTree(string $id, bool $with_config = true): array
   {
     if (\bbn\Str::isUid($id)
@@ -1510,6 +1978,10 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
+    /**
+     * @param $bit
+     * @return array
+     */
   public function explodeBitCfg($bit): array
   {
     $c = $this->class_cfg['arch']['user_options_bits'];
@@ -1527,7 +1999,10 @@ class Preferences extends bbn\Models\Cls\Db
     return $bit;
   }
 
-
+    /**
+     * @param string $id
+     * @return int|null
+     */
   public function nextBitNum(string $id): ?int
   {
     if (\bbn\Str::isUid($id)
@@ -1544,13 +2019,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Gets the bit's cfg array, normalized either from the DB or from the $cfg argument
-   *
-   * @param string     $id
-   * @param null|array $cfg
-   * @return null|array
-   */
+    /**
+     * Gets the bit's cfg array, normalized either from the DB or from the $cfg argument
+     *
+     * @param string|null $id
+     * @param null|array $cfg
+     * @return null|array
+     */
 
 
   public function getBitCfg(string $id = null, array $cfg = null): ?array
@@ -1583,13 +2058,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Orders a bit.
-   *
-   * @param string $id  The bit's ID
-   * @param int    $pos The new position
-   * @return bool|null
-   */
+    /**
+     * Orders a bit.
+     *
+     * @param string $id The bit's ID
+     * @param int $pos The new position
+     * @return bool|null
+     * @throws Exception
+     */
   public function orderBit(string $id, int $pos): ?bool
   {
     if (\bbn\Str::isUid($id)
@@ -1640,7 +2116,13 @@ class Preferences extends bbn\Models\Cls\Db
     return null;
   }
 
-
+    /**
+     * @param string $id_user_option
+     * @param string|null $id_parent
+     * @param false $deep
+     * @return int|null
+     * @throws Exception
+     */
   public function fixBitsOrder(string $id_user_option, string $id_parent = null, $deep = false): ?int
   {
     if (\bbn\Str::isUid($id_user_option)
@@ -1665,13 +2147,14 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Moves a bit.
-   *
-   * @param string                          $id The bit's ID
-   * @param string|null The new parent's ID
-   * @return bool|null
-   */
+    /**
+     * Moves a bit.
+     *
+     * @param string $id The bit's ID
+     * @param string|null The new parent's ID
+     * @return bool|null
+     * @throws Exception
+     */
   public function moveBit(string $id, string $id_parent = null): ?bool
   {
     if (\bbn\Str::isUid($id)
@@ -1723,12 +2206,12 @@ class Preferences extends bbn\Models\Cls\Db
         ]
       )
       ) {
-        $max = (int)$max;
-        return $incr ? $max + 1 : $max;
+          $max = (int)$max;
+          return $incr ? $max + 1 : $max;
       }
-
       return 0;
     }
+    return 0;
   }
 
 
@@ -1765,6 +2248,7 @@ class Preferences extends bbn\Models\Cls\Db
         ]
       );
     }
+    return null;
   }
 
 
@@ -1800,7 +2284,13 @@ class Preferences extends bbn\Models\Cls\Db
     return null;
   }
 
-
+    /**
+     * @param string $id_option
+     * @param null $id_user
+     * @param null $id_group
+     * @return array|null
+     * @throws Exception
+     */
   public function textValue(string $id_option, $id_user = null, $id_group = null):? array
   {
     if (\bbn\Str::isUid($id_option)) {
@@ -1838,12 +2328,13 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Retrieves or confirm the ID of an option based on the same parameters as Option::from_path
-   *
-   * @param string|null $id_option
-   * @return null|string
-   */
+    /**
+     * Retrieves or confirm the ID of an option based on the same parameters as Option::from_path
+     *
+     * @param string|null $id_option
+     * @return null|string
+     * @throws Exception
+     */
   private function _get_id_option(string $id_option = null): ?string
   {
     if (!$id_option && !($id_option = $this->getCurrent())) {
@@ -1886,14 +2377,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Returns preferences' IDs from the option's ID
-   *
-   * @param string      $id_option
-   * @param null|string $id_user
-   * @param null|string $id_group
-   * @return array|null
-   */
+    /**
+     * Returns preferences' IDs from the option's ID
+     *
+     * @param string $id_option
+     * @param null|string $id_user
+     * @param null|string $id_group
+     * @return array|null
+     * @throws Exception
+     */
   private function _retrieve_ids(string $id_option, string $id_user = null, string $id_group = null): ?array
   {
     if (!$id_user && !$id_group && isset($this->id_user, $this->id_group)) {
@@ -1956,12 +2448,15 @@ class Preferences extends bbn\Models\Cls\Db
   }
 
 
-  /**
-   * Gets the preferences which have the option's $id as id_link
-   *
-   * @param string $id_link
-   * @return array|null
-   */
+    /**
+     * Gets the preferences which have the option's $id as id_link
+     *
+     * @param string $id_link
+     * @param string|null $id_user
+     * @param string|null $id_group
+     * @return array|null
+     * @throws Exception
+     */
   private function _get_links(string $id_link, string $id_user = null, string $id_group = null): ?array
   {
     if ($id_link = $this->_get_id_option($id_link)) {

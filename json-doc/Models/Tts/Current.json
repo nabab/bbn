@@ -21,7 +21,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_option)\n  {\n    self::_set_current($id_option);\n  }",
+            "code": "function(string $id_option)\n  {\n    self::_set_current($id_option);\n  }",
             "startLine": 29,
             "endLine": 32,
             "isDeprecated": false,

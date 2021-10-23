@@ -9,7 +9,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/SqlEngines.php",
     "startLine": 5,
-    "endLine": 71,
+    "endLine": 90,
     "contentConstructor": null,
     "methods": {
         "createIndex": {
@@ -21,7 +21,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $column, $unique = false, $length = NULL)\n  {\n  \/**\n   * Deletes an index\n   *\n   * @param string $table\n   * @param string $key\n   * @return bool\n   *\/\n  public function deleteIndex(string $table, string $key): bool;\n\n  \/**\n   * Creates a database user\n   *\n   * @param string $user\n   * @param string $pass\n   * @param string|null $db\n   * @return bool\n   *\/\n  public function createUser(string $user, string $pass, string $db = null): bool;\n\n  \/**\n   * Deletes a database user\n   *\n   * @param string $user\n   * @return bool\n   *\/\n  public function deleteUser(string $user): bool;\n\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  }",
+            "code": "function(string $table, $column, bool $unique = false, $length = NULL)\n  {\n  \/**\n   * Deletes an index\n   *\n   * @param string $table\n   * @param string $key\n   * @return bool\n   *\/\n  public function deleteIndex(string $table, string $key): bool;\n\n  \/**\n   * Creates a database user\n   *\n   * @param string $user\n   * @param string $pass\n   * @param string|null $db\n   * @return bool\n   *\/\n  public function createUser(string $user, string $pass, string $db = null): bool;\n\n  \/**\n   * Deletes a database user\n   *\n   * @param string $user\n   * @return bool\n   *\/\n  public function deleteUser(string $user): bool;\n\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  public function getTableComment(string $table): string;\n\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 16,
             "endLine": 16,
             "isDeprecated": false,
@@ -84,7 +84,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $key)\n  {\n  \/**\n   * Creates a database user\n   *\n   * @param string $user\n   * @param string $pass\n   * @param string|null $db\n   * @return bool\n   *\/\n  public function createUser(string $user, string $pass, string $db = null): bool;\n\n  \/**\n   * Deletes a database user\n   *\n   * @param string $user\n   * @return bool\n   *\/\n  public function deleteUser(string $user): bool;\n\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  }",
+            "code": "function(string $table, string $key)\n  {\n  \/**\n   * Creates a database user\n   *\n   * @param string $user\n   * @param string $pass\n   * @param string|null $db\n   * @return bool\n   *\/\n  public function createUser(string $user, string $pass, string $db = null): bool;\n\n  \/**\n   * Deletes a database user\n   *\n   * @param string $user\n   * @return bool\n   *\/\n  public function deleteUser(string $user): bool;\n\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  public function getTableComment(string $table): string;\n\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 25,
             "endLine": 25,
             "isDeprecated": false,
@@ -129,7 +129,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($user, $pass, $db = NULL)\n  {\n  \/**\n   * Deletes a database user\n   *\n   * @param string $user\n   * @return bool\n   *\/\n  public function deleteUser(string $user): bool;\n\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  }",
+            "code": "function(string $user, string $pass, string $db = NULL)\n  {\n  \/**\n   * Deletes a database user\n   *\n   * @param string $user\n   * @return bool\n   *\/\n  public function deleteUser(string $user): bool;\n\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  public function getTableComment(string $table): string;\n\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 35,
             "endLine": 35,
             "isDeprecated": false,
@@ -183,7 +183,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($user)\n  {\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  }",
+            "code": "function(string $user)\n  {\n  \/**\n   * Return an array including privileges of a specific db_user or all db_users.\n   *\n   * @param string $user\n   * @param string $host\n   * @return array\n   *\/\n  public function getUsers(string $user = '', string $host = ''): ?array;\n\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  public function getTableComment(string $table): string;\n\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 43,
             "endLine": 43,
             "isDeprecated": false,
@@ -219,7 +219,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($user = '', $host = '')\n  {\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  }",
+            "code": "function(string $user = '', string $host = '')\n  {\n  \/**\n   * Renames the given table to the new given name.\n   *\n   * @param string $table   The current table's name\n   * @param string $newName The new name.\n   * @return bool  True if it succeeded\n   *\/\n  public function renameTable(string $table, string $newName): bool;\n\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  public function getTableComment(string $table): string;\n\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 52,
             "endLine": 52,
             "isDeprecated": false,
@@ -265,7 +265,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $newName)\n  {\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  }",
+            "code": "function(string $table, string $newName)\n  {\n  \/**\n   * Returns the comment (or an empty string if none) for a given table.\n   *\n   * @param string $table The table's name\n   *\n   * @return string The table's comment\n   *\/\n  public function getTableComment(string $table): string;\n\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 61,
             "endLine": 61,
             "isDeprecated": false,
@@ -311,7 +311,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table)\n  {\n  }",
+            "code": "function(string $table)\n  {\n  \/**\n   * Creates the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @param array $col\n   * @return bool\n   *\/\n  public function createColumn(string $table, string $column, array $col): bool;\n\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
             "startLine": 70,
             "endLine": 70,
             "isDeprecated": false,
@@ -337,12 +337,111 @@
                     "default_name": ""
                 }
             ]
+        },
+        "createColumn": {
+            "name": "createColumn",
+            "summary": "Creates the given column for the given table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlEngines",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $table, string $column, array $col)\n  {\n  \/**\n   * Drops the given column for the given table.\n   *\n   * @param string $table\n   * @param string $column\n   * @return bool\n   *\/\n  }",
+            "startLine": 80,
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "col",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dropColumn": {
+            "name": "dropColumn",
+            "summary": "Drops the given column for the given table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db\\SqlEngines",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $table, string $column)\n  {\n  }",
+            "startLine": 89,
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
-    "numMethods": 7,
+    "numMethods": 9,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,

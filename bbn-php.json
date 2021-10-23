@@ -5039,7 +5039,7 @@
                         "text": "_insert_notes_events",
                         "value": "_insert_notes_events",
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/_insert_notes_events",
-                        "desc": "If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -5047,7 +5047,7 @@
                         "text": "_remove_note_events",
                         "value": "_remove_note_events",
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/_remove_note_events",
-                        "desc": "Removes the row corresponding to the given arguments from bbn_notes_events."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -5618,7 +5618,7 @@
                         "text": "codeIds",
                         "value": "codeIds",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/codeIds",
-                        "desc": ""
+                        "desc": "* Returns an array of ids for a given parent"
                     },
                     {
                         "type": "method",
@@ -5674,7 +5674,7 @@
                         "text": "findI18n",
                         "value": "findI18n",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/findI18n",
-                        "desc": "returns an array containing all options that have the property i18n set"
+                        "desc": "Returns an array containing all options that have the property i18n set"
                     },
                     {
                         "type": "method",
@@ -5682,7 +5682,7 @@
                         "text": "findI18nOption",
                         "value": "findI18nOption",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/findI18nOption",
-                        "desc": "returns an array containing the option (having the property i18n setted) corresponding to the given id"
+                        "desc": "returns an array containing the option (having the property i18n set) corresponding to the given id"
                     },
                     {
                         "type": "method",
@@ -5698,7 +5698,7 @@
                         "text": "fixOrder",
                         "value": "fixOrder",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fixOrder",
-                        "desc": "Sets the order configuration for each options of a sortable given parent"
+                        "desc": "Sets the order configuration for each option of a sortable given parent"
                     },
                     {
                         "type": "method",
@@ -5746,7 +5746,7 @@
                         "text": "fullOptionsByCode",
                         "value": "fullOptionsByCode",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsByCode",
-                        "desc": "Returns an id-indexed array of full options arrays for a given parent"
+                        "desc": "Returns code-indexed array of full options arrays for a given parent"
                     },
                     {
                         "type": "method",
@@ -5762,7 +5762,7 @@
                         "text": "fullOptionsCfg",
                         "value": "fullOptionsCfg",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsCfg",
-                        "desc": "Returns an id-indexed array of full options with the config in arrays for a given parent"
+                        "desc": "Returns an array of full options with the config in arrays for a given parent"
                     },
                     {
                         "type": "method",
@@ -5778,7 +5778,7 @@
                         "text": "fullSoptions",
                         "value": "fullSoptions",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullSoptions",
-                        "desc": "Returns an id-indexed array of full options arrays for a given parent"
+                        "desc": "Returns an array of full options arrays for a given grandparent"
                     },
                     {
                         "type": "method",
@@ -5994,7 +5994,7 @@
                         "text": "itemsRef",
                         "value": "itemsRef",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/itemsRef",
-                        "desc": "Returns each individual option plus the children of options having this as alias."
+                        "desc": "Returns each individual item plus the children of items having this as alias."
                     },
                     {
                         "type": "method",
@@ -6034,7 +6034,7 @@
                         "text": "merge",
                         "value": "merge",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/merge",
-                        "desc": "Updates an option's row (without changing cfg)"
+                        "desc": "Updates an option's row by merging the data and cfg."
                     },
                     {
                         "type": "method",
@@ -6162,7 +6162,7 @@
                         "text": "rawOptions",
                         "value": "rawOptions",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/rawOptions",
-                        "desc": "Returns an option's items  as stored in its original form in the database, including cfg"
+                        "desc": "Returns an option's items as stored in its original form in the database, including cfg"
                     },
                     {
                         "type": "method",
@@ -6186,7 +6186,7 @@
                         "text": "removeFull",
                         "value": "removeFull",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/removeFull",
-                        "desc": "Deletes a row from the options table, deletes the cache and fix order if needed"
+                        "desc": "Deletes an option row with all it's hierarchical structure from the options table and deletes the cache."
                     },
                     {
                         "type": "method",
@@ -6242,7 +6242,7 @@
                         "text": "setProp",
                         "value": "setProp",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setProp",
-                        "desc": "Updates option's properties derivated from the value column"
+                        "desc": "Updates option's properties derived from the value column"
                     },
                     {
                         "type": "method",
@@ -6306,7 +6306,7 @@
                         "text": "toPath",
                         "value": "toPath",
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/toPath",
-                        "desc": "Concatenates the codes and separator $sep of a a line of options"
+                        "desc": "Concatenates the codes and separator $sep of a line of options"
                     },
                     {
                         "type": "method",
@@ -8053,7 +8053,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Cron\/Manager\/__construct",
-                        "desc": "Cron constructor."
+                        "desc": "Manager constructor."
                     },
                     {
                         "type": "method",
@@ -8189,7 +8189,7 @@
                         "text": "setPid",
                         "value": "setPid",
                         "url": "bbn-php\/doc\/method\/Cron\/Manager\/setPid",
-                        "desc": "Sets the active column to 1 for the given CRON ID."
+                        "desc": "Sets the pid' column to the given value for the given CRON ID."
                     },
                     {
                         "type": "method",
@@ -8205,7 +8205,7 @@
                         "text": "unsetPid",
                         "value": "unsetPid",
                         "url": "bbn-php\/doc\/method\/Cron\/Manager\/unsetPid",
-                        "desc": "Sets the active column to 0 for the given CRON ID."
+                        "desc": "Sets the pid and notification columns to null for the given CRON ID."
                     }
                 ]
             },
@@ -8222,7 +8222,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/__construct",
-                        "desc": "cron constructor."
+                        "desc": "Runner constructor."
                     },
                     {
                         "type": "method",
@@ -8367,7 +8367,7 @@
                         "text": "getPath",
                         "value": "getPath",
                         "url": "bbn-php\/doc\/method\/Cron\/Common\/getPath",
-                        "desc": "Returns the $data property."
+                        "desc": "Returns the $path property."
                     },
                     {
                         "type": "method",
@@ -8407,7 +8407,7 @@
                         "text": "init",
                         "value": "init",
                         "url": "bbn-php\/doc\/method\/Cron\/Common\/init",
-                        "desc": "cron constructor."
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -15713,7 +15713,7 @@
                         "text": "getRequest",
                         "value": "getRequest",
                         "url": "bbn-php\/doc\/method\/Mvc\/Environment\/getRequest",
-                        "desc": ""
+                        "desc": "Returns the original request sent to the server."
                     },
                     {
                         "type": "method",
@@ -17694,7 +17694,7 @@
                         "text": "__construct",
                         "value": "__construct",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/__construct",
-                        "desc": "preferences constructor."
+                        "desc": "Preferences constructor."
                     },
                     {
                         "type": "method",
@@ -17758,7 +17758,7 @@
                         "text": "deleteGroupOption",
                         "value": "deleteGroupOption",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/deleteGroupOption",
-                        "desc": "Deletes all the given group's permissions for the given option"
+                        "desc": "Deletes all the given group's preferences for the given option"
                     },
                     {
                         "type": "method",
@@ -17766,7 +17766,7 @@
                         "text": "deleteUserOption",
                         "value": "deleteUserOption",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/deleteUserOption",
-                        "desc": "Deletes all the given or current user's permissions for the given option"
+                        "desc": "Deletes all the given or current user's preferences for the given option"
                     },
                     {
                         "type": "method",
@@ -17790,7 +17790,7 @@
                         "text": "fullOptions",
                         "value": "fullOptions",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/fullOptions",
-                        "desc": ""
+                        "desc": "Returns all the children IDs of the given code with their property and their preferences."
                     },
                     {
                         "type": "method",
@@ -17798,7 +17798,7 @@
                         "text": "get",
                         "value": "get",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/get",
-                        "desc": "Returns the current user's preference based on the given id, his own profile and his group"
+                        "desc": "Returns the current user's preference based on the given id, his own profile and his group."
                     },
                     {
                         "type": "method",
@@ -17806,7 +17806,7 @@
                         "text": "getAll",
                         "value": "getAll",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getAll",
-                        "desc": "Returns an array of the current user's preferences based on the given id_option, his own profile and his group's"
+                        "desc": "Returns an array of the current user's preferences based on the given id_option, his own profile and his group's."
                     },
                     {
                         "type": "method",
@@ -17814,7 +17814,7 @@
                         "text": "getAllNotMine",
                         "value": "getAllNotMine",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getAllNotMine",
-                        "desc": "Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option"
+                        "desc": "Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option."
                     },
                     {
                         "type": "method",
@@ -17854,7 +17854,7 @@
                         "text": "getBitsOrder",
                         "value": "getBitsOrder",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getBitsOrder",
-                        "desc": "*"
+                        "desc": ""
                     },
                     {
                         "type": "method",
@@ -17870,7 +17870,7 @@
                         "text": "getByOption",
                         "value": "getByOption",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getByOption",
-                        "desc": ""
+                        "desc": "Returns the current user's preference and the config if second parameter set to true, based on the given option id, his own profile and his group."
                     },
                     {
                         "type": "method",
@@ -17878,7 +17878,7 @@
                         "text": "getCfg",
                         "value": "getCfg",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getCfg",
-                        "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument"
+                        "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument."
                     },
                     {
                         "type": "method",
@@ -17886,7 +17886,7 @@
                         "text": "getCfgByOption",
                         "value": "getCfgByOption",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getCfgByOption",
-                        "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument"
+                        "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument."
                     },
                     {
                         "type": "method",
@@ -17894,7 +17894,7 @@
                         "text": "getClassCfg",
                         "value": "getClassCfg",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getClassCfg",
-                        "desc": ""
+                        "desc": "Returns an array describing the structures of the tables for the class."
                     },
                     {
                         "type": "method",
@@ -17910,7 +17910,7 @@
                         "text": "getGroup",
                         "value": "getGroup",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getGroup",
-                        "desc": ""
+                        "desc": "Returns the Id of the current group."
                     },
                     {
                         "type": "method",
@@ -17926,7 +17926,7 @@
                         "text": "getLinks",
                         "value": "getLinks",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getLinks",
-                        "desc": "Gets the preferences which have the option's $id as id_link"
+                        "desc": "Gets the preferences which have the option's $id as id_link."
                     },
                     {
                         "type": "method",
@@ -17966,7 +17966,7 @@
                         "text": "getUser",
                         "value": "getUser",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getUser",
-                        "desc": ""
+                        "desc": "Returns the Id of the current user."
                     },
                     {
                         "type": "method",
@@ -17974,7 +17974,7 @@
                         "text": "groupHas",
                         "value": "groupHas",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/groupHas",
-                        "desc": "Checks if a group has the given preference"
+                        "desc": "Checks if a group has the given preference."
                     },
                     {
                         "type": "method",
@@ -17982,7 +17982,7 @@
                         "text": "has",
                         "value": "has",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/has",
-                        "desc": "Returns true if the current user can access a preference, false otherwise"
+                        "desc": "Returns true if the current user can access a preference, false otherwise."
                     },
                     {
                         "type": "method",
@@ -17998,7 +17998,7 @@
                         "text": "items",
                         "value": "items",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/items",
-                        "desc": ""
+                        "desc": "Return all the IDs of the children of the given option in the user's order."
                     },
                     {
                         "type": "method",
@@ -18038,7 +18038,7 @@
                         "text": "options",
                         "value": "options",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/options",
-                        "desc": ""
+                        "desc": "Returns all children of the given code with they own attributes."
                     },
                     {
                         "type": "method",
@@ -18062,7 +18062,7 @@
                         "text": "retrieveGroupIds",
                         "value": "retrieveGroupIds",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/retrieveGroupIds",
-                        "desc": "Returns preferences' IDs from the option's ID and the given group ID"
+                        "desc": "Returns preferences' IDs from the option's ID and the given group ID."
                     },
                     {
                         "type": "method",
@@ -18070,7 +18070,7 @@
                         "text": "retrieveIds",
                         "value": "retrieveIds",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/retrieveIds",
-                        "desc": "Returns preferences' IDs from the option's ID"
+                        "desc": "Returns all preferences' IDs from the option's ID."
                     },
                     {
                         "type": "method",
@@ -18078,7 +18078,7 @@
                         "text": "retrieveUserIds",
                         "value": "retrieveUserIds",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/retrieveUserIds",
-                        "desc": "Returns preferences' IDs from the option's ID and the given user ID"
+                        "desc": "Returns preferences' IDs from the option's ID and the given user ID."
                     },
                     {
                         "type": "method",
@@ -18086,7 +18086,7 @@
                         "text": "set",
                         "value": "set",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/set",
-                        "desc": "Sets the permission config for the current user by the preference's ID"
+                        "desc": "Sets the preference config for the current user by the preference's ID"
                     },
                     {
                         "type": "method",
@@ -18094,7 +18094,7 @@
                         "text": "setByOption",
                         "value": "setByOption",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setByOption",
-                        "desc": "Sets the permission row for the current user by the option's ID"
+                        "desc": "Sets the preference row for the current user by the option's ID"
                     },
                     {
                         "type": "method",
@@ -18110,7 +18110,7 @@
                         "text": "setGroup",
                         "value": "setGroup",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setGroup",
-                        "desc": "Sets the given group."
+                        "desc": "Changes the current group and return the changed preferences class."
                     },
                     {
                         "type": "method",
@@ -18134,7 +18134,7 @@
                         "text": "setUser",
                         "value": "setUser",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setUser",
-                        "desc": ""
+                        "desc": "Changes the current user and return the changed preferences class."
                     },
                     {
                         "type": "method",
@@ -18174,7 +18174,7 @@
                         "text": "update",
                         "value": "update",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/update",
-                        "desc": "Sets the permission row for the current user by the preference's ID"
+                        "desc": "Sets the preference row for the current user by the preference's ID"
                     },
                     {
                         "type": "method",
@@ -18198,7 +18198,7 @@
                         "text": "userHas",
                         "value": "userHas",
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/userHas",
-                        "desc": "Checks if a user has the given preference"
+                        "desc": "Checks if a user has the given preference."
                     }
                 ]
             },
@@ -18702,7 +18702,7 @@
                         "text": "reset",
                         "value": "reset",
                         "url": "bbn-php\/doc\/method\/Util\/Timer\/reset",
-                        "desc": ""
+                        "desc": "Resets the timer for the given key."
                     },
                     {
                         "type": "method",

@@ -116,7 +116,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($limit)\n  {\n    self::$limit = $limit;\n  }",
+            "code": "function(int $limit)\n  {\n    self::$limit = $limit;\n  }",
             "startLine": 75,
             "endLine": 78,
             "isDeprecated": false,

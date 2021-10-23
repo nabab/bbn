@@ -87,6 +87,17 @@ class System extends bbn\Models\Cls\Basic
           $this->obj  = new \bbn\Api\Nextcloud($cfg);
         }
         break;
+      case 'webdav':
+        if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
+          $this->mode = 'webdav';
+          $this->prefix = 'https://'.$cfg['host'].self::prefix;
+          $this->obj  = new \Sabre\DAV\Client([
+            'baseUri' => $this->path,
+            'userName' => $cfg['user'],
+            'password' => $cfg['pass']
+          ]);
+        }
+        break;
       case 'local':
         $this->mode    = $type;
         $this->current = getcwd();
@@ -139,12 +150,16 @@ class System extends bbn\Models\Cls\Basic
   public function getRealPath(string $path): string
   {
     $path = $this->cleanPath($path);
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->getRealPath($path);
-    } else {
-      return $this->prefix . (strpos($path, '/') === 0 ? $path : (
-          ($this->current ? $this->current . ($path ? '/' : '') : '') .
-          (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
+    switch ($this->mode) {
+      case 'nextcloud':
+        return $this->obj->getRealPath($path);
+      case 'webdav':
+        return $path;
+      default:
+        return $this->prefix . (strpos($path, '/') === 0 ?
+          $path : (($this->current ?
+            $this->current . ($path ? '/' : '') : ''
+          ) . (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
     }
   }
 
@@ -157,16 +172,18 @@ class System extends bbn\Models\Cls\Basic
   public function getSystemPath(string $file, bool $is_absolute = true): string
   {
     // The full path without the obj prefix, and if it's not absolute we remove the initial slash
-    if ($this->mode === 'nextcloud') {
-      $file = $this->obj->getSystemPath($file, $is_absolute);
-    } else {
-      $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
-      if (!$is_absolute && $this->current) {
-        $file = substr($file, strlen($this->current));
-      }
+    switch ($this->mode) {
+      case 'nextcloud':
+        return $this->obj->getSystemPath($file, $is_absolute);
+      case 'webdav':
+        return $file;
+      default:
+        $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
+        if (!$is_absolute && $this->current) {
+          $file = substr($file, strlen($this->current));
+        }
+        return $file;
     }
-
-    return $file;
   }
 
 
@@ -207,8 +224,11 @@ class System extends bbn\Models\Cls\Basic
    */
   public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
-    if ($this->check() && $this->isDir($path)) {
-      if ($this->mode !== 'nextcloud') {
+    if ($this->check()) {
+      if ($this->mode === 'nextcloud') {
+        return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
+      }
+      else {
         $is_absolute = strpos($path, '/') === 0;
         $fs          = &$this;
         clearstatcache();
@@ -224,8 +244,6 @@ class System extends bbn\Models\Cls\Basic
           },
           $this->_get_items($this->getRealPath($path), $filter ?: $type, $hidden, $detailed)
         );
-      } else {
-        return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
       }
     }
 
@@ -241,7 +259,7 @@ class System extends bbn\Models\Cls\Basic
    */
   public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
-    if ($this->check() && $this->isDir($path)) {
+    if ($this->check()) {
       $is_absolute = strpos($path, '/') === 0;
       $fs          = &$this;
       clearstatcache();
@@ -720,9 +738,12 @@ class System extends bbn\Models\Cls\Basic
         if ($this->_is_dir($rpath)) {
           return $this->_dirsize($rpath);
         }
-      } else {
+      }
+      else {
         return $this->obj->getSize($rpath);
       }
+
+      return null;
     }
   }
 
@@ -1237,7 +1258,8 @@ class System extends bbn\Models\Cls\Basic
         } else {
           X::log(error_get_last(), 'filesystem');
         }
-      } else {
+      }
+      elseif (is_dir($path)) {
         $fs = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach ($fs as $f) {
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {
@@ -1612,16 +1634,15 @@ class System extends bbn\Models\Cls\Basic
   /**
    * @param $file
    */
-  private function _download($file): String
+  private function _download($file): void
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->download($file);
-    } else {
-      if (($f = $this->getFile($file)) && $f->check()) {
-
-        return $file;
-        /*die(var_dump($file));
-        $f->download();*/
+    if ($this->_is_file($file)) {
+      if ($this->mode === 'nextcloud') {
+        $this->obj->download($file);
+      }
+      elseif ($this->isFile($file)) {
+        $f = new bbn\File($file);
+        $f->download();
       }
     }
   }
