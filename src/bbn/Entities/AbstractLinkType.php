@@ -145,9 +145,10 @@ abstract class AbstractLinkType
    * ]
    * ```
    *
+   * @param bool $included_deleted
    * @return array
    */
-  public function getAll(): array
+  public function getAll(bool $included_deleted = false): array
   {
     $r = [];
 
@@ -241,9 +242,10 @@ abstract class AbstractLinkType
   }
 
   /**
+   * @param bool $included_deleted
    * @return int|null
    */
-  public function count(): ?int
+  public function count(bool $included_deleted = false): ?int
   {
     return $this->db->count(
       $this->class_table, [
@@ -373,12 +375,13 @@ abstract class AbstractLinkType
   }
 
   /**
+   * @param bool $included_deleted
    * @return array
    */
-  public function get_all_st(): array
+  public function get_all_st(bool $included_deleted = false): array
   {
     $r = [];
-    if ($liens = $this->getAll()) {
+    if ($liens = $this->getAll($included_deleted)) {
       foreach ($liens as $lien){
         array_push($r, $this->get_st($lien));
       }
@@ -388,9 +391,10 @@ abstract class AbstractLinkType
   }
 
   /**
+   * @param bool $included_deleted
    * @return array|null
    */
-  public function get_ids(): ?array
+  public function get_ids(bool $included_deleted = false): ?array
   {
     return $this->db->getColumnValues(
       $this->class_table, $this->fields['id'], [
