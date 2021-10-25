@@ -56,7 +56,7 @@ class Db implements Db\Actions
    */
   public function __construct(array $cfg = [])
   {
-    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
+    if (!isset($cfg['engine']) && \defined('BBN_DB_ENGINE')) {
       $cfg['engine'] = BBN_DB_ENGINE;
     }
 
@@ -90,6 +90,20 @@ class Db implements Db\Actions
       $connection .= '/'.($cfg['db'] ?? 'No DB');
       $this->log(X::_("Impossible to create the connection for").' '.$connection);
       throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
+    }
+  }
+
+
+  /**
+   * Closes the connection making the object unusable.
+   *
+   * @return void
+   */
+  public function close(): void
+  {
+    if ($this->language) {
+      $this->language->close();
+      $this->setErrorMode('continue');
     }
   }
 

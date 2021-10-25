@@ -77,7 +77,8 @@ class Mysql extends Sql
       }
 
       unset($cfg['pass']);
-    } catch (\PDOException $e) {
+    }
+    catch (\PDOException $e) {
       $err = X::_("Impossible to create the connection") .
         " {$cfg['engine']}/Connection " . $this->getEngine() . " to {$this->host} "
         . X::_("with the following error") . $e->getMessage();
@@ -85,6 +86,7 @@ class Mysql extends Sql
     }
   }
 
+  
   /**
    * @param array $cfg The user's options
    * @return array|null The final configuration

@@ -1,78 +1,100 @@
 <?php
-/**
- * Class Webmin
- * @package api
- * @author Mirko Argentino <mirko@bbn.solutions>
- */
 namespace bbn\Api;
+
 use bbn\Cache;
 
-class Webmin {
+/**
+ * Webmin API class
+ * @package Api
+ * @author Mirko Argentino <mirko@bbn.solutions>
+ */
+class Webmin
+{
   use \bbn\Models\Tts\Cache;
 
-  const cache_name = 'bbn/api/webmin';
+  const CACHE_NAME = 'bbn/api/webmin';
 
-  private
-    /** @var username */
-    $user,
-    /** @var password */
-    $pass,
-    /** @var chostname */
-    $hostname,
-    /** @var cache */
-    $cacher;
+  /** @var string Username */
+  private $_user;
+
+  /** @var string Password */
+  private $_pass;
+
+  /** @var string Hostname */
+  private $_hostname;
+
+  /** @var \bbn\Cache Cache */
+  private $_cacher;
+
 
   /**
    * Constructor.
    * @param array $cfg
    */
-  public function __construct(array $cfg){
+  public function __construct(array $cfg)
+  {
     if (empty($cfg['user'])) {
       throw new \Error(_('The username is mandatory'));
     }
+
     if (empty($cfg['pass'])) {
       throw new \Error(_('The password is mandatory'));
     }
+
     self::cacheInit();
-    $this->user = $cfg['user'];
-    $this->pass = $cfg['pass'];
-    $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
-    $this->checked = true;
-    if ( class_exists('\\bbn\\Cache') ){
-      $this->cacher = Cache::getEngine();
+    $this->_user = $cfg['user'];
+    $this->_pass = $cfg['pass'];
+    $this->_hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
+    if (class_exists('\\bbn\\Cache')) {
+      $this->_cacher = Cache::getEngine();
     }
   }
 
-  public function callCommand(string $command){
+
+  public function callCommand(string $command)
+  {
     return xmlrpc_decode(file_get_contents($this->_getUrl(), false, $this->_getContext($command)));
   }
 
-  public function getHostname(){
+
+  public function getHostname()
+  {
     return $this->callCommand('webmin::get_system_hostname');
   }
 
-  public function getSystemUptime(){
+
+  public function getSystemUptime()
+  {
     return $this->callCommand('webmin::get_system_uptime');
   }
 
-  public function getNotifications(){
+
+  public function getNotifications()
+  {
     return $this->callCommand('webmin::get_webmin_notifications');
   }
 
-  public function getOS(){
+
+  public function getOS()
+  {
     return $this->callCommand('webmin::detect_operating_system');
   }
 
-  public function getSmartDisksPartitions(){
+
+  public function getSmartDisksPartitions()
+  {
     return $this->callCommand('smart-status::list_smart_disks_partitions');
   }
 
+
   private function _getCredentials(): string
   {
-    return base64_encode($this->user.':'.$this->pass);
+    return base64_encode($this->_user.':'.$this->_pass);
   }
-  
-  private function _getContext(string $command){
+
+
+  private function _getContext(string $command)
+  {
     return stream_context_create([
       'http' => [
         'method' => 'POST',
@@ -88,9 +110,11 @@ class Webmin {
     ]);
   }
 
+
   private function _getUrl(): string
   {
-    return (strpos($this->hostname, 'https://') !== 0 ? 'https://' : '') . $this->hostname . ':10000/xmlrpc.cgi';
+    return (strpos($this->_hostname, 'https://') !== 0 ? 'https://' : '') . $this->_hostname . ':10000/xmlrpc.cgi';
   }
-  
+
+
 }

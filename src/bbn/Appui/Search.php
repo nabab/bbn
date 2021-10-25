@@ -357,11 +357,12 @@ class Search
     // Get how many parameters the closure has
     try {
       $parameters = (new \ReflectionFunction($function))->getParameters();
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $parameters = ['search'];
     }
 
-    // Add an empty string to every parameter of the closure
+    // Add an empty string to every parameter of the closure for the hash
     $args = array_map(function () {
       return '';
     }, $parameters);
