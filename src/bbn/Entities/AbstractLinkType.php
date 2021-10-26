@@ -159,9 +159,9 @@ abstract class AbstractLinkType
 
       $f = $this->fields;
       foreach ($links as $link) {
-        $id_tiers[]   = $this->parseId($link[$f['id_people']]);
-        $id_lieu[]    = $this->parseId($link[$f['id_address']]);
-        $id_options[] = $this->parseId($link[$f['id_option']]);
+        $id_tiers[]   = $this->parseId($link[$f['id_people']]) ?? '';
+        $id_lieu[]    = $this->parseId($link[$f['id_address']]) ?? '';
+        $id_options[] = $this->parseId($link[$f['id_option']]) ?? '';
       }
 
       // Here will fetch ALL linked items for all results in just 3 queries
@@ -200,9 +200,9 @@ abstract class AbstractLinkType
       $tables = $this->class_cfg['tables'];
       return new Link(
         $link,
-        $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']])], 'one'),
-        $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']])], 'one'),
-        $this->fetchLinks($tables['options'], [$this->parseId($link['id_option'])], 'one'),
+        $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']]) ?? ''], 'one'),
+        $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']]) ?? ''], 'one'),
+        $this->fetchLinks($tables['options'], [$this->parseId($link['id_option']) ?? ''], 'one'),
       );
     }
 
