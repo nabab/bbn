@@ -1,5 +1,10 @@
-phpcs -p --report-file=./build/phpcs.log.xml ./src
-phploc --log-xml=./build/phploc.xml ./src
-phpmd ./src xml cleancode codesize > ./build/phpmd.xml
+echo "------------------------------------- Starting PHPCS -----------------------------------------------"
+./vendor/bin/phpcs -p --report-file=./build/phpcs.log.xml ./src
+echo "------------------------------------- Starting PHPLoc -----------------------------------------------"
+./vendor/bin/phploc --log-xml=./build/phploc.xml ./src
+echo "------------------------------------- Starting PHPMD -----------------------------------------------"
+./vendor/bin/phpmd ./src xml cleancode codesize > ./build/phpmd.xml
+echo "------------------------------------- Starting PHPDOX -----------------------------------------------"
 phpdox
+./vendor/bin/echo "------------------------------------- END Build  -----------------------------------------------"
 
