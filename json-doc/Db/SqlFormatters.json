@@ -44,7 +44,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration array"
                 }
             ]
         },
@@ -80,7 +81,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration array"
                 }
             ]
         },
@@ -116,7 +118,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration array"
                 }
             ]
         },
@@ -152,7 +155,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration array"
                 }
             ]
         },
@@ -404,7 +408,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The table for which to create the statement"
                 },
                 {
                     "name": "model",
@@ -746,5 +751,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "SqlFormatters",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

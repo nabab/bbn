@@ -393,7 +393,7 @@ class Library
             if (!empty($info['content']->theme_prepend)) {
               foreach ($info['content']->theme_files as $tf) {
                 foreach ($info['content']->files as $f) {
-                  /** @todo Remove!!! */
+                  /** @todo Remove(bool)! */
                   if (substr($f, -4) === 'less') {
                     if (X::indexOf($tf, '%s') > -1) {
                       $info['prepend'][$f][] = sprintf(str_replace('%s', '%1$s', $tf), $th);

@@ -157,5 +157,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "MollieTokensHandlerContract",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

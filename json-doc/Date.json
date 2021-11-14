@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Deals with date manipulation.",
+        "description": "Deals with date manipulation.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Time and Date",
@@ -346,5 +347,7 @@
     "extensionName": false,
     "namespaceName": "bbn",
     "shortName": "Date",
-    "summary": "Deals with date manipulation."
+    "summary": "Deals with date manipulation.",
+    "description": "",
+    "description_parts": []
 }

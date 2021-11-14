@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "The LESS compiler and parser.\n *\nConverting LESS to CSS is a three stage process. The incoming file is parsed\nby `Less_parser` into a syntax tree, then it is compiled into another tree\nrepresenting the CSS structure by `Less`. The CSS tree is fed into a\nformatter, like `Less_formatter` which then outputs CSS as a string.\n *\nDuring the first compile, all values are *reduced*, which means that their\ntypes are brought to the lowest form before being dump as strings. This\nhandles math equations, variable dereferences, and the like.\n *\nThe `parse` function of `Less` is the entry point.\n *\nIn summary:\n *\nThe `Less` class creates an instance of the parser, feeds it LESS code,\nthen transforms the resulting tree to a CSS tree. This class also holds the\nevaluation context, such as all available mixins and variables at any given\ntime.\n *\nThe `Less_parser` class is only concerned with parsing its input.\n *\nThe `Less_formatter` takes a CSS tree, and dumps it to a formatted string,\nhandling things like indentation.",
+        "description": "The LESS compiler and parser.\n\nConverting LESS to CSS is a three stage process. The incoming file is parsed\nby `Less_parser` into a syntax tree, then it is compiled into another tree\nrepresenting the CSS structure by `Less`. The CSS tree is fed into a\nformatter, like `Less_formatter` which then outputs CSS as a string.\n\nDuring the first compile, all values are *reduced*, which means that their\ntypes are brought to the lowest form before being dump as strings. This\nhandles math equations, variable dereferences, and the like.\n\nThe `parse` function of `Less` is the entry point.\n\nIn summary:\n\nThe `Less` class creates an instance of the parser, feeds it LESS code,\nthen transforms the resulting tree to a CSS tree. This class also holds the\nevaluation context, such as all available mixins and variables at any given\ntime.\n\nThe `Less_parser` class is only concerned with parsing its input.\n\nThe `Less_formatter` takes a CSS tree, and dumps it to a formatted string,\nhandling things like indentation.",
         "tags": []
     },
     "name": "bbn\\Compilers\\Less",
@@ -95,11 +95,11 @@
         "compileValue": {
             "name": "compileValue",
             "summary": "Compiles a primitive value into a CSS property value.",
-            "description": "*\nValues in lessphp are typed by being wrapped in arrays, their format is\ntypically:\n\t *\n    array(type, contents [, additional_contents]*)\n\t *\nThe input is expected to be reduced. This function will not work on\nthings like expressions and variables.",
+            "description": "Values in lessphp are typed by being wrapped in arrays, their format is\ntypically:\n\n    array(type, contents [, additional_contents]*)\n\nThe input is expected to be reduced. This function will not work on\nthings like expressions and variables.",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><em>\nValues in lessphp are typed by being wrapped in arrays, their format is\ntypically:\n<\/em>\narray(type, contents [, additional_contents]<em>)\n<\/em>\nThe input is expected to be reduced. This function will not work on\nthings like expressions and variables.<\/p>"
+                    "content": "<p>Values in lessphp are typed by being wrapped in arrays, their format is\ntypically:<\/p>\n<pre><code>array(type, contents [, additional_contents]*)<\/code><\/pre>\n<p>The input is expected to be reduced. This function will not work on\nthings like expressions and variables.<\/p>"
                 }
             ],
             "file": "bbn\\Compilers\\Less",
@@ -615,11 +615,11 @@
         "cachedCompile": {
             "name": "cachedCompile",
             "summary": "Execute lessphp on a .less file or a lessphp cache structure",
-            "description": "*\nThe lessphp cache structure contains information about a specific\nless file having been parsed. It can be used as a hint for future\ncalls to determine whether or not a rebuild is required.\n\t *\nThe cache structure contains two important keys that may be used\nexternally:\n\t *\ncompiled: The final compiled CSS\nupdated: The time (in seconds) the CSS was last compiled\n\t *\nThe cache structure is a plain-ol' PHP associative array and can\nbe serialized and unserialized without a hitch.",
+            "description": "The lessphp cache structure contains information about a specific\nless file having been parsed. It can be used as a hint for future\ncalls to determine whether or not a rebuild is required.\n\nThe cache structure contains two important keys that may be used\nexternally:\n\ncompiled: The final compiled CSS\nupdated: The time (in seconds) the CSS was last compiled\n\nThe cache structure is a plain-ol' PHP associative array and can\nbe serialized and unserialized without a hitch.",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><em>\nThe lessphp cache structure contains information about a specific\nless file having been parsed. It can be used as a hint for future\ncalls to determine whether or not a rebuild is required.\n<\/em>\nThe cache structure contains two important keys that may be used\nexternally:\n<em>\ncompiled: The final compiled CSS\nupdated: The time (in seconds) the CSS was last compiled\n<\/em>\nThe cache structure is a plain-ol' PHP associative array and can\nbe serialized and unserialized without a hitch.<\/p>"
+                    "content": "<p>The lessphp cache structure contains information about a specific\nless file having been parsed. It can be used as a hint for future\ncalls to determine whether or not a rebuild is required.<\/p>\n<p>The cache structure contains two important keys that may be used\nexternally:<\/p>\n<p>compiled: The final compiled CSS\nupdated: The time (in seconds) the CSS was last compiled<\/p>\n<p>The cache structure is a plain-ol' PHP associative array and can\nbe serialized and unserialized without a hitch.<\/p>"
                 }
             ],
             "file": "bbn\\Compilers\\Less",
@@ -648,7 +648,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Force rebuild?"
+                    "description": "Input"
                 },
                 {
                     "name": "force",
@@ -657,7 +657,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Force rebuild?"
                 }
             ]
         },
@@ -1579,11 +1580,11 @@
     "namespaceName": "bbn\\Compilers",
     "shortName": "Less",
     "summary": "The LESS compiler and parser.",
-    "description": "*\nConverting LESS to CSS is a three stage process. The incoming file is parsed\nby `Less_parser` into a syntax tree, then it is compiled into another tree\nrepresenting the CSS structure by `Less`. The CSS tree is fed into a\nformatter, like `Less_formatter` which then outputs CSS as a string.\n *\nDuring the first compile, all values are *reduced*, which means that their\ntypes are brought to the lowest form before being dump as strings. This\nhandles math equations, variable dereferences, and the like.\n *\nThe `parse` function of `Less` is the entry point.\n *\nIn summary:\n *\nThe `Less` class creates an instance of the parser, feeds it LESS code,\nthen transforms the resulting tree to a CSS tree. This class also holds the\nevaluation context, such as all available mixins and variables at any given\ntime.\n *\nThe `Less_parser` class is only concerned with parsing its input.\n *\nThe `Less_formatter` takes a CSS tree, and dumps it to a formatted string,\nhandling things like indentation.",
+    "description": "Converting LESS to CSS is a three stage process. The incoming file is parsed\nby `Less_parser` into a syntax tree, then it is compiled into another tree\nrepresenting the CSS structure by `Less`. The CSS tree is fed into a\nformatter, like `Less_formatter` which then outputs CSS as a string.\n\nDuring the first compile, all values are *reduced*, which means that their\ntypes are brought to the lowest form before being dump as strings. This\nhandles math equations, variable dereferences, and the like.\n\nThe `parse` function of `Less` is the entry point.\n\nIn summary:\n\nThe `Less` class creates an instance of the parser, feeds it LESS code,\nthen transforms the resulting tree to a CSS tree. This class also holds the\nevaluation context, such as all available mixins and variables at any given\ntime.\n\nThe `Less_parser` class is only concerned with parsing its input.\n\nThe `Less_formatter` takes a CSS tree, and dumps it to a formatted string,\nhandling things like indentation.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\nConverting LESS to CSS is a three stage process. The incoming file is parsed\nby <code>Less_parser<\/code> into a syntax tree, then it is compiled into another tree\nrepresenting the CSS structure by <code>Less<\/code>. The CSS tree is fed into a\nformatter, like <code>Less_formatter<\/code> which then outputs CSS as a string.\n<\/em>\nDuring the first compile, all values are <em>reduced<\/em>, which means that their\ntypes are brought to the lowest form before being dump as strings. This\nhandles math equations, variable dereferences, and the like.\n<em>\nThe <code>parse<\/code> function of <code>Less<\/code> is the entry point.\n<\/em>\nIn summary:\n<em>\nThe <code>Less<\/code> class creates an instance of the parser, feeds it LESS code,\nthen transforms the resulting tree to a CSS tree. This class also holds the\nevaluation context, such as all available mixins and variables at any given\ntime.\n<\/em>\nThe <code>Less_parser<\/code> class is only concerned with parsing its input.\n*\nThe <code>Less_formatter<\/code> takes a CSS tree, and dumps it to a formatted string,\nhandling things like indentation.<\/p>"
+            "content": "<p>Converting LESS to CSS is a three stage process. The incoming file is parsed\nby <code>Less_parser<\/code> into a syntax tree, then it is compiled into another tree\nrepresenting the CSS structure by <code>Less<\/code>. The CSS tree is fed into a\nformatter, like <code>Less_formatter<\/code> which then outputs CSS as a string.<\/p>\n<p>During the first compile, all values are <em>reduced<\/em>, which means that their\ntypes are brought to the lowest form before being dump as strings. This\nhandles math equations, variable dereferences, and the like.<\/p>\n<p>The <code>parse<\/code> function of <code>Less<\/code> is the entry point.<\/p>\n<p>In summary:<\/p>\n<p>The <code>Less<\/code> class creates an instance of the parser, feeds it LESS code,\nthen transforms the resulting tree to a CSS tree. This class also holds the\nevaluation context, such as all available mixins and variables at any given\ntime.<\/p>\n<p>The <code>Less_parser<\/code> class is only concerned with parsing its input.<\/p>\n<p>The <code>Less_formatter<\/code> takes a CSS tree, and dumps it to a formatted string,\nhandling things like indentation.<\/p>"
         }
     ]
 }

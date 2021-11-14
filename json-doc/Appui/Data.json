@@ -1259,5 +1259,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Data",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

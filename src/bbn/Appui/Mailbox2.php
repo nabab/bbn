@@ -178,7 +178,7 @@ class Mailbox2
   // are we connected?
   public function ifok(): bool
   {
-    return !!$this->stream;
+    return (bool)$this->stream;
   }
 
 

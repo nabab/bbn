@@ -1,0 +1,278 @@
+{
+    "doc": {
+        "description": "Scaleway Server trait",
+        "tags": []
+    },
+    "name": "bbn\\Api\\Scaleway\\Server",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
+    "startLine": 9,
+    "endLine": 88,
+    "contentConstructor": null,
+    "methods": {
+        "getServers": {
+            "name": "getServers",
+            "summary": "Gets the servers list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('server');\n  }",
+            "startLine": 17,
+            "endLine": 20,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getServer": {
+            "name": "getServer",
+            "summary": "Gets the server info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/$id\" : $id);\n  }",
+            "startLine": 28,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The server ID"
+                }
+            ]
+        },
+        "getFailoverIps": {
+            "name": "getFailoverIps",
+            "summary": "Gets the failover IPs list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('server\/failover');\n  }",
+            "startLine": 38,
+            "endLine": 41,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getIpInfo": {
+            "name": "getIpInfo",
+            "summary": "Gets the IP info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $ip)\n  {\n    return $this->_callCommand(\"server\/ip\/$ip\");\n  }",
+            "startLine": 49,
+            "endLine": 52,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ip",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The IP address"
+                }
+            ]
+        },
+        "getDiskInfo": {
+            "name": "getDiskInfo",
+            "summary": "Gets information on a server's disk",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/disk\/$id\" : $id);\n  }",
+            "startLine": 60,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The disk ID"
+                }
+            ]
+        },
+        "getRaidInfo": {
+            "name": "getRaidInfo",
+            "summary": "Gets information on a server's RAID controller",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/raidController\/$id\" : $id);\n  }",
+            "startLine": 71,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The disk ID"
+                }
+            ]
+        },
+        "getProductInfo": {
+            "name": "getProductInfo",
+            "summary": "Gets server product info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/product\/$id\" : $id);\n  }",
+            "startLine": 82,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The server ID"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\Scaleway",
+    "shortName": "Server",
+    "summary": "Scaleway Server trait",
+    "description": "",
+    "description_parts": []
+}

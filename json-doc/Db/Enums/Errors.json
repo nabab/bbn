@@ -34,5 +34,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db\\Enums",
     "shortName": "Errors",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

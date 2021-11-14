@@ -821,5 +821,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "Common",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

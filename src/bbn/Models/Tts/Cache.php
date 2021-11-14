@@ -24,7 +24,7 @@ trait Cache
   }
 
   protected function _cache_name($uid, $method = ''){
-    $uid = (string)$uid;
+    $uid  = (string)$uid;
     $path = \bbn\Str::isUid($uid) ? substr($uid, 0, 3).'/'.substr($uid, 3, 3).'/'.substr($uid, 6) : $uid;
     return $this->_cache_prefix.$path.(empty($method) ? '' : '/'.(string)$method);
   }

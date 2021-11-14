@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Image Class\n *\n *\nThis class is used to upload, delete and transform images, and create thumbnails.",
+        "description": "Image Class\n\n\nThis class is used to upload, delete and transform images, and create thumbnails.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Files ressources",
@@ -30,12 +31,8 @@
         "jpg2pdf": {
             "name": "jpg2pdf",
             "summary": "Converts one or more jpg image(s) to a pdf file. If the pdf file doesn't exist will be created.",
-            "description": "*\n```php\nbbn\\X::dump(bbn\\File\\Image::jpg2pdf([\"\/home\/data\/test\/two.jpg\",\"\/home\/data\/test\/one.jpeg\"], \"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.pdf\"\n```",
+            "description": "```php\nbbn\\X::dump(bbn\\File\\Image::jpg2pdf([\"\/home\/data\/test\/two.jpg\",\"\/home\/data\/test\/one.jpeg\"], \"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.pdf\"\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "bbn\\X::dump(bbn\\File\\Image::jpg2pdf([\"\/home\/data\/test\/two.jpg\",\"\/home\/data\/test\/one.jpeg\"], \"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.pdf\""
@@ -67,7 +64,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The path of the pdf file"
+                    "description": "The path of jpg file(s) to convert"
                 },
                 {
                     "name": "pdf",
@@ -76,19 +73,16 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The path of the pdf file"
                 }
             ]
         },
         "pdf2jpg": {
             "name": "pdf2jpg",
             "summary": "Converts pdf file to jpg image(s).",
-            "description": "*\n```php\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string)  \"\/home\/data\/test\/doc.jpg\"\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'', all));\n\/\/ (array) [\"\/home\/data\/test\/doc-0.jpg\",\"\/home\/data\/test\/doc-1.jpg\"]\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'\/home\/data\/test\/Folder\/image.jpg', all));\n\/\/ (array) [\"\/home\/data\/test\/Folder\/image-0.jpg\", \"\/home\/data\/test\/Folder\/image-1.jpg\"],\n```",
+            "description": "```php\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string)  \"\/home\/data\/test\/doc.jpg\"\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'', all));\n\/\/ (array) [\"\/home\/data\/test\/doc-0.jpg\",\"\/home\/data\/test\/doc-1.jpg\"]\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'\/home\/data\/test\/Folder\/image.jpg', all));\n\/\/ (array) [\"\/home\/data\/test\/Folder\/image-0.jpg\", \"\/home\/data\/test\/Folder\/image-1.jpg\"],\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "bbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string)  \"\/home\/data\/test\/doc.jpg\"\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'', all));\n\/\/ (array) [\"\/home\/data\/test\/doc-0.jpg\",\"\/home\/data\/test\/doc-1.jpg\"]\nbbn\\X::dump(bbn\\File\\Image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'\/home\/data\/test\/Folder\/image.jpg', all));\n\/\/ (array) [\"\/home\/data\/test\/Folder\/image-0.jpg\", \"\/home\/data\/test\/Folder\/image-1.jpg\"],"
@@ -120,7 +114,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The destination filename. If empty is used the same path of pdf. Default: empty."
+                    "description": "The path of pdf file to convert"
                 },
                 {
                     "name": "jpg",
@@ -130,7 +124,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page)."
+                    "description": "The destination filename. If empty is used the same path of pdf. Default: empty."
                 },
                 {
                     "name": "num",
@@ -139,7 +133,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page)."
                 }
             ]
         },
@@ -210,12 +205,8 @@
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
-                "description": "*\n```php\n$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');\n```",
+                "description": "```php\n$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');"
@@ -309,12 +300,8 @@
         "getExtension": {
             "name": "getExtension",
             "summary": "Returns the extension of the image. If the file has jpg extension will return 'jpeg'.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getExtension());\n\/\/ (string) \"jpeg\"\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getExtension());\n\/\/ (string) \"jpeg\"\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getExtension());\n\/\/ (string) \"jpeg\""
@@ -339,12 +326,8 @@
             "parent": {
                 "name": "getExtension",
                 "summary": "Return the extension of the file.",
-                "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'\n```",
+                "description": "```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'"
@@ -374,12 +357,8 @@
         "test": {
             "name": "test",
             "summary": "Tests if the object is a image.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->test());\n\/\/ (bool) true\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/file.doc\");\nbbn\\X::dump($img->test());\n\/\/ (bool) false\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->test());\n\/\/ (bool) true\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/file.doc\");\nbbn\\X::dump($img->test());\n\/\/ (bool) false\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->test());\n\/\/ (bool) true\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/file.doc\");\nbbn\\X::dump($img->test());\n\/\/ (bool) false"
@@ -430,12 +409,8 @@
         "display": {
             "name": "display",
             "summary": "Sends the image with Content-Type.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->display();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->display();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->display();"
@@ -463,12 +438,8 @@
         "save": {
             "name": "save",
             "summary": "Save the image in a new destination if given or overwrite the file (default).",
-            "description": "*\n```php\n$new_file=\"\/home\/data\/test\/Folder_test\/image_test.jpeg\";\n$img2=new bbn\\File\\Image($new_file);\nbbn\\X::dump($img2->test());\n\/\/ (bool) false\nbbn\\X::dump($img->save($new_file));\nbbn\\X::dump($img2->test());\n\/\/ (bool) true\n```",
+            "description": "```php\n$new_file=\"\/home\/data\/test\/Folder_test\/image_test.jpeg\";\n$img2=new bbn\\File\\Image($new_file);\nbbn\\X::dump($img2->test());\n\/\/ (bool) false\nbbn\\X::dump($img->save($new_file));\nbbn\\X::dump($img2->test());\n\/\/ (bool) true\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$new_file=\"\/home\/data\/test\/Folder_test\/image_test.jpeg\";\n$img2=new bbn\\File\\Image($new_file);\nbbn\\X::dump($img2->test());\n\/\/ (bool) false\nbbn\\X::dump($img->save($new_file));\nbbn\\X::dump($img2->test());\n\/\/ (bool) true"
@@ -493,12 +464,8 @@
             "parent": {
                 "name": "save",
                 "summary": "That feature saves the file as a parameter, and accepts a string that contains the path where to save.",
-                "description": "*\n```php\n $file->save('\/home\/user\/desktop\/');\n```",
+                "description": "```php\n $file->save('\/home\/user\/desktop\/');\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "$file->save('\/home\/user\/desktop\/');"
@@ -541,19 +508,16 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The destination of the file to save. Default = false, the file will overwrited."
                 }
             ]
         },
         "getWidth": {
             "name": "getWidth",
             "summary": "If the file is an image will return its width in pixel.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getWidth());\n\/\/ (int) 265\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getWidth());\n\/\/ (int) 265\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getWidth());\n\/\/ (int) 265"
@@ -581,12 +545,8 @@
         "getHeight": {
             "name": "getHeight",
             "summary": "If the file is an image will return its height in pixel.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getHeight());\n\/\/ (int) 190\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getHeight());\n\/\/ (int) 190\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getHeight());\n\/\/ (int) 190"
@@ -642,7 +602,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "The new height."
+                    "description": "The new width."
                 },
                 {
                     "name": "h",
@@ -652,7 +612,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "If cropping the image. Default = false."
+                    "description": "The new height."
                 },
                 {
                     "name": "crop",
@@ -662,7 +622,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "w The maximum value for new width."
+                    "description": "If cropping the image. Default = false."
                 },
                 {
                     "name": "max_w",
@@ -672,7 +632,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "h The maximum valure for new height."
+                    "description": "w The maximum value for new width."
                 },
                 {
                     "name": "max_h",
@@ -681,7 +641,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "h The maximum valure for new height."
                 }
             ]
         },
@@ -716,7 +677,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "default BBN_MAX_HEIGHT"
+                    "description": "default  BBN_MAX_WIDTH"
                 },
                 {
                     "name": "h",
@@ -725,19 +686,16 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "default BBN_MAX_HEIGHT"
                 }
             ]
         },
         "crop": {
             "name": "crop",
             "summary": "Returns a crop of the image.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getWidth(),$img->getHeight());\n\/\/ (int) 345  146\n$img->crop(10, 10, 30, 30)->save(\"\/home\/data\/test\/img2.jpeg\");\n$img2 = new \\bbn\\File\\Image(\"\/home\/data\/test\/img2.jpeg\");\nbbn\\X::hdump($img2->getWidth(),$img2->getHeight());\n\/\/ (int) 10  10\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getWidth(),$img->getHeight());\n\/\/ (int) 345  146\n$img->crop(10, 10, 30, 30)->save(\"\/home\/data\/test\/img2.jpeg\");\n$img2 = new \\bbn\\File\\Image(\"\/home\/data\/test\/img2.jpeg\");\nbbn\\X::hdump($img2->getWidth(),$img2->getHeight());\n\/\/ (int) 10  10\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::dump($img->getWidth(),$img->getHeight());\n\/\/ (int) 345  146\n$img->crop(10, 10, 30, 30)->save(\"\/home\/data\/test\/img2.jpeg\");\n$img2 = new \\bbn\\File\\Image(\"\/home\/data\/test\/img2.jpeg\");\nbbn\\X::hdump($img2->getWidth(),$img2->getHeight());\n\/\/ (int) 10  10"
@@ -769,7 +727,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "the new height"
+                    "description": "the new width"
                 },
                 {
                     "name": "h",
@@ -779,7 +737,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "X coordinate"
+                    "description": "the new height"
                 },
                 {
                     "name": "x",
@@ -789,7 +747,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Y coordinate"
+                    "description": "X coordinate"
                 },
                 {
                     "name": "y",
@@ -798,19 +756,16 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Y coordinate"
                 }
             ]
         },
         "rotate": {
             "name": "rotate",
             "summary": "Rotates the image.",
-            "description": "*_\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->rotate( 90 )->save();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->rotate( 90 )->save();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*_<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->rotate( 90 )->save();"
@@ -841,19 +796,16 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The angle of rotation."
                 }
             ]
         },
         "flip": {
             "name": "flip",
             "summary": "Flips the image.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->flip()->save();\n$img->flip(\"h\")->save();\n$img->flip()->save();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->flip()->save();\n$img->flip(\"h\")->save();\n$img->flip()->save();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->flip()->save();\n$img->flip(\"h\")->save();\n$img->flip()->save();"
@@ -884,19 +836,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "v",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Vertical (\"v\") or Horizontal (\"h\") flip, default: \"v\"."
                 }
             ]
         },
         "quality": {
             "name": "quality",
             "summary": "Compresses and sets the image's quality (JPEG image only).",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->quality(60, 6)->save();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->quality(60, 6)->save();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->quality(60, 6)->save();"
@@ -928,7 +877,7 @@
                     "has_default": true,
                     "default": 80,
                     "default_name": "",
-                    "description": "The compression type"
+                    "description": "The quality level (0-100)"
                 },
                 {
                     "name": "comp",
@@ -937,19 +886,16 @@
                     "required": false,
                     "has_default": true,
                     "default": 8,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The compression type"
                 }
             ]
         },
         "brightness": {
             "name": "brightness",
             "summary": "Adjusts the image's brightness.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->brightness();\n$img->brightness(\"-\");\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->brightness();\n$img->brightness(\"-\");\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->brightness();\n$img->brightness(\"-\");"
@@ -980,19 +926,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "+",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The value \"+\" (default) increases the brightness, the value (\"-\") reduces it."
                 }
             ]
         },
         "contrast": {
             "name": "contrast",
             "summary": "Adjusts the image contrast.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->contrast(\"-\");\n$img->contrast();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->contrast(\"-\");\n$img->contrast();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->contrast(\"-\");\n$img->contrast();"
@@ -1023,19 +966,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "+",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The value \"+\" (default), increases the contrast, the value (\"-\") reduces it."
                 }
             ]
         },
         "grayscale": {
             "name": "grayscale",
             "summary": "Converts the image's color to grayscale.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->grayscale()->save();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->grayscale()->save();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->grayscale()->save();"
@@ -1063,12 +1003,8 @@
         "negate": {
             "name": "negate",
             "summary": "Converts the image's color to negative.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->negate();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->negate();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->negate();"
@@ -1096,12 +1032,8 @@
         "polaroid": {
             "name": "polaroid",
             "summary": "Converts the image's color with polaroid filter.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->polaroid()->save();\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->polaroid()->save();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->polaroid()->save();"
@@ -1129,12 +1061,8 @@
         "thumbs": {
             "name": "thumbs",
             "summary": "Creates miniature of the image",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->thumbs()->save(\/home\/data\/test\/image_test.jpg\");\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->thumbs()->save(\/home\/data\/test\/image_test.jpg\");\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\n$img->thumbs()->save(\/home\/data\/test\/image_test.jpg\");"
@@ -1208,12 +1136,8 @@
         "toString": {
             "name": "toString",
             "summary": "Return the image as string.",
-            "description": "*\n```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::hdump($img->toString());\n\/\/ (string)\n```",
+            "description": "```php\n$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::hdump($img->toString());\n\/\/ (string)\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$img = new bbn\\File\\Image(\"\/home\/data\/test\/image.jpg\");\nbbn\\X::hdump($img->toString());\n\/\/ (string)"
@@ -1293,12 +1217,8 @@
         "getSize": {
             "name": "getSize",
             "summary": "Return the filesize in byte.",
-            "description": "*\n```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
+            "description": "```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314"
@@ -1323,12 +1243,8 @@
             "parent": {
                 "name": "getSize",
                 "summary": "Return the filesize in byte.",
-                "description": "*\n```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
+                "description": "```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314"
@@ -1405,12 +1321,8 @@
         "download": {
             "name": "download",
             "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
-            "description": "*\n```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
+            "description": "```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();"
@@ -1435,12 +1347,8 @@
             "parent": {
                 "name": "download",
                 "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
-                "description": "*\n```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
+                "description": "```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();"
@@ -1470,12 +1378,8 @@
         "getHash": {
             "name": "getHash",
             "summary": "Return the hash of the file.",
-            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+            "description": "```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
@@ -1500,12 +1404,8 @@
             "parent": {
                 "name": "getHash",
                 "summary": "Return the hash of the file.",
-                "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+                "description": "```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
@@ -1535,12 +1435,8 @@
         "delete": {
             "name": "delete",
             "summary": "Deletes the file.",
-            "description": "*\n```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+            "description": "```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "X::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
@@ -1565,12 +1461,8 @@
             "parent": {
                 "name": "delete",
                 "summary": "Deletes the file.",
-                "description": "*\n```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+                "description": "```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
                 "description_parts": [
-                    {
-                        "type": "text",
-                        "content": "<p>*<\/p>"
-                    },
                     {
                         "type": "code",
                         "content": "X::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
@@ -2232,11 +2124,11 @@
     "namespaceName": "bbn\\File",
     "shortName": "Image",
     "summary": "Image Class",
-    "description": "*\n *\nThis class is used to upload, delete and transform images, and create thumbnails.",
+    "description": "This class is used to upload, delete and transform images, and create thumbnails.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThis class is used to upload, delete and transform images, and create thumbnails.<\/p>"
+            "content": "<p>This class is used to upload, delete and transform images, and create thumbnails.<\/p>"
         }
     ]
 }

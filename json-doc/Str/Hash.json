@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "A Class for hashes",
+        "description": "A Class for hashes\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Strings",
@@ -257,5 +258,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Str",
     "shortName": "Hash",
-    "summary": "A Class for hashes"
+    "summary": "A Class for hashes",
+    "description": "",
+    "description_parts": []
 }

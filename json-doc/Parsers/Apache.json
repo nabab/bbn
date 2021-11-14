@@ -299,5 +299,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Parsers",
     "shortName": "Apache",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

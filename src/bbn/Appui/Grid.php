@@ -444,7 +444,7 @@ class Grid extends bbn\Models\Cls\Cache
         }
         if (
           (($idx = X::find($cfg['fields'], ['field' => $i])) === null ) ||
-          !!$cfg['fields'][$idx]['hidden']
+          (bool)$cfg['fields'][$idx]['hidden']
         ){
           unset($row[$i]);
         }

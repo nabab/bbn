@@ -12,7 +12,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search.php",
     "startLine": 14,
-    "endLine": 380,
+    "endLine": 399,
     "contentConstructor": {
         "file": "bbn\\Appui\\Search",
         "returns": null
@@ -27,7 +27,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Mvc\\Controller $ctrl, array $cfg = [])\n  {\n    $this->ctrl   = $ctrl;\n    $this->db     = Db::getInstance();\n    $this->user   = User::getInstance();\n\n    if (!$this->db) {\n      throw new \\Exception('Db instance cannot be found!');\n    }\n\n    if (!$this->user) {\n      throw new \\Exception(X::_('User is not logged in!'));\n    }\n\n    $this->_init_class_cfg($cfg);\n    $this->cacheInit();\n    $this->search_cfg = $this->getSearchCfg();\n    $this->timer      = new Timer();\n  }",
+            "code": "function(bbn\\Mvc\\Controller $ctrl, array $cfg = [])\n  {\n    $this->ctrl   = $ctrl;\n    \/\/ $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])\n    $this->db     = Db::getInstance();\n    $this->user   = User::getInstance();\n\n    if (!$this->db) {\n      throw new \\Exception('Db instance cannot be found!');\n    }\n\n    if (!$this->user) {\n      throw new \\Exception(X::_('User is not logged in!'));\n    }\n\n    $this->_init_class_cfg($cfg);\n    $this->cacheInit();\n    $this->timer      = new Timer();\n  }",
             "startLine": 94,
             "endLine": 112,
             "isDeprecated": false,
@@ -70,9 +70,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $search_value, int $step = 0)\n  {\n    $cache_name = sprintf($this->search_cache_name, $search_value);\n\n    \/\/ Check if same search is saved for the user\n    if (!$config_array = $this->cacheGet($this->user->getId(), $cache_name)) {\n\n      \/\/ Execute all functions with the given search string\n      $config_array = $this->executeFunctions($search_value);\n\n      \/\/ Save it in cache\n      $this->cacheSet($this->user->getId(), $cache_name, $config_array);\n    }\n\n    $results = [\n      'data' => []\n    ];\n\n    $this->timer->start('search');\n\n    for ($i = $step; $i < count($config_array); $i++) {\n      $item = $config_array[$i];\n\n      if (empty($item['cfg'])) {\n        continue;\n      }\n\n      \/\/ If the search value has been done by the user before\n      if ($previous_search_id = $this->getPreviousSearchId($search_value)) {\n        if (\n          $previous_search_results = $this->getPreviousSearchResults(\n            $previous_search_id, $item['signature']\n          )\n        ) {\n          $results_arch  = $this->class_cfg['arch']['search_results'];\n          $processed_cfg = $this->db->processCfg($item['cfg']);\n\n          foreach ($previous_search_results as $r) {\n            \/\/ Get the results saved in the json field `result`\n            if ($previous_result = json_decode($r[$results_arch['result']], true)) {\n              if (X::hasProps($previous_result, $processed_cfg['fields'])) {\n                $cfg = $item['cfg'];\n\n                $cfg['where'] = [\n                  'logic' => 'AND',\n                  'conditions' => [\n                    $processed_cfg['filters'],\n                    [\n                      'conditions' => [\n                        ...array_map(function ($value, $key) {\n                          return [\n                            'field' => $key,\n                            'operator' => '=',\n                            'value' => $value\n                          ];\n                        }, $previous_result, array_keys($previous_result))\n                      ]\n                    ]\n                  ]\n                ];\n\n                if ($add_to_top = $this->db->rselect($cfg)) {\n                  $results['data'] = array_merge($results['data'], [$add_to_top]);\n                }\n              }\n            }\n          }\n        }\n      }\n\n      if ($search_results = $this->db->rselectAll($item['cfg'])) {\n        $results['data'] = array_merge($results['data'], $search_results);\n      }\n\n      if ($this->timer->measure('search') > $this->time_limit) {\n        \/\/ If time limit has passed then return the result and the index of the next step\n        $this->timer->stop('search');\n\n        if (isset($config_array[$i + 1])) {\n          $results['next_step'] = $i + 1;\n        }\n\n        break;\n      }\n    }\n\n    return $results;\n  }",
-            "startLine": 209,
-            "endLine": 296,
+            "code": "function(string $search_value, int $step = 0)\n  {\n    if (!$step) {\n      \n    }\n    $cache_name = sprintf($this->search_cache_name, $search_value);\n\n    \/\/ Check if same search is saved for the user\n    if (!($config_array = $this->cacheGet($this->user->getId(), $cache_name))) {\n\n      \/\/ Execute all functions with the given search string\n      $config_array = $this->executeFunctions($search_value);\n\n      \/\/ Save it in cache\n      $this->cacheSet($this->user->getId(), $cache_name, $config_array);\n    }\n\n    $results = [\n      'data' => []\n    ];\n\n    $this->timer->start('search');\n\n    \/\/ If the search value has been done by the user before\n    if (($previous_search_id = $this->getPreviousSearchId($search_value))\n        && ($previous_search_results = $this->getPreviousSearchResults($previous_search_id))\n    ) {\n      $results_arch  = $this->class_cfg['arch']['search_results'];\n      foreach ($previous_search_results as $r) {\n        $item          = X::getRow($config_array, ['signature' => $r['signature']]);\n        $processed_cfg = $this->db->processCfg($item['cfg']);\n        \/\/ Get the results saved in the json field `result`\n        if (($previous_result = json_decode($r[$results_arch['result']], true))\n            && (X::hasProps($previous_result, $processed_cfg['fields']))\n        ) {\n          $cfg          = $item['cfg'];\n          $cfg['where'] = [\n            'logic' => 'AND',\n            'conditions' => [\n              $processed_cfg['filters'],\n              [\n                'conditions' => [\n                  ...array_map(\n                    function ($value, $key) {\n                      return [\n                        'field' => $key,\n                        'operator' => '=',\n                        'value' => $value\n                      ];\n                    },\n                    $previous_result, array_keys($previous_result)\n                  )\n                ]\n              ]\n            ]\n          ];\n\n          if ($add_to_top = $this->db->rselect($cfg)) {\n            $results['data'] = array_merge($results['data'], [$add_to_top]);\n          }\n        }\n      }\n    }\n\n    \/\/X::ddump($config_array, \"DDDD\", $this->executeFunctions($search_value), $search_value, $this->search_cfg);\n    $num_cfg = count($config_array);\n    for ($i = $step; $i < $num_cfg; $i++) {\n      $item = $config_array[$i];\n\n      if (empty($item['cfg'])) {\n        continue;\n      }\n\n      X::ddump($item);\n      if ($search_results = $this->db->rselectAll($item['cfg'])) {\n        $results['data'] = array_merge($results['data'], $search_results);\n      }\n\n      if ($this->timer->measure('search') > $this->time_limit) {\n        \/\/ If time limit has passed then return the result and the index of the next step\n        $this->timer->stop('search');\n        if (isset($config_array[$i + 1])) {\n          $results['next_step'] = $i + 1;\n        }\n\n        break;\n      }\n    }\n\n    return $results;\n  }",
+            "startLine": 212,
+            "endLine": 302,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -93,7 +93,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "value"
                 },
                 {
                     "name": "step",
@@ -115,9 +116,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $function, string $plugin_name)\n  {\n    \/\/ Get how many parameters the closure has\n    try {\n      $parameters = (new \\ReflectionFunction($function))->getParameters();\n    } catch (\\Exception $e) {\n      $parameters = ['search'];\n    }\n\n    \/\/ Add an empty string to every parameter of the closure\n    $args = array_map(function () {\n      return '';\n    }, $parameters);\n\n    if (!isset(self::$functions[$plugin_name])) {\n      self::$functions[$plugin_name] = [];\n    }\n\n    \/\/ Invoke the closure with the parameters set to empty string and return the results\n    self::$functions[$plugin_name][] = [\n      'fn' => $function,\n      'signature' => \\bbn\\Cache::makeHash($function(...$args)),\n      'file' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file']\n    ];\n  }",
-            "startLine": 355,
-            "endLine": 379,
+            "code": "function(callable $function, string $plugin_name = 'main')\n  {\n    \/\/ Get how many parameters the closure has\n    try {\n      $parameters = (new \\ReflectionFunction($function))->getParameters();\n    }\n    catch (\\Exception $e) {\n      $parameters = ['search'];\n    }\n\n    \/\/ Add an empty string to every parameter of the closure for the hash\n    $args = array_map(function () {\n      return '';\n    }, $parameters);\n\n    if (!isset(self::$functions[$plugin_name])) {\n      self::$functions[$plugin_name] = [];\n    }\n\n    $res =  [\n      'fn' => $function,\n      'signature' => \\bbn\\Cache::makeHash($function(...$args)),\n      'file' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file']\n    ];\n    \/\/ Invoke the closure with the parameters set to empty string and return the results\n    self::$functions[$plugin_name][] = $res;\n    return $res;\n  }",
+            "startLine": 369,
+            "endLine": 396,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -125,8 +126,10 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": null,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -142,9 +145,9 @@
                     "name": "plugin_name",
                     "position": 1,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "main",
                     "default_name": "",
                     "description": "name"
                 }
@@ -280,7 +283,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return !!$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
             "startLine": 99,
             "endLine": 108,
             "isDeprecated": false,
@@ -316,7 +319,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new \\Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->select($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return !!$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new \\Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->select($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
             "startLine": 119,
             "endLine": 136,
             "isDeprecated": false,
@@ -523,5 +526,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Search",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

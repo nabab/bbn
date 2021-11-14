@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class chat",
+        "description": "Class chat\n",
         "tags": {
             "package": "bbn\\Appui"
         }
@@ -68,7 +68,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -81,7 +82,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The user object"
+                    "description": "The database connection object"
                 },
                 {
                     "name": "user",
@@ -90,7 +91,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The user object"
                 }
             ]
         },
@@ -314,7 +316,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "chat"
                 },
                 {
                     "name": "message",
@@ -477,7 +480,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "user"
+                    "description": "chat"
                 },
                 {
                     "name": "id_user",
@@ -486,7 +489,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 }
             ]
         },
@@ -523,7 +527,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "user"
+                    "description": "chat"
                 },
                 {
                     "name": "id_user",
@@ -532,7 +536,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 }
             ]
         },
@@ -662,7 +667,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "current"
+                    "description": "chat"
                 },
                 {
                     "name": "with_current",
@@ -671,7 +676,8 @@
                     "required": false,
                     "has_default": true,
                     "default": true,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "current"
                 },
                 {
                     "name": "last_activity",
@@ -717,7 +723,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "chat"
                 }
             ]
         },
@@ -755,7 +762,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "user"
+                    "description": "chat"
                 },
                 {
                     "name": "id_user",
@@ -764,7 +771,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 }
             ]
         },
@@ -802,7 +810,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "user"
+                    "description": "chat"
                 },
                 {
                     "name": "id_user",
@@ -811,7 +819,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 }
             ]
         },
@@ -849,7 +858,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "user"
+                    "description": "chat"
                 },
                 {
                     "name": "id_user",
@@ -858,7 +867,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 }
             ]
         },
@@ -1212,7 +1222,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_chat, string $id_user = NULL)\n  {\n    if ($this->check()\n        && bbn\\Str::isUid($id_chat)\n        && $this->isParticipant($id_chat)\n        && $this->_add_bot_message($id_chat, $this->user->getName($id_user ?: $this->user->getId()) . ' ' . X::_('has left the chat'))\n        && $this->db->update(\n          'bbn_chats_users', ['active' => 0], [\n          'id_chat' => $id_chat,\n          'id_user' => $id_user ?: $this->user->getId()\n          ]\n        )\n    ) {\n      $ok = true;\n      if (($parts = $this->getParticipants($id_chat))\n          && (count($parts) === 1)\n      ) {\n        $ok = !!$this->leave($id_chat, $parts[0]);\n      }\n\n      $this->_set_state_hash($id_chat);\n      return $ok;\n    }\n\n    return null;\n  }",
+            "code": "function(string $id_chat, string $id_user = NULL)\n  {\n    if ($this->check()\n        && bbn\\Str::isUid($id_chat)\n        && $this->isParticipant($id_chat)\n        && $this->_add_bot_message($id_chat, $this->user->getName($id_user ?: $this->user->getId()) . ' ' . X::_('has left the chat'))\n        && $this->db->update(\n          'bbn_chats_users', ['active' => 0], [\n          'id_chat' => $id_chat,\n          'id_user' => $id_user ?: $this->user->getId()\n          ]\n        )\n    ) {\n      $ok = true;\n      if (($parts = $this->getParticipants($id_chat))\n          && (count($parts) === 1)\n      ) {\n        $ok = (bool)$this->leave($id_chat, $parts[0]);\n      }\n\n      $this->_set_state_hash($id_chat);\n      return $ok;\n    }\n\n    return null;\n  }",
             "startLine": 735,
             "endLine": 760,
             "isDeprecated": false,
@@ -2139,5 +2149,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Chat",
-    "summary": "Class chat"
+    "summary": "Class chat",
+    "description": "",
+    "description_parts": []
 }

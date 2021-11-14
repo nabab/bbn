@@ -1422,7 +1422,7 @@ class Note extends bbn\Models\Cls\Db
    */
   private function _remove_note_event(string $id_note, string $id_event): bool
   {
-    return !!$this->db->delete(
+    return (bool)$this->db->delete(
       $this->class_cfg['tables']['notes_events'],
       [
         $this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
@@ -1448,7 +1448,7 @@ class Note extends bbn\Models\Cls\Db
         $this->class_cfg['arch']['notes_events']['id_event'] => $id_event
       ]
     )) {
-      return !!$this->db->insert(
+      return (bool)$this->db->insert(
         $this->class_cfg['tables']['notes_events'],
         [
           $this->class_cfg['arch']['notes_events']['id_note'] => $id_note,

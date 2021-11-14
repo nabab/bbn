@@ -78,19 +78,16 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The text to write"
                 }
             ]
         },
         "log": {
             "name": "log",
             "summary": "Writes in data\/logs\/db.log.",
-            "description": "*\n```php\n$db->$db->log('test');\n```",
+            "description": "```php\n$db->$db->log('test');\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$db->$db->log('test');"
@@ -130,12 +127,8 @@
         "setErrorMode": {
             "name": "setErrorMode",
             "summary": "Sets the error mode.",
-            "description": "*\n```php\n$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)\n```",
+            "description": "```php\n$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$db->setErrorMode('continue'|'die'|'stop_all|'stop');\n\/\/ (self)"
@@ -166,19 +159,16 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The error mode: \"continue\", \"die\", \"stop\", \"stop_all\"."
                 }
             ]
         },
         "getErrorMode": {
             "name": "getErrorMode",
             "summary": "Gets the error mode.",
-            "description": "*\n```php\nX::dump($db->getErrorMode());\n\/\/ (string) stop_all\n```",
+            "description": "```php\nX::dump($db->getErrorMode());\n\/\/ (string) stop_all\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "X::dump($db->getErrorMode());\n\/\/ (string) stop_all"
@@ -290,5 +280,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "HasError",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

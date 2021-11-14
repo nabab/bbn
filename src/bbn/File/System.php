@@ -528,15 +528,20 @@ class System extends bbn\Models\Cls\Basic
 
 
   /**
-   * @param string $file
+   * Returns the decoded content of the given file with a predefined or given decoding function
+   *
+   * @param string $file     The file to get the content from
+   * @param mixed  $decoder  A decoding function or an encoding type
+   * @param bool   $as_array If set to true the result will be forced into an array
    * @return null|string
    */
-  public function decodeContents(string $file, $decoder = null, $as_array = false)
+  public function decodeContents(string $file, $decoder = null, $as_array = false): ?iterable
   {
     if ($c = $this->getContents($file)) {
       if (is_callable($decoder)) {
         return $decoder($c);
-      } else {
+      }
+      else {
         $encoding = false;
         if (!$decoder) {
           $encoding = bbn\Str::fileExt($file);

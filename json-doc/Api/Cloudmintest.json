@@ -297,5 +297,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api",
     "shortName": "Cloudmintest",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

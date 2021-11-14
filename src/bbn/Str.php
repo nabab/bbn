@@ -286,8 +286,8 @@ class Str
    * Trims, and removes extra spaces (all more than one)
    *
    * ```php
-   * X::dump(Str::cleanSpaces(" Hello     World\n\n\n  !!!    "));
-   * // (string)  "Hello World !!!"
+   * X::dump(Str::cleanSpaces(" Hello     World\n\n\n  (bool)!    "));
+   * // (string)  "Hello World (bool)!"
    * ```
    *
    * @param string $st The string to escape.

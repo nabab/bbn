@@ -278,7 +278,7 @@ class Cache
         case 'files':
           $file = self::_file($item, $this->path);
           if (is_file($file)) {
-            return !!$this->fs->delete($file);
+            return (bool)$this->fs->delete($file);
           }
           return false;
       }
@@ -302,10 +302,10 @@ class Cache
 
       $dir = self::_dir($st, $this->path, false);
       if ($this->fs->isDir($dir)) {
-        return !!$this->fs->delete($dir, $dir === $this->path ? false : true);
+        return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);
       }
       else {
-        return !!$this->fs->delete($dir.'.bbn.cache');
+        return (bool)$this->fs->delete($dir.'.bbn.cache');
       }
     }
     elseif (self::$type) {
@@ -702,8 +702,9 @@ class Cache
    */
   public function serializeFunction(callable $function): string
   {
-    return serialize(
-      new \Opis\Closure\SerializableClosure($function)
-    );
+    $wrapper = new \Opis\Closure\SerializableClosure(function() {
+      X::log("Helklo world");
+    });
+    return serialize($wrapper);
   }
 }

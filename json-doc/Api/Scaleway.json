@@ -1,0 +1,677 @@
+{
+    "doc": {
+        "description": "Scaleway API\n",
+        "tags": {
+            "category": "API",
+            "package": "Api",
+            "author": "Mirko Argentino <mirko@bbn.solutions>",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License",
+            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/Api\/Scaleway"
+        }
+    },
+    "name": "bbn\\Api\\Scaleway",
+    "namespace": true,
+    "traits": [
+        "bbn\\Models\\Tts\\Cache",
+        "bbn\\Api\\Scaleway\\Server",
+        "bbn\\Api\\Scaleway\\Dedibox",
+        "bbn\\Api\\Scaleway\\Failover",
+        "bbn\\Api\\Scaleway\\Domain",
+        "bbn\\Api\\Scaleway\\Hosting"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway.php",
+    "startLine": 16,
+    "endLine": 113,
+    "contentConstructor": {
+        "file": "bbn\\Api\\Scaleway",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $token, bool $testmode = false)\n  {\n    if (empty($token)) {\n      throw new \\Error(_('The API token is mandatory'));\n    }\n\n    self::cacheInit();\n    $this->_token = $token;\n    $this->_testmode = $testmode;\n    if (class_exists('\\\\bbn\\\\Cache')) {\n      $this->_cacher = Cache::getEngine();\n    }\n  }",
+            "startLine": 48,
+            "endLine": 60,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "token",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "THe API auth token"
+                },
+                {
+                    "name": "testmode",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getServers": {
+            "name": "getServers",
+            "summary": "Gets the servers list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('server');\n  }",
+            "startLine": 17,
+            "endLine": 20,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getServer": {
+            "name": "getServer",
+            "summary": "Gets the server info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/$id\" : $id);\n  }",
+            "startLine": 28,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The server ID"
+                }
+            ]
+        },
+        "getFailoverIps": {
+            "name": "getFailoverIps",
+            "summary": "Gets the failover IPs list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('server\/failover');\n  }",
+            "startLine": 38,
+            "endLine": 41,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getIpInfo": {
+            "name": "getIpInfo",
+            "summary": "Gets the IP info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $ip)\n  {\n    return $this->_callCommand(\"server\/ip\/$ip\");\n  }",
+            "startLine": 49,
+            "endLine": 52,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ip",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The IP address"
+                }
+            ]
+        },
+        "getDiskInfo": {
+            "name": "getDiskInfo",
+            "summary": "Gets information on a server's disk",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/disk\/$id\" : $id);\n  }",
+            "startLine": 60,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The disk ID"
+                }
+            ]
+        },
+        "getRaidInfo": {
+            "name": "getRaidInfo",
+            "summary": "Gets information on a server's RAID controller",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/raidController\/$id\" : $id);\n  }",
+            "startLine": 71,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The disk ID"
+                }
+            ]
+        },
+        "getProductInfo": {
+            "name": "getProductInfo",
+            "summary": "Gets server product info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function( $id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/product\/$id\" : $id);\n  }",
+            "startLine": 82,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "stringint|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The server ID"
+                }
+            ]
+        },
+        "getPlans": {
+            "name": "getPlans",
+            "summary": "Gets Dedibox plans list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('dedibox\/plans');\n  }",
+            "startLine": 16,
+            "endLine": 19,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDediboxOptions": {
+            "name": "getDediboxOptions",
+            "summary": "Gets the list of available options products",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/options\/$id\");\n  }",
+            "startLine": 27,
+            "endLine": 30,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The dedibox product ID"
+                }
+            ]
+        },
+        "getDediboxDatacenters": {
+            "name": "getDediboxDatacenters",
+            "summary": "Gets the list of available datacenters",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/availability\/$id\");\n  }",
+            "startLine": 38,
+            "endLine": 41,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The dedibox product ID"
+                }
+            ]
+        },
+        "getAvailableFailoverIps": {
+            "name": "getAvailableFailoverIps",
+            "summary": "Gets the list of available failover ips",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return X::sortBy($this->_callCommand('failover\/ips'), 'ip', 'asc');\n  }",
+            "startLine": 17,
+            "endLine": 20,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDomains": {
+            "name": "getDomains",
+            "summary": "Gets a list of domains owned by the current user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('domain\/');\n  }",
+            "startLine": 15,
+            "endLine": 18,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDomain": {
+            "name": "getDomain",
+            "summary": "Gets a domain info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\");\n  }",
+            "startLine": 26,
+            "endLine": 29,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The domain name"
+                }
+            ]
+        },
+        "getDomainVersion": {
+            "name": "getDomainVersion",
+            "summary": "Returns a paginated list of zone version associated with the domain",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\/version\");\n  }",
+            "startLine": 37,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The domain name"
+                }
+            ]
+        },
+        "getDomainZone": {
+            "name": "getDomainZone",
+            "summary": "Returns the currently active zone of the domain",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\/zone\");\n  }",
+            "startLine": 48,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The domain name"
+                }
+            ]
+        },
+        "getHostings": {
+            "name": "getHostings",
+            "summary": "Gets a list of links to the user's hostings",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('hosting');\n  }",
+            "startLine": 15,
+            "endLine": 18,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getHosting": {
+            "name": "getHosting",
+            "summary": "Gets information on a hosting",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return $this->_callCommand(\"hosting\/$id\");\n  }",
+            "startLine": 26,
+            "endLine": 29,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The hosting ID"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": [],
+    "numMethods": 18,
+    "numProperties": 0,
+    "numConstants": 3,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Cache",
+        "bbn\\Api\\Scaleway\\Server",
+        "bbn\\Api\\Scaleway\\Dedibox",
+        "bbn\\Api\\Scaleway\\Failover",
+        "bbn\\Api\\Scaleway\\Domain",
+        "bbn\\Api\\Scaleway\\Hosting"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_token": null,
+        "_cacher": null,
+        "_testmode": null,
+        "_cache_prefix": null,
+        "cache_engine": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api",
+    "shortName": "Scaleway",
+    "summary": "Scaleway API",
+    "description": "",
+    "description_parts": []
+}

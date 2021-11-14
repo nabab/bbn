@@ -80,7 +80,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The main database connection (where options are)"
                 }
             ]
         },
@@ -117,7 +118,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The database name"
+                    "description": "A string user@host"
                 },
                 {
                     "name": "engine",
@@ -126,7 +127,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "mysql",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database name"
                 },
                 {
                     "name": "db",
@@ -172,7 +174,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection code (user@host or host)"
                 },
                 {
                     "name": "engine",
@@ -328,7 +331,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 },
                 {
                     "name": "host",
@@ -382,7 +386,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 },
                 {
                     "name": "engine",
@@ -427,7 +432,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code, all DBs are returned if empty."
                 },
                 {
                     "name": "engine",
@@ -472,7 +478,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code, all DBs are returned if empty."
                 },
                 {
                     "name": "engine",
@@ -519,7 +526,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the DB"
+                    "description": "The name of the table"
                 },
                 {
                     "name": "db",
@@ -529,7 +536,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "The name of the DB"
                 },
                 {
                     "name": "host",
@@ -538,7 +545,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 },
                 {
                     "name": "engine",
@@ -585,7 +593,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "The database name"
                 },
                 {
                     "name": "host",
@@ -594,7 +602,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 },
                 {
                     "name": "engine",
@@ -641,7 +650,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "The database name"
                 },
                 {
                     "name": "host",
@@ -650,7 +659,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 },
                 {
                     "name": "engine",
@@ -697,7 +707,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "The database name"
                 },
                 {
                     "name": "host",
@@ -706,7 +716,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 },
                 {
                     "name": "engine",
@@ -752,7 +763,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
                 }
             ]
         },
@@ -789,7 +801,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
                 }
             ]
         },
@@ -826,7 +839,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "table The table's ID."
                 }
             ]
         },
@@ -863,7 +877,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "table The table's ID."
                 }
             ]
         },
@@ -900,7 +915,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
                 }
             ]
         },
@@ -937,7 +953,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
                 }
             ]
         },
@@ -975,7 +992,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The column's name"
                 },
                 {
                     "name": "table",
@@ -985,7 +1002,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The DB's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -994,7 +1011,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The DB's name"
                 }
             ]
         },
@@ -1031,7 +1049,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's UID"
+                    "description": "The table's name or UID"
                 },
                 {
                     "name": "db",
@@ -1040,7 +1058,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's UID"
                 }
             ]
         },
@@ -1078,7 +1097,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's UID"
+                    "description": "The table's name or UID"
                 },
                 {
                     "name": "db",
@@ -1087,7 +1106,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's UID"
                 }
             ]
         },
@@ -1124,7 +1144,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database UID"
+                    "description": "The table's name or UID"
                 },
                 {
                     "name": "db",
@@ -1133,7 +1153,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database UID"
                 }
             ]
         },
@@ -1171,7 +1192,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name"
+                    "description": "The key;s name."
                 },
                 {
                     "name": "table",
@@ -1181,7 +1202,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -1190,7 +1211,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -1227,7 +1249,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -1236,7 +1258,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -1273,7 +1296,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -1282,7 +1305,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -1319,7 +1343,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -1328,7 +1352,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -1365,7 +1390,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -1374,7 +1399,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -1410,7 +1436,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -1446,7 +1473,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 }
             ]
         },
@@ -1484,7 +1512,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "The database's name"
+                    "description": "The table's name"
                 },
                 {
                     "name": "db",
@@ -1493,7 +1521,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 },
                 {
                     "name": "host",
@@ -1549,7 +1578,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's engine"
+                    "description": "The connection's code"
                 },
                 {
                     "name": "engine",
@@ -1559,7 +1588,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's config"
+                    "description": "The connection's engine"
                 },
                 {
                     "name": "cfg",
@@ -1569,7 +1598,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "If true will connect to the database and get its structure"
+                    "description": "The connection's config"
                 },
                 {
                     "name": "full",
@@ -1578,7 +1607,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If true will connect to the database and get its structure"
                 }
             ]
         },
@@ -1616,7 +1646,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's UID"
+                    "description": "The database's name"
                 },
                 {
                     "name": "host",
@@ -1626,7 +1656,7 @@
                     "has_default": true,
                     "default": "",
                     "default_name": "",
-                    "description": "If true will connect to the database and get its structure"
+                    "description": "The connection's UID"
                 },
                 {
                     "name": "full",
@@ -1635,7 +1665,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If true will connect to the database and get its structure"
                 }
             ]
         },
@@ -1672,7 +1703,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "db"
                 }
             ]
         },
@@ -1710,7 +1742,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "db The database to which import the table (its id_parent)"
+                    "description": "The table's name"
                 },
                 {
                     "name": "id_db",
@@ -1720,7 +1752,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The connection's code"
+                    "description": "db The database to which import the table (its id_parent)"
                 },
                 {
                     "name": "host",
@@ -1729,7 +1761,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The connection's code"
                 }
             ]
         },
@@ -1766,7 +1799,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The table's name"
                 }
             ]
         },
@@ -1803,7 +1837,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The database's name"
                 }
             ]
         },
@@ -3335,5 +3370,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Database",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

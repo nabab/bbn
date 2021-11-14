@@ -563,7 +563,8 @@ class Medias extends bbn\Models\Cls\Db
         foreach ($sizes as $size) {
           if ($size >= $current) {
             $dot = strrpos($media['file'], '.');
-            $tmpFile = substr($media['file'], 0, $dot) . '_w' . $size . substr($media['file'], $dot);
+            $tmpFile = substr($media['file'], 0, $dot) . '_w' . $size .
+              strtolower(substr($media['file'], $dot));
             if ($fs->isFile($tmpFile) && $this->isImage($tmpFile)) {
               $media['file'] = $tmpFile;
             }

@@ -8,8 +8,8 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
-    "startLine": 9,
-    "endLine": 980,
+    "startLine": 10,
+    "endLine": 1003,
     "contentConstructor": {
         "file": "bbn\\Parsers\\Php",
         "returns": null
@@ -25,8 +25,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->docParser = \\phpDocumentor\\Reflection\\DocBlockFactory::createInstance();\n    $this->parser    = new Doc('', 'php');\n  }",
-            "startLine": 16,
-            "endLine": 20,
+            "startLine": 17,
+            "endLine": 21,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -48,9 +48,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $meth, $cls)\n  {\n    if (is_string($cls)) {\n      $cls = new \\ReflectionClass($cls);\n    }\n\n    $arr = null;\n    if (!empty($meth)\n        && !empty($cls)\n        && $cls->hasMethod($meth)\n    ) {\n      $f = &$this;\n\n      \/\/get method in current class\n      $arr = $this->_get_method_info($cls->getMethod($meth));\n\n      \/\/get method in parent class\n      $parent = $cls->getParentClass();\n\n      while($parent){\n        if ($parent->hasMethod($meth)) {\n          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth));\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    return $arr ?: null;\n  }",
-            "startLine": 30,
-            "endLine": 59,
+            "code": "function(string $meth, $cls)\n  {\n    if (is_string($cls)) {\n      $cls = new \\ReflectionClass($cls);\n    }\n\n    $arr = null;\n    if (\n        !empty($meth)\n        && !empty($cls)\n        && $cls->hasMethod($meth)\n    ) {\n      $f = &$this;\n\n      \/\/get method in current class\n      $arr = $this->_get_method_info($cls->getMethod($meth));\n\n      \/\/get method in parent class\n      $parent = $cls->getParentClass();\n\n      while ($parent) {\n        if ($parent->hasMethod($meth)) {\n          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth));\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    return $arr ?: null;\n  }",
+            "startLine": 31,
+            "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -72,7 +72,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Name of the method to search for to take information"
                 },
                 {
                     "name": "cls",
@@ -94,9 +95,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $prop, ReflectionClass $cls)\n  {\n    if ($arr = $this->_get_property_info($prop, $cls)) {\n      $parent = $cls->getParentClass();\n      while($parent){\n        if ($arr_parent = $this->_get_property_info($prop, $parent)) {\n          $arr['parent'] = $arr_parent;\n          break;\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    return $arr ?: null;\n  }",
-            "startLine": 69,
-            "endLine": 84,
+            "code": "function(string $prop, ReflectionClass $cls)\n  {\n    if ($arr = $this->_get_property_info($prop, $cls)) {\n      $parent = $cls->getParentClass();\n      while ($parent) {\n        if ($arr_parent = $this->_get_property_info($prop, $parent)) {\n          $arr['parent'] = $arr_parent;\n          break;\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    return $arr ?: null;\n  }",
+            "startLine": 71,
+            "endLine": 86,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -118,7 +119,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Name of the property to be searched"
                 },
                 {
                     "name": "cls",
@@ -140,9 +142,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $const, ReflectionClass $cls)\n  {\n    if (!empty($const)\n        && !empty($cls)\n        && $cls->hasConstant($const)\n    ) {\n      $cst    = $cls->getReflectionConstant($const);\n      $arr    = [\n        'name' => $cst->name,\n        'value' => $cls->getConstant($const),\n        'class' => $cls->name,\n        'parent' => false,\n        'private' => $cst->isPrivate(),\n        'protected' => $cst->isProtected(),\n        'public' => $cst->isPublic(),\n        'doc' => $this->parsePropertyComments($cst->getDocComment()),\n      ];\n      $parent = $cls->getParentClass();\n      while($parent){\n        if ($parent->hasConstant($const)) {\n          $cst           = $cls->getReflectionConstant($const);\n          $arr['parent'] = [\n            'name' => $cst->name,\n            'doc' => $this->parsePropertyComments($cst->getDocComment()),\n            'value' => $parent->getConstant($const),\n            'protected' => $cst->isProtected(),\n            'public' => $cst->isPublic(),\n            'class' => $parent->name,\n            'parent' => false\n          ];\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    if (isset($arr)) {\n      return $arr;\n    }\n\n    return null;\n  }",
-            "startLine": 94,
-            "endLine": 135,
+            "code": "function(string $const, ReflectionClass $cls)\n  {\n    if (\n        !empty($const)\n        && !empty($cls)\n        && $cls->hasConstant($const)\n    ) {\n      $cst    = $cls->getReflectionConstant($const);\n      $arr    = [\n        'name' => $cst->name,\n        'value' => $cls->getConstant($const),\n        'class' => $cls->name,\n        'parent' => false,\n        'private' => $cst->isPrivate(),\n        'protected' => $cst->isProtected(),\n        'public' => $cst->isPublic(),\n        'doc' => $this->parsePropertyComments($cst->getDocComment()),\n      ];\n      $parent = $cls->getParentClass();\n      while ($parent) {\n        if ($parent->hasConstant($const)) {\n          $cst           = $cls->getReflectionConstant($const);\n          $arr['parent'] = [\n            'name' => $cst->name,\n            'doc' => $this->parsePropertyComments($cst->getDocComment()),\n            'value' => $parent->getConstant($const),\n            'protected' => $cst->isProtected(),\n            'public' => $cst->isPublic(),\n            'class' => $parent->name,\n            'parent' => false\n          ];\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    if (isset($arr)) {\n      return $arr;\n    }\n\n    return null;\n  }",
+            "startLine": 96,
+            "endLine": 138,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -164,7 +166,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Name of constant to search for information"
                 },
                 {
                     "name": "cls",
@@ -186,9 +189,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $cls)\n  {\n    $rc = new \\ReflectionClass($cls);\n    if (!empty($cls) && is_object($rc)) {\n      $constructor = $rc->getConstructor();\n      $methods     = $rc->getMethods(\\ReflectionMethod::IS_PUBLIC);\n      $props       = $rc->getProperties(\\ReflectionMethod::IS_PUBLIC);\n      $statprops   = $rc->getStaticProperties();\n      $constants   = $rc->getConstants();\n      $parent      = $rc->getParentClass();\n      $res         = [\n        'doc' => $this->parseClassComments($rc->getDocComment()),\n        'name' => $rc->getName(),\n        'namespace' => $rc->getNamespaceName(),\n        'traits' => $rc->getTraitNames(),\n        'interfaces' => $rc->getInterfaces(),\n        \/\/'isInstantiable' => $rc->isInstantiable(),\n        \/\/'cloneable' =>  $rc->isCloneable(),\n        'fileName' => $rc->getFileName(),\n        'startLine' => $rc->getStartLine(),\n        'endLine' => $rc->getEndLine(),\n        'contentConstructor' => !empty($constructor) ? array_filter(\n          $this->analyzeMethod($constructor->name, $rc),\n          function ($m, $i) {\n              return in_array($i,['file', 'returns']);\n          }, ARRAY_FILTER_USE_BOTH\n        ) : null,\n        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,\n        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,\n        'staticProperties' => $statprops,\n        'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null,\n        'numMethods' => $methods ? count($methods) : 0,\n        'numProperties' => $props ? count($props) : 0,\n        'numConstants' => $constants ? count($constants) : 0,\n        'numStaticProperties' => $statprops ? count($statprops) : 0,\n        'interfaces' => $rc->getInterfaces(),\n        'interfaceNames' => $rc->getInterfaceNames(),\n        'isInterface' => $rc->isInterface(),\n        'traitNames' => $rc->getTraitNames(),\n        'traitAliases' => $rc->getTraitAliases(),\n        'isTrait' => $rc->isTrait(),\n        'isAbstract' => $rc->isAbstract(),\n        'isFinal' => $rc->isFinal(),\n        'modifiers' => $rc->getModifiers(),\n        'parentClass' => $parent ? $parent->name : null,\n        'isSubclassOf' => $rc->isSubclassOf($cls),\n        'defaultProperties' => $rc->getDefaultProperties(),\n        'isIterable' => $rc->isIterable(),\n      \/\/'implementsInterface' => $rc->implementsInterface(),\n        'extensionName' => $rc->getExtensionName(),\n        'namespace' => $rc->inNamespace(),\n        'namespaceName' => $rc->getNamespaceName(),\n        'shortName' => $rc->getShortName()\n      ];\n      $comments = $rc->getDocComment();\n      if (($doc = $this->parseClassComments($comments))\n          && ($extracted = $this->_extract_description($doc['description']))\n      ) {\n        $res = X::mergeArrays($res, $extracted);\n      }\n\n      return $res;\n    }\n  }",
-            "startLine": 144,
-            "endLine": 207,
+            "code": "function(string $cls)\n  {\n    $rc = new \\ReflectionClass($cls);\n    if (!empty($cls) && is_object($rc)) {\n      $constructor = $rc->getConstructor();\n      $methods     = $rc->getMethods(\\ReflectionMethod::IS_PUBLIC);\n      $props       = $rc->getProperties(\\ReflectionMethod::IS_PUBLIC);\n      $statprops   = $rc->getStaticProperties();\n      $constants   = $rc->getConstants();\n      $parent      = $rc->getParentClass();\n      $res         = [\n        'doc' => $this->parseClassComments($rc->getDocComment()),\n        'name' => $rc->getName(),\n        'namespace' => $rc->getNamespaceName(),\n        'traits' => $rc->getTraitNames(),\n        'interfaces' => $rc->getInterfaces(),\n        \/\/'isInstantiable' => $rc->isInstantiable(),\n        \/\/'cloneable' =>  $rc->isCloneable(),\n        'fileName' => $rc->getFileName(),\n        'startLine' => $rc->getStartLine(),\n        'endLine' => $rc->getEndLine(),\n        'contentConstructor' => !empty($constructor) ? array_filter(\n            $this->analyzeMethod($constructor->name, $rc),\n            function ($m, $i) {\n                return in_array($i, ['file', 'returns']);\n            },\n            ARRAY_FILTER_USE_BOTH\n        ) : null,\n        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,\n        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,\n        'staticProperties' => $statprops,\n        'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null,\n        'numMethods' => $methods ? count($methods) : 0,\n        'numProperties' => $props ? count($props) : 0,\n        'numConstants' => $constants ? count($constants) : 0,\n        'numStaticProperties' => $statprops ? count($statprops) : 0,\n        'interfaces' => $rc->getInterfaces(),\n        'interfaceNames' => $rc->getInterfaceNames(),\n        'isInterface' => $rc->isInterface(),\n        'traitNames' => $rc->getTraitNames(),\n        'traitAliases' => $rc->getTraitAliases(),\n        'isTrait' => $rc->isTrait(),\n        'isAbstract' => $rc->isAbstract(),\n        'isFinal' => $rc->isFinal(),\n        'modifiers' => $rc->getModifiers(),\n        'parentClass' => $parent ? $parent->name : null,\n        'isSubclassOf' => $rc->isSubclassOf($cls),\n        'defaultProperties' => $rc->getDefaultProperties(),\n        'isIterable' => $rc->isIterable(),\n      \/\/'implementsInterface' => $rc->implementsInterface(),\n        'extensionName' => $rc->getExtensionName(),\n        'namespace' => $rc->inNamespace(),\n        'namespaceName' => $rc->getNamespaceName(),\n        'shortName' => $rc->getShortName()\n      ];\n      if (\n          $res['doc']\n          && ($extracted = $this->_extract_description($res['doc']['description']))\n      ) {\n        $res = X::mergeArrays($res, $extracted);\n      }\n\n      return $res;\n    }\n  }",
+            "startLine": 147,
+            "endLine": 211,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -223,9 +226,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $namespace = '')\n  {\n    if (!empty($path)\n        && !empty($namespace)\n    ) {\n      $fs = new System();\n      if ($fs->cd($path)) {\n        $files = $fs->scan('.', '.php', false);\n        $arr   = [];\n        if (is_array($files) && count($files)) {\n          foreach ($files as $file){\n            $bits  = X::split($file, '\/');\n            $name  = X::basename(array_pop($bits), '.php');\n            $class = $namespace.'\\\\'.(empty($bits) ? '' : X::join($bits, '\\\\').'\\\\').$name;\n            if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {\n              try {\n                $arr[$file] = $this->analyzeCLass($class);\n              }\n              catch (\\Exception $e) {\n                die(var_dump($file, $e));\n                if (isset($arr[$file])) {\n                  unset($arr[$file]);\n                }\n              }\n            }\n          }\n        }\n      }\n\n      return $arr;\n    }\n\n    return null;\n  }",
-            "startLine": 217,
-            "endLine": 250,
+            "code": "function(string $path, string $namespace = '')\n  {\n    if (\n        !empty($path)\n        && !empty($namespace)\n    ) {\n      $fs = new System();\n      if ($fs->cd($path)) {\n        $files = $fs->scan('.', '.php', false);\n        $arr   = [];\n        if (is_array($files) && count($files)) {\n          foreach ($files as $file) {\n            $bits  = X::split($file, '\/');\n            $name  = X::basename(array_pop($bits), '.php');\n            $class = $namespace . '\\\\' . (empty($bits) ? '' : X::join($bits, '\\\\') . '\\\\') . $name;\n            if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {\n              try {\n                $arr[$file] = $this->analyzeCLass($class);\n              }\n              catch (\\Exception $e) {\n                die(var_dump($file, $e));\n                if (isset($arr[$file])) {\n                  unset($arr[$file]);\n                }\n              }\n            }\n          }\n        }\n      }\n\n      return $arr;\n    }\n\n    return null;\n  }",
+            "startLine": 221,
+            "endLine": 255,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -248,7 +251,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "of the class"
+                    "description": "of the library"
                 },
                 {
                     "name": "namespace",
@@ -257,7 +260,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "of the class"
                 }
             ]
         },
@@ -270,9 +274,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $text)\n  {\n    if ($text) {\n      $docblock = $this->docParser->create($text);\n      $res      = [\n        'summary' => $docblock->getSummary(),\n        'tags' => [],\n        'description' => (string)$docblock->getDescription()\n      ];\n      $tags     = $docblock->getTags();\n      \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n      $res['description_obj'] = $docblock->getDescription();\n      foreach ($tags as $i => $t){\n        $desc          = $t->getDescription() ?: false;\n        $res['tags'][] = [\n          'index' => $i,\n          'type' => method_exists($t, 'getType') ? $t->getType() : null,\n          'varname' => method_exists($t, 'getVariableName') ? $t->getVariableName() : null,\n          'isVariadic' => method_exists($t, 'isVariadic') ? $t->isVariadic() : null,\n          'name' => $t->getName(),\n          'desc0' => (string)$desc,\n          'desc1' => $desc ? $t->getDescription()->getTags() : '',\n          'desc2' => $desc ? $t->getDescription()->render() : ''\n        ];\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
-            "startLine": 259,
-            "endLine": 289,
+            "code": "function(string $text)\n  {\n    if ($text) {\n      $docblock = $this->docParser->create($text);\n      $res      = [\n        'summary' => $docblock->getSummary(),\n        'tags' => [],\n        'description' => (string)$docblock->getDescription()\n      ];\n      $tags     = $docblock->getTags();\n      \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n      $res['description_obj'] = $docblock->getDescription();\n      foreach ($tags as $i => $t) {\n        $desc          = $t->getDescription() ?: false;\n        $res['tags'][] = [\n          'index' => $i,\n          'type' => method_exists($t, 'getType') ? $t->getType() : null,\n          'varname' => method_exists($t, 'getVariableName') ? $t->getVariableName() : null,\n          'isVariadic' => method_exists($t, 'isVariadic') ? $t->isVariadic() : null,\n          'name' => $t->getName(),\n          'desc0' => (string)$desc,\n          'desc1' => $desc ? $t->getDescription()->getTags() : '',\n          'desc2' => $desc ? $t->getDescription()->render() : ''\n        ];\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
+            "startLine": 264,
+            "endLine": 294,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -304,9 +308,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $class_name)\n  {\n    $rc = new \\ReflectionClass($class_name);\n    \/\/die(var_dump($rc->hasConstant('PARAM_BOOL')));\n    $constants        = $rc->getConstants();\n    $parent           = $rc->getParentClass();\n    $parent_constants = [];\n    if ($parent) {\n      $parent_constants = $parent->getConstants();\n    }\n\n    $cparser =& $this;\n    $cls     = [\n      'doc' => [\n        'title' => $this->iparse($rc->getDocComment()),\n      ],\n      'name' => $rc->getName(),\n      'constants' => array_map(\n        function ($a) use ($constants, $parent_constants) {\n          return [\n          'name' => $a->name,\n          'value' => $constants[$a->name]\n          ];\n        }, array_filter(\n          $rc->getReflectionConstants(), function ($a) use ($parent_constants, $constants) {\n            return !array_key_exists($a->name, $parent_constants) || ($parent_constants[$a->name] !== $constants[$a->name]);\n          }\n        )\n      ),\n      'namespace' => $rc->getNamespaceName(),\n      'traits' => $rc->getTraits(),\n      'interfaces' => $rc->getInterfaces(),\n      'parent' => $parent ? $parent->getName() : null,\n      'properties' => array_map(\n        function ($m) use ($cparser) {\n          \/\/$m->setAccessible(true);\n          return [\n          'name' => $m->getName(),\n          \/\/'value' => $m->getValue(),\n          'static' => $m->isStatic(),\n          'private' => $m->isPrivate(),\n          'protected' => $m->isProtected(),\n          'public' => $m->isPublic(),\n          'doc' => $cparser->iparse($m->getDocComment())\n          ];\n        }, $rc->getProperties()\n      ),\n      'methods' => array_map(\n        function ($m) use ($cparser) {\n          $ret = null;\n          if ($m->hasReturnType()) {\n            $type = $m->getReturnType();\n            $ret  = [(string)$type];\n            if ($type->allowsNull()) {\n              $ret[] = null;\n            }\n          }\n\n          return [\n          'name' => $m->getName(),\n          'static' => $m->isStatic(),\n          'private' => $m->isPrivate(),\n          'protected' => $m->isProtected(),\n          'public' => $m->isPublic(),\n          'final' => $m->isFinal(),\n          'code' => $this->_closureSource($m),\n          'doc' => $cparser->iparse($m->getDocComment()),\n          'returns' => $ret,\n          'arguments' => array_map(\n            function ($p) use ($m) {\n              return [\n              'name' => $p->getName(),\n              'position' => $p->getPosition(),\n              'type' => $p->getType(),\n              'required' => !$p->isOptional(),\n              'has_default' => $p->isDefaultValueAvailable(),\n              'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',\n              'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''\n              ];\n            }, $m->getParameters()\n          )\n          ];\n        }, $rc->getMethods()\n      )\n    ];\n\n    \/*\n    try {\n      $obj = $parser->parse($code);\n      $arr = json_decode(json_encode($obj), true);\n      foreach ( $arr[0]['stmts'] as $node ){\n        if ( $node['nodeType'] === 'Stmt_Class' ){\n          $res['class'] = $node['name']['name'];\n          $res['elements'] = [];\n          foreach ( $node['stmts'] as $stmts ){\n            if ( isset($stmts['attributes'], $stmts['attributes']['comments']) ){\n              foreach ( $stmts['attributes']['comments'] as $c ){\n                $docblock = $doc_parser->create($c['text']);\n\n                \/\/ Contains the summary for this DocBlock\n                $res['summary'] = $docblock->getSummary();\n\n                $tags = $docblock->getTags();\n                \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n                $res['description_obj'] = $docblock->getDescription();\n                foreach ( $tags as $i => $t ){\n                  X::hdump($i, (string)$t->getType(), $t->getName);\n                  $desc = $t->getDescription()->render();\n                  var_dump($desc);\n                }\n                echo '<pre>';\n                var_dump($summary, $description, $tags);\n                echo '<\/pre>';\n              }\n            }\n          }\n          X::hdump(\"HEY??\", count($node['stmts']));\n        }\n      }\n      X::hdump(count($arr[0]['stmts']));\n      X::hdump($arr[0]['stmts']);\n    }\n    catch (PhpParser\\Error $e) {\n        echo 'Parse Error: ', $e->getMessage();\n    }\n    *\/\n    return $cls;\n  }",
-            "startLine": 298,
-            "endLine": 425,
+            "code": "function(string $class_name)\n  {\n    $rc = new \\ReflectionClass($class_name);\n    \/\/die(var_dump($rc->hasConstant('PARAM_BOOL')));\n    $constants        = $rc->getConstants();\n    $parent           = $rc->getParentClass();\n    $parent_constants = [];\n    if ($parent) {\n      $parent_constants = $parent->getConstants();\n    }\n\n    $cparser =& $this;\n    $cls     = [\n      'doc' => [\n        'title' => $this->iparse($rc->getDocComment()),\n      ],\n      'name' => $rc->getName(),\n      'constants' => array_map(\n          function ($a) use ($constants, $parent_constants) {\n            return [\n            'name' => $a->name,\n            'value' => $constants[$a->name]\n            ];\n          },\n          array_filter(\n              $rc->getReflectionConstants(),\n              function ($a) use ($parent_constants, $constants) {\n                return !array_key_exists($a->name, $parent_constants) || ($parent_constants[$a->name] !== $constants[$a->name]);\n              }\n          )\n      ),\n      'namespace' => $rc->getNamespaceName(),\n      'traits' => $rc->getTraits(),\n      'interfaces' => $rc->getInterfaces(),\n      'parent' => $parent ? $parent->getName() : null,\n      'properties' => array_map(\n          function ($m) use ($cparser) {\n            \/\/$m->setAccessible(true);\n            return [\n            'name' => $m->getName(),\n            \/\/'value' => $m->getValue(),\n            'static' => $m->isStatic(),\n            'private' => $m->isPrivate(),\n            'protected' => $m->isProtected(),\n            'public' => $m->isPublic(),\n            'doc' => $cparser->iparse($m->getDocComment())\n            ];\n          },\n          $rc->getProperties()\n      ),\n      'methods' => array_map(\n          function ($m) use ($cparser) {\n            $ret = null;\n            if ($m->hasReturnType()) {\n              $type = $m->getReturnType();\n              $ret  = [(string)$type];\n              if ($type->allowsNull()) {\n                $ret[] = null;\n              }\n            }\n\n            return [\n            'name' => $m->getName(),\n            'static' => $m->isStatic(),\n            'private' => $m->isPrivate(),\n            'protected' => $m->isProtected(),\n            'public' => $m->isPublic(),\n            'final' => $m->isFinal(),\n            'code' => $this->_closureSource($m),\n            'doc' => $cparser->iparse($m->getDocComment()),\n            'returns' => $ret,\n            'arguments' => array_map(\n                function ($p) use ($m) {\n                  return [\n                  'name' => $p->getName(),\n                  'position' => $p->getPosition(),\n                  'type' => $p->getType(),\n                  'required' => !$p->isOptional(),\n                  'has_default' => $p->isDefaultValueAvailable(),\n                  'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',\n                  'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''\n                  ];\n                },\n                $m->getParameters()\n            )\n            ];\n          },\n          $rc->getMethods()\n      )\n    ];\n\n    \/*\n    try {\n      $obj = $parser->parse($code);\n      $arr = json_decode(json_encode($obj), true);\n      foreach ( $arr[0]['stmts'] as $node ){\n        if ( $node['nodeType'] === 'Stmt_Class' ){\n          $res['class'] = $node['name']['name'];\n          $res['elements'] = [];\n          foreach ( $node['stmts'] as $stmts ){\n            if ( isset($stmts['attributes'], $stmts['attributes']['comments']) ){\n              foreach ( $stmts['attributes']['comments'] as $c ){\n                $docblock = $doc_parser->create($c['text']);\n\n                \/\/ Contains the summary for this DocBlock\n                $res['summary'] = $docblock->getSummary();\n\n                $tags = $docblock->getTags();\n                \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n                $res['description_obj'] = $docblock->getDescription();\n                foreach ( $tags as $i => $t ){\n                  X::hdump($i, (string)$t->getType(), $t->getName);\n                  $desc = $t->getDescription()->render();\n                  var_dump($desc);\n                }\n                echo '<pre>';\n                var_dump($summary, $description, $tags);\n                echo '<\/pre>';\n              }\n            }\n          }\n          X::hdump(\"HEY??\", count($node['stmts']));\n        }\n      }\n      X::hdump(count($arr[0]['stmts']));\n      X::hdump($arr[0]['stmts']);\n    }\n    catch (PhpParser\\Error $e) {\n        echo 'Parse Error: ', $e->getMessage();\n    }\n    *\/\n    return $cls;\n  }",
+            "startLine": 303,
+            "endLine": 435,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -325,7 +329,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "name"
                 }
             ]
         },
@@ -338,9 +343,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $class, $type = false)\n  {\n    $ok = true;\n    try {\n      $ref = new \\ReflectionClass($class);\n    }\n    catch (\\Exception $e){\n      throw new \\Exception($e->getMessage());\n    }\n\n    if ($ok) {\n      $fs   = new System();\n      $tmp  = $ref->getFileName();\n      $file = $tmp && $fs->isFile($tmp) ? $tmp : null;\n      $arr  = [\n        'name' => $class,\n        'file' => $file,\n        'parents' => [],\n        'isAnonymous' => $ref->isAnonymous(),\n        'isCloneable' => $ref->isCloneable(),\n        'isFinal' => $ref->isFinal(),\n        'isInstantiable' => $ref->isInstantiable(),\n        'isInternal' => $ref->isInternal(),\n        'isIterateable' => $ref->isIterateable(),\n        'isUserDefined' => $ref->isUserDefined(),\n        'methods' => $this->addMethods($ref, $type, $file),\n        'properties' => [],\n        'traits' => [],\n        'unused' => []\n      ];\n\n      $props = $ref->getProperties();\n      if (!empty($props)) {\n        foreach($props as $prop){\n          $type_prop = false;\n          if ($prop->isPublic()) {\n            $type_prop = 'public';\n          }\n          elseif ($prop->isPrivate()) {\n            $type_prop = 'private';\n          }\n          elseif ($prop->isProtected()) {\n            $type_prop = 'protected';\n          }\n          elseif($prop->isStatic()) {\n            $type_prop = 'static';\n          }\n\n          if (!empty($type_prop)) {\n            $arr['properties'][$type_prop][] = $prop->getName();\n          }\n        }\n      }\n\n      \/\/for parents\n      $parents = $ref->getParentClass();\n      if (!empty($parents)) {\n        foreach ($parents as $parent){\n          $arr['parents'][$parent] = $this->analyze($parent, 'parent');\n\n          foreach ($arr['parents'][$parent]['methods'] as $i => $m){\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($m, $arr['methods'][$i]);\n            }\n          }\n        }\n      }\n\n      \/\/for traits\n      $traits = $ref->getTraitNames();\n      if (!empty($traits)) {\n        foreach ($traits as $trait){\n          $arr['traits'][$trait] = $this->analyze($trait, 'trait');\n\n          foreach ($arr['traits'][$trait]['methods'] as $i => $m){\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($arr['methods'][$i], $m);\n            }\n          }\n        }\n      }\n\n      \/\/for interfaces\n      if ($interfaces = $ref->getInterfaceNames()) {\n        foreach ($interfaces as $interface){\n          $arr['interfaces'][$interface] = $this->analyze($interface, 'interface');\n          foreach (array_keys($arr['interfaces'][$interface]['methods']) as $i) {\n            if (isset($arr['methods'][$i]['interfaces'])) {\n              $arr['methods'][$i]['interfaces'][] = $interface;\n            }\n            else {\n              $arr['methods'][$i]['interfaces'] = [$interface];\n            }\n          }\n        }\n      }\n\n      if (!empty($arr['methods']['private'])) {\n        foreach ($arr['methods']['private'] as $name => $priv){\n          $str = ($priv['static'] ? '::' : '->').$name;\n          if (X::indexOf($fs->getContents($arr['file']), $str) === -1) {\n            $arr['unused'][] = $arr['name'].'::'.$priv['name'];\n          }\n        }\n      }\n\n      return $arr;\n    }\n\n    return null;\n  }",
-            "startLine": 435,
-            "endLine": 545,
+            "code": "function(string $class, $type = false)\n  {\n    $ok = true;\n    try {\n      $ref = new \\ReflectionClass($class);\n    }\n    catch (\\Exception $e) {\n      throw new \\Exception($e->getMessage());\n    }\n\n    if ($ok) {\n      $fs   = new System();\n      $tmp  = $ref->getFileName();\n      $file = $tmp && $fs->isFile($tmp) ? $tmp : null;\n      $arr  = [\n        'name' => $class,\n        'file' => $file,\n        'parents' => [],\n        'isAnonymous' => $ref->isAnonymous(),\n        'isCloneable' => $ref->isCloneable(),\n        'isFinal' => $ref->isFinal(),\n        'isInstantiable' => $ref->isInstantiable(),\n        'isInternal' => $ref->isInternal(),\n        'isIterateable' => $ref->isIterateable(),\n        'isUserDefined' => $ref->isUserDefined(),\n        'methods' => $this->addMethods($ref, $type, $file),\n        'properties' => [],\n        'traits' => [],\n        'unused' => []\n      ];\n\n      $props = $ref->getProperties();\n      if (!empty($props)) {\n        foreach ($props as $prop) {\n          $type_prop = false;\n          if ($prop->isPublic()) {\n            $type_prop = 'public';\n          }\n          elseif ($prop->isPrivate()) {\n            $type_prop = 'private';\n          }\n          elseif ($prop->isProtected()) {\n            $type_prop = 'protected';\n          }\n          elseif ($prop->isStatic()) {\n            $type_prop = 'static';\n          }\n\n          if (!empty($type_prop)) {\n            $arr['properties'][$type_prop][] = $prop->getName();\n          }\n        }\n      }\n\n      \/\/for parents\n      $parents = $ref->getParentClass();\n      if (!empty($parents)) {\n        foreach ($parents as $parent) {\n          $arr['parents'][$parent] = $this->analyze($parent, 'parent');\n\n          foreach ($arr['parents'][$parent]['methods'] as $i => $m) {\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($m, $arr['methods'][$i]);\n            }\n          }\n        }\n      }\n\n      \/\/for traits\n      $traits = $ref->getTraitNames();\n      if (!empty($traits)) {\n        foreach ($traits as $trait) {\n          $arr['traits'][$trait] = $this->analyze($trait, 'trait');\n\n          foreach ($arr['traits'][$trait]['methods'] as $i => $m) {\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($arr['methods'][$i], $m);\n            }\n          }\n        }\n      }\n\n      \/\/for interfaces\n      if ($interfaces = $ref->getInterfaceNames()) {\n        foreach ($interfaces as $interface) {\n          $arr['interfaces'][$interface] = $this->analyze($interface, 'interface');\n          foreach (array_keys($arr['interfaces'][$interface]['methods']) as $i) {\n            if (isset($arr['methods'][$i]['interfaces'])) {\n              $arr['methods'][$i]['interfaces'][] = $interface;\n            }\n            else {\n              $arr['methods'][$i]['interfaces'] = [$interface];\n            }\n          }\n        }\n      }\n\n      if (!empty($arr['methods']['private'])) {\n        foreach ($arr['methods']['private'] as $name => $priv) {\n          $str = ($priv['static'] ? '::' : '->') . $name;\n          if (X::indexOf($fs->getContents($arr['file']), $str) === -1) {\n            $arr['unused'][] = $arr['name'] . '::' . $priv['name'];\n          }\n        }\n      }\n\n      return $arr;\n    }\n\n    return null;\n  }",
+            "startLine": 445,
+            "endLine": 555,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -384,9 +389,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($class_object, $origin = false, $file = NULL)\n  {\n    $methods = [\n      'private' => [],\n      'protected' => [],\n      'public' => []\n    ];\n\n    foreach ($class_object->getMethods() as $m){\n      $idx = 'public';\n      if ($m->isPrivate()) {\n        $idx = 'private';\n      }\n      elseif ($m->isProtected()) {\n        $idx = 'protected';\n      }\n\n      if ($m->getDeclaringClass()->getName() === $class_object->getName()) {\n        $doc = is_null($file) ? false : $m->getDocComment();\n        $ret = null;\n        if ($m->hasReTurnType()) {\n          $type = $m->getReturnType();\n          $ret  = [(string)$type];\n          if ($type->allowsNull()) {\n            $ret[] = null;\n          }\n        }\n\n        $methods[$idx][$m->getName()] = [\n          'static' => $m->isStatic(),\/\/ ? 'static' : 'non-static',\n          'returns' => $ret,\n          'doc' => is_null($file) ? false : $doc,\n          'parsed' => is_null($file) ? false : $this->parser->parseDocblock($doc),\n          'line' => is_null($file) ? false : $m->getStartLine(),\n          'type' => $origin !== false ? $origin : 'origin',\n          'file' => $m->getDeclaringClass()->getName()\n        ];\n      }\n    }\n\n    if ($origin === 'parent') {\n      unset($methods['private']);\n    }\n\n    return $methods;\n  }",
-            "startLine": 556,
-            "endLine": 601,
+            "code": "function($class_object, $origin = false, $file = NULL)\n  {\n    $methods = [\n      'private' => [],\n      'protected' => [],\n      'public' => []\n    ];\n\n    foreach ($class_object->getMethods() as $m) {\n      $idx = 'public';\n      if ($m->isPrivate()) {\n        $idx = 'private';\n      }\n      elseif ($m->isProtected()) {\n        $idx = 'protected';\n      }\n\n      if ($m->getDeclaringClass()->getName() === $class_object->getName()) {\n        $doc = is_null($file) ? false : $m->getDocComment();\n        $ret = null;\n        if ($m->hasReTurnType()) {\n          $type = $m->getReturnType();\n          $ret  = [(string)$type];\n          if ($type->allowsNull()) {\n            $ret[] = null;\n          }\n        }\n\n        $methods[$idx][$m->getName()] = [\n          'static' => $m->isStatic(),\/\/ ? 'static' : 'non-static',\n          'returns' => $ret,\n          'doc' => is_null($file) ? false : $doc,\n          'parsed' => is_null($file) ? false : $this->parser->parseDocblock($doc),\n          'line' => is_null($file) ? false : $m->getStartLine(),\n          'type' => $origin !== false ? $origin : 'origin',\n          'file' => $m->getDeclaringClass()->getName()\n        ];\n      }\n    }\n\n    if ($origin === 'parent') {\n      unset($methods['private']);\n    }\n\n    return $methods;\n  }",
+            "startLine": 566,
+            "endLine": 611,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -405,7 +410,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "object"
                 },
                 {
                     "name": "origin",
@@ -889,5 +895,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Parsers",
     "shortName": "Php",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

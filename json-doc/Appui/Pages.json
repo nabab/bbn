@@ -69,7 +69,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -957,5 +958,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Pages",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

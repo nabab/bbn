@@ -929,5 +929,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "View",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

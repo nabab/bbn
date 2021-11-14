@@ -99,7 +99,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A list of tags which will be retrieved or added"
+                    "description": "element The ID of the element to which attach the tags"
                 },
                 {
                     "name": "tags",
@@ -108,7 +108,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A list of tags which will be retrieved or added"
                 },
                 {
                     "name": "lang",
@@ -293,5 +294,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Tagger",
-    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one."
+    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
+    "description": "",
+    "description_parts": []
 }

@@ -68,7 +68,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -1366,5 +1367,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Masks",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

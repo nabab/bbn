@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "DB Interface\n *\n *\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+        "description": "DB Interface\n\n\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -108,7 +109,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The item's name (escaped or not)"
                 }
             ]
         },
@@ -146,7 +148,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "If set to true the returned string will be escaped"
+                    "description": "The table's name (escaped or not)"
                 },
                 {
                     "name": "escaped",
@@ -155,7 +157,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
                 }
             ]
         },
@@ -193,7 +196,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "If set to true the returned string will be escaped"
+                    "description": "The table's name (escaped or not)"
                 },
                 {
                     "name": "escaped",
@@ -202,7 +205,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
                 }
             ]
         },
@@ -237,7 +241,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The table's name (escaped or not)"
+                    "description": "The column's name (escaped or not)"
                 },
                 {
                     "name": "table",
@@ -247,7 +251,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "If set to true the returned string will be escaped"
+                    "description": "The table's name (escaped or not)"
                 },
                 {
                     "name": "escaped",
@@ -256,7 +260,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
                 }
             ]
         },
@@ -291,7 +296,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "If set to true the returned string will be escaped"
+                    "description": "The column's name (escaped or not)"
                 },
                 {
                     "name": "escaped",
@@ -300,7 +305,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If set to true the returned string will be escaped"
                 }
             ]
         },
@@ -379,13 +385,8 @@
         "disableKeys": {
             "name": "disableKeys",
             "summary": "Disables foreign keys check.",
-            "description": "*",
-            "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                }
-            ],
+            "description": "",
+            "description_parts": [],
             "file": "bbn\\Db\\Engines",
             "static": false,
             "visibility": "public",
@@ -408,13 +409,8 @@
         "enableKeys": {
             "name": "enableKeys",
             "summary": "Enables foreign keys check.",
-            "description": "*",
-            "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                }
-            ],
+            "description": "",
+            "description_parts": [],
             "file": "bbn\\Db\\Engines",
             "static": false,
             "visibility": "public",
@@ -802,8 +798,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "having"
+                    "default_name": ""
                 },
                 {
                     "name": "is_having",
@@ -812,7 +807,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "having"
                 },
                 {
                     "name": "indent",
@@ -1810,7 +1806,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The table's name"
                 }
             ]
         },
@@ -2049,12 +2046,8 @@
         "getColumnValues": {
             "name": "getColumnValues",
             "summary": "Return a numeric indexed array with the values of the unique column ($field) from the selected $table",
-            "description": "*\n```php\nX::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]\n```",
+            "description": "```php\nX::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "X::dump($db->getColumnValues('table_users','surname',['id','>',1]));\n\/*\narray [\n   \"Smith\",\n   \"Jones\",\n   \"Williams\",\n   \"Taylor\"\n]"
@@ -2089,7 +2082,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The field's name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "field",
@@ -2099,7 +2092,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The field's name"
                 },
                 {
                     "name": "where",
@@ -2109,7 +2102,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -2118,7 +2111,8 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "limit",
@@ -2617,11 +2611,11 @@
     "namespaceName": "bbn\\Db",
     "shortName": "Engines",
     "summary": "DB Interface",
-    "description": "*\n *\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+    "description": "These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
+            "content": "<p>These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
         }
     ]
 }

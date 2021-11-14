@@ -42,5 +42,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Report",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

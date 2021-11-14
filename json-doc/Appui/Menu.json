@@ -229,7 +229,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The menu item's ID to link"
                 }
             ]
         },
@@ -266,7 +267,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The shortcut's ID"
                 }
             ]
         },
@@ -330,7 +332,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The ID of the menu's item"
                 }
             ]
         },
@@ -401,7 +404,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "menu"
                 },
                 {
                     "name": "cfg",
@@ -492,7 +496,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new text tp set"
+                    "description": "The menu's ID"
                 },
                 {
                     "name": "text",
@@ -501,7 +505,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The new text tp set"
                 }
             ]
         },
@@ -575,7 +580,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($k_text = 'text', $k_value = 'value')\n  {\n    $c    = $this->pref->getClassCfg();\n    $pref =& $this->pref;\n    if (!($id_menus = self::getAppuiOptionId('menus'))) {\n      throw new \\Exception(\"Impossible to find the option for menus\");\n    }\n\n    if (!($menus = $this->pref->getAll($id_menus))) {\n      return [];\n      throw new \\Exception(\"Impossible to get the  menus items\");\n    }\n\n    return array_map(\n      function ($e) use ($c, $k_text, $k_value, $pref) {\n        return [\n          $k_text => $e[$c['arch']['user_options']['text']],\n          $k_value => $e[$c['arch']['user_options']['id']],\n          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],\n          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],\n          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],\n          'hasItems' => !!count($pref->getBits($e[$c['arch']['user_options']['id']]))\n          ];\n      },\n      $menus\n    );\n  }",
+            "code": "function($k_text = 'text', $k_value = 'value')\n  {\n    $c    = $this->pref->getClassCfg();\n    $pref =& $this->pref;\n    if (!($id_menus = self::getAppuiOptionId('menus'))) {\n      throw new \\Exception(\"Impossible to find the option for menus\");\n    }\n\n    if (!($menus = $this->pref->getAll($id_menus))) {\n      return [];\n      throw new \\Exception(\"Impossible to get the  menus items\");\n    }\n\n    return array_map(\n      function ($e) use ($c, $k_text, $k_value, $pref) {\n        return [\n          $k_text => $e[$c['arch']['user_options']['text']],\n          $k_value => $e[$c['arch']['user_options']['id']],\n          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],\n          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],\n          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],\n          'hasItems' => (bool)count($pref->getBits($e[$c['arch']['user_options']['id']]))\n          ];\n      },\n      $menus\n    );\n  }",
             "startLine": 398,
             "endLine": 424,
             "isDeprecated": false,
@@ -599,7 +604,7 @@
                     "has_default": true,
                     "default": "text",
                     "default_name": "",
-                    "description": "value The key used for the value. Default 'value'"
+                    "description": "text  The key used for the text. Default: 'text'"
                 },
                 {
                     "name": "k_value",
@@ -608,7 +613,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "value",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "value The key used for the value. Default 'value'"
                 }
             ]
         },
@@ -692,7 +698,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new menu's name"
+                    "description": "The menu's ID to clone"
                 },
                 {
                     "name": "name",
@@ -701,7 +707,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The new menu's name"
                 }
             ]
         },
@@ -739,7 +746,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "menu_to The target menu's ID"
+                    "description": "The menu's ID to copy"
                 },
                 {
                     "name": "id_menu_to",
@@ -748,7 +755,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "menu_to The target menu's ID"
                 },
                 {
                     "name": "cfg",
@@ -795,7 +803,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "menu_to The menu's ID to clone"
+                    "description": "bit     The bit's ID to clone"
                 },
                 {
                     "name": "id_menu_to",
@@ -805,7 +813,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "of bit"
+                    "description": "menu_to The menu's ID to clone"
                 },
                 {
                     "name": "cfg",
@@ -814,7 +822,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "of bit"
                 }
             ]
         },
@@ -906,7 +915,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new position."
+                    "description": "The section\/link's ID"
                 },
                 {
                     "name": "pos",
@@ -915,7 +924,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The new position."
                 }
             ]
         },
@@ -952,7 +962,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "parent The parent's ID."
+                    "description": "The section\/link's ID."
                 },
                 {
                     "name": "id_parent",
@@ -961,7 +971,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "parent The parent's ID."
                 }
             ]
         },
@@ -1845,5 +1856,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Menu",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

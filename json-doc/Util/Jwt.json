@@ -228,5 +228,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Util",
     "shortName": "Jwt",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

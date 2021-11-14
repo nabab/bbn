@@ -544,5 +544,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "Output",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

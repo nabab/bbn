@@ -69,7 +69,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -2163,7 +2164,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The message to attach to track (optional)"
+                    "description": "task The task's ID"
                 },
                 {
                     "name": "message",
@@ -2173,7 +2174,7 @@
                     "has_default": true,
                     "default": false,
                     "default_name": "",
-                    "description": "user The track's user. If you give 'false', it will use the current user"
+                    "description": "The message to attach to track (optional)"
                 },
                 {
                     "name": "id_user",
@@ -2182,7 +2183,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user The track's user. If you give 'false', it will use the current user"
                 }
             ]
         },
@@ -3225,5 +3227,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Task",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

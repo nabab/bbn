@@ -45,7 +45,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "token"
                 }
             ]
         },
@@ -258,11 +259,11 @@
         "submitOnboardingData": {
             "name": "submitOnboardingData",
             "summary": "Submits onboarding data.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data\">https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data\">https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -299,11 +300,11 @@
         "createPayment": {
             "name": "createPayment",
             "summary": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -333,8 +334,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "id"
+                    "default_name": ""
                 },
                 {
                     "name": "customer_id",
@@ -343,7 +343,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "mandate_id",
@@ -359,11 +360,11 @@
         "createPaymentFirstTime": {
             "name": "createPaymentFirstTime",
             "summary": "Create a payment for the first time for the user.",
-            "description": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n   *\nThis will return the `customerId` and `mandateId` in the response.",
+            "description": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n\nThis will return the `customerId` and `mandateId` in the response.",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n*\nThis will return the <code>customerId<\/code> and <code>mandateId<\/code> in the response.<\/p>"
+                    "content": "<p>Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']<\/p>\n<p>This will return the <code>customerId<\/code> and <code>mandateId<\/code> in the response.<\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -403,18 +404,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "data"
                 }
             ]
         },
         "createOnDemandPayment": {
             "name": "createOnDemandPayment",
             "summary": "Charging immediately on-demand.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand",
+            "description": "https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand\">https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand\">https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -446,7 +448,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "id"
+                    "description": "data"
                 },
                 {
                     "name": "customer_id",
@@ -465,18 +467,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 }
             ]
         },
         "getMandate": {
             "name": "getMandate",
             "summary": "Retrieve a mandate by its ID and its customer\u2019s ID.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -516,7 +519,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "params",
@@ -532,11 +536,11 @@
         "listMandates": {
             "name": "listMandates",
             "summary": "Retrieve all mandates for the given customerId, ordered from newest to oldest.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -566,7 +570,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "params",
@@ -582,11 +587,11 @@
         "revokeMandate": {
             "name": "revokeMandate",
             "summary": "Revoke a customer\u2019s mandate.",
-            "description": "*\nYou will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n   *\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate",
+            "description": "You will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><em>\nYou will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n<\/em>\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate<\/a><\/p>"
+                    "content": "<p>You will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.<\/p>\n<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -626,7 +631,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "params",
@@ -642,11 +648,11 @@
         "getCustomer": {
             "name": "getCustomer",
             "summary": "Retrieve a single customer by its ID.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\">https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\">https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -676,7 +682,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "params",
@@ -692,11 +699,11 @@
         "refundPayment": {
             "name": "refundPayment",
             "summary": "Creates a Refund on the Payment. The refunded amount is credited to your customer.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund\">https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund\">https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -726,7 +733,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "amount",
@@ -751,11 +759,11 @@
         "getOrganization": {
             "name": "getOrganization",
             "summary": "Return the currently authenticated organization object.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization\">https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization\">https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -808,11 +816,11 @@
         "createProfile": {
             "name": "createProfile",
             "summary": "Create a profile in order to process payments.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -900,11 +908,11 @@
         "getProfiles": {
             "name": "getProfiles",
             "summary": "Retrieve all profiles available on the account.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -957,11 +965,11 @@
         "getActivePaymentMethods": {
             "name": "getActivePaymentMethods",
             "summary": "Retrieve all active payment methods.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -991,18 +999,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 }
             ]
         },
         "getAllPaymentMethods": {
             "name": "getAllPaymentMethods",
             "summary": "Retrieve all enabled payment methods.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -1032,7 +1041,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 }
             ]
         },
@@ -1076,11 +1086,11 @@
         "enablePaymentMethod": {
             "name": "enablePaymentMethod",
             "summary": "Enable a payment method on a specific or authenticated profile to use it with payments.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method#\n   *\nList of payment methods: https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method#\n\nList of payment methods: https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><em>\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method<\/a>#\n<\/em>\nList of payment methods: <a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method<\/a>#<\/p>\n<p>List of payment methods: <a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -1111,7 +1121,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "method_id"
+                    "description": "id"
                 },
                 {
                     "name": "payment_method_id",
@@ -1120,18 +1130,19 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "method_id"
                 }
             ]
         },
         "listPayments": {
             "name": "listPayments",
             "summary": "Retrieve all payments created ordered from newest to oldest.",
-            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n   *\n```php\n$client_payments = $mollie_manager->listPayments([\n 'testmode' => true,\n]);\nforeach ($client_payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n   *\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
+            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n\n```php\n$client_payments = $mollie_manager->listPayments([\n 'testmode' => true,\n]);\nforeach ($client_payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n*<\/p>"
+                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:<\/p>"
                 },
                 {
                     "type": "code",
@@ -1139,7 +1150,7 @@
                 },
                 {
                     "type": "text",
-                    "content": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -1169,8 +1180,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
+                    "default_name": ""
                 },
                 {
                     "name": "from",
@@ -1180,7 +1190,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The number of payments to return (with a maximum of 250)."
+                    "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
                 },
                 {
                     "name": "limit",
@@ -1189,18 +1199,19 @@
                     "required": false,
                     "has_default": true,
                     "default": 250,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The number of payments to return (with a maximum of 250)."
                 }
             ]
         },
         "getPayment": {
             "name": "getPayment",
             "summary": "Retrieve a single payment object by it's id.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -1230,7 +1241,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "params",
@@ -1246,11 +1258,11 @@
         "listMainAccountPayments": {
             "name": "listMainAccountPayments",
             "summary": "Retrieve all main account payments created ordered from newest to oldest.",
-            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n   *\n```php\n$_payments = $mollie_manager->listMainAccountPayments();\nforeach ($payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n   *\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
+            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n\n```php\n$_payments = $mollie_manager->listMainAccountPayments();\nforeach ($payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n*<\/p>"
+                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:<\/p>"
                 },
                 {
                     "type": "code",
@@ -1258,7 +1270,7 @@
                 },
                 {
                     "type": "text",
-                    "content": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -1288,7 +1300,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "key"
                 },
                 {
                     "name": "params",
@@ -1297,8 +1310,7 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": "",
-                    "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
+                    "default_name": ""
                 },
                 {
                     "name": "from",
@@ -1308,7 +1320,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The number of payments to return (with a maximum of 250)."
+                    "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
                 },
                 {
                     "name": "limit",
@@ -1317,18 +1329,19 @@
                     "required": false,
                     "has_default": true,
                     "default": 250,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The number of payments to return (with a maximum of 250)."
                 }
             ]
         },
         "getMainAccountPayment": {
             "name": "getMainAccountPayment",
             "summary": "Retrieve a single payment object by it's id.",
-            "description": "*\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
+                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
                 }
             ],
             "file": "bbn\\Api\\Permissions\\MollieManager",
@@ -1359,7 +1372,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "id"
+                    "description": "key"
                 },
                 {
                     "name": "payment_id",
@@ -1368,7 +1381,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "id"
                 },
                 {
                     "name": "params",
@@ -1404,5 +1418,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "MollieManager",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

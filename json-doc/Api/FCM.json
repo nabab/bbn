@@ -138,5 +138,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api",
     "shortName": "FCM",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

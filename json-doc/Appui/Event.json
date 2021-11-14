@@ -68,7 +68,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -176,7 +177,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if ( \\bbn\\Str::isUid($id) ){\n      return !!$this->db->delete($this->class_table, [$this->fields['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "code": "function(string $id)\n  {\n    if ( \\bbn\\Str::isUid($id) ){\n      return (bool)$this->db->delete($this->class_table, [$this->fields['id'] => $id]);\n    }\n\n    return false;\n  }",
             "startLine": 272,
             "endLine": 279,
             "isDeprecated": false,
@@ -550,7 +551,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, string $until = NULL)\n  {\n    if ( \n      \\bbn\\Str::isUid($id) &&\n      (\n        \\is_null($until) ||\n        \\bbn\\Str::isDateSql($until)\n      )\n    ){\n      return !!$this->db->update($this->class_cfg['tables']['recurring'], [\n        $this->class_cfg['arch']['recurring']['until'] => $until\n      ], [\n        $this->class_cfg['arch']['recurring']['id_event'] => $id\n      ]);\n    }\n    return false;\n  }",
+            "code": "function(string $id, string $until = NULL)\n  {\n    if ( \n      \\bbn\\Str::isUid($id) &&\n      (\n        \\is_null($until) ||\n        \\bbn\\Str::isDateSql($until)\n      )\n    ){\n      return (bool)$this->db->update($this->class_cfg['tables']['recurring'], [\n        $this->class_cfg['arch']['recurring']['until'] => $until\n      ], [\n        $this->class_cfg['arch']['recurring']['id_event'] => $id\n      ]);\n    }\n    return false;\n  }",
             "startLine": 586,
             "endLine": 602,
             "isDeprecated": false,
@@ -631,7 +632,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_event, array $exc)\n  {\n    if ( \n      \\bbn\\Str::isUid($id_event) &&\n      ($ext =& $this->class_cfg['tables']['exceptions']) &&\n      ($exf =& $this->class_cfg['arch']['exceptions']) &&\n      $this->get($id_event) && \n      !empty($exc[$exf['day']]) &&\n      !empty($exc[$exf['start']]) &&\n      !empty($exc[$exf['end']]) &&\n      (\n        !empty($exc[$exf['deleted']]) ||\n        !empty($exc[$exf['rescheduled']])\n      )\n    ){\n      if ( empty($exc[$exf['id_event']]) ){\n        $exc[$exf['id_event']] = $id_event;\n      }\n      $exc[$exf['day']] = date('Y-m-d', strtotime($exc[$exf['day']]));\n      $exc[$exf['start']] = date('H:i:s', strtotime($exc[$exf['start']]));\n      $exc[$exf['end']] = date('H:i:s', strtotime($exc[$exf['end']]));\n      $exc[$exf['id_user']] = !empty($exc[$exf['id_user']]) ? $exc[$exf['id_user']] : \\bbn\\User::getInstance()->getId();\n      $exc[$exf['creation']] = \\bbn\\Str::isDateSql($exc[$exf['creation']]) ?\n        $exc[$exf['creation']] : date('Y-m-d H:i:s');\n      return !!$this->db->insert($ext, $exc);\n    }\n    return false;\n  }",
+            "code": "function(string $id_event, array $exc)\n  {\n    if ( \n      \\bbn\\Str::isUid($id_event) &&\n      ($ext =& $this->class_cfg['tables']['exceptions']) &&\n      ($exf =& $this->class_cfg['arch']['exceptions']) &&\n      $this->get($id_event) && \n      !empty($exc[$exf['day']]) &&\n      !empty($exc[$exf['start']]) &&\n      !empty($exc[$exf['end']]) &&\n      (\n        !empty($exc[$exf['deleted']]) ||\n        !empty($exc[$exf['rescheduled']])\n      )\n    ){\n      if ( empty($exc[$exf['id_event']]) ){\n        $exc[$exf['id_event']] = $id_event;\n      }\n      $exc[$exf['day']] = date('Y-m-d', strtotime($exc[$exf['day']]));\n      $exc[$exf['start']] = date('H:i:s', strtotime($exc[$exf['start']]));\n      $exc[$exf['end']] = date('H:i:s', strtotime($exc[$exf['end']]));\n      $exc[$exf['id_user']] = !empty($exc[$exf['id_user']]) ? $exc[$exf['id_user']] : \\bbn\\User::getInstance()->getId();\n      $exc[$exf['creation']] = \\bbn\\Str::isDateSql($exc[$exf['creation']]) ?\n        $exc[$exf['creation']] : date('Y-m-d H:i:s');\n      return (bool)$this->db->insert($ext, $exc);\n    }\n    return false;\n  }",
             "startLine": 619,
             "endLine": 646,
             "isDeprecated": false,
@@ -1279,7 +1280,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new \\Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->select($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return !!$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new \\Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->select($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
             "startLine": 119,
             "endLine": 136,
             "isDeprecated": false,
@@ -1562,5 +1563,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Event",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

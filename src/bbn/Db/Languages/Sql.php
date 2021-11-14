@@ -1272,7 +1272,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $fields_to_put['values'][] = '?';
         }
       } else {
-        $this->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error("Error(bool) The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
     }
 

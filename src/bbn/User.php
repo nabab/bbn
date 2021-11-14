@@ -518,7 +518,7 @@ class User extends Models\Cls\Basic
 
   protected function isToken(): bool
   {
-    return !!$this->class_cfg['tables']['api_tokens'];
+    return (bool)$this->class_cfg['tables']['api_tokens'];
   }
 
   public function isReset()
@@ -1185,7 +1185,7 @@ class User extends Models\Cls\Basic
    */
   public function isDev(): bool
   {
-    return (bool)($this->isAdmin() || !!$this->getSession('dev'));
+    return (bool)($this->isAdmin() || (bool)$this->getSession('dev'));
   }
 
 
@@ -2201,7 +2201,7 @@ class User extends Models\Cls\Basic
 
     $number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
 
-    return !!$this->db->update(
+    return (bool)$this->db->update(
       $this->class_cfg['tables']['users'],
       [
         $this->class_cfg['arch']['users']['login'] => $number,
@@ -2240,7 +2240,7 @@ class User extends Models\Cls\Basic
   protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser, string $deviceLang = ''): bool
   {
     if (!empty($token) && !empty($deviceUid) && !empty($idUser)) {
-      return !!$this->db->update(
+      return (bool)$this->db->update(
         $this->class_cfg['tables']['api_tokens'],
         [
           $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser,

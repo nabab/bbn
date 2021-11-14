@@ -664,5 +664,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Entities",
     "shortName": "People",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

@@ -68,7 +68,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -81,7 +82,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The code of the option"
+                    "description": "The database connection"
                 },
                 {
                     "name": "code",
@@ -91,7 +92,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The configuration"
+                    "description": "The code of the option"
                 },
                 {
                     "name": "cfg",
@@ -100,7 +101,8 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration"
                 }
             ]
         },
@@ -113,7 +115,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return !!$this->ocfg;\n  }",
+            "code": "function()\n  {\n    return (bool)$this->ocfg;\n  }",
             "startLine": 172,
             "endLine": 175,
             "isDeprecated": false,
@@ -256,8 +258,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "Start of time"
+                    "default_name": ""
                 },
                 {
                     "name": "start",
@@ -266,7 +267,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Start of time"
                 }
             ]
         },
@@ -1271,5 +1273,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Statistic",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

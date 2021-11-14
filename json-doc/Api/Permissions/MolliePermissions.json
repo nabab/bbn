@@ -203,5 +203,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "MolliePermissions",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

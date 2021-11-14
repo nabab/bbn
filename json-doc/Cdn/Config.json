@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Makes a usable configuration array out of a request string.",
+        "description": "Makes a usable configuration array out of a request string.\n\n",
         "tags": {
             "category": "CDN",
             "package": "BBN",
@@ -690,5 +690,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Cdn",
     "shortName": "Config",
-    "summary": "Makes a usable configuration array out of a request string."
+    "summary": "Makes a usable configuration array out of a request string.",
+    "description": "",
+    "description_parts": []
 }

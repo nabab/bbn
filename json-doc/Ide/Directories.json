@@ -197,7 +197,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "If true the function returns the global MVC's URL"
+                    "description": "The real file's path"
                 },
                 {
                     "name": "mvc",
@@ -206,7 +206,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If true the function returns the global MVC's URL"
                 }
             ]
         },
@@ -240,7 +241,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The real file's path"
                 }
             ]
         },
@@ -274,7 +276,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file's URL"
                 }
             ]
         },
@@ -342,7 +345,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file's ID"
                 }
             ]
         },
@@ -376,7 +380,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file's URL"
                 }
             ]
         },
@@ -410,7 +415,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file's ID"
                 }
             ]
         },
@@ -444,7 +450,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The dir's name (code)"
                 }
             ]
         },
@@ -614,7 +621,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The dir's name (code)"
                 }
             ]
         },
@@ -648,7 +656,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The dir's name (code)"
                 }
             ]
         },
@@ -751,7 +760,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The tab's name (MVC)"
+                    "description": "The source's name"
                 },
                 {
                     "name": "tab",
@@ -761,7 +770,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file\/directory's path"
+                    "description": "The tab's name (MVC)"
                 },
                 {
                     "name": "path",
@@ -771,7 +780,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file\/directory's name"
+                    "description": "The file\/directory's path"
                 },
                 {
                     "name": "name",
@@ -781,7 +790,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "If it's a file or a directory (file|dir)"
+                    "description": "The file\/directory's name"
                 },
                 {
                     "name": "type",
@@ -790,7 +799,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If it's a file or a directory (file|dir)"
                 }
             ]
         },
@@ -886,7 +896,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file's content"
+                    "description": "The file's URL"
                 },
                 {
                     "name": "code",
@@ -896,7 +906,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The user preferences"
+                    "description": "The file's content"
                 },
                 {
                     "name": "cfg",
@@ -905,7 +915,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The user preferences"
                 },
                 {
                     "name": "pref",
@@ -949,7 +960,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "file The file's id"
+                    "description": "user The user's id"
                 },
                 {
                     "name": "id_file",
@@ -959,7 +970,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file's md5"
+                    "description": "file The file's id"
                 },
                 {
                     "name": "md5",
@@ -968,7 +979,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file's md5"
                 },
                 {
                     "name": "cfg",
@@ -1021,7 +1033,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new file's path"
+                    "description": "The source's name"
                 },
                 {
                     "name": "path",
@@ -1031,7 +1043,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new filename"
+                    "description": "The new file's path"
                 },
                 {
                     "name": "name",
@@ -1041,7 +1053,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "file|dir"
+                    "description": "The new filename"
                 },
                 {
                     "name": "type",
@@ -1051,7 +1063,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The existing file path and name"
+                    "description": "file|dir"
                 },
                 {
                     "name": "file",
@@ -1060,7 +1072,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The existing file path and name"
                 }
             ]
         },
@@ -1095,7 +1108,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file|directory's path"
+                    "description": "The source's name"
                 },
                 {
                     "name": "path",
@@ -1105,7 +1118,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file|directory's name"
+                    "description": "The file|directory's path"
                 },
                 {
                     "name": "name",
@@ -1115,7 +1128,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The type (file|dir)"
+                    "description": "The file|directory's name"
                 },
                 {
                     "name": "type",
@@ -1124,7 +1137,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type (file|dir)"
                 }
             ]
         },
@@ -1159,7 +1173,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file|directory's path"
+                    "description": "The source's name"
                 },
                 {
                     "name": "path",
@@ -1169,7 +1183,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file|directory's name"
+                    "description": "The file|directory's path"
                 },
                 {
                     "name": "name",
@@ -1179,7 +1193,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "file|dir"
+                    "description": "The file|directory's name"
                 },
                 {
                     "name": "type",
@@ -1188,7 +1202,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "file|dir"
                 }
             ]
         },
@@ -1223,7 +1238,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file|directory's old path (included filename and its extension)"
+                    "description": "The source's name"
                 },
                 {
                     "name": "path",
@@ -1233,7 +1248,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new file's name"
+                    "description": "The file|directory's old path (included filename and its extension)"
                 },
                 {
                     "name": "new",
@@ -1243,7 +1258,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "file|dir"
+                    "description": "The new file's name"
                 },
                 {
                     "name": "type",
@@ -1252,7 +1267,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "file|dir"
                 }
             ]
         },
@@ -1287,7 +1303,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file|directory's old path (included filename and its extension)"
+                    "description": "The source's name"
                 },
                 {
                     "name": "src",
@@ -1297,7 +1313,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The destination path"
+                    "description": "The file|directory's old path (included filename and its extension)"
                 },
                 {
                     "name": "dest",
@@ -1307,7 +1323,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "file|dir"
+                    "description": "The destination path"
                 },
                 {
                     "name": "type",
@@ -1316,7 +1332,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "file|dir"
                 }
             ]
         },
@@ -1351,7 +1368,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The file to change"
+                    "description": "The new extension"
                 },
                 {
                     "name": "file",
@@ -1360,7 +1377,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file to change"
                 }
             ]
         },
@@ -1395,7 +1413,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The type (file\/dir)"
+                    "description": "The real file\/dir's path"
                 },
                 {
                     "name": "type",
@@ -1404,7 +1422,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
                 }
             ]
         },
@@ -1439,7 +1458,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The type of real (file\/dir)"
+                    "description": "The real file\/dir's path"
                 },
                 {
                     "name": "type",
@@ -1448,7 +1467,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type of real (file\/dir)"
                 }
             ]
         },
@@ -1483,7 +1503,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "new The new real file\/dir's path"
+                    "description": "The old real file\/dir's path"
                 },
                 {
                     "name": "file_new",
@@ -1493,7 +1513,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The type (file\/dir)"
+                    "description": "new The new real file\/dir's path"
                 },
                 {
                     "name": "type",
@@ -1502,7 +1522,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
                 }
             ]
         },
@@ -1537,7 +1558,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The type (file\/dir)"
+                    "description": "The real file\/dir's path"
                 },
                 {
                     "name": "type",
@@ -1546,7 +1567,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "file",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
                 }
             ]
         },
@@ -1580,7 +1602,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file's URL"
                 }
             ]
         },
@@ -2071,5 +2094,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Ide",
     "shortName": "Directories",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

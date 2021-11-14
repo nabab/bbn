@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class cron",
+        "description": "Class cron\n",
         "tags": {
             "package": "bbn\\Appui"
         }
@@ -1312,5 +1312,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Cron",
     "shortName": "Launcher",
-    "summary": "Class cron"
+    "summary": "Class cron",
+    "description": "",
+    "description_parts": []
 }

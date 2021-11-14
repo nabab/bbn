@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "File Transfer Protocol Class",
+        "description": "File Transfer Protocol Class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Files ressources",
@@ -104,11 +105,11 @@
         "scan": {
             "name": "scan",
             "summary": "Scans all the content from a directory, including the subdirectories",
-            "description": "*\n<code>\nbbn\\File\\Dir::scan(\"\/home\/me\");\nbbn\\File\\Dir::delete(\"C:\\Documents\\Test\");\n<\/code>",
+            "description": "<code>\nbbn\\File\\Dir::scan(\"\/home\/me\");\nbbn\\File\\Dir::delete(\"C:\\Documents\\Test\");\n<\/code>",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n<code>\nbbn\\File\\Dir::scan(&quot;\/home\/me&quot;);\nbbn\\File\\Dir::delete(&quot;C:\\Documents\\Test&quot;);\n<\/code><\/p>"
+                    "content": "<p><code>\nbbn\\File\\Dir::scan(&quot;\/home\/me&quot;);\nbbn\\File\\Dir::delete(&quot;C:\\Documents\\Test&quot;);\n<\/code><\/p>"
                 }
             ],
             "file": "bbn\\File\\Ftp",
@@ -525,7 +526,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The new file full path"
+                    "description": "The old file full path"
                 },
                 {
                     "name": "new",
@@ -534,7 +535,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The new file full path"
                 }
             ]
         },
@@ -568,7 +570,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The file or dir relative or full path"
                 }
             ]
         },
@@ -1068,5 +1071,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\File",
     "shortName": "Ftp",
-    "summary": "File Transfer Protocol Class"
+    "summary": "File Transfer Protocol Class",
+    "description": "",
+    "description_parts": []
 }

@@ -114,7 +114,7 @@ class Profiler extends bbn\Models\Cls\Db
       $this->is_started = false;
       $data = tideways_xhprof_disable();
       $c = &$this->class_cfg['arch']['bbn_profiler'];
-      return !!$this->db->insert(
+      return (bool)$this->db->insert(
         $this->class_table,
         [
           $c['id_user'] => $mvc->inc->user->getId(),

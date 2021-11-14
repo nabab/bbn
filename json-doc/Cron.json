@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
+        "description": "(Static) content delivery system through requests using filesystem and internal DB for libraries.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Jan 3, 2016, 12:24:36 +0000",
             "category": "Cache",
@@ -1474,5 +1475,7 @@
     "extensionName": false,
     "namespaceName": "bbn",
     "shortName": "Cron",
-    "summary": "(Static) content delivery system through requests using filesystem and internal DB for libraries."
+    "summary": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
+    "description": "",
+    "description_parts": []
 }

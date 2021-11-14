@@ -75,5 +75,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Util",
     "shortName": "Pparser",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

@@ -3044,11 +3044,125 @@
                     "icon": "nf nf-mdi-widgets",
                     "items": [
                       {
+                        "text": "Cloudmin",
+                        "code": "cloudmin",
+                        "cache": 0,
+                        "limit": 15,
+                        "closable": true,
+                        "itemComponent": "appui-server-widget-servers"
+                      },
+                      {
+                        "text": "CPU",
+                        "code": "cpu",
+                        "cache": 0,
+                        "limit": 0,
+                        "closable": true,
+                        "component": "appui-server-widget-cpu",
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ]
+                      },
+                      {
+                        "text": "Domains",
+                        "code": "domains",
+                        "cache": 0,
+                        "limit": 0,
+                        "closable": true,
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ],
+                        "itemComponent": "appui-server-widget-domains"
+                      },
+                      {
+                        "text": "FileSystem",
+                        "code": "fs",
+                        "cache": 0,
+                        "limit": 0,
+                        "closable": true,
+                        "component": "appui-server-widget-fs",
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ]
+                      },
+                      {
+                        "text": "Memory",
+                        "code": "memory",
+                        "cache": 0,
+                        "limit": 0,
+                        "closable": true,
+                        "component": "appui-server-widget-memory",
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ]
+                      },
+                      {
                         "text": "Servers",
                         "code": "servers",
-                        "limit":5,
-                        "closable":true,
+                        "cache": 0,
+                        "limit": 15,
+                        "closable": true,
                         "itemComponent": "appui-server-widget-servers"
+                      },
+                      {
+                        "text": "Info",
+                        "code": "info",
+                        "cache": 0,
+                        "limit": 0,
+                        "closable": false,
+                        "component": "appui-server-widget-info",
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ]
+                      },
+                      {
+                        "text": "Services",
+                        "code": "services",
+                        "cache": 0,
+                        "limit": 0,
+                        "closable": true,
+                        "component": "appui-server-widget-services",
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ]
+                      },
+                      {
+                        "text": "Packages updates",
+                        "code": "updates",
+                        "cache": 0,
+                        "limit": 10,
+                        "closable": true,
+                        "component": "appui-server-widget-updates",
+                        "buttonsRight": [
+                            {
+                                "icon": "nf nf-fa-refresh",
+                                "title": "Force refresh",
+                                "action": "forceRefresh"
+                            }
+                        ]
                       }
                     ]
                   }

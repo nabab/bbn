@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHP version 7
  *
@@ -9,6 +10,7 @@
  * @version  "GIT: <git_id>"
  * @link     https://www.bbn.io/bbn-php
  */
+
 namespace bbn\Cdn;
 
 use bbn\Models\Cls\Basic;
@@ -77,7 +79,7 @@ class Compiler extends Basic
           $tmp = CssMin::minify($st);
         }
       }
-      catch (\Exception $e){
+      catch (\Exception $e) {
         $this->setError("Error during $lang minification with string - {$e->getMessage()}");
         //die('Error during $lang minification with string - '.$e->getMessage());
       }
@@ -103,15 +105,16 @@ class Compiler extends Basic
       $c        = '';
       foreach ($file as $f) {
         $has_content = false;
-        if (!is_file($this->fpath.$f)) {
+        if (!is_file($this->fpath . $f)) {
+          throw new \Exception(X::_("Impossible to find the file") . ' ' . $this->fpath . $f);
           return false;
         }
 
-        foreach (self::$_min_suffixes as $s){
-          if (strpos($f, $s.'.')) {
+        foreach (self::$_min_suffixes as $s) {
+          if (strpos($f, $s . '.')) {
             $minified = true;
-            if ($test && file_exists($this->fpath.str_replace($s.'.', '.', $f))) {
-              $c          .= PHP_EOL.file_get_contents($this->fpath.str_replace($s.'.', '.', $f));
+            if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $f))) {
+              $c          .= PHP_EOL . file_get_contents($this->fpath . str_replace($s . '.', '.', $f));
               $has_content = true;
             }
 
@@ -120,7 +123,7 @@ class Compiler extends Basic
         }
 
         if (!$has_content) {
-          $c .= PHP_EOL.file_get_contents($this->fpath.$f);
+          $c .= PHP_EOL . file_get_contents($this->fpath . $f);
         }
 
         if (!empty($c)) {
@@ -130,19 +133,19 @@ class Compiler extends Basic
 
       $file = $file[0];
     }
-    else{
+    else {
       $ext      = Str::fileExt($file);
       $minified = false;
-      if (!is_file($this->fpath.$file)) {
-        throw new \Exception(X::_("Impossible to find the file").' '.$this->fpath.$file);
+      if (!is_file($this->fpath . $file)) {
+        throw new \Exception(X::_("Impossible to find the file") . ' ' . $this->fpath . $file);
         return false;
       }
 
-      foreach (self::$_min_suffixes as $s){
-        if (strpos($file, $s.'.')) {
+      foreach (self::$_min_suffixes as $s) {
+        if (strpos($file, $s . '.')) {
           $minified = true;
-          if ($test && file_exists($this->fpath.str_replace($s.'.', '.', $file))) {
-            $c = file_get_contents($this->fpath.str_replace($s.'.', '.', $file));
+          if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $file))) {
+            $c = file_get_contents($this->fpath . str_replace($s . '.', '.', $file));
           }
 
           break;
@@ -150,7 +153,7 @@ class Compiler extends Basic
       }
 
       if (!isset($c)) {
-        $c = file_get_contents($this->fpath.$file);
+        $c = file_get_contents($this->fpath . $file);
       }
 
       if (\is_string($c)) {
@@ -159,28 +162,28 @@ class Compiler extends Basic
     }
 
     if ($c) {
-      switch ($ext){
+      switch ($ext) {
         case 'js':
           if (!$test && !$minified) {
             $c = $this->minify($c, 'js');
           }
-          break;
+              break;
 
         case 'css':
           if (!$test && !$minified) {
             $c = $this->minify($c, 'css');
           }
-          break;
+              break;
 
         case 'less':
           $less = new Less();
-          $less->setImportDir([X::dirname($this->fpath.$file)]);
+          $less->setImportDir([X::dirname($this->fpath . $file)]);
           try {
             $c = $less->compile($c);
           }
           catch (\Exception $e) {
-            X::log("Error during LESS compilation with file $file :".$e->getMessage(), 'cdn_err');
-            $this->setError("Error during LESS compilation with file $file :".$e->getMessage());
+            X::log("Error during LESS compilation with file $file :" . $e->getMessage(), 'cdn_err');
+            $this->setError("Error during LESS compilation with file $file :" . $e->getMessage());
             throw $e;
           }
 
@@ -189,18 +192,18 @@ class Compiler extends Basic
               $c = $this->minify($c, 'css');
             }
             catch (\Exception $e) {
-              $this->setError("Error during LESS compilation with file $file :".$e->getMessage());
+              $this->setError("Error during LESS compilation with file $file :" . $e->getMessage());
               throw $e;
             }
           }
-          break;
+              break;
 
         case 'scss':
-          try{
+          try {
             $scss = new \ScssPhp\ScssPhp\Compiler();
-            $scss->setImportPaths([X::dirname($this->fpath.$file)]);
-            if (is_file(X::dirname($this->fpath.$file).'/_def.scss')) {
-              $c = file_get_contents((X::dirname($this->fpath.$file).'/_def.scss')).$c;
+            $scss->setImportPaths([X::dirname($this->fpath . $file)]);
+            if (is_file(X::dirname($this->fpath . $file) . '/_def.scss')) {
+              $c = file_get_contents((X::dirname($this->fpath . $file) . '/_def.scss')) . $c;
             }
 
             $c = $scss->compile($c);
@@ -208,18 +211,18 @@ class Compiler extends Basic
               $c = $this->minify($c, 'css');
             }
           }
-          catch (\Exception $e){
-            $this->setError("Error during SCSS compilation with file $file :".$e->getMessage());
+          catch (\Exception $e) {
+            $this->setError("Error during SCSS compilation with file $file :" . $e->getMessage());
             die($e->getMessage());
           }
-          break;
+              break;
 
         case 'sass':
           $sass = new \SassParser(
-            [
-            'cache' => false,
-            'syntax' => 'sass'
-            ]
+              [
+              'cache' => false,
+              'syntax' => 'sass'
+              ]
           );
           try {
             $c = $sass->toCss($c, false);
@@ -227,11 +230,11 @@ class Compiler extends Basic
               $c = $this->minify($c, 'css');
             }
           }
-          catch (\Exception $e){
-            $this->setError("Error during SASS compilation with file $file :".$e->getMessage());
+          catch (\Exception $e) {
+            $this->setError("Error during SASS compilation with file $file :" . $e->getMessage());
             die($e->getMessage());
           }
-          break;
+              break;
       }
 
       if (!$this->check()) {
@@ -257,7 +260,7 @@ class Compiler extends Basic
     $code      = '';
     $num_files = \count($files);
     if ($num_files) {
-      $url    = $this->furl.'?files=%s&';
+      $url    = $this->furl . '?files=%s&';
       $params = [];
       // The v parameter is passed between requests (to refresh)
       if (!empty($this->cfg['params']['v'])) {
@@ -333,42 +336,43 @@ JAVASCRIPT;
       $unprepended = [];
       $dir         = null;
       foreach ($files as $f) {
-        if (is_file($this->fpath.$f)) {
-          $tmp = X::dirname($f);
-          if (is_null($dir)) {
-            $dir = $tmp.'/';
-          }
-          elseif (strpos($dir, $tmp) !== 0) {
-            $old_tmp = null;
-            while ($tmp = X::dirname($tmp) && ($tmp !== $old_tmp)) {
-              $old_tmp = $tmp;
-              if ($tmp === $dir) {
-                break;
-              }
+        if (!is_file($this->fpath . $f)) {
+          throw new \Exception(X::_("Impossible to find the file %s", $this->fpath . $f));
+        }
+        $tmp = X::dirname($f);
+        if (is_null($dir)) {
+          $dir = $tmp . '/';
+        }
+        elseif (strpos($dir, $tmp) !== 0) {
+          $old_tmp = null;
+          while ($tmp = X::dirname($tmp) && ($tmp !== $old_tmp)) {
+            $old_tmp = $tmp;
+            if ($tmp === $dir) {
+              break;
             }
+          }
 
-            if ($tmp !== $dir) {
-              $bits    = \bbn\X::split(X::dirname($f), '/');
-              $new_dir = '';
-              foreach ($bits as $b) {
-                if (!empty($b)) {
-                  if (strpos($dir, $new_dir.$b) === 0) {
-                    $new_dir .= $b.'/';
-                  }
-                  else {
-                    $dir = $new_dir ?: '.';
-                    break;
-                  }
+          if ($tmp !== $dir) {
+            $bits    = \bbn\X::split(X::dirname($f), '/');
+            $new_dir = '';
+            foreach ($bits as $b) {
+              if (!empty($b)) {
+                if (strpos($dir, $new_dir . $b) === 0) {
+                  $new_dir .= $b . '/';
+                }
+                else {
+                  $dir = $new_dir ?: '.';
+                  break;
                 }
               }
             }
           }
+        }
 
-          if (isset($prepend_files[$f])) {
-            foreach ($prepend_files[$f] as $p){
-              if (!in_array($p, $prepended)) {
-                $prepended[] = $p;
-              }
+        if (isset($prepend_files[$f])) {
+          foreach ($prepend_files[$f] as $p) {
+            if (!in_array($p, $prepended)) {
+              $prepended[] = $p;
             }
           }
         }
@@ -380,12 +384,12 @@ JAVASCRIPT;
         }
       }
 
-      foreach ($files as $ar){
+      foreach ($files as $ar) {
         $files_json[] = str_replace($dir, '', $ar);
       }
 
       $files_json = json_encode($files_json);
-      $url        = $this->furl.'~~~BBN~~~';
+      $url        = $this->furl . '~~~BBN~~~';
       $params     = [];
       // The v parameter is passed between requests (to refresh)
       if (!empty($this->cfg['params']['v'])) {
@@ -428,7 +432,7 @@ JAVASCRIPT;
   })
 })
 JAVASCRIPT;
-      foreach ($unprepended as $file){
+      foreach ($unprepended as $file) {
         $css = $this->getContent($file, false);
         if ($this->hasLinks($css)) {
           if ($root) {
@@ -446,7 +450,7 @@ JAVASCRIPT;
             $dirs[X::dirname($file)][] = X::basename($file);
           }
         }
-        else{
+        else {
           if (!isset($dirs['.'])) {
             $dirs['.'] = [];
           }
@@ -456,11 +460,11 @@ JAVASCRIPT;
       }
 
       if (\count($dirs)) {
-        foreach ($dirs as $dir => $dfiles){
+        foreach ($dirs as $dir => $dfiles) {
           if (\count($dfiles)) {
             $files_json = json_encode($dfiles);
 
-            $url = $this->furl.'~~~BBN~~~';
+            $url = $this->furl . '~~~BBN~~~';
 
             $params = [];
             // The v parameter is passed between requests (to refresh)
@@ -474,9 +478,9 @@ JAVASCRIPT;
             }
 
             $url  .= http_build_query($params);
-            $jsdir = $dir === '.' ? '' : $dir.'/';
+            $jsdir = $dir === '.' ? '' : $dir . '/';
             $code .= <<<JAVASCRIPT
-            
+
   .then(function(){
     return new Promise(function(bbn_resolve, bbn_reject){
       let dir = "$jsdir";
@@ -530,8 +534,8 @@ JAVASCRIPT;
     $css = str_replace('`', '\\``', str_replace('\\', '\\\\', $css));
     //$css = Str::escapeSquotes($css);
     $code  = Str::genpwd(25, 20);
-    $head  = $code.'2';
-    $style = $code.'3';
+    $head  = $code . '2';
+    $style = $code . '3';
     return <<<JAVASCRIPT
   let $code = `$css`;
   let $head = document.head || document.getElementsByTagName('head')[0];
@@ -545,7 +549,6 @@ JAVASCRIPT;
   }
   return $head.appendChild($style);
 JAVASCRIPT;
-
   }
 
 
@@ -562,11 +565,11 @@ JAVASCRIPT;
     $codes = [];
     if (!empty($files)) {
       // Mix of CSS and javascript: the JS adds the CSS to the head before executing
-      foreach ($files as $f){
+      foreach ($files as $f) {
         if ($c = $this->getContent($f, $test)) {
           $e = Str::fileExt($f);
-          foreach (self::$types as $type => $exts){
-            foreach ($exts as $ext){
+          foreach (self::$types as $type => $exts) {
+            foreach ($exts as $ext) {
               if ($ext === $e) {
                 $mode = $type;
                 break;
@@ -580,7 +583,7 @@ JAVASCRIPT;
             'dir' => X::dirname($f)
           ];
         }
-        else{
+        else {
           //die("I can't find the file $f !");
         }
       }
@@ -605,8 +608,8 @@ JAVASCRIPT;
       // Mix of CSS and javascript: the JS adds the CSS to the head before executing
       if ($c = $this->getContent($files, $test)) {
         $e = Str::fileExt($files[0]);
-        foreach (self::$types as $type => $exts){
-          foreach ($exts as $ext){
+        foreach (self::$types as $type => $exts) {
+          foreach ($exts as $ext) {
             if ($ext === $e) {
               $mode = $type;
               break;
@@ -620,13 +623,11 @@ JAVASCRIPT;
           'dir' => X::dirname(end($files))
         ];
       }
-      else{
+      else {
         throw new \Exception("Impossible to get content from $f");
       }
     }
 
     return $codes;
   }
-
-
 }

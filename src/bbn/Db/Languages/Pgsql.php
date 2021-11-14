@@ -501,7 +501,7 @@ PSQL
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
 
       $res = $this->rawQuery(sprintf("ALTER TABLE %s RENAME TO %s", $t1, $t2));
-      return !!$res;
+      return (bool)$res;
     }
 
     return false;
@@ -1672,7 +1672,7 @@ PGSQL
           $fields_to_put['values'][] = '?';
         }
       } else {
-        $this->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error("Error(bool) The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
     }
 

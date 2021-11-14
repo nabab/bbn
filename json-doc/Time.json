@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class dealing with date manipulation\nexamples: test\/loredana\/time",
+        "description": "Class dealing with date manipulation\nexamples: test\/loredana\/time\n\n",
         "tags": {
             "copyright": "BBN Solutions",
             "category": "Time and Date",
@@ -142,7 +142,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "allowed comparators '>','>=', '<','<=', '='"
+                    "description": "the string of the date to compare or an object of this class"
                 },
                 {
                     "name": "comparator",
@@ -151,7 +151,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "allowed comparators '>','>=', '<','<=', '='"
                 }
             ]
         },
@@ -185,7 +186,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "the string of the date to compare or an object of this class"
                 }
             ]
         },
@@ -219,7 +221,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "the string of the date to compare or an object of this class"
                 }
             ]
         },
@@ -253,7 +256,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "the string of the date to compare or an object of this class"
                 }
             ]
         },

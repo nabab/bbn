@@ -334,7 +334,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Configuration array"
                 }
             ]
         },
@@ -613,5 +614,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Dbsync",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

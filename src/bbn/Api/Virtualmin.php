@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class virtualmin
  * @package api
@@ -7,176 +8,183 @@
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  *
  */
+
 namespace bbn\Api;
+
 use bbn;
 use bbn\X;
 
-class Virtualmin {
+class Virtualmin
+{
   use bbn\Models\Tts\Cache;
+  use CloudminVirtualmin\Common;
 
-  const cache_name = 'bbn/api/virtualmin';
+  const CACHE_NAME = 'bbn/Api/Virtualmin';
 
-  private
-    /** @var  Virtualmin username */
-    $user,
-    /** @var  Virtualmin password */
-    $pass,
-    /** @var  Virtualmin hostname */
-    $hostname,
-    /** @var string mode */
-    $mode = 'virtualmin',
-    /** @var  Check instance existence */
-    $checked = false,
-    /** @var  Array of all commands */
-    $commands = false,
-    /** @var cache */
-    $cacher;
+  /** @var array Info properties */
+  public $infoProps = [
+    'cpu',
+    'disk_free',
+    'disk_fs',
+    'disk_total',
+    'fcount',
+    'ftypes',
+    'host',
+    'io',
+    'kernel',
+    'load',
+    'maxquota',
+    'mem',
+    'procs',
+    'progs',
+    'poss',
+    'reboot',
+    'status',
+    'vposs'
+  ];
 
-
-  public
-    // The last action to have been performed
-    $last_action = false,
-    $error = false,
-    $message;
 
   /**
-   * virtualmin constructor.
-   * @param array $cfg
+   * Re-collect info
+   * @return string|false
    */
-  public function __construct(array $cfg){
-    if ( isset($cfg['user'], $cfg['pass']) ){
-      self::cacheInit();
-      $this->user = $cfg['user'];
-      $this->pass = $cfg['pass'];
-      $this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';
-      $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
-      $this->checked = true;
-      /*if ( class_exists('\\bbn\\Cache') ){
-        $this->cacher = bbn\Cache::getEngine();
-
-        if ( !$this->cacher->has(self::cache_name) ){
-          $this->fetchCommands();
-        }
-        $this->commands = $this->cacher->get(self::cache_name);
-      }
-      else{
-        $this->commands = $this->fetchCommands();
-      }*/
-    }
+  public function collectInfo()
+  {
+    $connection = ssh2_connect($this->hostname, 22);
+    ssh2_auth_password($connection, $this->user, $this->pass);
+    $cmd       = "echo '" . $this->pass . "' | sudo -S virtualmin collectinfo";
+    $stream    = ssh2_exec($connection, $cmd);
+    $errStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+    stream_set_blocking($errStream, true);
+    return stream_get_contents($errStream);
   }
 
-  /**
-   * @param $name
-   * @param $arguments
-   * @return array|bool
-   */
-  public function __call($name, $arguments){
-    if ( $this->checked ){
-      $cmd_name = str_replace('_', '-', $name);
-      if ( isset($this->commands[$cmd_name])){
 
-        //Setting the last action performed
-        $this->last_action = $cmd_name;
-        //Defining  the $url_part and the command to be executed
-        $url_part = $cmd_name;
-        if (\is_array($this->commands)) {
-          $cmd = $this->commands[$cmd_name];
-          if ( !empty($arguments[0]) ){
-            //Prepping, processing and validating the create user parameters
-            $args = $this->processParameters($arguments[0]);
-            if (!empty($cmd['args'])) {
-              foreach ( $cmd['args'] as $k => $v ){
-                if ( !empty($v['mandatory']) && !isset($args[$k]) ){
-                  if ( (strpos($k, 'pass') === false) &&
-                    (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))
-                  ){
-                    var_dump("Parameter $k mandatory for $name!");
-                    return false;
-                  }
-                }
-                if ( isset($args[$k]) ){
-                  if ( $v['binary'] && $args[$k] ){
-                    $url_part .= "&$k";
-                  }
-                  else if ( \is_array($v) && $v['multiple'] ){
-                    foreach ( $args[$k] as $w ){
-                      $url_part .= "&$k=$w";
+  /**
+   * Gets server info
+   *
+   * @param array $arguments
+   * @return array
+   */
+  public function info(array $arguments = []): array
+  {
+    $infoStr = $this->__call('info', [$arguments]);
+    $info    = [];
+    if (strlen($infoStr)) {
+      preg_match_all('/^[a-z|_]*\:\h{1}/m', $infoStr, $delimiters, PREG_OFFSET_CAPTURE);
+      $delimiters = \array_map(
+          function ($m) {
+            return [
+              'name' => \trim(str_replace(':', '', $m[0])),
+              'pos' => $m[1]
+            ];
+          },
+          $delimiters[0]
+      );
+      foreach ($delimiters as $i => $d) {
+        $pos1 = $d['pos'];
+        $pos2 = isset($delimiters[$i + 1]) ? ($delimiters[$i + 1]['pos'] - $pos1) : null;
+        $st   = \is_null($pos2) ? \trim(substr($infoStr, $pos1)) : \trim(substr($infoStr, $pos1, $pos2));
+        if (strlen($st)) {
+          $info[$d['name']] = [];
+          switch ($d['name']) {
+            case 'disk_fs':
+            case 'poss':
+            case 'status':
+            case 'vposs':
+              $info[$d['name']] = explode('*', $st);
+              unset($info[$d['name']][0]);
+              $info[$d['name']] = array_values($info[$d['name']]);
+              foreach ($info[$d['name']] as $istr => $str) {
+                if ($str = explode("\n", \trim($str))) {
+                  $tmp = [];
+                  foreach ($str as $is => $s) {
+                    if ($s = explode(':', $s)) {
+                      $tmp[\trim($s[0])] = \trim($s[1]);
                     }
                   }
-                  else{
-                    $url_part .= "&$k=".$args[$k];
+
+                  $str = $tmp;
+                }
+
+                $info[$d['name']][$istr] = $str;
+              }
+              break;
+
+            case 'progs':
+              $info[$d['name']] = explode('*', $st);
+              unset($info[$d['name']][0]);
+              $info[$d['name']] = array_values($info[$d['name']]);
+              foreach ($info[$d['name']] as $istr => $str) {
+                $info[$d['name']][$istr] = \trim(str_replace("\n", '', $str));
+                if (!strlen($info[$d['name']][$istr])) {
+                  unset($info[$d['name']][$istr]);
+                }
+              }
+
+              $info[$d['name']] = array_values($info[$d['name']]);
+              foreach ($info[$d['name']] as $istr => $str) {
+                if ($istr % 2 === 0) {
+                  $info[$d['name']][$str] = $info[$d['name']][$istr + 1];
+                  unset($info[$d['name']][$istr], $info[$d['name']][$istr + 1]);
+                }
+              }
+              break;
+
+            default:
+              if (substr_count($st, '*')) {
+                $info[$d['name']] = explode('*', $st);
+                unset($info[$d['name']][0]);
+                $info[$d['name']] = array_values($info[$d['name']]);
+                foreach ($info[$d['name']] as $istr => $str) {
+                  $str = str_replace("\n", '', $str);
+                  $info[$d['name']][$istr] = \trim($str);
+                }
+              }
+              elseif (substr_count($st, ':')) {
+                $fields = array_filter(
+                  explode("\n", $st),
+                  function ($val) {
+                    return $val !== '';
+                  }
+                );
+                foreach ($fields as $y => $field) {
+                  if (($pos = strpos($field, ':')) !== false) {
+                    $idx   = str_replace(' ', '', substr($field, 0, $pos));
+                    $value = substr($field, $pos, strlen($field) - $pos);
+                    $value = str_replace(': ', '', $value);
+                    if (count($fields) > 1) {
+                      $info[$d['name']][$idx] = $value;
+                      if (($idx === $d['name'])
+                          && ($info[$d['name']][$idx] === '')
+                      ) {
+                        unset($info[$d['name']][$idx]);
+                      }
+                    }
+                    else {
+                      $info[$d['name']] = $value;
+                    }
                   }
                 }
               }
-            }
+              break;
           }
         }
-        //Concatenating the closing single quote
-        $url_part .= "'";
-        //Concatenating the header url and $url_part to create the full url to be executed
-        $url_part = $this->getHeaderUrl() . $url_part;
-
-        //Calling shell_exec and returning the result array
-    //    return $this->callShellExec($url_part);
-
-        if ( (strpos($cmd_name, 'list-') !== false) ||
-          (strpos($cmd_name, 'get-') !== false) ||
-          (strpos($cmd_name, 'info') !== false)
-        ){
-          $uid = $this->hostname;
-          if ( !empty($arguments) ){
-            $uid .= md5(json_encode($arguments));
-          }
-          if ( $this->cacheHas($uid, $name) ){
-            $result_call = $this->cacheGet($uid, $name);
-          }
-          else {
-            $result_call = $this->callShellExec($url_part);
-            $this->cacheSet($uid, $name, $result_call);
-          }
-        }
-        else{
-          $result_call = $this->callShellExec($url_part);
-        }
-        //Calling shell_exec and returning the result array
-        return $result_call;
       }
-      // We force even if we don't have the command in the list
-      else {
-        if ( !empty($arguments) ){
-          $args = $this->processParameters($arguments[0]);
-        }
-        $url_part = $cmd_name;
-        //todo
-        if ( !empty($args) ){
-          foreach ( $args as $k => $v ){
-            if ( \is_array($v) ){
-              foreach ( $v as $w ){
-                $url_part .= "&$k=$w";
-              }
-            }
-            else if ( $v === 1 ){
-              $url_part .= "&$k";
-            }
-            else{
-              $url_part .= "&$k=$v";
-            }
-          }
-        }
-        //Concatenating the closing single quote
-        $url_part .= "'";
-        //Concatenating the header url and $url_part to create the full url to be executed
-        $url_part = $this->getHeaderUrl() . $url_part;
-        X::log($url_part, 'webmin');
-
-        //Calling shell_exec and returning the result array
-        return $this->callShellExec($url_part);
-      }
-      // else{
-      //   die("The command $name doesn't exist...");
-      // }
     }
-    return false;
+
+    return $info;
+  }
+
+
+  /**
+   * Checks if the given property is part of the info
+   * @param string $prop The property to check
+   * @return bool
+   */
+  public function isInfoProp(string $prop): bool
+  {
+    return \in_array($prop, $this->infoProps, true);
   }
 
 
@@ -187,335 +195,18 @@ class Virtualmin {
    * @param $method name
    * @return bool
    */
-  public function deleteCache($command_name = '', $arguments= false){
+  public function deleteCache($command_name = '', $arguments = false)
+  {
     $uid = $this->hostname;
-    if ( !empty($arguments) ){
+    if (!empty($arguments)) {
       $uid .= md5(json_encode($arguments));
     }
-    if ( !empty($this->cacheDelete($uid, $command_name)) ){
+
+    if (!empty($this->cacheDelete($uid, $command_name))) {
       X::log([$uid, $command_name], 'cache_delete');
       return true;
     }
-    return false;
-  }
 
-
-  /**
-   * @return array
-   */
-  private function fetchCommands(){
-    if ( $this->checked ){
-      $raw_commands = $this->listCommands();
-      $commands = [];
-      foreach ( $raw_commands as $com ){
-        if ( $cmd = $this->getCommand($com['name']) ){
-          array_shift($cmd)['value'];
-          $args = [];
-          foreach ( $cmd as $cm ){
-            $args[$cm['name']] = [
-              'desc' => !empty($cm['values']['value']) ? $cm['values']['value'][0] : '',
-              'binary' => $cm['values']['binary'][0] === 'No' ? false : true,
-              'multiple' => $cm['values']['repeats'][0] === 'No' ? false : true,
-              'mandatory' => $cm['values']['optional'][0] === 'No' ? true : false,
-            ];
-          }
-          ksort($args);
-          $cm = [
-            'cat' => $com['values']['category'][0],
-            'desc' => $com['values']['description'][0],
-            'args' => $args,
-            'cmd' => $cmd
-          ];
-          $commands[$com['name']] = $cm;
-        }
-      }
-      ksort($commands);
-    //  $this->cacher->set(self::cache_name, $commands);
-      return $commands;
-    }
-  }
-
-  /**
-   * This function is used to sanitize the strings which are given as parameters
-   * @param string $st
-   * @return string The the header url part to be executed
-   */
-  private function sanitize($st){
-    $st = trim((string)$st);
-    if ( strpos($st, ';') !== false ){
-      return '';
-    }
-    if ( strpos($st, '<') !== false ){
-      return '';
-    }
-    if ( strpos($st, '"') !== false ){
-      return '';
-    }
-    if ( strpos($st, "'") !== false ){
-      return '';
-    }
-    return $st;
-  }
-
-  /**
-   * This function is used to get the header url part to be executed
-   * @return string The the header url part to be executed
-   */
-  private function getHeaderUrl(){
-    return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . escapeshellarg($this->pass) . " --no-check-certificate 'https://" . $this->hostname . ":10000/".(
-      $this->mode === 'cloudmin' ? 'server-manager' : 'virtual-server'
-    )."/remote.cgi?json=1&multiline=&program=";
-  }
-
-  /**
-   * Executes the $request using shell_exec
-   * @param string $request the command to be excecuted
-   * @return array an array with the execution status and message
-   */
-  private function callShellExec($request){
-    //Executing the shell_exec
-    //die(var_dump($this->mode, $request));
-    if ( $result = shell_exec($request) ){
-      \bbn\X::log($request, 'mirko');
-      //Decoding the json result into an array
-      $result_array = json_decode($result, TRUE);
-      if ( isset($result_array['error']) ){
-        $this->error = $result_array['error'];
-      }
-      if ($result_array['status'] === 'success' ){
-        if (isset($result_array['data'])){
-          if ( isset($result_array['data'][0], $result_array['data'][0]['name']) &&
-            ($result_array['data'][0]['name'] === 'Warning') ){
-            $result_array['data'] = \array_slice($result_array['data'], 1);
-          }
-          return $result_array['data'];
-        }
-        else if (isset($result_array['output'])){
-          return $result_array['output'];
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Sanitize each parameter
-   * @param array $param the raw parameters
-   * @return array the processed parameters
-   */
-  private function processParameters($param){
-    foreach ($param as $key => $val){
-      //$val is an array
-      if (\is_array($val)){
-        $param[$key] = $this->processParameters($val);
-      }
-      else {
-        $param[$key] = $this->sanitize($val);
-      }
-    }
-    //Return the processed parameters
-    return $param;
-  }
-
-  /**
-   * Returns the arguments description of a given command
-   * @param $name The command name
-   * @return array
-   */
-  public function getArgs($name){
-    if ( $this->checked ){
-      $cmd_name = str_replace('_', '-', $name);
-      return isset($this->commands[$cmd_name], $this->commands[$cmd_name]['args']) ? $this->commands[$cmd_name]['args'] : [];
-    }
-  }
-
-  /**
-   * Returns an array containing all the commands and their parameters
-   * @return array
-   */
-  public function getCommands(){
-    if ( $this->checked ){
-      return $this->commands;
-    }
-  }
-
-
-  /**
-   * Gets all the commands directly from the API
-   * @param array $param
-   * @return array
-   */
-  public function listCommands($param = []){
-    //Prepping, processing and validating the create user parameters
-    $param = $this->processParameters($param);
-    //Setting the last action performed
-    $this->last_action = "list-commands";
-
-    //Defining  the $url_part and the command to be executed
-    $url_part = "list-commands";
-    if (isset($param['short'])){//short parameter is set
-      $url_part .= "&short";
-    }
-
-    if (isset($param['nameonly'])){//nameonly parameter is set
-      $url_part .= "&nameonly";
-    }
-    //Concatenating the closing single quote
-    $url_part .="'";
-    //Concatenating the header url and $url_part to create the full url to be executed
-    $url_part = $this->getHeaderUrl() . $url_part;
-
-    //test
-    $uid = $this->hostname;
-    if ( !empty($param) ){
-      $uid .= md5(json_encode($param));
-    }
-
-    if ( $this->cacheHas($uid, 'list_commands') ){
-      $result_call = $this->cacheGet($uid, 'list_commands');
-    }
-    else {
-      $result_call = $this->callShellExec($url_part);
-      $this->cacheSet($uid, 'list_commands', $result_call);
-    }
-    return $result_call;
-  }
-
-
-  /**
-   * @param $command
-   * @return array
-   */
-  public function getCommand($command){
-    $command = str_replace('_', '-', $command);
-    //Setting the last action performed
-    $this->last_action = "get-command";
-
-    //Defining  the $url_part and the command to be executed
-    $url_part = "get-command&command=".$this->sanitize($command);
-    //Concatenating the closing single quote
-    $url_part .="'";
-    //Concatenating the header url and $url_part to create the full url to be executed
-    $url_part = $this->getHeaderUrl() . $url_part;
-    //Calling shell_exec and returning the result array
-    return $this->callShellExec($url_part);
-  }
-
-  /**
-   * Returns a string of PHP code for executing a given command with all its possible parameters pre-populated
-   * @param $command
-   * @return bool|string
-   */
-  public function generate($command){
-    $perl_cmd = str_replace('_', '-', $command);
-    if ( isset($this->commands[$perl_cmd]) ){
-      $cmd = $this->commands[$perl_cmd];
-      $st = '$vm->'.$command.'(['.PHP_EOL;
-      foreach ( $cmd['args'] as $k => $v ){
-        $st .= "'$k' => ".($v['binary'] ? '0' : "''").PHP_EOL;
-      }
-      $st .= ']);';
-      return $st;
-    }
     return false;
   }
 }
-
-
-
-/*
-$config = array(
-  'user' => 'root',
-  'pass' => 'JvLy3HbJ',
-  'hostname' => 'localhost'
-);
-//Creating a virtualmin object
-$vm = new Virtualmin($config);
-$list_commands_param = [];
-//$vm->listCommands($list_commands_param);
-if ($r = $vm->list_domains()){
-  print_r($r);
-} else {
-  var_dump($vm->error);
-}
-$create_domain_param = array(
-  'domain' => 'fr1s2.co',
-  'pass' => 'mugendi',
-  'dns' => 1,
-  'web' => 1,
-  'mail' => 1
-);
-echo '</pre><p>create domain with mail: </p><pre>';
-//if ($r = $vm->create_domain($create_domain_param)){
-//    print_r($r);
-//} else {
-//   var_dump($vm->error);
-//}
-$create_user_param = array(
-  'domain' => 'fr1s.co',
-  'user' => 'edwin61',
-  'pass' => 'mugendi',
-  'quota' => 20,
-  'realname' => 'Edwin Mugendi'
-);
-echo '<p>create user: </p><pre>';
-if ($r = $vm->createUser($create_user_param)){
-  print_r($r);
-} else {
-  var_dump($vm->error);
-}
-echo '</pre><p>repeat create user: </p><pre>';
-if ($r = $vm->createUser($create_user_param)){
-  print_r($a);
-} else {
-  var_dump($vm->error);
-}
-$create_domain_param = array(
-  'domain' => 'edw661.co',
-  'pass' => 'mugendi',
-  'dns' => 1,
-  'web' => 1
-  );
-  echo '</pre><p>create domain: </p><pre>';
-  print_r($vm->create_domain($create_domain_param));
-  $create_domain_param = array(
-  'domain' => 'edw4441.co',
-  'pass' => 'mugendi',
-  'dns' => 1,
-  'web' => 1
-  );
-  echo '</pre><p>create domain: </p><pre>';
-  print_r($vm->create_domain($create_domain_param));
-  $create_domain_param = array(
-  'domain' => 'edw155.co',
-  'pass' => 'mugendi',
-  'dns' => 1,
-  'web' => 1
-  );
-  echo '</pre><p>repeat create domain: </p><pre>';
-  print_r($vm->create_domain($create_domain_param));
-
-  $delete_domain_param = array(
-  'domain' => array('edw661.co', 'edw155.co')
-  );
-  echo '</pre><p>delete domain: </p><pre>';
-  print_r($vm->delete_domain($delete_domain_param));
-  echo '</pre><p>repeat delete domain: </p><pre>';
-  print_r($vm->delete_domain($delete_domain_param));
-
-  $disable_domain_param = array(
-  'domain' => 'edw4441.co',
-  'why' => 'No in use'
-  );
-  echo '</pre><p>disable domain: </p><pre>';
-  print_r($vm->disable_domain($disable_domain_param));
-  $enable_domain_param = array(
-  'domain' => 'edw4441.co'
-  );
-  echo '</pre><p>enable domain: </p><pre>';
-  print_r($vm->enable_domain($enable_domain_param));
-  echo '</pre><p>List domains: </p><pre>';
-  print_r($vm->list_domains());
-  echo '</pre>';
- *
- */

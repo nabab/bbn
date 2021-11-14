@@ -111,5 +111,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "Api",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

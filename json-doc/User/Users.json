@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class admin",
+        "description": "Class admin\n",
         "tags": {
             "package": "bbn\\User\nWay to manipulate and access user tables without using user as argument (without auth, for CLI purpose)"
         }
@@ -176,7 +176,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -188,7 +189,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A database connection"
                 }
             ]
         },
@@ -655,5 +657,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\User",
     "shortName": "Users",
-    "summary": "Class admin"
+    "summary": "Class admin",
+    "description": "",
+    "description_parts": []
 }

@@ -37,5 +37,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Cache",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

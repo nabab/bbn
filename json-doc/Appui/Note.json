@@ -14,7 +14,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Note.php",
     "startLine": 20,
-    "endLine": 1436,
+    "endLine": 1462,
     "contentConstructor": {
         "file": "bbn\\Appui\\Note",
         "returns": null
@@ -71,7 +71,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -376,7 +377,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "note"
                 },
                 {
                     "name": "title",
@@ -757,7 +759,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "note"
                 }
             ]
         },
@@ -794,7 +797,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "note"
                 }
             ]
         },
@@ -828,7 +832,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "note"
                 },
                 {
                     "name": "url",
@@ -871,7 +876,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "note"
                 }
             ]
         },
@@ -1649,7 +1655,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "media"
                 }
             ]
         },
@@ -1683,7 +1690,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "note"
                 }
             ]
         },
@@ -1717,7 +1725,102 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "event"
+                }
+            ]
+        },
+        "removeNoteEvent": {
+            "name": "removeNoteEvent",
+            "summary": "Removes the row corresponding to the given arguments from bbn_notes_events.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_note, string $id_event)\n  {\n    return $this->_remove_note_event($id_note, $id_event);\n  }",
+            "startLine": 1377,
+            "endLine": 1380,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_note",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "note"
+                },
+                {
+                    "name": "id_event",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "event"
+                }
+            ]
+        },
+        "insertNoteEvent": {
+            "name": "insertNoteEvent",
+            "summary": "If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_note, string $id_event)\n  {\n    return $this->_insert_note_event($id_note, $id_event);\n  }",
+            "startLine": 1390,
+            "endLine": 1393,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_note",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "note"
+                },
+                {
+                    "name": "id_event",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "event"
                 }
             ]
         },
@@ -2647,7 +2750,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return !!$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
             "startLine": 99,
             "endLine": 108,
             "isDeprecated": false,
@@ -2834,7 +2937,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A list of tags which will be retrieved or added"
+                    "description": "element The ID of the element to which attach the tags"
                 },
                 {
                     "name": "tags",
@@ -2843,7 +2946,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A list of tags which will be retrieved or added"
                 },
                 {
                     "name": "lang",
@@ -3081,7 +3185,7 @@
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 71,
+    "numMethods": 73,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 4,
@@ -3202,5 +3306,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Note",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

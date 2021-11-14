@@ -114,7 +114,7 @@ class Dashboard
    */
   public function exists(string $code)
   {
-    return !!$this->getId($code);
+    return (bool)$this->getId($code);
   }
 
 
@@ -378,7 +378,7 @@ class Dashboard
       throw new \Exception(_("The id must be a uuid"));
     }
 
-    return !!$this->opt->set($id, $this->_prepareNativeWidget($widget));
+    return (bool)$this->opt->set($id, $this->_prepareNativeWidget($widget));
   }
 
 
@@ -420,7 +420,7 @@ class Dashboard
     if (!Str::isUid($idParent)) {
       throw new \Exception(_("The parent id must be a uuid"));
     }
-    return !!$this->opt->move($id, $idParent);
+    return (bool)$this->opt->move($id, $idParent);
   }
 
 
@@ -474,7 +474,7 @@ class Dashboard
    */
   public function sort(array $order): ?int
   {
-    if (!empty($order) && !!$this->id) {
+    if (!empty($order) && (bool)$this->id) {
       $changed = 0;
       if ($uDash = $this->getUserDashboard($this->id)) {
         $uCfg = Str::isJson($uDash[$this->archPref['cfg']]) ? json_decode($uDash[$this->archPref['cfg']], true) : [];
@@ -523,7 +523,7 @@ class Dashboard
 
   public function get()
   {
-    return !!$this->id ? $this->pref->get($this->id) : null;
+    return (bool)$this->id ? $this->pref->get($this->id) : null;
   }
 
 
@@ -894,7 +894,7 @@ class Dashboard
     $res = [];
     /** @var array The user's own preferences */
     $widgetPrefs = [];
-    if (!!$this->id) {
+    if ((bool)$this->id) {
       // Looking for some preferences if he has some
       if (($uDash = $this->getUserDashboard($this->id))
         && !empty($uDash[$this->archPref['cfg']])
@@ -995,7 +995,7 @@ class Dashboard
    */
   private function _getWidgetPref(): array
   {
-    if (!!$this->id) {
+    if ((bool)$this->id) {
       $t = $this;
       // Get the personal user's widgets
       if (!$prefs = $this->pref->getAll($this->id)) {
@@ -1011,7 +1011,7 @@ class Dashboard
               $t->archPref['id_option'] => $p[$t->archPref['id_option']],
               $t->archPref['text'] => $p[$t->archPref['text']],
               $t->archPref['num'] => $p[$t->archPref['num']],
-              'hidden' => isset($p['hidden']) ? !!$p['hidden'] : false
+              'hidden' => isset($p['hidden']) ? (bool)$p['hidden'] : false
             ],
             $p['widget']
           );

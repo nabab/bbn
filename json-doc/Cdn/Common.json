@@ -101,5 +101,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Cdn",
     "shortName": "Common",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

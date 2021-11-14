@@ -323,7 +323,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Configuration array"
                 }
             ]
         },
@@ -617,5 +618,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "Sync",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

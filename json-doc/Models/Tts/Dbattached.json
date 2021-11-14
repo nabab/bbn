@@ -69,5 +69,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Dbattached",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

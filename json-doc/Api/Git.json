@@ -3608,5 +3608,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api",
     "shortName": "Git",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

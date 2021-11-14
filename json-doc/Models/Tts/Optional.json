@@ -419,5 +419,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Optional",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

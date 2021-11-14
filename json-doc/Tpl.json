@@ -126,5 +126,7 @@
     "extensionName": false,
     "namespaceName": "bbn",
     "shortName": "Tpl",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

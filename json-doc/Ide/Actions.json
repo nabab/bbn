@@ -344,5 +344,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Ide",
     "shortName": "Actions",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

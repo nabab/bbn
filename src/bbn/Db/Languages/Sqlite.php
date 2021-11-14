@@ -1044,7 +1044,7 @@ class Sqlite extends Sql
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
 
       $res = $this->rawQuery(sprintf("ALTER TABLE %s RENAME TO %s", $t1, $t2));
-      return !!$res;
+      return (bool)$res;
     }
 
     return false;

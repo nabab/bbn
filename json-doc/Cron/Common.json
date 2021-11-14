@@ -738,5 +738,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Cron",
     "shortName": "Common",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

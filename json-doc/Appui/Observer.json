@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class observer",
+        "description": "Class observer\n",
         "tags": {
             "package": "bbn\\Appui"
         }
@@ -68,7 +68,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -279,7 +280,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "user"
                 }
             ]
         },
@@ -819,5 +821,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Observer",
-    "summary": "Class observer"
+    "summary": "Class observer",
+    "description": "",
+    "description_parts": []
 }

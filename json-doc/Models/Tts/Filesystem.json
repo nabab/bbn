@@ -36,5 +36,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Filesystem",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

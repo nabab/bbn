@@ -150,13 +150,8 @@
         "__destruct": {
             "name": "__destruct",
             "summary": "Closes the imap stream.",
-            "description": "*",
-            "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                }
-            ],
+            "description": "",
+            "description_parts": [],
             "file": "bbn\\Appui\\Mailbox",
             "static": false,
             "visibility": "public",
@@ -607,7 +602,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Mailbox name"
                 }
             ]
         },
@@ -641,7 +637,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Mailbox"
                 }
             ]
         },
@@ -676,7 +673,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "New mailbox name"
+                    "description": "Old mailbox name"
                 },
                 {
                     "name": "new",
@@ -685,7 +682,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "New mailbox name"
                 }
             ]
         },
@@ -743,7 +741,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Current mailbox folder"
                 }
             ]
         },
@@ -801,7 +800,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Current mailbox folder"
                 }
             ]
         },
@@ -859,7 +859,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Mailbox folder"
                 }
             ]
         },
@@ -917,7 +918,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Current mailbox folder"
                 }
             ]
         },
@@ -959,7 +961,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Simple\/full mailbox name"
                 }
             ]
         },
@@ -1119,7 +1122,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Set this to 1 for reverse sorting"
+                    "description": "Pass it without quote or double quote"
                 },
                 {
                     "name": "reverse",
@@ -1128,7 +1131,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Set this to 1 for reverse sorting"
                 }
             ]
         },
@@ -1411,7 +1415,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Set this to 1 for reverse sorting"
+                    "description": "Pass it without quote or double quote"
                 },
                 {
                     "name": "reverse",
@@ -1420,7 +1424,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Set this to 1 for reverse sorting"
                 }
             ]
         },
@@ -1522,7 +1527,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "UID of the message"
                 }
             ]
         },
@@ -1556,7 +1562,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "No of the message"
                 }
             ]
         },
@@ -1591,7 +1598,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Set true f the msgnum is a UID"
+                    "description": "No of the message"
                 },
                 {
                     "name": "uid",
@@ -1600,7 +1607,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Set true f the msgnum is a UID"
                 }
             ]
         },
@@ -1634,7 +1642,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "UID of the message"
                 }
             ]
         },
@@ -1669,7 +1678,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Destination mailbox name"
+                    "description": "UID of the message"
                 },
                 {
                     "name": "tombox",
@@ -1678,7 +1687,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Destination mailbox name"
                 }
             ]
         },
@@ -1737,7 +1747,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The part number"
+                    "description": "No of the message"
                 },
                 {
                     "name": "part",
@@ -1746,7 +1756,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The part number"
                 }
             ]
         },
@@ -1786,7 +1797,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The flag\/s. Ex. \"\\\\Seen \\\\Flagged\""
+                    "description": "A sequence of message numbers. Ex. \"2,5,6\" or \"2:5:6\""
                 },
                 {
                     "name": "flg",
@@ -1796,7 +1807,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Set this to true to remove flag\/s"
+                    "description": "The flag\/s. Ex. \"\\\\Seen \\\\Flagged\""
                 },
                 {
                     "name": "remove",
@@ -1805,18 +1816,19 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Set this to true to remove flag\/s"
                 }
             ]
         },
         "search": {
             "name": "search",
             "summary": "Search messages. (Test: ok)",
-            "description": "Returns an array of UIDs.\n   *\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\\\ANSWERED flag set\nBCC \"string\" - match messages with \"string\" in the Bcc: field\nBEFORE \"date\" - match messages with Date: before \"date\"\nBODY \"string\" - match messages with \"string\" in the body of the message\nCC \"string\" - match messages with \"string\" in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM \"string\" - match messages with \"string\" in the From: field\nKEYWORD \"string\" - match messages with \"string\" as a keyword\nNEW - match new messages\nOLD - match old messages\nON \"date\" - match messages with Date: matching \"date\"\nRECENT - match messages with the \\\\RECENT flag set\nSEEN - match messages that have been read (the \\\\SEEN flag is set)\nSINCE \"date\" - match messages with Date: after \"date\"\nSUBJECT \"string\" - match messages with \"string\" in the Subject:\nTEXT \"string\" - match messages with text \"string\"\nTO \"string\" - match messages with \"string\" in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD \"string\" - match messages that do not have the keyword \"string\"\nUNSEEN - match messages which have not been read yet",
+            "description": "Returns an array of UIDs.\n\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\\\ANSWERED flag set\nBCC \"string\" - match messages with \"string\" in the Bcc: field\nBEFORE \"date\" - match messages with Date: before \"date\"\nBODY \"string\" - match messages with \"string\" in the body of the message\nCC \"string\" - match messages with \"string\" in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM \"string\" - match messages with \"string\" in the From: field\nKEYWORD \"string\" - match messages with \"string\" as a keyword\nNEW - match new messages\nOLD - match old messages\nON \"date\" - match messages with Date: matching \"date\"\nRECENT - match messages with the \\\\RECENT flag set\nSEEN - match messages that have been read (the \\\\SEEN flag is set)\nSINCE \"date\" - match messages with Date: after \"date\"\nSUBJECT \"string\" - match messages with \"string\" in the Subject:\nTEXT \"string\" - match messages with text \"string\"\nTO \"string\" - match messages with \"string\" in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD \"string\" - match messages that do not have the keyword \"string\"\nUNSEEN - match messages which have not been read yet",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Returns an array of UIDs.\n*\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\ANSWERED flag set\nBCC &quot;string&quot; - match messages with &quot;string&quot; in the Bcc: field\nBEFORE &quot;date&quot; - match messages with Date: before &quot;date&quot;\nBODY &quot;string&quot; - match messages with &quot;string&quot; in the body of the message\nCC &quot;string&quot; - match messages with &quot;string&quot; in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM &quot;string&quot; - match messages with &quot;string&quot; in the From: field\nKEYWORD &quot;string&quot; - match messages with &quot;string&quot; as a keyword\nNEW - match new messages\nOLD - match old messages\nON &quot;date&quot; - match messages with Date: matching &quot;date&quot;\nRECENT - match messages with the \\RECENT flag set\nSEEN - match messages that have been read (the \\SEEN flag is set)\nSINCE &quot;date&quot; - match messages with Date: after &quot;date&quot;\nSUBJECT &quot;string&quot; - match messages with &quot;string&quot; in the Subject:\nTEXT &quot;string&quot; - match messages with text &quot;string&quot;\nTO &quot;string&quot; - match messages with &quot;string&quot; in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD &quot;string&quot; - match messages that do not have the keyword &quot;string&quot;\nUNSEEN - match messages which have not been read yet<\/p>"
+                    "content": "<p>Returns an array of UIDs.<\/p>\n<p>Arguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\ANSWERED flag set\nBCC &quot;string&quot; - match messages with &quot;string&quot; in the Bcc: field\nBEFORE &quot;date&quot; - match messages with Date: before &quot;date&quot;\nBODY &quot;string&quot; - match messages with &quot;string&quot; in the body of the message\nCC &quot;string&quot; - match messages with &quot;string&quot; in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM &quot;string&quot; - match messages with &quot;string&quot; in the From: field\nKEYWORD &quot;string&quot; - match messages with &quot;string&quot; as a keyword\nNEW - match new messages\nOLD - match old messages\nON &quot;date&quot; - match messages with Date: matching &quot;date&quot;\nRECENT - match messages with the \\RECENT flag set\nSEEN - match messages that have been read (the \\SEEN flag is set)\nSINCE &quot;date&quot; - match messages with Date: after &quot;date&quot;\nSUBJECT &quot;string&quot; - match messages with &quot;string&quot; in the Subject:\nTEXT &quot;string&quot; - match messages with text &quot;string&quot;\nTO &quot;string&quot; - match messages with &quot;string&quot; in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD &quot;string&quot; - match messages that do not have the keyword &quot;string&quot;\nUNSEEN - match messages which have not been read yet<\/p>"
                 }
             ],
             "file": "bbn\\Appui\\Mailbox",
@@ -1879,7 +1891,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Message"
+                    "description": "Destination mailbox name"
                 },
                 {
                     "name": "msg",
@@ -1888,7 +1900,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Message"
                 }
             ]
         },
@@ -1922,7 +1935,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The mailbox name"
                 }
             ]
         },
@@ -2377,5 +2391,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Mailbox",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

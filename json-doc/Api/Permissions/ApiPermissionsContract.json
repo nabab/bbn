@@ -155,5 +155,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "ApiPermissionsContract",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

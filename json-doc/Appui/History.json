@@ -1860,5 +1860,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "History",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

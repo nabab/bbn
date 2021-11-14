@@ -289,7 +289,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "ame The new name."
+                    "description": "The current table's name"
                 },
                 {
                     "name": "newName",
@@ -298,7 +298,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ame The new name."
                 }
             ]
         },
@@ -334,7 +335,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The table's name"
                 }
             ]
         },
@@ -460,5 +462,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "SqlEngines",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

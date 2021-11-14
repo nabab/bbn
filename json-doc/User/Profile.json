@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "A user authentication Class",
+        "description": "A user authentication Class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Authentication",
@@ -167,5 +168,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\User",
     "shortName": "Profile",
-    "summary": "A user authentication Class"
+    "summary": "A user authentication Class",
+    "description": "",
+    "description_parts": []
 }

@@ -94,5 +94,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Singleton",
-    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one."
+    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
+    "description": "",
+    "description_parts": []
 }

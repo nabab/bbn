@@ -1,0 +1,766 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Entities\\AbstractLinkType",
+    "namespace": true,
+    "traits": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/AbstractLinkType.php",
+    "startLine": 11,
+    "endLine": 550,
+    "contentConstructor": {
+        "file": "bbn\\Entities\\AbstractLinkType",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\Entities\\EntityInterface $entity, bbn\\Db $db, array $cfg = [])\n  {\n    $this->db       = $db;\n    $this->entity   = $entity;\n    $this->options  = Option::getInstance();\n    $this->_init_class_cfg($cfg);\n    $this->setType();\n  }",
+            "startLine": 70,
+            "endLine": 77,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "entity",
+                    "position": 0,
+                    "type": "bbn\\Entities\\EntityInterface",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "bbn\\Db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAll": {
+            "name": "getAll",
+            "summary": "Returns an array of link objects or empty array if no result found.",
+            "description": "```php\nX::dump($link->getAll());\n\n\/\/ (array) [\n bbn\\Entities\\Link {\n   stdClass Object 'link': {\n    'id': '0ab0986031be11ecbb0c37346045384d',\n    'type_lien': '0a9ebf0a31be11ecbb0c37346045384d',\n    'id_adherent': 99,\n    'id_tiers': '0aa1830231be11ecbb0c37346045384d',\n    'id_lieu': '0aa8204031be11ecbb0c37346045384d',\n     'id_option': '0aa9758a31be11ecbb0c37346045384d',\n    'cfg': null,\n  }\n stdClass Object 'people': {\n     'id': '0aa1830231be11ecbb0c37346045384d',\n     'nom': 'a',\n     'prenom': 'aa',\n     'civilite': 'M',\n     'fullname': 'M aa a',\n     'email': null,\n     'portable': null,\n     'cfg': null\n    },\n stdClass Object 'address': {\n      'id': '0aa8204031be11ecbb0c37346045384d',\n      'adresse': 'address A',\n      'cp': 123,\n      'ville': 'Martigues',\n      'id_country': null,\n      'tel': null,\n      'fax': null,\n      'email': null\n     },\n  stdClass Object 'option': {\n       'id': '0aa9758a31be11ecbb0c37346045384d',\n       'id_parent': '0aa8db0c31be11ecbb0c37346045384d',\n       'id_alias': null,\n       'num': null,\n       'code': 'P',\n       'text': 'foo',\n       'value': null,\n       'cfg': null\n     }\n   }\n]\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($link->getAll());\n\n\/\/ (array) [\n bbn\\Entities\\Link {\n   stdClass Object 'link': {\n    'id': '0ab0986031be11ecbb0c37346045384d',\n    'type_lien': '0a9ebf0a31be11ecbb0c37346045384d',\n    'id_adherent': 99,\n    'id_tiers': '0aa1830231be11ecbb0c37346045384d',\n    'id_lieu': '0aa8204031be11ecbb0c37346045384d',\n     'id_option': '0aa9758a31be11ecbb0c37346045384d',\n    'cfg': null,\n  }\n stdClass Object 'people': {\n     'id': '0aa1830231be11ecbb0c37346045384d',\n     'nom': 'a',\n     'prenom': 'aa',\n     'civilite': 'M',\n     'fullname': 'M aa a',\n     'email': null,\n     'portable': null,\n     'cfg': null\n    },\n stdClass Object 'address': {\n      'id': '0aa8204031be11ecbb0c37346045384d',\n      'adresse': 'address A',\n      'cp': 123,\n      'ville': 'Martigues',\n      'id_country': null,\n      'tel': null,\n      'fax': null,\n      'email': null\n     },\n  stdClass Object 'option': {\n       'id': '0aa9758a31be11ecbb0c37346045384d',\n       'id_parent': '0aa8db0c31be11ecbb0c37346045384d',\n       'id_alias': null,\n       'num': null,\n       'code': 'P',\n       'text': 'foo',\n       'value': null,\n       'cfg': null\n     }\n   }\n]"
+                }
+            ],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bool $included_deleted = false)\n  {\n    $r = [];\n\n    if ($links = $this->fetch()) {\n      $id_tiers   = [];\n      $id_lieu    = [];\n      $id_options = [];\n\n      $f = $this->fields;\n      foreach ($links as $link) {\n        if ($link[$f['id_people']] !== null) {\n          $id_tiers[] = $this->parseId($link[$f['id_people']]);\n        }\n\n        if ($link[$f['id_address']] !== null) {\n          $id_lieu[] = $this->parseId($link[$f['id_address']]);\n        }\n\n        if ($link[$f['id_option']] !== null) {\n          $id_options[] = $this->parseId($link[$f['id_option']]);\n        }\n      }\n\n      \/\/ Here will fetch ALL linked items for all results in just 3 queries\n      \/\/ Then later will assign every link together\n      \/\/ To avoid executing too many queries\n      $tables = $this->class_cfg['tables'];\n\n      $people    = $this->fetchLinks($tables['people'], $id_tiers);\n      $addresses = $this->fetchLinks($tables['addresses'], $id_lieu);\n      $options   = $this->fetchLinks($tables['options'], $id_options);\n\n      foreach ($links as $link) {\n        $r[] = new Link(\n          $link,\n          $this->getLinkedItem($people, $link[$f['id_people']]),\n          $this->getLinkedItem($addresses, $link[$f['id_address']]),\n          $this->getLinkedItem($options, $link[$f['id_option']])\n        );\n      }\n    }\n\n    return $r;\n  }",
+            "startLine": 151,
+            "endLine": 195,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "included_deleted",
+                    "position": 0,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "deleted"
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "Returns a Link object from the given id or null if not exists.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ($link = $this->fetch('one', [$this->fields['id'] => $id])) {\n      $f      = $this->fields;\n      $tables = $this->class_cfg['tables'];\n\n      $people = $link[$f['id_people']] !== null\n        ? $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']])], 'one')\n        : null;\n\n      $address = $link[$f['id_address']] !== null\n        ? $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']])], 'one')\n        : null;\n\n      $option = $link[$f['id_option']] !== null\n        ? $this->fetchLinks($tables['options'], [$this->parseId($link[$f['id_option']])], 'one')\n        : null;\n\n      return new Link($link, $people, $address, $option);\n    }\n\n    return null;\n  }",
+            "startLine": 204,
+            "endLine": 226,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bbn\\Entities\\Link",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_id_by_tiers": {
+            "name": "_id_by_tiers",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_tiers)\n  {\n    if ($id = $this->fetch('field', [\n      $this->fields['id_people'] => $id_tiers\n    ], $this->fields['id'])) {\n      return $id;\n    }\n\n    return null;\n  }",
+            "startLine": 233,
+            "endLine": 242,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_tiers",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_id_by_lieu": {
+            "name": "_id_by_lieu",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_lieu)\n  {\n    if ($id = $this->fetch('field', [\n      $this->fields['id_address'] => $id_lieu\n    ], $this->fields['id'])) {\n      return $id;\n    }\n\n    return null;\n  }",
+            "startLine": 249,
+            "endLine": 258,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_lieu",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "count": {
+            "name": "count",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bool $included_deleted = false)\n  {\n    return $this->db->count(\n      $this->class_table, [\n        $this->fields['id_entity'] => $this->entity->getId(),\n        $this->fields['type_link'] => $this->type\n      ]\n    );\n  }",
+            "startLine": 264,
+            "endLine": 272,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "included_deleted",
+                    "position": 0,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "deleted"
+                }
+            ]
+        },
+        "insert": {
+            "name": "insert",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n     $f = $this->fields;\n    if (($cfg = $this->input($cfg)) && (isset($cfg[$f['id_people']]) || isset($cfg[$f['id_address']]))) {\n      $param = [];\n      foreach ($cfg as $k => $v){\n        if (!in_array($k, $this->fields)) {\n          $param[$k] = $v;\n          unset($cfg[$k]);\n        }\n      }\n\n      if (!empty($param)) {\n        $cfg[$f['cfg']] = json_encode($param);\n      }\n\n      $cfg[$f['id_entity']] = $this->entity->getId();\n      $cfg[$f['type_link']]   = $this->type;\n\n      if (\\array_key_exists($f['id'], $cfg)) {\n        unset($cfg[$f['id']]);\n      }\n\n      if ($this->db->insert($this->class_table, $cfg)) {\n        return $this->output($this->db->lastId());\n      }\n\n      $this->error(\"Insert\", false);\n      return false;\n    }\n\n    $this->error(\"Insert\");\n    return false;\n  }",
+            "startLine": 279,
+            "endLine": 312,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update": {
+            "name": "update",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    $f = $this->fields;\n    if (($cfg = $this->input($cfg))\n        && isset($cfg[$f['id']])\n        && (isset($cfg[$f['id_people']]) || isset($cfg[$f['id_address']]))\n    ) {\n      $param = [];\n      foreach ($cfg as $k => $v){\n        if (!in_array($k, $this->fields)) {\n          $param[$k] = $v;\n          unset($cfg[$k]);\n        }\n      }\n\n      $cfg[$f['cfg']] = json_encode($param);\n\n      $id = $cfg[$f['id']];\n      unset($cfg[$f['id']]);\n\n      if ($this->db->update($this->class_table, $cfg, [\n        $f['id'] => $id, $f['id_entity'] => $this->entity->getId()]\n      )) {\n        return $this->output($id);\n      }\n\n      $this->error(\"Update\", false);\n      return false;\n    }\n\n    $this->error(\"Update\");\n    return false;\n  }",
+            "startLine": 320,
+            "endLine": 352,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_st": {
+            "name": "get_st",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ($id instanceof Link) {\n      $r    = $id;\n      $link = (array)$id->link;\n    }\n    elseif ($r = $this->get($id)) {\n      $link = (array)$r->link;\n    }\n    else {\n      return null;\n    }\n\n    foreach ($link as $k => $v) {\n      switch ($k) {\n        case $this->fields['id_people']:\n          $link[$k] = $this->entity->fnom((array)$r->people);\n          break;\n        case $this->fields['id_address']:\n          $link[$k] = $this->entity->fadresse((array)$r->address);\n          break;\n        case $this->fields['id_entity']:\n          $cfg = $this->class_cfg;\n          $f   = $cfg['arch']['entities'];\n          $link[$k] = $this->db->selectOne($cfg['tables']['entities'], $f['name'], [\n            $f['id'] => $v\n          ]);\n          break;\n      }\n    }\n\n    return $link;\n  }",
+            "startLine": 359,
+            "endLine": 391,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_all_st": {
+            "name": "get_all_st",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bool $included_deleted = false)\n  {\n    $r = [];\n    if ($liens = $this->getAll($included_deleted)) {\n      foreach ($liens as $lien){\n        array_push($r, $this->get_st($lien));\n      }\n    }\n\n    return $r;\n  }",
+            "startLine": 397,
+            "endLine": 407,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "included_deleted",
+                    "position": 0,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "deleted"
+                }
+            ]
+        },
+        "get_ids": {
+            "name": "get_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bool $included_deleted = false)\n  {\n    return $this->db->getColumnValues(\n      $this->class_table, $this->fields['id'], [\n        $this->fields['id_entity'] => $this->entity->getId(),\n        $this->fields['type_link'] => $this->type\n      ]\n    );\n  }",
+            "startLine": 413,
+            "endLine": 421,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "included_deleted",
+                    "position": 0,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "deleted"
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $param = [\n      $this->fields['id_entity'] => $this->entity->getId(),\n      $this->fields['id'] => $id,\n      $this->fields['type_link'] => $this->type\n    ];\n\n    if ($this->db->delete($this->class_table, $param)) {\n      return $id;\n    }\n\n    $this->error(\"Delete\");\n    return false;\n  }",
+            "startLine": 428,
+            "endLine": 442,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "error": {
+            "name": "error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($message, $die = true)\n  {\n    $this->entity->error(\"Error while executing $message with \".get_class($this), $die);\n  }",
+            "startLine": 448,
+            "endLine": 451,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "message",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "die",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if (!$this->class_table_index) {\n      throw new \\Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $res = $this->db->count(\n      $this->class_table, [\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n      ]\n    );\n    return (bool)$res;\n  }",
+            "startLine": 35,
+            "endLine": 47,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getClassCfg": {
+            "name": "getClassCfg",
+            "summary": "Returns the class configuration.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "startLine": 55,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getFields": {
+            "name": "getFields",
+            "summary": "Returns the fields of the main table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->fields;\n  }",
+            "startLine": 66,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "select": {
+            "name": "select",
+            "summary": "Retrieves a row from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    if ($this->exists($id)) {\n      $f = $this->class_cfg['arch'][$this->class_table_index];\n      if ($arr = $this->db->rselect(\n        $this->class_table, array_values($f), [\n          $f['id'] => $id\n        ]\n      )) {\n        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {\n          $cfg = json_decode($arr[$f['cfg']], true);\n          $arr = array_merge($cfg, $arr);\n          unset($arr[$f['cfg']]);\n        }\n\n        return $arr;\n      }\n    }\n\n    return null;\n\n  }",
+            "startLine": 146,
+            "endLine": 167,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "selectAll": {
+            "name": "selectAll",
+            "summary": "Returns an array of rows from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\AbstractLinkType",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cond)\n  {\n    if (!$this->class_table_index) {\n      throw new \\Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if ($arrs = $this->db->rselectAll($this->class_table, array_values($f), $cond)) {\n      foreach ($arrs as &$arr) {\n        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {\n          $cfg = json_decode($arr[$f['cfg']], true);\n          $arr = array_merge($cfg, $arr);\n          unset($arr[$f['cfg']]);\n        }\n      }\n      unset($arr);\n\n      return $arrs;\n    }\n\n    return [];\n  }",
+            "startLine": 177,
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cond",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": {
+        "default_class_cfg": {
+            "table": "bbn_links",
+            "tables": {
+                "links": "bbn_links",
+                "people": "bbn_people",
+                "addresses": "bbn_addresses",
+                "options": "bbn_options",
+                "entities": "bbn_entities"
+            },
+            "arch": {
+                "links": {
+                    "id": "id",
+                    "id_entity": "id_entity",
+                    "type_link": "type_link",
+                    "id_people": "id_people",
+                    "id_address": "id_address",
+                    "id_option": "id_option",
+                    "cfg": "cfg"
+                },
+                "entities": {
+                    "id": "id",
+                    "name": "nom"
+                }
+            }
+        }
+    },
+    "constants": null,
+    "numMethods": 18,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": true,
+    "isFinal": false,
+    "modifiers": 64,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_links",
+            "tables": {
+                "links": "bbn_links",
+                "people": "bbn_people",
+                "addresses": "bbn_addresses",
+                "options": "bbn_options",
+                "entities": "bbn_entities"
+            },
+            "arch": {
+                "links": {
+                    "id": "id",
+                    "id_entity": "id_entity",
+                    "type_link": "type_link",
+                    "id_people": "id_people",
+                    "id_address": "id_address",
+                    "id_option": "id_option",
+                    "cfg": "cfg"
+                },
+                "entities": {
+                    "id": "id",
+                    "name": "nom"
+                }
+            }
+        },
+        "db": null,
+        "entity": null,
+        "options": null,
+        "type": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Entities",
+    "shortName": "AbstractLinkType",
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

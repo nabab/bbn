@@ -18,13 +18,8 @@
         "__construct": {
             "name": "__construct",
             "summary": "Constructor",
-            "description": "*",
-            "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                }
-            ],
+            "description": "",
+            "description_parts": [],
             "file": "bbn\\Appui\\Api",
             "static": false,
             "visibility": "public",
@@ -117,7 +112,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return !!$this->_get_key();\n  }",
+            "code": "function()\n  {\n    return (bool)$this->_get_key();\n  }",
             "startLine": 79,
             "endLine": 82,
             "isDeprecated": false,
@@ -682,5 +677,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Api",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

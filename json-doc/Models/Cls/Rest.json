@@ -20,13 +20,8 @@
         "__construct": {
             "name": "__construct",
             "summary": "instantiate the class infolegale",
-            "description": "*",
-            "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                }
-            ],
+            "description": "",
+            "description_parts": [],
             "file": "bbn\\Models\\Cls\\Rest",
             "static": false,
             "visibility": "public",
@@ -570,5 +565,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Cls",
     "shortName": "Rest",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

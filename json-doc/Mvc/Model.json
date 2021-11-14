@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Model View Controller Class\n *\n *\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
+        "description": "Model View Controller Class\n\n\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "MVC",
@@ -81,7 +82,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -94,7 +96,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The full path to the model's file"
+                    "description": "The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books\/466565 or html\/home)<\/em>"
                 },
                 {
                     "name": "info",
@@ -104,7 +106,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The parent controller"
+                    "description": "The full path to the model's file"
                 },
                 {
                     "name": "ctrl",
@@ -114,7 +116,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The parent MVC"
+                    "description": "The parent controller"
                 },
                 {
                     "name": "mvc",
@@ -123,7 +125,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The parent MVC"
                 }
             ]
         },
@@ -2245,7 +2248,7 @@
         "db": {
             "visibility": "public",
             "doc": {
-                "description": "The database connection instance",
+                "description": "The database connection instance\n",
                 "tags": [
                     {
                         "tag": "var",
@@ -2273,7 +2276,7 @@
         "data": {
             "visibility": "public",
             "doc": {
-                "description": "The data model",
+                "description": "The data model\n",
                 "tags": [
                     {
                         "tag": "var",
@@ -2285,7 +2288,7 @@
         "inc": {
             "visibility": "public",
             "doc": {
-                "description": "An external object that can be filled after the object creation and can be used as a global with the function add_inc",
+                "description": "An external object that can be filled after the object creation and can be used as a global with the function add_inc\n",
                 "tags": [
                     {
                         "tag": "var",
@@ -2337,11 +2340,11 @@
     "namespaceName": "bbn\\Mvc",
     "shortName": "Model",
     "summary": "Model View Controller Class",
-    "description": "*\n *\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
+    "description": "This class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class<\/p>"
+            "content": "<p>This class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class<\/p>"
         }
     ]
 }

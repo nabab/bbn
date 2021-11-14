@@ -112,5 +112,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Obj",
     "shortName": "Entity",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

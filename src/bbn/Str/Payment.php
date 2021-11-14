@@ -59,7 +59,7 @@ class Payment
   public static function check(string $number, string $type): bool
   {
     if ($row = X::getRow(self::$regexps, ['type' => $type])) {
-      return !!preg_match($row['regex'], $number);
+      return (bool)preg_match($row['regex'], $number);
     }
 
     return false;

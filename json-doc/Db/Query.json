@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "An extended approach of the PDOStatement object",
+        "description": "An extended approach of the PDOStatement object\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -1872,5 +1873,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "Query",
-    "summary": "An extended approach of the PDOStatement object"
+    "summary": "An extended approach of the PDOStatement object",
+    "description": "",
+    "description_parts": []
 }

@@ -588,5 +588,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Clipboard",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

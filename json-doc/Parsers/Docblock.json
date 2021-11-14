@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Documentation block parser",
+        "description": "Documentation block parser\n",
         "tags": {
+            "author": "Mirko Argentino <mirko@bbn.solutions>",
             "copyright": "BBN Solutions",
             "category": "Parsers",
             "version": "1.0"
@@ -758,5 +759,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Parsers",
     "shortName": "Docblock",
-    "summary": "Documentation block parser"
+    "summary": "Documentation block parser",
+    "description": "",
+    "description_parts": []
 }

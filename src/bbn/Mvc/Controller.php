@@ -7,7 +7,6 @@ use bbn\X;
 
 class Controller implements Api
 {
-
   use Common;
 
   /**
@@ -354,7 +353,8 @@ class Controller implements Api
         return '';
       }
 
-      if (($prepath = $this->getPrepath())
+      if (
+          ($prepath = $this->getPrepath())
           && (strpos($p, $prepath) === 0)
       ) {
         return substr($p, \strlen($prepath));
@@ -412,7 +412,7 @@ class Controller implements Api
    * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
    * @return void
    */
-  public function reroute($path='', $post = false, $arguments = false)
+  public function reroute($path = '', $post = false, $arguments = false)
   {
     if (!\in_array($path, $this->_reroutes) && ($this->_path !== $path)) {
       $this->_reroutes[] = $path;
@@ -431,13 +431,13 @@ class Controller implements Api
   public function incl($file_name)
   {
     if ($this->exists()) {
-      $d = X::dirname($this->_file).'/';
+      $d = X::dirname($this->_file) . '/';
       if (substr($file_name, -4) !== '.php') {
         $file_name .= '.php';
       }
 
-      if ((strpos($file_name, '..') === false) && file_exists($d.$file_name)) {
-        $bbn_path = $d.$file_name;
+      if ((strpos($file_name, '..') === false) && file_exists($d . $file_name)) {
+        $bbn_path = $d . $file_name;
         unset($d, $file_name);
         include $bbn_path;
       }
@@ -476,17 +476,18 @@ class Controller implements Api
   public function registerPluginClasses($plugin_path): self
   {
     spl_autoload_register(
-      function ($class_name) use ($plugin_path) {
-        if ((strpos($class_name,'/') === false)
-            && (strpos($class_name,'.') === false)
-        ) {
-          $cls  = explode('\\', $class_name);
-          $path = implode('/', $cls);
-          if (file_exists($plugin_path.'lib/'.$path.'.php')) {
-            include_once $plugin_path.'lib/'.$path.'.php';
+        function ($class_name) use ($plugin_path) {
+          if (
+              (strpos($class_name, '/') === false)
+              && (strpos($class_name, '.') === false)
+          ) {
+            $cls  = explode('\\', $class_name);
+            $path = implode('/', $cls);
+            if (file_exists($plugin_path . 'lib/' . $path . '.php')) {
+              include_once $plugin_path . 'lib/' . $path . '.php';
+            }
           }
         }
-      }
     );
     return $this;
   }
@@ -514,7 +515,7 @@ class Controller implements Api
         }
       }
 
-      foreach ($this->_checkers as $appui_checker_file){
+      foreach ($this->_checkers as $appui_checker_file) {
         // If a checker file returns false, the controller is not processed
         // The checker file can define data and inc that can be used in the subsequent controller
         if (self::includeController($appui_checker_file, $this, true) === false) {
@@ -606,7 +607,7 @@ class Controller implements Api
    * @param string $path
    * @return string|false
    */
-  public function getJs($path='', array $data=null, $encapsulated = true)
+  public function getJs($path = '', array $data = null, $encapsulated = true)
   {
     $params = func_get_args();
     // The model can be set as first argument if the path is default
@@ -621,12 +622,12 @@ class Controller implements Api
     }
 
     if ($r = $this->getView($path, 'js', $data)) {
-      return '<script>'.
-        ( $encapsulated ? '(function(){'.PHP_EOL : '' ).
-        ( empty($data) ? '' : 'let data = '.X::jsObject($data).';' ).
-        $r.
+      return '<script>' .
+        ( $encapsulated ? '(function(){' . PHP_EOL : '' ) .
+        ( empty($data) ? '' : 'let data = ' . X::jsObject($data) . ';' ) .
+        $r .
         //( $encapsulated ? '})(jQuery);' : '' ).
-        ($encapsulated ? PHP_EOL.'})();' : '').
+        ($encapsulated ? PHP_EOL . '})();' : '') .
         '</script>';
     }
 
@@ -643,15 +644,15 @@ class Controller implements Api
    * @param boolean      $encapsulated
    * @return string|false
    */
-  public function getJsGroup($files='', array $data=null, $encapsulated = true)
+  public function getJsGroup($files = '', array $data = null, $encapsulated = true)
   {
     if ($js = $this->getViewGroup($files, $data, 'js')) {
-      return '<script>'.
-      ( $encapsulated ? '(function($){'.PHP_EOL : '' ).
-      ( empty($data) ? '' : 'let data = '.X::jsObject($data).';' ).
-      $js.
+      return '<script>' .
+      ( $encapsulated ? '(function($){' . PHP_EOL : '' ) .
+      ( empty($data) ? '' : 'let data = ' . X::jsObject($data) . ';' ) .
+      $js .
       //( $encapsulated ? '})(jQuery);' : '' ).
-      ( $encapsulated ? PHP_EOL.'})();' : '' ).
+      ( $encapsulated ? PHP_EOL . '})();' : '' ) .
       '</script>';
     }
 
@@ -667,7 +668,7 @@ class Controller implements Api
    * @param string       $mode
    * @return string|false
    */
-  public function getViewGroup($files='', array $data=null, $mode = 'html')
+  public function getViewGroup($files = '', array $data = null, $mode = 'html')
   {
     if (!\is_array($files)) {
       if (!($tmp = $this->_mvc->fetchDir($files, $mode))) {
@@ -680,7 +681,7 @@ class Controller implements Api
 
     if (\is_array($files) && \count($files)) {
       $st = '';
-      foreach ($files as $f){
+      foreach ($files as $f) {
         if ($tmp = $this->getView($f, $mode, $data)) {
           $st .= $tmp;
         }
@@ -699,7 +700,7 @@ class Controller implements Api
    * @param string $path
    * @return string|false
    */
-  public function getCss($path='')
+  public function getCss($path = '')
   {
     if ($r = $this->getView($path, 'css')) {
       return \CssMin::minify($r);
@@ -715,7 +716,7 @@ class Controller implements Api
    * @param string $path
    * @return string|false
    */
-  public function getLess($path='')
+  public function getLess($path = '')
   {
     return $this->getView($path, 'css', false);
   }
@@ -727,7 +728,7 @@ class Controller implements Api
    * @param string $path
    * @return self
    */
-  public function addCss($path='')
+  public function addCss($path = '')
   {
     if ($css = $this->getCss($path)) {
       if (!isset($this->obj->css)) {
@@ -747,7 +748,7 @@ class Controller implements Api
    * @param string $path
    * @return self
    */
-  public function addLess($path='')
+  public function addLess($path = '')
   {
     if ($css = $this->getLess($path)) {
       if (!isset($this->obj->css)) {
@@ -771,7 +772,7 @@ class Controller implements Api
   {
     $args     = \func_get_args();
     $has_path = false;
-    foreach ($args as $i => $a){
+    foreach ($args as $i => $a) {
       if ($new_data = $this->retrieveVar($a)) {
         $this->jsData($new_data);
       }
@@ -825,7 +826,7 @@ class Controller implements Api
    */
   public function setObj(array $arr)
   {
-    foreach ($arr as $k => $a){
+    foreach ($arr as $k => $a) {
       $this->obj->{$k} = $a;
     }
 
@@ -936,12 +937,13 @@ class Controller implements Api
         }
 
         if (!empty($tmp['html'])) {
-          $v              = new View($tmp['html']);
+          $v = new View($tmp['html']);
           if (!$data) {
             $data = [];
           }
+
           $data['componentName'] = $name;
-          $res['content'] = $v->get($data);
+          $res['content']        = $v->get($data);
         }
 
         return $res;
@@ -982,7 +984,7 @@ class Controller implements Api
   private function getArguments(array $args)
   {
     $r = [];
-    foreach ($args as $a){
+    foreach ($args as $a) {
       if ($new_data = $this->retrieveVar($a)) {
         $r['data'] = $new_data;
       }
@@ -1007,14 +1009,15 @@ class Controller implements Api
 
     if (empty($r['path'])) {
       $r['path'] = $this->_path;
-      if (($this->getMode() === 'dom')
+      if (
+          ($this->getMode() === 'dom')
           && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))
       ) {
         $r['path'] .= '/index';
       }
     }
     elseif (strpos($r['path'], './') === 0) {
-      $r['path'] = $this->getCurrentDir().substr($r['path'], 1);
+      $r['path'] = $this->getCurrentDir() . substr($r['path'], 1);
     }
 
     if (!isset($r['data'])) {
@@ -1072,7 +1075,7 @@ class Controller implements Api
    * @return false|string
    * @throws \Exception
    */
-  public function getExternalView(string $full_path, string $mode = 'html', ?array $data=null)
+  public function getExternalView(string $full_path, string $mode = 'html', ?array $data = null)
   {
     return $this->_mvc->getExternalView($full_path, $mode, $data);
   }
@@ -1096,6 +1099,29 @@ class Controller implements Api
 
     if ($plugin) {
       return $this->_mvc->customPluginView($path, $mode, $data, $plugin);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Retrieves a view of a custom plugin.
+   *
+   * @param string $path
+   * @param array $data
+   * @param string|null $plugin
+   *
+   * @return string|null
+   */
+  public function customPluginModel(string $path, array $data = [], string $plugin = null): ?string
+  {
+    if (!$plugin) {
+      $plugin = $this->getPlugin();
+    }
+
+    if ($plugin) {
+      return $this->_mvc->customPluginModel($path, $data, $this, $plugin);
     }
 
     return null;
@@ -1254,7 +1280,7 @@ class Controller implements Api
   public function cachedAction(int $ttl = 60)
   {
     $this->obj = X::toObject(
-      $this->addData(['res' => ['success' => false]])->addData($this->post)->getCachedModel('', $this->data, $ttl)
+        $this->addData(['res' => ['success' => false]])->addData($this->post)->getCachedModel('', $this->data, $ttl)
     );
   }
 
@@ -1285,7 +1311,7 @@ class Controller implements Api
         }
         elseif (end($bits) !== $basename) {
           $bits[] = $basename;
-          $path = X::join($bits, '/');
+          $path   = X::join($bits, '/');
         }
       }
     }
@@ -1323,7 +1349,7 @@ class Controller implements Api
     if ($this->mode === 'dom') {
       $this->data['script'] = $this->getJs($path, $data);
     }
-    else{
+    else {
       $this->addJs($path, $data, false);
     }
 
@@ -1340,11 +1366,12 @@ class Controller implements Api
    */
   public function getContent($file_name)
   {
-    if ($this->checkPath($file_name)
+    if (
+        $this->checkPath($file_name)
         && \defined('BBN_DATA_PATH')
-        && is_file(BBN_DATA_PATH.$file_name)
+        && is_file(BBN_DATA_PATH . $file_name)
     ) {
-      return file_get_contents(BBN_DATA_PATH.$file_name);
+      return file_get_contents(BBN_DATA_PATH . $file_name);
     }
 
     return false;
@@ -1403,7 +1430,7 @@ class Controller implements Api
   {
     $args = \func_get_args();
     $die  = false;
-    foreach ($args as $a){
+    foreach ($args as $a) {
       if (\is_string($a)) {
         $path = $a;
       }
@@ -1422,7 +1449,7 @@ class Controller implements Api
       }
     }
     elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir().substr($path, 1);
+      $path = $this->getCurrentDir() . substr($path, 1);
     }
 
     if (!isset($data)) {
@@ -1445,6 +1472,41 @@ class Controller implements Api
     return $m;
   }
 
+
+  public function getModelGroup(string $path, array $data = null)
+  {
+    if (strpos($path, './') === 0) {
+      $path = $this->getCurrentDir() . substr($path, 1);
+    }
+
+    if (!isset($data)) {
+      $data = $this->data;
+    }
+
+    $m = $this->_mvc->getModelGroup($path, $data, $this);
+    if (\is_object($m)) {
+      $m = X::toArray($m);
+    }
+  }
+
+  public function getCustomModelGroup(string $path, string $plugin, array $data = null)
+  {
+    if (strpos($path, './') === 0) {
+      $path = $this->getCurrentDir() . substr($path, 1);
+    }
+
+    if (!isset($data)) {
+      $data = $this->data;
+    }
+
+    $res = $this->_mvc->getCustomModelGroup($path, $plugin, $data, $this);
+    if (\is_object($res)) {
+      $res = X::toArray($res);
+    }
+
+    return $res;
+  }
+
   /**
    * This will get the cached model. There is no order for the arguments.
    *
@@ -1457,7 +1519,7 @@ class Controller implements Api
     $args = \func_get_args();
     $die  = false;
     $ttl  = 0;
-    foreach ($args as $a){
+    foreach ($args as $a) {
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
       }
@@ -1476,7 +1538,7 @@ class Controller implements Api
       $path = $this->_path;
     }
     elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir().substr($path, 1);
+      $path = $this->getCurrentDir() . substr($path, 1);
     }
 
     if (!isset($data)) {
@@ -1511,7 +1573,7 @@ class Controller implements Api
   {
     $args = \func_get_args();
 
-    foreach ($args as $a){
+    foreach ($args as $a) {
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
       }
@@ -1524,7 +1586,7 @@ class Controller implements Api
       $path = $this->_path;
     }
     elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir().substr($path, 1);
+      $path = $this->getCurrentDir() . substr($path, 1);
     }
 
     if (!isset($data)) {
@@ -1546,7 +1608,7 @@ class Controller implements Api
   {
     $args = \func_get_args();
 
-    foreach ($args as $a){
+    foreach ($args as $a) {
       if (\is_string($a) && \strlen($a)) {
         $path = $a;
       }
@@ -1562,7 +1624,7 @@ class Controller implements Api
       $path = $this->_path;
     }
     elseif (strpos($path, './') === 0) {
-      $path = $this->getCurrentDir().substr($path, 1);
+      $path = $this->getCurrentDir() . substr($path, 1);
     }
 
     if (!isset($data)) {
@@ -1772,7 +1834,7 @@ class Controller implements Api
   public function addData(array $data)
   {
     $ar = \func_get_args();
-    foreach ($ar as $d){
+    foreach ($ar as $d) {
       if (\is_array($d)) {
         $this->data = empty($this->data) ? $d : array_merge($this->data, $d);
       }
@@ -1787,10 +1849,10 @@ class Controller implements Api
    *
    * @return self|false
    */
-  public function add($path, $data=[], $internal = false)
+  public function add($path, $data = [], $internal = false)
   {
     if (substr($path, 0, 2) === './') {
-      $path = $this->getCurrentDir().substr($path, 1);
+      $path = $this->getCurrentDir() . substr($path, 1);
     }
 
     if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {
@@ -1811,10 +1873,10 @@ class Controller implements Api
    * @param bool $internal
    * @return self
    */
-  public function addToObj(string $path, $data=[], $internal = false): self
+  public function addToObj(string $path, $data = [], $internal = false): self
   {
     if (substr($path, 0, 2) === './') {
-      $path = $this->getCurrentDir().substr($path, 1);
+      $path = $this->getCurrentDir() . substr($path, 1);
     }
 
     if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {
@@ -1823,7 +1885,7 @@ class Controller implements Api
       $this->obj = X::mergeObjects($this->obj, $o->obj);
     }
     else {
-      throw new \Error(X::_("Impossible to route the following request").': '.$path);
+      throw new \Error(X::_("Impossible to route the following request") . ': ' . $path);
     }
 
     return $this;
@@ -1865,21 +1927,21 @@ class Controller implements Api
      * @param Controller $ctrl
      * @return string|bool|void
      */
-    public static function includeController(string $bbn_inc_file, Controller $ctrl, $bbn_is_super = false)
-    {
-      if ($ctrl->isCli()) {
-          return include $bbn_inc_file;
-      }
-
-      ob_start();
-      $r      = include $bbn_inc_file;
-      $output = ob_get_contents();
-      ob_end_clean();
-
-      if ($bbn_is_super) {
-          return $r ? true : false;
-      }
-
-      return $output;
+  public static function includeController(string $bbn_inc_file, Controller $ctrl, $bbn_is_super = false)
+  {
+    if ($ctrl->isCli()) {
+        return include $bbn_inc_file;
     }
+
+    ob_start();
+    $r      = include $bbn_inc_file;
+    $output = ob_get_contents();
+    ob_end_clean();
+
+    if ($bbn_is_super) {
+        return $r ? true : false;
+    }
+
+    return $output;
+  }
 }
