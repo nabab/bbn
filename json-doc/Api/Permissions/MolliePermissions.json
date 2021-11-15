@@ -11,7 +11,7 @@
             "name": "bbn\\Api\\Permissions\\ApiPermissionsContract"
         }
     },
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissions.php",
+    "fileName": "\/Api\/Permissions\/MolliePermissions.php",
     "startLine": 10,
     "endLine": 111,
     "contentConstructor": {

@@ -14,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
+    "fileName": "\/User\/Manager.php",
     "startLine": 22,
     "endLine": 1162,
     "contentConstructor": {

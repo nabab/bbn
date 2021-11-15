@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
+    "fileName": "\/Api\/CloudminVirtualmin\/Common.php",
     "startLine": 8,
     "endLine": 407,
     "contentConstructor": {

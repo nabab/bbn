@@ -13,7 +13,7 @@
             "name": "bbn\\Mvc\\Api"
         }
     },
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Controller.php",
+    "fileName": "\/Mvc\/Controller.php",
     "startLine": 8,
     "endLine": 1947,
     "contentConstructor": {

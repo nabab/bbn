@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Mailing.php",
+    "fileName": "\/Appui\/Mailing.php",
     "startLine": 15,
     "endLine": 867,
     "contentConstructor": {

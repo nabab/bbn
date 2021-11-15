@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/ApiPermissionsContract.php",
+    "fileName": "\/Api\/Permissions\/ApiPermissionsContract.php",
     "startLine": 5,
     "endLine": 14,
     "contentConstructor": null,

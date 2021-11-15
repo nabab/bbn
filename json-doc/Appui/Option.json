@@ -18,7 +18,7 @@
         "bbn\\Models\\Tts\\Dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option.php",
+    "fileName": "\/Appui\/Option.php",
     "startLine": 34,
     "endLine": 4496,
     "contentConstructor": {

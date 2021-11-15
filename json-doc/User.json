@@ -18,7 +18,7 @@
         "bbn\\Models\\Tts\\Dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User.php",
+    "fileName": "\/User.php",
     "startLine": 21,
     "endLine": 2307,
     "contentConstructor": {

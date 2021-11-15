@@ -25,7 +25,7 @@
             "name": "bbn\\Db\\Actions"
         }
     },
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+    "fileName": "\/Db\/Query.php",
     "startLine": 21,
     "endLine": 367,
     "contentConstructor": {

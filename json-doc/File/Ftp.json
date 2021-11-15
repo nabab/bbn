@@ -14,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
+    "fileName": "\/File\/Ftp.php",
     "startLine": 21,
     "endLine": 407,
     "contentConstructor": {

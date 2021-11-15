@@ -15,7 +15,7 @@
         "bbn\\Cdn\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
+    "fileName": "\/Cdn\/Compiler.php",
     "startLine": 33,
     "endLine": 633,
     "contentConstructor": {

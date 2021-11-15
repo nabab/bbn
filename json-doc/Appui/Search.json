@@ -10,7 +10,7 @@
         "bbn\\Models\\Tts\\Cache"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Search.php",
+    "fileName": "\/Appui\/Search.php",
     "startLine": 14,
     "endLine": 399,
     "contentConstructor": {

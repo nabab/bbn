@@ -12,7 +12,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+    "fileName": "\/Parsers\/Doc.php",
     "startLine": 17,
     "endLine": 787,
     "contentConstructor": {

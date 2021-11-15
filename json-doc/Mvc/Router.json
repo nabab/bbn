@@ -16,7 +16,7 @@
         "bbn\\Models\\Tts\\Retriever"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+    "fileName": "\/Mvc\/Router.php",
     "startLine": 28,
     "endLine": 1153,
     "contentConstructor": {
@@ -1498,9 +1498,9 @@
             "dom": [],
             "public": {
                 "cdn\/publishing\/home": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
                     "path": "cdn\/publishing\/home",
-                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
+                    "root": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
                     "request": "cdn\/publishing\/gen-php",
                     "mode": "public",
                     "plugin": "cdn",
@@ -1510,14 +1510,14 @@
                     ],
                     "checkers": [
                         "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
                     ]
                 }
             },
             "private": [],
             "model": {
                 "core\/_definitions": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
                     "path": "core\/_definitions",
                     "plugin": "core",
                     "plugin_name": "appui-core",
@@ -1525,7 +1525,7 @@
                     "mode": "model",
                     "i18n": null,
                     "checkers": [
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
                     ]
                 },
                 "_init": {
@@ -1539,7 +1539,7 @@
                     "checkers": []
                 },
                 "cdn\/publishing\/gen-php": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
                     "path": "cdn\/publishing\/gen-php",
                     "plugin": "cdn",
                     "plugin_name": "appui-cdn",
@@ -1618,9 +1618,9 @@
             "dom": [],
             "public": {
                 "cdn\/publishing\/home": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
                     "path": "cdn\/publishing\/home",
-                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
+                    "root": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
                     "request": "cdn\/publishing\/gen-php",
                     "mode": "public",
                     "plugin": "cdn",
@@ -1630,14 +1630,14 @@
                     ],
                     "checkers": [
                         "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
                     ]
                 }
             },
             "private": [],
             "model": {
                 "core\/_definitions": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
                     "path": "core\/_definitions",
                     "plugin": "core",
                     "plugin_name": "appui-core",
@@ -1645,7 +1645,7 @@
                     "mode": "model",
                     "i18n": null,
                     "checkers": [
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
                     ]
                 },
                 "_init": {
@@ -1659,7 +1659,7 @@
                     "checkers": []
                 },
                 "cdn\/publishing\/gen-php": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
                     "path": "cdn\/publishing\/gen-php",
                     "plugin": "cdn",
                     "plugin_name": "appui-cdn",

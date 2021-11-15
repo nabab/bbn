@@ -16,7 +16,7 @@
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Server.php",
+    "fileName": "\/Appui\/Server.php",
     "startLine": 23,
     "endLine": 905,
     "contentConstructor": {

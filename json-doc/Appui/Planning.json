@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Planning.php",
+    "fileName": "\/Appui\/Planning.php",
     "startLine": 5,
     "endLine": 541,
     "contentConstructor": {

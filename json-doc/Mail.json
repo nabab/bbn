@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
+    "fileName": "\/Mail.php",
     "startLine": 45,
     "endLine": 422,
     "contentConstructor": {

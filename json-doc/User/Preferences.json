@@ -20,7 +20,7 @@
         "bbn\\Models\\Tts\\Current"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Preferences.php",
+    "fileName": "\/User\/Preferences.php",
     "startLine": 35,
     "endLine": 2614,
     "contentConstructor": {

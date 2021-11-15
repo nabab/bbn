@@ -23,7 +23,7 @@
             "name": "bbn\\Db\\SqlFormatters"
         }
     },
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Sql.php",
+    "fileName": "\/Db\/Languages\/Sql.php",
     "startLine": 13,
     "endLine": 4771,
     "contentConstructor": null,

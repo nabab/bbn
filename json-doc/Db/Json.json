@@ -14,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Json.php",
+    "fileName": "\/Db\/Json.php",
     "startLine": 19,
     "endLine": 65,
     "contentConstructor": {

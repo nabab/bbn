@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
+    "fileName": "\/Appui\/Statistic.php",
     "startLine": 7,
     "endLine": 1167,
     "contentConstructor": {

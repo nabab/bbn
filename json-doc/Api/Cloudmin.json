@@ -17,7 +17,7 @@
         "bbn\\Api\\CloudminVirtualmin\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Cloudmin.php",
+    "fileName": "\/Api\/Cloudmin.php",
     "startLine": 22,
     "endLine": 77,
     "contentConstructor": {

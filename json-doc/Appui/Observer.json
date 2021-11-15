@@ -9,7 +9,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Observer.php",
+    "fileName": "\/Appui\/Observer.php",
     "startLine": 18,
     "endLine": 661,
     "contentConstructor": {

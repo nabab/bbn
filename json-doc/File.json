@@ -15,7 +15,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File.php",
+    "fileName": "\/File.php",
     "startLine": 18,
     "endLine": 333,
     "contentConstructor": {

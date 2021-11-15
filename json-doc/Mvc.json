@@ -14,7 +14,7 @@
             "name": "bbn\\Mvc\\Api"
         }
     },
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc.php",
+    "fileName": "\/Mvc.php",
     "startLine": 52,
     "endLine": 1548,
     "contentConstructor": {
@@ -3826,7 +3826,7 @@
         "_app_prefix": "apst",
         "_app_path": "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/",
         "_cur_path": "\/",
-        "_lib_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/",
+        "_lib_path": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/",
         "_data_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/data\/",
         "db_in_controller": true,
         "reserved": [
@@ -3882,7 +3882,7 @@
         "_app_prefix": "apst",
         "_app_path": "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/",
         "_cur_path": "\/",
-        "_lib_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/",
+        "_lib_path": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/",
         "_data_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/data\/",
         "db_in_controller": true,
         "reserved": [

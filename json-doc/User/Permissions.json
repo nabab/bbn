@@ -19,7 +19,7 @@
         "bbn\\Models\\Tts\\Current"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Permissions.php",
+    "fileName": "\/User\/Permissions.php",
     "startLine": 27,
     "endLine": 1422,
     "contentConstructor": {

@@ -142,9 +142,10 @@ class Php extends bbn\Models\Cls\Basic
    * Function that analyzes the desired class by returning the information belonging to it
    *
    * @param string $cls
+   * @param string $path
    * @return array|null
    */
-  public function analyzeClass(string $cls): ?array
+  public function analyzeClass(string $cls, string $path = ''): ?array
   {
     $rc = new \ReflectionClass($cls);
     if (!empty($cls) && is_object($rc)) {
@@ -162,7 +163,7 @@ class Php extends bbn\Models\Cls\Basic
         'interfaces' => $rc->getInterfaces(),
         //'isInstantiable' => $rc->isInstantiable(),
         //'cloneable' =>  $rc->isCloneable(),
-        'fileName' => $rc->getFileName(),
+        'fileName' => substr($rc->getFileName(), strlen($path)),
         'startLine' => $rc->getStartLine(),
         'endLine' => $rc->getEndLine(),
         'contentConstructor' => !empty($constructor) ? array_filter(
@@ -235,7 +236,7 @@ class Php extends bbn\Models\Cls\Basic
             $class = $namespace . '\\' . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
             if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {
               try {
-                $arr[$file] = $this->analyzeCLass($class);
+                $arr[$file] = $this->analyzeCLass($class, $path);
               }
               catch (\Exception $e) {
                 die(var_dump($file, $e));
@@ -719,9 +720,9 @@ class Php extends bbn\Models\Cls\Basic
         if (method_exists($type, 'getName')) {
           $arg .= $type->getName() . ' ';
         }
-        elseif (method_exists($type, 'getTypes')) {
+        elseif (method_exists($type, 'getTypes') && ($types = $type->getTypes())) {
           $tmp = [];
-          foreach ($type->getTypes as $t) {
+          foreach ($types as $t) {
             $tmp[] = $t->getName();
           }
 

@@ -10,7 +10,7 @@
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Menu.php",
+    "fileName": "\/Appui\/Menu.php",
     "startLine": 8,
     "endLine": 761,
     "contentConstructor": {

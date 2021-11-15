@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/People.php",
+    "fileName": "\/Entities\/People.php",
     "startLine": 6,
     "endLine": 744,
     "contentConstructor": {

@@ -14,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
+    "fileName": "\/Str\/Hash.php",
     "startLine": 18,
     "endLine": 151,
     "contentConstructor": {

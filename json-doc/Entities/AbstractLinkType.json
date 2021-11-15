@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/AbstractLinkType.php",
+    "fileName": "\/Entities\/AbstractLinkType.php",
     "startLine": 11,
     "endLine": 550,
     "contentConstructor": {

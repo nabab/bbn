@@ -30,7 +30,7 @@
             "name": "Stringable"
         }
     },
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Languages\/Sqlite.php",
+    "fileName": "\/Db\/Languages\/Sqlite.php",
     "startLine": 22,
     "endLine": 1338,
     "contentConstructor": {

@@ -14,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Data.php",
+    "fileName": "\/Models\/Cls\/Data.php",
     "startLine": 20,
     "endLine": 141,
     "contentConstructor": {

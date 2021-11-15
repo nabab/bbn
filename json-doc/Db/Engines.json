@@ -14,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Engines.php",
+    "fileName": "\/Db\/Engines.php",
     "startLine": 23,
     "endLine": 604,
     "contentConstructor": null,

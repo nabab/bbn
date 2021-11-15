@@ -18,7 +18,7 @@
         "bbn\\Models\\Tts\\Cache"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Model.php",
+    "fileName": "\/Mvc\/Model.php",
     "startLine": 25,
     "endLine": 525,
     "contentConstructor": {

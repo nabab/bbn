@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Filesystem.php",
+    "fileName": "\/Models\/Tts\/Filesystem.php",
     "startLine": 14,
     "endLine": 29,
     "contentConstructor": null,

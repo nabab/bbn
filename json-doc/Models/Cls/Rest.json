@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Cache"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Rest.php",
+    "fileName": "\/Models\/Cls\/Rest.php",
     "startLine": 6,
     "endLine": 50,
     "contentConstructor": {

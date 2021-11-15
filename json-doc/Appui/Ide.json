@@ -10,7 +10,7 @@
         "bbn\\Mvc\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide.php",
+    "fileName": "\/Appui\/Ide.php",
     "startLine": 16,
     "endLine": 3700,
     "contentConstructor": {

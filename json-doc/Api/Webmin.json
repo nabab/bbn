@@ -15,7 +15,7 @@
         "bbn\\Models\\Tts\\Cache"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Webmin.php",
+    "fileName": "\/Api\/Webmin.php",
     "startLine": 16,
     "endLine": 201,
     "contentConstructor": {

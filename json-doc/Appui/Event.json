@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Event.php",
+    "fileName": "\/Appui\/Event.php",
     "startLine": 6,
     "endLine": 691,
     "contentConstructor": {

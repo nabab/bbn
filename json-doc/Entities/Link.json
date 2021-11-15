@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Link.php",
+    "fileName": "\/Entities\/Link.php",
     "startLine": 5,
     "endLine": 56,
     "contentConstructor": {
