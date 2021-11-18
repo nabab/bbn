@@ -2648,7 +2648,7 @@ class X
     else {
       foreach ($cfg['fields'] as $i => $field) {
         // Get cell object
-        $cell = $sheet->getCellByColumnAndRow($i + 1, 1);
+        $cell = $sheet->getCellByColumnAndRow($i + 1, 0);
         // Get colum name
         $col_idx = $cell->getColumn();
         // Set auto width to the column
@@ -2671,7 +2671,7 @@ class X
             break;
           case 'money':
             // Set code's format to currency
-            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_EUR);
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
             break;
           case 'date':
             // Set code's format to date
@@ -2689,6 +2689,10 @@ class X
             // Set the horizontal alignment to center
             $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             break;
+          case 'phone':
+            // Set the custom fortmat
+            $style->getAlignment()->setHorizontal('+#');
+            break;
           case 'string':
           default:
             // Set code's format to text
@@ -2699,7 +2703,7 @@ class X
         }
 
         if ($with_titles) {
-          //$cell = $sheet->getCellByColumnAndRow($i+1, 1);
+          $cell  = $sheet->getCellByColumnAndRow($i + 1, 1);
           $style = $cell->getStyle();
           // Set code's format to text
           $style->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
