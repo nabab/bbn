@@ -2690,8 +2690,8 @@ class X
             $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             break;
           case 'phone':
-            // Set the custom fortmat
-            $style->getAlignment()->setHorizontal('+#');
+            // Set the custom format
+            $format->setFormatCode('+#');
             break;
           case 'string':
           default:
