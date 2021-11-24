@@ -144,10 +144,7 @@ class Notification extends bbn\Models\Cls\Db
   {
     if (\is_string($id_option) && !bbn\Str::isUid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
-      if (\count($id_option) === 2) {
-        $id_option[] = 'list';
-      }
-
+      $id_option[] = 'list';
       $id_option = self::getOptionId(...$id_option);
     }
 
@@ -446,7 +443,7 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function getUnreadIds(string $id_user = null): array
+  public function getUnreadIds(string $id_user = null, array $filters = []): array
   {
     $ucfg  = $this->user->getClassCfg();
     $where = [
@@ -460,6 +457,10 @@ class Notification extends bbn\Models\Cls\Db
         'field' => $this->db->colFullName($this->fields['id_user'], $this->class_table),
         'value' => $id_user
       ];
+    }
+
+    if (!empty($filters)) {
+      $where['conditions'] = bbn\X::mergeArrays($where['conditions'], $filters);
     }
 
     return $this->db->getColumnValues(
@@ -642,9 +643,9 @@ class Notification extends bbn\Models\Cls\Db
   }
 
 
-  public function process()
+  public function process(array $filters = [])
   {
-    foreach ($this->getUnreadIds() as $n) {
+    foreach ($this->getUnreadIds(null, $filters) as $n) {
       $this->notify($n);
     }
   }
