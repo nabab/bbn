@@ -1,13 +1,19 @@
 [
     {
-        "name": "bbn\\X",
-        "type": "class",
-        "ref": "X"
-    },
-    {
-        "name": "bbn\\Str",
-        "type": "class",
-        "ref": "Str"
+        "name": "bbn",
+        "type": "namespace",
+        "items": [
+            {
+                "name": "X",
+                "type": "class",
+                "ref": "X"
+            },
+            {
+                "name": "Str",
+                "type": "class",
+                "ref": "Str"
+            }
+        ]
     },
     {
         "name": "$model",
