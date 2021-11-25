@@ -296,7 +296,7 @@ class User extends Models\Cls\Basic
             $params[$f['token']],
             $params[$f['device_uid']],
             $exUser[$f['id']],
-            $params[$f['device_lang']] ?? ''
+            !empty($params[$f['device_lang']]) ? str_replace('"', '', $params[$f['device_lang']]) : ''
           )
         ) {
           if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [
