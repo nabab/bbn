@@ -10026,7 +10026,7 @@
                         "value": "Mysql",
                         "text": "Mysql",
                         "url": "bbn-php\/doc\/class\/Db\/Languages\/Mysql",
-                        "lastmod": 1636934512,
+                        "lastmod": 1637762138,
                         "desc": "",
                         "items": [
                             {
@@ -10034,7 +10034,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "__construct",
                                 "value": "__construct",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/__construct",
                                 "desc": "Constructor"
                             },
@@ -10043,7 +10043,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "__toString",
                                 "value": "__toString",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/__toString",
                                 "desc": ""
                             },
@@ -10052,7 +10052,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "alter",
                                 "value": "alter",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/alter",
                                 "desc": ""
                             },
@@ -10061,7 +10061,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "createColumn",
                                 "value": "createColumn",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/createColumn",
                                 "desc": "Creates the given column for the given table."
                             },
@@ -10070,7 +10070,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "createDatabase",
                                 "value": "createDatabase",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/createDatabase",
                                 "desc": "Creates a database"
                             },
@@ -10079,7 +10079,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "createIndex",
                                 "value": "createIndex",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/createIndex",
                                 "desc": "Creates an index"
                             },
@@ -10088,7 +10088,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "createTable",
                                 "value": "createTable",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/createTable",
                                 "desc": ""
                             },
@@ -10097,7 +10097,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "createUser",
                                 "value": "createUser",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/createUser",
                                 "desc": "Creates a database user"
                             },
@@ -10106,7 +10106,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "dbSize",
                                 "value": "dbSize",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/dbSize",
                                 "desc": "Gets the size of a database"
                             },
@@ -10115,7 +10115,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "deleteIndex",
                                 "value": "deleteIndex",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/deleteIndex",
                                 "desc": "Deletes an index"
                             },
@@ -10124,7 +10124,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "deleteUser",
                                 "value": "deleteUser",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/deleteUser",
                                 "desc": "Deletes a database user"
                             },
@@ -10133,7 +10133,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "disableKeys",
                                 "value": "disableKeys",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/disableKeys",
                                 "desc": "Disables foreign keys check."
                             },
@@ -10142,7 +10142,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "dropDatabase",
                                 "value": "dropDatabase",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/dropDatabase",
                                 "desc": "Drops the given database"
                             },
@@ -10151,7 +10151,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "enableKeys",
                                 "value": "enableKeys",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/enableKeys",
                                 "desc": "Enables foreign keys check."
                             },
@@ -10160,7 +10160,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getAlterColumn",
                                 "value": "getAlterColumn",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getAlterColumn",
                                 "desc": "Return a string for alter column statement."
                             },
@@ -10169,7 +10169,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getAlterKey",
                                 "value": "getAlterKey",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getAlterKey",
                                 "desc": "Returns a string for alter keys statement."
                             },
@@ -10178,7 +10178,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getAlterTable",
                                 "value": "getAlterTable",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getAlterTable",
                                 "desc": "Return a string for alter table sql statement."
                             },
@@ -10187,7 +10187,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getCfg",
                                 "value": "getCfg",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getCfg",
                                 "desc": ""
                             },
@@ -10196,7 +10196,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getColumns",
                                 "value": "getColumns",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getColumns",
                                 "desc": "Returns the columns' configuration of the given table."
                             },
@@ -10205,7 +10205,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getConnection",
                                 "value": "getConnection",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getConnection",
                                 "desc": ""
                             },
@@ -10214,7 +10214,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getConnectionCode",
                                 "value": "getConnectionCode",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getConnectionCode",
                                 "desc": ""
                             },
@@ -10223,7 +10223,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getCreate",
                                 "value": "getCreate",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getCreate",
                                 "desc": ""
                             },
@@ -10232,7 +10232,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getCreateKeys",
                                 "value": "getCreateKeys",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getCreateKeys",
                                 "desc": ""
                             },
@@ -10241,7 +10241,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getCreateTable",
                                 "value": "getCreateTable",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getCreateTable",
                                 "desc": ""
                             },
@@ -10250,7 +10250,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getDatabases",
                                 "value": "getDatabases",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getDatabases",
                                 "desc": "Return databases' names as an array."
                             },
@@ -10259,7 +10259,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getHost",
                                 "value": "getHost",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getHost",
                                 "desc": "Returns the host of the current connection."
                             },
@@ -10268,7 +10268,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getKeys",
                                 "value": "getKeys",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getKeys",
                                 "desc": "Returns the keys of the given table."
                             },
@@ -10277,7 +10277,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getRawCreate",
                                 "value": "getRawCreate",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getRawCreate",
                                 "desc": ""
                             },
@@ -10286,7 +10286,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getTableComment",
                                 "value": "getTableComment",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getTableComment",
                                 "desc": "Returns the comment (or an empty string if none) for a given table."
                             },
@@ -10295,7 +10295,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getTables",
                                 "value": "getTables",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getTables",
                                 "desc": "Return tables' names of a database as an array."
                             },
@@ -10304,7 +10304,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getUid",
                                 "value": "getUid",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getUid",
                                 "desc": "Returns a UUID"
                             },
@@ -10313,7 +10313,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "getUsers",
                                 "value": "getUsers",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/getUsers",
                                 "desc": ""
                             },
@@ -10322,7 +10322,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "postCreation",
                                 "value": "postCreation",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/postCreation",
                                 "desc": "Actions to do once the PDO object has been created"
                             },
@@ -10331,7 +10331,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "renameTable",
                                 "value": "renameTable",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/renameTable",
                                 "desc": "Renames the given table to the new given name."
                             },
@@ -10340,7 +10340,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "status",
                                 "value": "status",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/status",
                                 "desc": "Gets the status of a table"
                             },
@@ -10349,7 +10349,7 @@
                                 "class": "Db\/Languages\/Mysql",
                                 "text": "tableSize",
                                 "value": "tableSize",
-                                "lastmod": 1636934512,
+                                "lastmod": 1637762138,
                                 "url": "bbn-php\/doc\/method\/Db\/Languages\/Mysql\/tableSize",
                                 "desc": "Gets the size of a table"
                             }

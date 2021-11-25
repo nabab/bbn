@@ -525,7 +525,7 @@ MYSQL
           $st .= ' NOT NULL';
         }
 
-        if (isset($c['default'])) {
+        if (array_key_exists('default', $c)) {
           $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . bbn\Str::escapeSquotes($c['default']) . "'");
         }
 
