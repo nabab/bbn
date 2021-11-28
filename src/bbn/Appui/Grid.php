@@ -452,7 +452,7 @@ class Grid extends bbn\Models\Cls\Cache
         }
       }
       return $row;
-    }, $data ?: $this->getData());
+    }, $data ?: ($this->getData() ?: []));
     $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){
       return empty($c['hidden']);
     }));

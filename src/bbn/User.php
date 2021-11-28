@@ -296,7 +296,7 @@ class User extends Models\Cls\Basic
             $params[$f['token']],
             $params[$f['device_uid']],
             $exUser[$f['id']],
-            $params[$f['device_lang']] ?? ''
+            !empty($params[$f['device_lang']]) ? str_replace('"', '', $params[$f['device_lang']]) : ''
           )
         ) {
           if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [
@@ -386,11 +386,14 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
         }
 
-        // Update device_lang and last 
-        $this->db->update($this->class_cfg['tables']['api_tokens'], [
-          $this->class_cfg['arch']['api_tokens']['device_lang'] => $params[$f['device_lang']] ?? '',
+        // Update device_lang and last
+        $toUdp = [
           $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')
-        ], [
+        ];
+        if (isset($params[$f['device_lang']])) {
+          $toUdp[$this->class_cfg['arch']['api_tokens']['device_lang']] = $params[$f['device_lang']];
+        }
+        $this->db->update($this->class_cfg['tables']['api_tokens'], $toUdp, [
           $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
           $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]
         ]);

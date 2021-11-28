@@ -11,6 +11,7 @@ use bbn\Appui\Passwords;
 use bbn\X;
 use bbn\Appui\Option;
 use bbn\Db;
+use SQLite3;
 
 /**
  * Server class
@@ -47,8 +48,17 @@ class Server
   /** @var bbn\Api\Webmin Webmin instance */
   private $webmin;
 
-  /** @var stering The server cache name prefix */
+  /** @var string The server cache name prefix */
   private $cacheNamePrefix;
+
+  /** @var string The data path of the appui-server plugin */
+  private $mainDataPath;
+
+  /** @var string The data path of the server inside the appui-server plugin */
+  private $dataPath;
+
+  /** @var string The internal SQLite database */
+  private $db;
 
   /**
    * Constructor.
@@ -81,7 +91,30 @@ class Server
     $this->pass            = $cfg['pass'];
     $this->hostname        = isset($cfg['host']) ? $cfg['host'] : 'localhost';
     $this->cacheNamePrefix = $this->hostname . '/';
-    $this->virtualmin      = new Virtualmin([
+    $this->mainDataPath    = self::getMainDataPath();
+    $this->dataPath        = $this->mainDataPath . $this->hostname . '/';
+    if (!\is_file($this->mainDataPath . 'servers.sqlite')) {
+      bbn\File\Dir::createPath($this->mainDataPath);
+      $db = new SQLite3($this->mainDataPath . 'servers.sqlite');
+      $db->exec("CREATE TABLE queue (
+        id INTEGER PRIMARY KEY,
+        server VARCHAR (150) NOT NULL,
+        created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+        user VARCHAR (32),
+        method VARCHAR (100) NOT NULL,
+        args TEXT,
+        hash TEXT NOT NULL,
+        start DATETIME,
+        [end] DATETIME,
+        failed INTEGER (1) DEFAULT (0),
+        active INTEGER (1) DEFAULT (1)
+      );");
+    }
+    $this->db         = new bbn\Db([
+      'engine' => 'sqlite',
+      'db' => $this->mainDataPath . 'servers.sqlite'
+    ]);
+    $this->virtualmin = new Virtualmin([
       'user' => $this->user,
       'pass' => $this->pass,
       'host' => $this->hostname,
@@ -588,6 +621,31 @@ class Server
 
 
   /**
+   * Adds the given action to the queue
+   * @param string $method
+   * @param array $args
+   * @return int!false
+   */
+  public function addToQueue(string $method, array $args = [])
+  {
+    $user = bbn\User::getInstance();
+    if (
+        !$this->checkQueueHash($method, $args)
+        && $this->db->insert('queue', [
+          'server' => $this->hostname,
+          'hash' => $this->getQueueHash($method, $args),
+          'method' => $method,
+          'args' => \json_encode($args),
+          'user' => $user->getId() ?: null
+        ])
+    ) {
+      return $this->db->lastId();
+    }
+    return false;
+  }
+
+
+  /**
    * Makes global domains cache
    *
    * @return array
@@ -621,6 +679,118 @@ class Server
     }
     $cache->set(self::CACHE_NAME . '/domains', $domains);
     return $domains;
+  }
+
+
+  /**
+   * Gets the data path of the appui-server plugin
+   * @return string
+   */
+  public static function getMainDataPath(): string
+  {
+    return bbn\Mvc::getDataPath('appui-server');
+  }
+
+
+  public static function processQueue()
+  {
+    $dbPath = \bbn\Appui\Server::getMainDataPath() . 'servers.sqlite';
+    if (is_file($dbPath)) {
+      $db = new \bbn\Db([
+        'engine' => 'sqlite',
+        'db' => $dbPath
+      ]);
+      $running = (bool)$db->select([
+        'table' => 'queue',
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'active',
+            'value' => 1
+          ], [
+            'field' => 'failed',
+            'value' => 0
+          ], [
+            'field' => 'start',
+            'operator' => 'isnotnull'
+          ], [
+            'field' => 'end',
+            'operator' => 'isnull'
+          ]]
+        ]
+      ]);
+      if ($running) {
+        return false;
+      }
+      $queue = $db->rselectAll([
+        'table' => 'queue',
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'active',
+            'value' => 1
+          ], [
+            'field' => 'failed',
+            'value' => 0
+          ], [
+            'field' => 'start',
+            'operator' => 'isnull'
+          ]]
+        ]
+          ]);
+      if (!empty($queue)) {
+        foreach ($queue as $q) {
+          if (!empty($q['server'])) {
+            $server = new bbn\Appui\Server($q['server']);
+            if (\method_exists($server, $q['method'])) {
+              $db->update('queue', ['start' => date('Y-m-d H:i:s')], ['id' => $q['id']]);
+              $args = \json_decode($q['args'], true);
+              if ($server->{$q['method']}(...$args)) {
+                $set = [
+                  'end' => date('Y-m-d H:i:s')
+                ];
+              }
+              else {
+                $set = [
+                  'end' => date('Y-m-d H:i:s'),
+                  'failed' => 1
+                ];
+              }
+              $db->update('queue', $set, ['id' => $q['id']]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Checks if the hash is already present on the queue
+   * @param string $method
+   * @param array $args
+   * @return bool
+   */
+  private function checkQueueHash(string $method, array $args = [])
+  {
+    $hash = $this->getQueueHash($method, $args);
+    return (bool)$this->db->selectOne('queue', 'id', [
+      'server' => $this->hostname,
+      'hash' => $hash,
+      'active' => 1
+    ]);
+  }
+
+
+  /**
+   * Gets the queue hash
+   * @param string $method
+   * @param array $args
+   * @return string
+   */
+  private function getQueueHash(string $method, array $args = []): string
+  {
+    return \md5($method . \json_encode($args));
   }
 
 
