@@ -747,8 +747,7 @@ class Str
   public static function isBuid($st): bool
   {
     if (\is_string($st) && (\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st)) {
-      $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);
-      if (!$enc || ($enc === '8bit')) {
+      if (!mb_check_encoding($st, 'UTF-8')) {
         return preg_match('~[^\x20-\x7E\t\r\n]~', $st) > 0;
       }
     }

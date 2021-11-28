@@ -1133,8 +1133,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           // Adding the alias in $fields
           if (strpos($f, '(')) {
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $f . (\is_string($alias) ? ' AS ' . $this->escape($alias) : '');
-          } elseif (isset($cfg['available_fields']) && array_key_exists($f, $cfg['available_fields'])) {
+          }
+          elseif (isset($cfg['available_fields']) && array_key_exists($f, $cfg['available_fields'])) {
             $idx    = $cfg['available_fields'][$f];
+            if ($idx && isset($cfg['tables_full'][$idx])) {
+              $idx = $cfg['tables_full'][$idx];
+            }
+
             $csn    = $this->colSimpleName($f);
             $is_uid = false;
             //die(var_dump($idx, $f, $tables[$idx]));
@@ -1149,7 +1154,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             }
 
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
-
             if ($is_uid) {
               if (method_exists($this, 'getHexStatement')) {
                 $st = 'LOWER(' . $this->getHexStatement($this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
@@ -1161,7 +1165,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             // For JSON fields
             elseif ($cfg['available_fields'][$f] === false) {
               $st = $f;
-            } else {
+            }
+            else {
               $st = $this->colFullName($csn, $cfg['available_fields'][$f], true);
             }
 
