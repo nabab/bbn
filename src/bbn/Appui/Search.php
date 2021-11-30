@@ -5,7 +5,7 @@ namespace bbn\Appui;
 use bbn\Db;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\Dbconfig;
-use bbn\Mvc\Controller;
+use bbn\Mvc\Model;
 use bbn\User;
 use bbn\Util\Timer;
 use bbn\X;
@@ -26,9 +26,9 @@ class Search
   protected User $user;
 
   /**
-   * @var Controller
+   * @var Model
    */
-  protected Controller $ctrl;
+  protected Model $model;
 
   /**
    * @var string
@@ -83,7 +83,7 @@ class Search
    *
    * @var int
    */
-  protected int $time_limit = 300;
+  protected int $time_limit = 50;
 
   /**
    * @var array
@@ -91,7 +91,7 @@ class Search
   protected static array $functions = [];
 
 
-  public function __construct(Controller $ctrl, array $cfg = [])
+  public function __construct(Model $model, array $cfg = [])
   {
     $this->ctrl   = $ctrl;
     // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
@@ -109,6 +109,7 @@ class Search
     $this->_init_class_cfg($cfg);
     $this->cacheInit();
     $this->timer      = new Timer();
+    $model->getCustomModelGroup('', 'appui-search');
   }
 
   /**
@@ -167,7 +168,7 @@ class Search
     $result = [];
     $i      = 0;
 
-    foreach ($this->search_cfg as $items) {
+    foreach ($this->getSearchCfg() as $items) {
       if (!is_array($items)) {
         continue;
       }
@@ -178,10 +179,10 @@ class Search
             && ($wrapper instanceof SerializableClosure)
         ) {
           // Extract the closure object
-          $closure = $wrapper->getClosure();
+          //$closure = $wrapper->getClosure();
 
           // Invoke the closure with the search string
-          $content =  $closure($search_value);
+          $content = $wrapper($search_value);
 
           if (is_array($content)) {
             $result[] = array_merge($content, [
@@ -211,9 +212,6 @@ class Search
    */
   public function get(string $search_value, int $step = 0): array
   {
-    if (!$step) {
-      
-    }
     $cache_name = sprintf($this->search_cache_name, $search_value);
 
     // Check if same search is saved for the user
@@ -282,12 +280,11 @@ class Search
         continue;
       }
 
-      X::ddump($item);
       if ($search_results = $this->db->rselectAll($item['cfg'])) {
         $results['data'] = array_merge($results['data'], $search_results);
       }
 
-      if ($this->timer->measure('search') > $this->time_limit) {
+      if ($this->timer->measure('search') > ($this->time_limit/1000)) {
         // If time limit has passed then return the result and the index of the next step
         $this->timer->stop('search');
         if (isset($config_array[$i + 1])) {
