@@ -254,6 +254,12 @@ class Model extends bbn\Models\Cls\Db
   }
 
 
+  public function getCustomModelGroup(string $path, string $plugin, array $data = null)
+  {
+    return $this->_ctrl->getCustomModelGroup(...\func_get_args());
+  }
+
+
   /**
    * This will get the cached model. There is no order for the arguments.
    *

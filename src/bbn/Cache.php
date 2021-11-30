@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use Closure;
+
 /**
  * Universal caching class: called once per request, it holds the cache system.
  *
@@ -700,11 +702,11 @@ class Cache
    * @param callable $function
    * @return string
    */
-  public function serializeFunction(callable $function): string
+  public function serializeFunction(\Closure $function): string
   {
-    $wrapper = new \Opis\Closure\SerializableClosure(function() {
-      X::log("Helklo world");
-    });
-    return serialize($wrapper);
+    return serialize(
+      new \Opis\Closure\SerializableClosure($function)
+    );
   }
+
 }

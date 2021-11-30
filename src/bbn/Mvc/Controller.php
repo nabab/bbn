@@ -1507,6 +1507,7 @@ class Controller implements Api
     return $res;
   }
 
+  
   /**
    * This will get the cached model. There is no order for the arguments.
    *
