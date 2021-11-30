@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
+    "fileName": "\/Db\/Sync.php",
     "startLine": 9,
     "endLine": 570,
     "contentConstructor": null,
@@ -323,7 +323,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Configuration array"
                 }
             ]
         },
@@ -617,5 +618,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "Sync",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

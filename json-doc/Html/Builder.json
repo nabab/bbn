@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "This class generates html form elements with a predefined configuration",
+        "description": "This class generates html form elements with a predefined configuration\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Dec 14, 2012, 04:23:55 +0000",
             "category": "Appui",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Builder.php",
+    "fileName": "\/Html\/Builder.php",
     "startLine": 20,
     "endLine": 609,
     "contentConstructor": {
@@ -1123,5 +1124,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Html",
     "shortName": "Builder",
-    "summary": "This class generates html form elements with a predefined configuration"
+    "summary": "This class generates html form elements with a predefined configuration",
+    "description": "",
+    "description_parts": []
 }

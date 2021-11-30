@@ -11,8 +11,8 @@ use Exception, bbn, bbn\X, bbn\Str, bbn\User, bbn\Db, bbn\Appui\Option, bbn\Mvc,
  * A permission is an option under the permission option ("permissions", "appui") or one of its aliases.
  * They are ONLY permissions.
  *
- * No!!! From the moment a user or a group has a preference on an item, it is considered to have a permission.
- * No!!! Deleting a permission deletes the preference
+ * No(bool)! From the moment a user or a group has a preference on an item, it is considered to have a permission.
+ * No(bool)! Deleting a permission deletes the preference
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
@@ -45,6 +45,12 @@ class Permissions extends bbn\Models\Cls\Basic
   /** @var array */
   protected $plugins = [];
 
+  /** @var array */
+  protected $allowedRoutes = [];
+
+  /** @var array */
+  protected $forbiddenRoutes = [];
+
 
   /**
    * Permissions constructor.
@@ -65,16 +71,62 @@ class Permissions extends bbn\Models\Cls\Basic
       throw new Exception(X::_('Impossible to construct permissions: you need to instantiate preferences before'));
     }
 
+    /** @todo Add the default routes from Mvc::getInstance */
+    if (empty($routes)) {
+      $mvc    = Mvc::getInstance();
+      $routes = $mvc->getRoutes();
+    }
+
     if ($routes) {
-      foreach ($routes as $url => $plugin) {
-        $plugin['url']   = $url;
-        $this->plugins[] = $plugin;
+      if (!empty($routes['root'])) {
+        foreach ($routes['root'] as $url => $plugin) {
+          $plugin['url']   = $url;
+          $this->plugins[] = $plugin;
+        }
+      }
+
+      if (!empty($routes['allowed']) && is_array($routes['allowed'])) {
+        $this->allowedRoutes = $routes['allowed'];
+      }
+
+      if (!empty($routes['forbidden']) && is_array($routes['forbidden'])) {
+        $this->forbiddenRoutes = $routes['forbidden'];
       }
     }
 
     self::retrieverInit($this);
     self::optionalInit();
     $this->db = Db::getInstance();
+  }
+
+
+  public function isAuthorizedRoute($url): bool
+  {
+    if (in_array($url, $this->allowedRoutes, true)) {
+      return true;
+    }
+
+    foreach ($this->allowedRoutes as $ar) {
+      if (substr($ar, -1) === '*') {
+        if ((strlen($ar) === 1) || (strpos($url, substr($ar, 0, -1)) === 0)) {
+          if (in_array($url, $this->forbiddenRoutes, true)) {
+            return false;
+          }
+
+          foreach ($this->forbiddenRoutes as $ar2) {
+            if (substr($ar2, -1) === '*') {
+              if (strpos($url, substr($ar2, 0, -1)) === 0) {
+                return false;
+              }
+            }
+          }
+
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
 
@@ -168,7 +220,6 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function toPath(string $id_option): ?string
   {
-    $p    = [];
     $bits = $this->opt->getCodePath($id_option);
     // Minimum: appui, plugin, permissions, path
     if (empty($bits) || (count($bits) < 4)) {
@@ -681,7 +732,6 @@ class Permissions extends bbn\Models\Cls\Basic
     else {
       array_push($args, $name, 'plugins');
     }
-    X::log($args, 'errorUpdatePermissions');
 
     return $this->opt->fromCode(...$args);
   }
@@ -781,7 +831,7 @@ class Permissions extends bbn\Models\Cls\Basic
         $a['path'] = substr($a['path'], 0, -4);
       }
 
-      return \bbn\User\Permissions::fFilter($a);
+      return $this->fFilter($a);
     };
 
     if ($all = $fs->getTree($path.'mvc/public', '', false, $ff)) {
@@ -997,6 +1047,7 @@ class Permissions extends bbn\Models\Cls\Basic
                 "Impossible to find the plugin %s",
                 substr($route['name'], 6)
               );
+
               X::log($err, 'errorUpdatePermissions');
               continue;
               throw new Exception($err);
@@ -1154,21 +1205,22 @@ class Permissions extends bbn\Models\Cls\Basic
       }
     }
 
-    X::log(['perm_parents', $perm_parents]);
     $id_parent = $id_parent_perm ?: $id_root;
     foreach (array_reverse($perm_parents) as $a) {
-      $id_parent = $this->opt->add([
-        'id_parent' => $id_parent,
-        'id_alias'  => $a
-      ]);
+      $id_parent = $this->opt->add(
+        [
+          'id_parent' => $id_parent,
+          'id_alias'  => $a
+        ]
+      );
     }
 
-    X::log($this->opt->option($id_parent));
-
-    return $this->opt->add([
-      'id_parent' => $id_parent,
-      'id_alias'  => $id
-    ]);
+    return $this->opt->add(
+      [
+        'id_parent' => $id_parent,
+        'id_alias'  => $id
+      ]
+    );
   }
 
 
@@ -1195,11 +1247,9 @@ class Permissions extends bbn\Models\Cls\Basic
       if (!$id) {
         $item['text'] = null;
         $id = $this->opt->add($item);
-        X::log($this->opt->getPathArray($item['id_alias']), 'insertPerm');
         if ($id) {
           $res++;
         }
-
       }
       elseif ($this->opt->text($id)) {
         $this->db->update(
@@ -1229,14 +1279,13 @@ class Permissions extends bbn\Models\Cls\Basic
   }
 
 
-  public static function fFilter(array $a): bool
+  public function fFilter(array $a): bool
   {
-    $mvc = Mvc::getInstance();
     if (!empty($a['num'])
       || ((substr($a['name'], -4) === '.php')
           && (X::basename($a['name']) !== '_ctrl.php'))
     ) {
-      if (!$mvc->isAuthorizedRoute($a['path'])) {
+      if (!$this->isAuthorizedRoute($a['path'])) {
         return true;
       }
     }
@@ -1333,7 +1382,7 @@ class Permissions extends bbn\Models\Cls\Basic
       $id     = $this->db->lastId();
     }
 
-    /* No!!!
+    /* No(bool)!
     else if ( isset($o['cfg']) ){
       $this->opt->set($id, $o);
     }

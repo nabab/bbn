@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Mailing.php",
+    "fileName": "\/Appui\/Mailing.php",
     "startLine": 15,
     "endLine": 867,
     "contentConstructor": {
@@ -102,7 +102,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -333,8 +334,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "state"
+                    "default_name": ""
                 },
                 {
                     "name": "new_state",
@@ -343,7 +343,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "state"
                 }
             ]
         },
@@ -766,7 +767,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "email"
                 }
             ]
         },
@@ -803,7 +805,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "mailing"
                 }
             ]
         },
@@ -839,7 +842,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "email"
                 },
                 {
                     "name": "state",
@@ -1909,5 +1913,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Mailing",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

@@ -1,7 +1,13 @@
 {
     "doc": {
-        "description": "",
-        "tags": []
+        "description": "Webmin API class\n",
+        "tags": {
+            "category": "Api",
+            "package": "Api",
+            "author": "Mirko Argentino <mirko@bbn.solutions>",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License",
+            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/Api\/Webmin"
+        }
     },
     "name": "bbn\\Api\\Webmin",
     "namespace": true,
@@ -9,9 +15,9 @@
         "bbn\\Models\\Tts\\Cache"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Webmin.php",
-    "startLine": 10,
-    "endLine": 96,
+    "fileName": "\/Api\/Webmin.php",
+    "startLine": 16,
+    "endLine": 201,
     "contentConstructor": {
         "file": "bbn\\Api\\Webmin",
         "returns": null
@@ -26,9 +32,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n      throw new \\Error(_('The username is mandatory'));\n    }\n    if (empty($cfg['pass'])) {\n      throw new \\Error(_('The password is mandatory'));\n    }\n    self::cacheInit();\n    $this->user = $cfg['user'];\n    $this->pass = $cfg['pass'];\n    $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n    $this->checked = true;\n    if ( class_exists('\\\\bbn\\\\Cache') ){\n      $this->cacher = Cache::getEngine();\n    }\n  }",
-            "startLine": 29,
-            "endLine": 44,
+            "code": "function(array $cfg)\n  {\n    if (empty($cfg['user'])) {\n      throw new \\Error(_('The username is mandatory'));\n    }\n\n    if (empty($cfg['pass'])) {\n      throw new \\Error(_('The password is mandatory'));\n    }\n\n    $this->cacheInit();\n    $this->user     = $cfg['user'];\n    $this->pass     = $cfg['pass'];\n    $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n  }",
+            "startLine": 36,
+            "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -53,23 +59,23 @@
         },
         "callCommand": {
             "name": "callCommand",
-            "summary": "",
+            "summary": "Call a command",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Webmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $command)\n  {\n  }",
-            "startLine": 46,
-            "endLine": 48,
+            "code": "function(string $command, array $args = [])\n  {\n    return xmlrpc_decode(\n      file_get_contents(\n        $this->getUrl(),\n        false,\n        $this->getContext($command, $args)\n      )\n    );\n  }",
+            "startLine": 59,
+            "endLine": 68,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": null,
             "parent": false,
@@ -81,22 +87,33 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The command"
+                },
+                {
+                    "name": "args",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The command arguments"
                 }
             ]
         },
         "getHostname": {
             "name": "getHostname",
-            "summary": "",
+            "summary": "Gets the hostname",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Webmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 50,
-            "endLine": 52,
+            "code": "function()\n  {\n    return $this->callCommand('webmin::get_system_hostname');\n  }",
+            "startLine": 75,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -105,22 +122,24 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
         "getSystemUptime": {
             "name": "getSystemUptime",
-            "summary": "",
+            "summary": "Gets the system uptime",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Webmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 54,
-            "endLine": 56,
+            "code": "function()\n  {\n    return $this->callCommand('webmin::get_system_uptime');\n  }",
+            "startLine": 85,
+            "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -129,22 +148,25 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string",
+                null
+            ],
             "parent": false,
             "arguments": []
         },
         "getNotifications": {
             "name": "getNotifications",
-            "summary": "",
+            "summary": "Gets notifications",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Webmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 58,
-            "endLine": 60,
+            "code": "function()\n  {\n    return $this->callCommand('webmin::get_webmin_notifications');\n  }",
+            "startLine": 95,
+            "endLine": 98,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -153,22 +175,24 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "object"
+            ],
             "parent": false,
             "arguments": []
         },
         "getOS": {
             "name": "getOS",
-            "summary": "",
+            "summary": "Gets the operating system",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Webmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 62,
-            "endLine": 64,
+            "code": "function()\n  {\n    return $this->callCommand('webmin::detect_operating_system');\n  }",
+            "startLine": 105,
+            "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -177,22 +201,24 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
         "getSmartDisksPartitions": {
             "name": "getSmartDisksPartitions",
-            "summary": "",
+            "summary": "Gets disks partitions",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Webmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
-            "startLine": 66,
-            "endLine": 68,
+            "code": "function()\n  {\n    return $this->callCommand('smart-status::list_smart_disks_partitions');\n  }",
+            "startLine": 115,
+            "endLine": 118,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -201,15 +227,128 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
+        },
+        "startService": {
+            "name": "startService",
+            "summary": "Start a service",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Webmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $service)\n  {\n    $res = $this->callCommand('init::start_action', [$service]);\n    return \\is_array($res) && !empty($res[0]);\n  }",
+            "startLine": 126,
+            "endLine": 130,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "service",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the service"
+                }
+            ]
+        },
+        "stopService": {
+            "name": "stopService",
+            "summary": "Stop a service",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Webmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $service)\n  {\n    $res = $this->callCommand('init::stop_action', [$service]);\n    return \\is_array($res) && !empty($res[0]);\n  }",
+            "startLine": 138,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "service",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the service"
+                }
+            ]
+        },
+        "restartService": {
+            "name": "restartService",
+            "summary": "Restart a service",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Webmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $service)\n  {\n    $res = $this->callCommand('init::restart_action', [$service]);\n    return \\is_array($res) && !empty($res[0]);\n  }",
+            "startLine": 150,
+            "endLine": 154,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "service",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the service"
+                }
+            ]
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": [],
-    "numMethods": 7,
+    "numMethods": 10,
     "numProperties": 0,
     "numConstants": 1,
     "numStaticProperties": 0,
@@ -229,7 +368,6 @@
         "user": null,
         "pass": null,
         "hostname": null,
-        "cacher": null,
         "_cache_prefix": null,
         "cache_engine": null
     },
@@ -237,5 +375,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api",
     "shortName": "Webmin",
-    "summary": ""
+    "summary": "Webmin API class",
+    "description": "",
+    "description_parts": []
 }

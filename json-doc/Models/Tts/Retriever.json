@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
+    "fileName": "\/Models\/Tts\/Retriever.php",
     "startLine": 13,
     "endLine": 67,
     "contentConstructor": {
@@ -121,5 +121,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Retriever",
-    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one."
+    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
+    "description": "",
+    "description_parts": []
 }

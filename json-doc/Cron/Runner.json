@@ -9,7 +9,7 @@
         "bbn\\Cron\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Runner.php",
+    "fileName": "\/Cron\/Runner.php",
     "startLine": 14,
     "endLine": 527,
     "contentConstructor": {

@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "A few recurrent functions\n *\n *\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()",
+        "description": "A few recurrent functions\n\n\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n* $cli\n* $info = array()\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Traits",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Info.php",
+    "fileName": "\/Util\/Info.php",
     "startLine": 19,
     "endLine": 78,
     "contentConstructor": null,
@@ -119,11 +120,11 @@
     "namespaceName": "bbn\\Util",
     "shortName": "Info",
     "summary": "A few recurrent functions",
-    "description": "*\n *\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()",
+    "description": "These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n* $cli\n* $info = array()",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:<\/p>\n<ul>\n<li>\n<ul>\n<li>$cli<\/li>\n<\/ul>\n<\/li>\n<li>\n<ul>\n<li>$info = array()<\/li>\n<\/ul>\n<\/li>\n<\/ul>"
+            "content": "<p>These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:<\/p>\n<ul>\n<li>$cli<\/li>\n<li>$info = array()<\/li>\n<\/ul>"
         }
     ]
 }

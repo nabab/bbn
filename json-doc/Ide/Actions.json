@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Ide\/Actions.php",
+    "fileName": "\/Ide\/Actions.php",
     "startLine": 13,
     "endLine": 576,
     "contentConstructor": {
@@ -344,5 +344,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Ide",
     "shortName": "Actions",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

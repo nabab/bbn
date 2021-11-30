@@ -272,7 +272,7 @@ class Event extends bbn\Models\Cls\Db
   public function delete(string $id): bool
   {
     if ( \bbn\Str::isUid($id) ){
-      return !!$this->db->delete($this->class_table, [$this->fields['id'] => $id]);
+      return (bool)$this->db->delete($this->class_table, [$this->fields['id'] => $id]);
     }
 
     return false;
@@ -592,7 +592,7 @@ class Event extends bbn\Models\Cls\Db
         \bbn\Str::isDateSql($until)
       )
     ){
-      return !!$this->db->update($this->class_cfg['tables']['recurring'], [
+      return (bool)$this->db->update($this->class_cfg['tables']['recurring'], [
         $this->class_cfg['arch']['recurring']['until'] => $until
       ], [
         $this->class_cfg['arch']['recurring']['id_event'] => $id
@@ -640,7 +640,7 @@ class Event extends bbn\Models\Cls\Db
       $exc[$exf['id_user']] = !empty($exc[$exf['id_user']]) ? $exc[$exf['id_user']] : \bbn\User::getInstance()->getId();
       $exc[$exf['creation']] = \bbn\Str::isDateSql($exc[$exf['creation']]) ?
         $exc[$exf['creation']] : date('Y-m-d H:i:s');
-      return !!$this->db->insert($ext, $exc);
+      return (bool)$this->db->insert($ext, $exc);
     }
     return false;
   }

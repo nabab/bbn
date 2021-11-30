@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class cron",
+        "description": "Class cron\n",
         "tags": {
             "package": "bbn\\Appui"
         }
@@ -11,7 +11,7 @@
         "bbn\\Cron\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Launcher.php",
+    "fileName": "\/Cron\/Launcher.php",
     "startLine": 14,
     "endLine": 82,
     "contentConstructor": {
@@ -1312,5 +1312,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Cron",
     "shortName": "Launcher",
-    "summary": "Class cron"
+    "summary": "Class cron",
+    "description": "",
+    "description_parts": []
 }

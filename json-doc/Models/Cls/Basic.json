@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Basic object Class\n *\n *\nThis class implements Basic functions and vars",
+        "description": "Basic object Class\n\n\nThis class implements Basic functions and vars\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Generic classes",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+    "fileName": "\/Models\/Cls\/Basic.php",
     "startLine": 25,
     "endLine": 185,
     "contentConstructor": null,
@@ -268,11 +269,11 @@
     "namespaceName": "bbn\\Models\\Cls",
     "shortName": "Basic",
     "summary": "Basic object Class",
-    "description": "*\n *\nThis class implements Basic functions and vars",
+    "description": "This class implements Basic functions and vars",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThis class implements Basic functions and vars<\/p>"
+            "content": "<p>This class implements Basic functions and vars<\/p>"
         }
     ]
 }

@@ -9,7 +9,7 @@
         "bbn\\Mvc\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/View.php",
+    "fileName": "\/Mvc\/View.php",
     "startLine": 25,
     "endLine": 230,
     "contentConstructor": {
@@ -929,5 +929,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "View",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

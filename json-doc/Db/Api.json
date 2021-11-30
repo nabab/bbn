@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "DB API\n *\n *\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+        "description": "DB API\n\n\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Api.php",
+    "fileName": "\/Db\/Api.php",
     "startLine": 20,
     "endLine": 210,
     "contentConstructor": null,
@@ -52,7 +53,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -62,7 +63,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "where",
@@ -72,7 +73,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -82,7 +83,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "start",
@@ -91,7 +92,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
                 }
             ]
         },
@@ -129,7 +131,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -139,7 +141,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "where",
@@ -149,7 +151,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -159,7 +161,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"limit\" condition, default: 0"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "limit",
@@ -169,7 +171,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "description": "The \"limit\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -178,7 +180,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
                 }
             ]
         },
@@ -216,7 +219,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -226,7 +229,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "where",
@@ -236,7 +239,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -246,7 +249,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "start",
@@ -255,7 +258,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
                 }
             ]
         },
@@ -293,7 +297,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields's name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -303,7 +307,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields's name"
                 },
                 {
                     "name": "where",
@@ -313,7 +317,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "| boolean The \"order\" condition, default: false"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -323,7 +327,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"limit\" condition, default: 0"
+                    "description": "| boolean The \"order\" condition, default: false"
                 },
                 {
                     "name": "limit",
@@ -333,7 +337,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "description": "The \"limit\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -342,7 +346,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
                 }
             ]
         },
@@ -380,7 +385,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -390,7 +395,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "where",
@@ -400,7 +405,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -410,7 +415,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "description": "The \"order\" condition, default: false"
                 },
                 {
                     "name": "start",
@@ -419,7 +424,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
                 }
             ]
         },
@@ -457,7 +463,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields' name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -467,7 +473,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields' name"
                 },
                 {
                     "name": "where",
@@ -477,7 +483,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "condition, default: false"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -487,7 +493,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"limit\" condition, default: 0"
+                    "description": "condition, default: false"
                 },
                 {
                     "name": "limit",
@@ -497,7 +503,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0"
+                    "description": "The \"limit\" condition, default: 0"
                 },
                 {
                     "name": "start",
@@ -506,7 +512,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
                 }
             ]
         },
@@ -541,7 +548,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields name."
+                    "description": "The table name."
                 },
                 {
                     "name": "field",
@@ -551,7 +558,7 @@
                     "has_default": true,
                     "default": null,
                     "default_name": "",
-                    "description": "The \"where\" condition."
+                    "description": "The fields name."
                 },
                 {
                     "name": "where",
@@ -561,7 +568,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition, default: false."
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "order",
@@ -571,7 +578,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"start\" condition, default: 0."
+                    "description": "The \"order\" condition, default: false."
                 },
                 {
                     "name": "start",
@@ -580,7 +587,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0."
                 }
             ]
         },
@@ -618,7 +626,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "where",
@@ -627,7 +635,8 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"where\" condition"
                 }
             ]
         },
@@ -670,7 +679,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The fields's name"
+                    "description": "The table's name or a configuration array"
                 },
                 {
                     "name": "fields",
@@ -680,7 +689,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"where\" condition"
+                    "description": "The fields's name"
                 },
                 {
                     "name": "where",
@@ -690,7 +699,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition"
+                    "description": "The \"where\" condition"
                 },
                 {
                     "name": "order",
@@ -700,7 +709,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The $limit condition, default: 0"
+                    "description": "The \"order\" condition"
                 },
                 {
                     "name": "limit",
@@ -719,7 +728,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The $limit condition, default: 0"
                 }
             ]
         },
@@ -757,7 +767,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The field's name."
+                    "description": "The table's name or a configuration array."
                 },
                 {
                     "name": "column",
@@ -767,7 +777,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The \"where\" condition."
+                    "description": "The field's name."
                 },
                 {
                     "name": "where",
@@ -777,7 +787,7 @@
                     "has_default": true,
                     "default": [],
                     "default_name": "",
-                    "description": "The \"order\" condition."
+                    "description": "The \"where\" condition."
                 },
                 {
                     "name": "order",
@@ -786,7 +796,8 @@
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The \"order\" condition."
                 }
             ]
         },
@@ -1181,11 +1192,11 @@
     "namespaceName": "bbn\\Db",
     "shortName": "Api",
     "summary": "DB API",
-    "description": "*\n *\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+    "description": "These methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nThese methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
+            "content": "<p>These methods have to be implemented on the database and another class .\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
         }
     ]
 }

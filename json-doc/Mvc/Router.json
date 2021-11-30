@@ -16,9 +16,9 @@
         "bbn\\Models\\Tts\\Retriever"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+    "fileName": "\/Mvc\/Router.php",
     "startLine": 28,
-    "endLine": 1089,
+    "endLine": 1153,
     "contentConstructor": {
         "file": "bbn\\Mvc\\Router",
         "returns": null
@@ -56,7 +56,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The mode as defined in self::$_modes"
                 }
             ]
         },
@@ -69,9 +70,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path)\n  {\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    \/\/$path = trim($path, '\/\\\\ ');\n\n    return $path ?: '.';\n  }",
+            "code": "function(string $path)\n  {\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    \/\/ case like my\/dir\/.\n    if ((strlen($path) > 0) && (X::basename($path) === '.')) {\n      $path = substr($path, 0, -1);\n    }\n\n    return $path ?: '.';\n  }",
             "startLine": 145,
-            "endLine": 154,
+            "endLine": 157,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -106,8 +107,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bbn\\Mvc $mvc, array $routes = [])\n  {\n    self::retrieverInit($this);\n    $this->_mvc    = $mvc;\n    $this->_routes = $routes;\n    $this->_root   = $this->_mvc->appPath();\n    $this->_registerLocaleDomain();\n  }",
-            "startLine": 163,
-            "endLine": 170,
+            "startLine": 166,
+            "endLine": 173,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -149,8 +150,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->alt_root = false;\n    return $this;\n  }",
-            "startLine": 178,
-            "endLine": 182,
+            "startLine": 181,
+            "endLine": 185,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -175,8 +176,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    if (!$this->checkPath($path)) {\n      throw new Exception(X::_(\"The prepath $path is not valid\"));\n    }\n\n    $this->_prepath = $path;\n    if (substr($this->_prepath, -1) !== '\/') {\n      $this->_prepath = $this->_prepath . '\/';\n    }\n\n    if ($this->_mode) {\n      $this->route($this->_mvc->getUrl(), $this->_mode);\n    }\n\n    return true;\n  }",
-            "startLine": 189,
-            "endLine": 205,
+            "startLine": 192,
+            "endLine": 208,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -211,8 +212,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($with_slash = 1)\n  {\n    if (!empty($this->_prepath)) {\n      return $with_slash ? $this->_prepath : substr($this->_prepath, 0, -1);\n    }\n\n    return '';\n  }",
-            "startLine": 211,
-            "endLine": 218,
+            "startLine": 214,
+            "endLine": 221,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -248,8 +249,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $plugin = NULL)\n  {\n    return $this->_textdomains[$plugin ?: 'main'] ?? null;\n  }",
-            "startLine": 225,
-            "endLine": 228,
+            "startLine": 228,
+            "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -285,8 +286,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $name)\n  {\n    foreach ($this->getPlugins() as $n => $p) {\n      if (X::indexOf($name, $n . '-') === 0) {\n        return $p;\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 237,
-            "endLine": 246,
+            "startLine": 240,
+            "endLine": 249,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -322,8 +323,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $name)\n  {\n    if ($p = $this->getPluginFromComponent($name)) {\n      $root       = $p['path'] . 'src\/';\n      $prefix     = $p['name'] . '-';\n      $plugin     = $p['name'];\n      $plugin_url = $p['url'];\n    }\n    else {\n      $root       = $this->appPath();\n      $prefix     = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';\n      if (X::indexOf($name, $prefix) !== 0) {\n        $prefix = substr($name, 0, strpos($name, '-') + 1);\n      }\n      $plugin     = null;\n      $plugin_url = null;\n    }\n\n    if (!empty($root) && (X::indexOf($name, $prefix) === 0)) {\n      $local_name = substr($name, strlen($prefix));\n      $parts      = explode('-', $local_name);\n      $root      .= 'components\/';\n      $path       = implode('\/', $parts);\n      $dir        = $root . $path;\n      $this->_registerLocaleDomain($plugin);\n\n      if (is_dir($dir)) {\n        $res   = [\n          'js' => [],\n          'html' => [],\n          'css' => [],\n        ];\n        $fpath = $root . $path . '\/' . end($parts);\n        foreach ($res as $mode => $c) {\n          foreach (self::$_filetypes[$mode] as $f) {\n            if (is_file($fpath . '.' . $f)) {\n              $res[$mode] = $this->_set_known(\n                [\n                'file' => $fpath . '.' . $f,\n                'path' => str_replace('-', '\/', $local_name),\n                'plugin' => $plugin_url,\n                'plugin_name' => $plugin,\n                'component' => true,\n                'component_name' => $name,\n                'ext' => $f,\n                'mode' => $mode,\n                'i18n' => $mode === 'js' ? $this->_find_translation($plugin ?? null) : null,\n                ], true\n              );\n              break;\n            }\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 253,
-            "endLine": 312,
+            "startLine": 256,
+            "endLine": 315,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -359,8 +360,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, string $plugin)\n  {\n    if ($root = $this->_get_custom_root($mode, $plugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n\n      if (!empty($file)) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $plugin,\n          'mode' => $mode,\n          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,\n          ], true\n        );\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 321,
-            "endLine": 346,
+            "startLine": 324,
+            "endLine": 349,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -414,8 +415,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, string $pluginName, string $subplugin)\n  {\n    if ($root = $this->_get_subplugin_root($mode, $pluginName, $subplugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n\n      if (!empty($file)) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $this->pluginPath($pluginName),\n          'plugin_name' => $pluginName,\n          'mode' => $mode,\n          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,\n          ], false\n        );\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 356,
-            "endLine": 382,
+            "startLine": 359,
+            "endLine": 385,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -478,8 +479,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode)\n  {\n    if (self::isMode($mode)) {\n      \/\/ If there is a prepath defined we prepend it to the path\n      if ($this->_prepath && (strpos($path, '\/') !== 0) && (strpos($path, $this->_prepath) !== 0)) {\n        $path = $this->_prepath . $path;\n      }\n\n      \/\/ We only try to retrieve a file path through a whole URL for controllers\n      if (\\in_array($mode, self::$_controllers, true)) {\n        $this->_mode = $mode;\n        return $this->_find_controller($path, $mode);\n      }\n\n      return $this->_find_mv($path, $mode);\n    }\n\n    return null;\n  }",
-            "startLine": 391,
-            "endLine": 409,
+            "startLine": 394,
+            "endLine": 412,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -523,9 +524,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path, $mode)\n  {\n    \/\/ Only for views and models\n    if (self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      \/\/ If there is a prepath defined we prepend it to the path\n      if ($this->_prepath\n          && (strpos($path, '\/') !== 0)\n          && (strpos($path, $this->_prepath) !== 0)\n      ) {\n        $path = $this->_prepath . $path;\n      }\n\n      \/** @var string $root Where the files will be searched for by default *\/\n      $root   = $this->_get_root($mode);\n      $plugin = $this->_find_plugin($path);\n      if ($plugin && ($alt_path = $plugin['url'])) {\n        $alt_root = $this->_get_alt_root($mode, $alt_path);\n      }\n      elseif ($alt_root = $this->_get_alt_root($mode)) {\n        $alt_path = $this->alt_root;\n      }\n\n      $dir = false;\n      foreach (self::$_filetypes[$mode] as $t) {\n        $dir1 = self::parse($root . $path);\n        if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n          $dir = $dir1;\n        }\n        elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)\n            && is_dir($dir2)\n        ) {\n          $dir = $dir2;\n        }\n\n        if ($dir) {\n          $res   = [];\n          $files = bbn\\File\\Dir::getFiles($dir);\n          foreach ($files as $f) {\n            if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n              $res[] = $path . '\/' . bbn\\Str::fileExt($f, true)[0];\n            }\n          }\n\n          return $res;\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 417,
-            "endLine": 466,
+            "code": "function($path, $mode)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_root($mode);\n    $plugin = $this->_find_plugin($path);\n    if ($plugin && ($alt_path = $plugin['url'])) {\n      $alt_root = $this->_get_alt_root($mode, $alt_path);\n    }\n    elseif ($alt_root = $this->_get_alt_root($mode)) {\n      $alt_path = $this->alt_root;\n    }\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)\n        && is_dir($dir2)\n    ) {\n      $dir = $dir2;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n    $res   = [];\n    $files = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 420,
+            "endLine": 474,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -560,6 +561,60 @@
                 }
             ]
         },
+        "fetchCustomDir": {
+            "name": "fetchCustomDir",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Mvc\\Router",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $path, string $mode, string $plugin)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_custom_root($mode, $plugin);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)\n        && is_dir($dir2)\n    ) {\n      $dir = $dir2;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 482,
+            "endLine": 530,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "getRoutes": {
             "name": "getRoutes",
             "summary": "",
@@ -570,8 +625,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_routes;\n  }",
-            "startLine": 472,
-            "endLine": 475,
+            "startLine": 536,
+            "endLine": 539,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1443,9 +1498,9 @@
             "dom": [],
             "public": {
                 "cdn\/publishing\/home": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
                     "path": "cdn\/publishing\/home",
-                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
+                    "root": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
                     "request": "cdn\/publishing\/gen-php",
                     "mode": "public",
                     "plugin": "cdn",
@@ -1455,14 +1510,14 @@
                     ],
                     "checkers": [
                         "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
                     ]
                 }
             },
             "private": [],
             "model": {
                 "core\/_definitions": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
                     "path": "core\/_definitions",
                     "plugin": "core",
                     "plugin_name": "appui-core",
@@ -1470,7 +1525,7 @@
                     "mode": "model",
                     "i18n": null,
                     "checkers": [
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
                     ]
                 },
                 "_init": {
@@ -1484,7 +1539,7 @@
                     "checkers": []
                 },
                 "cdn\/publishing\/gen-php": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
                     "path": "cdn\/publishing\/gen-php",
                     "plugin": "cdn",
                     "plugin_name": "appui-cdn",
@@ -1503,7 +1558,7 @@
         "retriever_exists": true
     },
     "constants": null,
-    "numMethods": 38,
+    "numMethods": 39,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 7,
@@ -1563,9 +1618,9 @@
             "dom": [],
             "public": {
                 "cdn\/publishing\/home": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
                     "path": "cdn\/publishing\/home",
-                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
+                    "root": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
                     "request": "cdn\/publishing\/gen-php",
                     "mode": "public",
                     "plugin": "cdn",
@@ -1575,14 +1630,14 @@
                     ],
                     "checkers": [
                         "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
                     ]
                 }
             },
             "private": [],
             "model": {
                 "core\/_definitions": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
                     "path": "core\/_definitions",
                     "plugin": "core",
                     "plugin_name": "appui-core",
@@ -1590,7 +1645,7 @@
                     "mode": "model",
                     "i18n": null,
                     "checkers": [
-                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
+                        "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
                     ]
                 },
                 "_init": {
@@ -1604,7 +1659,7 @@
                     "checkers": []
                 },
                 "cdn\/publishing\/gen-php": {
-                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
+                    "file": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/src\/mvc\/model\/publishing\/gen-php.php",
                     "path": "cdn\/publishing\/gen-php",
                     "plugin": "cdn",
                     "plugin_name": "appui-cdn",
@@ -1634,5 +1689,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "Router",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

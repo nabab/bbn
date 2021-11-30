@@ -1,0 +1,118 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Entities\\Link",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Entities\/Link.php",
+    "startLine": 5,
+    "endLine": 56,
+    "contentConstructor": {
+        "file": "bbn\\Entities\\Link",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Entities\\Link",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $link, array $people, array $address, array $option)\n  {\n    $this->link    = (object)$this->parseCfg($link);\n    $this->people  = $people ? (object)$this->parseCfg($people) : null;\n    $this->address = $address ? (object)$this->parseCfg($address) : null;\n    $this->option  = $option ? (object)$this->parseCfg($option) : null;\n  }",
+            "startLine": 21,
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "link",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "people",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "address",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "option",
+                    "position": 3,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "link": {
+            "visibility": "public"
+        },
+        "people": {
+            "visibility": "public"
+        },
+        "address": {
+            "visibility": "public"
+        },
+        "option": {
+            "visibility": "public"
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 1,
+    "numProperties": 4,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Entities",
+    "shortName": "Link",
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

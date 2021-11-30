@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Output.php",
+    "fileName": "\/Mvc\/Output.php",
     "startLine": 13,
     "endLine": 203,
     "contentConstructor": {
@@ -544,5 +544,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "Output",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

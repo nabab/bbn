@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "HTML Class creating a form INPUT",
+        "description": "HTML Class creating a form INPUT\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 2, 2013, 21:27:42 +0000",
             "category": "MVC",
@@ -14,7 +15,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Input.php",
+    "fileName": "\/Html\/Input.php",
     "startLine": 19,
     "endLine": 222,
     "contentConstructor": {
@@ -180,7 +181,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "Configuration"
                     }
                 ]
             },
@@ -192,7 +194,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Configuration"
                 }
             ]
         },
@@ -294,7 +297,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "CSS properties\/values array"
                     }
                 ]
             },
@@ -306,7 +310,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "CSS properties\/values array"
                 }
             ]
         },
@@ -1424,5 +1429,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Html",
     "shortName": "Input",
-    "summary": "HTML Class creating a form INPUT"
+    "summary": "HTML Class creating a form INPUT",
+    "description": "",
+    "description_parts": []
 }

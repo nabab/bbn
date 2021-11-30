@@ -59,44 +59,25 @@
         <property name="indent" value="2"/>
     </properties>
 </rule>
-<rule ref="MySource.PHP.EvalObjectFactory"/>
+<!--rule ref="MySource.PHP.EvalObjectFactory"/>
 <rule ref="MySource.PHP.GetRequestData"/>
-<rule ref="MySource.PHP.AjaxNullComparison"/>
-<rule ref="PEAR.Classes.ClassDeclaration">
-    <properties>
-        <property name="indent" value="2"/>
-    </properties>
+<rule ref="MySource.PHP.AjaxNullComparison"/-->
+
+<rule ref="PSR12">
+    <exclude name="Squiz.PHP.DisallowComparisonAssignment"/>
+    <exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace"/>
 </rule>
-<rule ref="PEAR.Commenting.ClassComment"/>
-<rule ref="PEAR.Commenting.FunctionComment"/>
-<rule ref="PEAR.Commenting.InlineComment"/>
-<rule ref="PEAR.ControlStructures.MultiLineCondition"/>
-<rule ref="PEAR.Files.IncludingFile"/>
-<rule ref="PEAR.Formatting.MultiLineAssignment"/>
-<rule ref="PEAR.Functions.FunctionCallSignature">
-    <properties>
-        <property name="indent" value="2"/>
-    </properties>
-</rule>
-<rule ref="PEAR.Functions.FunctionDeclaration"/>
-<rule ref="PEAR.Functions.ValidDefaultValue"/>
-<rule ref="PEAR.NamingConventions.ValidFunctionName">
-	<exclude name="PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps"/>
-</rule>
-<rule ref="PEAR.NamingConventions.ValidVariableName"/>
-<rule ref="PSR1.Classes.ClassDeclaration"/>
-<rule ref="PSR1.Files.SideEffects"/>
-<rule ref="PSR2.ControlStructures.ElseIfDeclaration"/>
+<!--rule ref="PSR2.ControlStructures.ElseIfDeclaration"/>
 <rule ref="PSR2.ControlStructures.SwitchDeclaration">
     <properties>
         <property name="indent" value="2"/>
     </properties>
 </rule>
 <rule ref="PSR2.Files.EndFileNewline"/>
-<rule ref="PSR2.Namespaces.NamespaceDeclaration"/>
+<rule ref="PSR2.Namespaces.NamespaceDeclaration"/>ControlStructures.MultiLineCondition
 <rule ref="PSR2.Namespaces.UseDeclaration"/>
 <rule ref="Squiz.PHP.CommentedOutCode"/>
-<rule ref="Squiz.PHP.DisallowComparisonAssignment"/>
+<rule ref="Squiz.PHP.DisallowComparisonAssignment">
 <rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
 <rule ref="Squiz.PHP.DiscouragedFunctions"/>
 <rule ref="Squiz.PHP.EmbeddedPhp"/>
@@ -122,5 +103,6 @@
 <rule ref="Squiz.WhiteSpace.ScopeClosingBrace"/>
 <rule ref="Squiz.WhiteSpace.ScopeKeywordSpacing"/>
 <rule ref="Squiz.WhiteSpace.SemicolonSpacing"/>
-<rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+<rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/-->
 </ruleset>
+

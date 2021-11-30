@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Encryption Class",
+        "description": "Encryption Class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "July 11, 2013, 13:08:00 +01:00",
             "category": "Utilities",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
+    "fileName": "\/Util\/Timer.php",
     "startLine": 21,
     "endLine": 203,
     "contentConstructor": null,
@@ -384,5 +385,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Util",
     "shortName": "Timer",
-    "summary": "Encryption Class"
+    "summary": "Encryption Class",
+    "description": "",
+    "description_parts": []
 }

@@ -749,7 +749,7 @@ SQL;
       if (($parts = $this->getParticipants($id_chat))
           && (count($parts) === 1)
       ) {
-        $ok = !!$this->leave($id_chat, $parts[0]);
+        $ok = (bool)$this->leave($id_chat, $parts[0]);
       }
 
       $this->_set_state_hash($id_chat);

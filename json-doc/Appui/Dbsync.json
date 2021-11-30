@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Dbsync.php",
+    "fileName": "\/Appui\/Dbsync.php",
     "startLine": 6,
     "endLine": 454,
     "contentConstructor": null,
@@ -334,7 +334,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Configuration array"
                 }
             ]
         },
@@ -613,5 +614,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Dbsync",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
+    "fileName": "\/Mail.php",
     "startLine": 45,
     "endLine": 422,
     "contentConstructor": {
@@ -81,7 +81,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration"
                 }
             ]
         },
@@ -669,7 +670,7 @@
                 "tags": [
                     {
                         "tag": "todo",
-                        "text": "document"
+                        "text": "document\n"
                     },
                     {
                         "tag": "var",
@@ -732,5 +733,7 @@
     "extensionName": false,
     "namespaceName": "bbn",
     "shortName": "Mail",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

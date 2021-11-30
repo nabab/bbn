@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "(Static) content delivery system through requests using filesystem and internal DB for libraries.\n *\n### Generates in a cache directory a javascript or CSS file based on the request received.\n *\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n *\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n *\n *\n *\n *\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n *\n```php\n$cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n$cdn->process();\nif ( $cdn->check() ){\n  $cdn->output();\n}\n```",
+        "description": "(Static) content delivery system through requests using filesystem and internal DB for libraries.\n\n### Generates in a cache directory a javascript or CSS file based on the request received.\n\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n\n\n\n\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n\n```php\n$cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n$cdn->process();\nif ( $cdn->check() ){\n  $cdn->output();\n}\n```\n",
         "tags": {
+            "category": "CDN",
             "package": "BBN",
             "author": "Theomas Nabet <thomas.nabet@gmail.com>",
             "license": "https:\/\/opensource.org\/licenses\/mit-license.php MIT",
@@ -14,9 +15,9 @@
         "bbn\\Cdn\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Cdn.php",
-    "startLine": 53,
-    "endLine": 736,
+    "fileName": "\/Cdn.php",
+    "startLine": 55,
+    "endLine": 741,
     "contentConstructor": {
         "file": "bbn\\Cdn",
         "returns": null
@@ -25,20 +26,20 @@
         "__construct": {
             "name": "__construct",
             "summary": "Constructor.",
-            "description": "*\nGenerates a configuration based on the given request and instantiate\na compiler for the response.\nIf *$db* is not not given the current instance if any will be used.",
+            "description": "Generates a configuration based on the given request and instantiate\na compiler for the response.\nIf *$db* is not not given the current instance if any will be used.",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><em>\nGenerates a configuration based on the given request and instantiate\na compiler for the response.\nIf <\/em>$db* is not not given the current instance if any will be used.<\/p>"
+                    "content": "<p>Generates a configuration based on the given request and instantiate\na compiler for the response.\nIf <em>$db<\/em> is not not given the current instance if any will be used.<\/p>"
                 }
             ],
             "file": "bbn\\Cdn",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $request, bbn\\Db $db = NULL)\n  {\n    \/\/ Need to be in a bbn environment, this is the absolute path of the server's root directory\n    if (!defined('BBN_PUBLIC')) {\n      $this->error('You must define the constant $this->fpath as the root of your public document');\n      die('You must define the constant $this->fpath as the root of your public document');\n    }\n\n    \/** @todo Remove? *\/\n    $this->_set_prefix();\n    if (!$db) {\n      $db = Db::getInstance();\n    }\n\n    if ($db) {\n      $this->db = $db;\n    }\n\n    $this->request = $request;\n    \/\/ Creation of a config object\n    $config = new Cdn\\Config($request, $this->db);\n    \/\/ Checking request validity\n    if ($config->check()) {\n      \/\/ Getting a configuration array\n      $this->cfg = $config->get();\n      if (!empty($this->cfg['content']['js']) || $this->cfg['is_component']) {\n        $this->mode = 'js';\n      }\n      else{\n        if (!empty($this->cfg['content']['css'])) {\n          $this->mode = 'css';\n        }\n      }\n\n      if ($this->mode) {\n        $this->cp = new Cdn\\Compiler($this->cfg);\n      }\n    }\n  }",
-            "startLine": 188,
-            "endLine": 226,
+            "code": "function(string $request, bbn\\Db $db = NULL)\n  {\n    \/\/ Need to be in a bbn environment, this is the absolute path of the server's root directory\n    if (!defined('BBN_PUBLIC')) {\n      $this->error('You must define the constant $this->fpath as the root of your public document');\n      die('You must define the constant $this->fpath as the root of your public document');\n    }\n\n    \/** @todo Remove? *\/\n    $this->_set_prefix();\n    if (!$db) {\n      $db = Db::getInstance();\n    }\n\n    if ($db) {\n      $this->db = $db;\n    }\n\n    $this->request = $request;\n    \/\/ Creation of a config object\n    $config = new Cdn\\Config($request, $this->db);\n    \/\/ Checking request validity\n    if ($config->check()) {\n      \/\/ Getting a configuration array\n      $this->cfg = $config->get();\n      if (!empty($this->cfg['content']['js']) || $this->cfg['is_component']) {\n        $this->mode = 'js';\n      }\n      else {\n        if (!empty($this->cfg['content']['css'])) {\n          $this->mode = 'css';\n        }\n      }\n\n      if ($this->mode) {\n        $this->cp = new Cdn\\Compiler($this->cfg);\n      }\n    }\n  }",
+            "startLine": 189,
+            "endLine": 227,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -58,7 +59,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The DB connection with the libraries tables"
+                    "description": "The original request sent to the server"
                 },
                 {
                     "name": "db",
@@ -67,7 +68,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The DB connection with the libraries tables"
                 }
             ]
         },
@@ -80,9 +82,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $code = '';\n    \/\/ One file at least\n    if ($this->cfg['num']) {\n      \/\/ Cache should be checked quickly if in prod, deeply if in dev\n      \/** Do not check the files, send the cache file if not in dev *\/\n      if (!$this->checkCache($this->cfg['test'])) {\n        $c =& $this->cfg;\n        \/\/ New cache file time\n        $this->file_mtime = time();\n        if ($c['is_component']) {\n          $code = $this->getComponents();\n        }\n        else{\n          if ($c['grouped']) {\n            $codes = $this->cp->groupCompile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);\n          }\n          elseif ($this->mode) {\n            $codes = $this->cp->compile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);\n          }\n\n          if ($codes) {\n            if ($this->mode === 'css') {\n              $code = $this->getCss($codes);\n            }\n            elseif ($this->mode === 'js') {\n              $code = $this->getJs($codes, empty($c['nocompil']) ? true : false);\n            }\n          }\n        }\n\n        if ($code) {\n          if (defined('BBN_IS_DEV') && BBN_IS_DEV) {\n            $code = sprintf(\n              self::HEAD_COMMENT,\n              $this->furl.$this->request,\n              $c['test'] ? self::TEST_ST : self::NO_TEST_ST\n            ).$code;\n          }\n\n          file_put_contents($c['cache_file'], $code);\n          file_put_contents($c['cache_file'].'.gzip', gzencode($code));\n        }\n      }\n    }\n\n    return $this;\n  }",
-            "startLine": 232,
-            "endLine": 280,
+            "code": "function()\n  {\n    $code = '';\n    \/\/ One file at least\n    if ($this->cfg['num']) {\n      \/\/ Cache should be checked quickly if in prod, deeply if in dev\n      \/** Do not check the files, send the cache file if not in dev *\/\n      if (!$this->checkCache($this->cfg['test'])) {\n        $c =& $this->cfg;\n        \/\/ New cache file time\n        $this->file_mtime = time();\n        if ($c['is_component']) {\n          $code = $this->getComponents();\n        }\n        else {\n          if ($c['grouped']) {\n            $codes = $this->cp->groupCompile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);\n          }\n          elseif ($this->mode) {\n            $codes = $this->cp->compile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);\n          }\n\n          if ($codes) {\n            if ($this->mode === 'css') {\n              $code = $this->getCss($codes);\n            }\n            elseif ($this->mode === 'js') {\n              $code = $this->getJs($codes, empty($c['nocompil']) ? true : false);\n            }\n          }\n        }\n\n        if ($code) {\n          if (defined('BBN_IS_DEV') && BBN_IS_DEV) {\n            $code = sprintf(\n                self::HEAD_COMMENT,\n                $this->furl . $this->request,\n                $c['test'] ? self::TEST_ST : self::NO_TEST_ST\n            ) . $code;\n          }\n\n          file_put_contents($c['cache_file'], $code);\n          file_put_contents($c['cache_file'] . '.gzip', gzencode($code));\n        }\n      }\n    }\n\n    return $this;\n  }",
+            "startLine": 233,
+            "endLine": 281,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -105,8 +107,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->cfg;\n  }",
-            "startLine": 286,
-            "endLine": 289,
+            "startLine": 287,
+            "endLine": 290,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -128,9 +130,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!parent::check()) {\n      return false;\n    }\n\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];\n    if ($file && is_file($file)) {\n      return true;\n    }\n\n    if ($this->cfg['ext'] !== 'map') {\n      X::log(\"Impossible to find $file for \".$this->cfg['url'], 'cdn_errors');\n    }\n\n    return false;\n  }",
-            "startLine": 295,
-            "endLine": 311,
+            "code": "function()\n  {\n    if (!parent::check()) {\n      return false;\n    }\n\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath . $this->cfg['file'];\n    if ($file && is_file($file)) {\n      return true;\n    }\n\n    if ($this->cfg['ext'] !== 'map') {\n      X::log(\"Impossible to find $file for \" . $this->cfg['url'], 'cdn_errors');\n    }\n\n    return false;\n  }",
+            "startLine": 296,
+            "endLine": 312,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -177,9 +179,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($real = true)\n  {\n    if (is_file($this->cfg['cache_file'])) {\n      $last_modified    = time();\n      $this->file_mtime = filemtime($this->cfg['cache_file']);\n      $c                =& $this->cfg;\n      \/\/ Only checks if the file exists and is valid\n      if (!$real\n          && \\is_array($c['content'])\n          && (($last_modified - $this->file_mtime) < $this->cache_length)\n      ) {\n        return true;\n      }\n\n      clearstatcache();\n      \/\/ Real research for last mods and generation timestamps\n      if ($c['is_component']) {\n        foreach ($c['content'] as $name => $cp){\n          foreach ($cp as $type => $files){\n            foreach ($files as $f){\n              if (is_file($this->fpath.$f)) {\n                $last_modified = filemtime($this->fpath.$f);\n                if ($last_modified > $this->file_mtime) {\n                  return false;\n                }\n              }\n              else{\n                throw new \\Exception(\"Impossible to find the file $f!\");\n              }\n            }\n          }\n        }\n      }\n      else{\n        foreach ($this->cfg['content'][$this->mode] as $f){\n          if (is_file($this->fpath.$f)) {\n            $last_modified = filemtime($this->fpath.$f);\n            if ($last_modified > $this->file_mtime) {\n              return false;\n            }\n          }\n          else{\n            \/\/adump($this->cfg);\n            throw new \\Exception(\"Impossible to find the file $f!\");\n          }\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 318,
-            "endLine": 370,
+            "code": "function($real = true)\n  {\n    if (is_file($this->cfg['cache_file'])) {\n      $last_modified    = time();\n      $this->file_mtime = filemtime($this->cfg['cache_file']);\n      $c                =& $this->cfg;\n      \/\/ Only checks if the file exists and is valid\n      if (\n          !$real\n          && \\is_array($c['content'])\n          && (($last_modified - $this->file_mtime) < $this->cache_length)\n      ) {\n        return true;\n      }\n\n      clearstatcache();\n      \/\/ Real research for last mods and generation timestamps\n      if ($c['is_component']) {\n        foreach ($c['content'] as $name => $cp) {\n          foreach ($cp as $type => $files) {\n            foreach ($files as $f) {\n              if (is_file($this->fpath . $f)) {\n                $last_modified = filemtime($this->fpath . $f);\n                if ($last_modified > $this->file_mtime) {\n                  return false;\n                }\n              }\n              else {\n                throw new \\Exception(\"Impossible to find the file $f!\");\n              }\n            }\n          }\n        }\n      }\n      else {\n        foreach ($this->cfg['content'][$this->mode] as $f) {\n          if (is_file($this->fpath . $f)) {\n            $last_modified = filemtime($this->fpath . $f);\n            if ($last_modified > $this->file_mtime) {\n              return false;\n            }\n          }\n          else {\n            \/\/adump($this->cfg);\n            throw new \\Exception(\"Impossible to find the file $f!\");\n          }\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "startLine": 319,
+            "endLine": 372,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -204,16 +206,16 @@
         },
         "output": {
             "name": "output",
-            "summary": "*",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Cdn",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];\n    if ($file && is_file($file)) {\n      \/\/ get the HTTP_IF_MODIFIED_SINCE header if set\n      $client_if_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;\n      \/\/ get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)\n      $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('\"', '', Stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;\n\n      \/\/ We get a unique hash of this file (etag)\n      $file_tag = md5($file.$this->file_mtime);\n\n      \/\/die(var_dump($this->file_mtime, $client_tag, $etagFile, $client_if_modified, $_SERVER));\n      if ($this->mode === 'css') {\n        header('Content-type: text\/css; charset=utf-8');\n      }\n      else{\n        if ($this->mode === 'js') {\n          header('Content-type: text\/javascript; charset=utf-8');\n        }\n        else{\n          $mime = finfo_open(FILEINFO_MIME_TYPE);\n          header('Content-type: '.finfo_file($mime, $file));\n        }\n      }\n\n      \/\/ make sure caching is turned on\n      header('Cache-Control: max-age=14400');\n      header('Expires: '.gmdate('D, d M Y H:i:s', Time() + 14400).' GMT');\n      \/\/ set last-modified header\n      header('Date: '.gmdate('D, d M Y H:i:s', $this->file_mtime).' GMT');\n      header('Last-Modified: '.gmdate('D, d M Y H:i:s', $this->file_mtime).' GMT');\n      \/\/ set etag-header\n      header(\"ETag: $file_tag\");\n      \/\/header('Pragma: public');\n\n      \/\/ check if page has changed. If not, send 304 and exit\n      if ($client_if_modified\n          && ((strtotime($client_if_modified) == $this->file_mtime)\n          || ($client_tag == $file_tag)          )\n      ) {\n        header('HTTP\/1.1 304 Not Modified');\n      }\n      else{\n        if (empty($this->cfg['file']) && (($this->mode === 'js')\n            || ($this->mode === 'css')            )\n        ) {\n          if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])\n              && (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)\n          ) {\n            header('Content-Encoding: gzip');\n            $file .= '.gzip';\n          }\n        }\n\n        readfile($file);\n      }\n\n      exit();\n    }\n\n    throw new \\Exception('No cache file '.$file);\n  }",
-            "startLine": 376,
-            "endLine": 438,
+            "code": "function()\n  {\n    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath . $this->cfg['file'];\n    if ($file && is_file($file)) {\n      \/\/ get the HTTP_IF_MODIFIED_SINCE header if set\n      $client_if_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;\n      \/\/ get the HTTP_IF_NONE_MATCH header if set (etag: unique file hash)\n      $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('\"', '', Stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;\n\n      \/\/ We get a unique hash of this file (etag)\n      $file_tag = md5($file . $this->file_mtime);\n\n      \/\/die(var_dump($this->file_mtime, $client_tag, $etagFile, $client_if_modified, $_SERVER));\n      if ($this->mode === 'css') {\n        header('Content-type: text\/css; charset=utf-8');\n      }\n      else {\n        if ($this->mode === 'js') {\n          header('Content-type: text\/javascript; charset=utf-8');\n        }\n        else {\n          $mime = finfo_open(FILEINFO_MIME_TYPE);\n          header('Content-type: ' . finfo_file($mime, $file));\n        }\n      }\n\n      \/\/ make sure caching is turned on\n      header('Cache-Control: max-age=14400');\n      header('Expires: ' . gmdate('D, d M Y H:i:s', Time() + 14400) . ' GMT');\n      \/\/ set last-modified header\n      header('Date: ' . gmdate('D, d M Y H:i:s', $this->file_mtime) . ' GMT');\n      header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->file_mtime) . ' GMT');\n      \/\/ set etag-header\n      header(\"ETag: $file_tag\");\n      \/\/header('Pragma: public');\n\n      \/\/ check if page has changed. If not, send 304 and exit\n      if (\n          $client_if_modified\n          && ((strtotime($client_if_modified) == $this->file_mtime)\n          || ($client_tag == $file_tag)          )\n      ) {\n        header('HTTP\/1.1 304 Not Modified');\n      }\n      else {\n        if (\n            empty($this->cfg['file']) && (($this->mode === 'js')\n            || ($this->mode === 'css')            )\n        ) {\n          if (\n              isset($_SERVER['HTTP_ACCEPT_ENCODING'])\n              && (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)\n          ) {\n            header('Content-Encoding: gzip');\n            $file .= '.gzip';\n          }\n        }\n\n        readfile($file);\n      }\n\n      exit();\n    }\n\n    throw new \\Exception('No cache file ' . $file);\n  }",
+            "startLine": 378,
+            "endLine": 443,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -746,11 +748,11 @@
     "namespaceName": "bbn",
     "shortName": "Cdn",
     "summary": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
-    "description": "*\n### Generates in a cache directory a javascript or CSS file based on the request received.\n *\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n *\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n *\n *\n *\n *\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n *\n```php\n$cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n$cdn->process();\nif ( $cdn->check() ){\n  $cdn->output();\n}\n```",
+    "description": "### Generates in a cache directory a javascript or CSS file based on the request received.\n\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n\n\n\n\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n\n```php\n$cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n$cdn->process();\nif ( $cdn->check() ){\n  $cdn->output();\n}\n```",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>*<\/p>\n<h3>Generates in a cache directory a javascript or CSS file based on the request received.<\/h3>\n<p><em>\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n<\/em><\/p>\n<ul>\n<li>First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated<\/li>\n<li>Then it will serve a cache file if it exists and create one otherwise by:<\/li>\n<li>Making a full configuration array using libraries database with all the needed file(s)<\/li>\n<li>Then it will compile these files into a single file that will be put in cache<\/li>\n<li>This file should be of type js or css<\/li>\n<li>If files are both types the content returned will be JS which will call the css files\n<em>\n<\/em>\n<em>\n<\/em>\n<h3>Request can have the following forms:<\/h3><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib=bbn-vue,jquery\">https:\/\/mycdn.net\/lib=bbn-vue,jquery<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\">https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib\/my_library\/?dir=true\">https:\/\/mycdn.net\/lib\/my_library\/?dir=true<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\">https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css<\/a>\n*<\/li>\n<\/ul>"
+            "content": "<h3>Generates in a cache directory a javascript or CSS file based on the request received.<\/h3>\n<p>The cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.<\/p>\n<ul>\n<li>First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated<\/li>\n<li>Then it will serve a cache file if it exists and create one otherwise by:<\/li>\n<li>Making a full configuration array using libraries database with all the needed file(s)<\/li>\n<li>Then it will compile these files into a single file that will be put in cache<\/li>\n<li>This file should be of type js or css<\/li>\n<li>If files are both types the content returned will be JS which will call the css files<\/li>\n<\/ul>\n<h3>Request can have the following forms:<\/h3>\n<ul>\n<li><a href=\"https:\/\/mycdn.net\/lib=bbn-vue,jquery\">https:\/\/mycdn.net\/lib=bbn-vue,jquery<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\">https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib\/my_library\/?dir=true\">https:\/\/mycdn.net\/lib\/my_library\/?dir=true<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\">https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css<\/a><\/li>\n<\/ul>"
         },
         {
             "type": "code",

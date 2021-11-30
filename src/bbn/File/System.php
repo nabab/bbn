@@ -89,9 +89,9 @@ class System extends bbn\Models\Cls\Basic
         break;
       case 'webdav':
         if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
-          $this->mode = 'webdav';
-          $this->prefix = 'https://'.$cfg['host'].self::prefix;
-          $this->obj  = new \Sabre\DAV\Client([
+          $this->mode   = 'webdav';
+          $this->prefix = 'https://' . $cfg['host'] . $cfg['prefix'];
+          $this->obj    = new \Sabre\DAV\Client([
             'baseUri' => $this->path,
             'userName' => $cfg['user'],
             'password' => $cfg['pass']
@@ -112,8 +112,8 @@ class System extends bbn\Models\Cls\Basic
 
   public function __destruct()
   {
-    if ($this->mode === 'ssh') {
-      @fclose($this->cn);
+    if (($this->mode === 'ssh') && \is_resource($this->obj)) {
+      //fclose($this->obj);
     }
   }
 
@@ -158,8 +158,7 @@ class System extends bbn\Models\Cls\Basic
       default:
         return $this->prefix . (strpos($path, '/') === 0 ?
           $path : (($this->current ?
-            $this->current . ($path ? '/' : '') : ''
-          ) . (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
+            $this->current . ($path ? '/' : '') : '') . (substr($path, -1) === '/' ? substr($path, 0, -1) : $path)));
     }
   }
 
@@ -227,8 +226,7 @@ class System extends bbn\Models\Cls\Basic
     if ($this->check()) {
       if ($this->mode === 'nextcloud') {
         return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
-      }
-      else {
+      } else {
         $is_absolute = strpos($path, '/') === 0;
         $fs          = &$this;
         clearstatcache();
@@ -528,10 +526,14 @@ class System extends bbn\Models\Cls\Basic
 
 
   /**
-   * @param string $file
+   * Returns the decoded content of the given file with a predefined or given decoding function
+   *
+   * @param string $file     The file to get the content from
+   * @param mixed  $decoder  A decoding function or an encoding type
+   * @param bool   $as_array If set to true the result will be forced into an array
    * @return null|string
    */
-  public function decodeContents(string $file, $decoder = null, $as_array = false)
+  public function decodeContents(string $file, $decoder = null, $as_array = false): ?iterable
   {
     if ($c = $this->getContents($file)) {
       if (is_callable($decoder)) {
@@ -600,8 +602,7 @@ class System extends bbn\Models\Cls\Basic
             $dest_is_dir = $nfs->isDir($dest);
             if ($dest_is_dir && $this->isFile($source)) {
               $dest .= '/' . X::basename($source);
-            }
-            elseif ((!$dest_is_dir && !$overwrite)
+            } elseif ((!$dest_is_dir && !$overwrite)
               || ($dest_is_dir && (count($nfs->getFiles($dest, true, true)) > 0) && !$overwrite)
             ) {
               return false;
@@ -738,8 +739,7 @@ class System extends bbn\Models\Cls\Basic
         if ($this->_is_dir($rpath)) {
           return $this->_dirsize($rpath);
         }
-      }
-      else {
+      } else {
         return $this->obj->getSize($rpath);
       }
 
@@ -1258,8 +1258,7 @@ class System extends bbn\Models\Cls\Basic
         } else {
           X::log(error_get_last(), 'filesystem');
         }
-      }
-      elseif (is_dir($path)) {
+      } elseif (is_dir($path)) {
         $fs = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach ($fs as $f) {
           if (($f !== '.') && ($f !== '..') && ($hidden || (strpos(X::basename($f), '.') !== 0))) {
@@ -1639,8 +1638,7 @@ class System extends bbn\Models\Cls\Basic
     if ($this->_is_file($file)) {
       if ($this->mode === 'nextcloud') {
         $this->obj->download($file);
-      }
-      elseif ($this->isFile($file)) {
+      } elseif ($this->isFile($file)) {
         $f = new bbn\File($file);
         $f->download();
       }

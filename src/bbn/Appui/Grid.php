@@ -19,6 +19,7 @@
 namespace bbn\Appui;
 use bbn;
 use bbn\X;
+use bbn\Str;
 
 class Grid extends bbn\Models\Cls\Cache
 {
@@ -74,7 +75,7 @@ class Grid extends bbn\Models\Cls\Cache
    * @var string The timer object
    */
   private $chrono;
-  
+
   /**
    * @var array
    */
@@ -283,7 +284,7 @@ class Grid extends bbn\Models\Cls\Cache
       if ( $this->query ){
         $this->sql = $this->getQuery();
         $q = $this->db->query($this->sql, \array_map(function($v){
-          if (\bbn\Str::isUid($v)) {
+          if (Str::isUid($v)) {
             $v = hex2bin($v);
           }
           return $v;
@@ -321,7 +322,7 @@ class Grid extends bbn\Models\Cls\Cache
             $this->db->getWhere($this->cfg).
             $this->db->getGroupBy($this->cfg),
             \array_map(function($v){
-              if (\bbn\Str::isUid($v)) {
+              if (Str::isUid($v)) {
                 $v = hex2bin($v);
               }
               return $v;
@@ -404,9 +405,10 @@ class Grid extends bbn\Models\Cls\Cache
       if (!defined('BBN_IS_PROD') || (($usr = bbn\User::getInstance()) && $usr->isAdmin())) {
         $r['query'] = $this->db->last();
         $r['queryValues'] = array_map(function($a){
-          if (\bbn\Str::isBuid($a)) {
+          if (Str::isBuid($a)) {
             return bin2hex($a);
           }
+
           return $a;
         }, $this->db->getLastValues());
       }
@@ -444,13 +446,13 @@ class Grid extends bbn\Models\Cls\Cache
         }
         if (
           (($idx = X::find($cfg['fields'], ['field' => $i])) === null ) ||
-          !!$cfg['fields'][$idx]['hidden']
+          (bool)$cfg['fields'][$idx]['hidden']
         ){
           unset($row[$i]);
         }
       }
       return $row;
-    }, $data ?: $this->getData());
+    }, $data ?: ($this->getData() ?: []));
     $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){
       return empty($c['hidden']);
     }));
@@ -466,7 +468,7 @@ class Grid extends bbn\Models\Cls\Cache
    */
   public function getExcel(): array
   {
-   return $this->excel; 
+   return $this->excel;
   }
 
   public function check(): bool

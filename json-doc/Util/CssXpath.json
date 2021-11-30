@@ -1,13 +1,13 @@
 {
     "doc": {
-        "description": "Convert CSS selector to xpath selector\n *",
+        "description": "Convert CSS selector to xpath selector\n",
         "tags": []
     },
     "name": "bbn\\Util\\CssXpath",
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/CssXpath.php",
+    "fileName": "\/Util\/CssXpath.php",
     "startLine": 21,
     "endLine": 265,
     "contentConstructor": null,
@@ -42,7 +42,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "css selector"
                 }
             ]
         }
@@ -78,11 +79,6 @@
     "namespaceName": "bbn\\Util",
     "shortName": "CssXpath",
     "summary": "Convert CSS selector to xpath selector",
-    "description": "*",
-    "description_parts": [
-        {
-            "type": "text",
-            "content": "<p>*<\/p>"
-        }
-    ]
+    "description": "",
+    "description_parts": []
 }

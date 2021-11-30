@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Perform a single file objectification and manage its manipulation.",
+        "description": "Perform a single file objectification and manage its manipulation.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Files ressources",
@@ -14,7 +15,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File.php",
+    "fileName": "\/File.php",
     "startLine": 18,
     "endLine": 333,
     "contentConstructor": {
@@ -25,12 +26,8 @@
         "__construct": {
             "name": "__construct",
             "summary": "Constructor.",
-            "description": "*\n```php\n$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');\n```",
+            "description": "```php\n$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file=new bbn\\File('\/home\/user\/Desktop\/test.txt');"
@@ -77,12 +74,8 @@
         "getSize": {
             "name": "getSize",
             "summary": "Return the filesize in byte.",
-            "description": "*\n```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
+            "description": "```php\n$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file = new bbn\\File('C:\/Test\/file.txt');\nX::dump($file->getSize());\n\/\/ (int) 314"
@@ -134,12 +127,8 @@
         "getExtension": {
             "name": "getExtension",
             "summary": "Return the extension of the file.",
-            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'\n```",
+            "description": "```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getExtension());\n\/\/(string) 'txt'"
@@ -167,12 +156,8 @@
         "download": {
             "name": "download",
             "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
-            "description": "*\n```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
+            "description": "```php\n$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$f = new \\bbn\\File('C:\/Test\/file.png');\n$f->download();"
@@ -200,12 +185,8 @@
         "getHash": {
             "name": "getHash",
             "summary": "Return the hash of the file.",
-            "description": "*\n```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+            "description": "```php\n$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file = new File('C:\/Test\/file.txt');\nX::dump($file->getHash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
@@ -233,12 +214,8 @@
         "delete": {
             "name": "delete",
             "summary": "Deletes the file.",
-            "description": "*\n```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+            "description": "```php\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "X::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new File('C:\/Test\/file.txt');\n$file->delete();\nX::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
@@ -266,12 +243,8 @@
         "save": {
             "name": "save",
             "summary": "That feature saves the file as a parameter, and accepts a string that contains the path where to save.",
-            "description": "*\n```php\n $file->save('\/home\/user\/desktop\/');\n```",
+            "description": "```php\n $file->save('\/home\/user\/desktop\/');\n```",
             "description_parts": [
-                {
-                    "type": "text",
-                    "content": "<p>*<\/p>"
-                },
                 {
                     "type": "code",
                     "content": "$file->save('\/home\/user\/desktop\/');"
@@ -838,5 +811,7 @@
     "extensionName": false,
     "namespaceName": "bbn",
     "shortName": "File",
-    "summary": "Perform a single file objectification and manage its manipulation."
+    "summary": "Perform a single file objectification and manage its manipulation.",
+    "description": "",
+    "description_parts": []
 }

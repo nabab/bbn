@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Encryption Class",
+        "description": "Encryption Class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Utilities",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
+    "fileName": "\/Util\/Enc.php",
     "startLine": 20,
     "endLine": 242,
     "contentConstructor": null,
@@ -234,8 +235,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Any random secure SALT string for your website"
+                    "default_name": ""
                 },
                 {
                     "name": "key",
@@ -244,7 +244,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Any random secure SALT string for your website"
                 },
                 {
                     "name": "method",
@@ -253,8 +254,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "User's optional password"
+                    "default_name": ""
                 },
                 {
                     "name": "password",
@@ -263,7 +263,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "User's optional password"
                 }
             ]
         },
@@ -300,8 +301,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "Any random secure SALT string for your website"
+                    "default_name": ""
                 },
                 {
                     "name": "key",
@@ -310,7 +310,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Any random secure SALT string for your website"
                 },
                 {
                     "name": "method",
@@ -319,8 +320,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "User's optional password"
+                    "default_name": ""
                 },
                 {
                     "name": "password",
@@ -329,7 +329,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "User's optional password"
                 }
             ]
         },
@@ -374,8 +375,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "sha512",
-                    "default_name": "",
-                    "description": "bits"
+                    "default_name": ""
                 },
                 {
                     "name": "key_bits",
@@ -384,7 +384,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 4096,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "bits"
                 }
             ]
         },
@@ -466,5 +467,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Util",
     "shortName": "Enc",
-    "summary": "Encryption Class"
+    "summary": "Encryption Class",
+    "description": "",
+    "description_parts": []
 }

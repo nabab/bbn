@@ -1074,7 +1074,7 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
-    return !!$this->db->insertIgnore(
+    return (bool)$this->db->insertIgnore(
       'bbn_users_options',
       [
         'id_option' => $id_perm,
@@ -1092,7 +1092,7 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
-    return !!$this->db->deleteIgnore(
+    return (bool)$this->db->deleteIgnore(
       'bbn_users_options',
       [
         'id_option' => $id_perm,

@@ -75,10 +75,7 @@ class Profiler extends bbn\Models\Cls\Db
         if (function_exists('tideways_xhprof_enable')) {
           tideways_xhprof_enable(
             TIDEWAYS_XHPROF_FLAGS_MEMORY | 
-            TIDEWAYS_XHPROF_FLAGS_CPU |
-            TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |
-            TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC |
-            TIDEWAYS_XHPROF_FLAGS_MEMORY_MU
+            TIDEWAYS_XHPROF_FLAGS_CPU
           );
           $this->is_started = true;
           return true;
@@ -86,10 +83,7 @@ class Profiler extends bbn\Models\Cls\Db
         elseif (function_exists('xhprof_enable')) {
           xhprof_enable(
             XHPROF_FLAGS_MEMORY | 
-            XHPROF_FLAGS_CPU |
-            XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |
-            XHPROF_FLAGS_MEMORY_ALLOC |
-            XHPROF_FLAGS_MEMORY_MU
+            XHPROF_FLAGS_CPU
           );
           $this->is_started = true;
           return true;
@@ -112,9 +106,9 @@ class Profiler extends bbn\Models\Cls\Db
   {
     if ($this->is_started && $this->check()) {
       $this->is_started = false;
-      $data = tideways_xhprof_disable();
+      $data = function_exists('tideways_xhprof_disable') ? tideways_xhprof_disable() : xhprof_disable();
       $c = &$this->class_cfg['arch']['bbn_profiler'];
-      return !!$this->db->insert(
+      return (bool)$this->db->insert(
         $this->class_table,
         [
           $c['id_user'] => $mvc->inc->user->getId(),

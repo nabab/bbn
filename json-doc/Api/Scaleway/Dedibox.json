@@ -1,0 +1,141 @@
+{
+    "doc": {
+        "description": "Scaleway Dedibox trait",
+        "tags": []
+    },
+    "name": "bbn\\Api\\Scaleway\\Dedibox",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Api\/Scaleway\/Dedibox.php",
+    "startLine": 8,
+    "endLine": 44,
+    "contentConstructor": null,
+    "methods": {
+        "getPlans": {
+            "name": "getPlans",
+            "summary": "Gets Dedibox plans list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Dedibox",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('dedibox\/plans');\n  }",
+            "startLine": 16,
+            "endLine": 19,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDediboxOptions": {
+            "name": "getDediboxOptions",
+            "summary": "Gets the list of available options products",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Dedibox",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/options\/$id\");\n  }",
+            "startLine": 27,
+            "endLine": 30,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The dedibox product ID"
+                }
+            ]
+        },
+        "getDediboxDatacenters": {
+            "name": "getDediboxDatacenters",
+            "summary": "Gets the list of available datacenters",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Dedibox",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/availability\/$id\");\n  }",
+            "startLine": 38,
+            "endLine": 41,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The dedibox product ID"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\Scaleway",
+    "shortName": "Dedibox",
+    "summary": "Scaleway Dedibox trait",
+    "description": "",
+    "description_parts": []
+}
