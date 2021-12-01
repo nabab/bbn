@@ -159,17 +159,9 @@ abstract class AbstractLinkType
 
       $f = $this->fields;
       foreach ($links as $link) {
-        if ($link[$f['id_people']] !== null) {
-          $id_tiers[] = $this->parseId($link[$f['id_people']]);
-        }
-
-        if ($link[$f['id_address']] !== null) {
-          $id_lieu[] = $this->parseId($link[$f['id_address']]);
-        }
-
-        if ($link[$f['id_option']] !== null) {
-          $id_options[] = $this->parseId($link[$f['id_option']]);
-        }
+        $id_tiers[]   = $this->parseId($link[$f['id_people']]) ?? '';
+        $id_lieu[]    = $this->parseId($link[$f['id_address']]) ?? '';
+        $id_options[] = $this->parseId($link[$f['id_option']]) ?? '';
       }
 
       // Here will fetch ALL linked items for all results in just 3 queries
@@ -206,20 +198,12 @@ abstract class AbstractLinkType
     if ($link = $this->fetch('one', [$this->fields['id'] => $id])) {
       $f      = $this->fields;
       $tables = $this->class_cfg['tables'];
-
-      $people = $link[$f['id_people']] !== null
-        ? $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']])], 'one')
-        : null;
-
-      $address = $link[$f['id_address']] !== null
-        ? $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']])], 'one')
-        : null;
-
-      $option = $link[$f['id_option']] !== null
-        ? $this->fetchLinks($tables['options'], [$this->parseId($link[$f['id_option']])], 'one')
-        : null;
-
-      return new Link($link, $people, $address, $option);
+      return new Link(
+        $link,
+        $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']]) ?? ''], 'one'),
+        $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']]) ?? ''], 'one'),
+        $this->fetchLinks($tables['options'], [$this->parseId($link['id_option']) ?? ''], 'one'),
+      );
     }
 
     return null;
@@ -459,10 +443,6 @@ abstract class AbstractLinkType
    */
   private function getLinkedItem(array $items, $id): ?array
   {
-    if ($id === null) {
-      return null;
-    }
-
     foreach ($items as $item) {
       if ($item[$this->fields['id']] === $id) {
         return $item;
