@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Obj\/Entity.php",
+    "fileName": "\/Models\/Obj\/Entity.php",
     "startLine": 7,
     "endLine": 29,
     "contentConstructor": {
@@ -112,5 +112,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Obj",
     "shortName": "Entity",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

@@ -10,7 +10,7 @@
         "bbn\\Models\\Tts\\Dbconfig"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Pages.php",
+    "fileName": "\/Appui\/Pages.php",
     "startLine": 5,
     "endLine": 89,
     "contentConstructor": {
@@ -69,7 +69,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -957,5 +958,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Pages",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

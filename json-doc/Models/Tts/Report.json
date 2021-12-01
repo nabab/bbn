@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Report.php",
+    "fileName": "\/Models\/Tts\/Report.php",
     "startLine": 13,
     "endLine": 22,
     "contentConstructor": null,
@@ -42,5 +42,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Report",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

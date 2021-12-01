@@ -77,7 +77,8 @@ class Mysql extends Sql
       }
 
       unset($cfg['pass']);
-    } catch (\PDOException $e) {
+    }
+    catch (\PDOException $e) {
       $err = X::_("Impossible to create the connection") .
         " {$cfg['engine']}/Connection " . $this->getEngine() . " to {$this->host} "
         . X::_("with the following error") . $e->getMessage();
@@ -85,6 +86,7 @@ class Mysql extends Sql
     }
   }
 
+  
   /**
    * @param array $cfg The user's options
    * @return array|null The final configuration
@@ -346,7 +348,7 @@ MYSQL
       $t2 = strpos($newName, '.') ? $this->tableFullName($newName, true) : $this->tableSimpleName($newName, true);
 
       $res = $this->rawQuery(sprintf("RENAME TABLE %s TO %s", $t1, $t2));
-      return !!$res;
+      return (bool)$res;
     }
 
     return false;
@@ -523,7 +525,7 @@ MYSQL
           $st .= ' NOT NULL';
         }
 
-        if (isset($c['default'])) {
+        if (array_key_exists('default', $c)) {
           $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . bbn\Str::escapeSquotes($c['default']) . "'");
         }
 
@@ -731,7 +733,7 @@ MYSQL;
             'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
             'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
             'extra' => $row['EXTRA'],
-            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
+            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false ? 1 : 0,
             'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
             'generation' => $row['GENERATION_EXPRESSION'],
           ];

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHP version 7
  *
@@ -9,6 +10,7 @@
  * @version  "GIT: <git_id>"
  * @link     https://www.bbn.io/bbn-php
  */
+
 namespace bbn;
 
 /**
@@ -52,11 +54,10 @@ namespace bbn;
  */
 class Cdn extends Models\Cls\Basic
 {
-
   use Cdn\Common;
 
 
-  /**
+  /**7
    * @var string The header that will be placed in the head of the output of a generated file.
    */
   protected const HEAD_COMMENT = '/* This file has been created by the cdn class from BBN PHP library
@@ -213,7 +214,7 @@ class Cdn extends Models\Cls\Basic
       if (!empty($this->cfg['content']['js']) || $this->cfg['is_component']) {
         $this->mode = 'js';
       }
-      else{
+      else {
         if (!empty($this->cfg['content']['css'])) {
           $this->mode = 'css';
         }
@@ -243,7 +244,7 @@ class Cdn extends Models\Cls\Basic
         if ($c['is_component']) {
           $code = $this->getComponents();
         }
-        else{
+        else {
           if ($c['grouped']) {
             $codes = $this->cp->groupCompile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);
           }
@@ -264,14 +265,14 @@ class Cdn extends Models\Cls\Basic
         if ($code) {
           if (defined('BBN_IS_DEV') && BBN_IS_DEV) {
             $code = sprintf(
-              self::HEAD_COMMENT,
-              $this->furl.$this->request,
-              $c['test'] ? self::TEST_ST : self::NO_TEST_ST
-            ).$code;
+                self::HEAD_COMMENT,
+                $this->furl . $this->request,
+                $c['test'] ? self::TEST_ST : self::NO_TEST_ST
+            ) . $code;
           }
 
           file_put_contents($c['cache_file'], $code);
-          file_put_contents($c['cache_file'].'.gzip', gzencode($code));
+          file_put_contents($c['cache_file'] . '.gzip', gzencode($code));
         }
       }
     }
@@ -298,13 +299,13 @@ class Cdn extends Models\Cls\Basic
       return false;
     }
 
-    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];
+    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath . $this->cfg['file'];
     if ($file && is_file($file)) {
       return true;
     }
 
     if ($this->cfg['ext'] !== 'map') {
-      X::log("Impossible to find $file for ".$this->cfg['url'], 'cdn_errors');
+      X::log("Impossible to find $file for " . $this->cfg['url'], 'cdn_errors');
     }
 
     return false;
@@ -322,7 +323,8 @@ class Cdn extends Models\Cls\Basic
       $this->file_mtime = filemtime($this->cfg['cache_file']);
       $c                =& $this->cfg;
       // Only checks if the file exists and is valid
-      if (!$real
+      if (
+          !$real
           && \is_array($c['content'])
           && (($last_modified - $this->file_mtime) < $this->cache_length)
       ) {
@@ -332,31 +334,31 @@ class Cdn extends Models\Cls\Basic
       clearstatcache();
       // Real research for last mods and generation timestamps
       if ($c['is_component']) {
-        foreach ($c['content'] as $name => $cp){
-          foreach ($cp as $type => $files){
-            foreach ($files as $f){
-              if (is_file($this->fpath.$f)) {
-                $last_modified = filemtime($this->fpath.$f);
+        foreach ($c['content'] as $name => $cp) {
+          foreach ($cp as $type => $files) {
+            foreach ($files as $f) {
+              if (is_file($this->fpath . $f)) {
+                $last_modified = filemtime($this->fpath . $f);
                 if ($last_modified > $this->file_mtime) {
                   return false;
                 }
               }
-              else{
+              else {
                 throw new \Exception("Impossible to find the file $f!");
               }
             }
           }
         }
       }
-      else{
-        foreach ($this->cfg['content'][$this->mode] as $f){
-          if (is_file($this->fpath.$f)) {
-            $last_modified = filemtime($this->fpath.$f);
+      else {
+        foreach ($this->cfg['content'][$this->mode] as $f) {
+          if (is_file($this->fpath . $f)) {
+            $last_modified = filemtime($this->fpath . $f);
             if ($last_modified > $this->file_mtime) {
               return false;
             }
           }
-          else{
+          else {
             //adump($this->cfg);
             throw new \Exception("Impossible to find the file $f!");
           }
@@ -375,7 +377,7 @@ class Cdn extends Models\Cls\Basic
    */
   public function output()
   {
-    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];
+    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath . $this->cfg['file'];
     if ($file && is_file($file)) {
       // get the HTTP_IF_MODIFIED_SINCE header if set
       $client_if_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;
@@ -383,44 +385,47 @@ class Cdn extends Models\Cls\Basic
       $client_tag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim(str_replace('"', '', Stripslashes($_SERVER['HTTP_IF_NONE_MATCH']))) : false;
 
       // We get a unique hash of this file (etag)
-      $file_tag = md5($file.$this->file_mtime);
+      $file_tag = md5($file . $this->file_mtime);
 
       //die(var_dump($this->file_mtime, $client_tag, $etagFile, $client_if_modified, $_SERVER));
       if ($this->mode === 'css') {
         header('Content-type: text/css; charset=utf-8');
       }
-      else{
+      else {
         if ($this->mode === 'js') {
           header('Content-type: text/javascript; charset=utf-8');
         }
-        else{
+        else {
           $mime = finfo_open(FILEINFO_MIME_TYPE);
-          header('Content-type: '.finfo_file($mime, $file));
+          header('Content-type: ' . finfo_file($mime, $file));
         }
       }
 
       // make sure caching is turned on
       header('Cache-Control: max-age=14400');
-      header('Expires: '.gmdate('D, d M Y H:i:s', Time() + 14400).' GMT');
+      header('Expires: ' . gmdate('D, d M Y H:i:s', Time() + 14400) . ' GMT');
       // set last-modified header
-      header('Date: '.gmdate('D, d M Y H:i:s', $this->file_mtime).' GMT');
-      header('Last-Modified: '.gmdate('D, d M Y H:i:s', $this->file_mtime).' GMT');
+      header('Date: ' . gmdate('D, d M Y H:i:s', $this->file_mtime) . ' GMT');
+      header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $this->file_mtime) . ' GMT');
       // set etag-header
       header("ETag: $file_tag");
       //header('Pragma: public');
 
       // check if page has changed. If not, send 304 and exit
-      if ($client_if_modified
+      if (
+          $client_if_modified
           && ((strtotime($client_if_modified) == $this->file_mtime)
           || ($client_tag == $file_tag)          )
       ) {
         header('HTTP/1.1 304 Not Modified');
       }
-      else{
-        if (empty($this->cfg['file']) && (($this->mode === 'js')
+      else {
+        if (
+            empty($this->cfg['file']) && (($this->mode === 'js')
             || ($this->mode === 'css')            )
         ) {
-          if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])
+          if (
+              isset($_SERVER['HTTP_ACCEPT_ENCODING'])
               && (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false)
           ) {
             header('Content-Encoding: gzip');
@@ -434,7 +439,7 @@ class Cdn extends Models\Cls\Basic
       exit();
     }
 
-    throw new \Exception('No cache file '.$file);
+    throw new \Exception('No cache file ' . $file);
   }
 
 
@@ -472,7 +477,7 @@ class Cdn extends Models\Cls\Basic
     };
   }
   $code
-  
+
 })(window);
 
 JS;
@@ -490,7 +495,7 @@ JS;
     if (!empty($codes['js'])) {
       $num      = count($codes['js']);
       $root_url = $this->furl;
-      foreach ($codes['js'] as $c){
+      foreach ($codes['js'] as $c) {
         $tmp = $c['code'];
         if (empty($this->cfg['nocompil'])) {
           $tmp = <<<JS
@@ -506,7 +511,7 @@ JS;
         }
 
         if (!empty($tmp)) {
-          $code .= $tmp.($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
+          $code .= $tmp . ($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
         }
       }
 
@@ -521,15 +526,15 @@ JS;
         foreach ($this->cfg['content']['includes'] as $lib) {
           if (!empty($lib['css'])) {
             $code .= $this->cp->cssLinks(
-              array_map(
-                function ($a) use ($lib, &$done_css) {
-                  $done_css[] = $lib['path'].$a;
-                  return $lib['path'].$a;
-                },
-                $lib['css']
-              ),
-              $this->cfg['test'],
-              $lib['prepend']
+                array_map(
+                    function ($a) use ($lib, &$done_css) {
+                      $done_css[] = $lib['path'] . $a;
+                      return $lib['path'] . $a;
+                    },
+                    $lib['css']
+                ),
+                $this->cfg['test'],
+                $lib['prepend']
             );
           }
         }
@@ -565,8 +570,8 @@ JS;
   {
     $code = '';
     if (!empty($codes['css'])) {
-      foreach ($codes['css'] as $c){
-        $code .= $c['code'].($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
+      foreach ($codes['css'] as $c) {
+        $code .= $c['code'] . ($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
       }
     }
 
@@ -586,8 +591,8 @@ JS;
     if (\is_array($c['content'])) {
       $i        = 0;
       $includes = '';
-      foreach ($c['content'] as $name => $cp){
-        foreach ($cp['js'] as $js){
+      foreach ($c['content'] as $name => $cp) {
+        foreach ($cp['js'] as $js) {
           $ext = Str::fileExt($js, true);
           //X::dump($codes);
           // A js file with the component name is mandatory
@@ -600,54 +605,56 @@ JS;
             ];
             if (!empty($cp['css'])) {
               $cssc = $this->cp->compile($cp['css'], $c['test']);
-              foreach ($cssc['css'] as $css){
-                if (!isset($css['code'])) {
-                  throw new \Exception("Impossible to get the SCSS code from component ".$cp);
-                  //die(var_dump($css));
+              if (is_array($cssc) && !empty($cssc['css'])) {
+                foreach ($cssc['css'] as $css) {
+                  if (!isset($css['code'])) {
+                    throw new \Exception("Impossible to get the SCSS code from component " . $cp);
+                    //die(var_dump($css));
+                  }
+
+                  if ($this->cp->hasLinks($css['code'])) {
+                    $includes .= $this->cp->cssLinks($cp['css'], $c['test']);
+                    unset($cp['css']);
+                    break;
+                  }
                 }
 
-                if ($this->cp->hasLinks($css['code'])) {
-                  $includes .= $this->cp->cssLinks($cp['css'], $c['test']);
-                  unset($cp['css']);
-                  break;
-                }
-              }
-
-              if (isset($cp['css'])) {
                 $codes[$i]['css'] = array_map(
-                  function ($a) {
-                    return $a['code'];
-                  }, $cssc['css']
+                    function ($a) {
+                      return $a['code'];
+                    },
+                    $cssc['css']
                 );
               }
             }
 
-            if (!empty($c['lang'])
+            if (
+                !empty($c['lang'])
                 && !empty($cp['lang'])
-                && \in_array(X::dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
+                && \in_array(X::dirname($js) . "/$name.$c[lang].lang", $cp['lang'], true)
             ) {
-              $lang = file_get_contents($this->fpath.X::dirname($js)."/$name.$c[lang].lang");
+              $lang = file_get_contents($this->fpath . X::dirname($js) . "/$name.$c[lang].lang");
               if ($lang) {
                 //$lang = json_decode($lang, true);
-                $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }".PHP_EOL.$codes[$i]['js'];
+                $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }" . PHP_EOL . $codes[$i]['js'];
               }
             }
 
             // Dependencies links
-            $dep_path = $this->fpath.$jsc['js'][0]['dir'].'/';
-            if (is_file($dep_path.'bbn.json')) {
-              $json = json_decode(file_get_contents($dep_path.'bbn.json'), true);
+            $dep_path = $this->fpath . $jsc['js'][0]['dir'] . '/';
+            if (is_file($dep_path . 'bbn.json')) {
+              $json = json_decode(file_get_contents($dep_path . 'bbn.json'), true);
             }
-            else{
-              if (is_file($dep_path.'bower.json')) {
-                $json = json_decode(file_get_contents($dep_path.'bower.json'), true);
+            else {
+              if (is_file($dep_path . 'bower.json')) {
+                $json = json_decode(file_get_contents($dep_path . 'bower.json'), true);
               }
             }
 
             if (!empty($json)) {
               if (!empty($json['dependencies'])) {
                 $lib = new Cdn\Library($this->db, $this->cfg['lang'], true);
-                foreach ($json['dependencies'] as $l => $version){
+                foreach ($json['dependencies'] as $l => $version) {
                   $lib->add($l);
                 }
 
@@ -670,11 +677,11 @@ JS;
             // HTML inclusion
             $html = [];
             if (!empty($cp['html'])) {
-              foreach ($cp['html'] as $f){
+              foreach ($cp['html'] as $f) {
                 if ($tmp = $this->cp->getContent($f, $c['test'])) {
                   $component_name = Str::fileExt($f, true)[0];
                   if ($name !== $component_name) {
-                    $component_name = $name.'-'.$component_name;
+                    $component_name = $name . '-' . $component_name;
                   }
 
                   $html[] = [
@@ -697,14 +704,14 @@ JS;
 
       if ($codes) {
         $str = '';
-        foreach ($codes as $cd){
-          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){bbn.fn.log(e.message); throw new Error('Impossible to load component $cd[name]');}}";
+        foreach ($codes as $cd) {
+          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){throw new Error('Impossible to load component $cd[name] - ' + e.message);}}";
           if (!empty($cd['css'])) {
-            $str .= ', css: '.json_encode($cd['css']);
+            $str .= ', css: ' . json_encode($cd['css']);
           }
 
           if (!empty($cd['html'])) {
-            $str .= ', html: '.json_encode($cd['html']);
+            $str .= ', html: ' . json_encode($cd['html']);
           }
 
           $str .= '},';
@@ -731,6 +738,4 @@ JAVASCRIPT;
       return $code;
     }
   }
-
-
 }

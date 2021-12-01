@@ -171,7 +171,7 @@ class Statistic extends bbn\Models\Cls\Db
    */
   public function check(): bool
   {
-    return !!$this->ocfg;
+    return (bool)$this->ocfg;
   }
 
 

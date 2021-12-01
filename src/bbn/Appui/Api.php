@@ -78,7 +78,7 @@ class Api extends bbn\Models\Cls\Basic
 
   public function hasKey()
   {
-    return !!$this->_get_key();
+    return (bool)$this->_get_key();
   }
 
 

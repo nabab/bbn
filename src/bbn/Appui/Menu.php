@@ -416,7 +416,7 @@ class Menu extends bbn\Models\Cls\Basic
           $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],
           $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],
           $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],
-          'hasItems' => !!count($pref->getBits($e[$c['arch']['user_options']['id']]))
+          'hasItems' => (bool)count($pref->getBits($e[$c['arch']['user_options']['id']]))
           ];
       },
       $menus
@@ -711,7 +711,7 @@ class Menu extends bbn\Models\Cls\Basic
         $res['id_permission'] = $menu['id_option'];
         $res['link']          = $this->perm->toPath($menu['id_option']);
         if ($prepath && (strpos($res['link'], $prepath) === 0)) {
-          $res['link'] = substr($res['link'], Strlen($prepath));
+          $res['link'] = substr($res['link'], strlen($prepath));
         }
 
         if (!empty($menu['argument'])) {

@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use Closure;
+
 /**
  * Universal caching class: called once per request, it holds the cache system.
  *
@@ -278,7 +280,7 @@ class Cache
         case 'files':
           $file = self::_file($item, $this->path);
           if (is_file($file)) {
-            return !!$this->fs->delete($file);
+            return (bool)$this->fs->delete($file);
           }
           return false;
       }
@@ -302,10 +304,10 @@ class Cache
 
       $dir = self::_dir($st, $this->path, false);
       if ($this->fs->isDir($dir)) {
-        return !!$this->fs->delete($dir, $dir === $this->path ? false : true);
+        return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);
       }
       else {
-        return !!$this->fs->delete($dir.'.bbn.cache');
+        return (bool)$this->fs->delete($dir.'.bbn.cache');
       }
     }
     elseif (self::$type) {
@@ -700,10 +702,11 @@ class Cache
    * @param callable $function
    * @return string
    */
-  public function serializeFunction(callable $function): string
+  public function serializeFunction(\Closure $function): string
   {
     return serialize(
       new \Opis\Closure\SerializableClosure($function)
     );
   }
+
 }

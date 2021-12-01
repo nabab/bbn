@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class system",
+        "description": "Class system\n",
         "tags": {
             "package": "bbn\\File"
         }
@@ -9,7 +9,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File\/System2.php",
+    "fileName": "\/File\/System2.php",
     "startLine": 24,
     "endLine": 1280,
     "contentConstructor": {
@@ -1835,5 +1835,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\File",
     "shortName": "System2",
-    "summary": "Class system"
+    "summary": "Class system",
+    "description": "",
+    "description_parts": []
 }

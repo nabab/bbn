@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Universal caching class: called once per request, it holds the cache system.",
+        "description": "Universal caching class: called once per request, it holds the cache system.\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Jan 23, 2016, 23:23:55 +0000",
             "category": "Cache",
@@ -12,9 +13,9 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+    "fileName": "\/Cache.php",
     "startLine": 14,
-    "endLine": 709,
+    "endLine": 710,
     "contentConstructor": {
         "file": "bbn\\Cache",
         "returns": null
@@ -221,7 +222,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The type of engine to use"
                 }
             ]
         },
@@ -258,7 +260,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The time-to-live value"
+                    "description": "The name of the item"
                 },
                 {
                     "name": "ttl",
@@ -267,7 +269,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The time-to-live value"
                 }
             ]
         },
@@ -280,7 +283,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $item)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_delete($item);\n        case 'memcache':\n          return $this->obj->delete($item);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (is_file($file)) {\n            return !!$this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
+            "code": "function(string $item)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_delete($item);\n        case 'memcache':\n          return $this->obj->delete($item);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (is_file($file)) {\n            return (bool)$this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
             "startLine": 270,
             "endLine": 286,
             "isDeprecated": false,
@@ -303,7 +306,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The name of the item"
                 }
             ]
         },
@@ -316,7 +320,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $st = NULL)\n  {\n    if (self::$type === 'files') {\n      if ($st === null) {\n          $st = '';\n      }\n\n      $dir = self::_dir($st, $this->path, false);\n      if ($this->fs->isDir($dir)) {\n        return !!$this->fs->delete($dir, $dir === $this->path ? false : true);\n      }\n      else {\n        return !!$this->fs->delete($dir.'.bbn.cache');\n      }\n    }\n    elseif (self::$type) {\n      $items = $this->items($st);\n      $res   = 0;\n      foreach ($items as $item){\n        if (!$st || strpos($item, $st) === 0) {\n          switch (self::$type){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
+            "code": "function(string $st = NULL)\n  {\n    if (self::$type === 'files') {\n      if ($st === null) {\n          $st = '';\n      }\n\n      $dir = self::_dir($st, $this->path, false);\n      if ($this->fs->isDir($dir)) {\n        return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);\n      }\n      else {\n        return (bool)$this->fs->delete($dir.'.bbn.cache');\n      }\n    }\n    elseif (self::$type) {\n      $items = $this->items($st);\n      $res   = 0;\n      foreach ($items as $item){\n        if (!$st || strpos($item, $st) === 0) {\n          switch (self::$type){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
             "startLine": 296,
             "endLine": 331,
             "isDeprecated": false,
@@ -339,7 +343,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The path of the items to delete"
                 }
             ]
         },
@@ -402,7 +407,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The name of the item"
                 }
             ]
         },
@@ -439,7 +445,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The name of the item"
                 }
             ]
         },
@@ -476,7 +483,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The timestamp to which the item's timestamp will be compared"
+                    "description": "The name of the item"
                 },
                 {
                     "name": "time",
@@ -485,7 +492,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The timestamp to which the item's timestamp will be compared"
                 }
             ]
         },
@@ -522,7 +530,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The value to be stored in the cache"
+                    "description": "The name of the item"
                 },
                 {
                     "name": "val",
@@ -532,7 +540,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The length in seconds during which the value will be considered as valid"
+                    "description": "The value to be stored in the cache"
                 },
                 {
                     "name": "ttl",
@@ -541,7 +549,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 10,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The length in seconds during which the value will be considered as valid"
                 },
                 {
                     "name": "exec",
@@ -587,7 +596,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A MD5 hash to compare with"
+                    "description": "The name of the item"
                 },
                 {
                     "name": "hash",
@@ -596,7 +605,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A MD5 hash to compare with"
                 }
             ]
         },
@@ -631,7 +641,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The cache length"
+                    "description": "The name of the item"
                 },
                 {
                     "name": "ttl",
@@ -640,7 +650,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The cache length"
                 }
             ]
         },
@@ -675,7 +686,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The name of the item"
+                    "description": "The function which returns the value for the cache"
                 },
                 {
                     "name": "item",
@@ -685,7 +696,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The cache length"
+                    "description": "The name of the item"
                 },
                 {
                     "name": "ttl",
@@ -694,7 +705,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The cache length"
                 }
             ]
         },
@@ -789,9 +801,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $function)\n  {\n    return serialize(\n      new \\Opis\\Closure\\SerializableClosure($function)\n    );\n  }",
+            "code": "function(callable $function)\n  {\n    $wrapper = new \\Opis\\Closure\\SerializableClosure(function() {\n      X::log(\"Helklo world\");\n    });\n    return serialize($wrapper);\n  }",
             "startLine": 703,
-            "endLine": 708,
+            "endLine": 709,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -852,5 +864,7 @@
     "extensionName": false,
     "namespaceName": "bbn",
     "shortName": "Cache",
-    "summary": "Universal caching class: called once per request, it holds the cache system."
+    "summary": "Universal caching class: called once per request, it holds the cache system.",
+    "description": "",
+    "description_parts": []
 }

@@ -23,9 +23,9 @@ class Db implements Db\Actions
   use Models\Tts\Retriever;
 
   /**
-   * @var Db\Engines Can be other driver
+   * @var Db\Languages\Sql Can be other driver
    */
-  protected $language = false;
+  protected $language;
 
   /**
    * The ODBC engine of this connection
@@ -56,7 +56,7 @@ class Db implements Db\Actions
    */
   public function __construct(array $cfg = [])
   {
-    if (\defined('BBN_DB_ENGINE') && !isset($cfg['engine'])) {
+    if (!isset($cfg['engine']) && \defined('BBN_DB_ENGINE')) {
       $cfg['engine'] = BBN_DB_ENGINE;
     }
 
@@ -95,8 +95,32 @@ class Db implements Db\Actions
 
 
   /**
-   * Says if the given database engine is supported or not
+   * Closes the connection making the object unusable.
    *
+   * @return void
+   */
+  public function close(): void
+  {
+    if ($this->language) {
+      $this->language->close();
+      $this->setErrorMode('continue');
+    }
+  }
+
+
+  /**
+   * Says if the given database engine is supported or not
+   * 
+   * ```php
+   * X::adump(
+   *   $db->isEngineSupported("mysql"), // true
+   *   $db->isEngineSupported("postgre"), // false
+   *   $db->isEngineSupported("sqlite"), // true
+   *   $db->isEngineSupported("mssql"), // false
+   *   $db->isEngineSupported("test") // false
+   * );
+   * ```
+   * 
    * @param string $engine
    *
    * @return bool
@@ -109,9 +133,13 @@ class Db implements Db\Actions
 
   /**
    * Returns the icon (CSS class from nerd fonts) for the given db engine
-   *
-   * @param string $engine
-   *
+   * 
+   * ```php
+   * echo '<i class="'.$ctrl->db->getEngineIcon("mysql").'"></i>'; // nf nf-dev-mysql
+   * ```
+   * 
+   * @param string $engine Name of the engine
+   * 
    * @return string|null
    */
   public static function getEngineIcon(string $engine): ?string
@@ -119,6 +147,15 @@ class Db implements Db\Actions
     return self::$engines[$engine] ?? null;
   }
 
+  /**
+   * Return the config of the language
+   * 
+   * ```php
+   * adump($ctrl->db->getCfg("mysql"));
+   * ```
+   *
+   * @return array
+   */
   public function getCfg(): array
   {
     return $this->language->getCfg();
@@ -126,7 +163,11 @@ class Db implements Db\Actions
 
   /**
    * Returns the engine used by the current connection.
-   *
+   * 
+   * ```php
+   * X::adump($ctrl->db->getEngine()); // mysql
+   * ```
+   * 
    * @return string|null
    */
   public function getEngine(): ?string
@@ -137,7 +178,11 @@ class Db implements Db\Actions
 
   /**
    * Returns the host of the current connection.
-   *
+   * 
+   * ```php
+   * X::adump($ctrl->db->getHost()); // db.m3l.co
+   * ```
+   * 
    * @return string|null
    */
   public function getHost(): ?string
@@ -149,6 +194,10 @@ class Db implements Db\Actions
   /**
    * Returns the current database selected by the current connection.
    *
+   * ```php
+   * X::adump($ctrl->db->getCurrent()); // dev_mk
+   * ```
+   * 
    * @return string|null
    */
   public function getCurrent(): ?string
@@ -158,8 +207,12 @@ class Db implements Db\Actions
 
 
   /**
-   * Returns the last error.
+   * Returns the last error, return null if there is no last error.
    *
+   * ```php
+   * X::adump($ctrl->db->getLastError()); // null
+   * ```
+   * 
    * @return string|null
    */
   public function getLastError(): ?string
@@ -169,8 +222,14 @@ class Db implements Db\Actions
 
   /**
    * Returns true if the column name is an aggregate function
-   *
+   * 
+   * ```php
+   * X::adump($ctrl->db->isAggregateFunction("name")); // false
+   * X::adump($ctrl->db->isAggregateFunction("ID")); // true
+   * ```
+   * 
    * @param string $f The string to check
+   * 
    * @return bool
    */
   public function isAggregateFunction(string $f): bool
@@ -182,7 +241,11 @@ class Db implements Db\Actions
 
   /**
    * Makes that echoing the connection shows its engine and host.
-   *
+   * 
+   * ```php
+   * X::adump($ctrl->db->__toString()); // Connection mysql to db.m3l.co
+   * ```
+   * 
    * @return string
    */
   public function __toString()
@@ -192,6 +255,12 @@ class Db implements Db\Actions
 
 
   /**
+   * Returns the connection code
+   * 
+   * ```php
+   * X::adump($ctrl->db->getConnectionCode()); // dev_mk@db.m3l.co
+   * ```
+   * 
    * @return string
    */
   public function getConnectionCode()
@@ -200,7 +269,7 @@ class Db implements Db\Actions
   }
 
   /**
-   * Return the last config for this connection.
+   * Returns the last config for this connection.
    *
    * ```php
    * X::dump($db->getLastCfg());
@@ -215,6 +284,11 @@ class Db implements Db\Actions
   }
 
   /**
+   * 
+   * ```php
+   * X::adump($ctrl->db->getConnection()); 
+   * ```
+   * 
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
@@ -309,6 +383,7 @@ class Db implements Db\Actions
    * X::dump($db->check());
    * // (bool)
    * ```
+   * 
    * @return bool
    */
   public function check(): bool
@@ -322,6 +397,7 @@ class Db implements Db\Actions
    * ```php
    * $db->$db->log('test');
    * ```
+   * 
    * @param mixed $st
    * @return self
    */
@@ -361,6 +437,7 @@ class Db implements Db\Actions
    * X::dump($db->getErrorMode());
    * // (string) stop_all
    * ```
+   * 
    * @return string
    */
   public function getErrorMode(): string
@@ -435,6 +512,7 @@ class Db implements Db\Actions
    * $db->startFancyStuff();
    * // (self)
    * ```
+   * 
    * @return self
    */
   public function startFancyStuff(): self
@@ -459,6 +537,10 @@ class Db implements Db\Actions
   /**
    * Enable the triggers' functions
    *
+   * ```php
+   * X::adump($ctrl->db->enableTrigger()); // bbn\Db Object
+   * ```
+   * 
    * @return self
    */
   public function enableTrigger(): self
@@ -470,7 +552,11 @@ class Db implements Db\Actions
 
   /**
    * Disable the triggers' functions
-   *
+   * 
+   * ```php
+   * X::adump($ctrl->db->disableTrigger());
+   * ```
+   * 
    * @return self
    */
   public function disableTrigger(): self
@@ -479,13 +565,29 @@ class Db implements Db\Actions
     return $this;
   }
 
-
+  /**
+   * Checks if the triggers' functions are enable
+   * 
+   * ```php
+   * X::adump($ctrl->db->isTriggerEnabled()); // true
+   * ```
+   *
+   * @return boolean
+   */
   public function isTriggerEnabled(): bool
   {
     return $this->language->isTriggerEnabled();
   }
 
-
+  /**
+   * Checks if the triggers' functions are disable
+   * 
+   * ```php
+   * X::adump($ctrl->db->isTriggerEnabled()); // false
+   * ```
+   * 
+   * @return boolean
+   */
   public function isTriggerDisabled(): bool
   {
     return $this->language->isTriggerDisabled();
@@ -510,6 +612,11 @@ class Db implements Db\Actions
 
 
   /**
+   * Returns an array 
+   * 
+   * ```php
+   * X::adump($ctrl->db->getTriggers());
+   * ```
    * @return array
    */
   public function getTriggers(): array
@@ -581,6 +688,21 @@ class Db implements Db\Actions
 
   /**
    * Return the table's structure as an indexed array.
+   * 
+   * X::hdump($ctrl->db->modelize('my_date_2')); /*    
+   * "fields": {
+   *     "ID": {
+   *         "position": 1,
+   *         "type": "int",
+   *         "null": 0,
+   *         "key": null,
+   *         "extra": "",
+   *         "signed": true,
+   *         "virtual": false,
+   *         "generation": "",
+   *         "maxlength": 10,
+   *     },
+   * 
    *
    * @param null|array|string $table The table's name
    * @param bool              $force If set to true will force the modernization to re-perform even if the cache exists
@@ -592,7 +714,13 @@ class Db implements Db\Actions
   }
 
 
-  /**
+  /** 
+   * Return the table's structure as an indexed array.
+   * 
+   * ```php
+   * X::hdump($ctrl->db->fmodelize('my_date_2'));
+   * ```
+   * 
    * @param string $table
    * @param bool   $force
    * @return null|array
@@ -779,6 +907,9 @@ class Db implements Db\Actions
   /**
    * Deletes all the queries recorded and returns their (ex) number.
    *
+   * ```php
+   * X::hdump($ctrl->db->flush()); // 9
+   * ```
    * @return int
    */
   public function flush(): int
@@ -944,7 +1075,12 @@ class Db implements Db\Actions
   }
 
 
-  /**
+  /** Returns the number of queries 
+   * 
+   * ```php
+   * X::hdump($ctrl->db->countQueries()); // 10
+   * ```
+   * 
    * @return int
    */
   public function countQueries(): int
@@ -1920,6 +2056,10 @@ class Db implements Db\Actions
   /**
    * Actions to do once the PDO object has been created
    *
+   * ```php
+   * X::hdump($ctrl->db->postCreation()); // null 
+   * ```
+   * 
    * @return void
    */
   public function postCreation()
@@ -1990,6 +2130,10 @@ class Db implements Db\Actions
   /**
    * Returns true if the given string is the full name of a table ('database.table').
    *
+   * ```php
+   * X::hdump($ctrl->db->isTableFullName("table_users")); // true or false
+   * ```
+   * 
    * @param string $table The table's name
    * @return bool
    */
@@ -2002,6 +2146,10 @@ class Db implements Db\Actions
   /**
    * Returns true if the given string is the full name of a column ('table.column').
    *
+   * ```php
+   * X::hdump($ctrl->db->isColFullName("column_users")); // true or false
+   * ```
+   * 
    * @param string $col
    * @return bool
    */
@@ -2036,7 +2184,7 @@ class Db implements Db\Actions
    *
    * ```php
    * X::dump($db->colFullName("name", "table_users"));
-   * // (string)  table_users.name
+   * // (string)  table_users.name Hello Ohohoho!!
    * X::dump($db->colFullName("name", "table_users", true));
    * // (string) \`table_users\`.\`name\`
    * ```
@@ -2503,6 +2651,7 @@ class Db implements Db\Actions
    *    ) ENGINE=InnoDB DEFAULT CHARSET=utf8
    *
    * ```
+   * 
    * @param string $table The table's name
    * @return string | false
    * @throws \Exception

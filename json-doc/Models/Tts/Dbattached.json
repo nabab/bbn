@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Dbattached.php",
+    "fileName": "\/Models\/Tts\/Dbattached.php",
     "startLine": 14,
     "endLine": 24,
     "contentConstructor": null,
@@ -69,5 +69,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Dbattached",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

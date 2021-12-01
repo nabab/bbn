@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "A class for managing users",
+        "description": "A class for managing users\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Authentication",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
+    "fileName": "\/User\/Manager.php",
     "startLine": 22,
     "endLine": 1162,
     "contentConstructor": {
@@ -190,7 +191,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "A user's connection object (\\connection or subclass)\n   *"
+                    "description": "A user's connection object (\\connection or subclass)"
                 }
             ]
         },
@@ -739,7 +740,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A configuration array"
                 }
             ]
         },
@@ -776,7 +778,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A configuration array"
                 },
                 {
                     "name": "id_user",
@@ -984,7 +987,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Type of the message"
+                    "description": "user User ID"
                 },
                 {
                     "name": "message",
@@ -994,7 +997,7 @@
                     "has_default": true,
                     "default": "hotlink",
                     "default_name": "",
-                    "description": "Timestamp of the expiration date"
+                    "description": "Type of the message"
                 },
                 {
                     "name": "exp",
@@ -1003,7 +1006,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Timestamp of the expiration date"
                 }
             ]
         },
@@ -1040,7 +1044,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "group Group ID"
+                    "description": "user  User ID"
                 },
                 {
                     "name": "id_group",
@@ -1049,7 +1053,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "group Group ID"
                 }
             ]
         },
@@ -1705,7 +1710,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_perm, string $id_user = NULL, string $id_group = NULL, int $public = 0)\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    return !!$this->db->insertIgnore(\n      'bbn_users_options',\n      [\n        'id_option' => $id_perm,\n        'id_user' => $id_user,\n        'id_group' => $id_group,\n        'public' => $public\n      ]\n    );\n  }",
+            "code": "function(string $id_perm, string $id_user = NULL, string $id_group = NULL, int $public = 0)\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    return (bool)$this->db->insertIgnore(\n      'bbn_users_options',\n      [\n        'id_option' => $id_perm,\n        'id_user' => $id_user,\n        'id_group' => $id_group,\n        'public' => $public\n      ]\n    );\n  }",
             "startLine": 1071,
             "endLine": 1086,
             "isDeprecated": false,
@@ -1768,7 +1773,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_perm, string $id_user = NULL, string $id_group = NULL, int $public = 0)\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    return !!$this->db->deleteIgnore(\n      'bbn_users_options',\n      [\n        'id_option' => $id_perm,\n        'id_user' => $id_user,\n        'id_group' => $id_group,\n        'public' => $public\n      ]\n    );\n  }",
+            "code": "function(string $id_perm, string $id_user = NULL, string $id_group = NULL, int $public = 0)\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    return (bool)$this->db->deleteIgnore(\n      'bbn_users_options',\n      [\n        'id_option' => $id_perm,\n        'id_user' => $id_user,\n        'id_group' => $id_group,\n        'public' => $public\n      ]\n    );\n  }",
             "startLine": 1089,
             "endLine": 1104,
             "isDeprecated": false,
@@ -1944,5 +1949,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\User",
     "shortName": "Manager",
-    "summary": "A class for managing users"
+    "summary": "A class for managing users",
+    "description": "",
+    "description_parts": []
 }

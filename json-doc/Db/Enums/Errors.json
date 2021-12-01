@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Enums\/Errors.php",
+    "fileName": "\/Db\/Enums\/Errors.php",
     "startLine": 5,
     "endLine": 26,
     "contentConstructor": null,
@@ -34,5 +34,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db\\Enums",
     "shortName": "Errors",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

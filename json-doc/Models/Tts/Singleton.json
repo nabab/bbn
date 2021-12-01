@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
+    "fileName": "\/Models\/Tts\/Singleton.php",
     "startLine": 17,
     "endLine": 65,
     "contentConstructor": null,
@@ -94,5 +94,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Singleton",
-    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one."
+    "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
+    "description": "",
+    "description_parts": []
 }

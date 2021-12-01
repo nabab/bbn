@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
+    "fileName": "\/Api\/Permissions\/MolliePermissionManager.php",
     "startLine": 5,
     "endLine": 136,
     "contentConstructor": {
@@ -46,7 +46,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "ermission"
+                    "description": "andler"
                 },
                 {
                     "name": "apiPermission",
@@ -55,7 +55,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ermission"
                 }
             ]
         },
@@ -116,7 +117,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "name"
+                    "description": "code"
                 },
                 {
                     "name": "account_name",
@@ -125,7 +126,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "name"
                 }
             ]
         },
@@ -162,7 +164,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "name"
+                    "description": "token"
                 },
                 {
                     "name": "account_name",
@@ -171,7 +173,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "name"
                 }
             ]
         },
@@ -298,7 +301,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "in"
+                    "description": "token"
                 },
                 {
                     "name": "expires_in",
@@ -308,7 +311,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "name"
+                    "description": "in"
                 },
                 {
                     "name": "account_name",
@@ -317,7 +320,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "name"
                 }
             ]
         }
@@ -344,5 +348,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "MolliePermissionManager",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

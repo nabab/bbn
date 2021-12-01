@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Masks.php",
+    "fileName": "\/Appui\/Masks.php",
     "startLine": 14,
     "endLine": 254,
     "contentConstructor": {
@@ -68,7 +68,8 @@
                         "required": true,
                         "has_default": false,
                         "default": "",
-                        "default_name": ""
+                        "default_name": "",
+                        "description": "A database connection"
                     }
                 ]
             },
@@ -1366,5 +1367,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Masks",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

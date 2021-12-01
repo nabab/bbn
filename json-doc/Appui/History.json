@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Report"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/History.php",
+    "fileName": "\/Appui\/History.php",
     "startLine": 6,
     "endLine": 1391,
     "contentConstructor": null,
@@ -1860,5 +1860,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "History",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

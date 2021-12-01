@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+    "fileName": "\/Mvc\/Environment.php",
     "startLine": 23,
     "endLine": 707,
     "contentConstructor": {
@@ -495,7 +495,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"JDvSZ2Cn9cE3DM605Xr\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"p770C16Jxac85x4Nk8G279yik8\"}"
     },
     "constants": null,
     "numMethods": 17,
@@ -532,5 +532,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Mvc",
     "shortName": "Environment",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

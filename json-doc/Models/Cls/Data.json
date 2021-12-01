@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Data Class with Db and cache\n *\n *\nAll change of properties will be synced with the database",
+        "description": "Data Class with Db and cache\n\n\nAll change of properties will be synced with the database\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "July 15, 2016, 14:10:55 +0000",
             "category": "Data Observer",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Data.php",
+    "fileName": "\/Models\/Cls\/Data.php",
     "startLine": 20,
     "endLine": 141,
     "contentConstructor": {
@@ -1307,11 +1308,11 @@
     "namespaceName": "bbn\\Models\\Cls",
     "shortName": "Data",
     "summary": "Data Class with Db and cache",
-    "description": "*\n *\nAll change of properties will be synced with the database",
+    "description": "All change of properties will be synced with the database",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p><em>\n<\/em>\nAll change of properties will be synced with the database<\/p>"
+            "content": "<p>All change of properties will be synced with the database<\/p>"
         }
     ]
 }

@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "A Class for hashes",
+        "description": "A Class for hashes\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Strings",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
+    "fileName": "\/Str\/Hash.php",
     "startLine": 18,
     "endLine": 151,
     "contentConstructor": {
@@ -257,5 +258,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Str",
     "shortName": "Hash",
-    "summary": "A Class for hashes"
+    "summary": "A Class for hashes",
+    "description": "",
+    "description_parts": []
 }

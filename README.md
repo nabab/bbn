@@ -1,4 +1,4 @@
-<p align="center"><img alt="BBN PHP" src="https://bbn.io/bbn/php-title-black.png" style="max-width: 40%; height: auto"></p>
+<p align="center"><img alt="BBN PHP" src="https://bbn.io/logo/black/text/php.svg" style="max-width: 40%; height: auto"></p>
 
 bbn
 ===
@@ -10,7 +10,7 @@ bbn
 ```
 {
   "require": {
-    "nabab/bbn": "dev/master"
+    "bbn/bbn": "dev/master"
   }
 }
 ```

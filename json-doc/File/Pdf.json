@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "This class generates PDF with the mPDF class",
+        "description": "This class generates PDF with the mPDF class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Dec 14, 2012, 04:23:55 +0000",
             "category": "Appui",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/File\/Pdf.php",
+    "fileName": "\/File\/Pdf.php",
     "startLine": 24,
     "endLine": 326,
     "contentConstructor": {
@@ -589,11 +590,11 @@
         "addFonts": {
             "name": "addFonts",
             "summary": "Adds custom fonts",
-            "description": "*\n$pdf->addFonts([\n 'dawningofanewday' => [\n   'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n  ]\n]);",
+            "description": "$pdf->addFonts([\n 'dawningofanewday' => [\n   'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n  ]\n]);",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>*\n$pdf-&gt;addFonts([\n'dawningofanewday' =&gt; [\n'R' =&gt; BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n]\n]);<\/p>"
+                    "content": "<p>$pdf-&gt;addFonts([\n'dawningofanewday' =&gt; [\n'R' =&gt; BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n]\n]);<\/p>"
                 }
             ],
             "file": "bbn\\File\\Pdf",
@@ -693,5 +694,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\File",
     "shortName": "Pdf",
-    "summary": "This class generates PDF with the mPDF class"
+    "summary": "This class generates PDF with the mPDF class",
+    "description": "",
+    "description_parts": []
 }

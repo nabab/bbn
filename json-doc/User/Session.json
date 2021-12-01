@@ -9,7 +9,7 @@
         "bbn\\Models\\Tts\\Singleton"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/User\/Session.php",
+    "fileName": "\/User\/Session.php",
     "startLine": 28,
     "endLine": 367,
     "contentConstructor": {
@@ -645,5 +645,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\User",
     "shortName": "Session",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

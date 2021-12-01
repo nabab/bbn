@@ -20,7 +20,6 @@
     "zordius/lightncandy": "1.2.*",
     "greenlion/php-sql-parser": "4.4.*",
     "mpdf/mpdf": "8.0.*",
-    "squizlabs/php_codesniffer": "3.5.*",
     "natxet/cssmin": "3.0.*",
     "sunra/php-simple-html-dom-parser": "1.5.*",
     "scssphp/scssphp": "1.6.*",
@@ -43,17 +42,18 @@
     "firebase/php-jwt": "5.2.*",
     "mollie/oauth2-mollie-php": "^2.0",
     "brick/phonenumber": "0.3.*",
-    "opis/closure": "^3.6"
+    "opis/closure": "^3.5"
   },
   "require-dev": {
+    "squizlabs/php_codesniffer": "3.6.*",
     "phpunit/phpunit": "9.5.*",
     "pdepend/pdepend": "2.10.*",
     "phpmd/phpmd": "2.10.*",
     "phploc/phploc": "7.0.*",
     "sebastian/phpcpd": "6.0.*",
-    "friendsofphp/php-cs-fixer": "3.0.*",
+    "friendsofphp/php-cs-fixer": "3.3.*",
     "phpunitgen/core": "2.0.*",
-    "mockery/mockery": "^1.4"
+    "mockery/mockery": "1.4.*"
   },
   "autoload": {
     "psr-0": {"": "src/"}

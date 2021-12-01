@@ -954,7 +954,7 @@ class Ide
         }
       }
 
-      return !!$perm->fromPath($f, 'access', true);
+      return (bool)$perm->fromPath($f, 'access', true);
     }
 
     return false;

@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Nextcloud.php",
+    "fileName": "\/Api\/Nextcloud.php",
     "startLine": 7,
     "endLine": 479,
     "contentConstructor": {
@@ -489,8 +489,7 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
-                    "default_name": "",
-                    "description": "(both, Files, Dirs)"
+                    "default_name": ""
                 },
                 {
                     "name": "type",
@@ -499,7 +498,8 @@
                     "required": false,
                     "has_default": true,
                     "default": "both",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "(both, Files, Dirs)"
                 },
                 {
                     "name": "hidden",
@@ -672,8 +672,7 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": "",
-                    "description": "dirs"
+                    "default_name": ""
                 },
                 {
                     "name": "including_dirs",
@@ -682,7 +681,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "dirs"
                 },
                 {
                     "name": "hidden",
@@ -1222,5 +1222,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Api",
     "shortName": "Nextcloud",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

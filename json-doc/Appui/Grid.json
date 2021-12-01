@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Grid.php",
+    "fileName": "\/Appui\/Grid.php",
     "startLine": 23,
     "endLine": 492,
     "contentConstructor": {
@@ -79,7 +79,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Mandatory configuration sent by the table component (client side)"
+                    "description": "The database connection"
                 },
                 {
                     "name": "post",
@@ -89,7 +89,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "Original table configuration (server side)"
+                    "description": "Mandatory configuration sent by the table component (client side)"
                 },
                 {
                     "name": "cfg",
@@ -98,7 +98,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "Original table configuration (server side)"
                 }
             ]
         },
@@ -265,7 +266,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data = [])\n  {\n    $path = X::makeStoragePath(\\bbn\\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';\n    $cfg = $this->getExcel();\n    $dates = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));\n    }));\n    $data = array_map(function($row) use($cfg, $dates){\n      foreach ( $row as $i => $r ){\n        if ( \\is_string($r) ){\n          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;\n        }\n        if ( (($k = X::find($dates, ['field' => $i])) !== null ) ){\n          if ( !empty($dates[$k]['format']) && !empty($r) ){\n            $r = date($dates[$k]['format'], strtotime($r));\n          }\n          $row[$i] = \\PhpOffice\\PhpSpreadsheet\\Shared\\Date::PHPToExcel($r);\n        }\n        if (\n          (($idx = X::find($cfg['fields'], ['field' => $i])) === null ) ||\n          !!$cfg['fields'][$idx]['hidden']\n        ){\n          unset($row[$i]);\n        }\n      }\n      return $row;\n    }, $data ?: $this->getData());\n    $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']);\n    }));\n    if ( X::toExcel($data, $path, true, $cfg) ){\n      return ['file' => $path];\n    }\n    return ['error' => X::_('Error')];\n  }",
+            "code": "function(array $data = [])\n  {\n    $path = X::makeStoragePath(\\bbn\\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';\n    $cfg = $this->getExcel();\n    $dates = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));\n    }));\n    $data = array_map(function($row) use($cfg, $dates){\n      foreach ( $row as $i => $r ){\n        if ( \\is_string($r) ){\n          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;\n        }\n        if ( (($k = X::find($dates, ['field' => $i])) !== null ) ){\n          if ( !empty($dates[$k]['format']) && !empty($r) ){\n            $r = date($dates[$k]['format'], strtotime($r));\n          }\n          $row[$i] = \\PhpOffice\\PhpSpreadsheet\\Shared\\Date::PHPToExcel($r);\n        }\n        if (\n          (($idx = X::find($cfg['fields'], ['field' => $i])) === null ) ||\n          (bool)$cfg['fields'][$idx]['hidden']\n        ){\n          unset($row[$i]);\n        }\n      }\n      return $row;\n    }, $data ?: $this->getData());\n    $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']);\n    }));\n    if ( X::toExcel($data, $path, true, $cfg) ){\n      return ['file' => $path];\n    }\n    return ['error' => X::_('Error')];\n  }",
             "startLine": 427,
             "endLine": 461,
             "isDeprecated": false,
@@ -1437,5 +1438,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Appui",
     "shortName": "Grid",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

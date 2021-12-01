@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Basic object Class\n *\nThis class implements Basic functions and vars",
+        "description": "Basic object Class\n\nThis class implements Basic functions and vars\n",
         "tags": {
+            "category": "GenericClasses",
             "package": "BBN_Library",
             "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
@@ -14,7 +15,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Db.php",
+    "fileName": "\/Models\/Cls\/Db.php",
     "startLine": 24,
     "endLine": 41,
     "contentConstructor": {
@@ -52,7 +53,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "A database connection"
                 }
             ]
         },
@@ -520,11 +522,11 @@
     "namespaceName": "bbn\\Models\\Cls",
     "shortName": "Db",
     "summary": "Basic object Class",
-    "description": "*\nThis class implements Basic functions and vars",
+    "description": "This class implements Basic functions and vars",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>*\nThis class implements Basic functions and vars<\/p>"
+            "content": "<p>This class implements Basic functions and vars<\/p>"
         }
     ]
 }

@@ -6,29 +6,172 @@
     "name": "bbn\\Api\\Virtualmin",
     "namespace": true,
     "traits": [
-        "bbn\\Models\\Tts\\Cache"
+        "bbn\\Models\\Tts\\Cache",
+        "bbn\\Api\\CloudminVirtualmin\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Virtualmin.php",
-    "startLine": 14,
-    "endLine": 422,
+    "fileName": "\/Api\/Virtualmin.php",
+    "startLine": 17,
+    "endLine": 212,
     "contentConstructor": {
         "file": "bbn\\Api\\Virtualmin",
         "returns": null
     },
     "methods": {
-        "__construct": {
-            "name": "__construct",
-            "summary": "virtualmin constructor.",
+        "collectInfo": {
+            "name": "collectInfo",
+            "summary": "Re-collect info",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Virtualmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n      self::cacheInit();\n      $this->user = $cfg['user'];\n      $this->pass = $cfg['pass'];\n      $this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';\n      $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n      $this->checked = true;\n      \/*if ( class_exists('\\\\bbn\\\\Cache') ){\n        $this->cacher = bbn\\Cache::getEngine();\n\n        if ( !$this->cacher->has(self::cache_name) ){\n          $this->fetchCommands();\n        }\n        $this->commands = $this->cacher->get(self::cache_name);\n      }\n      else{\n        $this->commands = $this->fetchCommands();\n      }*\/\n    }\n  }",
-            "startLine": 46,
-            "endLine": 66,
+            "code": "function()\n  {\n    $connection = ssh2_connect($this->hostname, 22);\n    ssh2_auth_password($connection, $this->user, $this->pass);\n    $cmd       = \"echo '\" . $this->pass . \"' | sudo -S virtualmin collectinfo\";\n    $stream    = ssh2_exec($connection, $cmd);\n    $errStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);\n    stream_set_blocking($errStream, true);\n    return stream_get_contents($errStream);\n  }",
+            "startLine": 51,
+            "endLine": 60,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "info": {
+            "name": "info",
+            "summary": "Gets server info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $arguments = [])\n  {\n    $infoStr = $this->__call('info', [$arguments]);\n    $info    = [];\n    if (strlen($infoStr)) {\n      preg_match_all('\/^[a-z|_]*\\:\\h{1}\/m', $infoStr, $delimiters, PREG_OFFSET_CAPTURE);\n      $delimiters = \\array_map(\n          function ($m) {\n            return [\n              'name' => \\trim(str_replace(':', '', $m[0])),\n              'pos' => $m[1]\n            ];\n          },\n          $delimiters[0]\n      );\n      foreach ($delimiters as $i => $d) {\n        $pos1 = $d['pos'];\n        $pos2 = isset($delimiters[$i + 1]) ? ($delimiters[$i + 1]['pos'] - $pos1) : null;\n        $st   = \\is_null($pos2) ? \\trim(substr($infoStr, $pos1)) : \\trim(substr($infoStr, $pos1, $pos2));\n        if (strlen($st)) {\n          $info[$d['name']] = [];\n          switch ($d['name']) {\n            case 'disk_fs':\n            case 'poss':\n            case 'status':\n            case 'vposs':\n              $info[$d['name']] = explode('*', $st);\n              unset($info[$d['name']][0]);\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                if ($str = explode(\"\\n\", \\trim($str))) {\n                  $tmp = [];\n                  foreach ($str as $is => $s) {\n                    if ($s = explode(':', $s)) {\n                      $tmp[\\trim($s[0])] = \\trim($s[1]);\n                    }\n                  }\n\n                  $str = $tmp;\n                }\n\n                $info[$d['name']][$istr] = $str;\n              }\n              break;\n\n            case 'progs':\n              $info[$d['name']] = explode('*', $st);\n              unset($info[$d['name']][0]);\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                $info[$d['name']][$istr] = \\trim(str_replace(\"\\n\", '', $str));\n                if (!strlen($info[$d['name']][$istr])) {\n                  unset($info[$d['name']][$istr]);\n                }\n              }\n\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                if ($istr % 2 === 0) {\n                  $info[$d['name']][$str] = $info[$d['name']][$istr + 1];\n                  unset($info[$d['name']][$istr], $info[$d['name']][$istr + 1]);\n                }\n              }\n              break;\n\n            default:\n              if (substr_count($st, '*')) {\n                $info[$d['name']] = explode('*', $st);\n                unset($info[$d['name']][0]);\n                $info[$d['name']] = array_values($info[$d['name']]);\n                foreach ($info[$d['name']] as $istr => $str) {\n                  $str = str_replace(\"\\n\", '', $str);\n                  $info[$d['name']][$istr] = \\trim($str);\n                }\n              }\n              elseif (substr_count($st, ':')) {\n                $fields = array_filter(\n                  explode(\"\\n\", $st),\n                  function ($val) {\n                    return $val !== '';\n                  }\n                );\n                foreach ($fields as $y => $field) {\n                  if (($pos = strpos($field, ':')) !== false) {\n                    $idx   = str_replace(' ', '', substr($field, 0, $pos));\n                    $value = substr($field, $pos, strlen($field) - $pos);\n                    $value = str_replace(': ', '', $value);\n                    if (count($fields) > 1) {\n                      $info[$d['name']][$idx] = $value;\n                      if (($idx === $d['name'])\n                          && ($info[$d['name']][$idx] === '')\n                      ) {\n                        unset($info[$d['name']][$idx]);\n                      }\n                    }\n                    else {\n                      $info[$d['name']] = $value;\n                    }\n                  }\n                }\n              }\n              break;\n          }\n        }\n      }\n    }\n\n    return $info;\n  }",
+            "startLine": 69,
+            "endLine": 177,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "arguments",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "isInfoProp": {
+            "name": "isInfoProp",
+            "summary": "Checks if the given property is part of the info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $prop)\n  {\n    return \\in_array($prop, $this->infoProps, true);\n  }",
+            "startLine": 185,
+            "endLine": 188,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "prop",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The property to check"
+                }
+            ]
+        },
+        "deleteCache": {
+            "name": "deleteCache",
+            "summary": "This function allows the cancellation of the cache of the used commands",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($command_name = '', $arguments = false)\n  {\n    $uid = $this->hostname;\n    if (!empty($arguments)) {\n      $uid .= md5(json_encode($arguments));\n    }\n\n    if (!empty($this->cacheDelete($uid, $command_name))) {\n      X::log([$uid, $command_name], 'cache_delete');\n      return true;\n    }\n\n    return false;\n  }",
+            "startLine": 198,
+            "endLine": 211,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "command_name",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "file cache"
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "name"
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "Virtualmin constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    if (isset($cfg['user'], $cfg['pass'])) {\n      $this->cacheInit();\n      $this->user     = $cfg['user'];\n      $this->pass     = $cfg['pass'];\n      $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n      $this->checked  = true;\n      if (class_exists('\\\\bbn\\\\Cache')) {\n        if (!$this->cacheHas('list_commands')) {\n          $this->fetchCommands();\n        }\n\n        $this->commands = $this->cacheGet('list_commands');\n      }\n      else {\n        $this->commands = $this->fetchCommands();\n      }\n    }\n  }",
+            "startLine": 39,
+            "endLine": 58,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -60,9 +203,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $arguments)\n  {\n      $cmd_name = str_replace('_', '-', $name);\n      if ( isset($this->commands[$cmd_name])){\n\n        \/\/Setting the last action performed\n        $this->last_action = $cmd_name;\n        \/\/Defining  the $url_part and the command to be executed\n        $url_part = $cmd_name;\n        if (\\is_array($this->commands)) {\n          $cmd = $this->commands[$cmd_name];\n          if ( !empty($arguments[0]) ){\n            \/\/Prepping, processing and validating the create user parameters\n            $args = $this->processParameters($arguments[0]);\n            if (!empty($cmd['args'])) {\n              foreach ( $cmd['args'] as $k => $v ){\n                if ( !empty($v['mandatory']) && !isset($args[$k]) ){\n                  if ( (strpos($k, 'pass') === false) &&\n                    (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))\n                  ){\n                    var_dump(\"Parameter $k mandatory for $name!\");\n                    return false;\n                  }\n                }\n                if ( isset($args[$k]) ){\n                  if ( $v['binary'] && $args[$k] ){\n                    $url_part .= \"&$k\";\n                  }\n                  else if ( \\is_array($v) && $v['multiple'] ){\n                    foreach ( $args[$k] as $w ){\n                      $url_part .= \"&$k=$w\";\n                    }\n                  }\n                  else{\n                    $url_part .= \"&$k=\".$args[$k];\n                  }\n                }\n              }\n            }\n          }\n        }\n        \/\/Concatenating the closing single quote\n        $url_part .= \"'\";\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part;\n\n        \/\/Calling shell_exec and returning the result array\n    \/\/    return $this->callShellExec($url_part);\n\n        if ( (strpos($cmd_name, 'list-') !== false) ||\n          (strpos($cmd_name, 'get-') !== false) ||\n          (strpos($cmd_name, 'info') !== false)\n        ){\n          $uid = $this->hostname;\n          if ( !empty($arguments) ){\n            $uid .= md5(json_encode($arguments));\n          }\n          if ( $this->cacheHas($uid, $name) ){\n            $result_call = $this->cacheGet($uid, $name);\n          }\n          else {\n            $result_call = $this->callShellExec($url_part);\n            $this->cacheSet($uid, $name, $result_call);\n          }\n        }\n        else{\n          $result_call = $this->callShellExec($url_part);\n        }\n        \/\/Calling shell_exec and returning the result array\n        return $result_call;\n      }\n      \/\/ We force even if we don't have the command in the list\n      else {\n        if ( !empty($arguments) ){\n          $args = $this->processParameters($arguments[0]);\n        }\n        $url_part = $cmd_name;\n        \/\/todo\n        if ( !empty($args) ){\n          foreach ( $args as $k => $v ){\n            if ( \\is_array($v) ){\n              foreach ( $v as $w ){\n                $url_part .= \"&$k=$w\";\n              }\n            }\n            else if ( $v === 1 ){\n              $url_part .= \"&$k\";\n            }\n            else{\n              $url_part .= \"&$k=$v\";\n            }\n          }\n        }\n        \/\/Concatenating the closing single quote\n        $url_part .= \"'\";\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part;\n        X::log($url_part, 'webmin');\n\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n      \/\/ else{\n      \/\/   die(\"The command $name doesn't exist...\");\n      \/\/ }\n    }\n    return false;\n  }",
-            "startLine": 73,
-            "endLine": 180,
+            "code": "function($name, $arguments)\n  {\n    if ($this->checked) {\n      $cmdName = str_replace('_', '-', $name);\n      if (\\is_array($this->commands) && isset($this->commands[$cmdName])) {\n        \/\/Setting the last action performed\n        $this->lastAction = $cmdName;\n        \/\/Defining  the $url_part and the command to be executed\n        $url_part = $cmdName;\n        $cmd      = $this->commands[$cmdName];\n        if (!empty($arguments[0])) {\n          \/\/Prepping, processing and validating the create user parameters\n          $args = $this->processParameters($arguments[0]);\n          if (!empty($cmd['args'])) {\n            foreach ($cmd['args'] as $k => $v) {\n              \/\/ We can't use this system to check the mandatory properties:\n              \/\/ Virtualmin also marks properties that are actually a choice between\n              \/\/ several \"mandatory\" properties as \"mandatory\"\n              \/*\n              if (!empty($v['mandatory']) && !isset($args[$k])) {\n                if (\n                    (strpos($k, 'pass') === false)\n                    && (!isset($args['pass']) && !isset($args['encpass'])\n                    && !isset($args['passfile']))\n                ) {\n                  var_dump(\"Parameter $k mandatory for $name!\");\n                  return false;\n                }\n              }\n              *\/\n              if (isset($args[$k])) {\n                if ($v['binary'] && ($args[$k] || $v['mandatory'])) {\n                  $url_part .= \"&$k=\";\n                }\n                elseif (\\is_array($v) && $v['multiple'] && \\is_array($args[$k])) {\n                  foreach ($args[$k] as $w) {\n                    $url_part .= \"&$k=$w\";\n                  }\n                }\n                else {\n                  $url_part .= \"&$k=\" . $args[$k];\n                }\n              }\n            }\n          }\n        }\n\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n      \/\/ We force even if we don't have the command in the list\n      else {\n        if (!empty($arguments)) {\n          $args = $this->processParameters($arguments[0]);\n        }\n        $url_part = $cmdName;\n        if (!empty($args)) {\n          foreach ($args as $k => $v) {\n            if (\\is_array($v)) {\n              foreach ($v as $w) {\n                $url_part .= \"&$k=$w\";\n              }\n            }\n            elseif ($v == 1) {\n              $url_part .= \"&$k=\";\n            }\n            else {\n              $url_part .= \"&$k=$v\";\n            }\n          }\n        }\n\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n    }\n    return false;\n  }",
+            "startLine": 66,
+            "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -94,49 +237,29 @@
                 }
             ]
         },
-        "deleteCache": {
-            "name": "deleteCache",
-            "summary": "This function allows the cancellation of the cache of the used commands",
+        "getCommands": {
+            "name": "getCommands",
+            "summary": "Returns an array containing all the commands and their parameters",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\Virtualmin",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($command_name = '', $arguments = false)\n  {\n    if ( !empty($arguments) ){\n      $uid .= md5(json_encode($arguments));\n    }\n    if ( !empty($this->cacheDelete($uid, $command_name)) ){\n      X::log([$uid, $command_name], 'cache_delete');\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 190,
-            "endLine": 200,
+            "code": "function()\n  {\n    if ($this->checked) {\n      return $this->commands;\n    }\n  }",
+            "startLine": 154,
+            "endLine": 159,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": null,
             "parent": false,
-            "arguments": [
-                {
-                    "name": "command_name",
-                    "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": "",
-                    "default_name": "",
-                    "description": "name"
-                },
-                {
-                    "name": "arguments",
-                    "position": 1,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
-                }
-            ]
+            "arguments": []
         },
         "getArgs": {
             "name": "getArgs",
@@ -147,9 +270,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name)\n  {\n      $cmd_name = str_replace('_', '-', $name);\n      return isset($this->commands[$cmd_name], $this->commands[$cmd_name]['args']) ? $this->commands[$cmd_name]['args'] : [];\n    }\n  }",
-            "startLine": 325,
-            "endLine": 330,
+            "code": "function($name)\n  {\n    if ($this->checked) {\n      $cmdName = str_replace('_', '-', $name);\n      return isset($this->commands[$cmdName], $this->commands[$cmdName]['args']) ? $this->commands[$cmdName]['args'] : [];\n    }\n  }",
+            "startLine": 167,
+            "endLine": 173,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -173,64 +296,6 @@
                 }
             ]
         },
-        "getCommands": {
-            "name": "getCommands",
-            "summary": "Returns an array containing all the commands and their parameters",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n      return $this->commands;\n    }\n  }",
-            "startLine": 336,
-            "endLine": 340,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
-            "parent": false,
-            "arguments": []
-        },
-        "listCommands": {
-            "name": "listCommands",
-            "summary": "Gets all the commands directly from the API",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($param = [])\n  {\n    $param = $this->processParameters($param);\n    \/\/Setting the last action performed\n    $this->last_action = \"list-commands\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"list-commands\";\n    if (isset($param['short'])){\/\/short parameter is set\n      $url_part .= \"&short\";\n    }\n\n    if (isset($param['nameonly'])){\/\/nameonly parameter is set\n      $url_part .= \"&nameonly\";\n    }\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part;\n\n    \/\/test\n    $uid = $this->hostname;\n    if ( !empty($param) ){\n      $uid .= md5(json_encode($param));\n    }\n\n    if ( $this->cacheHas($uid, 'list_commands') ){\n      $result_call = $this->cacheGet($uid, 'list_commands');\n    }\n    else {\n      $result_call = $this->callShellExec($url_part);\n      $this->cacheSet($uid, 'list_commands', $result_call);\n    }\n    return $result_call;\n  }",
-            "startLine": 348,
-            "endLine": 382,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": null,
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "param",
-                    "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
         "getCommand": {
             "name": "getCommand",
             "summary": "",
@@ -240,9 +305,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($command)\n  {\n    \/\/Setting the last action performed\n    $this->last_action = \"get-command\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\".$this->sanitize($command);\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part;\n    \/\/Calling shell_exec and returning the result array\n    return $this->callShellExec($url_part);\n  }",
-            "startLine": 389,
-            "endLine": 402,
+            "code": "function($command)\n  {\n    $command = str_replace('_', '-', $command);\n    \/\/Setting the last action performed\n    $this->lastAction = \"get-command\";\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\" . $this->sanitize($command);\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n    \/\/Calling shell_exec and returning the result array\n    return $this->callShellExec($url_part);\n  }",
+            "startLine": 180,
+            "endLine": 191,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -274,9 +339,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($command)\n  {\n    if ( isset($this->commands[$perl_cmd]) ){\n      $cmd = $this->commands[$perl_cmd];\n      $st = '$vm->'.$command.'(['.PHP_EOL;\n      foreach ( $cmd['args'] as $k => $v ){\n        $st .= \"'$k' => \".($v['binary'] ? '0' : \"''\").PHP_EOL;\n      }\n      $st .= ']);';\n      return $st;\n    }\n    return false;\n  }",
-            "startLine": 409,
-            "endLine": 421,
+            "code": "function($command)\n  {\n    $perlCmd = str_replace('_', '-', $command);\n    if (isset($this->commands[$perlCmd])) {\n      $cmd = $this->commands[$perlCmd];\n      $st  = '$vm->' . $command . '([' . PHP_EOL;\n      foreach ($cmd['args'] as $k => $v) {\n        $st .= \"'$k' => \" . ($v['binary'] ? '0' : \"''\") . PHP_EOL;\n      }\n\n      $st .= ']);';\n      return $st;\n    }\n\n    return false;\n  }",
+            "startLine": 199,
+            "endLine": 214,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -298,29 +363,144 @@
                     "default_name": ""
                 }
             ]
+        },
+        "setJson": {
+            "name": "setJson",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $this->asJson = true;\n    return $this;\n  }",
+            "startLine": 217,
+            "endLine": 221,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "unsetJson": {
+            "name": "unsetJson",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $this->asJson = false;\n    return $this;\n  }",
+            "startLine": 224,
+            "endLine": 228,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "listCommands": {
+            "name": "listCommands",
+            "summary": "Gets all the commands directly from the API",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Virtualmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $param = [])\n  {\n    \/\/Prepping, processing and validating the create user parameters\n    $param = $this->processParameters($param);\n    \/\/Setting the last action performed\n    $this->lastAction = \"list-commands\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"list-commands\";\n    if (isset($param['short'])) {\/\/short parameter is set\n      $url_part .= \"&short\";\n    }\n\n    if (isset($param['nameonly'])) {\/\/nameonly parameter is set\n      $url_part .= \"&nameonly\";\n    }\n\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n\n    \/\/test\n    $uid = $this->hostname;\n    if (!empty($param)) {\n      $uid .= md5(json_encode($param));\n    }\n\n    if ($this->cacheHas($uid, 'list_commands')) {\n      $result_call = $this->cacheGet($uid, 'list_commands');\n    }\n    else {\n      $result_call = $this->callShellExec($url_part);\n      $this->cacheSet($uid, 'list_commands', $result_call);\n    }\n\n    return $result_call;\n  }",
+            "startLine": 371,
+            "endLine": 406,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "param",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": {
-        "last_action": {
-            "visibility": "public"
+        "infoProps": {
+            "visibility": "public",
+            "doc": {
+                "description": "@var array Info properties",
+                "tags": []
+            },
+            "value": [
+                "cpu",
+                "disk_free",
+                "disk_fs",
+                "disk_total",
+                "fcount",
+                "ftypes",
+                "host",
+                "io",
+                "kernel",
+                "load",
+                "maxquota",
+                "mem",
+                "procs",
+                "progs",
+                "poss",
+                "reboot",
+                "status",
+                "vposs"
+            ]
+        },
+        "lastAction": {
+            "visibility": "public",
+            "doc": {
+                "description": "@var string The last action to have been performed",
+                "tags": []
+            }
         },
         "error": {
-            "visibility": "public"
-        },
-        "message": {
-            "visibility": "public"
+            "visibility": "public",
+            "doc": {
+                "description": "@var",
+                "tags": []
+            }
         }
     },
     "staticProperties": [],
     "constants": [],
-    "numMethods": 8,
+    "numMethods": 13,
     "numProperties": 3,
     "numConstants": 1,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
-        "bbn\\Models\\Tts\\Cache"
+        "bbn\\Models\\Tts\\Cache",
+        "bbn\\Api\\CloudminVirtualmin\\Common"
     ],
     "traitAliases": [],
     "isTrait": false,
@@ -330,22 +510,42 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
+        "infoProps": [
+            "cpu",
+            "disk_free",
+            "disk_fs",
+            "disk_total",
+            "fcount",
+            "ftypes",
+            "host",
+            "io",
+            "kernel",
+            "load",
+            "maxquota",
+            "mem",
+            "procs",
+            "progs",
+            "poss",
+            "reboot",
+            "status",
+            "vposs"
+        ],
+        "_cache_prefix": null,
+        "cache_engine": null,
         "user": null,
         "pass": null,
-        "hostname": null,
-        "mode": "virtualmin",
         "checked": false,
-        "commands": false,
+        "commands": [],
         "cacher": null,
-        "last_action": false,
-        "error": false,
-        "message": null,
-        "_cache_prefix": null,
-        "cache_engine": null
+        "asJson": true,
+        "lastAction": false,
+        "error": false
     },
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Api",
     "shortName": "Virtualmin",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

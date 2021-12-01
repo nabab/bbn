@@ -281,7 +281,7 @@ class Imessages extends \bbn\Models\Cls\Db
   {
     $cfg =& $this->class_cfg;
     if (!empty($id_imess) && !empty($id_user)) {
-      return !!$this->db->insertUpdate(
+      return (bool)$this->db->insertUpdate(
         $cfg['tables']['users'], [
         $cfg['arch']['users']['id_imessage'] => $id_imess,
         $cfg['arch']['users']['id_user'] => $id_user,
@@ -307,7 +307,7 @@ class Imessages extends \bbn\Models\Cls\Db
   {
     $cfg =& $this->class_cfg;
     if (!empty($id_imess) && !empty($id_user)) {
-      return !!$this->db->updateIgnore(
+      return (bool)$this->db->updateIgnore(
         $cfg['tables']['users'], [
         $cfg['arch']['users']['id_imessage'] => $id_imess,
         $cfg['arch']['users']['id_user'] => $id_user,

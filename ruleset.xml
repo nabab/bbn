@@ -10,14 +10,11 @@
         My custom rule set that checks my code...
     </description>
 
-    <!-- Import the entire unused code rule set -->
-    <rule ref="rulesets/unusedcode.xml" />
-
     <!--
         Import the entire cyclomatic complexity rule and
         customize the rule configuration.
     -->
-    <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
+    <rule ref="CyclomaticComplexity">
         <priority>1</priority>
         <properties>
             <property name="reportLevel" value="5" />
@@ -34,6 +31,44 @@
     <rule ref="rulesets/cleancode.xml">
         <exclude name="StaticAccess" />
     </rule>
+
+    <!--rule ref="PSR12">
+        <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
+        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceBefore" />
+        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter" />
+        <exclude name="PSR12.Functions.ReturnTypeDeclaration.SpaceBeforeColon" />
+        <exclude name="PEAR.ControlStructures.MultiLineCondition.StartWithBoolean" />
+        <exclude name="PEAR.ControlStructures.MultiLineCondition.SpacingAfterOpenBrace" />
+    </rule-->
+
+    <rule ref="PSR12">
+    </rule>
+
+    <!--rule ref="Squiz">
+        <exclude name="Squiz.Commenting.ClosingDeclarationComment.Missing" />
+        <exclude name="Squiz.Commenting.FileComment.Missing" />
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType" />
+        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+        <exclude name="Squiz.Files.FileExtension.ClassFound" />
+        <exclude name="Squiz.Operators.ComparisonOperatorUsage.ImplicitTrue" />
+        <exclude name="Squiz.Operators.ComparisonOperatorUsage.NotAllowed" />
+        <exclude name="Squiz.PHP.DisallowComparisonAssignment.AssignedComparison" />
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.WhiteSpace.FunctionClosingBraceSpace.SpacingBeforeClose" />
+        <exclude name="Squiz.WhiteSpace.FunctionOpeningBraceSpace.SpacingAfter" />
+        <exclude name="Squiz.WhiteSpace.FunctionSpacing.After" />
+        <exclude name="Squiz.WhiteSpace.FunctionSpacing.AfterLast" />
+        <exclude name="Squiz.WhiteSpace.FunctionSpacing.Before" />
+        <exclude name="Squiz.WhiteSpace.FunctionSpacing.BeforeFirst" />
+    </rule-->
+    <rule ref="Squiz">
+        <exclude name="Squiz.PHP.DisallowComparisonAssignment.AssignedComparison" />
+        <exclude name="Squiz.WhiteSpace.FunctionOpeningBraceSpace.SpacingAfter" />
+    </rule>
+
+
     <rule ref="rulesets/cleancode.xml/StaticAccess">
         <properties>
             <property name="exceptions">

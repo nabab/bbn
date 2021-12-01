@@ -296,7 +296,7 @@ class User extends Models\Cls\Basic
             $params[$f['token']],
             $params[$f['device_uid']],
             $exUser[$f['id']],
-            $params[$f['device_lang']] ?? ''
+            !empty($params[$f['device_lang']]) ? str_replace('"', '', $params[$f['device_lang']]) : ''
           )
         ) {
           if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [
@@ -386,11 +386,14 @@ class User extends Models\Cls\Basic
           throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
         }
 
-        // Update device_lang and last 
-        $this->db->update($this->class_cfg['tables']['api_tokens'], [
-          $this->class_cfg['arch']['api_tokens']['device_lang'] => $params[$f['device_lang']] ?? '',
+        // Update device_lang and last
+        $toUdp = [
           $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')
-        ], [
+        ];
+        if (isset($params[$f['device_lang']])) {
+          $toUdp[$this->class_cfg['arch']['api_tokens']['device_lang']] = $params[$f['device_lang']];
+        }
+        $this->db->update($this->class_cfg['tables']['api_tokens'], $toUdp, [
           $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
           $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]
         ]);
@@ -518,7 +521,7 @@ class User extends Models\Cls\Basic
 
   protected function isToken(): bool
   {
-    return !!$this->class_cfg['tables']['api_tokens'];
+    return (bool)$this->class_cfg['tables']['api_tokens'];
   }
 
   public function isReset()
@@ -1185,7 +1188,7 @@ class User extends Models\Cls\Basic
    */
   public function isDev(): bool
   {
-    return (bool)($this->isAdmin() || !!$this->getSession('dev'));
+    return (bool)($this->isAdmin() || (bool)$this->getSession('dev'));
   }
 
 
@@ -2201,7 +2204,7 @@ class User extends Models\Cls\Basic
 
     $number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
 
-    return !!$this->db->update(
+    return (bool)$this->db->update(
       $this->class_cfg['tables']['users'],
       [
         $this->class_cfg['arch']['users']['login'] => $number,
@@ -2240,7 +2243,7 @@ class User extends Models\Cls\Basic
   protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser, string $deviceLang = ''): bool
   {
     if (!empty($token) && !empty($deviceUid) && !empty($idUser)) {
-      return !!$this->db->update(
+      return (bool)$this->db->update(
         $this->class_cfg['tables']['api_tokens'],
         [
           $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser,

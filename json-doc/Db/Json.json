@@ -1,7 +1,8 @@
 {
     "doc": {
-        "description": "Database Class",
+        "description": "Database Class\n",
         "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Database",
@@ -13,7 +14,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Json.php",
+    "fileName": "\/Db\/Json.php",
     "startLine": 19,
     "endLine": 65,
     "contentConstructor": {
@@ -23,7 +24,7 @@
     "methods": {
         "__construct": {
             "name": "__construct",
-            "summary": "*",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Db\\Json",
@@ -185,5 +186,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Db",
     "shortName": "Json",
-    "summary": "Database Class"
+    "summary": "Database Class",
+    "description": "",
+    "description_parts": []
 }

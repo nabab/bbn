@@ -5,7 +5,7 @@ namespace bbn\Appui;
 use bbn\Db;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\Dbconfig;
-use bbn\Mvc\Controller;
+use bbn\Mvc\Model;
 use bbn\User;
 use bbn\Util\Timer;
 use bbn\X;
@@ -26,9 +26,9 @@ class Search
   protected User $user;
 
   /**
-   * @var Controller
+   * @var Model
    */
-  protected Controller $ctrl;
+  protected Model $model;
 
   /**
    * @var string
@@ -83,7 +83,7 @@ class Search
    *
    * @var int
    */
-  protected int $time_limit = 300;
+  protected int $time_limit = 50;
 
   /**
    * @var array
@@ -91,9 +91,10 @@ class Search
   protected static array $functions = [];
 
 
-  public function __construct(Controller $ctrl, array $cfg = [])
+  public function __construct(Model $model, array $cfg = [])
   {
     $this->ctrl   = $ctrl;
+    // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
     $this->db     = Db::getInstance();
     $this->user   = User::getInstance();
 
@@ -107,8 +108,8 @@ class Search
 
     $this->_init_class_cfg($cfg);
     $this->cacheInit();
-    $this->search_cfg = $this->getSearchCfg();
     $this->timer      = new Timer();
+    $model->getCustomModelGroup('', 'appui-search');
   }
 
   /**
@@ -167,18 +168,21 @@ class Search
     $result = [];
     $i      = 0;
 
-    foreach ($this->search_cfg as $items) {
+    foreach ($this->getSearchCfg() as $items) {
       if (!is_array($items)) {
         continue;
       }
 
       foreach ($items as $item) {
-        if (($wrapper = @unserialize($item['fn'])) && $wrapper instanceof SerializableClosure) {
+        if (!empty($item['fn'])
+            && ($wrapper = unserialize($item['fn']))
+            && ($wrapper instanceof SerializableClosure)
+        ) {
           // Extract the closure object
-          $closure = $wrapper->getClosure();
+          //$closure = $wrapper->getClosure();
 
           // Invoke the closure with the search string
-          $content =  $closure($search_value);
+          $content = $wrapper($search_value);
 
           if (is_array($content)) {
             $result[] = array_merge($content, [
@@ -211,7 +215,7 @@ class Search
     $cache_name = sprintf($this->search_cache_name, $search_value);
 
     // Check if same search is saved for the user
-    if (!$config_array = $this->cacheGet($this->user->getId(), $cache_name)) {
+    if (!($config_array = $this->cacheGet($this->user->getId(), $cache_name))) {
 
       // Execute all functions with the given search string
       $config_array = $this->executeFunctions($search_value);
@@ -226,64 +230,63 @@ class Search
 
     $this->timer->start('search');
 
-    for ($i = $step; $i < count($config_array); $i++) {
+    // If the search value has been done by the user before
+    if (($previous_search_id = $this->getPreviousSearchId($search_value))
+        && ($previous_search_results = $this->getPreviousSearchResults($previous_search_id))
+    ) {
+      $results_arch  = $this->class_cfg['arch']['search_results'];
+      foreach ($previous_search_results as $r) {
+        $item          = X::getRow($config_array, ['signature' => $r['signature']]);
+        $processed_cfg = $this->db->processCfg($item['cfg']);
+        // Get the results saved in the json field `result`
+        if (($previous_result = json_decode($r[$results_arch['result']], true))
+            && (X::hasProps($previous_result, $processed_cfg['fields']))
+        ) {
+          $cfg          = $item['cfg'];
+          $cfg['where'] = [
+            'logic' => 'AND',
+            'conditions' => [
+              $processed_cfg['filters'],
+              [
+                'conditions' => [
+                  ...array_map(
+                    function ($value, $key) {
+                      return [
+                        'field' => $key,
+                        'operator' => '=',
+                        'value' => $value
+                      ];
+                    },
+                    $previous_result, array_keys($previous_result)
+                  )
+                ]
+              ]
+            ]
+          ];
+
+          if ($add_to_top = $this->db->rselect($cfg)) {
+            $results['data'] = array_merge($results['data'], [$add_to_top]);
+          }
+        }
+      }
+    }
+
+    //X::ddump($config_array, "DDDD", $this->executeFunctions($search_value), $search_value, $this->search_cfg);
+    $num_cfg = count($config_array);
+    for ($i = $step; $i < $num_cfg; $i++) {
       $item = $config_array[$i];
 
       if (empty($item['cfg'])) {
         continue;
       }
 
-      // If the search value has been done by the user before
-      if ($previous_search_id = $this->getPreviousSearchId($search_value)) {
-        if (
-          $previous_search_results = $this->getPreviousSearchResults(
-            $previous_search_id, $item['signature']
-          )
-        ) {
-          $results_arch  = $this->class_cfg['arch']['search_results'];
-          $processed_cfg = $this->db->processCfg($item['cfg']);
-
-          foreach ($previous_search_results as $r) {
-            // Get the results saved in the json field `result`
-            if ($previous_result = json_decode($r[$results_arch['result']], true)) {
-              if (X::hasProps($previous_result, $processed_cfg['fields'])) {
-                $cfg = $item['cfg'];
-
-                $cfg['where'] = [
-                  'logic' => 'AND',
-                  'conditions' => [
-                    $processed_cfg['filters'],
-                    [
-                      'conditions' => [
-                        ...array_map(function ($value, $key) {
-                          return [
-                            'field' => $key,
-                            'operator' => '=',
-                            'value' => $value
-                          ];
-                        }, $previous_result, array_keys($previous_result))
-                      ]
-                    ]
-                  ]
-                ];
-
-                if ($add_to_top = $this->db->rselect($cfg)) {
-                  $results['data'] = array_merge($results['data'], [$add_to_top]);
-                }
-              }
-            }
-          }
-        }
-      }
-
       if ($search_results = $this->db->rselectAll($item['cfg'])) {
         $results['data'] = array_merge($results['data'], $search_results);
       }
 
-      if ($this->timer->measure('search') > $this->time_limit) {
+      if ($this->timer->measure('search') > ($this->time_limit/1000)) {
         // If time limit has passed then return the result and the index of the next step
         $this->timer->stop('search');
-
         if (isset($config_array[$i + 1])) {
           $results['next_step'] = $i + 1;
         }
@@ -294,6 +297,7 @@ class Search
 
     return $results;
   }
+
 
   /**
    * @param string $search_value
@@ -335,33 +339,41 @@ class Search
     return $insert ? $this->db->lastId() : null;
   }
 
+
   /**
    * @param string $id_search
    * @param string $signature
    * @return array|null
    */
-  protected function getPreviousSearchResults(string $id_search, string $signature)
+  protected function getPreviousSearchResults(string $id_search, string $signature = '')
   {
-    return $this->db->rselectAll($this->class_cfg['tables']['search_results'], [], [
-      $this->class_cfg['arch']['search_results']['id_search'] => $id_search,
-      $this->class_cfg['arch']['search_results']['signature'] => $signature,
-    ]);
+    $filter = [
+      $this->class_cfg['arch']['search_results']['id_search'] => $id_search
+    ];
+    if (!empty($signature)) {
+      $filter[$this->class_cfg['arch']['search_results']['signature']] = $signature;
+    }
+
+    return $this->db->rselectAll($this->class_cfg['tables']['search_results'], [], $filter);
   }
+
 
   /**
    * @param callable $function
    * @param string $plugin_name
+   * @return array
    */
-  public static function register(callable $function, string $plugin_name)
+  public static function register(callable $function, string $plugin_name = 'main'): array
   {
     // Get how many parameters the closure has
     try {
       $parameters = (new \ReflectionFunction($function))->getParameters();
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $parameters = ['search'];
     }
 
-    // Add an empty string to every parameter of the closure
+    // Add an empty string to every parameter of the closure for the hash
     $args = array_map(function () {
       return '';
     }, $parameters);
@@ -370,11 +382,15 @@ class Search
       self::$functions[$plugin_name] = [];
     }
 
-    // Invoke the closure with the parameters set to empty string and return the results
-    self::$functions[$plugin_name][] = [
+    $res =  [
       'fn' => $function,
       'signature' => \bbn\Cache::makeHash($function(...$args)),
       'file' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file']
     ];
+    // Invoke the closure with the parameters set to empty string and return the results
+    self::$functions[$plugin_name][] = $res;
+    return $res;
   }
+
+
 }

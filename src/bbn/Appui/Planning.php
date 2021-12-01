@@ -44,7 +44,7 @@ class Planning {
     if ( empty($id_event) ){
       $id_event = $this->getIdEvent($id_planning);
     }
-    return !!$this->db->delete($this->class_table, [$this->fields['id'] => $id_planning]) && !!$this->events->delete($id_event);
+    return (bool)$this->db->delete($this->class_table, [$this->fields['id'] => $id_planning]) && (bool)$this->events->delete($id_event);
   }
 
   public function __construct(\bbn\Db $db)
@@ -123,7 +123,7 @@ class Planning {
         $this->fields['id'] => $id_planning
       ]);
       $ok2 = \is_array($event) ? $this->events->edit($id_event, $event) : false;
-      return !!$ok || !!$ok2;
+      return (bool)$ok || (bool)$ok2;
     }
     return false;
   }
@@ -174,7 +174,7 @@ class Planning {
                 ($event_next = $this->events->makeRecurrencesFields($old_event, [$first_recc]))
               ){
                 $event_next = $event_next[0];
-                return !!$this->events->edit($id_event, $event_next);
+                return (bool)$this->events->edit($id_event, $event_next);
               }
             }
             else {
@@ -534,7 +534,7 @@ class Planning {
   public function isReplaced(string $id_planning, string $day): bool
   {
     $t =& $this;
-    return !!array_filter($this->getAllByAlias($id_planning), function($a) use($day, $t){
+    return (bool)array_filter($this->getAllByAlias($id_planning), function($a) use($day, $t){
       return $a[$t->fields['alias']] === date('Y-m-d', strtotime($day));
     });
   }

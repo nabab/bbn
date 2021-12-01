@@ -7,7 +7,7 @@
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Pparser.php",
+    "fileName": "\/Util\/Pparser.php",
     "startLine": 11,
     "endLine": 91,
     "contentConstructor": null,
@@ -75,5 +75,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Util",
     "shortName": "Pparser",
-    "summary": ""
+    "summary": "",
+    "description": "",
+    "description_parts": []
 }

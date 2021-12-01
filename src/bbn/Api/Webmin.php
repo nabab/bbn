@@ -1,96 +1,201 @@
 <?php
-/**
- * Class Webmin
- * @package api
- * @author Mirko Argentino <mirko@bbn.solutions>
- */
-namespace bbn\Api;
-use bbn\Cache;
 
-class Webmin {
+namespace bbn\Api;
+
+use bbn\Cache;
+use stdClass;
+
+/**
+ * Webmin API class
+ * @category Api
+ * @package Api
+ * @author Mirko Argentino <mirko@bbn.solutions>
+ * @license http://www.opensource.org/licenses/mit-license.html MIT License
+ * @link https://bbn.io/bbn-php/doc/class/Api/Webmin
+ */
+class Webmin
+{
   use \bbn\Models\Tts\Cache;
 
-  const cache_name = 'bbn/api/webmin';
+  const CACHE_NAME = 'bbn/Api/Webmin';
 
-  private
-    /** @var username */
-    $user,
-    /** @var password */
-    $pass,
-    /** @var chostname */
-    $hostname,
-    /** @var cache */
-    $cacher;
+  /** @var string Username */
+  private $user;
+
+  /** @var string Password */
+  private $pass;
+
+  /** @var string Hostname */
+  private $hostname;
+
 
   /**
    * Constructor.
    * @param array $cfg
    */
-  public function __construct(array $cfg){
+  public function __construct(array $cfg)
+  {
     if (empty($cfg['user'])) {
       throw new \Error(_('The username is mandatory'));
     }
+
     if (empty($cfg['pass'])) {
       throw new \Error(_('The password is mandatory'));
     }
-    self::cacheInit();
-    $this->user = $cfg['user'];
-    $this->pass = $cfg['pass'];
+
+    $this->cacheInit();
+    $this->user     = $cfg['user'];
+    $this->pass     = $cfg['pass'];
     $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
-    $this->checked = true;
-    if ( class_exists('\\bbn\\Cache') ){
-      $this->cacher = Cache::getEngine();
-    }
   }
 
-  public function callCommand(string $command){
-    return xmlrpc_decode(file_get_contents($this->_getUrl(), false, $this->_getContext($command)));
+
+  /**
+   * Call a command
+   * @param string $command The command
+   * @param array $args The command arguments
+   * @return mixed
+   */
+  public function callCommand(string $command, array $args = [])
+  {
+    return xmlrpc_decode(
+      file_get_contents(
+        $this->getUrl(),
+        false,
+        $this->getContext($command, $args)
+      )
+    );
   }
 
-  public function getHostname(){
+
+  /**
+   * Gets the hostname
+   * @return string
+   */
+  public function getHostname(): string
+  {
     return $this->callCommand('webmin::get_system_hostname');
   }
 
-  public function getSystemUptime(){
+
+  /**
+   * Gets the system uptime
+   * @return string
+   */
+  public function getSystemUptime(): ?string
+  {
     return $this->callCommand('webmin::get_system_uptime');
   }
 
-  public function getNotifications(){
+
+  /**
+   * Gets notifications
+   * @return object
+   */
+  public function getNotifications(): object
+  {
     return $this->callCommand('webmin::get_webmin_notifications');
   }
 
-  public function getOS(){
+
+  /**
+   * Gets the operating system
+   * @return string
+   */
+  public function getOS(): string
+  {
     return $this->callCommand('webmin::detect_operating_system');
   }
 
-  public function getSmartDisksPartitions(){
+
+  /**
+   * Gets disks partitions
+   * @return array
+   */
+  public function getSmartDisksPartitions(): array
+  {
     return $this->callCommand('smart-status::list_smart_disks_partitions');
   }
 
-  private function _getCredentials(): string
+
+  /**
+   * Start a service
+   * @param string $service The name of the service
+   * @return bool
+   */
+  public function startService(string $service): bool
   {
-    return base64_encode($this->user.':'.$this->pass);
+    $res = $this->callCommand('init::start_action', [$service]);
+    return \is_array($res) && !empty($res[0]);
   }
-  
-  private function _getContext(string $command){
+
+
+  /**
+   * Stop a service
+   * @param string $service The name of the service
+   * @return bool
+   */
+  public function stopService(string $service): bool
+  {
+    $res = $this->callCommand('init::stop_action', [$service]);
+    return \is_array($res) && !empty($res[0]);
+  }
+
+
+  /**
+   * Restart a service
+   * @param string $service The name of the service
+   * @return bool
+   */
+  public function restartService(string $service): bool
+  {
+    $res = $this->callCommand('init::restart_action', [$service]);
+    return \is_array($res) && !empty($res[0]);
+  }
+
+
+  /**
+   * Encodes and returns the credentials
+   * @return string
+   */
+  private function getCredentials(): string
+  {
+    return base64_encode($this->user.':' . $this->pass);
+  }
+
+
+  /**
+   * Undocumented function
+   * @param string $command The command
+   * @param array $args The command arguments
+   * @return stream_context
+   */
+  private function getContext(string $command, $args = [])
+  {
     return stream_context_create([
       'http' => [
         'method' => 'POST',
         'header' => [
           'Content-Type: text/xml',
-          'Authorization: Basic ' . $this->_getCredentials()
+          'Authorization: Basic ' . $this->getCredentials()
         ],
-        'content' => xmlrpc_encode_request($command, null)
+        'content' => xmlrpc_encode_request($command, $args)
       ],
       'ssl' => [
-        'verify_peer' => false
+        'verify_peer' => false,
+        'verify_peer_name' => false
       ]
     ]);
   }
 
-  private function _getUrl(): string
+
+  /**
+   * Gets the call URL
+   * @return string
+   */
+  private function getUrl(): string
   {
-    return (strpos($this->hostname, 'https://') !== 0 ? 'https://' : '') . $this->hostname . ':10000/xmlrpc.cgi';
+    return (strpos($this->hostname, 'https://') !== 0 ? 'https://' : '')
+      . $this->hostname . ':10000/xmlrpc.cgi';
   }
-  
 }

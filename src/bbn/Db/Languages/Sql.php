@@ -255,6 +255,27 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return false;
   }
 
+
+  /**
+   * Destructor; setting the property holding the PDO object to null will close the connection.
+   */
+  public function __destruct()
+  {
+    $this->close();
+  }
+
+
+  /**
+   * Closes the connection definitely, making the object unusable.
+   */
+  public function close()
+  {
+    if ($this->pdo) {
+      $this->pdo = null;
+    }
+  }
+
+
   /**
    * Returns the engine class that extends the base Sql class.
    *
@@ -265,6 +286,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     $class = static::class;
     return strtolower(X::basename(str_replace('\\', '/', $class)));
   }
+
 
   /**
    * Returns the current database selected by the current connection.
@@ -1111,8 +1133,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           // Adding the alias in $fields
           if (strpos($f, '(')) {
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $f . (\is_string($alias) ? ' AS ' . $this->escape($alias) : '');
-          } elseif (isset($cfg['available_fields']) && array_key_exists($f, $cfg['available_fields'])) {
+          }
+          elseif (isset($cfg['available_fields']) && array_key_exists($f, $cfg['available_fields'])) {
             $idx    = $cfg['available_fields'][$f];
+            if ($idx && isset($cfg['tables_full'][$idx])) {
+              $idx = $cfg['tables_full'][$idx];
+            }
+
             $csn    = $this->colSimpleName($f);
             $is_uid = false;
             //die(var_dump($idx, $f, $tables[$idx]));
@@ -1127,7 +1154,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             }
 
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
-
             if ($is_uid) {
               if (method_exists($this, 'getHexStatement')) {
                 $st = 'LOWER(' . $this->getHexStatement($this->colFullName($csn, $cfg['available_fields'][$f], true)) . ')';
@@ -1139,7 +1165,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             // For JSON fields
             elseif ($cfg['available_fields'][$f] === false) {
               $st = $f;
-            } else {
+            }
+            else {
               $st = $this->colFullName($csn, $cfg['available_fields'][$f], true);
             }
 
@@ -1250,7 +1277,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $fields_to_put['values'][] = '?';
         }
       } else {
-        $this->error("Error!! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error("Error(bool) The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
     }
 
@@ -1802,6 +1829,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function query($statement)
   {
+    if (!$this->pdo) {
+      return null;
+    }
+
     $args = \func_get_args();
     // If fancy is false we just use the regular PDO query function
     if (!$this->_fancy) {
@@ -2465,7 +2496,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   protected function _exec()
   {
-    if ($this->check()
+    if ($this->pdo
+      && $this->check()
       && ($cfg = $this->processCfg(\func_get_args()))
       && !empty($cfg['sql'])
     ) {

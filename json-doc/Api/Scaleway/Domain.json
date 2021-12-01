@@ -1,0 +1,178 @@
+{
+    "doc": {
+        "description": "Scaleway Domain trait",
+        "tags": []
+    },
+    "name": "bbn\\Api\\Scaleway\\Domain",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Api\/Scaleway\/Domain.php",
+    "startLine": 7,
+    "endLine": 54,
+    "contentConstructor": null,
+    "methods": {
+        "getDomains": {
+            "name": "getDomains",
+            "summary": "Gets a list of domains owned by the current user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Domain",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_callCommand('domain\/');\n  }",
+            "startLine": 15,
+            "endLine": 18,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDomain": {
+            "name": "getDomain",
+            "summary": "Gets a domain info",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Domain",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\");\n  }",
+            "startLine": 26,
+            "endLine": 29,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The domain name"
+                }
+            ]
+        },
+        "getDomainVersion": {
+            "name": "getDomainVersion",
+            "summary": "Returns a paginated list of zone version associated with the domain",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Domain",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\/version\");\n  }",
+            "startLine": 37,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The domain name"
+                }
+            ]
+        },
+        "getDomainZone": {
+            "name": "getDomainZone",
+            "summary": "Returns the currently active zone of the domain",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\Scaleway\\Domain",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\/zone\");\n  }",
+            "startLine": 48,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The domain name"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\Scaleway",
+    "shortName": "Domain",
+    "summary": "Scaleway Domain trait",
+    "description": "",
+    "description_parts": []
+}

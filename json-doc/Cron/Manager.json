@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Class cron",
+        "description": "Class cron\n",
         "tags": {
             "package": "bbn\\Appui"
         }
@@ -11,7 +11,7 @@
         "bbn\\Cron\\Common"
     ],
     "interfaces": [],
-    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Manager.php",
+    "fileName": "\/Cron\/Manager.php",
     "startLine": 18,
     "endLine": 634,
     "contentConstructor": {
@@ -216,7 +216,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "cron"
                 }
             ]
         },
@@ -250,7 +251,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "cron"
                 },
                 {
                     "name": "res",
@@ -297,7 +299,7 @@
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "time A SQL formatted date which will be the base of the operation."
+                    "description": "A string made of 1 letter (i, h, d, w, m, or y) and a number."
                 },
                 {
                     "name": "from_time",
@@ -306,7 +308,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 0,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "time A SQL formatted date which will be the base of the operation."
                 }
             ]
         },
@@ -343,7 +346,8 @@
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "cron"
                 }
             ]
         },
@@ -1925,5 +1929,7 @@
     "extensionName": false,
     "namespaceName": "bbn\\Cron",
     "shortName": "Manager",
-    "summary": "Class cron"
+    "summary": "Class cron",
+    "description": "",
+    "description_parts": []
 }
