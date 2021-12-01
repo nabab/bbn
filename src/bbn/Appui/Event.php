@@ -180,13 +180,13 @@ class Event extends bbn\Models\Cls\Db
       }
       if ( 
         $this->db->insert($this->class_table, [
-          $f['id_parent'] => $event[$f['id_parent']] ?? NULL,
+          $f['id_parent'] => $event[$f['id_parent']] ?? null,
           $f['id_type'] => $event[$f['id_type']],
           $f['start'] => $event[$f['start']],
-          $f['end'] => $event[$f['end']] ?? NULL,
-          $f['name'] => $event[$f['name']] ?? NULL,
+          $f['end'] => $event[$f['end']] ?? null,
+          $f['name'] => $event[$f['name']] ?? null,
           $f['recurring'] => (int)$is_rec,
-          $f['cfg'] => $event[$f['cfg']] ?? NULL
+          $f['cfg'] => $event[$f['cfg']] ?? null
         ]) &&
         ($id = $this->db->lastId())
       ){
@@ -194,13 +194,13 @@ class Event extends bbn\Models\Cls\Db
           $this->db->insert($this->class_cfg['tables']['recurring'], [
             $rf['id_event'] => $id,
             $rf['type'] => $event[$rf['type']],
-            $rf['interval'] => $event[$rf['interval']] ?? NULL,
-            $rf['occurrences'] => $event[$rf['occurrences']] ?? NULL,
-            $rf['until'] => $event[$rf['until']] ?? NULL,
-            $rf['wd'] => !empty($event[$rf['wd']]) ? (\bbn\Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : NULL,
-            $rf['mw'] => !empty($event[$rf['mw']]) ? (\bbn\Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : NULL,
-            $rf['md'] => !empty($event[$rf['md']]) ? (\bbn\Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : NULL,
-            $rf['ym'] => !empty($event[$rf['ym']]) ? (\bbn\Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : NULL
+            $rf['interval'] => $event[$rf['interval']] ?? null,
+            $rf['occurrences'] => $event[$rf['occurrences']] ?? null,
+            $rf['until'] => $event[$rf['until']] ?? null,
+            $rf['wd'] => !empty($event[$rf['wd']]) ? (\bbn\Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : null,
+            $rf['mw'] => !empty($event[$rf['mw']]) ? (\bbn\Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : null,
+            $rf['md'] => !empty($event[$rf['md']]) ? (\bbn\Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : null,
+            $rf['ym'] => !empty($event[$rf['ym']]) ? (\bbn\Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : null
           ]);
         }
         return $id; 
@@ -232,13 +232,14 @@ class Event extends bbn\Models\Cls\Db
       ){
         $event[$f['cfg']] = json_encode($event[$f['cfg']]);
       }
+
       $ok2 = $this->db->update($this->class_table, [
         $f['id_type'] => $event[$f['id_type']],
         $f['start'] => $event[$f['start']],
-        $f['end'] => $event[$f['end']] ?? NULL,
-        $f['name'] => $event[$f['name']] ?? NULL,
-        $f['recurring'] => $event[$f['recurring']] ?? NULL,
-        $f['cfg'] => $event[$f['cfg']] ?? NULL
+        $f['end'] => $event[$f['end']] ?? null,
+        $f['name'] => $event[$f['name']] ?? null,
+        $f['recurring'] => $event[$f['recurring']] ?? 0,
+        $f['cfg'] => $event[$f['cfg']] ?? null
       ], [
 	      $f['id'] => $id
       ]);
@@ -246,13 +247,13 @@ class Event extends bbn\Models\Cls\Db
         $ok = $this->db->insertUpdate($this->class_cfg['tables']['recurring'], [
           $rf['id_event'] => $id,
           $rf['type'] => $event[$rf['type']],
-          $rf['interval'] => $event[$rf['interval']] ?? NULL,
-          $rf['occurrences'] => $event[$rf['occurrences']] ?? NULL,
-          $rf['until'] => $event[$rf['until']] ?? NULL,
-          $rf['wd'] => !empty($event[$rf['wd']]) ? (\bbn\Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : NULL,
-          $rf['mw'] => !empty($event[$rf['mw']]) ? (\bbn\Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : NULL,
-          $rf['md'] => !empty($event[$rf['md']]) ? (\bbn\Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : NULL,
-          $rf['ym'] => !empty($event[$rf['ym']]) ? (\bbn\Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : NULL
+          $rf['interval'] => $event[$rf['interval']] ?? null,
+          $rf['occurrences'] => $event[$rf['occurrences']] ?? null,
+          $rf['until'] => $event[$rf['until']] ?? null,
+          $rf['wd'] => !empty($event[$rf['wd']]) ? (\bbn\Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : null,
+          $rf['mw'] => !empty($event[$rf['mw']]) ? (\bbn\Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : null,
+          $rf['md'] => !empty($event[$rf['md']]) ? (\bbn\Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : null,
+          $rf['ym'] => !empty($event[$rf['ym']]) ? (\bbn\Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : null
         ]);
       }
       else if ( !empty($old_is_rec) ){

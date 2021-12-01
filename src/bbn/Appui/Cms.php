@@ -51,14 +51,30 @@ class Cms extends bbn\Models\Cls\Db
    */
   private function _check_date(?string $start, ?string $end): bool
   {
-    if (isset($start)) {
-      if (!isset($end) || (($end = strtotime($end)) && ($start = strtotime($start)) && $end > $start)) {
-        return true;
-      }
-    } else {
-        return true;
-    }
+    if (!isset($start)) {
       return false;
+    }
+
+    $start = strtotime($start);
+    if (!$start) {
+      throw new \Exception(X::_("The end date is not valid"));
+    }
+
+    if (empty($end)) {
+      return true;
+    }
+
+    $end = strtotime($end);
+    if (!$end) {
+      throw new \Exception(X::_("The end date is not valid"));
+    }
+
+    if ($end <= $start) {
+      //throw new \Exception(X::_("The end date is before the start"));
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -70,24 +86,24 @@ class Cms extends bbn\Models\Cls\Db
    */
   public function __construct(bbn\Db $db, Note $note = null)
   {
-      parent::__construct($db);
-      $this->event = new Event($this->db);
-      $this->opt   = Option::getInstance();
+    parent::__construct($db);
+    $this->event = new Event($this->db);
+    $this->opt   = Option::getInstance();
     if (!self::$_id_event) {
-        $id = $this->opt->fromCode('publication', 'event', 'appui');
-        self::_set_id_event($id);
+      $id = $this->opt->fromCode('publication', 'types', 'event', 'appui');
+      self::_set_id_event($id);
     }
     if (!$note) {
-        $this->note = new Note($this->db);
+      $this->note = new Note($this->db);
     }
     else {
-        $this->note = $note;
+      $this->note = $note;
     }
 
-      $this->class_cfg = X::mergeArrays(
-          $this->note->getClassCfg(),
-          $this->event->getClassCfg()
-      );
+    $this->class_cfg = X::mergeArrays(
+        $this->note->getClassCfg(),
+        $this->event->getClassCfg()
+    );
   }
 
 
@@ -341,7 +357,7 @@ class Cms extends bbn\Models\Cls\Db
  * @param string $url
  * @return string|null
  */
-  public function getByUrl(string $url, bool $force = false): ?string
+  public function getByUrl(string $url, bool $force = false): ?array
   {
     if (($id_note = $this->note->urlToId($url)) && ($force || $this->isPublished($id_note))) {
       return $this->get($id_note);
@@ -568,33 +584,48 @@ class Cms extends bbn\Models\Cls\Db
   public function setEvent(string $id_note, array $cfg = [])
   {
     if (!array_key_exists('start', $cfg)) {
-      return null;
+      throw new \Exception(X::_("A start date is mandatory for CMS event (even null)"));
     }
 
     if (empty($cfg['start'])) {
-        return $this->unpublish($id_note);
+      return $this->unpublish($id_note);
     }
 
-    if (($note = $this->note->get($id_note)) && ($this->_check_date($cfg['start'], $cfg['end'] ?? null))) {
-      if (empty($this->getEvent($id_note))) {
-        $fields = $this->class_cfg['arch']['events'];
-          //if a type is not given it inserts the event as page
-        if (
-                $id_event = $this->event->insert([
-              $fields['name']    => $note['title'] ?? '',
-              $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,
-              $fields['start']   => $cfg['start'],
-              $fields['end']     => $cfg['end'] ?? null
-                ])
-        ) {
-          return $this->note->insertNoteEvent($id_note, $id_event);
-        }
-      } else {
-          return $this->updateEvent($id_note, $cfg);
+    if (!($note = $this->note->get($id_note))) {
+      throw new \Exception(X::_("The note %s does not exist", $id_note));
+    }
+    
+    if (!$this->_check_date($cfg['start'], $cfg['end'] ?? null)) {
+      throw new \Exception(X::_("The dates don't work... End before start?"));
+    }
+
+    if (empty($this->getEvent($id_note))) {
+      $fields = $this->class_cfg['arch']['events'];
+        //if a type is not given it inserts the event as page
+      if (
+        $id_event = $this->event->insert([
+          $fields['name']    => $note['title'] ?? '',
+          $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,
+          $fields['start']   => $cfg['start'],
+          $fields['end']     => $cfg['end'] ?? null
+      ])) {
+        return $this->note->insertNoteEvent($id_note, $id_event);
+      }
+      else {
+        X::log([
+          $fields['name']    => $note['title'] ?? '',
+          $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,
+          $fields['start']   => $cfg['start'],
+          $fields['end']     => $cfg['end'] ?? null
+        ], 'cmsss');
+        throw new \Exception(X::_("Impossible to insert the event"));
       }
     }
+    else {
+      return $this->updateEvent($id_note, $cfg);
+    }
 
-      return null;
+    return null;
   }
 
 
@@ -652,20 +683,29 @@ class Cms extends bbn\Models\Cls\Db
      * @param string $end
      * @return bool Returns true if something has been modified.
      */
-  public function set(string $url, string $title, string $content, string $start = null, string $end = null): bool
+  public function set(string $url, string $title, string $content, string $start = null, string $end = null, array $tags = null): bool
   {
-    if (!($cfg = $this->get($url))) {
-        throw new \Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
+    if (!($cfg = $this->getByUrl($url, true))) {
+      throw new \Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
     }
 
-      $change = 0;
+    $change = 0;
     if (($cfg['title'] !== $title) || ($cfg['content'] !== $content)) {
-        $change += (int)$this->setContent($cfg['id_note'], $title, $content);
+      $change += (int)$this->setContent($cfg['id_note'], $title, $content);
     }
+
     if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {
-        $change += (int)$this->setEvent($cfg['id_note'], $start, $end);
+      $change += (int)$this->setEvent($cfg['id_note'], [
+        'start' => $start,
+        'end' => $end
+      ]);
     }
-      return $change ? true : false;
+
+    if (is_array($tags)) {
+      $change += $this->note->setTags($cfg['id_note'], $tags);
+    }
+
+    return $change ? true : false;
   }
 
 
