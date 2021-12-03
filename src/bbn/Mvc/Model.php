@@ -1,7 +1,11 @@
 <?php
 namespace bbn\Mvc;
 
-use bbn;
+use bbn\X;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\Models\Cls\Db as DbClass;
+use bbn\Models\Tts\Cache;
 
 /**
  * Model View Controller Class
@@ -22,11 +26,11 @@ use bbn;
  * @todo Look into the check function and divide it
  */
 
-class Model extends bbn\Models\Cls\Db
+class Model extends DbClass
 {
 
   use Common;
-  use bbn\Models\Tts\Cache;
+  use Cache;
 
   /**
    * The file as being requested
@@ -36,7 +40,7 @@ class Model extends bbn\Models\Cls\Db
 
   /**
    * The controller instance requesting the model
-   * @var null|string
+   * @var null|Controller
    */
   private $_ctrl;
 
@@ -48,7 +52,7 @@ class Model extends bbn\Models\Cls\Db
 
   /**
    * Included files
-   * @var null|string
+   * @var null|Controller
    */
   private $_checkers;
 
@@ -67,7 +71,7 @@ class Model extends bbn\Models\Cls\Db
   public
     /**
      * The database connection instance
-     * @var null|bbn\Db
+     * @var null|Db
      */
     $db,
     /**
@@ -88,11 +92,11 @@ class Model extends bbn\Models\Cls\Db
    *
    * @param null|bbn\Db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
    * @param array $info The full path to the model's file
-   * @param controller $ctrl The parent controller
-   * @param bbn\Mvc $mvc The parent MVC
+   * @param Controller $ctrl The parent controller
+   * @param Mvc $mvc The parent MVC
    * @throws \Exception
    */
-  public function __construct(bbn\Db $db = null, array $info, Controller $ctrl, bbn\Mvc $mvc)
+  public function __construct(Db $db = null, array $info, Controller $ctrl, Mvc $mvc)
   {
     if (isset($info['path']) && $this->checkPath($info['path'])) {
       if ($db) {
@@ -126,7 +130,7 @@ class Model extends bbn\Models\Cls\Db
   {
     if (isset($this->data['res'], $this->data['res'])) {
       if (is_array($vars)) {
-        return bbn\X::hasProps($this->data, $vars, $check_empty);
+        return X::hasProps($this->data, $vars, $check_empty);
       }
 
       return true;
@@ -173,7 +177,7 @@ class Model extends bbn\Models\Cls\Db
    */
   public function hasVar(string $var, bool $check_empty = false): bool
   {
-    return bbn\X::hasProp($this->data, $var, $check_empty);
+    return X::hasProp($this->data, $var, $check_empty);
   }
 
 
@@ -184,7 +188,7 @@ class Model extends bbn\Models\Cls\Db
    */
   public function hasVars(array $vars, bool $check_empty = false): bool
   {
-    return bbn\X::hasProps($this->data, $vars, $check_empty);
+    return X::hasProps($this->data, $vars, $check_empty);
   }
 
 
@@ -223,7 +227,7 @@ class Model extends bbn\Models\Cls\Db
       }
     }
 
-    $res = bbn\Mvc::includeModel($this->_file, $this);
+    $res = Mvc::includeModel($this->_file, $this);
     if (!empty($oldTextDomain)) {
       textdomain($oldTextDomain);
     }
@@ -257,6 +261,26 @@ class Model extends bbn\Models\Cls\Db
   public function getCustomModelGroup(string $path, string $plugin, array $data = null)
   {
     return $this->_ctrl->getCustomModelGroup(...\func_get_args());
+  }
+
+
+  public function getDataError(array|string $propNames, ?string $errorMsg = null, bool $checkEmpty = true): ?array
+  {
+    if (!$errorMsg) {
+      $errorMsg = "A value must be given for the field %s";
+    }
+
+    $propNames = (array)$propNames;
+    foreach ($propNames as $p) {
+      if (!$this->hasData($p, $checkEmpty)) {
+        return [
+          'success' => false,
+          'error'  => X::_($errorMsg, $p)
+        ];
+      }
+    }
+
+    return null;
   }
 
 
@@ -388,7 +412,7 @@ class Model extends bbn\Models\Cls\Db
         return !empty($this->data);
       }
 
-      return \bbn\X::hasProps($this->data, (array)$idx, $check_empty);
+      return X::hasProps($this->data, (array)$idx, $check_empty);
     }
 
 

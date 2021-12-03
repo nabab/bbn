@@ -1288,19 +1288,25 @@ MYSQL
   }
 
 
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return int
-   * @throws \Exception
-   */
-  public function alter(string $table, array $cfg): int
+  public function getMoveColumn(string $table, string $column, string $after = null, array $cfg = null): ?string
   {
-    if ($st = $this->getAlterTable($table, $cfg)) {
-      return (bool)$this->rawQuery($st);
+    if (!$cfg) {
+      $cfg = $this->modelize($table, true);
     }
 
-    return 0;
+    if (!$cfg) {
+      throw new \Exception(X::_("If the table does not exist a configuration should be provided"));
+    }
+
+    if (!$cfg['fields'][$column]) {
+      throw new \Exception(X::_("The column is not part of the table's structure"));
+    }
+
+    $st  = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+    $st .= 'MODIFY COLUMN ' . $this->escape($column) . ' ';
+    $st .= $this->getColumnDefinitionStatement($column, $cfg['fields'][$column], false). ' ';
+    $st .= $after ? $this->escape($after) : 'FIRST';
+    return $st;
   }
 
 

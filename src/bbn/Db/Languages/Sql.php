@@ -2035,7 +2035,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $this->setLastInsertId();
         }
 
-        return $r ?? false;
+        return $r ?: false;
       }
     }
   }

@@ -1627,7 +1627,7 @@ class User extends Models\Cls\Basic
         $r = [];
         foreach ($d as $key => $val){
           $this->$key = $val;
-          $r[$key]    = $key === $this->fields['cfg'] ? json_decode($val, true) : $val;
+          $r[$key]    = ($key === $this->fields['cfg']) && $val ? json_decode($val, true) : $val;
         }
 
         $this->cfg = $r['cfg'] ?? [];
