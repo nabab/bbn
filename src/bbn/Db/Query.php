@@ -5,6 +5,7 @@
 namespace bbn\Db;
 
 use bbn;
+use PDO;
 
 /**
  * An extended approach of the PDOStatement object
@@ -84,7 +85,7 @@ class Query extends \PDOStatement implements Actions
    * @param array|null $args
    * @return bool
    */
-  public function execute($args = null): ?bool
+  public function execute(?array $args = null): bool
   {
     if (($this->res === null) || ($args !== null)) {
       $this->res = 1;
@@ -143,7 +144,7 @@ class Query extends \PDOStatement implements Actions
       }
     }
 
-    return null;
+    return false;
   }
 
 
@@ -158,19 +159,15 @@ class Query extends \PDOStatement implements Actions
 
 
   /**
-   * @param int $how
+   * @param int $mode
    * @param int $orientation
    * @param int $offset
    * @return mixed
    */
-  public function fetch($how = null, $orientation = null, $offset = null)
+  public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed
   {
-    if ($how === null) {
-      $how = \PDO::FETCH_BOTH;
-    }
-
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetch($how, $orientation, $offset));
+    return bbn\Str::correctTypes(parent::fetch($mode, $orientation, $offset));
   }
 
 
@@ -201,7 +198,7 @@ class Query extends \PDOStatement implements Actions
    * @param int $column_number
    * @return mixed
    */
-  public function fetchColumn($column_number = 0)
+  public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
     return bbn\Str::correctTypes(parent::fetchColumn($column_number));
@@ -213,7 +210,7 @@ class Query extends \PDOStatement implements Actions
    * @param array  $ctor_args
    * @return mixed
    */
-  public function fetchObject($class_name = 'stdClass', $ctor_args = [])
+  public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): object|false
   {
     $this->execute();
     return bbn\Str::correctTypes(parent::fetchObject($class_name,$ctor_args));

@@ -2796,18 +2796,48 @@ class Db implements Db\Actions
 
 
   /**
-   * @param $table
-   * @param $cfg
+   * @param string $table
+   * @param array $cfg
    * @return int
+   * @throws \Exception
    */
-  public function alter($table, $cfg): int
+  public function alter(string $table, array $cfg): int
   {
-    return $this->language->alter($table, $cfg);
+    if (method_exists($this->language, 'alter')) {
+      return $this->language->alter($table, $cfg);
+    }
+
+    if ($st = $this->language->getAlterTable($table, $cfg)) {
+      return (int)$this->language->rawQuery($st);
+    }
+
+    return 0;
   }
 
 
   /**
-   * Creates an user for a specific db.
+   * Moves the given column's position within a table.
+   *
+   * @param string $table
+   * @param string $column
+   * @param array $cfg
+   * @param string|null $after
+   * @return integer
+   */
+  public function moveColumn(string $table, string $column, array $cfg, string $after = null): int
+  {
+    $this->ensureLanguageMethodExists('getMoveColumn');
+
+    if ($st = $this->language->getMoveColumn($table, $column, $cfg, $after)) {
+      return (int)$this->language->rawQuery($st);
+    }
+
+    return 0;
+  }
+
+
+  /**
+   * Creates a user for a specific db.
    * @todo return data
    *
    * ```php
@@ -3258,7 +3288,7 @@ class Db implements Db\Actions
   private function ensureLanguageMethodExists(string $method)
   {
     if (!method_exists($this->language, $method)) {
-      throw new \Exception(X::_('Method not found on the language class!'));
+      throw new \Exception(X::_('Method %s not found on the language %s class!', $method, $this->engine));
     }
   }
 }

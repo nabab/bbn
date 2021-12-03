@@ -216,8 +216,8 @@ class Note extends bbn\Models\Cls\Db
    * @return string|null
    */
   public function insert(
-    $title,
-    $content = '',
+    string|array $title,
+    string $content = '',
     string $type = null,
     bool $private = false,
     bool $locked = false,

@@ -129,7 +129,7 @@ class Mvc implements Mvc\Api
   /**
    * @var string The root of the application in the URL (base href)
    */
-  protected $root;
+  protected $root = '';
 
   /**
    * @var array The plugins registered through the routes

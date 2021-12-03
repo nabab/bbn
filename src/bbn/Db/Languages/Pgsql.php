@@ -1292,20 +1292,6 @@ PGSQL
     return $st;
   }
 
-  /**
-   * @param string $table
-   * @param array $cfg
-   * @return int
-   * @throws \Exception
-   */
-  public function alter(string $table, array $cfg): int
-  {
-    if ($st = $this->getAlterTable($table, $cfg)) {
-      return (bool)$this->rawQuery($st);
-    }
-
-    return 0;
-  }
 
   /**
    * @param string $table
