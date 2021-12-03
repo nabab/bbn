@@ -225,13 +225,6 @@ interface Engines
 
 
   /**
-   * @param string $table
-   * @param array $cfg
-   * @return int
-   */
-  public function alter(string $table, array $cfg): int;
-
-  /**
    * Creates a database
    *
    * @param string $database
