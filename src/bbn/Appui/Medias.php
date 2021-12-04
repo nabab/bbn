@@ -4,6 +4,7 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\File\System;
 
 class Medias extends bbn\Models\Cls\Db
 {
@@ -80,6 +81,18 @@ class Medias extends bbn\Models\Cls\Db
   /** @var array $class_cfg */
   protected $class_cfg;
 
+  /** @var string $imageRoot */
+  protected static $imageRoot;
+
+  public static function getImageUrl(string $id = null): string
+  {
+    if (!self::$imageRoot) {
+      self::$imageRoot = bbn\Mvc::getPluginUrl('appui-note').'/media/image/';
+    }
+
+    return self::$imageRoot. (string)$id;
+  }
+
   public function __construct(bbn\Db $db)
   {
     parent::__construct($db);
@@ -87,14 +100,19 @@ class Medias extends bbn\Models\Cls\Db
     $this->opt    = bbn\Appui\Option::getInstance();
     $this->usr    = bbn\User::getInstance();
     $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
+    $this->fs     = new System();
   }
 
   /**
    * @param array|null $media
    * @return string
    */
-  public function getPath(array $media = null): string
+  public function getPath(string|array $media = null): string
   {
+    if ($media && !is_array($media)) {
+      $media = $this->getMedia($media);
+    }
+
     if (!isset($this->path)) {
       $this->path = bbn\Mvc::getDataPath('appui-note').'media';
     }
@@ -167,19 +185,8 @@ class Medias extends bbn\Models\Cls\Db
         'start' => $cfg['start'] ?? $start
       ]);
       if ($data = $grid->getDatatable()) {
-        $url = bbn\Mvc::getPluginUrl('appui-note').'/media/image/';
         foreach ($data['data'] as &$d) {
-          $d['is_image'] = false;
-          if ($d['content']) {
-            $d['content'] = json_decode($d['content'], true);
-            $full_path = $this->getPath($d);
-            $d['full_pat'] = $this->getThumbs($full_path);
-            $d['path'] = $url.$d['id'];
-            $d['is_image'] = $this->isImage($full_path);
-            if ($d['is_image']) {
-              $d['thumbs'] = $this->getThumbsSizes($d[$ct['id']]);
-            }
-          }
+          $this->transformMedia($d);
         }
         return $data;
       }
@@ -263,8 +270,7 @@ class Medias extends bbn\Models\Cls\Db
         && ($ext = Str::fileExt($file))
     ) {
       $content = null;
-      $fs = new bbn\File\System();
-      if (!$fs->isFile($file)) {
+      if (!$this->fs->isFile($file)) {
         throw new \Exception(X::_("Impossible to find the file %s", $file));
       }
 
@@ -280,13 +286,13 @@ class Medias extends bbn\Models\Cls\Db
       }
 
       $root   .= 'media/';
-      $path    = bbn\X::makeStoragePath($root, '', 0, $fs);
+      $path    = bbn\X::makeStoragePath($root, '', 0, $this->fs);
       $dpath   = substr($path, strlen($root));
       $name    = X::basename($file);
       $mime    = mime_content_type($file) ?: null;
       $content = [
         'path' => $dpath,
-        'size' => $fs->filesize($file),
+        'size' => $this->fs->filesize($file),
         'extension' => $ext
       ];
       if (empty($title)) {
@@ -311,14 +317,14 @@ class Medias extends bbn\Models\Cls\Db
       }
 
       $id = $this->db->lastId();
-      if ($fs->createPath($path.$id)) {
-        $fs->move(
+      if ($this->fs->createPath($path.$id)) {
+        $this->fs->move(
           $file,
           $path.$id
         );
         $new_file = $path.$id.'/'.X::basename($file);
         if (strpos($mime, 'image/') === 0) {
-          $image = new \bbn\File\Image($new_file, $fs);
+          $image = new \bbn\File\Image($new_file, $this->fs);
           $image->thumbs($path.$id, $this->thumbs_sizes);
         }
       }
@@ -377,16 +383,25 @@ class Medias extends bbn\Models\Cls\Db
 
 
   /**
-   * @param string $id
+   * @param string|array $media
    * @return array
    */
-  public function getThumbsSizes(string $id): array
+  public function getThumbsSizes(string|array $media): array
   {
-    if (\bbn\Str::isUid($id)
-      && ($path = $this->getMediaPath($id))
-      && ($list = \bbn\File\Dir::getFiles(X::dirname($path)))
-      && (count($list) > 1)
-    ) {
+    if (!is_array($media)) {
+      $media = $this->getMedia($media);
+    }
+
+    if (!is_array($media)) {
+      throw new \Exception("Impossible to find the media in the database");
+    }
+
+    if (!($path = $this->getPath($media))) {
+      throw new \Exception("Impossible to retrieve the path");
+    }
+    
+    $list = \bbn\File\Dir::getFiles(X::dirname($path));
+    if (count($list) > 1) {
       $sizes = [];
       foreach ($list as $l) {
         preg_match('/.*\_w([0-9]*)\.[a-zA-Z]*$/', $l, $m);
@@ -397,6 +412,7 @@ class Medias extends bbn\Models\Cls\Db
       sort($sizes);
       return $sizes;
     }
+
     return [];
   }
 
@@ -405,7 +421,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $path
    * @param array $size
    */
-  public function getThumbs(string $path, array $size = [60, 60], $if_exists = true)
+  public function getThumbPath(string $path, array $size = [60, 60], $if_exists = true)
   {
     if (isset($size[0], $size[1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {
       $ext = '.'.Str::fileExt($path);
@@ -441,7 +457,7 @@ class Medias extends bbn\Models\Cls\Db
 
     if (file_exists($path) && $this->isImage($path)) {
       foreach($this->thumbs_sizes as $size){
-        if (($result = $this->getThumbs($path, $size)) !== null) {
+        if (($result = $this->getThumbPath($path, $size)) !== null) {
           $res[] = $result;
         }
       }
@@ -495,15 +511,14 @@ class Medias extends bbn\Models\Cls\Db
   {
     if (\bbn\Str::isUid($id)) {
       $cf    =& $this->class_cfg;
-      $media = $this->getMedia($id, true);
-      $fs    = new bbn\File\System();
+      $media =  $this->getMedia($id, true);
 
       if ($media
           && ($path = X::dirname($media['file']))
           && is_file($media['file'])
           && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])
       ) {
-        if ($fs->delete($path, false)) {
+        if ($this->fs->delete($path, false)) {
           bbn\X::cleanStoragePath($path);
         }
 
@@ -545,36 +560,12 @@ class Medias extends bbn\Models\Cls\Db
   public function getMedia(string $id, bool $details = false, int $width = null)
   {
     $cf =& $this->class_cfg;
-    $fs = new \bbn\File\System();
     if (\bbn\Str::isUid($id)
         && ($link_type = $this->opt->fromCode('link', $this->opt_id))
-        && ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id]))
+        && ($media = $this->db->rselect($cf['table'], $cf['arch']['medias'], [$cf['arch']['medias']['id'] => $id]))
         && ($link_type !== $media[$cf['arch']['medias']['type']])
     ) {
-      if ($media[$cf['arch']['medias']['content']]) {
-        $tmp   = json_decode($media[$cf['arch']['medias']['content']], true);
-        $media = array_merge($tmp, $media);
-      }
-      $media['file'] = (
-        $media['private'] ? bbn\Mvc::getUserDataPath($this->usr->getId(), 'appui-note') : bbn\Mvc::getDataPath('appui-note')
-      ).'media/'.($media['path'] ?? '').$id.'/'.$media[$cf['arch']['medias']['name']];
-      if ($width && ($sizes = $this->getThumbsSizes($id))) {
-        $current = $width;
-        foreach ($sizes as $size) {
-          if ($size >= $current) {
-            $dot = strrpos($media['file'], '.');
-            $tmpFile = substr($media['file'], 0, $dot) . '_w' . $size .
-              strtolower(substr($media['file'], $dot));
-            if ($fs->isFile($tmpFile) && $this->isImage($tmpFile)) {
-              $media['file'] = $tmpFile;
-            }
-            break;
-          }
-        }
-      }
-      if ($fs->isFile($media['file']) && $this->isImage($media['file'])) {
-        $media['is_image'] = true;
-      }
+      $this->transformMedia($media, $width);
 
       return empty($details) ? $media['file'] : $media;
     }
@@ -626,7 +617,6 @@ class Medias extends bbn\Models\Cls\Db
   {
     $new = [];
     //the old media
-    $fs   = new bbn\File\System();
     $old  = $this->getMedia($id_media, true);
     $root = bbn\Mvc::getDataPath('appui-note').'media/';
     if ($old
@@ -635,7 +625,7 @@ class Medias extends bbn\Models\Cls\Db
         $content = json_decode($old['content'], true);
         $path    = $root.$content['path'].'/';
 
-      if ($fs->exists($path.$id_media.'/'.$old['name'])) {
+      if ($this->fs->exists($path.$id_media.'/'.$old['name'])) {
         if ($old['name'] !== $name) {
           //if the media is an image has to update also the thumbs names
           if ($this->isImage($path.$id_media.'/'.$old['name'])) {
@@ -652,11 +642,11 @@ class Medias extends bbn\Models\Cls\Db
               ]
             ];
             foreach ($thumbs_names as $t){
-              $fs->rename($path.$id_media.'/'.$t['old'], $t['new'], true);
+              $this->fs->rename($path.$id_media.'/'.$t['old'], $t['new'], true);
             }
           }
 
-          $fs->rename($path.$id_media.'/'.$old['name'], $name, true);
+          $this->fs->rename($path.$id_media.'/'.$old['name'], $name, true);
         }
 
         if ($this->updateDb($id_media, $name, $title)) {
@@ -718,15 +708,14 @@ class Medias extends bbn\Models\Cls\Db
   public function updateContent(string $id_media, int $ref, string $oldName, string $newName, string $title)
   {
     $tmp_path  = \bbn\Mvc::getUserTmpPath().$ref.'/'.$oldName;
-    $fs        = new \bbn\File\System();
     $new_media = [];
-    if ($fs->isFile($tmp_path)) {
+    if ($this->fs->isFile($tmp_path)) {
       $file_content = file_get_contents($tmp_path);
 
       if (($media = $this->getMedia($id_media, true))) {
         $old_path  = $this->getMediaPath($id_media, $oldName);
         $full_path = $this->getMediaPath($id_media, $newName);
-        if ($fs->putContents($full_path, $file_content)) {
+        if ($this->fs->putContents($full_path, $file_content)) {
           if ($this->isImage($full_path)) {
             $image = new \bbn\File\Image($full_path);
             $this->removeThumbs($old_path);
@@ -738,7 +727,7 @@ class Medias extends bbn\Models\Cls\Db
         if($this->updateDb(
           $id_media, $newName, $title, [
             'path' => $media['path'],
-            'size' => $fs->filesize($full_path),
+            'size' => $this->fs->filesize($full_path),
             'extension' => X::pathinfo($full_path, PATHINFO_EXTENSION)
           ]
         )
@@ -771,5 +760,35 @@ class Medias extends bbn\Models\Cls\Db
     return null;
   }
 
+
+  protected function transformMedia(array &$data, int $width = null): void
+  {
+    $data['is_image'] = false;
+
+    if (!empty($data['content'])) {
+      $data['content'] = json_decode($data['content'], true);
+      $full_path = $this->getPath($data);
+      $data['file'] = $full_path;
+      $data['full_path'] = $this->getThumbPath($full_path);
+      $data['path'] = self::getImageUrl($data['id']);
+      $data['is_image'] = $this->isImage($full_path);
+      if ($data['is_image']) {
+        $d['thumbs'] = $this->getThumbsSizes($data);
+        if ($width) {
+          foreach ($d['thumbs'] as $size) {
+            if ($size >= $width) {
+              $dot = strrpos($data['file'], '.');
+              $tmpFile = substr($data['file'], 0, $dot) . '_w' . $size .
+                strtolower(substr($data['file'], $dot));
+              if ($this->fs->isFile($tmpFile) && $this->isImage($tmpFile)) {
+                $data['file'] = $tmpFile;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
 
 }
