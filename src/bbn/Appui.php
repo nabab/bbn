@@ -392,7 +392,7 @@ class Appui
     if ($throwError || is_null($this->_checked)) {
       $ok = true;
       foreach (self::$vars as $v) {
-        if (empty($this->_current[$v])) {
+        if (!array_key_exists($v, $this->_current)) {
           if ($throwError) {
             throw new \Exception(X::_("The parameter %s is not defined", $v));
           }
