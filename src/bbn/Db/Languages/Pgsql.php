@@ -650,13 +650,8 @@ PSQL
    */
   public function getUid(): ?string
   {
-    $uid = null;
-    while (!bbn\Str::isBuid(hex2bin($uid))) {
-      $uid = $this->getOne("SELECT gen_random_uuid()");
-      $uid = str_replace('-', '', $uid);
-    }
-
-    return $uid;
+    $uid = $this->getOne("SELECT gen_random_uuid()");
+    return str_replace('-', '', $uid);
   }
 
 

@@ -477,12 +477,7 @@ MYSQL
    */
   public function getUid(): ?string
   {
-    $uid = null;
-    while (!bbn\Str::isBuid(hex2bin($uid))) {
-      $uid = $this->getOne("SELECT replace(uuid(),'-','')");
-    }
-
-    return $uid;
+    return $this->getOne("SELECT replace(uuid(),'-','')");
   }
 
 
