@@ -65,6 +65,7 @@ class Jwt extends Basic
       X::hdump($e->getMessage());
       throw new \Exception($e);
     }
+
     return $jwt;
   }
 
@@ -74,15 +75,14 @@ class Jwt extends Basic
       $payload = \Firebase\JWT\JWT::decode($jwt, $this->key, ['HS256', 'RS512']);
     }
     catch (\Exception $e) {
-      X::log($this->key, 'jwt');
-      X::log($jwt, 'jwt');
-      X::log($this->payload, 'jwt');
       X::hdump($e->getMessage());
       throw new \Exception($e);
     }
+
     if (!empty($payload->data)) {
       return X::toArray($payload->data);
     }
+
     return null;
   }
 }
