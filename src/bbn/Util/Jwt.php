@@ -70,14 +70,11 @@ class Jwt extends Basic
 
   public function get(string $jwt): ?array
   {
-    X::log($jwt, 'jwt');
     try {
       $payload = \Firebase\JWT\JWT::decode($jwt, $this->key, ['HS256', 'RS512']);
     }
     catch (\Exception $e) {
-      X::log($this->key, 'jwt');
-      X::log($jwt, 'jwt');
-      X::log($this->payload, 'jwt');
+      X::ddump($jwt);
       X::hdump($e->getMessage());
       throw new \Exception($e);
     }
