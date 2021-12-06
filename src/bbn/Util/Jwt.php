@@ -4,8 +4,9 @@ namespace bbn\Util;
 
 use bbn;
 use bbn\X;
+use bbn\Models\Cls\Basic;
 
-class Jwt
+class Jwt extends Basic
 {
 
   protected $payload;
@@ -29,7 +30,7 @@ class Jwt
   public function reset(): self
   {
     $this->payload = [
-      "iss" => BBN_SERVER_NAME,
+      "iss" => defined('BBN_SERVER_NAME') ? BBN_SERVER_NAME : gethostname(),
       "iat" => time(),
       "exp" => time() + $this->ttl,
       "sub" => $this->sub,
@@ -73,6 +74,7 @@ class Jwt
       $payload = \Firebase\JWT\JWT::decode($jwt, $this->key, ['HS256', 'RS512']);
     }
     catch (\Exception $e) {
+      $this->log([$this->key, $jwt]);
       X::hdump($e->getMessage());
       throw new \Exception($e);
     }
