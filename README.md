@@ -86,7 +86,7 @@ Any help is welcome!
 	- .htaccess
 	- index.php
 
-## By default the BBN framework returns a HTML document if there is no POST, and a JSON object otherwise.
+**By default the BBN framework returns a HTML document if there is no POST, and a JSON object otherwise.**  
 
 The [bbn-js](https://github.com/nabab/bbn-js) and [bbn-vue](https://github.com/nabab/bbn-vue) libraries are intimately related with this framework, and deal with its I/O.
 
