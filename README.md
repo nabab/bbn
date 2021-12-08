@@ -8,7 +8,7 @@ bbn
 
 ### You can install the library through Composer
 
-```
+```json
 {
   "require": {
     "bbn/bbn": "dev/master"
@@ -18,9 +18,9 @@ bbn
 
 ### A library targeted at Single Page Applications that includes:
 
-* An MVC framework
-* A powerful ORM supporting database structure analysis and plenty of return methods
-* An options' class on which most app-UI features are based
+* [An MVC framework](#mvc)
+* [A powerful ORM supporting database structure analysis and lots of return methods](#orm)
+* [An options' class on which most app-UI features are based](#option)
 * API classes for integrating external services (Virtualmin, Cloudmin, Github, Gitlab, Payments...)
 * A History class allowing to store each change done in the database and revert them
 * Files, Images, and PDF files manipulation classes
@@ -93,12 +93,12 @@ They catch each local link clicked, send them as a POST request, then deal with 
 
 ### The JSON object returned by clicking a link typically holds the following properties:
 
-- `content` a HTML string, which will be injected into a container
-- `title` will be the new page's title, that will be prepended to the website's general title
-- `css` a CSS string which will be put as a `<style/>` tag in the same container
-- `script` a javascript function which will either return:
+|`content`|a HTML string, which will be injected into a container|
+|`title`|will be the new page's title, that will be prepended to the website's general title|
+|`css`|a CSS string which will be put as a `<style/>` tag in the same container|
+|`script`|a javascript function which will either return:
   * A function that will receive the container as argument and will be executed after the content injection
-  * An object that will be treated as a VueJS anonymous component inside the [router component](https://github.com/nabab/bbn-vue/blob/master/src/components/router/router.js)
+  * An object that will be treated as a VueJS anonymous component inside the [router component](https://github.com/nabab/bbn-vue/blob/master/src/components/router/router.js)|
 
 ### The life cycle of a typical call to a server with bbn works as follow:
 
@@ -144,7 +144,7 @@ They catch each local link clicked, send them as a POST request, then deal with 
 
 ## A few examples
 
-### ORM
+### ORM {#orm}
 
 ```php
 <?php
@@ -213,7 +213,7 @@ X::adump($db->rselectAll([
 ]));
 ```
 
-### MVC
+### MVC {#mvc}
 
 ```php
 use bbn\X;
@@ -318,9 +318,11 @@ $ctrl->combo("My page title", ['my' => 'data']);
 
 
 
-### Options
+### Option {#option}
 
 The option system is built in a database with a table having the following structure:
+
+
 - `id` is the primary key
 - `id_parent` has a constraint to `id`. It is nullable but all options but one (the `root`) should have it set
 - `text` Is a string which should be the title of the option
