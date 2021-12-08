@@ -117,7 +117,8 @@ They catch each local link clicked, send them as a POST request, then deal with 
 	- Otherwise it looks for:
 	`src/mvc/public/just.php` then returns a `404` if it doesn't find it
 
-**If the route is found, it goes on:**
+**If the route is found, it goes on:**  
+
 :arrow_right: An optional file `src/custom1.php` is included with an object `$bbn` available with property `mvc`  
 :arrow_right: As we are not in CLI mode a session is started   
 :arrow_right: An optional file `src/custom2.php` is included with an object `$bbn` available with property `mvc`, `user` and `session` depending on the configuration  
@@ -125,7 +126,8 @@ They catch each local link clicked, send them as a POST request, then deal with 
 :arrow_right: Whatever output becomes the `content` property of the response object  
 :arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
 
-**Output returned:**
+**Output returned:**  
+
 	- If it is a landing page (no POST) the property `content` will be returned with HTML headers
 	- Otherwise the object `mvc->obj` will be returned encoded with JSON headers
 	- If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers
