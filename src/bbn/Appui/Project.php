@@ -454,11 +454,11 @@ class Project extends bbn\Models\Cls\Db
       $project_name = $this->name;
     }
 
-    $projects = $this->options->fullTree($this->options->fromCode('path', $project_name, 'list', 'project', 'appui'));
-    if (!empty($projects) && !empty($projects['items'])) {
-      $projects = $projects['items'];
-      foreach ($projects as $i => $project) {
-        $paths = $this->options->fullTree($project['id']);
+    $roots = $this->options->fullTree($this->options->fromCode('path', $project_name, 'list', 'project', 'appui'));
+    if (!empty($roots) && !empty($roots['items'])) {
+      $roots = $roots['items'];
+      foreach ($roots as $root) {
+        $paths = $this->options->fullTree($root['id']);
         if (isset($paths['items']) && count($paths['items'])) {
           foreach ($paths['items'] as $repository) {
             if (empty($repository['id_alias'])) {

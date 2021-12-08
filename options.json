@@ -508,6 +508,30 @@
                 },
                 "text": "Databases",
                 "code": "dbs"
+              },
+              {
+                "text": "Preconfigured Columns",
+                "code": "pcolumns",
+                "items": [
+                  {
+                    "text": "Datetime now not null",
+                    "code": "dtnow",
+                    "type": "datetime",
+                    "default": "now()",
+                    "defaultExpression": 1
+                  },
+                  {
+                    "text": "Primary key binary 16",
+                    "code": "pkb16",
+                    "type": "binary",
+                    "index": "primary",
+                    "maxlength": 16
+                  }
+                ],
+                "cfg": {
+                  "show_code": 1,
+                  "show_value": 1
+                }
               }
             ]
           },
