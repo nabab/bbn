@@ -380,7 +380,7 @@ X::adump(
   // Same as options but with an items property holding the lineage
   $option->tree($id_option),
   // Same as fullOptions but with an items property holding the lineage
-  $option->Fulltree($id_option),
+  $option->fullTree($id_option),
   // Returns the code: permissions
   $option->code($id_option),
   // Returns the text
