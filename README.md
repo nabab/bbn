@@ -131,14 +131,14 @@ They catch each local link clicked, send them as a POST request, then deal with 
 #### The execution
 
 :arrow_right: An optional file `src/custom1.php` is included with an object `$bbn` available with property `mvc`  
-:arrow_right: If we are not in CLI mode a session is started   
+:arrow_right: If we are not in CLI mode a session is started  
 :arrow_right: Still not in CLI mode an optional file `src/custom2.php` is included with an object `$bbn` available with property `mvc`, `user` and `session` depending on the configuration  
 :arrow_right: The MVC includes the controller  
-:arrow_right: Whatever output becomes the `content` property of the response object  
-:arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
 
 #### The output  
 
+:arrow_right: The output buffer becomes the `content` property of the response object  
+:arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
 :arrow_right:  If it is a landing page (no POST) the property `content` will be returned with HTML headers  
 :arrow_right:  Otherwise the object `mvc->obj` will be returned encoded with JSON headers  
 :arrow_right:  If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers  
