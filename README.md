@@ -269,9 +269,48 @@ $ctrl->combo("My page title", ['my' => 'data']);
 
 ?>
 ```
-When the javascript can access the data, it will be differently available:
-- If the anonymous function returns a **function**, the data will be its **second argument**
-- If the anonymous function returns an **object**, the data will reside in the **source property**
+#### When the javascript can access the data, it will be differently available
+
+##### If the anonymous function returns a **function**, the data will be its **second argument**
+
+```javascript
+(() => {
+  return (container, data) => {
+    if (data && data.success && data.color) {
+      container.style.color = '#' + data.color;
+    }
+  };
+})();
+```
+
+##### If the anonymous function returns an **object**, the data will reside in the **source property**
+
+```javascript
+(() => {
+  return {
+    computed: {
+      realColor() {
+        return '#' + this.source.color
+      }
+    }
+  };
+})();
+```
+
+##### Example of an HTML view (has access to all the data)
+
+```html
+<div style="color: #{{color}}">Hello world</div>
+```
+
+##### Example of a PHP view (has access to all the data)
+
+```php
+<div style="color: #<?= $color ?>"><?= _("Hello world") ?></div>
+```
+
+
+
 
 ### Options
 
