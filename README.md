@@ -142,9 +142,10 @@ Any help is welcome!
 
 ```php
 <?php
-// A quick example with the ORM
 use bbn\X;
-$db = new \bbn\Db($cfg);
+
+/** @var bbn\Db $db */
+
 // Returns an array with fields, cols and keys props which will give you all information about a table
 X::adump($db->modelize("my_table"));
 // Simple query
