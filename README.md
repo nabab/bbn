@@ -51,7 +51,7 @@ bbn
   * Project management system
   * A statistics system
   * A general project and workflow management system
-  * A bunch of static methods for manipulating all kind of data and other useful functions
+  * Static methods for manipulating all kind of data and other useful functions
 * And many other features!
 
 The bbn framework works with a [router](https://github.com/nabab/bbn-router) and some configuration files. An [installer](https://www.youtube.com/watch?v=dQw4w9WgXcQ) will be released in 2022.
@@ -88,7 +88,7 @@ Any help is welcome!
 
 ## By default the BBN framework returns a HTML document if there is no POST, and a JSON object otherwise.
 
-The [bbn-js](https://github.com/nabab/bbn-js) and [bbn-vue](https://github.com/nabab/bbn-vue) libraries and intimately related with this framework, and deal with its I/O.
+The [bbn-js](https://github.com/nabab/bbn-js) and [bbn-vue](https://github.com/nabab/bbn-vue) libraries are intimately related with this framework, and deal with its I/O.
 
 They catch each local link clicked, send them as a POST request, then deal with the response.
 
