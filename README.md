@@ -245,7 +245,7 @@ X::adump(
   // The files array (revisited)
   $ctrl->files, 
   // an array of each bit of the path which are not part of (=after) the controller 
-  $ctrl->arguments, path
+  $ctrl->arguments,
   // an associative array that will be sent to the model if nothiung else is sent
   $ctrl->data, 
   // Adds properties to $ctrl->data
@@ -265,7 +265,10 @@ X::adump(
 // Fetches for everything related to the current controller (model, html, js, css) and combines the results into a single object ($ctrl->obj). That's the typical function for showing a page
 $ctrl->combo("My page title");
 
-// Fetches the corresponding model and returns its result as an object. Typically used for write operations.
+// Transform all input (get, post, files) data into a single data array
+// Fetches the corresponding model with this data
+// and returns its result as an object.
+// Typically used for write operations.
 $ctrl->action();
 
 // The second parameter allows the javascript to access the model's data
@@ -303,6 +306,8 @@ $ctrl->combo("My page title", ['my' => 'data']);
   };
 })();
 ```
+
+#### The HTML views are server-rendered and therefore  can by default access all the data
 
 ##### Example of an HTML view
 
@@ -382,5 +387,4 @@ X::adump(
   // You can insert whaever you like
   $option->add(['id_parent' => $id_option, 'text' => 'Hello', 'myProp' => 'myValue'])
 );
-?>
 ```
