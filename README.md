@@ -102,13 +102,19 @@ They catch each local link clicked, send them as a POST request, then deal with 
 
 ### The life cycle of a typical call to a server with bbn works as follow:
 
+#### The request redirection
+
 :arrow_right: Call to https://myapp.com/just/testing (which does not exist)  
 :arrow_right: An .htaccess file rewrites all the not found files to an index.php file  
 :arrow_right: The index file `chdir` in the app folder `src/` which should be outside of the public root  
 :arrow_right: It then includes the [router](https://github.com/nabab/bbn-router/blob/master/src/router.php) which should be in the src/ directory (as a symlink towards vendor)  
-:arrow_right: The router recognizes the predefined configuration in which it stands through the `hostname` and `app_path` definitions from `src/cfg/environment.yml`  
-:arrow_right: The router defines constants and initializes autoload, then different classes depending on the configuration  
-:arrow_right: The router creates the MVC class, which will look for the right controller:  
+
+#### The router
+
+:arrow_right: It recognizes the predefined configuration in which it stands through the `hostname` and `app_path` definitions from `src/cfg/environment.yml`  
+:arrow_right: It defines constants and initializes autoload  
+:arrow_right: It instantiates different classes depending on the configuration  
+:arrow_right: It creates the MVC class, which will look for the right controller:  
 
 - It looks into `src/mvc/public/` for a controller corresponding to the path `just/testing`:
 	- If it is a landing page (no POST) the file should be:
@@ -121,7 +127,7 @@ They catch each local link clicked, send them as a POST request, then deal with 
 	- Otherwise it looks for:
 	`src/mvc/public/just.php` then returns a `404` if it doesn't find it
 
-**If the route is found, it goes on:**  
+#### After the route is found
 
 :arrow_right: An optional file `src/custom1.php` is included with an object `$bbn` available with property `mvc`  
 :arrow_right: As we are not in CLI mode a session is started   
@@ -130,7 +136,7 @@ They catch each local link clicked, send them as a POST request, then deal with 
 :arrow_right: Whatever output becomes the `content` property of the response object  
 :arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
 
-**Output**  
+#### The output  
 
 :arrow_right:  If it is a landing page (no POST) the property `content` will be returned with HTML headers  
 :arrow_right:  Otherwise the object `mvc->obj` will be returned encoded with JSON headers  
