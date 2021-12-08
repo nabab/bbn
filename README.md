@@ -32,26 +32,26 @@ bbn
 * Users and groups management classes
 * Parsers for PHP, Javascript and VueJS components
 * Specific classes for app-UI features such as:
-* Notes
-* Medias
-* Chat
-* Clipboard
-* Content Management System
-* Dashboard
-* Databases management system
-* Databases synchronization system
-* I.D.E.
-* Automated mailings
-* Internationalization
-* Masking system for letters and texts
-* A notification system
-* Data's observers
-* Passwords management
-* Planning and events management
-* Project management system
-* A statistics system
-* A general project and workflow management system
-* A bunch of static methods for manipulating all kind of data and other useful functions
+  * Notes
+  * Medias
+  * Chat
+  * Clipboard
+  * Content Management System
+  * Dashboard
+  * Databases management system
+  * Databases synchronization system
+  * I.D.E.
+  * Automated mailings
+  * Internationalization
+  * Masking system for letters and texts
+  * A notification system
+  * Data's observers
+  * Passwords management
+  * Planning and events management
+  * Project management system
+  * A statistics system
+  * A general project and workflow management system
+  * A bunch of static methods for manipulating all kind of data and other useful functions
 * And many other features!
 
 The bbn framework works with a [router](https://github.com/nabab/bbn-router) and some configuration files. An [installer](https://www.youtube.com/watch?v=dQw4w9WgXcQ) will be released in 2022.
