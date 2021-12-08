@@ -55,6 +55,10 @@ bbn
 
 The bbn framework works with a [router](https://github.com/nabab/bbn-router) and some configuration files. An [installer](https://www.youtube.com/watch?v=dQw4w9WgXcQ) will be released in 2022.
 
+There is still a huge amount of work on code review, translation and documentation ahead.
+
+Any help is welcome!
+
 ### Typical installation structure:
 
 - app-ui/
@@ -126,15 +130,11 @@ They catch each local link clicked, send them as a POST request, then deal with 
 :arrow_right: Whatever output becomes the `content` property of the response object  
 :arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
 
-**Output returned:**  
+**Output**  
 
-- If it is a landing page (no POST) the property `content` will be returned with HTML headers
-- Otherwise the object `mvc->obj` will be returned encoded with JSON headers
-- If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers
-
-There is still a huge work of code review, translation and documentation ahead.
-
-Any help is welcome!
+:arrow_right:  If it is a landing page (no POST) the property `content` will be returned with HTML headers  
+:arrow_right:  Otherwise the object `mvc->obj` will be returned encoded with JSON headers  
+:arrow_right:  If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers  
 
 ## A few examples
 
