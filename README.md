@@ -93,7 +93,6 @@ They catch each local link clicked, send them as a POST request, then deal with 
 
 ### The JSON object returned by clicking a link typically holds the following properties:
 
-|||
 |---|---|
 |`content`|a HTML string, which will be injected into a container|
 |`title`|will be the new page's title, that will be prepended to the website's general title|
