@@ -1117,7 +1117,7 @@
                   {
                     "ext": "php",
                     "mode": "php",
-                    "default": "<?php\n\/*\n *  Describe what it does or you're a pussy\n *\n **\/"
+                    "default": "<?php\n\/*\n *  Describe what it does\n *\n **\/"
                   }
                 ]
               },

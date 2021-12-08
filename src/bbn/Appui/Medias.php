@@ -751,9 +751,8 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function getMediaPath(string $id_media, string $name = null)
   {
-    if ($media = $this->getMedia($id_media, true)) {
-      $content = json_decode($media['content'], true);
-      $path    = bbn\Mvc::getDataPath('appui-note').'media/'.$content['path'].$id_media.'/'.($name ? $name : $media['name']);
+    if ($media = $this->getMedia($id_media, true) && !empty($media['content'])) {
+      $path    = bbn\Mvc::getDataPath('appui-note').'media/'.$media['content']['path'].$id_media.'/'.($name ? $name : $media['name']);
       return $path;
     }
 
