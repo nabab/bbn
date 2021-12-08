@@ -100,6 +100,7 @@ They catch each local link clicked, send them as a POST request, then deal with 
 |`title`|will be the new page's title, that will be prepended to the website's general title|
 |`css`|a CSS string which will be put as a `<style/>` tag in the same container|
 |`script`|a javascript function which will either return:<br>- A function that will receive the container as argument and will be executed after the content injection<br>- An object that will be treated as a VueJS anonymous component inside the [router component](https://github.com/nabab/bbn-vue/blob/master/src/components/router/router.js)|
+|`data`|An object of data, [accessible by the javascript](#accessing-the-data-through-javascript)|
 
 ### Life cycle of a typical request
 
@@ -279,7 +280,7 @@ $ctrl->combo("My page title", ['my' => 'data']);
 
 ?>
 ```
-#### When the javascript can access the data, it will be differently available
+#### Accessing the data through javascript
 
 ##### If the anonymous function returns a **function**, the data will be its **second argument**
 
