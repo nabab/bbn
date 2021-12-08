@@ -100,9 +100,9 @@ They catch each local link clicked, send them as a POST request, then deal with 
 |`css`|a CSS string which will be put as a `<style/>` tag in the same container|
 |`script`|a javascript function which will either return:<br>- A function that will receive the container as argument and will be executed after the content injection<br>- An object that will be treated as a VueJS anonymous component inside the [router component](https://github.com/nabab/bbn-vue/blob/master/src/components/router/router.js)|
 
-### The life cycle of a typical call to a server with bbn works as follow:
+### Life cycle of a typical request
 
-#### The request redirection
+#### The redirection
 
 :arrow_right: Call to https://myapp.com/just/testing (which does not exist)  
 :arrow_right: An .htaccess file rewrites all the not found files to an index.php file  
@@ -130,8 +130,8 @@ They catch each local link clicked, send them as a POST request, then deal with 
 #### After the route is found
 
 :arrow_right: An optional file `src/custom1.php` is included with an object `$bbn` available with property `mvc`  
-:arrow_right: As we are not in CLI mode a session is started   
-:arrow_right: An optional file `src/custom2.php` is included with an object `$bbn` available with property `mvc`, `user` and `session` depending on the configuration  
+:arrow_right: If we are not in CLI mode a session is started   
+:arrow_right: Still not in CLI mode an optional file `src/custom2.php` is included with an object `$bbn` available with property `mvc`, `user` and `session` depending on the configuration  
 :arrow_right: The MVC includes the controller  
 :arrow_right: Whatever output becomes the `content` property of the response object  
 :arrow_right: An optional file `src/custom3.php` is included with an object `$bbn` available with the new property `obj` which will be the output  
@@ -321,6 +321,13 @@ $ctrl->combo("My page title", ['my' => 'data']);
 ### Option {#option}
 
 The option system is built in a database with a table having the following structure:
+
+<table>
+  <tr>
+    <td>Hello</td>
+    <td>World</td>
+  </tr>
+</table>
 
 
 - `id` is the primary key
