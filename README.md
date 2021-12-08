@@ -1,4 +1,5 @@
 
+
 <p  align="center"><img  alt="BBN PHP"  src="https://bbn.io/logo/black/text/php.svg"  style="max-width: 40%; height: auto"></p>
 
 bbn
@@ -93,7 +94,7 @@ They catch each local link clicked, send them as a POST request, then deal with 
 
 ### The JSON object returned by clicking a link typically holds the following properties:
 
-|Property|Description|
+|Name|Description|
 |---|---|
 |`content`|a HTML string, which will be injected into a container|
 |`title`|will be the new page's title, that will be prepended to the website's general title|
@@ -303,13 +304,13 @@ $ctrl->combo("My page title", ['my' => 'data']);
 })();
 ```
 
-##### Example of an HTML view (has access to all the data)
+##### Example of an HTML view
 
 ```html
 <div style="color: #{{color}}">Hello world</div>
 ```
 
-##### Example of a PHP view (has access to all the data)
+##### Example of a PHP view
 
 ```php
 <div style="color: #<?= $color ?>"><?= _("Hello world") ?></div>
@@ -322,33 +323,17 @@ $ctrl->combo("My page title", ['my' => 'data']);
 
 The option system is built in a database with a table having the following structure:
 
-<table>
-  <tr>
-    <td>Hello</td>
-    <td>World</td>
-  </tr>
-</table>
+|Name|Description|
+|---|---|
+|`id`|is the primary key|
+|`id_parent`|has a constraint to `id`. It is nullable but all options but one (the `root`) should have it set|
+|`text`|Is a string which should be the title of the option|
+|`code`|is a `varchar` which forms a unique key associated with `id_parent`, so 2 same codes can't co-exist with a same parent, except if they are `NULL`|
+|`num`|is the position of the option among its siblings, if the parent option is orderable|
+|`id_alias`|has also a constraint on `id` but is never mandatory. It is a reference to another option|
+|`value`|(JSON) is whatever properties the option will hold; when you get an option you won't see `value` but all the properties you will get which are not in the aforementioned columns come from `value`|
+|`cfg`|(JSON) is the configuration of the option defines how the children, or the whole tree below, will be fetched and displayed. The properties can be:<br>- `show_code`   The code matters<br>- `show_alias`  The alias might matter<br>- `show_value`  The value contains stuff and thre is no schema<br>- `orderable`   If true the num will be used for the options' order<br>- `schema`      An array of object describing the different properties held in value<br>- `language`    A language set so the options can be translated<br>- `children`    Allows the option to have children<br>- `inheritance` Sets if these rules apply to children, children + grand-children, or all lineage<br>- `permissions` True if the options below should have a permission<br>- `default`     The default value among the children<br>- `scfg`        A similar configuration object to apply to grand-children|
 
-
-- `id` is the primary key
-- `id_parent` has a constraint to `id`. It is nullable but all options but one (the `root`) should have it set
-- `text` Is a string which should be the title of the option
-- `code` is a `varchar` which forms a unique key associated with `id_parent`, so 2 same codes can't co-exist with a same parent, except if they are `NULL`
-- `num` is the position of the option among its siblings, if the parent option is orderable
-- `id_alias` has also a constraint on `id` but is never mandatory. It is a reference to another option
-- `value` (JSON) is whatever properties the option will hold; when you get an option you won't see `value` but all the properties you will get which are not in the aforementioned columns come from `value`
-- `cfg` (JSON) is the configuration of the option defines how the children, or the whole tree below, will be fetched and displayed. The properties can be:
-	- `show_code`   The code matters
-	- `show_alias`  The alias might matter
-	- `show_value`  The value contains stuff and thre is no schema
-	- `orderable`   If true the num will be used for the options' order
-	- `schema`      An array of object describing the different properties held in value
-	- `language`    A language set so the options can be translated
-	- `children`    Allows the option to have children
-	- `inheritance` Sets if these rules apply to children, children + grand-children, or all lineage
-	- `permissions` True if the options below should have a permission
-	- `default`     The default value among the children
-	- `scfg`        A similar configuration object to apply to grand-children
 
 The `code` system allows us to find an option just by its codes path.  
 For example the sequence of codes `permissions`, `ide`, `appui` targets:
