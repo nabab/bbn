@@ -275,7 +275,7 @@ When the javascript can access the data, it will be differently available:
 
 ### Options
 
-The option system is built in a database with a table with the following structure:
+The option system is built in a database with a table having the following structure:
 - `id` is the primary key
 - `id_parent` has a constraint to `id`. It is nullable but all options but one (the `root`) should have it set
 - `text` Is a string which should be the title of the option
@@ -284,18 +284,20 @@ The option system is built in a database with a table with the following structu
 - `id_alias` has also a constraint on `id` but is never mandatory. It is a reference to another option
 - `value` (JSON) is whatever properties the option will hold; when you get an option you won't see `value` but all the properties you will get which are not in the aforementioned columns come from `value`
 - `cfg` (JSON) is the configuration of the option defines how the children, or the whole tree below, will be fetched and displayed. The properties can be:
-	- `show_code`
-	- `show_alias`
-	- `show_value`
-	- `orderable`
-	- `schema`
-	- `language`
-	- `children`
-	- `inheritance`
-	- `scfg`
+	- `show_code`   The code matters
+	- `show_alias`  The alias might matter
+	- `show_value`  The value contains stuff and thre is no schema
+	- `orderable`   If true the num will be used for the options' order
+	- `schema`      An array of object describing the different properties held in value
+	- `language`    A language set so the options can be translated
+	- `children`    Allows the option to have children
+	- `inheritance` Sets if these rules apply to children, children + grand-children, or all lineage
+	- `permissions` True if the options below should have a permission
+	- `default`     The default value among the children
+	- `scfg`        A similar configuration object to apply to grand-children
 
-The code system allows us to find an option just by its codes path.
-For example the sequence of codes `permissions`, `ide`, `appui` targets the option:
+The `code` system allows us to find an option just by its codes path.  
+For example the sequence of codes `permissions`, `ide`, `appui` targets:
 - in the option which has code `appui` whose parent is the `root`
 - in the option which has code `ide`
 - the option which has code `permissions`
@@ -330,9 +332,9 @@ X::adump(
   $option->options($id_option),
   // All the option properties (but cfg)
   $option->fullOptions($id_option),
-  // Same as options but with an items property holding the descendency
+  // Same as options but with an items property holding the lineage
   $option->tree($id_option),
-  // Same as fullOptions but with an items property holding the descendency
+  // Same as fullOptions but with an items property holding the lineage
   $option->Fulltree($id_option),
   // Returns the code: permissions
   $option->code($id_option),
