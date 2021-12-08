@@ -347,7 +347,7 @@ For example the sequence of codes `permissions`, `ide`, `appui` targets:
 - in the option which has code `ide`
 - the option which has code `permissions`
 
-The order is reversed to go from the most precise to the most general when in fact the sequence is:
+The order is reversed to go from the most precise to the most general when in fact the sequence is:  
 `root` :arrow_right: `appui` :arrow_right: `ide` :arrow_right: `permissions`
 
 ```php
