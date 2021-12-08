@@ -128,9 +128,9 @@ They catch each local link clicked, send them as a POST request, then deal with 
 
 **Output returned:**  
 
-	- If it is a landing page (no POST) the property `content` will be returned with HTML headers
-	- Otherwise the object `mvc->obj` will be returned encoded with JSON headers
-	- If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers
+- If it is a landing page (no POST) the property `content` will be returned with HTML headers
+- Otherwise the object `mvc->obj` will be returned encoded with JSON headers
+- If there is no `content` in `obj` but there is `file` or `image` the response will be dealt accordingly with the corresponding headers
 
 There is still a huge work of code review, translation and documentation ahead.
 
