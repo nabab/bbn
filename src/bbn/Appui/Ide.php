@@ -218,11 +218,10 @@ class Ide
    */
   public function isComponentFromUrl(string $url)
   {
-    $ele = explode("/", $url);
-    if (is_array($ele)) {
-      if ($ele[2] === 'components') {
-        return true;
-      }
+    $bits = explode("/", $url);
+    $idx = array_search('components', $bits);
+    if (($idx > 1) && ($idx < (count($bits) - 2))) {
+      return true;
     }
 
     return false;
@@ -1557,7 +1556,6 @@ class Ide
     if (($rep = $this->repositoryFromUrl($url, true))
       && ($res = $this->getRootPath($rep['name']))
     ) {
-      $plugin = $this->isPlugin($res);
       //for analyze url for get tab , type etc..
       $bits = explode('/', substr($url, \strlen($rep['name']) + 1));
       //if is project get tabs or if is components or is mvc
@@ -1576,26 +1574,28 @@ class Ide
           $rep['tabs'] = $ptype['tabs'];
         }
       }
+      /*
+      elseif (!empty($rep['tabs'])) {
+        $rep['tabs'] = $rep['tabs'];
+      }*/
 
       $o            = [
         'mode' => false,
         'repository' => $rep,
         'tab' => false
       ];
-      $position_end = $bits[count($bits) - 2] === '_end_' ? count($bits) - 2 : false;
-      if (!empty($bits) && $position_end) {
+      $tab = array_pop($bits);
+      $end = array_pop($bits);
+      if ($end === '_end_') {
         // Tab's nane
         //case component or mvc
         if (!empty($rep['tabs']) && (end($bits) !== 'code')) {
           // Tab's nane
-          $tab = $bits[$position_end + 1];
-          unset($bits[$position_end + 1]);
           // File's name
-          $file_name = $bits[$position_end - 1];
-          unset($bits[$position_end - 1]);
-
-          unset($bits[$position_end]);
-          array_shift($bits);
+          $file_name = array_pop($bits);
+          if ($rep['alias_code'] === 'bbn-project') {
+            array_shift($bits);
+          }
           // File's path
           $file_path = implode('/', $bits);
           // Check if the file is a superior super-controller
@@ -1614,11 +1614,15 @@ class Ide
               $res .= 'mvc/';
             }
 
-            if (empty($this->isComponentFromUrl($url))) {
-              $res .= $tab['path'];
-            } elseif (!empty($this->isComponentFromUrl($url))) {
-              $res .= 'components/';
+            if ($rep['type'] !== 'components') {
+              if (empty($this->isComponentFromUrl($url))) {
+                $res .= $tab['path'];
+              }
+              else {
+                $res .= 'components/';
+              }
             }
+
 
             if (!empty($tab['fixed'])) {
               $res        .= $file_path . $tab['fixed'];
@@ -1646,11 +1650,10 @@ class Ide
           /*else {
             return false;
           }*/
-        } else {
-          unset($bits[$position_end + 1]);
+        }
+        else {
           // File's name
-          $file_name = $bits[$position_end - 1];
-          unset($bits[$position_end]);
+          $file_name = $tab;
           $res .= '/' . implode('/', $bits);
           if (is_array($rep)) {
             //temporaney for lib plugin
@@ -1676,6 +1679,7 @@ class Ide
         }
 
         $res = Str::parsePath($res);
+        //X::ddump($res, $tab, $bits, $rep);
         if ($obj) {
           $o['file'] = $res;
           return $o;

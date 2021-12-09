@@ -311,6 +311,7 @@ class Project extends bbn\Models\Cls\Db
             break;
           case 'cdn':
             $path = $this->getCdnPath();
+            $path .= $repository['path'];
             break;
           case 'data':
             $path = $this->getDataPath();
