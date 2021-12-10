@@ -198,10 +198,12 @@ class Ide
    * @param string $rep
    * @return bool
    */
-  public function isComponent(string $rep)
+  public function isComponent(string|array $rep)
   {
     //$rep = $this->repositories($rep);
-    $rep = $this->repository($rep);
+    if (is_string($rep)) {
+      $rep = $this->repository($rep);
+    }
     if ($rep && isset($rep['tabs']) && ($rep['alias_code'] === "components")) {
       return true;
     }
@@ -455,7 +457,7 @@ class Ide
     if (!empty($root) && !empty($bit_rep)) {
       $bits      = explode('/', $st);
       $part_bits = array_diff($bits, $bit_rep);
-      array_shift($part_bits);
+      //array_shift($part_bits);
       /** @var string $path The path that will be returned */
       $path = $root . '/' . implode('/', $part_bits);
       return Str::parsePath($path);
@@ -531,6 +533,7 @@ class Ide
       && !empty($real['repository'])
     ) {
       $this->_set_current_file($real['file']);
+      X::log([$url, $real['file'], self::$current_file, self::$current_id], 'load');
       $f = [
         'mode' => $real['mode'],
         'tab' => $real['tab'],
@@ -617,6 +620,11 @@ class Ide
    */
   public function save(array $file)
   {
+    if (empty($file['full_path'])) {
+      throw new \Exception(X::_("No file given to save"));
+    }
+
+    $file['full_path'] = str_replace('/_end_', '', $file['full_path']);
     if ($this->_set_current_file($this->decipherPath($file['full_path']))) {
       /*if ( $this->getOrigin() !== 'appui-ide' ){
         die(var_dump(self::$current_file, self::$current_id));
@@ -1586,13 +1594,13 @@ class Ide
       ];
       $tab = array_pop($bits);
       $end = array_pop($bits);
+      $file_name = array_pop($bits);
       if ($end === '_end_') {
         // Tab's nane
         //case component or mvc
         if (!empty($rep['tabs']) && (end($bits) !== 'code')) {
           // Tab's nane
           // File's name
-          $file_name = array_pop($bits);
           if ($rep['alias_code'] === 'bbn-project') {
             array_shift($bits);
           }
@@ -1603,7 +1611,7 @@ class Ide
           $tab       = $ssc['tab'];
           $o['tab']  = $tab;
           $file_path = $ssc['path'] . '/';
-          $i         = \bbn\X::find($rep['tabs'], ['url' => $tab]);
+          $i         = X::find($rep['tabs'], ['url' => $tab]);
           if ($i !== null) {
             if (!isset($rep['tabs'][$i])) {
               throw new \Error("No index corresponding to $i");
@@ -1653,8 +1661,7 @@ class Ide
         }
         else {
           // File's name
-          $file_name = $tab;
-          $res .= '/' . implode('/', $bits);
+          $res .= '/' . implode('/', $bits) . '/' . $file_name;
           if (is_array($rep)) {
             //temporaney for lib plugin
             if (!empty($rep['extensions'])) {
@@ -2678,7 +2685,7 @@ class Ide
     }
 
     self::$current_file = $file;
-    $this->realToUrl($file);
+    //$this->realToUrl($file);
     $this->_set_current_id();
     return self::$current_file;
   }

@@ -31,13 +31,6 @@ class Router
   use bbn\Models\Tts\Retriever;
 
   /**
-   * The path for the default controller.
-   *
-   * @var array
-   */
-  private static $_def = 'default';
-
-  /**
    * The list of types of controllers.
    *
    * @var array
@@ -911,6 +904,10 @@ class Router
       } elseif ($tmp === '.') {
         $tmp = '';
       }
+    }
+
+    if (!$file && !$plugin && !empty($this->_routes['force']) && ($this->_routes['force'] !== $path)) {
+      return $this->_find_controller(self::parse($this->_routes['force']), $mode);
     }
 
     /**

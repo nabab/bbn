@@ -913,11 +913,10 @@ class Mvc implements Mvc\Api
       $this->info['args'] = $arguments;
     }
 
-    if (!$this->controller) {
-      throw new \Exception(X::_('Controller is not set'));
+    if ($this->controller) {
+      $this->controller->reset($this->info);
     }
 
-    $this->controller->reset($this->info);
 
     return $this;
   }
@@ -1478,10 +1477,12 @@ class Mvc implements Mvc\Api
       $output = new Output($obj, $this->getMode());
       $output->run();
     } else {
-      header('HTTP/1.0 404 Not Found');
-      exit();
+      Output::statusHeader(404);
     }
   }
+
+
+
 
 
   /**

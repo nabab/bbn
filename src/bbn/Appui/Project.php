@@ -556,30 +556,50 @@ class Project extends bbn\Models\Cls\Db
       }
     }
 
-    if (isset($rep)) {
-      $res = $rep . '/src/';
 
+    if (isset($rep)) {
+      X::log([561, $file, $rep, $root], 'real');
+      $res = $rep . '/';
       $bits = explode('/', substr($file, \strlen($root)));
+      $filename  = array_pop($bits);
+      $extension = \bbn\Str::fileExt($filename);
+      $basename  = \bbn\Str::fileExt($filename, 1)[0];
       // MVC
       if (!empty($d['tabs'])) {
-        $tab_path = array_shift($bits);
-        $fn       = array_pop($bits);
-        $ext      = \bbn\Str::fileExt($fn);
-        $fn       = \bbn\Str::fileExt($fn, 1)[0];
+        // URL is interverted
+        if ($d['type'] === 'components') {
+          foreach ($d['tabs'] as $tab) {
+            foreach ($tab['extensions'] as $ext) {
+              if ($extension === $ext['ext']) {
+                $tab_path = $tab['url'];
+                break;
+              }
+            }
+
+            if (isset($tab_path)) {
+              break;
+            }
+          }
+        }
+        else {
+          $tab_path = array_shift($bits);
+          X::log([$tab_path, $bits], 'real');
+        }
+
         $res     .= implode('/', $bits);
-        foreach ($d['tabs'] as $k => $t) {
+        foreach ($d['tabs'] as $t) {
           if (
             empty($t['fixed'])
             && ($t['path'] === $tab_path . '/')
           ) {
-            $res .= "/$fn/$t[url]";
+            $res .= "/$filename";
             break;
           }
         }
       }
       // Normal file
       else {
-        $res .= implode('/', $bits);
+        $res .= implode('/', $bits) . '/' . $basename . '.' . $extension;
       }
 
       return \bbn\Str::parsePath($res);
