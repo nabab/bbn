@@ -552,6 +552,20 @@ class Email extends bbn\Models\Cls\Basic
   }
 
 
+  public function getLoginByEmailId($id) {
+    $cfg      = $this->class_cfg['arch']['users_emails'];
+    $table    = $this->class_cfg['tables']['users_emails'];
+    $em = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);
+    if ($em) {
+      $folder = $this->getFolder($em['id_folder']);
+      if ($folder
+          && ($mb = $this->getAccount($folder['id_account']))) {
+        return $mb;
+      }
+    }
+    return null;
+  }
+
   public function getEmail($id): ?array
   {
     $cfg      = $this->class_cfg['arch']['users_emails'];

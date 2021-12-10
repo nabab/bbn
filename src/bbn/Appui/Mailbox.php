@@ -806,7 +806,7 @@ class Mailbox extends bbn\Models\Cls\Basic
   {
     if ($msgnum && $this->_is_connected()) {
       try {
-        $res = imap_header($this->stream, $msgnum);
+        $res = imap_headerinfo($this->stream, $msgnum);
       }
       catch (\Exception $e) {
         throw new \Exception($e->getMessage().' '.(string)$msgnum);
