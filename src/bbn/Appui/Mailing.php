@@ -619,8 +619,9 @@ class Mailing extends bbn\Models\Cls\Db
   public function deleteEmail(string $id_email):? int
   {
     if (!empty($id_email)) {
-      return $this->db->delete('bbn_emails', ['id' => $id_email]);
+      return $this->db->delete('bbn_users_emails', ['id' => $id_email]);
     }
+    return 0;
   }
 
   /**
