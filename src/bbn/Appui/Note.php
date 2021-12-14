@@ -623,6 +623,19 @@ class Note extends bbn\Models\Cls\Db
    */
   public function insertOrUpdateUrl(string $id_note, string $url)
   {
+    if (!$this->exists($id_note)) {
+      throw new \Exception(
+        X::_(
+          "Impossible to retrieve the note with ID %s",
+          Str::isUid($id_note) ? $id_note : '[String (' . strlen($id_note) . ')]'
+        )
+        );
+    }
+
+    if ($url && substr($url, 0, 1) === '/') {
+      $url = substr($url, 1);
+    }
+
     if (!$this->hasUrl($id_note)) {
       return $this->db->insert(
         $this->class_cfg['tables']['url'],
@@ -640,7 +653,7 @@ class Note extends bbn\Models\Cls\Db
         $this->class_cfg['arch']['url']['id_note'] => $id_note
       ]
     );
-  }
+}
 
   /**
    * Deletes url for the given note.

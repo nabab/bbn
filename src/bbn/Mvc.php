@@ -489,27 +489,38 @@ class Mvc implements Mvc\Api
       return true;
     }
 
+    $has_allow_all   = false;
+    $auth_applicable = '';
     foreach ($this->authorized_routes as $ar) {
+      if ($ar === '*') {
+        $has_allow_all = true;
+        continue;
+      }
+
       if ((substr($ar, -1) === '*')
-          && (
-              (strlen($ar) === 1)
-              || (strpos($url, substr($ar, 0, -1)) === 0)
-          )
+          && (strpos($url, substr($ar, 0, -1)) === 0)
       ) {
-        if (in_array($url, $this->forbidden_routes, true)) {
+        if (strlen($ar) > strlen($auth_applicable)) {
+          $auth_applicable = substr($ar, 0, -1);
+        }
+      }
+    }
+
+    if ($auth_applicable || $has_allow_all) {
+      foreach ($this->forbidden_routes as $forbidden) {
+        if ((substr($forbidden, -1) === '*')
+            && (strpos($url, substr($forbidden, 0, -1)) === 0)
+            // Should be as or more precise
+            && (strlen($auth_applicable) < strlen($forbidden))
+        ) {
           return false;
         }
-
-        foreach ($this->forbidden_routes as $ar2) {
-          if ((substr($ar2, -1) === '*')
-              && (strpos($url, substr($ar2, 0, -1)) === 0)
-          ) {
-            return false;
-          }
+        elseif ($url === $forbidden) {
+          return false;
         }
-
-        return true;
       }
+
+      return true;
     }
 
     return false;
