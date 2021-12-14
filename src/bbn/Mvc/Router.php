@@ -151,6 +151,30 @@ class Router
 
 
   /**
+   * Gets the name that the checker file should have for the given known route.
+   *
+   * @param array $cfg
+   * @return string|null
+   */
+  public static function getCheckerFile(array $cfg): ?string
+  {
+    if (!empty($cfg['mode'])) {
+      if (\in_array($cfg['mode'], self::$_controllers, true)) {
+        return '_ctrl.php';
+      }
+      if ($cfg['mode'] === 'model') {
+        return '_model.php';
+      }
+      if (!empty($cfg['ext']) && ($cfg['ext'] === 'less')) {
+        return '_mixins.less';
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
    * Router constructor.
    *
    * @param bbn\Mvc $mvc
@@ -708,18 +732,7 @@ class Router
       self::$_known[$mode][$path] = $o;
       $s                          = &self::$_known[$mode][$path];
       // Defining the checker files' name according to the mode (controllers, Models and CSS)
-      if (\in_array($mode, self::$_controllers, true)) {
-        $checker_file = '_ctrl.php';
-      }
-      elseif (isset($o['ext'])) {
-        if ($o['ext'] === 'less') {
-          $checker_file = '_mixins.less';
-        }
-        elseif ($o['mode'] === 'model') {
-          $checker_file = '_model.php';
-        }
-      }
-
+      $checker_file = self::getCheckerFile($o);
       if (!empty($checker_file)) {
         // Looking for checker files in each parent directory
         $s['checkers'] = [];

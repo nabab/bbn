@@ -659,7 +659,7 @@ class Mvc implements Mvc\Api
   private function route($url = false)
   {
     if (\is_null($this->info)) {
-      $this->info = $this->getRoute($this->getUrl() ?? '', $this->getMode() ?? '');
+      $this->info = $this->getRoute($this->getUrl() ?: '', $this->getMode() ?: '');
     }
 
     return $this;
@@ -824,7 +824,7 @@ class Mvc implements Mvc\Api
    *
    * @return array|mixed|null
    */
-  public function getRoute(string $path, string $mode, $root = null)
+  public function getRoute(string $path, string $mode, $root = null): ?array
   {
     return $this->router->route($path, $mode, $root);
   }
