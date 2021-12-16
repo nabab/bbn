@@ -990,6 +990,7 @@ class Email extends bbn\Models\Cls\Basic
       $fields = ['to', 'cc', 'bcc'];
       $num    = 0;
       $dest   = [];
+      /*
       foreach ($fields as $field) {
         $dest[$field] = [];
         if (!empty($cfg[$field])) {
@@ -1001,8 +1002,9 @@ class Email extends bbn\Models\Cls\Basic
           }
         }
       }
+      */
   
-      if ($num && (!empty($cfg['title']) || !empty($cfg['text']))) {
+      if (!empty($cfg['title']) || !empty($cfg['text'])) {
         $mailer = $mb->getMailer();
         return $mailer->send($cfg);
       }
