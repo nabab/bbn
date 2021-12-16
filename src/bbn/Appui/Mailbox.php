@@ -3,6 +3,7 @@
 namespace bbn\Appui;
 
 use bbn;
+use bbn\Mail;
 use bbn\X;
 use bbn\Str;
 use HTMLPurifier_Config;
@@ -194,6 +195,21 @@ class Mailbox extends bbn\Models\Cls\Basic
     if ($this->stream) {
       imap_close($this->stream);
     }
+  }
+
+
+  public function getMailer(): Mail
+  {
+    if (!$this->mailer) {
+      $this->mailer = new Mail([
+        'host'  => $this->host,
+        'login' => $this->login,
+        'pass'  => $this->pass,
+        'type'  => $this->type
+      ]);
+    }
+
+    return $this->mailer;
   }
 
 

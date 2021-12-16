@@ -5,6 +5,7 @@ use bbn;
 use bbn\X;
 use bbn\Str;
 use bbn\User;
+use bbn\Appui\Mailbox;
 
 class Email extends bbn\Models\Cls\Basic
 {
@@ -106,7 +107,7 @@ class Email extends bbn\Models\Cls\Basic
   }
 
 
-  public function getMailbox(string $id_account)
+  public function getMailbox(string $id_account): Mailbox
   {
     if (!isset($this->mboxes[$id_account])) {
       $this->getAccount($id_account);
@@ -117,7 +118,7 @@ class Email extends bbn\Models\Cls\Basic
       if (!isset($mb['mailbox'])) {
         $cfg           = $this->mboxes[$id_account];
         $cfg['pass']   = $this->_get_password()->userGet($id_account, $this->user);
-        $mb['mailbox'] = new bbn\Appui\Mailbox($cfg);
+        $mb['mailbox'] = new Mailbox($cfg);
       }
 
       if (isset($mb['mailbox'])) {
@@ -189,8 +190,8 @@ class Email extends bbn\Models\Cls\Basic
 
   public function checkConfig($cfg): bool
   {
-    if (X::hasProps(['login', 'pass', 'type'], true)) {
-      $mb = new bbn\Appui\Mailbox($cfg);
+    if (X::hasProps($cfg, ['login', 'pass', 'type'], true)) {
+      $mb = new Mailbox($cfg);
       return $mb->check();
     }
   }
@@ -280,7 +281,7 @@ class Email extends bbn\Models\Cls\Basic
   public function createFolder(string $id_account, string $name, string $id_parent = null): bool
   {
 
-    $this->createFolderDb($id, $id_parent);
+    $this->createFolderDb($id_account, $id_parent);
   }
 
 
@@ -598,7 +599,7 @@ class Email extends bbn\Models\Cls\Basic
           $cfg['msg_unique_id'] => $email['message_id']
         ]
       );
-      foreach (bbn\Appui\MailboX::getDestFields() as $df) {
+      foreach (Mailbox::getDestFields() as $df) {
         if (!empty($email[$df])) {
           foreach ($email[$df] as &$dest) {
             if ($id = $this->retrieveEmail($dest['email'])) {
@@ -674,7 +675,7 @@ class Email extends bbn\Models\Cls\Basic
         }
 
         if ($id) {
-          foreach (bbn\Appui\MailboX::getDestFields() as $df) {
+          foreach (Mailbox::getDestFields() as $df) {
             if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {
               foreach ($email[$df] as $dest) {
                 if (!empty($dest['id'])) {
@@ -978,6 +979,34 @@ class Email extends bbn\Models\Cls\Basic
     }
 
     return null;
+  }
+
+
+  public function send(string $id_account, array $cfg): int
+  {
+    if ($mb = $this->getMailbox($id_account)) {
+      $fields = ['to', 'cc', 'bcc'];
+      $num    = 0;
+      $dest   = [];
+      foreach ($fields as $field) {
+        $dest[$field] = [];
+        if (!empty($cfg[$field])) {
+          foreach ($cfg[$field] as $d) {
+            if (Str::isEmail($d)) {
+              $dest[$field][] = $d;
+              $num++;
+            }
+          }
+        }
+      }
+  
+      if ($num && (!empty($cfg['title']) || !empty($cfg['text']))) {
+        $mailer = $mb->getMailer();
+        return $mailer->send($cfg);
+      }
+    }
+
+    throw new \Exception(X::_("Impossible to find the mailbox"));
   }
 
 
