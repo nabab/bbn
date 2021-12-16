@@ -579,7 +579,9 @@ class Email extends bbn\Models\Cls\Basic
           && $mb->selectFolder($folder['uid'])
           && ($number = $mb->getMsgNo($em['msg_uid']))
       ) {
-        return $mb->getMsg($number);
+        $arr = $mb->getMsg($number);
+        $arr['id_account'] = $folder['id_account'];
+        return $arr;
       }
     }
     return null;
