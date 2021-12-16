@@ -5,6 +5,8 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use HTMLPurifier_Config;
+use HTMLPurifier;
 
 class Mailbox extends bbn\Models\Cls\Basic
 {
@@ -634,7 +636,12 @@ class Mailbox extends bbn\Models\Cls\Basic
       }
     }
 
-    $res['html']       = $this->_htmlmsg;
+    if ($res['html'] = $this->_htmlmsg) {
+      $config      = HTMLPurifier_Config::createDefault();
+      $purifier    = new HTMLPurifier($config);
+      $res['html'] =  $purifier->purify(quoted_printable_decode($res['html']));
+    }
+
     $res['plain']      = $this->_plainmsg;
     $res['charset']    = $this->_charset;
     $res['attachment'] = $this->_attachments;

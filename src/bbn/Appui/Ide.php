@@ -215,6 +215,7 @@ class Ide
   /**
    * Checks if a repository is a Component from URL
    *
+   * @todo This is wrong as it will return true if a file or a folder are called components
    * @param string $url
    * @return bool
    */
