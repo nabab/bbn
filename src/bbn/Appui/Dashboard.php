@@ -938,6 +938,17 @@ class Dashboard
                 $o = X::mergeArrays($o, $widgetPrefs[$o['key']]);
               }
 
+              // Parse JSON properties
+              if (Str::isJson($o['buttonsRight'])) {
+                $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
+              }
+              if (Str::isJson($o['buttonsLeft'])) {
+                $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
+              }
+              if (Str::isJson($o['buttonsRight'])) {
+                $o['options'] = \json_decode($o['options'], true);
+              }
+
               if (!isset($o['hidden'])) {
                 $o['hidden'] = false;
               }
