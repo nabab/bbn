@@ -103,5 +103,16 @@
         "id_option": ["services", "widgets", "appui-dashboard", "plugins", "server", "appui"]
       }
     ]
+  },
+  {
+    "text": "Databases",
+    "code": "appui-database",
+    "id_option": ["list", "appui-dashboard", "plugins", "database", "appui"],
+    "items": [
+      {
+        "code": "databases",
+        "id_option": ["databases", "widgets", "appui-dashboard", "plugins", "database", "appui"]
+      }
+    ]
   }
 ]
