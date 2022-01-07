@@ -82,15 +82,43 @@ class Medias extends bbn\Models\Cls\Db
   protected $class_cfg;
 
   /** @var string $imageRoot */
-  protected static $imageRoot;
+  protected $imageRoot;
 
-  public static function getImageUrl(string $id = null): string
+  public function setImageRoot(string $root): bool
   {
-    if (!self::$imageRoot) {
-      self::$imageRoot = bbn\Mvc::getPluginUrl('appui-note').'/media/image/';
+    if ($root) {
+      if (substr($root, -1) !== '/') {
+        $root .= '/';
+      }
+
+      $this->imageRoot = $root;
+      return true;
     }
 
-    return self::$imageRoot. (string)$id;
+    return false;
+    
+  }
+
+  public function getImageUrl(string $id = null): string
+  {
+    if ($this->exists($id)) {
+      if (!$this->imageRoot) {
+        $this->imageRoot = bbn\Mvc::getPluginUrl('appui-note').'/media/image/';
+      }
+
+      $cfg = $this->getClassCfg();
+      $url = $this->db->selectOne(
+        $cfg['tables']['medias_url'],
+        $cfg['arch']['medias_url']['url'],
+        [$cfg['arch']['medias_url']['id_media'] => $id]
+      );
+
+      if ($url) {
+        return $url;
+      }
+
+      return $this->imageRoot . (string)$id;
+    }
   }
 
   public function __construct(bbn\Db $db)
@@ -769,7 +797,7 @@ class Medias extends bbn\Models\Cls\Db
       $full_path = $this->getPath($data);
       $data['file'] = $full_path;
       $data['full_path'] = $this->getThumbPath($full_path);
-      $data['path'] = self::getImageUrl($data['id']);
+      $data['path'] = $this->getImageUrl($data['id']);
       $data['is_image'] = $this->isImage($full_path);
       if ($data['is_image']) {
         $d['thumbs'] = $this->getThumbsSizes($data);
