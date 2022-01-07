@@ -65,7 +65,7 @@ class Date
    * @param string $mode
    * @return false|int|string
    */
-  public static function format($date='', $mode='')
+  public static function format($date='', $mode='', ?string $locale = null)
 	{
 		/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time */
 		if ( empty($date) ){
@@ -77,7 +77,7 @@ class Date
 		else{
 			$idate = strtotime($date);
     }
-		$is_windows = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? true : false;
+
 		if ( $idate )
 		{
 			/* Getting the time difference */
@@ -95,57 +95,113 @@ class Date
         $date_ok = date('Y-m-d H:i:s', $idate);
       }
       else if ( $mode === 'm' ){
-        $date_ok = $is_windows ? strftime("%m", $idate) : strftime("%B", $idate);
+        $date_ok = self::intlDateFormat('MMMM', $idate, $locale);
       }
       else if ( $mode === 'my' ){
-        $date_ok = $is_windows ? strftime("%m %Y", $idate) : strftime("%B %Y", $idate);
+        $date_ok = self::intlDateFormat('MMMM yyyy', $idate, $locale);
       }
 			else if ( $mode === 'wsdate' || $mode === 's' ){
 				if ( $is_today && !$only_date ){
-          $date_ok = strftime('%H:%M', $idate);
+          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);
         }
 				else{
-          $date_ok = $is_windows ? strftime('%d/%m/%y', $idate) : strftime('%x', $idate);
+          $date_ok = self::intlDateFormat('dd/MM/yyyy', $idate, $locale);
         }
 			}
 			else if ( $mode == 'r' ){
 				if ( $is_today && !$only_date ){
-          $date_ok = strftime('%R', $idate);
+          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);
         }
 				else{
-          $date_ok = $is_windows ? utf8_encode(strftime('%#d %b %Y', $idate)) : strftime('%e %b %Y', $idate);
+          $date_ok = self::intlDateFormat('d MMM yyyy', $idate, $locale);
         }
 			}
 			else if ( $mode == 'js' ){
         $date_ok = date('D M d Y H:i:s O', $idate);
 			}
       else if ( ($mode === 'wdate') || ($mode === 'wdate') ){
-        $date_ok = $is_windows ? utf8_encode(strftime('%A %#d %B %Y', $idate)) : strftime('%A %e %B %Y', $idate);
+        $date_ok = self::intlDateFormat('EEEE d MMMM yyyy', $idate, $locale);
         if ( !$only_date && ($mode !== 'notime') ){
-          $date_ok .= ', '.strftime('%H:%M', $idate);
+          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);
         }
       }
       else {
-        $date_ok = $is_windows ? utf8_encode(strftime('%#d %B %Y', $idate)) : strftime('%e %B %Y', $idate);
+        $date_ok = self::intlDateFormat('d MMMM yyyy', $idate, $locale);
         if ( !$only_date && ($mode !== 'notime') ){
-          $date_ok .= ', '.strftime('%H:%M', $idate);
+          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);;
         }
       }
 			return $date_ok;
 		}
 	}
-  
-  public static function monthpickerOptions($val='')
+
+  /**
+   * @param $val
+   * @param string|null $local
+   *
+   * @return string
+   */
+  public static function monthpickerOptions($val = '', ?string $local = null)
   {
     $arr = [];
-    for ( $i = 1; $i <= 12; $i++ ){
-      $arr[$i] = self::monthName($i);
+    for ( $i = 1; $i <= 12; $i++ ) {
+      $arr[$i] = self::monthName($i, $local);
     }
+
     return X::buildOptions($arr, $val);
   }
-  
-  public static function monthName($m){
-    return self::isWindows() ? strftime("%m", strtotime("2012-$m-01")) : strftime("%B", strtotime("2012-$m-01"));
+
+  /**
+   * @param $m
+   * @param string|null $local
+   *
+   * @return false|string
+   */
+  public static function monthName($m, ?string $local = null)
+  {
+    return self::intlDateFormat('MMMM', strtotime("2012-$m-01"), $local);
+  }
+
+  /**
+   * @param string $format
+   * @param int $timestamp
+   * @param string|null $local
+   * @return false|string
+   */
+  public static function intlDateFormat(string $format, int $timestamp, ?string $local = null)
+  {
+    if (!extension_loaded('intl')) {
+      $formats_map = [
+        'MMMM' => 'F', // January
+        'd MMMM yyyy' => 'j F Y', // 8 December 2021
+        'EEEE d MMMM yyyy' => 'l j F Y', // Wednesday 8 December 2021
+        'd MMM yyyy' => 'j M Y', // 8 Dec 2021
+        'MMMM yyyy' => 'F Y', // December 2021
+        'dd/MM/yyyy' => 'd/m/Y', // 08/09/2021
+        'kk:mm' => 'H:i' // 09:09 or 14:10
+      ];
+
+      if (array_key_exists($format, $formats_map)) {
+        $format = $formats_map[$format];
+      }
+
+      return date($format, $timestamp);
+    }
+
+    if (!$local && defined('BBN_LOCALE')) {
+      $local = BBN_LOCALE;
+    }
+
+    $formatter = new \IntlDateFormatter(
+      $local,
+      \IntlDateFormatter::LONG,
+      \IntlDateFormatter::LONG,
+      null,
+      null,
+      $format
+    );
+
+    return $formatter->format($timestamp);
   }
 
   /**
@@ -174,4 +230,3 @@ class Date
   }
 
 }
-?>

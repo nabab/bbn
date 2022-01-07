@@ -643,10 +643,43 @@
                       {
                         "text": "Databases",
                         "code": "databases",
-                        "limit":5,
                         "observe":false,
                         "closable":true,
-                        "itemComponent": "appui-database-widget-database"
+                        "itemComponent": "appui-database-widget-database",
+                        "limit": 10
+                      },
+                      {
+                        "text": "MySQL Databases",
+                        "code": "dbs_mysql",
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent": "appui-database-widget-database",
+                        "limit": 10
+                      },
+                      {
+                        "text": "MySQL Hosts",
+                        "code": "hosts_mysql",
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent": "appui-database-widget-database",
+                        "limit": 10,
+                        "buttonsRight": "[{\"text\":\"Add a new MySQL host\",\"icon\":\"nf nf-fa-plus\",\"action\":\"addMysqlHost\"}]"
+                      },
+                      {
+                        "text": "SQLite Databases",
+                        "code": "dbs_sqlite",
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent": "appui-database-widget-database",
+                        "limit": 10
+                      },
+                      {
+                        "text": "Tables",
+                        "code": "tables",
+                        "observe":false,
+                        "closable":true,
+                        "itemComponent": "appui-database-widget-database",
+                        "limit": 10
                       }
                     ]
                   }
