@@ -85,12 +85,22 @@ class Email extends bbn\Models\Cls\Basic
   protected $pw;
 
 
+  /**
+   * Returns a list typical folder types as they are recorded in the options
+   *
+   * @return array
+   */
   public static function getFolderTypes(): array
   {
     return self::getOptions('folders');
   }
 
 
+  /**
+   * Returns a list of typical email accounts types as they are recorded in the options
+   *
+   * @return array
+   */
   public static function getAccountTypes(): array
   {
     return self::getOptions('types');
@@ -437,7 +447,6 @@ class Email extends bbn\Models\Cls\Basic
       if ($folder['last_uid'] && ($folder['last_uid'] !== $folder['db_uid'])) {
         $mb = $this->getMailbox($folder['id_account']);
         if ($mb->selectFolder($folder['uid'])) {
-          $start = 1;
           if (!empty($folder['db_uid'])) {
             try {
               $start = $mb->getMsgNo($folder['db_uid']);
@@ -445,6 +454,10 @@ class Email extends bbn\Models\Cls\Basic
             catch (\Exception $e) {
               $start = 1;
             }
+          }
+
+          if (empty($start)) {
+            $start = 1;
           }
           $real_end = 1;
           if (!empty($folder['last_uid'])) {
@@ -474,6 +487,7 @@ class Email extends bbn\Models\Cls\Basic
               $start += 1000;
               //var_dump($start, $end);
               foreach ($all as $a) {
+                X::log($a, 'mail');
                 if ($this->insertEmail($folder, $a)) {
                   $res++;
                 }
@@ -657,14 +671,14 @@ class Email extends bbn\Models\Cls\Basic
           $cfg['msg_unique_id'] => $email['message_id'],
           $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),
           $cfg['id_sender'] => $id_sender,
-          $cfg['subject'] => empty($email['subject']) ? '' : mb_decode_mimeheader($email['subject']),
+          $cfg['subject'] => $email['subject'] ?: '',
           $cfg['size'] => $email['Size'],
           $cfg['attachments'] => empty($email['attachments']) ? null : json_encode($email['attachments']),
           $cfg['flags'] => $email['Flagged'] ?: null,
           $cfg['is_read'] => $email['Unseen'] ? 0 : 1,
           $cfg['id_parent'] => $id_parent,
           $cfg['id_thread'] => $id_thread,
-          $cfg['external_uids'] => json_encode($external)
+          $cfg['external_uids'] => $external ? json_encode($external) : null
         ];
         $id = false;
         if ($existing) {
@@ -705,7 +719,7 @@ class Email extends bbn\Models\Cls\Basic
       $table_links = $this->class_cfg['tables']['users_contacts_links'];
       if ($this->db->insert($table_contacts, [
         $cfg_contacts['id_user']   => $this->user->getId(),
-        $cfg_contacts['name']      => $dest['name'] ?? null,
+        $cfg_contacts['name']      => empty($dest['name']) ? null : mb_substr($dest['name'], 0, 100),
         $cfg_contacts['blacklist'] => $blacklist ? 1 : 0
       ])) {
         $id_contact = $this->db->lastId();

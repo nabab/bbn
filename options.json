@@ -2540,10 +2540,23 @@
                 "code": "personal"
               },
               {
+                "text": "Post",
+                "code": "post"
+              },
+              {
+                "text": "Products",
+                "code": "products"
+              },
+              {
                 "text": "Tasks",
                 "code": "tasks"
               }
             ]
+          },
+          {
+            "text": "Bookmarks",
+            "code": "bookmarks",
+            "icon": "nf nf-oct-bookmark"
           },
           {
             "cfg": {

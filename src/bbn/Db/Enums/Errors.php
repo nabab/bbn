@@ -7,6 +7,10 @@ class Errors
   /**
    * The error configuration for continuing after an error occurred
    */
+  public const E_EXCEPTION = 'exception';
+  /**
+   * The error configuration for continuing after an error occurred
+   */
   public const E_CONTINUE = 'continue';
 
   /**

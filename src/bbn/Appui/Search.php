@@ -185,7 +185,26 @@ class Search
           $content = $wrapper($search_value);
 
           if (is_array($content)) {
-            $result[] = array_merge($content, [
+            if (!empty($content['regex'])) {
+              if (!preg_match($content['regex'], $search_value)) {
+                continue;
+              }
+            }
+
+            if (!empty($content['alternates'])) {
+              $alts = $content['alternates'];
+              unset($content['alternates']);
+              foreach ($alts as $i => $alt) {
+                $tmp = $content;
+                $tmp['cfg'] = X::mergeArrays($tmp['cfg'], $alt);
+                $result[] = X::mergeArrays($tmp, [
+                  'file' => $item['file'] ?? null,
+                  'signature' => ($item['signature'] ?? '') . '-' . ($i + 1)
+                ]);
+              }
+            }
+
+            $result[] = X::mergeArrays($content, [
               'file' => $item['file'] ?? null,
               'signature' => $item['signature'] ?? null
             ]);
@@ -210,7 +229,7 @@ class Search
    * @return array
    * @throws \Exception
    */
-  public function get(string $search_value, int $step = 0): array
+  public function get(string $search_value, int $step = 0, $start = 0, $limit = 100): array
   {
     $cache_name = sprintf($this->search_cache_name, $search_value);
 
@@ -273,18 +292,36 @@ class Search
 
     //X::ddump($config_array, "DDDD", $this->executeFunctions($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
-    for ($i = $step; $i < $num_cfg; $i++) {
-      $item = $config_array[$i];
+    if (!$start && !$step) {
+      array_walk($config_array, function ($a) {
+        $a['cfg']['start'] = 0;
+      });
+    }
 
-      if (empty($item['cfg'])) {
+    for ($i = $step; $i < $num_cfg; $i++) {
+      if (empty($config_array[$i]['cfg'])) {
         continue;
       }
 
+      $item = $config_array[$i];
+      $item['cfg']['limit'] = $limit - count($results['data']);
       if ($search_results = $this->db->rselectAll($item['cfg'])) {
+        array_walk($search_results, function (&$a) use ($item) {
+          $a['score'] = $item['score'];
+          if (!empty($item['component'])) {
+            $a['component'] = $item['component'];
+          }
+        });
         $results['data'] = array_merge($results['data'], $search_results);
+
+        if (count($search_results) === $item['cfg']['limit']) {
+          $config_array[$i]['cfg']['start'] += $item['cfg']['limit'];
+          // So the loop doesn't go on
+          $num_cfg = $i;
+        }
       }
 
-      if ($this->timer->measure('search') > ($this->time_limit/1000)) {
+      if ($this->timer->measure('search') > ($this->time_limit / 1000)) {
         // If time limit has passed then return the result and the index of the next step
         $this->timer->stop('search');
         if (isset($config_array[$i + 1])) {
@@ -295,6 +332,7 @@ class Search
       }
     }
 
+    $this->cacheSet($this->user->getId(), $cache_name, $config_array);
     return $results;
   }
 

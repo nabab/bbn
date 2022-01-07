@@ -1,9 +1,23 @@
 <?php
+/**
+ * This class creates daily statistics in the database, and extracts series for displaying graphs.
+ * The list of statistic is based on the options in appui > statistics > active; 
+ * The statistic system uses the history system to determine and store values of the past.
+ * For counting the number of elements in a table on a given day the class will check:
+ *  - that the latest creation event (INSERT/RESTORE) happened before the given day
+ *  - while there has not been posterior deletion (DELETE) before the given day
+ * If there are filters with value, for each of them the class will also check:
+ *  - if the column had not been changed to that value after the given day
+ *  - if the column with a different value had that value before the given day
+ * Therefore a lot of JOINs are added to each request and the filling of the table can take a long time
+ */
 
 namespace bbn\Appui;
 
 use bbn;
+use Exception;
 use bbn\X;
+use bbn\Str;
 class Statistic extends bbn\Models\Cls\Db
 {
   use bbn\Models\Tts\Optional;
@@ -69,24 +83,24 @@ class Statistic extends bbn\Models\Cls\Db
   protected string $code;
 
   /**
-   * @var string The UID of the user inserting.
+   * @var string When stat by user the UID of the user inserting.
    */
   protected ?string $inserter = null;
 
   /**
-   * @var string The UID of the user updating.
+   * @var string When stat by user the UID of the user updating.
    */
   protected ?string $updater = null;
 
   /**
-   * @var string The UID of the user deleting.
+   * @var string When stat by user the UID of the user deleting.
    */
   protected ?string $deleter = null;
 
   /**
    * @var string The UID.
    */
-  private string $_id_field;
+  private ?string $_id_field;
 
   /**
    * @var string The expression that will be used as placeholder for the timestamps
@@ -107,58 +121,74 @@ class Statistic extends bbn\Models\Cls\Db
     parent::__construct($db);
     self::optionalInit();
     // Db ok
-    if ($this->db->check()
-        // History ok
-        && History::isInit()
-        // Id option corresponding to code in active statistics
-        && ($this->id_option = self::getOptionId($code, 'active'))
-        // Option retrieved
-        && ($this->ocfg = self::getOption($this->id_option))
-    ) {
-      if (X::hasProps($cfg, ['type', 'table'], true)
-          // And right types
-          && X::is_string($cfg['type'], $cfg['table'])
-          // Correcting case
-          && ($cfg['type'] = strtolower($cfg['type']))
-          // Type accepted
-          && (X::indexOf(self::$types, $cfg['type']) > -1)
-          // History config retrieved
-          && ($this->hcfg = History::getTableCfg($cfg['table']))
-      ) {
-        if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
-          throw new \Error(X::_("The field parameter is mandatory for sum and avg types"));
-        }
+    if (!$this->db->check()) {
+      throw new Exception(X::_("The database is in error mode"));
+    }
 
-        $this->code = $code;
-        $this->dbo  = new \bbn\Appui\Database($this->db);
-        if (isset($cfg['field'])) {
-          if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {
-            throw new \Error(X::_("The field parameter must be a known field of the table"));
-          }
-        }
+    // History ok
+    if (!History::isInit()) {
+      throw new Exception(X::_("History is disabled"));
+    }
 
-        if (($cfg['type'] === 'update') && empty($this->_id_field)) {
-          throw new \Error(X::_("The field parameter is mandatory for statistics of type update"));
-        }
+    // Option found
+    if (!($this->id_option = self::getOptionId($code, 'active'))) {
+      throw new Exception(X::_("No id option corresponding to code in active statistics"));
+    }
 
-        $this->type = $cfg['type'];
-        $this->cfg  = $cfg;
-        if (!empty($cfg['inserter']) && bbn\Str::isUid($cfg['inserter'])) {
-          $this->inserter = $cfg['inserter'];
-        }
+    // Cfg retrieved
+    if (!($this->ocfg = self::getOption($this->id_option))) {
+      throw new Exception(X::_("No cfg option corresponding to id in active statistics"));
+    }
 
-        if (!empty($cfg['updater']) && bbn\Str::isUid($cfg['updater'])) {
-          $this->updater = $cfg['updater'];
-        }
+    // Params ok
+    if (!X::hasProps($cfg, ['type', 'table'], true) || !X::is_string($cfg['type'], $cfg['table'])) {
+      throw new Exception(X::_("Invalid configuration"));
+    }
+    // Correcting case
+    $cfg['type'] = strtolower($cfg['type']);
 
-        if (!empty($cfg['deleter']) && bbn\Str::isUid($cfg['deleter'])) {
-          $this->deleter = $cfg['deleter'];
-        }
+    // Type accepted
+    if (X::indexOf(self::$types, $cfg['type']) === -1) {
+      throw new Exception(X::_("Invalid type in configuration"));
+    }
 
-        $req          = $this->_set_request_cfg();
-        $this->db_cfg = $this->db->processCfg($req);
+    // History config retrieved
+    if ($this->hcfg = History::getTableCfg($cfg['table'])) {
+      // For sum and avg types field is mandatory
+      if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {
+        throw new Exception(X::_("The field parameter is mandatory for sum and avg types"));
       }
 
+      $this->code = $code;
+      $this->dbo  = new \bbn\Appui\Database($this->db);
+      if (isset($cfg['field'])) {
+        if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {
+          throw new Exception(X::_("The field parameter must be a known field of the table (asked %s in %s)", $cfg['field'], $cfg['table']));
+        }
+      }
+
+      if (($cfg['type'] === 'update') && empty($this->_id_field)) {
+        throw new Exception(X::_("The field parameter is mandatory for statistics of type update"));
+      }
+
+      $this->type = $cfg['type'];
+      $this->cfg  = $cfg;
+      if (!empty($cfg['inserter']) && bbn\Str::isUid($cfg['inserter'])) {
+        $this->inserter = $cfg['inserter'];
+      }
+
+      if (!empty($cfg['updater']) && bbn\Str::isUid($cfg['updater'])) {
+        $this->updater = $cfg['updater'];
+      }
+
+      if (!empty($cfg['deleter']) && bbn\Str::isUid($cfg['deleter'])) {
+        $this->deleter = $cfg['deleter'];
+      }
+
+      // Creating the configuration
+      $req          = $this->_set_request_cfg();
+      X::log([$cfg, $req], 'stat');
+      $this->db_cfg = $this->db->processCfg($req);
     }
         // Right props in cfg
   }
@@ -205,7 +235,7 @@ class Statistic extends bbn\Models\Cls\Db
       }
 
       if (!$start || !is_int($start)) {
-        throw new Error(X::_('Impossible to read the given start date'));
+        throw new Exception(X::_('Impossible to read the given start date'));
       }
 
       if (!$this->is_total) {
@@ -214,7 +244,7 @@ class Statistic extends bbn\Models\Cls\Db
         }
 
         if (!$end || !is_int($end)) {
-          throw new Error(X::_('Impossible to read the given end date'));
+          throw new Exception(X::_('Impossible to read the given end date'));
         }
       }
 
@@ -261,7 +291,7 @@ class Statistic extends bbn\Models\Cls\Db
         }
       }
 
-      if (\bbn\Str::isDateSql($real_start)) {
+      if (Str::isDateSql($real_start)) {
         $num_days  = 0;
         $num       = $this->db->count(
           'bbn_statistics',
@@ -284,12 +314,14 @@ class Statistic extends bbn\Models\Cls\Db
         $test      = date('Ymd', $time);
         while ($test <= $today) {
           $res = $this->run($real_start);
+          /*
           if ($num_days) {
             X::hdump($res, $this->db->getLastValues());
           }
           else {
             X::hdump($res, $this->db->last(), $this->db->getLastValues());
           }
+          */
 
           $num_days++;
           if (!$res) {
@@ -624,6 +656,11 @@ class Statistic extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * Creates the proper request parameters from the current configuration
+   *
+   * @return array|null
+   */
   private function _set_request_cfg(): ?array
   {
     if ($this->type) {
@@ -657,7 +694,7 @@ class Statistic extends bbn\Models\Cls\Db
           ];
         }
         else {
-          $alias                        = \bbn\Str::genpwd(12);
+          $alias                        = Str::genpwd(12);
           $cfg['join'][]                = [
             'table' => 'bbn_history',
             'alias' => $alias,
@@ -728,7 +765,7 @@ class Statistic extends bbn\Models\Cls\Db
 
   private function _set_count_cfg(array &$cfg): array
   {
-    $alias         = \bbn\Str::genpwd(12);
+    $alias         = Str::genpwd(12);
     $cfg['fields'] = ['COUNT(DISTINCT bbn_history.uid)'];
     $cfg['join'][] = [
       'table' => 'bbn_history',
@@ -776,7 +813,7 @@ class Statistic extends bbn\Models\Cls\Db
 
   private function _set_fn_cfg($fn, array &$cfg): array
   {
-    $alias         = \bbn\Str::genpwd(12);
+    $alias         = Str::genpwd(12);
     $alias1        = bbn\Str::genpwd(12);
     $alias2        = bbn\Str::genpwd(12);
     $field         = $this->db->cfn($this->cfg['field'], $this->cfg['table'], true);
@@ -900,11 +937,11 @@ class Statistic extends bbn\Models\Cls\Db
   private function _set_update_cfg(array &$cfg)
   {
     if (empty($this->cfg['field'])) {
-      throw new \Error(X::_("The parameters field and value must be given for update statistics"));
+      throw new Exception(X::_("The parameters field and value must be given for update statistics"));
     }
 
     if (!$this->_id_field) {
-      throw new \Error(X::_("The parameters field must be a valid column from the given table"));
+      throw new Exception(X::_("The parameters field must be a valid column from the given table"));
     }
 
     $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];

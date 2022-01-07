@@ -2015,7 +2015,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $q['exe_time'] = microtime(true) - $time;
         }
       }
-      catch (\PDOException $e){
+      catch (\PDOException $e) {
         $this->error($e);
       }
 

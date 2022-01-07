@@ -649,9 +649,11 @@ class Database extends bbn\Models\Cls\Cache
 
     $c = $this->db->csn($column);
     $t = $this->db->tsn($table);
-    if (Str::isUid($db)
-        && ($tmp = $this->o->fromCode($c, 'columns', $t, 'tables', $db))
-    ) {
+    if (!Str::isUid($db)) {
+      $db = $this->dbId($db);
+    }
+
+    if (Str::isUid($db) && ($tmp = $this->o->fromCode($c, 'columns', $t, 'tables', $db))) {
       $res = $tmp;
     }
 

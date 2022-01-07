@@ -390,6 +390,24 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
+   * Changes the type of the note
+   *
+   * @param string $id_note
+   * @param string $type
+   * @return null|int The number of affected rows (1 if ok)
+   */
+  public function setType(string $id_note, string $type): int
+  {
+    $cf = &$this->class_cfg;
+    return $this->db->update(
+      $cf['tables']['notes'],
+      [$cf['arch']['notes']['id_type'] => $type],
+      [$cf['arch']['notes']['id'] => $id_note]
+    );
+  }
+
+
+  /**
    * @param $id
    * @return mixed
    */
@@ -675,13 +693,21 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
-  public function getLastVersionCfg(): array
+  /**
+   * Returns the configuration to have the last version for each note
+   *
+   * @param boolean $with_content
+   * @return array
+   */
+  public function getLastVersionCfg($with_content = false): array
   {
     $cf  = &$this->class_cfg;
-    return [
+    $res = [
       'tables' => [$cf['table']],
       'fields' => [
         'versions1.' . $cf['arch']['versions']['id_note'],
+        $cf['arch']['notes']['id_type'],
+        $cf['arch']['notes']['id_option'],
         'versions1.' . $cf['arch']['versions']['version'],
         'versions1.' . $cf['arch']['versions']['title'],
         'versions1.' . $cf['arch']['versions']['id_user'],
@@ -728,7 +754,11 @@ class Note extends bbn\Models\Cls\Db
         'dir' => 'DESC',
       ]]
     ];
+    if (!$with_content) {
+      array_pop($res['fields']);
+    }
 
+    return $res;
   }
 
   /**

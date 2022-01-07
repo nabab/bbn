@@ -103,7 +103,7 @@ class Dbsync
     return self::$_is_init;
   }
 
-  public static function firstCall(){
+  public static function firstCall() {
     if ( \is_array(self::$dbs) ){
       self::$dbs = new bbn\Db(self::$dbs);
     }
@@ -183,15 +183,17 @@ MYSQL
 	 * @return array Resulting configuration
 	 */
   public static function trigger(array $cfg){
-    self::firstCall();
     if ( !isset($cfg['run']) ){
       $cfg['run'] = 1;
     }
     if ( !isset($cfg['trig']) ){
       $cfg['run'] = 1;
     }
-    if ( !self::$disabled &&
-      self::check() &&
+    if (self::$disabled) {
+      return $cfg;
+    }
+    self::firstCall();
+    if (self::check() &&
       (count($cfg['tables']) === 1) &&
       ($table = self::$db->tfn(current($cfg['tables']))) &&
       \in_array($table, self::$tables, true)

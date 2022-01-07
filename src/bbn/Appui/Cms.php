@@ -249,6 +249,53 @@ class Cms extends bbn\Models\Cls\Db
     return $res;
   }
 
+
+  public function getLastVersionCfg(bool $with_content = false)
+  {
+    $cfg = $this->note->getLastVersionCfg($with_content);
+    $cfg['fields'][]             = 'url';
+    $cfg['fields'][]             = 'start';
+    $cfg['fields'][]             = 'end';
+    $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';
+    $cfg['where']['mime']        = 'json/bbn-cms';
+    $cfg['where']['private']     = 0;
+    $cfg['join'][] = [
+      'table' => $this->class_cfg['tables']['url'],
+      'type' => 'left',
+      'on' => [[
+          'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),
+          'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+      ]],
+    ];
+    $cfg['join'][] = [
+        'table' => $this->class_cfg['tables']['notes_events'],
+        'type' => 'left',
+        'on' => [[
+            'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),
+            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+        ]]
+    ];
+    $cfg['join'][] = [
+        'table' => $this->class_cfg['tables']['events'],
+        'type' => 'left',
+        'on' => [[
+            'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
+            'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
+        ]]
+    ];
+    $cfg['join'][] = [
+        'table' => $this->class_cfg['tables']['notes_medias'],
+        'type' => 'left',
+        'on' => [[
+            'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),
+            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+        ]]
+    ];
+    $cfg['group_by'] = [$this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])];
+
+    return $cfg;
+  }
+
   /**
    * Returns all the notes of type 'pages'.
    *
@@ -261,19 +308,9 @@ class Cms extends bbn\Models\Cls\Db
    */
   public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0): array
   {
-      $cfg = $this->note->getLastVersionCfg();
-    if (!$with_content) {
-        array_pop($cfg['fields']);
-    }
-
-      $cfg['limit']                = $limit;
-      $cfg['start']                = $start >= 0 ? $start : 0;
-      $cfg['fields'][]             = 'url';
-      $cfg['fields'][]             = 'start';
-      $cfg['fields'][]             = 'end';
-      $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';
-      $cfg['where']['mime']        = 'json/bbn-cms';
-      $cfg['where']['private']     = 0;
+    $cfg = $this->getLastVersionCfg($with_content);
+    $cfg['limit'] = $limit;
+    $cfg['start'] = $start >= 0 ? $start : 0;
     if (!empty($filter)) {
         $cfg['having'] = $filter;
     }
@@ -282,47 +319,14 @@ class Cms extends bbn\Models\Cls\Db
         $cfg['order'] = $order;
     }
 
-      $cfg['join'][] = [
-          'table' => $this->class_cfg['tables']['url'],
-          'type' => 'left',
-          'on' => [[
-              'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),
-              'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
-          ]],
-      ];
-      $cfg['join'][] = [
-          'table' => $this->class_cfg['tables']['notes_events'],
-          'type' => 'left',
-          'on' => [[
-              'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),
-              'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
-          ]]
-      ];
-      $cfg['join'][] = [
-          'table' => $this->class_cfg['tables']['events'],
-          'type' => 'left',
-          'on' => [[
-              'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
-              'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
-          ]]
-      ];
-      $cfg['join'][] = [
-          'table' => $this->class_cfg['tables']['notes_medias'],
-          'type' => 'left',
-          'on' => [[
-              'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),
-              'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
-          ]]
-      ];
+    $total = $this->db->count($cfg);
+    $data  = $this->db->rselectAll($cfg);
 
-      $total = $this->db->count($cfg);
-      $data  = $this->db->rselectAll($cfg);
-
-      return [
-          'query' => $this->db->last(),
-          'data' => $data,
-          'total' => $total
-      ];
+    return [
+      'query' => $this->db->last(),
+      'data' => $data,
+      'total' => $total
+    ];
   }
 
 
@@ -659,17 +663,30 @@ class Cms extends bbn\Models\Cls\Db
   }
 
 
-    /**
-     * Adds a new version to the given note with the new content
-     *
-     * @param string $id_note
-     * @param string $title
-     * @param string $content
-     * @return null|int The number of affected rows (1 if ok)
-     */
+  /**
+   * Adds a new version to the given note with the new content
+   *
+   * @param string $id_note
+   * @param string $title
+   * @param string $content
+   * @return null|int The number of affected rows (1 if ok)
+   */
   public function setContent(string $id_note, string $title, string $content): ?int
   {
       return $this->note->insertVersion($id_note, $title, $content);
+  }
+
+
+  /**
+   * Changes the type of the note
+   *
+   * @param string $id_note
+   * @param string $type
+   * @return null|int The number of affected rows (1 if ok)
+   */
+  public function setType(string $id_note, string $type): int
+  {
+      return $this->note->setType($id_note, $type);
   }
 
 
@@ -681,9 +698,19 @@ class Cms extends bbn\Models\Cls\Db
      * @param string $content
      * @param string $start
      * @param string $end
+     * @param array $tags
+     * @param string $id_type
      * @return bool Returns true if something has been modified.
      */
-  public function set(string $url, string $title, string $content, string $start = null, string $end = null, array $tags = null): bool
+  public function set(
+    string $url,
+    string $title,
+    string $content,
+    string $start = null,
+    string $end = null,
+    array $tags = null,
+    string $id_type = null
+  ): bool
   {
     if (!($cfg = $this->getByUrl($url, true))) {
       throw new \Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
@@ -703,6 +730,10 @@ class Cms extends bbn\Models\Cls\Db
 
     if (is_array($tags)) {
       $change += $this->note->setTags($cfg['id_note'], $tags);
+    }
+
+    if ($id_type && ($cfg['id_type'] !== $id_type)) {
+      $change += $this->setType($cfg['id_note'], $id_type);
     }
 
     return $change ? true : false;

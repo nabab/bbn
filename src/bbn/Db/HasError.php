@@ -37,7 +37,7 @@ trait HasError
    * *    die: the script will die with the error
    * *    continue: the script and further queries will be executed
    */
-  protected $on_error = Errors::E_STOP_ALL;
+  protected $on_error = Errors::E_EXCEPTION;
   
   /**
    * Set an error and acts appropriately based oon the error mode
@@ -101,12 +101,13 @@ trait HasError
     }
     );
     $this->log(implode(PHP_EOL, $msg));
-    if ($this->on_error === Errors::E_DIE) {
-      throw new \Exception(
-        \defined('BBN_IS_DEV') && BBN_IS_DEV
-          ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'</pre>'
-          : 'Database error'
-      );
+    if ($this->on_error === Errors::E_EXCEPTION) {
+      throw new \Exception(X::join($msg, PHP_EOL));
+    }
+
+    elseif ($this->on_error === Errors::E_DIE) {
+      throw new \Exception(X::join($msg, PHP_EOL));
+      die();
     }
   }
 
@@ -209,25 +210,21 @@ trait HasError
       throw new \Exception('Property current does not exist');
     }
 
-    if ($this->current !== null) {
-      // if $on_error is set to E_CONTINUE returns true
-      if ($this->on_error === Errors::E_CONTINUE) {
-        return true;
-      }
-
-      // If any connection has an error with mode E_STOP_ALL
-      if (self::$_has_error_all && ($this->on_error === Errors::E_STOP_ALL)) {
-        return false;
-      }
-
-      // If this connection has an error with mode E_STOP or E_STOP_ALL
-      if ($this->_has_error && ($this->on_error === Errors::E_STOP || $this->on_error === Errors::E_STOP_ALL)) {
-        return false;
-      }
-
+    // if $on_error is set to E_CONTINUE returns true
+    if (in_array($this->on_error, [Errors::E_EXCEPTION, Errors::E_CONTINUE])) {
       return true;
     }
 
-    return false;
+    // If any connection has an error with mode E_STOP_ALL
+    if (self::$_has_error_all && ($this->on_error === Errors::E_STOP_ALL)) {
+      return false;
+    }
+
+    // If this connection has an error with mode E_STOP or E_STOP_ALL
+    if ($this->_has_error && in_array($this->on_error, [Errors::E_STOP, $this->on_error === Errors::E_STOP_ALL])) {
+      return false;
+    }
+
+    return true;
   }
 }

@@ -93,12 +93,12 @@ class Mailbox extends bbn\Models\Cls\Basic
   protected $num_msg;
 
   /**
-   * @var stream The stream object
+   * @var resource The stream object
    */
   protected $stream;
 
   /**
-   * @var string The host address
+   * @var array The mail folders
    */
   protected $folders = [];
 
@@ -548,18 +548,22 @@ class Mailbox extends bbn\Models\Cls\Basic
           $tmp['senderaddress'],
           $tmp['reply_toaddress']
         );
-        foreach ($tmp as $k => &$v) {
+        foreach ($tmp as $k => $v) {
           if (is_string($v)) {
-            $v = trim($v);
+            $tmp[$k] = trim($v);
             if (empty($v)) {
-              $v = false;
+              $tmp[$k] = false;
             }
             elseif (Str::isNumber($v)) {
-              $v = (int)$v;
+              $tmp[$k] = (int)$v;
+            }
+            elseif ($k === 'subject') {
+              $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
+              if (strlen($tmp[$k]) > 1000) {
+                $tmp[$k] = Str::cut($tmp[$k], 1000);
+              }
             }
           }
-
-          unset($v);
         }
 
         foreach (self::getDestFields() as $df) {
@@ -568,7 +572,7 @@ class Mailbox extends bbn\Models\Cls\Basic
             foreach ($tmp[$df] as $a) {
               if (isset($a->host)) {
                 $ads[] = [
-                  'name' => $a->personal ?? null,
+                  'name' => empty($a->personal) ? null : mb_convert_encoding(iconv_mime_decode($a->personal, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8"),
                   'email' => strtolower($a->mailbox.'@'.$a->host),
                   'host' => $a->host
                 ];
@@ -586,6 +590,7 @@ class Mailbox extends bbn\Models\Cls\Basic
         $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
         $tmp['attachments'] = [];
         $tmp['is_html']     = false;
+        X::log(['real', $tmp], 'mail');
         if (empty($structure->parts)) {
           $tmp['is_html'] = $structure->subtype === 'HTML';
         }
@@ -878,9 +883,10 @@ class Mailbox extends bbn\Models\Cls\Basic
    * @param int $msgnum No of the message
    * @return bool|object
    */
-  public function getMsgStructure($msgnum)
+  public function getMsgStructure(int $msgnum)
   {
     if ($this->_is_connected()) {
+      X::log($msgnum, 'nummsg');
       return imap_fetchstructure($this->stream, $msgnum);
     }
 
