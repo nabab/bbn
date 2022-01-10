@@ -101,6 +101,10 @@
       {
         "code": "services",
         "id_option": ["services", "widgets", "appui-dashboard", "plugins", "server", "appui"]
+      },
+      {
+        "code": "updates",
+        "id_option": ["updates", "widgets", "appui-dashboard", "plugins", "server", "appui"]
       }
     ]
   },
