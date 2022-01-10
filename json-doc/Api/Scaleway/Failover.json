@@ -32,9 +32,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         }

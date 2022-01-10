@@ -69,9 +69,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -119,7 +117,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "float",
                 null
             ],
             "parent": false,
@@ -155,9 +152,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {

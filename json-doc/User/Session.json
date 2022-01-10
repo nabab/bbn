@@ -95,9 +95,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -576,7 +574,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "self",
                 null
             ],
             "parent": false,
@@ -602,9 +599,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         }
@@ -634,8 +629,8 @@
     "isSubclassOf": false,
     "defaultProperties": {
         "name": "apst-app",
-        "singleton_instance": {},
-        "singleton_exists": 1,
+        "singleton_instance": null,
+        "singleton_exists": false,
         "was_opened": false,
         "once_opened": false,
         "data": null,

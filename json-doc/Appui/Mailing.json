@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/Appui\/Mailing.php",
     "startLine": 15,
-    "endLine": 867,
+    "endLine": 868,
     "contentConstructor": {
         "file": "bbn\\Appui\\Mailing",
         "returns": null
@@ -148,9 +148,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -174,9 +172,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -223,9 +219,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -259,9 +253,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -296,7 +288,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -322,9 +313,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -369,7 +358,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -406,7 +394,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -443,7 +430,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -479,9 +465,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -525,7 +509,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -562,7 +545,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -626,7 +608,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -672,7 +653,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -709,7 +689,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -743,9 +722,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_email)\n  {\n    if (!empty($id_email)) {\n      return $this->db->delete('bbn_emails', ['id' => $id_email]);\n    }\n  }",
+            "code": "function(string $id_email)\n  {\n    if (!empty($id_email)) {\n      return $this->db->delete('bbn_users_emails', ['id' => $id_email]);\n    }\n    return 0;\n  }",
             "startLine": 619,
-            "endLine": 624,
+            "endLine": 625,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -755,7 +734,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -782,8 +760,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_mailing)\n  {\n    $success = null;\n    $emails = $this->db->rselectAll('bbn_emails', [], ['id_mailing' => $id_mailing]);\n    if (!empty($emails)) {\n      $n = 0;\n      foreach ($emails as $e){\n        if (($e['status'] === 'ready') || ($e['status'] === 'cancelled')) {\n          if ($this->db->delete('bbn_emails', ['id' => $e['id']])) {\n            $n++;\n          }\n        }\n      }\n      $success = $n;\n    }\n    return $success;\n  }",
-            "startLine": 632,
-            "endLine": 648,
+            "startLine": 633,
+            "endLine": 649,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -793,7 +771,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -820,8 +797,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_email, string $state)\n  {\n    return $this->db->update(\n      'bbn_emails', ['status' => $state], [\n      'id' => $id_email,\n      ]\n    );\n  }",
-            "startLine": 658,
-            "endLine": 665,
+            "startLine": 659,
+            "endLine": 666,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -830,9 +807,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -866,8 +841,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    return $this->db->rselectAll(\n      'bbn_emails', [], [\n      'id_mailing' => $id\n      ]\n    );\n  }",
-            "startLine": 673,
-            "endLine": 680,
+            "startLine": 674,
+            "endLine": 681,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -877,7 +852,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -903,8 +877,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    if ($this->check()) {\n      return $this->db->count(\n        'bbn_emails', [\n        'id_mailing' => $id,\n        ['status', '!=', 'ready'],\n        ['email', '!=', $this->getTestEmails()]\n        ]\n      );\n    }\n    return null;\n  }",
-            "startLine": 688,
-            "endLine": 700,
+            "startLine": 689,
+            "endLine": 701,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -914,7 +888,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -940,8 +913,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_mailing, string $status)\n  {\n    $count = 0;\n    if (($emails = $this->getEmails($id_mailing))) {\n      foreach ($emails as $e){\n        \/\/here I've to check if ready or cancelled??\n        if ($this->changeEmailStatus($e['id'], $status)) {\n          $count ++;\n        };\n      }\n      return $count;\n    }\n  }",
-            "startLine": 709,
-            "endLine": 721,
+            "startLine": 710,
+            "endLine": 722,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -950,9 +923,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -985,8 +956,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    if ($row = $this->getMailing($id)) {\n      $id_mailing = $this->add(\n        [\n        'title' => $row['title'],\n        'content' => $row['content'],\n        'sender' => $row['sender'],\n        'recipients' => $row['recipients']\n        ]\n      );\n      if (!empty($row['medias']) && ($row2 = $this->getMailing($id_mailing))) {\n        foreach ($row['medias'] as $r){\n          $this->notes->addMediaToNote($r['id'], $row2['id_note'], 1);\n        }\n      }\n      return $id_mailing;\n    }\n  }",
-            "startLine": 729,
-            "endLine": 747,
+            "startLine": 730,
+            "endLine": 748,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -996,7 +967,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1022,8 +992,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(int $limit = 10)\n  {\n    return $this->db->rselectAll(\n      [\n      'table' => 'bbn_emailings',\n      'fields' => ['id', 'title', 'sent', 'state'],\n      'join' => [\n        [\n          'table' => 'bbn_notes_versions',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'bbn_notes_versions.id_note',\n                'exp' => 'bbn_emailings.id_note'\n              ], [\n                'field' => 'bbn_notes_versions.version',\n                'exp' => 'bbn_emailings.version'\n              ]\n            ]\n          ]\n        ]\n      ],\n      'where' => [\n        ['state', '!=', 'sending'],\n        ['sent', 'isnotnull'],\n        ['sent', '<', Date('Y-m-d H:i:s')]\n      ],\n      'order' => [\n        'sent' => 'DESC'\n      ],\n      'limit' => $limit\n      ]\n    );\n  }",
-            "startLine": 755,
-            "endLine": 788,
+            "startLine": 756,
+            "endLine": 789,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1056,8 +1026,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(int $limit = 10)\n  {\n    return $this->db->rselectAll(\n      [\n        'table' => 'bbn_emailings',\n        'fields' => ['id', 'title', 'sent', 'state'],\n        'join' => [\n          [\n            'table' => 'bbn_notes_versions',\n            'on' => [\n              'conditions' => [\n                [\n                  'field' => 'bbn_notes_versions.id_note',\n                  'exp' => 'bbn_emailings.id_note'\n                ], [\n                  'field' => 'bbn_notes_versions.version',\n                  'exp' => 'bbn_emailings.version'\n                ]\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          ['state', '=', 'ready'],\n          ['sent', 'isnotnull'],\n        ],\n        'order' => [\n          'sent' => 'ASC'\n        ],\n        'limit' => $limit\n      ]\n    );\n  }",
-            "startLine": 796,
-            "endLine": 828,
+            "startLine": 797,
+            "endLine": 829,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1090,8 +1060,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->db->rselectAll(\n      [\n        'table' => 'bbn_emailings',\n        'fields' => ['id', 'title', 'sent', 'state'],\n        'join' => [\n          [\n            'table' => 'bbn_notes_versions',\n            'on' => [\n              'conditions' => [\n                [\n                  'field' => 'bbn_notes_versions.id_note',\n                  'exp' => 'bbn_emailings.id_note'\n                ], [\n                  'field' => 'bbn_notes_versions.version',\n                  'exp' => 'bbn_emailings.version'\n                ]\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          ['state', '=', 'sending']\n        ],\n        'order' => [\n          'sent' => 'DESC'\n        ]\n      ]\n    );\n  }",
-            "startLine": 836,
-            "endLine": 866,
+            "startLine": 837,
+            "endLine": 867,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1559,9 +1529,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Appui\\Option"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1730,7 +1698,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1756,9 +1723,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1782,9 +1747,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1809,7 +1772,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1836,7 +1798,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,

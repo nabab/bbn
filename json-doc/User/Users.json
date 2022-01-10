@@ -37,9 +37,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -73,9 +71,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -109,9 +105,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {

@@ -32,9 +32,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -70,7 +68,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,

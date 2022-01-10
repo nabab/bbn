@@ -17,7 +17,7 @@
     "interfaces": [],
     "fileName": "\/Str.php",
     "startLine": 21,
-    "endLine": 1801,
+    "endLine": 1800,
     "contentConstructor": null,
     "methods": {
         "cast": {
@@ -85,9 +85,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -137,9 +135,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -179,9 +175,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -221,9 +215,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -263,9 +255,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -305,9 +295,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -347,9 +335,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -389,9 +375,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -431,9 +415,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -473,9 +455,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -515,9 +495,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -557,9 +535,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -599,9 +575,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -641,9 +615,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -693,9 +665,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -734,9 +704,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -806,9 +774,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -908,9 +874,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1004,9 +968,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1039,9 +1001,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1070,9 +1030,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1105,9 +1063,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1136,9 +1092,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1161,9 +1115,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($st)\n  {\n    if (\\is_string($st) && (\\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st)) {\n      $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);\n      if (!$enc || ($enc === '8bit')) {\n        return preg_match('~[^\\x20-\\x7E\\t\\r\\n]~', $st) > 0;\n      }\n    }\n\n    return false;\n  }",
+            "code": "function($st)\n  {\n    if (\\is_string($st) && (\\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st)) {\n      if (!mb_check_encoding($st, 'UTF-8')) {\n        return preg_match('~[^\\x20-\\x7E\\t\\r\\n]~', $st) > 0;\n      }\n    }\n\n    return false;\n  }",
             "startLine": 747,
-            "endLine": 757,
+            "endLine": 756,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1172,9 +1126,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1203,8 +1155,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($email)\n  {\n    if (function_exists('filter_var')) {\n      return filter_var($email,FILTER_VALIDATE_EMAIL) ? true : false;\n    }\n    else\n    {\n      $isValid = true;\n      $atIndex = mb_strrpos($email, \"@\");\n      if (\\is_bool($atIndex) && !$atIndex) {\n        $isValid = false;\n      }\n      else\n      {\n        $domain    = mb_substr($email, $atIndex + 1);\n        $local     = mb_substr($email, 0, $atIndex);\n        $localLen  = mb_strlen($local);\n        $domainLen = mb_strlen($domain);\n        \/\/  local part length exceeded\n        if ($localLen < 1 || $localLen > 64) {\n          $isValid = false;\n        }\n        \/\/  domain part length exceeded\n        elseif ($domainLen < 1 || $domainLen > 255) {\n          $isValid = false;\n        }\n        \/\/ local part starts or ends with '.'\n        elseif ($local[0] == '.' || $local[$localLen - 1] == '.') {\n          $isValid = false;\n        }\n        \/\/ local part has two consecutive dots\n        elseif (mb_ereg_match('\\\\.\\\\.', $local)) {\n          $isValid = false;\n        }\n        \/\/ character not valid in domain part\n        elseif (!mb_ereg_match('^[A-Za-z0-9\\\\-\\\\.]+$', $domain)) {\n          $isValid = false;\n        }\n        \/\/  domain part has two consecutive dots\n        elseif (mb_ereg_match('\\\\.\\\\.', $domain)) {\n          $isValid = false;\n        }\n        \/\/  character not valid in local part unless\n        elseif (!mb_ereg_match(\n          '^(\\\\\\\\.|[A-Za-z0-9!#%&`_=\\\\\/$\\'*+?^{}|~.-])+$'\n          ,str_replace(\"\\\\\\\\\",\"\",$local)\n        )\n        ) {\n          \/\/ local part is quoted\n          if (!mb_ereg_match('^\"(\\\\\\\\\"|[^\"])+\"$',str_replace(\"\\\\\\\\\",\"\",$local))) {\n            $isValid = false;\n          }\n        }\n      }\n\n      return $isValid;\n    }\n  }",
-            "startLine": 777,
-            "endLine": 834,
+            "startLine": 776,
+            "endLine": 833,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1213,9 +1165,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1245,8 +1195,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    return (bool)filter_var($st, FILTER_VALIDATE_URL);\n  }",
-            "startLine": 851,
-            "endLine": 854,
+            "startLine": 850,
+            "endLine": 853,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1285,8 +1235,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    return (preg_match(\"\/^([a-z\\d](-*[a-z\\d])*)(\\.([a-z\\d](-*[a-z\\d])*))*$\/i\", $st) \/\/valid chars check\n      && preg_match(\"\/^.{1,253}$\/\", $st) \/\/overall length check\n      && preg_match(\"\/^[^\\.]{1,63}(\\.[^\\.]{1,63})*$\/\", $st)   ); \/\/length of each label\n  }",
-            "startLine": 871,
-            "endLine": 876,
+            "startLine": 870,
+            "endLine": 875,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1295,9 +1245,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1327,8 +1275,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    return (bool)filter_var($st, FILTER_VALIDATE_IP);\n  }",
-            "startLine": 896,
-            "endLine": 899,
+            "startLine": 895,
+            "endLine": 898,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1337,9 +1285,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1368,8 +1314,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    foreach (func_get_args() as $a) {\n      if (!Date::validateSQL($a)) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
-            "startLine": 917,
-            "endLine": 926,
+            "startLine": 916,
+            "endLine": 925,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1378,9 +1324,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1409,8 +1353,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    if (\\is_string($st)) {\n      if (self::isBuid($st)) {\n        $st = bin2hex($st);\n      }\n      else{\n        if (self::isJson($st)) {\n          if (strpos($st, '\": ') && ($json = json_decode($st))) {\n            return json_encode($json);\n          }\n\n          return $st;\n        }\n\n        $st = trim(trim($st, \" \"), \"\\t\");\n        if (self::isInteger($st)\n            && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))\n        ) {\n          $tmp = (int)$st;\n          if (($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX)) {\n            return $tmp;\n          }\n        }\n        \/\/ If it is a decimal, not starting or ending with a zero\n        elseif (self::isDecimal($st)) {\n          return (float)$st;\n        }\n      }\n    }\n    elseif (\\is_array($st)) {\n      foreach ($st as $k => $v) {\n        $st[$k] = self::correctTypes($v);\n      }\n    }\n    elseif (\\is_object($st)) {\n      $vs = get_object_vars($st);\n      foreach ($vs as $k => $v) {\n        $st->$k = self::correctTypes($v);\n      }\n    }\n\n    return $st;\n  }",
-            "startLine": 946,
-            "endLine": 989,
+            "startLine": 945,
+            "endLine": 988,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1448,8 +1392,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($url)\n  {\n    $url = self::cast($url);\n    $r   = X::mergeArrays(parse_url($url), ['url' => $url,'query' => '','params' => []]);\n    if (strpos($url,'?') > 0) {\n      $p          = explode('?',$url);\n      $r['url']   = $p[0];\n      $r['query'] = $p[1];\n      $ps         = explode('&',$r['query']);\n      foreach ($ps as $p){\n        $px                  = explode('=',$p);\n        $r['params'][$px[0]] = $px[1];\n      }\n    }\n\n    return $r;\n  }",
-            "startLine": 1017,
-            "endLine": 1033,
+            "startLine": 1016,
+            "endLine": 1032,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1458,9 +1402,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1490,8 +1432,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, $allow_parent = false)\n  {\n    $path = str_replace('\\\\', '\/', \\strval($path));\n    $path = str_replace('\/.\/', '\/', \\strval($path));\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    if (strpos($path, '..\/') !== false) {\n      if (!$allow_parent) {\n        return '';\n      }\n\n      $bits       = array_reverse(explode('\/', $path));\n      $path       = '';\n      $num_parent = 0;\n      foreach ($bits as $i => $b){\n        if ($b === '..') {\n          $num_parent++;\n        }\n        elseif ($b !== '.') {\n          if ($num_parent) {\n            $num_parent--;\n          }\n          else{\n            $path = empty($path) ? $b : $b.'\/'.$path;\n          }\n        }\n      }\n    }\n\n    return $path;\n  }",
-            "startLine": 1054,
-            "endLine": 1086,
+            "startLine": 1053,
+            "endLine": 1085,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1500,9 +1442,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1542,8 +1482,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    $st      = trim(\\mb_ereg_replace('&(.)(tilde|circ|grave|acute|uml|ring|oelig);', '\\\\1', self::cast($st)));\n    $search  = explode(\",\",\"\u00e7,\u00e6,\u0153,\u00e1,\u00e9,\u00ed,\u00f3,\u00fa,\u00e0,\u00e8,\u00ec,\u00f2,\u00f9,\u00e4,\u00eb,\u00ef,\u00f6,\u00fc,\u00ff,\u00e2,\u00ea,\u00ee,\u00f4,\u00fb,\u00e5,e,i,\u00f8,u,\u0105,\u0144,\u0142,\u017a,\u0119,\u00c0,\u00c1,\u00c2,\u00c3,\u00c4,\u00c7,\u00c8,\u00c9,\u00ca,\u00cb,\u00cc,\u00cd,\u00ce,\u00cf,\u00d1,\u00d2,\u00d3,\u00d4,\u00d5,\u00d6,\u00d9,\u00da,\u00db,\u00dc,\u00dd,\u0141,\u015a\");\n    $replace = explode(\",\",\"c,ae,oe,a,e,i,o,u,a,e,i,o,u,a,e,i,o,u,y,a,e,i,o,u,a,e,i,o,u,a,n,l,z,e,A,A,A,A,A,C,E,E,E,E,I,I,I,I,N,O,O,O,O,O,U,U,U,U,Y,L,S\");\n    foreach ($search as $i => $s) {\n      $st = \\mb_ereg_replace($s, $replace[$i], $st);\n    }\n\n    return $st;\n  }",
-            "startLine": 1100,
-            "endLine": 1110,
+            "startLine": 1099,
+            "endLine": 1109,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1552,9 +1492,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1584,8 +1522,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n    \/\/ Each argument must be a string made of letters, numbers and underscores\n    foreach ($args as $a) {\n      if (\\is_array($a)) {\n        foreach ($a as $b) {\n          if (!self::checkName($b)) {\n            return false;\n          }\n        }\n      }\n\n      if (!\\is_string($a)) {\n        return false;\n      }\n\n      return \\preg_match('\/^[A-z0-9_]*$\/', $a);\n    }\n\n    return true;\n  }",
-            "startLine": 1125,
-            "endLine": 1146,
+            "startLine": 1124,
+            "endLine": 1145,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1594,9 +1532,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1615,8 +1551,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n    foreach ($args as $a){\n      if (($a === '..' || $a === '.') || !\\is_string($a) || (strpos($a, '\/') !== false) || (strpos($a, '\\\\') !== false)) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
-            "startLine": 1161,
-            "endLine": 1171,
+            "startLine": 1160,
+            "endLine": 1170,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1625,9 +1561,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1646,8 +1580,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($args = \\func_get_args()) {\n      foreach ($args as $a){\n        if (!is_string($a) || strpos($a, '\/', -1) !== false || strpos($a, '\\\\', -1) !== false ) {\n          return false;\n        }\n\n        $bits = X::split($a, DIRECTORY_SEPARATOR);\n        foreach ($bits as $b){\n          if (!self::checkFilename($b)) {\n            return false;\n          }\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 1186,
-            "endLine": 1206,
+            "startLine": 1185,
+            "endLine": 1205,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1656,9 +1590,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1677,8 +1609,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n    foreach ($args as $a){\n      if ((strpos($a, '\/') !== false) || (strpos($a, '\\\\') !== false)) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 1223,
-            "endLine": 1233,
+            "startLine": 1222,
+            "endLine": 1232,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1687,9 +1619,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1708,8 +1638,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    return preg_replace(\"\/[^0-9]\/\", '', self::cast($st));\n  }",
-            "startLine": 1250,
-            "endLine": 1253,
+            "startLine": 1249,
+            "endLine": 1252,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1718,9 +1648,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1750,8 +1678,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($o)\n  {\n    $is_array = false;\n    if (\\is_object($o)) {\n      $class = \\get_class($o);\n      if ($class === 'stdClass') {\n        $is_array = 1;\n      }\n      else{\n        return $class;\n      }\n    }\n\n    if (\\is_array($o) || $is_array) {\n      $r = [];\n      foreach ($o as $k => $v){\n        $r[$k] = self::makeReadable($v);\n      }\n\n      return $r;\n    }\n\n    return $o;\n  }",
-            "startLine": 1294,
-            "endLine": 1317,
+            "startLine": 1293,
+            "endLine": 1316,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1790,8 +1718,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($o, $remove_empty = false, $lev = 1)\n  {\n    $st    = '';\n    $space = '    ';\n    if (\\is_object($o) && ($cls = \\get_class($o)) && (strpos($cls, 'stdClass') === false)) {\n      $st .= \"Object \".$cls;\n      \/*\n      $o = array_filter((array)$o, function($k) use ($cls){\n        if ( strpos($k, '*') === 0 ){\n          return false;\n        }\n        if ( strpos($k, $cls) === 0 ){\n          return false;\n        }\n        return true;\n      }, ARRAY_FILTER_USE_KEY);\n      *\/\n    }\n    elseif (\\is_object($o) || \\is_array($o)) {\n      $is_object = \\is_object($o);\n      $is_array  = !$is_object && \\is_array($o);\n      $is_assoc  = $is_object || ($is_array && X::isAssoc($o));\n      $st       .= $is_assoc ? '{' : '[';\n      $st       .= PHP_EOL;\n      foreach ($o as $k => $v){\n        if ($remove_empty && ( ( \\is_string($v) && empty($v) ) || ( \\is_array($v) && \\count($v) === 0 ) )) {\n          continue;\n        }\n\n        $st .= str_repeat($space, $lev);\n        if ($is_assoc) {\n          $st .= ( \\is_string($k) ? '\"'.self::escapeDquote($k).'\"' : $k ). ': ';\n        }\n\n        if (\\is_array($v)) {\n          $st .= self::export($v, $remove_empty, $lev + 1);\n        }\n        elseif ($v === 0) {\n          $st .= '0';\n        }\n        elseif (null === $v) {\n          $st .= 'null';\n        }\n        elseif (\\is_bool($v)) {\n          $st .= $v === false ? 'false' : 'true';\n        }\n        elseif (\\is_int($v) || \\is_float($v)) {\n          $st .= $v;\n        }\n        elseif (is_string($v)) {\n          if (self::isBuid($v)) {\n            $st .= '0x'.bin2hex($v);\n          }\n          elseif (!$remove_empty || !empty($v)) {\n            $st .= '\"'.self::escapeDquote($v).'\"';\n          }\n        }\n        else {\n          try{\n            $cls = get_class($v);\n          }\n          catch (\\Exception $e){\n            $st .= '\"Unknown\"';\n          }\n\n          if ($cls) {\n            if ($cls === 'stdClass') {\n              $st .= self::export($v, $remove_empty, $lev + 1);\n            }\n            else{\n              $st .= 'Object '.$cls;\n            }\n          }\n        }\n\n        $st .= ','.PHP_EOL;\n      }\n\n      $st .= str_repeat($space, $lev - 1);\n      $st .= $is_assoc ? '}' : ']';\n    }\n\n    return $st;\n  }",
-            "startLine": 1344,
-            "endLine": 1427,
+            "startLine": 1343,
+            "endLine": 1426,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1800,9 +1728,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1852,8 +1778,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($search, $replace, $subject)\n  {\n    $pos = strpos($subject, $search);\n    if ($pos !== false) {\n      return substr_replace($subject, $replace, $pos, \\strlen($search));\n    }\n\n    return $subject;\n  }",
-            "startLine": 1445,
-            "endLine": 1453,
+            "startLine": 1444,
+            "endLine": 1452,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1862,9 +1788,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1914,8 +1838,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st)\n  {\n    $pattern = '\/<!--.*?-->|(?:(?:\\\/\\*(?:[^*]|(?:\\*+[^*\\\/]))*\\*+\\\/)|(?:(?<!\\:|\\\\\\|\\')\\\/\\\/.*))\/';\n    return trim(preg_replace($pattern, '', $st));\n  }",
-            "startLine": 1473,
-            "endLine": 1477,
+            "startLine": 1472,
+            "endLine": 1476,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1924,9 +1848,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1955,8 +1877,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($bytes, $unit = 'B', $percision = 2)\n  {\n    \/\/ pretty printer for byte values\n    $i     = 0;\n    $units = ['B', 'K', 'M', 'G', 'T'];\n\n    if (!in_array(($unit = strtoupper($unit)), $units, true)) {\n      throw new \\Exception(X::_('Invalid provided unit'));\n    }\n\n    while (isset($units[$i]) && $unit !== $units[$i]){\n      $i++;\n      $bytes \/= 1024;\n    }\n\n    $st = $unit === 'B' ? \"%d %s\" : \"%0.{$percision}f %s\";\n\n    return sprintf($st, $bytes, $units[$i]);\n  }",
-            "startLine": 1500,
-            "endLine": 1518,
+            "startLine": 1499,
+            "endLine": 1517,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1965,9 +1887,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2015,8 +1935,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($size, $unit_orig = 'B', $unit_dest = 'MB', $percision = 0)\n  {\n    $unit_orig = strtoupper($unit_orig);\n    $unit_dest = strtoupper($unit_dest);\n\n    if (strlen($unit_orig) <= 1 && $unit_orig !== 'B') {\n      $unit_orig .= 'B';\n    }\n\n    if (strlen($unit_dest) <= 1 && $unit_dest !== 'B') {\n      $unit_dest .= 'B';\n    }\n\n    $units = ['B', 'KB', 'MB', 'GB', 'TB'];\n\n    if (!in_array($unit_orig, $units)) {\n      throw new \\Exception(X::_(\"Invalid original unit\"));\n    }\n\n    if (!in_array($unit_dest, $units)) {\n      throw new \\Exception(X::_(\"Invalid destination unit\"));\n    }\n\n    $bytes      = $size;\n    $orig_index = array_search($unit_orig, $units);\n    $dest_index = array_search($unit_dest, $units);\n\n    \/\/ If destination unit is smaller than the original then reverse the units array\n    if ($dest_index < $orig_index) {\n      $units      = array_reverse($units);\n      $orig_index = array_search($unit_orig, $units);\n      $dest_index = array_search($unit_dest, $units);\n      $reversed   = true;\n    }\n\n    for ($i = $orig_index + 1; $i <= $dest_index; $i++) {\n      if (isset($reversed)) {\n        $bytes *= 1024;\n      } else {\n        $bytes \/= 1024;\n      }\n    }\n\n    return round($bytes, $percision) . $unit_dest;\n  }",
-            "startLine": 1542,
-            "endLine": 1586,
+            "startLine": 1541,
+            "endLine": 1585,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2083,8 +2003,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $json, bool $return_error = false)\n  {\n    json_decode($json);\n    $error = json_last_error();\n    if ($error === JSON_ERROR_NONE) {\n      return true;\n    }\n\n    if (!$return_error) {\n      return false;\n    }\n\n    switch ($error) {\n      case JSON_ERROR_DEPTH:\n        return X::_('Maximum stack depth exceeded');\n      case JSON_ERROR_STATE_MISMATCH:\n        return X::_('State mismatch (invalid or malformed JSON)');\n      case JSON_ERROR_CTRL_CHAR:\n        return X::_('Unexpected control character found');\n      case JSON_ERROR_SYNTAX:\n        return X::_('Syntax error, malformed JSON');\n      case JSON_ERROR_UTF8:\n        return X::_('Malformed UTF-8 characters, possibly incorrectly encoded');\n      default:\n        return X::_('Unknown error');\n    }\n  }",
-            "startLine": 1607,
-            "endLine": 1633,
+            "startLine": 1606,
+            "endLine": 1632,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2132,8 +2052,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $var, $quote = '\"')\n  {\n    if (($quote !== \"'\") && ($quote !== '\"')) {\n      $quote = '\"';\n    }\n\n    $st = $quote === \"'\" ? self::escapeSquotes($var) : self::escapeDquotes($var);\n    return $quote.$st.$quote;\n  }",
-            "startLine": 1658,
-            "endLine": 1666,
+            "startLine": 1657,
+            "endLine": 1665,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2180,8 +2100,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st, bool $single_line = false)\n  {\n    if (!self::$_markdownParser) {\n      self::$_markdownParser = new \\Parsedown();\n    }\n\n    return $single_line ? self::$_markdownParser->line($st) : self::$_markdownParser->text($st);\n  }",
-            "startLine": 1687,
-            "endLine": 1694,
+            "startLine": 1686,
+            "endLine": 1693,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2190,9 +2110,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2232,8 +2150,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st, string $sep = '_', bool $first = false)\n  {\n    $st = strtolower($st);\n\n    $res = str_replace(' ', '', ucwords(str_replace($sep, ' ', $st)));\n    if (!$first) {\n        $res[0] = strtolower($res[0]);\n    }\n\n    return $res;\n  }",
-            "startLine": 1710,
-            "endLine": 1720,
+            "startLine": 1709,
+            "endLine": 1719,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2242,9 +2160,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2293,8 +2209,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st, bool $nl = true)\n  {\n    $st = trim($st);\n    if (empty($st)) {\n      return '';\n    }\n\n    $filter = $nl ? ['p', 'br'] : [];\n    $tmp    = strip_tags($st, $filter);\n    if (empty($tmp)) {\n      $config = array(\n        'clean' => 'yes',\n        'output-html' => 'yes',\n      );\n      $tidy   = tidy_parse_string($st, $config, 'utf8');\n      $tidy->cleanRepair();\n      $st = strip_tags((string)$tidy, $filter);\n    }\n    else {\n      $st = $tmp;\n    }\n\n    if (empty($st)) {\n      return '';\n    }\n\n    if (!$nl) {\n      return $st;\n    }\n\n    $st = preg_replace(\"\/<p[^>]*?>\/i\", \"\", $st);\n    $st = str_ireplace(\"<\/p>\", PHP_EOL.PHP_EOL, $st);\n    $p  = '\/<br[^>]*>\/i';\n    $r  = PHP_EOL;\n    return trim(html_entity_decode(preg_replace($p, $r, $st)));\n  }",
-            "startLine": 1738,
-            "endLine": 1773,
+            "startLine": 1737,
+            "endLine": 1772,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2303,9 +2219,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2344,8 +2258,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st, bool $paragraph = true)\n  {\n    if ($paragraph) {\n      $bits = X::split($st, PHP_EOL.PHP_EOL);\n      $st   = '<p>'.X::join($bits, '<\/p><p>').'<\/p>';\n    }\n\n    return str_replace(PHP_EOL, '<br>', $st);\n  }",
-            "startLine": 1790,
-            "endLine": 1798,
+            "startLine": 1789,
+            "endLine": 1797,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2354,9 +2268,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {

@@ -15,7 +15,7 @@
     },
     "fileName": "\/Mvc\/Controller.php",
     "startLine": 8,
-    "endLine": 1947,
+    "endLine": 1948,
     "contentConstructor": {
         "file": "bbn\\Mvc\\Controller",
         "returns": null
@@ -141,9 +141,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -167,9 +165,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -478,7 +474,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -528,9 +523,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -722,9 +715,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1438,7 +1429,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1595,7 +1585,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1659,7 +1648,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1895,8 +1883,8 @@
                     "position": 1,
                     "type": "array",
                     "required": true,
-                    "has_default": true,
-                    "default": [],
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 },
                 {
@@ -1904,8 +1892,8 @@
                     "position": 2,
                     "type": "string",
                     "required": true,
-                    "has_default": true,
-                    "default": null,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 },
                 {
@@ -2068,9 +2056,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2361,8 +2347,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n    $die  = false;\n    $ttl  = 0;\n    foreach ($args as $a) {\n      if (\\is_string($a) && \\strlen($a)) {\n        $path = $a;\n      }\n      elseif (\\is_array($a)) {\n        $data = $a;\n      }\n      elseif (\\is_int($a)) {\n        $ttl = $a;\n      }\n      elseif (\\is_bool($a)) {\n        $die = $a;\n      }\n    }\n\n    if (!isset($path)) {\n      $path = $this->_path;\n    }\n    elseif (strpos($path, '.\/') === 0) {\n      $path = $this->getCurrentDir() . substr($path, 1);\n    }\n\n    if (!isset($data)) {\n      $data = $this->data;\n    }\n\n    $m = $this->_mvc->getCachedModel($path, $data, $this, $ttl);\n    if (\\is_object($m)) {\n      $m = X::toArray($m);\n    }\n\n    if (!\\is_array($m)) {\n      if ($die) {\n        throw new \\Exception(X::_(\"$path is an invalid model\"));\n      }\n\n      return [];\n    }\n\n    return $m;\n  }",
-            "startLine": 1517,
-            "endLine": 1562,
+            "startLine": 1518,
+            "endLine": 1563,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2385,8 +2371,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n\n    foreach ($args as $a) {\n      if (\\is_string($a) && \\strlen($a)) {\n        $path = $a;\n      }\n      elseif (\\is_array($a)) {\n        $data = $a;\n      }\n    }\n\n    if (!isset($path)) {\n      $path = $this->_path;\n    }\n    elseif (strpos($path, '.\/') === 0) {\n      $path = $this->getCurrentDir() . substr($path, 1);\n    }\n\n    if (!isset($data)) {\n      $data = $this->data;\n    }\n\n    $this->_mvc->deleteCachedModel($path, $data, $this);\n  }",
-            "startLine": 1572,
-            "endLine": 1597,
+            "startLine": 1573,
+            "endLine": 1598,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2409,8 +2395,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n\n    foreach ($args as $a) {\n      if (\\is_string($a) && \\strlen($a)) {\n        $path = $a;\n      }\n      elseif (\\is_array($a)) {\n        $data = $a;\n      }\n      elseif (\\is_int($a)) {\n        $ttl = $a;\n      }\n    }\n\n    if (!isset($path)) {\n      $path = $this->_path;\n    }\n    elseif (strpos($path, '.\/') === 0) {\n      $path = $this->getCurrentDir() . substr($path, 1);\n    }\n\n    if (!isset($data)) {\n      $data = $this->data;\n    }\n\n    if (!isset($ttl)) {\n      $ttl = 10;\n    }\n\n    $this->_mvc->setCachedModel($path, $data, $this, $ttl);\n    return $this;\n  }",
-            "startLine": 1607,
-            "endLine": 1640,
+            "startLine": 1608,
+            "endLine": 1641,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2433,8 +2419,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args      = \\func_get_args();\n    $has_cache = false;\n    foreach ($args as $a) {\n      if (\\is_int($a)) {\n        $has_cache = true;\n        break;\n      }\n    }\n\n    if ($has_cache) {\n      $m = $this->getCachedModel(...$args);\n    }\n    else {\n      $m = $this->getModel(...$args);\n    }\n\n    if (empty($m)) {\n      return (new \\stdClass());\n    }\n\n    if (X::isAssoc($m)) {\n      $m = X::toObject($m);\n    }\n\n    return \\is_object($m) ? $m : null;\n  }",
-            "startLine": 1647,
-            "endLine": 1674,
+            "startLine": 1648,
+            "endLine": 1675,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2444,7 +2430,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "object",
                 null
             ],
             "parent": false,
@@ -2460,8 +2445,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($name, $obj)\n  {\n    $this->_mvc->addInc($name, $obj);\n    return $this;\n  }",
-            "startLine": 1682,
-            "endLine": 1686,
+            "startLine": 1683,
+            "endLine": 1687,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2503,8 +2488,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(int $num = 1)\n  {\n    $i = 0;\n    while ($i < $num) {\n      if (!array_key_exists($i, $this->arguments)) {\n        return false;\n      }\n\n      $i++;\n    }\n\n    return true;\n  }",
-            "startLine": 1693,
-            "endLine": 1705,
+            "startLine": 1694,
+            "endLine": 1706,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2537,8 +2522,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->obj;\n  }",
-            "startLine": 1713,
-            "endLine": 1716,
+            "startLine": 1714,
+            "endLine": 1717,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2561,8 +2546,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(callable $fn)\n  {\n    $this->obj = $fn($this->obj);\n  }",
-            "startLine": 1724,
-            "endLine": 1727,
+            "startLine": 1725,
+            "endLine": 1728,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2571,9 +2556,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2597,8 +2580,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($idx = NULL, $check_empty = false)\n  {\n    if (!\\is_array($this->data)) {\n      return false;\n    }\n\n    if (\\is_null($idx)) {\n      return !empty($this->data);\n    }\n\n    return X::hasProps($this->data, (array)$idx, $check_empty);\n  }",
-            "startLine": 1735,
-            "endLine": 1746,
+            "startLine": 1736,
+            "endLine": 1747,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2640,8 +2623,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!\\is_object($this->obj)) {\n      return false;\n    }\n\n    return !empty($this->obj->content);\n  }",
-            "startLine": 1754,
-            "endLine": 1761,
+            "startLine": 1755,
+            "endLine": 1762,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2669,8 +2652,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (isset($this->obj->content)) {\n      return $this->obj->content;\n    }\n\n    return false;\n  }",
-            "startLine": 1770,
-            "endLine": 1777,
+            "startLine": 1771,
+            "endLine": 1778,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2693,8 +2676,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->mode;\n  }",
-            "startLine": 1780,
-            "endLine": 1783,
+            "startLine": 1781,
+            "endLine": 1784,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2717,8 +2700,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($mode)\n  {\n    if ($this->_mvc->setMode($mode)) {\n      $this->mode = $mode;\n    }\n\n    return $this;\n  }",
-            "startLine": 1790,
-            "endLine": 1797,
+            "startLine": 1791,
+            "endLine": 1798,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2756,8 +2739,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (isset($this->obj->script)) {\n      return $this->obj->script;\n    }\n\n    return '';\n  }",
-            "startLine": 1806,
-            "endLine": 1813,
+            "startLine": 1807,
+            "endLine": 1814,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2780,8 +2763,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data)\n  {\n    $this->data = $data;\n    return $this;\n  }",
-            "startLine": 1822,
-            "endLine": 1826,
+            "startLine": 1823,
+            "endLine": 1827,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2814,8 +2797,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data)\n  {\n    $ar = \\func_get_args();\n    foreach ($ar as $d) {\n      if (\\is_array($d)) {\n        $this->data = empty($this->data) ? $d : array_merge($this->data, $d);\n      }\n    }\n\n    return $this;\n  }",
-            "startLine": 1834,
-            "endLine": 1844,
+            "startLine": 1835,
+            "endLine": 1845,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2848,8 +2831,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, $data = [], $internal = false)\n  {\n    if (substr($path, 0, 2) === '.\/') {\n      $path = $this->getCurrentDir() . substr($path, 1);\n    }\n\n    if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {\n      $o = new Controller($this->_mvc, $route, $data);\n      $o->process();\n      return $o;\n    }\n\n    return false;\n  }",
-            "startLine": 1852,
-            "endLine": 1865,
+            "startLine": 1853,
+            "endLine": 1866,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2900,8 +2883,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, $data = [], $internal = false)\n  {\n    if (substr($path, 0, 2) === '.\/') {\n      $path = $this->getCurrentDir() . substr($path, 1);\n    }\n\n    if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {\n      $o = new Controller($this->_mvc, $route, $data);\n      $o->process();\n      $this->obj = X::mergeObjects($this->obj, $o->obj);\n    }\n    else {\n      throw new \\Error(X::_(\"Impossible to route the following request\") . ': ' . $path);\n    }\n\n    return $this;\n  }",
-            "startLine": 1876,
-            "endLine": 1892,
+            "startLine": 1877,
+            "endLine": 1893,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2910,9 +2893,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2954,8 +2935,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->obj;\n  }",
-            "startLine": 1895,
-            "endLine": 1898,
+            "startLine": 1896,
+            "endLine": 1899,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2978,8 +2959,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode = 'html')\n  {\n    return $this->_mvc->viewExists($path, $mode);\n  }",
-            "startLine": 1908,
-            "endLine": 1911,
+            "startLine": 1909,
+            "endLine": 1912,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2988,9 +2969,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3023,8 +3002,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path)\n  {\n    return $this->_mvc->modelExists($path);\n  }",
-            "startLine": 1920,
-            "endLine": 1923,
+            "startLine": 1921,
+            "endLine": 1924,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3033,9 +3012,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3059,8 +3036,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $bbn_inc_file, bbn\\Mvc\\Controller $ctrl, $bbn_is_super = false)\n  {\n    if ($ctrl->isCli()) {\n        return include $bbn_inc_file;\n    }\n\n    ob_start();\n    $r      = include $bbn_inc_file;\n    $output = ob_get_contents();\n    ob_end_clean();\n\n    if ($bbn_is_super) {\n        return $r ? true : false;\n    }\n\n    return $output;\n  }",
-            "startLine": 1930,
-            "endLine": 1946,
+            "startLine": 1931,
+            "endLine": 1947,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3147,7 +3124,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -3545,7 +3521,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -3571,9 +3546,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3607,9 +3580,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -3633,9 +3604,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3669,9 +3638,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3705,9 +3672,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3741,9 +3706,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3777,9 +3740,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3814,7 +3775,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -3860,7 +3820,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,

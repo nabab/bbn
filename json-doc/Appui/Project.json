@@ -9,7 +9,7 @@
     "interfaces": [],
     "fileName": "\/Appui\/Project.php",
     "startLine": 17,
-    "endLine": 673,
+    "endLine": 694,
     "contentConstructor": {
         "file": "bbn\\Appui\\Project",
         "returns": null
@@ -160,7 +160,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -450,9 +449,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($rep)\n  {\n    \/\/if only name else get info repository\n    $path       = '';\n    $repository = \\is_string($rep) ? $this->repositories[$rep] : $rep;\n    if ((!empty($repository)\n        && is_array($repository))\n      && !empty($repository['root'])\n      && X::hasProps($repository, ['path', 'root', 'code'], true)\n    ) {\n      if (strpos($repository['root'], '\/') === 0) {\n        $path = $repository['root'];\n      } else {\n        switch ($repository['root']) {\n          case 'app':\n            $path = $this->getAppPath();\n            break;\n          case 'lib':\n            $path  = $this->getLibPath();\n            $path .= $repository['path'];\n            if ($repository['alias_code'] === 'bbn-project') {\n              $path .= '\/src\/';\n            }\n            break;\n          case 'cdn':\n            $path = $this->getCdnPath();\n            break;\n          case 'data':\n            $path = $this->getDataPath();\n            $path .= $repository['path'];\n            break;\n        }\n      }\n    }\n\n    if (!is_string($path)) {\n      throw new \\Exception(X::_(\"Impossible to determine the path for %s\", $rep));\n    }\n\n    if ($path && substr($path, -1) !== '\/') {\n      $path .= '\/';\n    }\n\n    return $path;\n  }",
+            "code": "function($rep)\n  {\n    \/\/if only name else get info repository\n    $path       = '';\n    $repository = \\is_string($rep) ? $this->repositories[$rep] : $rep;\n    if ((!empty($repository)\n        && is_array($repository))\n      && !empty($repository['root'])\n      && X::hasProps($repository, ['path', 'root', 'code'], true)\n    ) {\n      if (strpos($repository['root'], '\/') === 0) {\n        $path = $repository['root'];\n      } else {\n        switch ($repository['root']) {\n          case 'app':\n            $path = $this->getAppPath();\n            break;\n          case 'lib':\n            $path  = $this->getLibPath();\n            $path .= $repository['path'];\n            if ($repository['alias_code'] === 'bbn-project') {\n              $path .= '\/src\/';\n            }\n            break;\n          case 'cdn':\n            $path = $this->getCdnPath();\n            $path .= $repository['path'];\n            break;\n          case 'data':\n            $path = $this->getDataPath();\n            $path .= $repository['path'];\n            break;\n        }\n      }\n    }\n\n    if (!is_string($path)) {\n      throw new \\Exception(X::_(\"Impossible to determine the path for %s\", $rep));\n    }\n\n    if ($path && substr($path, -1) !== '\/') {\n      $path .= '\/';\n    }\n\n    return $path;\n  }",
             "startLine": 288,
-            "endLine": 332,
+            "endLine": 333,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -461,9 +460,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -488,8 +485,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->appPath) {\n      \/\/ Current project\n      if ($this->name === BBN_APP_NAME) {\n        $this->appPath = bbn\\Mvc::getAppPath();\n      } else {\n        $envs = $this->options->fullOptions('env', $this->id);\n        if (empty($envs)) {\n          throw new \\Exception(X::_(\"Impossible to find environments for option %s\", $this->id));\n        }\n\n        if ($env = X::getRow($envs, ['type' => BBN_ENV])) {\n          $this->appPath = $env['text'];\n          if (substr($this->appPath, -4) !== 'src\/') {\n            $this->appPath .= 'src\/';\n          }\n        }\n      }\n    }\n\n    return $this->appPath;\n  }",
-            "startLine": 340,
-            "endLine": 362,
+            "startLine": 341,
+            "endLine": 363,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -499,7 +496,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -515,8 +511,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->name === BBN_APP_NAME) {\n      if (defined('BBN_CDN_PATH')) {\n        return BBN_CDN_PATH;\n      }\n    } elseif ($content = $this->getEnvironment()) {\n      return $content['app_path'] . 'src\/';\n    }\n\n    throw new \\Exception(X::_(\"Impossible to find the CDN path for %s\", $this->name));\n  }",
-            "startLine": 370,
-            "endLine": 381,
+            "startLine": 371,
+            "endLine": 382,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -525,9 +521,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -541,8 +535,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->name === BBN_APP_NAME) {\n      return \\bbn\\Mvc::getLibPath();\n    } elseif ($content = $this->getEnvironment()) {\n      return $content['lib_path'] . 'bbn\\\/';\n    }\n\n    throw new \\Exception(X::_(\"Impossible to find the libraries path for %s\", $this->name));\n  }",
-            "startLine": 389,
-            "endLine": 398,
+            "startLine": 390,
+            "endLine": 399,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -551,9 +545,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -567,8 +559,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $plugin = NULL)\n  {\n    if ($this->name === BBN_APP_NAME) {\n      return \\bbn\\Mvc::getDataPath($plugin);\n    } elseif ($content = $this->getEnvironment()) {\n      $path = $content['data_path'];\n      if ($plugin) {\n        $path .= 'plugins\/' . $plugin . '\/';\n      }\n      return $path;\n    }\n\n    throw new \\Exception(X::_(\"Impossible to find the data path for %s\", $this->name));\n  }",
-            "startLine": 406,
-            "endLine": 419,
+            "startLine": 407,
+            "endLine": 420,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -577,9 +569,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -603,8 +593,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $plugin = NULL)\n  {\n    if ($this->name === BBN_APP_NAME) {\n      return \\bbn\\Mvc::getUserDataPath($plugin);\n    } elseif ($content = $this->getEnvironment()) {\n      $path = $content['data_path'];\n      if ($plugin) {\n        $path .= 'plugins\/' . $plugin . '\/';\n      }\n      return $path;\n    }\n\n    throw new \\Exception(X::_(\"Impossible to find the user path for %s\", $this->name));\n  }",
-            "startLine": 427,
-            "endLine": 440,
+            "startLine": 428,
+            "endLine": 441,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -613,9 +603,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -638,9 +626,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $project_name = '')\n  {\n    $cats         = [];\n    $repositories = [];\n    if (strlen($project_name) === 0) {\n      $project_name = $this->name;\n    }\n\n    $projects = $this->options->fullTree($this->options->fromCode('path', $project_name, 'list', 'project', 'appui'));\n    if (!empty($projects) && !empty($projects['items'])) {\n      $projects = $projects['items'];\n      foreach ($projects as $i => $project) {\n        $paths = $this->options->fullTree($project['id']);\n        if (isset($paths['items']) && count($paths['items'])) {\n          foreach ($paths['items'] as $repository) {\n            if (empty($repository['id_alias'])) {\n              $this->log(['No id alias for repo', $repository, $project_name]);\n              continue;\n            }\n\n            $name = $paths['code'] . '\/' . $repository['code'];\n            if (!isset($cats[$repository['id_alias']])) {\n              if (isset($repository['alias'])) {\n                unset($repository['alias']['cfg']);\n                $cats[$repository['id_alias']] = $repository['alias'];\n              }\n            }\n\n            unset($repository['cfg']);\n            unset($repository['alias']);\n            $repositories[$name]               = $repository;\n            $repositories[$name]['title']      = $repository['text'];\n            $repositories[$name]['root']       = $paths['code'];\n            $repositories[$name]['name']       = $name;\n            $repositories[$name]['alias_code'] = $cats[$repository['id_alias']]['code'];\n            if (!empty($cats[$repository['id_alias']]['tabs'])) {\n              $repositories[$name]['tabs'] = $cats[$repository['id_alias']]['tabs'];\n            } elseif (!empty($cats[$repository['id_alias']]['extensions'])) {\n              $repositories[$name]['extensions'] = $cats[$repository['id_alias']]['extensions'];\n            } elseif (!empty($cats[$repository['id_alias']]['types'])) {\n              $repositories[$name]['types'] = $cats[$repository['id_alias']]['types'];\n            }\n\n            unset($repositories[$name]['alias']);\n          }\n        }\n      }\n    }\n\n    return $repositories;\n  }",
-            "startLine": 449,
-            "endLine": 499,
+            "code": "function(string $project_name = '')\n  {\n    $cats         = [];\n    $repositories = [];\n    if (strlen($project_name) === 0) {\n      $project_name = $this->name;\n    }\n\n    $roots = $this->options->fullTree($this->options->fromCode('path', $project_name, 'list', 'project', 'appui'));\n    if (!empty($roots) && !empty($roots['items'])) {\n      $roots = $roots['items'];\n      foreach ($roots as $root) {\n        $paths = $this->options->fullTree($root['id']);\n        if (isset($paths['items']) && count($paths['items'])) {\n          foreach ($paths['items'] as $repository) {\n            if (empty($repository['id_alias'])) {\n              $this->log(['No id alias for repo', $repository, $project_name]);\n              continue;\n            }\n\n            $name = $paths['code'] . '\/' . $repository['code'];\n            if (!isset($cats[$repository['id_alias']])) {\n              if (isset($repository['alias'])) {\n                unset($repository['alias']['cfg']);\n                $cats[$repository['id_alias']] = $repository['alias'];\n              }\n            }\n\n            unset($repository['cfg']);\n            unset($repository['alias']);\n            $repositories[$name]               = $repository;\n            $repositories[$name]['title']      = $repository['text'];\n            $repositories[$name]['root']       = $paths['code'];\n            $repositories[$name]['name']       = $name;\n            $repositories[$name]['alias_code'] = $cats[$repository['id_alias']]['code'];\n            if (!empty($cats[$repository['id_alias']]['tabs'])) {\n              $repositories[$name]['tabs'] = $cats[$repository['id_alias']]['tabs'];\n            } elseif (!empty($cats[$repository['id_alias']]['extensions'])) {\n              $repositories[$name]['extensions'] = $cats[$repository['id_alias']]['extensions'];\n            } elseif (!empty($cats[$repository['id_alias']]['types'])) {\n              $repositories[$name]['types'] = $cats[$repository['id_alias']]['types'];\n            }\n\n            unset($repositories[$name]['alias']);\n          }\n        }\n      }\n    }\n\n    return $repositories;\n  }",
+            "startLine": 450,
+            "endLine": 500,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -649,9 +637,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -676,8 +662,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    $idx = \\bbn\\X::find($this->repositories, ['id' => $id]) ?: '';\n    if ($idx !== null) {\n      return $this->repositories[$idx];\n    }\n\n    return [];\n  }",
-            "startLine": 508,
-            "endLine": 516,
+            "startLine": 509,
+            "endLine": 517,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -710,8 +696,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($name)\n  {\n    if (\n      !empty($this->repositories)\n      && is_array($this->repositories)\n      && !empty(array_key_exists($name, $this->repositories))\n    ) {\n      return $this->repositories[$name];\n    }\n\n    return false;\n  }",
-            "startLine": 525,
-            "endLine": 536,
+            "startLine": 526,
+            "endLine": 537,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -744,9 +730,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $file)\n  {\n    foreach ($this->repositories as $i => $d) {\n      $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);\n      if (\n        $root\n        && (strpos($file, $root) === 0)\n      ) {\n        $rep = $i;\n        break;\n      }\n    }\n\n    if (isset($rep)) {\n      $res = $rep . '\/src\/';\n\n      $bits = explode('\/', substr($file, \\strlen($root)));\n      \/\/ MVC\n      if (!empty($d['tabs'])) {\n        $tab_path = array_shift($bits);\n        $fn       = array_pop($bits);\n        $ext      = \\bbn\\Str::fileExt($fn);\n        $fn       = \\bbn\\Str::fileExt($fn, 1)[0];\n        $res     .= implode('\/', $bits);\n        foreach ($d['tabs'] as $k => $t) {\n          if (\n            empty($t['fixed'])\n            && ($t['path'] === $tab_path . '\/')\n          ) {\n            $res .= \"\/$fn\/$t[url]\";\n            break;\n          }\n        }\n      }\n      \/\/ Normal file\n      else {\n        $res .= implode('\/', $bits);\n      }\n\n      return \\bbn\\Str::parsePath($res);\n    }\n\n    return false;\n  }",
-            "startLine": 545,
-            "endLine": 588,
+            "code": "function(string $file)\n  {\n    foreach ($this->repositories as $i => $d) {\n      $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);\n      if (\n        $root\n        && (strpos($file, $root) === 0)\n      ) {\n        $rep = $i;\n        break;\n      }\n    }\n\n\n    if (isset($rep)) {\n      X::log([561, $file, $rep, $root], 'real');\n      $res = $rep . '\/';\n      $bits = explode('\/', substr($file, \\strlen($root)));\n      $filename  = array_pop($bits);\n      $extension = \\bbn\\Str::fileExt($filename);\n      $basename  = \\bbn\\Str::fileExt($filename, 1)[0];\n      \/\/ MVC\n      if (!empty($d['tabs'])) {\n        \/\/ URL is interverted\n        if ($d['type'] === 'components') {\n          foreach ($d['tabs'] as $tab) {\n            foreach ($tab['extensions'] as $ext) {\n              if ($extension === $ext['ext']) {\n                $tab_path = $tab['url'];\n                break;\n              }\n            }\n\n            if (isset($tab_path)) {\n              break;\n            }\n          }\n        }\n        else {\n          $tab_path = array_shift($bits);\n          X::log([$tab_path, $bits], 'real');\n        }\n\n        $res     .= implode('\/', $bits);\n        foreach ($d['tabs'] as $t) {\n          if (\n            empty($t['fixed'])\n            && ($t['path'] === $tab_path . '\/')\n          ) {\n            $res .= \"\/$filename\";\n            break;\n          }\n        }\n      }\n      \/\/ Normal file\n      else {\n        $res .= implode('\/', $bits) . '\/' . $basename . '.' . $extension;\n      }\n\n      return \\bbn\\Str::parsePath($res);\n    }\n\n    return false;\n  }",
+            "startLine": 546,
+            "endLine": 609,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -780,8 +766,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $url, bool $obj = false)\n  {\n    \/\/search repository\n    if (\n      is_array($this->repositories)\n      && count($this->repositories)\n    ) { \/\/if in url name of repository break loop\n      foreach ($this->repositories as $i => $d) {\n        if ((strpos($url, $i) === 0)) {\n          $repository = $i;\n          break;\n        }\n      }\n\n      \/\/if there is name repository or total info\n      if (!empty($repository)) {\n        return empty($obj) ? $repository : $this->repositories[$repository];\n      }\n    }\n\n    return false;\n    \/\/return $this->projects->repositoryFromUrl($url, $obj);\n  }",
-            "startLine": 598,
-            "endLine": 620,
+            "startLine": 619,
+            "endLine": 641,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

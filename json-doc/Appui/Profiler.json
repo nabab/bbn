@@ -13,7 +13,7 @@
     "interfaces": [],
     "fileName": "\/Appui\/Profiler.php",
     "startLine": 14,
-    "endLine": 203,
+    "endLine": 197,
     "contentConstructor": {
         "file": "bbn\\Appui\\Profiler",
         "returns": null
@@ -131,9 +131,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $force = false)\n  {\n    if ($this->check() && !$this->is_started) {\n      $c = &$this->class_cfg['arch']['bbn_profiler'];\n      $last = $this->db->selectOne(\n        $this->class_table,\n        \"MAX(`$c[time]`)\"\n      );\n      if ($force || !$last || (time() - strtotime($last) > self::$delay)) {\n        $this->chrono->start();\n        if (function_exists('tideways_xhprof_enable')) {\n          tideways_xhprof_enable(\n            TIDEWAYS_XHPROF_FLAGS_MEMORY | \n            TIDEWAYS_XHPROF_FLAGS_CPU |\n            TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |\n            TIDEWAYS_XHPROF_FLAGS_MEMORY_ALLOC |\n            TIDEWAYS_XHPROF_FLAGS_MEMORY_MU\n          );\n          $this->is_started = true;\n          return true;\n        }\n        elseif (function_exists('xhprof_enable')) {\n          xhprof_enable(\n            XHPROF_FLAGS_MEMORY | \n            XHPROF_FLAGS_CPU |\n            XHPROF_FLAGS_MEMORY_ALLOC_AS_MU |\n            XHPROF_FLAGS_MEMORY_ALLOC |\n            XHPROF_FLAGS_MEMORY_MU\n          );\n          $this->is_started = true;\n          return true;\n        }\n      }\n    }\n\n    return false;\n  }",
+            "code": "function(bool $force = false)\n  {\n    if ($this->check() && !$this->is_started) {\n      $c = &$this->class_cfg['arch']['bbn_profiler'];\n      $last = $this->db->selectOne(\n        $this->class_table,\n        \"MAX(`$c[time]`)\"\n      );\n      if ($force || !$last || (time() - strtotime($last) > self::$delay)) {\n        $this->chrono->start();\n        if (function_exists('tideways_xhprof_enable')) {\n          tideways_xhprof_enable(\n            TIDEWAYS_XHPROF_FLAGS_MEMORY | \n            TIDEWAYS_XHPROF_FLAGS_CPU\n          );\n          $this->is_started = true;\n          return true;\n        }\n        elseif (function_exists('xhprof_enable')) {\n          xhprof_enable(\n            XHPROF_FLAGS_MEMORY | \n            XHPROF_FLAGS_CPU\n          );\n          $this->is_started = true;\n          return true;\n        }\n      }\n    }\n\n    return false;\n  }",
             "startLine": 65,
-            "endLine": 101,
+            "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -142,9 +142,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -167,9 +165,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Mvc $mvc)\n  {\n    if ($this->is_started && $this->check()) {\n      $this->is_started = false;\n      $data = tideways_xhprof_disable();\n      $c = &$this->class_cfg['arch']['bbn_profiler'];\n      return (bool)$this->db->insert(\n        $this->class_table,\n        [\n          $c['id_user'] => $mvc->inc->user->getId(),\n          $c['url'] => $mvc->getRequest(),\n          $c['time'] => date('Y-m-d-H:i:s'),\n          $c['length'] => $this->chrono->stop(),\n          $c['content'] => serialize($data)\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 111,
-            "endLine": 130,
+            "code": "function(bbn\\Mvc $mvc)\n  {\n    if ($this->is_started && $this->check()) {\n      $this->is_started = false;\n      $data = function_exists('tideways_xhprof_disable') ? tideways_xhprof_disable() : xhprof_disable();\n      $c = &$this->class_cfg['arch']['bbn_profiler'];\n      return (bool)$this->db->insert(\n        $this->class_table,\n        [\n          $c['id_user'] => $mvc->inc->user->getId(),\n          $c['url'] => $mvc->getRequest(),\n          $c['time'] => date('Y-m-d-H:i:s'),\n          $c['length'] => $this->chrono->stop(),\n          $c['content'] => serialize($data)\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "startLine": 105,
+            "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -178,9 +176,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -204,8 +200,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    if ($this->check()) {\n      $c   = &$this->class_cfg['arch']['bbn_profiler'];\n      $row = $this->db->rselect($this->class_table, [], [$c['id'] => $id]);\n      if ($row) {\n        $content       = unserialize($row['content']);\n        unset($row['content']);\n\n        $res         = $row;\n        $res['data'] = [];\n        foreach ($content as $fn => $data) {\n          [\n            $data['parent'],\n            $data['child']\n          ]               = X::split($fn, '==>');\n          $data['mem_na'] = $data['mem.na'];\n          $data['mem_nf'] = $data['mem.nf'];\n          $data['mem_aa'] = $data['mem.aa'];\n          unset($data['mem.na'], $data['mem.nf'], $data['mem.aa']);\n          $res['data'][] = $data;\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 133,
-            "endLine": 161,
+            "startLine": 127,
+            "endLine": 155,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -215,7 +211,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -241,8 +236,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      $c = &$this->class_cfg['arch']['bbn_profiler'];\n      return $this->db->getColumnValues($this->class_table, $c['url']);\n    }\n\n    return null;\n  }",
-            "startLine": 164,
-            "endLine": 172,
+            "startLine": 158,
+            "endLine": 166,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -252,7 +247,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -268,8 +262,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data)\n  {\n    if ($this->check()) {\n      $c = $this->class_cfg['arch']['bbn_profiler'];\n      unset($c['content']);\n      $data['limit'] = isset($data['limit']) && is_int($data['limit']) ? $data['limit'] : 50;\n      $data['start'] = isset($data['start']) && is_int($data['start']) ? $data['start'] : 0;\n      $grid = new \\bbn\\Appui\\Grid(\n        $this->db,\n        $data,\n        [\n          'table' => $this->class_table,\n          'fields' => $c,\n          'order' => [[\n            'field' => 'time',\n            'dir' => 'DESC'\n          ]]\n        ]\n      );\n\n      if ($grid->check()) {\n        return $grid->getDatatable(true);\n      }\n    }\n    return null;\n  }",
-            "startLine": 175,
-            "endLine": 200,
+            "startLine": 169,
+            "endLine": 194,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -279,7 +273,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -749,9 +742,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -834,7 +825,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -870,9 +860,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -906,9 +894,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -961,7 +947,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -997,9 +982,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {

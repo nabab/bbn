@@ -70,7 +70,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,

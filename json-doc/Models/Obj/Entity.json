@@ -78,9 +78,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Models\\Obj\\boolean"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         }

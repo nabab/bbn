@@ -26,8 +26,8 @@
         }
     },
     "fileName": "\/Db\/Query.php",
-    "startLine": 21,
-    "endLine": 367,
+    "startLine": 22,
+    "endLine": 364,
     "contentConstructor": {
         "file": "bbn\\Db\\Query",
         "returns": null
@@ -43,8 +43,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $values = [])\n  {\n    $this->values = $values;\n    $this->res    = null;\n    return $this;\n  }",
-            "startLine": 75,
-            "endLine": 80,
+            "startLine": 76,
+            "endLine": 81,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -53,9 +53,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -78,9 +76,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($args = NULL)\n  {\n    if (($this->res === null) || ($args !== null)) {\n      $this->res = 1;\n      if (\\is_array($args)) {\n        try{\n          return parent::execute($args);\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      elseif ($args !== null) {\n        $args = \\func_get_args();\n        try{\n          return parent::execute(...$args);\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      else{\n        if ($this->values && \\is_array($this->values) && count($this->values)) {\n          foreach ($this->values as $i => $v){\n            if (bbn\\Str::isBuid($v)) {\n              if ($this->db->getEngine() === 'pgsql') {\n                $this->bindValue($i + 1, $v, \\PDO::PARAM_LOB);\n              } else {\n                $this->bindValue($i + 1, $v);\n              }\n            }\n            else{\n              if (\\is_int($v)) {\n                $param = \\PDO::PARAM_INT;\n              }\n              elseif (\\is_bool($v)) {\n                $param = \\PDO::PARAM_BOOL;\n              }\n              elseif ($v === null) {\n                $param = \\PDO::PARAM_NULL;\n              }\n              else {\n                $param = \\PDO::PARAM_STR;\n              }\n\n              $this->bindValue($i + 1, $v, $param);\n            }\n          }\n        }\n\n        try{\n          return parent::execute();\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 87,
-            "endLine": 147,
+            "code": "function(array $args = NULL)\n  {\n    if (($this->res === null) || ($args !== null)) {\n      $this->res = 1;\n      if (\\is_array($args)) {\n        try{\n          return parent::execute($args);\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      elseif ($args !== null) {\n        $args = \\func_get_args();\n        try{\n          return parent::execute(...$args);\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      else{\n        if ($this->values && \\is_array($this->values) && count($this->values)) {\n          foreach ($this->values as $i => $v){\n            if (bbn\\Str::isBuid($v)) {\n              if ($this->db->getEngine() === 'pgsql') {\n                $this->bindValue($i + 1, $v, \\PDO::PARAM_LOB);\n              } else {\n                $this->bindValue($i + 1, $v);\n              }\n            }\n            else{\n              if (\\is_int($v)) {\n                $param = \\PDO::PARAM_INT;\n              }\n              elseif (\\is_bool($v)) {\n                $param = \\PDO::PARAM_BOOL;\n              }\n              elseif ($v === null) {\n                $param = \\PDO::PARAM_NULL;\n              }\n              else {\n                $param = \\PDO::PARAM_STR;\n              }\n\n              $this->bindValue($i + 1, $v, $param);\n            }\n          }\n        }\n\n        try{\n          return parent::execute();\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n    }\n\n    return false;\n  }",
+            "startLine": 88,
+            "endLine": 148,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -89,10 +87,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool",
-                null
-            ],
+            "returns": null,
             "parent": {
                 "name": "execute",
                 "summary": "",
@@ -131,7 +126,7 @@
                 {
                     "name": "args",
                     "position": 0,
-                    "type": "",
+                    "type": "array",
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -149,8 +144,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->execute();\n    return parent::columnCount();\n  }",
-            "startLine": 153,
-            "endLine": 157,
+            "startLine": 154,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -159,9 +154,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": {
                 "name": "columnCount",
                 "summary": "",
@@ -197,9 +190,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($how = NULL, $orientation = NULL, $offset = NULL)\n  {\n    if ($how === null) {\n      $how = \\PDO::FETCH_BOTH;\n    }\n\n    $this->execute();\n    return bbn\\Str::correctTypes(parent::fetch($how, $orientation, $offset));\n  }",
-            "startLine": 166,
-            "endLine": 174,
+            "code": "function(int $mode = 4, int $orientation = 0, int $offset = 0)\n  {\n    $this->execute();\n    return bbn\\Str::correctTypes(parent::fetch($mode, $orientation, $offset));\n  }",
+            "startLine": 167,
+            "endLine": 171,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -208,7 +201,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                null
+            ],
             "parent": {
                 "name": "fetch",
                 "summary": "",
@@ -263,30 +258,30 @@
             },
             "arguments": [
                 {
-                    "name": "how",
+                    "name": "mode",
                     "position": 0,
-                    "type": "",
+                    "type": "int",
                     "required": false,
                     "has_default": true,
-                    "default": null,
-                    "default_name": ""
+                    "default": 4,
+                    "default_name": "PDO::FETCH_BOTH"
                 },
                 {
                     "name": "orientation",
                     "position": 1,
-                    "type": "",
+                    "type": "int",
                     "required": false,
                     "has_default": true,
-                    "default": null,
-                    "default_name": ""
+                    "default": 0,
+                    "default_name": "PDO::FETCH_ORI_NEXT"
                 },
                 {
                     "name": "offset",
                     "position": 2,
-                    "type": "",
+                    "type": "int",
                     "required": false,
                     "has_default": true,
-                    "default": null,
+                    "default": 0,
                     "default_name": ""
                 }
             ]
@@ -301,8 +296,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($fetch_style = 4, $fetch_argument = false, $ctor_args = false)\n  {\n    $this->execute();\n    if ($ctor_args) {\n      $res = parent::fetchAll($fetch_style, $fetch_argument, $ctor_args);\n    }\n    elseif ($fetch_argument) {\n      $res = parent::fetchAll($fetch_style, $fetch_argument);\n    }\n    else{\n      $res = parent::fetchAll($fetch_style);\n    }\n\n    return bbn\\Str::correctTypes($res);\n  }",
-            "startLine": 183,
-            "endLine": 197,
+            "startLine": 180,
+            "endLine": 194,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -355,9 +350,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($column_number = 0)\n  {\n    $this->execute();\n    return bbn\\Str::correctTypes(parent::fetchColumn($column_number));\n  }",
-            "startLine": 204,
-            "endLine": 208,
+            "code": "function(int $column_number = 0)\n  {\n    $this->execute();\n    return bbn\\Str::correctTypes(parent::fetchColumn($column_number));\n  }",
+            "startLine": 201,
+            "endLine": 205,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -366,7 +361,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                null
+            ],
             "parent": {
                 "name": "fetchColumn",
                 "summary": "",
@@ -405,7 +402,7 @@
                 {
                     "name": "column_number",
                     "position": 0,
-                    "type": "",
+                    "type": "int",
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -423,9 +420,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($class_name = 'stdClass', $ctor_args = [])\n  {\n    $this->execute();\n    return bbn\\Str::correctTypes(parent::fetchObject($class_name,$ctor_args));\n  }",
-            "startLine": 216,
-            "endLine": 220,
+            "code": "function(string $class_name = 'stdClass', array $ctor_args = [])\n  {\n    $this->execute();\n    return bbn\\Str::correctTypes(parent::fetchObject($class_name,$ctor_args));\n  }",
+            "startLine": 213,
+            "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -482,7 +479,7 @@
                 {
                     "name": "class_name",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
                     "required": false,
                     "has_default": true,
                     "default": "stdClass",
@@ -492,7 +489,7 @@
                 {
                     "name": "ctor_args",
                     "position": 1,
-                    "type": "",
+                    "type": "array",
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -511,8 +508,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->execute();\n    return parent::rowCount();\n  }",
-            "startLine": 226,
-            "endLine": 230,
+            "startLine": 223,
+            "endLine": 227,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -521,9 +518,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": {
                 "name": "rowCount",
                 "summary": "",
@@ -560,8 +555,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($column = 0)\n  {\n    $this->execute();\n    return parent::getColumnMeta($column);\n  }",
-            "startLine": 237,
-            "endLine": 241,
+            "startLine": 234,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -570,9 +565,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": {
                 "name": "getColumnMeta",
                 "summary": "",
@@ -629,8 +622,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->execute();\n    return parent::nextRowset();\n  }",
-            "startLine": 247,
-            "endLine": 251,
+            "startLine": 244,
+            "endLine": 248,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -639,9 +632,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": {
                 "name": "nextRowset",
                 "summary": "",
@@ -678,8 +669,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetch(\\PDO::FETCH_ASSOC) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 257,
-            "endLine": 264,
+            "startLine": 254,
+            "endLine": 261,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -689,7 +680,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -705,8 +695,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      $r = $this->_fetchAll(\\PDO::FETCH_ASSOC);\n      return $r === false ? null : $r;\n    }\n\n    return null;\n  }",
-            "startLine": 270,
-            "endLine": 278,
+            "startLine": 267,
+            "endLine": 275,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -716,7 +706,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -732,8 +721,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetch(\\PDO::FETCH_NUM) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 284,
-            "endLine": 291,
+            "startLine": 281,
+            "endLine": 288,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -743,7 +732,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -759,8 +747,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(\\PDO::FETCH_NUM);\n    }\n\n    return null;\n  }",
-            "startLine": 297,
-            "endLine": 304,
+            "startLine": 294,
+            "endLine": 301,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -770,7 +758,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -786,8 +773,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      $r  = [];\n      $ds = $this->_fetchAll(\\PDO::FETCH_ASSOC);\n      foreach ($ds as $d){\n        foreach ($d as $k => $v){\n          if (!isset($r[$k])) {\n            $r[$k] = [];\n          }\n\n          $r[$k][] = $v;\n        }\n      }\n\n      return $r;\n    }\n\n    return null;\n  }",
-            "startLine": 310,
-            "endLine": 329,
+            "startLine": 307,
+            "endLine": 326,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -797,7 +784,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -813,8 +799,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->getObject(...\\func_get_args());\n  }",
-            "startLine": 335,
-            "endLine": 338,
+            "startLine": 332,
+            "endLine": 335,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -824,7 +810,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -840,8 +825,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetch(\\PDO::FETCH_OBJ) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 344,
-            "endLine": 351,
+            "startLine": 341,
+            "endLine": 348,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -851,7 +836,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -867,8 +851,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(\\PDO::FETCH_OBJ);\n    }\n\n    return null;\n  }",
-            "startLine": 357,
-            "endLine": 364,
+            "startLine": 354,
+            "endLine": 361,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -878,7 +862,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1795,9 +1778,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "Iterator"
-            ],
+            "returns": null,
             "parent": {
                 "name": "getIterator",
                 "summary": "",
@@ -1818,9 +1799,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": [
-                    "Iterator"
-                ],
+                "returns": null,
                 "parent": false,
                 "arguments": []
             },
@@ -1866,8 +1845,7 @@
         "values": null,
         "write": null,
         "structure": null,
-        "union": null,
-        "queryString": null
+        "union": null
     },
     "isIterable": true,
     "extensionName": false,

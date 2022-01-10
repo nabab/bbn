@@ -11,8 +11,8 @@
     ],
     "interfaces": [],
     "fileName": "\/User\/Email.php",
-    "startLine": 9,
-    "endLine": 1036,
+    "startLine": 10,
+    "endLine": 1097,
     "contentConstructor": {
         "file": "bbn\\User\\Email",
         "returns": null
@@ -20,7 +20,7 @@
     "methods": {
         "getFolderTypes": {
             "name": "getFolderTypes",
-            "summary": "",
+            "summary": "Returns a list typical folder types as they are recorded in the options",
             "description": "",
             "description_parts": [],
             "file": "bbn\\User\\Email",
@@ -28,32 +28,6 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getOptions('folders');\n  }",
-            "startLine": 87,
-            "endLine": 90,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getAccountTypes": {
-            "name": "getAccountTypes",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\User\\Email",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptions('types');\n  }",
             "startLine": 93,
             "endLine": 96,
             "isDeprecated": false,
@@ -64,9 +38,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getAccountTypes": {
+            "name": "getAccountTypes",
+            "summary": "Returns a list of typical email accounts types as they are recorded in the options",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Email",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::getOptions('types');\n  }",
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -80,8 +76,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bbn\\Db $db, bbn\\User $user = NULL, bbn\\User\\Preferences $preferences = NULL)\n  {\n    self::optionalInit();\n    $this->_init_class_cfg();\n    $this->db   = $db;\n    $this->user = $user ?: bbn\\User::getInstance();\n    $this->pref = $preferences ?: bbn\\User\\Preferences::getInstance();\n  }",
-            "startLine": 99,
-            "endLine": 106,
+            "startLine": 110,
+            "endLine": 117,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -131,9 +127,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_account)\n  {\n    if (!isset($this->mboxes[$id_account])) {\n      $this->getAccount($id_account);\n    }\n\n    if (isset($this->mboxes[$id_account])) {\n      $mb = &$this->mboxes[$id_account];\n      if (!isset($mb['mailbox'])) {\n        $cfg           = $this->mboxes[$id_account];\n        $cfg['pass']   = $this->_get_password()->userGet($id_account, $this->user);\n        $mb['mailbox'] = new bbn\\Appui\\Mailbox($cfg);\n      }\n\n      if (isset($mb['mailbox'])) {\n        return $mb['mailbox'];\n      }\n    }\n\n    return null;\n\n  }",
-            "startLine": 109,
-            "endLine": 130,
+            "code": "function(string $id_account)\n  {\n    if (!isset($this->mboxes[$id_account])) {\n      $this->getAccount($id_account);\n    }\n\n    if (isset($this->mboxes[$id_account])) {\n      $mb = &$this->mboxes[$id_account];\n      if (!isset($mb['mailbox'])) {\n        $cfg           = $this->mboxes[$id_account];\n        $cfg['pass']   = $this->_get_password()->userGet($id_account, $this->user);\n        $mb['mailbox'] = new Mailbox($cfg);\n      }\n\n      if (isset($mb['mailbox'])) {\n        return $mb['mailbox'];\n      }\n    }\n\n    return null;\n\n  }",
+            "startLine": 120,
+            "endLine": 141,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -166,8 +162,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($id_accounts = self::getOptionId('accounts')) {\n      return $this->pref->retrieveIds($id_accounts);\n    }\n\n    return null;\n  }",
-            "startLine": 139,
-            "endLine": 146,
+            "startLine": 150,
+            "endLine": 157,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -177,7 +173,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -193,8 +188,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bool $force = false)\n  {\n    $res = [];\n    if ($ids = $this->getAccountsIds()) {\n      foreach ($ids as $id) {\n        $res[] = $this->getAccount($id, $force);\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 155,
-            "endLine": 165,
+            "startLine": 166,
+            "endLine": 176,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -203,9 +198,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -229,8 +222,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_account, bool $force = false)\n  {\n    if ($force || !isset($this->mboxes[$id_account])) {\n      if ($a = $this->pref->get($id_account)) {\n        $this->mboxes[$id_account] = [\n          'id' => $a['id'],\n          'host' => $a['host'] ?? null,\n          'login' => $a['login'],\n          'type' => $a['type'],\n          'port' => $a['port'] ?? null,\n          'ssl' => $a['ssl'] ?? true,\n          'folders' => null,\n          'last_uid' => $a['last_uid'] ?? null,\n          'last_check' => $a['last_check'] ?? null\n        ];\n        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);\n      }\n    }\n    return $this->mboxes[$id_account] ?? null;\n  }",
-            "startLine": 168,
-            "endLine": 187,
+            "startLine": 179,
+            "endLine": 198,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -240,7 +233,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -274,9 +266,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg)\n  {\n    if (X::hasProps(['login', 'pass', 'type'], true)) {\n      $mb = new bbn\\Appui\\Mailbox($cfg);\n      return $mb->check();\n    }\n  }",
-            "startLine": 190,
-            "endLine": 196,
+            "code": "function($cfg)\n  {\n    if (X::hasProps($cfg, ['login', 'pass', 'type'], true)) {\n      $mb = new Mailbox($cfg);\n      return $mb->check();\n    }\n  }",
+            "startLine": 201,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -285,9 +277,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -311,8 +301,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_account, array $cfg)\n  {\n    if (X::hasProps($cfg, ['login', 'pass', 'type'], true)\n        && ($acc = $this->getAccount($id_account))\n        && ($this->pref->setCfg(\n          $id_account,\n          [\n            'host' => $cfg['host'] ?? null,\n            'login' => $cfg['login'],\n            'type' => $cfg['type'],\n            'port' => $cfg['port'] ?? null,\n            'ssl' => $cfg['ssl'] ?? true,\n            'last_uid' => $cfg['last_uid'] ?? null,\n            'last_check' => $cfg['last_check'] ?? null\n          ]\n        ))\n    ) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 199,
-            "endLine": 220,
+            "startLine": 210,
+            "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -321,9 +311,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -356,8 +344,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_account)\n  {\n    return (bool)$this->pref->delete($id_account);\n  }",
-            "startLine": 223,
-            "endLine": 226,
+            "startLine": 234,
+            "endLine": 237,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -366,9 +354,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -392,8 +378,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    if (!X::hasProps($cfg, ['login', 'pass', 'type'], true)) {\n      throw new \\Exception(\"Missing arguments\");\n    }\n\n    if (!($id_accounts = self::getOptionId('accounts'))) {\n      throw new \\Exception(\"Impossible to find the account option\");\n    }\n\n    \/\/ toGroup as this option will use different user options\n    if (!($id_pref = $this->pref->addToGroup(\n      $id_accounts,\n      [\n        'id_user' => $this->user->getId(),\n        'login' => $cfg['login'],\n        'type' => $cfg['type'],\n        'host' => $cfg['host'] ?? null,\n        'port' => $cfg['port'] ?? null,\n        'ssl' => $cfg['ssl'] ?? true\n      ]\n    ))\n    ) {\n      throw new \\Exception(\"Impossible to add the preference\");\n    }\n\n    if (!$this->_get_password()->userStore($cfg['pass'], $id_pref, $this->user)) {\n      throw new \\Exception(\"Impossible to set the password\");\n    }\n\n    $this->getAccount($id_pref, true);\n    if (!empty($cfg['folders'])) {\n      $this->syncFolders($id_pref, $cfg['folders']);\n    }\n\n    return $id_pref;\n  }",
-            "startLine": 229,
-            "endLine": 265,
+            "startLine": 240,
+            "endLine": 276,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -402,9 +388,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -428,8 +412,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_account)\n  {\n    if (($account = $this->getAccount($id_account))\n        && ($num = $this->pref->deleteBits($id_account))\n    ) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 268,
-            "endLine": 277,
+            "startLine": 279,
+            "endLine": 288,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -438,9 +422,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -463,9 +445,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_account, string $name, string $id_parent = NULL)\n  {\n\n    $this->createFolderDb($id, $id_parent);\n  }",
-            "startLine": 280,
-            "endLine": 284,
+            "code": "function(string $id_account, string $name, string $id_parent = NULL)\n  {\n\n    $this->createFolderDb($id_account, $id_parent);\n  }",
+            "startLine": 291,
+            "endLine": 295,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -474,9 +456,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -518,8 +498,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_account, string $name, string $id_parent = NULL)\n  {\n\n  }",
-            "startLine": 287,
-            "endLine": 290,
+            "startLine": 298,
+            "endLine": 301,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -528,9 +508,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -572,8 +550,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id, string $name)\n  {\n\n    $this->renameFolderDb($id, $name);\n  }",
-            "startLine": 293,
-            "endLine": 297,
+            "startLine": 304,
+            "endLine": 308,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -582,9 +560,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -617,8 +593,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id, string $name)\n  {\n\n  }",
-            "startLine": 300,
-            "endLine": 303,
+            "startLine": 311,
+            "endLine": 314,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -627,9 +603,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -662,8 +636,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    $this->deleteFolderDb($id);\n  }",
-            "startLine": 306,
-            "endLine": 309,
+            "startLine": 317,
+            "endLine": 320,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -672,9 +646,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -698,8 +670,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n\n  }",
-            "startLine": 312,
-            "endLine": 315,
+            "startLine": 323,
+            "endLine": 326,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -708,9 +680,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -734,8 +704,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $folder, $sync = false)\n  {\n    if (X::hasProp($folder, 'uid')\n        && ($mb = $this->getMailbox($folder['id_account']))\n        && $mb->check()\n    ) {\n      if ($mb->update($folder['uid'])\n          && ($folders = $mb->getFolders())\n          && ($res = $folders[$folder['uid']])\n      ) {\n        if ($folder['last_uid'] !== $res['last_uid']) {\n          $id_account = $folder['id_account'];\n          unset($folder['id_account']);\n          $res = array_merge($folder, $res);\n          $this->pref->updateBit($folder['id'], $res, true);\n          $res['id_account'] = $id_account;\n          $this->getAccount($id_account, true);\n          if ($sync) {\n            $this->syncEmails($res);\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n\n  }",
-            "startLine": 318,
-            "endLine": 346,
+            "startLine": 329,
+            "endLine": 357,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -777,8 +747,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($account, $force = false)\n  {\n    $acc = is_array($account) ? $account : $acc = $this->getAccount($account);\n    if ($acc) {\n      $types = self::getFolderTypes();\n      if ($force) {\n        $this->syncFolders($acc['id']);\n      }\n\n      $cfg   = $this->class_cfg['arch']['users_emails'];\n      $table = $this->class_cfg['tables']['users_emails'];\n      \/\/die(X::dump($this->pref->getFullBits($acc['id'])));\n      return X::map(\n        function ($a) use ($types, $cfg, $table) {\n          if (!isset($a['uid'])) {\n\n            \/\/die(X::dump(\"NO UID\", $a, debug_backtrace()));\n          }\n\n          $res = [\n            'id' => $a['id'],\n            'id_account' => $a['id_user_option'],\n            'text' => $a['text'],\n            'uid' => $a['uid'],\n            'id_option' => $a['id_option'],\n            'type' => X::getField($types, ['id' => $a['id_option']], 'code'),\n            'db_uid' => $this->db->selectOne(\n              $table,\n              'MAX('.$this->db->csn($cfg['msg_uid'], true).')',\n              [\n                $cfg['id_folder'] => $a['id'],\n                $cfg['id_user'] => $this->user->getId()\n              ]\n            ),\n            'last_uid' => $a['last_uid'] ?? null,\n            'last_check' => $a['last_check'] ?? null\n          ];\n          if (!empty($a['items'])) {\n            $res['items'] = $a['items'];\n          }\n\n          return $res;\n        },\n        $this->pref->getFullBits($acc['id']),\n        'items'\n      );\n    }\n\n    return null;\n  }",
-            "startLine": 349,
-            "endLine": 398,
+            "startLine": 360,
+            "endLine": 409,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -820,8 +790,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id, bool $force = false)\n  {\n    $types = self::getFolderTypes();\n    $cfg   = $this->class_cfg['arch']['users_emails'];\n    $table = $this->class_cfg['tables']['users_emails'];\n    $a = $this->pref->getBit($id);\n    if ($a) {\n      return [\n        'id' => $a['id'],\n        'id_account' => $a['id_user_option'],\n        'text' => $a['text'],\n        'uid' => $a['uid'],\n        'id_option' => $a['id_option'],\n        'type' => X::getField($types, ['id' => $a['id_option']], 'code'),\n        'db_uid' => $this->db->selectOne(\n          $table,\n          'MAX('.$this->db->csn($cfg['msg_uid'], true).')',\n          [\n            $cfg['id_folder'] => $a['id'],\n            $cfg['id_user'] => $this->user->getId()\n          ]\n        ),\n        'last_uid' => $a['last_uid'] ?? null,\n        'last_check' => $a['last_check'] ?? null\n      ];\n    }\n\n    return null;\n  }",
-            "startLine": 401,
-            "endLine": 429,
+            "startLine": 412,
+            "endLine": 440,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -831,7 +801,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -865,9 +834,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $folder, int $limit = 0)\n  {\n    if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {\n      $res = 0;\n      if ($folder['last_uid'] && ($folder['last_uid'] !== $folder['db_uid'])) {\n        $mb = $this->getMailbox($folder['id_account']);\n        if ($mb->selectFolder($folder['uid'])) {\n          $start = 1;\n          if (!empty($folder['db_uid'])) {\n            try {\n              $start = $mb->getMsgNo($folder['db_uid']);\n            }\n            catch (\\Exception $e) {\n              $start = 1;\n            }\n          }\n          $real_end = 1;\n          if (!empty($folder['last_uid'])) {\n            try {\n              $real_end = $mb->getMsgNo($folder['last_uid']);\n            }\n            catch (\\Exception $e) {\n              $real_end = 1;\n            }\n          }\n\n          \/** @todo temporary solution to avoid errors *\/\n          if ($start === $real_end) {\n            return 0;\n          }\n\n          if ($limit) {\n            $real_end = min($real_end, $start + $limit);\n          }\n\n          $end      = $start;\n          $num      = $real_end - $start;\n          \/\/var_dump($folder, $num, $real_end);\n          while ($end <= $real_end) {\n            $end = min($real_end, $start + 999);\n            if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {\n              $start += 1000;\n              \/\/var_dump($start, $end);\n              foreach ($all as $a) {\n                if ($this->insertEmail($folder, $a)) {\n                  $res++;\n                }\n                else {\n                  \/\/throw new \\Exception(X::_(\"Impossible to insert the email with ID\").' '.$a['message_id']);\n                  $this->log(X::_(\"Impossible to insert the email with ID\").' '.$a['message_id']);\n                }\n              }\n\n              if ($end === $real_end) {\n                $this->pref->updateBit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);\n                break;\n              }\n            }\n            else {\n              throw new \\Exception(\n                X::_(\"Impossible to get the emails for folder\")\n                .' '.$folder['uid']\n                .' '.X::_(\"from\").' '.$start\n                .' '.X::_(\"to\").' '.$end\n                .' ('.$real_end.')'\n              );\n            }\n          }\n        }\n      }\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 432,
-            "endLine": 506,
+            "code": "function(array $folder, int $limit = 0)\n  {\n    if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {\n      $res = 0;\n      if ($folder['last_uid'] && ($folder['last_uid'] !== $folder['db_uid'])) {\n        $mb = $this->getMailbox($folder['id_account']);\n        if ($mb->selectFolder($folder['uid'])) {\n          if (!empty($folder['db_uid'])) {\n            try {\n              $start = $mb->getMsgNo($folder['db_uid']);\n            }\n            catch (\\Exception $e) {\n              $start = 1;\n            }\n          }\n\n          if (empty($start)) {\n            $start = 1;\n          }\n          $real_end = 1;\n          if (!empty($folder['last_uid'])) {\n            try {\n              $real_end = $mb->getMsgNo($folder['last_uid']);\n            }\n            catch (\\Exception $e) {\n              $real_end = 1;\n            }\n          }\n\n          \/** @todo temporary solution to avoid errors *\/\n          if ($start === $real_end) {\n            return 0;\n          }\n\n          if ($limit) {\n            $real_end = min($real_end, $start + $limit);\n          }\n\n          $end      = $start;\n          $num      = $real_end - $start;\n          \/\/var_dump($folder, $num, $real_end);\n          while ($end <= $real_end) {\n            $end = min($real_end, $start + 999);\n            if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {\n              $start += 1000;\n              \/\/var_dump($start, $end);\n              foreach ($all as $a) {\n                X::log($a, 'mail');\n                if ($this->insertEmail($folder, $a)) {\n                  $res++;\n                }\n                else {\n                  \/\/throw new \\Exception(X::_(\"Impossible to insert the email with ID\").' '.$a['message_id']);\n                  $this->log(X::_(\"Impossible to insert the email with ID\").' '.$a['message_id']);\n                }\n              }\n\n              if ($end === $real_end) {\n                $this->pref->updateBit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);\n                break;\n              }\n            }\n            else {\n              throw new \\Exception(\n                X::_(\"Impossible to get the emails for folder\")\n                .' '.$folder['uid']\n                .' '.X::_(\"from\").' '.$start\n                .' '.X::_(\"to\").' '.$end\n                .' ('.$real_end.')'\n              );\n            }\n          }\n        }\n      }\n      return $res;\n    }\n\n    return null;\n  }",
+            "startLine": 443,
+            "endLine": 521,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -877,7 +846,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -912,8 +880,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_folder, array $post)\n  {\n    if ($ids = $this->idsFromFolder($id_folder)) {\n      $cfg      = $this->class_cfg['arch']['users_emails'];\n      $table    = $this->class_cfg['tables']['users_emails'];\n      $real_filter = [\n        'logic' => 'AND',\n        'conditions' => [\n          $cfg['id_folder'] => $ids\n        ]\n      ];\n      if (!empty($post['filters'])) {\n        if (!isset($post['filters']['conditions'])) {\n          $post['filters'] = ['conditions' => $post['filters']];\n        }\n\n        if (!empty($post['filters']['conditions'])) {\n          $real_filter['conditions'][] = $post['filters'];\n        }\n      }\n\n      $post['filters'] = $real_filter;\n      $grid = new \\bbn\\Appui\\Grid($this->db, $post, [\n        'table' => $table,\n        'fields' => $cfg\n      ]);\n\n      if ($grid->check()) {\n        return $grid->getDatatable();\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 519,
-            "endLine": 552,
+            "startLine": 534,
+            "endLine": 567,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -923,7 +891,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -949,6 +916,40 @@
                 }
             ]
         },
+        "getLoginByEmailId": {
+            "name": "getLoginByEmailId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Email",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $table    = $this->class_cfg['tables']['users_emails'];\n    $em = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);\n    if ($em) {\n      $folder = $this->getFolder($em['id_folder']);\n      if ($folder\n          && ($mb = $this->getAccount($folder['id_account']))) {\n        return $mb;\n      }\n    }\n    return null;\n  }",
+            "startLine": 570,
+            "endLine": 582,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "getEmail": {
             "name": "getEmail",
             "summary": "",
@@ -958,9 +959,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    $cfg      = $this->class_cfg['arch']['users_emails'];\n    $table    = $this->class_cfg['tables']['users_emails'];\n    $em = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);\n    if ($em) {\n      $folder = $this->getFolder($em['id_folder']);\n      if ($folder\n          && ($mb = $this->getMailbox($folder['id_account']))\n          && $mb->selectFolder($folder['uid'])\n          && ($number = $mb->getMsgNo($em['msg_uid']))\n      ) {\n        return $mb->getMsg($number);\n      }\n    }\n    return null;\n  }",
-            "startLine": 555,
-            "endLine": 571,
+            "code": "function($id)\n  {\n    $cfg      = $this->class_cfg['arch']['users_emails'];\n    $table    = $this->class_cfg['tables']['users_emails'];\n    $em = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);\n    if ($em) {\n      $folder = $this->getFolder($em['id_folder']);\n      if ($folder\n          && ($mb = $this->getMailbox($folder['id_account']))\n          && $mb->selectFolder($folder['uid'])\n          && ($number = $mb->getMsgNo($em['msg_uid']))\n      ) {\n        $arr = $mb->getMsg($number);\n        $arr['id_account'] = $folder['id_account'];\n        return $arr;\n      }\n    }\n    return null;\n  }",
+            "startLine": 584,
+            "endLine": 602,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -970,7 +971,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -995,9 +995,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $folder, array $email)\n  {\n    if (X::hasProps($email, ['from', 'uid'])) {\n      $cfg      = $this->class_cfg['arch']['users_emails'];\n      $table    = $this->class_cfg['tables']['users_emails'];\n      $existing = $this->db->selectOne(\n        $table,\n        $cfg['id'],\n        [\n          $cfg['id_user'] => $this->user->getId(),\n          $cfg['msg_unique_id'] => $email['message_id']\n        ]\n      );\n      foreach (bbn\\Appui\\MailboX::getDestFields() as $df) {\n        if (!empty($email[$df])) {\n          foreach ($email[$df] as &$dest) {\n            if ($id = $this->retrieveEmail($dest['email'])) {\n              $sent_opt = X::getField(self::getFolderTypes(), ['code' => 'sent'], 'id');\n              if ($sent_opt === $folder['id_option']) {\n                $this->addSentToLink($id, Date('Y-m-d H:i:s', strtotime($email['date'])));\n              }\n            }\n            elseif (!($id = $this->addContactFromMail($dest))) {\n              throw new \\Exception(X::_(\"Impossible to add the contact\").' '.$dest['email']);\n            }\n\n            $dest['id'] = $id;\n          }\n\n          if ($df === 'from') {\n            $id_sender = $id;\n          }\n        }\n      }\n\n      if (!empty($id_sender)) {\n        $id_parent = null;\n        $id_thread = null;\n        if (!empty($email['in_reply_to'])) {\n          $tmp = $this->db->rselect(\n            $table,\n            [$cfg['id'], $cfg['id_thread']],\n            [\n              $cfg['id_user'] => $this->user->getId(),\n              $cfg['msg_unique_id'] => $email['in_reply_to']\n            ]\n          );\n          if ($tmp) {\n            $id_parent = $tmp[$cfg['id']];\n            $id_thread = $tmp[$cfg['id_thread']] ?: $id_parent;\n          }\n        }\n\n        \/\/die(var_dump($email));\n        $external = null;\n        if (!empty($email['in_reply_to']) || !empty($email['references'])) {\n          $external = [\n            'in_reply_to' => $email['in_reply_to'] ?? null,\n            'references'  => $email['references'] ?? null\n          ];\n        }\n\n        $ar = [\n          $cfg['id_user'] => $this->user->getId(),\n          $cfg['id_folder'] => $folder['id'],\n          $cfg['msg_uid'] => $email['uid'],\n          $cfg['msg_unique_id'] => $email['message_id'],\n          $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),\n          $cfg['id_sender'] => $id_sender,\n          $cfg['subject'] => empty($email['subject']) ? '' : mb_decode_mimeheader($email['subject']),\n          $cfg['size'] => $email['Size'],\n          $cfg['attachments'] => empty($email['attachments']) ? null : json_encode($email['attachments']),\n          $cfg['flags'] => $email['Flagged'] ?: null,\n          $cfg['is_read'] => $email['Unseen'] ? 0 : 1,\n          $cfg['id_parent'] => $id_parent,\n          $cfg['id_thread'] => $id_thread,\n          $cfg['external_uids'] => json_encode($external)\n        ];\n        $id = false;\n        if ($existing) {\n          \/\/die(var_dump($ar));\n          \/\/$this->db->update($table, $ar, [$cfg['id'] => $existing]);\n          $id = $existing;\n        }\n        elseif ($this->db->insert($table, $ar)) {\n          $id = $this->db->lastId();\n        }\n\n        if ($id) {\n          foreach (bbn\\Appui\\MailboX::getDestFields() as $df) {\n            if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {\n              foreach ($email[$df] as $dest) {\n                if (!empty($dest['id'])) {\n                  $this->addLinkToMail($id, $dest['id'], $df);\n                }\n              }\n            }\n          }\n\n          return $id;\n        }\n      }\n    }\n    $this->log($email);\n    \/\/throw new \\Exception(X::_(\"Invalid email\"));\n  }",
-            "startLine": 574,
-            "endLine": 679,
+            "code": "function(array $folder, array $email)\n  {\n    if (X::hasProps($email, ['from', 'uid'])) {\n      $cfg      = $this->class_cfg['arch']['users_emails'];\n      $table    = $this->class_cfg['tables']['users_emails'];\n      $existing = $this->db->selectOne(\n        $table,\n        $cfg['id'],\n        [\n          $cfg['id_user'] => $this->user->getId(),\n          $cfg['msg_unique_id'] => $email['message_id']\n        ]\n      );\n      foreach (Mailbox::getDestFields() as $df) {\n        if (!empty($email[$df])) {\n          foreach ($email[$df] as &$dest) {\n            if ($id = $this->retrieveEmail($dest['email'])) {\n              $sent_opt = X::getField(self::getFolderTypes(), ['code' => 'sent'], 'id');\n              if ($sent_opt === $folder['id_option']) {\n                $this->addSentToLink($id, Date('Y-m-d H:i:s', strtotime($email['date'])));\n              }\n            }\n            elseif (!($id = $this->addContactFromMail($dest))) {\n              throw new \\Exception(X::_(\"Impossible to add the contact\").' '.$dest['email']);\n            }\n\n            $dest['id'] = $id;\n          }\n\n          if ($df === 'from') {\n            $id_sender = $id;\n          }\n        }\n      }\n\n      if (!empty($id_sender)) {\n        $id_parent = null;\n        $id_thread = null;\n        if (!empty($email['in_reply_to'])) {\n          $tmp = $this->db->rselect(\n            $table,\n            [$cfg['id'], $cfg['id_thread']],\n            [\n              $cfg['id_user'] => $this->user->getId(),\n              $cfg['msg_unique_id'] => $email['in_reply_to']\n            ]\n          );\n          if ($tmp) {\n            $id_parent = $tmp[$cfg['id']];\n            $id_thread = $tmp[$cfg['id_thread']] ?: $id_parent;\n          }\n        }\n\n        \/\/die(var_dump($email));\n        $external = null;\n        if (!empty($email['in_reply_to']) || !empty($email['references'])) {\n          $external = [\n            'in_reply_to' => $email['in_reply_to'] ?? null,\n            'references'  => $email['references'] ?? null\n          ];\n        }\n\n        $ar = [\n          $cfg['id_user'] => $this->user->getId(),\n          $cfg['id_folder'] => $folder['id'],\n          $cfg['msg_uid'] => $email['uid'],\n          $cfg['msg_unique_id'] => $email['message_id'],\n          $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),\n          $cfg['id_sender'] => $id_sender,\n          $cfg['subject'] => $email['subject'] ?: '',\n          $cfg['size'] => $email['Size'],\n          $cfg['attachments'] => empty($email['attachments']) ? null : json_encode($email['attachments']),\n          $cfg['flags'] => $email['Flagged'] ?: null,\n          $cfg['is_read'] => $email['Unseen'] ? 0 : 1,\n          $cfg['id_parent'] => $id_parent,\n          $cfg['id_thread'] => $id_thread,\n          $cfg['external_uids'] => $external ? json_encode($external) : null\n        ];\n        $id = false;\n        if ($existing) {\n          \/\/die(var_dump($ar));\n          \/\/$this->db->update($table, $ar, [$cfg['id'] => $existing]);\n          $id = $existing;\n        }\n        elseif ($this->db->insert($table, $ar)) {\n          $id = $this->db->lastId();\n        }\n\n        if ($id) {\n          foreach (Mailbox::getDestFields() as $df) {\n            if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {\n              foreach ($email[$df] as $dest) {\n                if (!empty($dest['id'])) {\n                  $this->addLinkToMail($id, $dest['id'], $df);\n                }\n              }\n            }\n          }\n\n          return $id;\n        }\n      }\n    }\n    $this->log($email);\n    \/\/throw new \\Exception(X::_(\"Invalid email\"));\n  }",
+            "startLine": 605,
+            "endLine": 710,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1038,9 +1038,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $dest, bool $blacklist = false)\n  {\n    if (X::hasProp($dest, 'email', true)) {\n      $cfg_contacts   = $this->class_cfg['arch']['users_contacts'];\n      $cfg_links      = $this->class_cfg['arch']['users_contacts_links'];\n      $table_contacts = $this->class_cfg['tables']['users_contacts'];\n      $table_links = $this->class_cfg['tables']['users_contacts_links'];\n      if ($this->db->insert($table_contacts, [\n        $cfg_contacts['id_user']   => $this->user->getId(),\n        $cfg_contacts['name']      => $dest['name'] ?? null,\n        $cfg_contacts['blacklist'] => $blacklist ? 1 : 0\n      ])) {\n        $id_contact = $this->db->lastId();\n        if ($this->db->insert($table_links, [\n          'id_contact' => $id_contact,\n          'type' => 'email',\n          'value' => $dest['email']\n        ])) {\n          return $this->db->lastId();\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 682,
-            "endLine": 706,
+            "code": "function(array $dest, bool $blacklist = false)\n  {\n    if (X::hasProp($dest, 'email', true)) {\n      $cfg_contacts   = $this->class_cfg['arch']['users_contacts'];\n      $cfg_links      = $this->class_cfg['arch']['users_contacts_links'];\n      $table_contacts = $this->class_cfg['tables']['users_contacts'];\n      $table_links = $this->class_cfg['tables']['users_contacts_links'];\n      if ($this->db->insert($table_contacts, [\n        $cfg_contacts['id_user']   => $this->user->getId(),\n        $cfg_contacts['name']      => empty($dest['name']) ? null : mb_substr($dest['name'], 0, 100),\n        $cfg_contacts['blacklist'] => $blacklist ? 1 : 0\n      ])) {\n        $id_contact = $this->db->lastId();\n        if ($this->db->insert($table_links, [\n          'id_contact' => $id_contact,\n          'type' => 'email',\n          'value' => $dest['email']\n        ])) {\n          return $this->db->lastId();\n        }\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 713,
+            "endLine": 737,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1050,7 +1050,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1085,8 +1084,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    $cfg   = $this->class_cfg['arch']['users_contacts_links'];\n    $table = $this->class_cfg['tables']['users_contacts_links'];\n    $data  = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);\n    return $data ?: null;\n  }",
-            "startLine": 709,
-            "endLine": 715,
+            "startLine": 740,
+            "endLine": 746,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1096,7 +1095,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1122,8 +1120,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_email, string $id_link, string $type)\n  {\n    $cfg   = $this->class_cfg['arch']['users_emails_recipients'];\n    $table = $this->class_cfg['tables']['users_emails_recipients'];\n    return (bool)$this->db->insertIgnore(\n      $table,\n      [\n        $cfg['id_email'] => $id_email,\n        $cfg['id_contact_link'] => $id_link,\n        $cfg['type'] => $type\n      ]\n    );\n\n  }",
-            "startLine": 718,
-            "endLine": 731,
+            "startLine": 749,
+            "endLine": 762,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1132,9 +1130,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1176,8 +1172,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_link, string $date = NULL)\n  {\n    if ($link = $this->getLink($id_link)) {\n      $cfg   = $this->class_cfg['arch']['users_contacts_links'];\n      $table = $this->class_cfg['tables']['users_contacts_links'];\n      if (!$date) {\n        $date = date('Y-m-d H:i:s');\n      }\n      if ($link['last_sent'] && ($link['last_sent'] > $date))  {\n        $date = $link['last_sent'];\n      }\n\n      return (bool)$this->db->update(\n        $table,\n        [\n          $cfg['num_sent']  => $link[$cfg['num_sent']] + 1,\n          $cfg['last_sent'] => $date\n        ], [\n          'id' => $id_link\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 734,
-            "endLine": 758,
+            "startLine": 765,
+            "endLine": 789,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1186,9 +1182,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1221,8 +1215,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $email)\n  {\n    $contacts = $this->class_cfg['tables']['users_contacts'];\n    $cfg_c    = $this->class_cfg['arch']['users_contacts'];\n    $links    = $this->class_cfg['tables']['users_contacts_links'];\n    $cfg_l    = $this->class_cfg['arch']['users_contacts_links'];\n    return $this->db->selectOne(\n      [\n        'tables' => [$links],\n        'field'  => $this->db->cfn($cfg_l['id'], $links),\n        'join'   => [\n          [\n            'table' => $contacts,\n            'on'    => [\n              [\n                'field' => $cfg_l['id_contact'],\n                'exp'   => $this->db->cfn($cfg_c['id'], $contacts)\n              ]\n            ]\n\n          ]\n        ],\n        'where' => [\n          'value' => $email,\n          'id_user' => $this->user->getId(),\n          'type' => 'email'\n        ]\n      ]\n    );\n  }",
-            "startLine": 761,
-            "endLine": 790,
+            "startLine": 792,
+            "endLine": 821,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1255,8 +1249,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $email, string $name, $force)\n  {\n\n  }",
-            "startLine": 793,
-            "endLine": 796,
+            "startLine": 824,
+            "endLine": 827,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1307,8 +1301,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $contacts = $this->class_cfg['tables']['users_contacts'];\n    $cfg_c    = $this->class_cfg['arch']['users_contacts'];\n    $links    = $this->class_cfg['tables']['users_contacts_links'];\n    $cfg_l    = $this->class_cfg['arch']['users_contacts_links'];\n    $rows = $this->db->rselectAll(\n      [\n        'tables' => [$links],\n        'fields'  => [\n          $this->db->cfn($cfg_l['id'], $links),\n          $this->db->cfn($cfg_l['value'], $links),\n          $this->db->cfn($cfg_l['id_contact'], $links),\n          $this->db->cfn($cfg_l['num_sent'], $links),\n          $this->db->cfn($cfg_l['last_sent'], $links),\n          $this->db->cfn($cfg_c['name'], $contacts),\n          $this->db->cfn($cfg_c['cfg'], $contacts),\n          $this->db->cfn($cfg_c['blacklist'], $contacts),\n          'sortIndex' => 'IFNULL('.$this->db->cfn($cfg_c['name'], $contacts, true).','.$this->db->cfn($cfg_l['value'], $links).')'\n        ],\n        'join'   => [\n          [\n            'table' => $contacts,\n            'on'    => [\n              [\n                'field' => $cfg_l['id_contact'],\n                'exp'   => $this->db->cfn($cfg_c['id'], $contacts)\n              ]\n            ]\n\n          ]\n        ],\n        'where' => [\n          'id_user' => $this->user->getId(),\n          'type' => 'email'\n        ],\n        'order' => [\n          'sortIndex' => 'ASC'\n        ]\n      ]\n    );\n    $res = [];\n    if ($rows) {\n      foreach ($rows as $r) {\n        $res[] = [\n          'value' => $r['id'],\n          'text' => (empty($r['name']) ? '' : $r['name'].' - ').$r['value'],\n          'cfg' => empty($r['cfg']) ? [] : json_decode($r['cfg'], true),\n          'id_contact' => $r['id_contact'],\n          'num_sent' => $r['num_sent'],\n          'last_sent' => $r['last_sent'],\n          'blacklist' => $r['blacklist']\n        ];\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 799,
-            "endLine": 856,
+            "startLine": 830,
+            "endLine": 887,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1317,9 +1311,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1333,8 +1325,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_account, array $subscribed = [])\n  {\n    if ($mb = $this->getMailbox($id_account)) {\n      $mbParam = $mb->getParams();\n      $types   = self::getFolderTypes();\n\n      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed) {\n        $ele = array_shift($a);\n        $idx = X::find($res, ['text' => $ele]);\n        if (null === $idx) {\n          $idx   = count($res);\n          $res[] = [\n            'text' => $ele,\n            'uid' => $prefix.$ele,\n            'items' => [],\n            'subscribed' => in_array($prefix.$ele, $subscribed)\n          ];\n        }\n\n        if (count($a)) {\n          $put_in_res($a, $res[$idx]['items'], $prefix.$ele.'.');\n        }\n      };\n\n      $compare = function (\n          array $real,\n          array $db,\n          array &$res = null,\n          $id_parent = null\n      ) use (&$compare): array {\n        if (!$res) {\n          $res = ['add' => [], 'delete' => []];\n        }\n\n        foreach ($real as $r) {\n          $idx = X::find($db, ['text' => $r['text']]);\n          if (null === $idx) {\n            if ($id_parent) {\n              $r['id_parent'] = $id_parent;\n            }\n\n            $res['add'][] = $r;\n          }\n          elseif ($r['items'] && $db[$idx]['items']) {\n            $compare($r['items'], $db[$idx]['items'], $res, $db[$idx]['id']);\n          }\n        }\n\n        foreach ($db as $r) {\n          $idx = X::find($real, ['text' => $r['text']]);\n          if (null === $idx) {\n            $res['delete'][] = $r;\n          }\n        }\n\n        return $res;\n      };\n\n      $pref = $this->pref;\n\n      $import = function (array $to_add, $id_parent = null) use ($id_account, &$pref, &$import, &$types) {\n        foreach ($to_add as $a) {\n          if ($id_parent) {\n            $a['id_parent'] = $id_parent;\n            $a['id_option'] = X::getField($types, ['code' => 'folders'], 'id');\n          }\n          else {\n            foreach ($types as $type) {\n              if (!empty($type['names'])) {\n                if (in_array($a['text'], $type['names'], true)) {\n                  $a['id_option'] = $type['id'];\n                  break;\n                }\n              }\n            }\n\n            if (!isset($a['id_option'])) {\n              $a['id_option'] = X::getField($types, ['code' => 'folders'], 'id');\n            }\n          }\n\n          if ($id_bit = $pref->addBit($id_account, $a)) {\n            if (!empty($a['items'])) {\n              $import($a['items'], $id_bit);\n            }\n          }\n        }\n      };\n\n      $res = [];\n      $all = $mb->listAllFolders();\n      foreach ($all as $dir) {\n        $tmp = str_replace($mbParam, '', $dir);\n        $bits = X::split($tmp, '.');\n        $put_in_res($bits, $res);\n      }\n\n      \/\/ We have a tree\n      $db_tree = $this->pref->getFullBits($id_account);\n\n      $result = $compare($res, $db_tree);\n\n      $import($result['add']);\n\n      return ['real' => $res, 'db' => $db_tree, 'compare' => $result];\n    }\n\n    return null;\n  }",
-            "startLine": 859,
-            "endLine": 967,
+            "startLine": 890,
+            "endLine": 998,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1366,6 +1358,49 @@
                 }
             ]
         },
+        "send": {
+            "name": "send",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Email",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_account, array $cfg)\n  {\n    if ($mb = $this->getMailbox($id_account)) {\n      $fields = ['to', 'cc', 'bcc'];\n      $num    = 0;\n      $dest   = [];\n      \/*\n      foreach ($fields as $field) {\n        $dest[$field] = [];\n        if (!empty($cfg[$field])) {\n          foreach ($cfg[$field] as $d) {\n            if (Str::isEmail($d)) {\n              $dest[$field][] = $d;\n              $num++;\n            }\n          }\n        }\n      }\n      *\/\n  \n      if (!empty($cfg['title']) || !empty($cfg['text'])) {\n        $mailer = $mb->getMailer();\n        return $mailer->send($cfg);\n      }\n    }\n\n    throw new \\Exception(X::_(\"Impossible to find the mailbox\"));\n  }",
+            "startLine": 1001,
+            "endLine": 1028,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_account",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "getStructure": {
             "name": "getStructure",
             "summary": "",
@@ -1376,8 +1411,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_account, $force)\n  {\n\n  }",
-            "startLine": 970,
-            "endLine": 973,
+            "startLine": 1031,
+            "endLine": 1034,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1863,9 +1898,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1948,7 +1981,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1984,9 +2016,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2020,9 +2050,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2075,7 +2103,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2111,9 +2138,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2195,9 +2220,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Appui\\Option"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2366,7 +2389,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2392,9 +2414,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2418,9 +2438,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2445,7 +2463,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2472,7 +2489,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2564,7 +2580,7 @@
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 65,
+    "numMethods": 67,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 4,

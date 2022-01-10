@@ -20,7 +20,7 @@
     "interfaces": [],
     "fileName": "\/User.php",
     "startLine": 21,
-    "endLine": 2307,
+    "endLine": 2310,
     "contentConstructor": {
         "file": "bbn\\User",
         "returns": null
@@ -35,9 +35,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $params = [], array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    $f =& $this->class_cfg['fields'];\n    self::retrieverInit($this);\n\n    if ($this->isToken() && !empty($params[$f['token']])) {\n\n      if ($this->isPhoneNumberCodeSendingRequest($params)) {\n        \/\/ Verify that the received token is associated with the device uid\n        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ Check if the phone number is already registered\n        if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))\n          && ($exUser[$f['id']] !== $user_id)\n          && $this->updateApiTokenUserByTokenDevice(\n            $params[$f['token']],\n            $params[$f['device_uid']],\n            $exUser[$f['id']],\n            $params[$f['device_lang']] ?? ''\n          )\n        ) {\n          if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [\n            $this->class_cfg['arch']['users']['id'] => $user_id\n          ])) {\n            $this->db->delete($this->class_cfg['table'], [\n              $this->class_cfg['arch']['users']['id'] => $user_id\n            ]);\n          }\n          $user_id = $exUser[$f['id']];\n        }\n\n        $this->id = $user_id;\n        \/\/ Generate a code\n        $code = random_int(1001, 9999);\n\n        \/\/ Save it\n        if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {\n          \/\/ Send the sms with code here\n\n          return $this->api_request_output = [\n            'success' => true,\n            'phone_verification_code' => $code\n          ];\n        }\n        else {\n          throw new \\Exception(X::_('Impossible to update the user'));\n        }\n\n\n      }\n      elseif ($this->isVerifyPhoneNumberRequest($params)) {\n        \/\/ Verify that the received token is associated to the device uid\n        if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ find the user using phone_number in db\n        $user = $this->findByPhoneNumber($params[$f['phone_number']]);\n\n        if (!$user) {\n          throw new \\Exception(X::_('Unknown phone number'));\n        }\n\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n\n        if (!$this->hasSkipVerification()) {\n          \/\/ Verify that the code is correct\n          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);\n\n          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n\n          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n        }\n\n        \/\/ Update verification code to null\n        $this->updatePhoneVerificationCode($params[$f['phone_number']], null);\n\n        \/\/ Generate a new token\n        $new_token = Str::genpwd(32, 16);\n\n        \/\/ Update user id and the new token in the row with the old token and device uid.\n        $this->db->update(\n            $this->class_cfg['tables']['api_tokens'], [\n            $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],\n            $this->class_cfg['arch']['api_tokens']['token']    => $new_token,\n          ], [\n            $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n            $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']],\n          ]\n        );\n\n        \/\/ Send the new token here\n        return $this->api_request_output =  [\n          'token'   => $new_token,\n          'success' => true\n        ];\n\n      }\n      elseif ($this->isTokenLoginRequest($params)) {\n        \/\/ Find the token associated to the device uid in db then get it's associated user.\n        if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {\n          throw new \\Exception(X::_('Invalid token').' '.$params[$f['token']].' \/ '.$params[$f['device_uid']]);\n        }\n\n        \/\/ Update device_lang and last \n        $this->db->update($this->class_cfg['tables']['api_tokens'], [\n          $this->class_cfg['arch']['api_tokens']['device_lang'] => $params[$f['device_lang']] ?? '',\n          $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')\n        ], [\n          $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n          $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]\n        ]);\n\n        \/\/ Now the user is authenticated\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n\n        return $this->api_request_output = [\n          'token'   => $params[$f['token']],\n          'success' => true\n        ];\n\n      }\n    }\n    else {\n      \/\/ The client environment variables\n      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';\n      $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';\n      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n\n      \/\/ Creating the session's variables if they don't exist yet\n      $this->_init_session();\n\n      \/*\n      if (x::isCli() && isset($params['id'])) {\n        $this->id = $params['id'];\n        $this->auth = true;\n      }\n      *\/\n      \/\/ The user logs in\n      if ($this->isLoginRequest($params)) {\n        \/** @todo separate credentials and salt checking *\/\n        if (!empty($this->sess_cfg['fingerprint'])\n          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']\n        ) {\n          \/** @todo separate credentials and salt checking *\/\n          $this->_check_credentials($params);\n        }\n        else{\n          $this->setError(19);\n          $this->session->destroy();\n        }\n      }\n\n      \/** @todo revise the process: dying is not the solution! *\/\n      \/\/ The user is not known yet\n      elseif ($this->isResetPasswordRequest($params)) {\n        if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {\n          $this->password_reset = true;\n          if (($params[$f['pass1']] === $params[$f['pass2']])) {\n            $this->expireHotlink($params[$f['id']]);\n            $this->id = $id;\n            $this->forcePassword($params[$f['pass2']]);\n            $this->session->set([]);\n          }\n          else{\n            $this->setError(7);\n          }\n        }\n        else{\n          $this->setError(18);\n        }\n      }\n      else {\n        $this->checkSession();\n      }\n    }\n  }",
+            "code": "function(bbn\\Db $db, array $params = [], array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    $f =& $this->class_cfg['fields'];\n    self::retrieverInit($this);\n\n    if ($this->isToken() && !empty($params[$f['token']])) {\n\n      if ($this->isPhoneNumberCodeSendingRequest($params)) {\n        \/\/ Verify that the received token is associated with the device uid\n        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ Check if the phone number is already registered\n        if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))\n          && ($exUser[$f['id']] !== $user_id)\n          && $this->updateApiTokenUserByTokenDevice(\n            $params[$f['token']],\n            $params[$f['device_uid']],\n            $exUser[$f['id']],\n            !empty($params[$f['device_lang']]) ? str_replace('\"', '', $params[$f['device_lang']]) : ''\n          )\n        ) {\n          if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [\n            $this->class_cfg['arch']['users']['id'] => $user_id\n          ])) {\n            $this->db->delete($this->class_cfg['table'], [\n              $this->class_cfg['arch']['users']['id'] => $user_id\n            ]);\n          }\n          $user_id = $exUser[$f['id']];\n        }\n\n        $this->id = $user_id;\n        \/\/ Generate a code\n        $code = random_int(1001, 9999);\n\n        \/\/ Save it\n        if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {\n          \/\/ Send the sms with code here\n\n          return $this->api_request_output = [\n            'success' => true,\n            'phone_verification_code' => $code\n          ];\n        }\n        else {\n          throw new \\Exception(X::_('Impossible to update the user'));\n        }\n\n\n      }\n      elseif ($this->isVerifyPhoneNumberRequest($params)) {\n        \/\/ Verify that the received token is associated to the device uid\n        if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ find the user using phone_number in db\n        $user = $this->findByPhoneNumber($params[$f['phone_number']]);\n\n        if (!$user) {\n          throw new \\Exception(X::_('Unknown phone number'));\n        }\n\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n\n        if (!$this->hasSkipVerification()) {\n          \/\/ Verify that the code is correct\n          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);\n\n          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n\n          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n        }\n\n        \/\/ Update verification code to null\n        $this->updatePhoneVerificationCode($params[$f['phone_number']], null);\n\n        \/\/ Generate a new token\n        $new_token = Str::genpwd(32, 16);\n\n        \/\/ Update user id and the new token in the row with the old token and device uid.\n        $this->db->update(\n            $this->class_cfg['tables']['api_tokens'], [\n            $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],\n            $this->class_cfg['arch']['api_tokens']['token']    => $new_token,\n          ], [\n            $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n            $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']],\n          ]\n        );\n\n        \/\/ Send the new token here\n        return $this->api_request_output =  [\n          'token'   => $new_token,\n          'success' => true\n        ];\n\n      }\n      elseif ($this->isTokenLoginRequest($params)) {\n        \/\/ Find the token associated to the device uid in db then get it's associated user.\n        if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {\n          throw new \\Exception(X::_('Invalid token').' '.$params[$f['token']].' \/ '.$params[$f['device_uid']]);\n        }\n\n        \/\/ Update device_lang and last\n        $toUdp = [\n          $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')\n        ];\n        if (isset($params[$f['device_lang']])) {\n          $toUdp[$this->class_cfg['arch']['api_tokens']['device_lang']] = $params[$f['device_lang']];\n        }\n        $this->db->update($this->class_cfg['tables']['api_tokens'], $toUdp, [\n          $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n          $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]\n        ]);\n\n        \/\/ Now the user is authenticated\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n\n        return $this->api_request_output = [\n          'token'   => $params[$f['token']],\n          'success' => true\n        ];\n\n      }\n    }\n    else {\n      \/\/ The client environment variables\n      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';\n      $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';\n      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n\n      \/\/ Creating the session's variables if they don't exist yet\n      $this->_init_session();\n\n      \/*\n      if (x::isCli() && isset($params['id'])) {\n        $this->id = $params['id'];\n        $this->auth = true;\n      }\n      *\/\n      \/\/ The user logs in\n      if ($this->isLoginRequest($params)) {\n        \/** @todo separate credentials and salt checking *\/\n        if (!empty($this->sess_cfg['fingerprint'])\n          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']\n        ) {\n          \/** @todo separate credentials and salt checking *\/\n          $this->_check_credentials($params);\n        }\n        else{\n          $this->setError(19);\n          $this->session->destroy();\n        }\n      }\n\n      \/** @todo revise the process: dying is not the solution! *\/\n      \/\/ The user is not known yet\n      elseif ($this->isResetPasswordRequest($params)) {\n        if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {\n          $this->password_reset = true;\n          if (($params[$f['pass1']] === $params[$f['pass2']])) {\n            $this->expireHotlink($params[$f['id']]);\n            $this->id = $id;\n            $this->forcePassword($params[$f['pass2']]);\n            $this->session->set([]);\n          }\n          else{\n            $this->setError(7);\n          }\n        }\n        else{\n          $this->setError(18);\n        }\n      }\n      else {\n        $this->checkSession();\n      }\n    }\n  }",
             "startLine": 273,
-            "endLine": 461,
+            "endLine": 464,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -88,8 +88,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->password_reset;\n  }",
-            "startLine": 524,
-            "endLine": 527,
+            "startLine": 527,
+            "endLine": 530,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -112,8 +112,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_get_session('salt');\n  }",
-            "startLine": 535,
-            "endLine": 538,
+            "startLine": 538,
+            "endLine": 541,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -123,7 +123,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -139,8 +138,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($salt)\n  {\n    return $this->getSalt() === $salt;\n  }",
-            "startLine": 546,
-            "endLine": 549,
+            "startLine": 549,
+            "endLine": 552,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -149,9 +148,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -175,8 +172,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr = '')\n  {\n    if ($this->check()) {\n      if (!$this->cfg) {\n        $this->cfg = $this->session->get('cfg');\n      }\n\n      if (empty($attr)) {\n        return $this->cfg;\n      }\n\n      if (isset($this->cfg[$attr])) {\n        return $this->cfg[$attr];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 558,
-            "endLine": 575,
+            "startLine": 561,
+            "endLine": 578,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -209,8 +206,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($index, $data = NULL)\n  {\n    if (!$this->auth) {\n      throw new \\Exception(X::_(\"Impossible to store data on an unauthenticated user\"));\n    }\n\n    if (is_array($index) && X::isAssoc($index)) {\n      foreach ($index as $k => $v) {\n        \/\/ Unsetting if null\n        if (is_null($v) && array_key_exists($k, $this->data)) {\n          unset($this->data[$k]);\n        }\n        else {\n          $this->data[$k] = $v;\n        }\n      }\n    }\n    elseif (is_string($index)) {\n      $this->data[$index] = $data;\n    }\n    else {\n      throw new \\Exception(X::_(\"Invalid parameters for function setData in user class\"));\n    }\n\n    return $this;\n  }",
-            "startLine": 586,
-            "endLine": 611,
+            "startLine": 589,
+            "endLine": 614,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -219,9 +216,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -256,8 +251,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $idx)\n  {\n    if (!$this->auth) {\n      throw new \\Exception(X::_(\"Impossible to retrieve data for an authenticated user\"));\n    }\n\n    return $this->data[$idx] ?? null;\n  }",
-            "startLine": 621,
-            "endLine": 628,
+            "startLine": 624,
+            "endLine": 631,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -290,8 +285,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->class_cfg;\n  }",
-            "startLine": 636,
-            "endLine": 639,
+            "startLine": 639,
+            "endLine": 642,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -300,9 +295,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -316,8 +309,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->path;\n  }",
-            "startLine": 647,
-            "endLine": 650,
+            "startLine": 650,
+            "endLine": 653,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -327,7 +320,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -343,8 +335,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->tmp_path;\n  }",
-            "startLine": 658,
-            "endLine": 661,
+            "startLine": 661,
+            "endLine": 664,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -354,7 +346,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -370,8 +361,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!empty($this->class_cfg)) {\n      return $this->class_cfg['tables'];\n    }\n\n    return null;\n  }",
-            "startLine": 668,
-            "endLine": 675,
+            "startLine": 671,
+            "endLine": 678,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -381,7 +372,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -397,8 +387,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table = '')\n  {\n    if (!empty($this->class_cfg)) {\n      if ($table) {\n        return $this->class_cfg['arch'][$table] ?? null;\n      }\n\n      return $this->class_cfg['arch'];\n    }\n\n    return null;\n  }",
-            "startLine": 684,
-            "endLine": 695,
+            "startLine": 687,
+            "endLine": 698,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -408,7 +398,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -434,8 +423,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $d)\n  {\n    if ($this->checkSession()) {\n      $update = [];\n      foreach ($d as $key => $val){\n        if (($key !== $this->fields['id'])\n            && ($key !== $this->fields['cfg'])\n            && ($key !== 'auth')\n            && ($key !== 'admin')\n            && ($key !== 'dev')\n            && ($key !== 'pass')\n        ) {\n          $update[$key] = $val;\n        }\n      }\n\n      if (\\count($update) > 0) {\n        $r = (bool)$this->update($this->getId(), $update, true);\n        \/** @todo Why did I do this?? *\/\n        if ($r) {\n          \/** @todo WTF?? *\/\n          $this->setSession(['cfg' => false]);\n          $this->_user_info();\n        }\n      }\n      return $r ?? false;\n    }\n\n    return false;\n  }",
-            "startLine": 704,
-            "endLine": 733,
+            "startLine": 707,
+            "endLine": 736,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -469,8 +458,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st)\n  {\n    return $this->_hash($st);\n  }",
-            "startLine": 742,
-            "endLine": 745,
+            "startLine": 745,
+            "endLine": 748,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -479,9 +468,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -505,8 +492,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return (bool)$this->_just_login;\n  }",
-            "startLine": 753,
-            "endLine": 756,
+            "startLine": 756,
+            "endLine": 759,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -529,8 +516,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    if ($this->session->has($this->userIndex)) {\n      $args = \\func_get_args();\n      if ((\\count($args) === 2) && \\is_string($args[0])) {\n        $attr = [$args[0] => $args[1]];\n      }\n\n      if(is_array($attr)) {\n        foreach ($attr as $key => $val){\n          if (\\is_string($key)) {\n            $this->session->set($val, $this->userIndex, $key);\n          }\n        }\n      }\n    }\n\n    return $this;\n  }",
-            "startLine": 764,
-            "endLine": 782,
+            "startLine": 767,
+            "endLine": 785,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -539,9 +526,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -565,8 +550,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $args = \\func_get_args();\n    array_unshift($args, $this->userIndex);\n    if ($this->session->has(...$args)) {\n      $this->session->uset(...$args);\n    }\n\n    return $this;\n  }",
-            "startLine": 790,
-            "endLine": 799,
+            "startLine": 793,
+            "endLine": 802,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -575,9 +560,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -591,8 +574,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr = NULL)\n  {\n    if ($this->session && $this->session->has($this->userIndex)) {\n      return $attr ? $this->session->get($this->userIndex, $attr) : $this->session->get($this->userIndex);\n    }\n\n    return null;\n  }",
-            "startLine": 808,
-            "endLine": 815,
+            "startLine": 811,
+            "endLine": 818,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -626,8 +609,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr = NULL)\n  {\n    return $this->_get_session($attr);\n  }",
-            "startLine": 824,
-            "endLine": 827,
+            "startLine": 827,
+            "endLine": 830,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -661,8 +644,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_set_session(...func_get_args());\n  }",
-            "startLine": 835,
-            "endLine": 838,
+            "startLine": 838,
+            "endLine": 841,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -685,8 +668,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    return $this->session->has($this->userIndex, $attr);\n  }",
-            "startLine": 846,
-            "endLine": 849,
+            "startLine": 849,
+            "endLine": 852,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -695,9 +678,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -721,8 +702,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($id_session = $this->getIdSession() && $this->check()) {\n      $p =& $this->class_cfg['arch']['sessions'];\n      $this->db->update(\n        $this->class_cfg['tables']['sessions'], [\n        $p['last_activity'] => date('Y-m-d H:i:s')\n        ], [\n        $p['id'] => $id_session\n        ]\n      );\n    }\n    else{\n      $this->setError(13);\n    }\n\n    return $this;\n  }",
-            "startLine": 857,
-            "endLine": 874,
+            "startLine": 860,
+            "endLine": 877,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -731,9 +712,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -747,8 +726,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bool $force = false)\n  {\n    $id_session = $this->getIdSession();\n    if ($this->check()) {\n      if ($id_session) {\n        $p =& $this->class_cfg['arch']['sessions'];\n        \/\/ It is normal this is sometimes not changing as different actions can happen in the same\n        $time = time();\n        if ($force || empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2)) {\n          $this->sess_cfg['last_renew'] = $time;\n          $this->db->update(\n            $this->class_cfg['tables']['sessions'],\n            [\n              $p['id_user'] => $this->id,\n              $p['sess_id'] => $this->session->getId(),\n              $p['ip_address'] => $this->ip_address,\n              $p['user_agent'] => $this->user_agent,\n              $p['opened'] => 1,\n              $p['last_activity'] => date('Y-m-d H:i:s', $time),\n              $p['cfg'] => json_encode($this->sess_cfg)\n            ],\n            [$p['id'] => $id_session]\n          );\n        }\n      }\n      else{\n        $this->setError(13);\n      }\n    }\n\n    return $this;\n  }",
-            "startLine": 883,
-            "endLine": 914,
+            "startLine": 886,
+            "endLine": 917,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -757,9 +736,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -783,8 +760,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($with_session = false)\n  {\n    if ($this->id) {\n      if ($this->session) {\n        $p =& $this->class_cfg['arch']['sessions'];\n        $this->db->update(\n          $this->class_cfg['tables']['sessions'], [\n            $p['ip_address'] => $this->ip_address,\n            $p['user_agent'] => $this->user_agent,\n            $p['opened'] => 0,\n            $p['last_activity'] => date('Y-m-d H:i:s'),\n            $p['cfg'] => json_encode($this->sess_cfg)\n          ],[\n            $p['id_user'] => $this->id,\n            $p['sess_id'] => $this->session->getId()\n          ]\n        );\n        if ($with_session) {\n          $this->session->set([]);\n        }\n        else{\n          $this->session->set([], $this->userIndex);\n        }\n      }\n      $this->auth     = false;\n      $this->id       = null;\n      $this->sess_cfg = null;\n    }\n    return $this;\n  }",
-            "startLine": 923,
-            "endLine": 952,
+            "startLine": 926,
+            "endLine": 955,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -793,9 +770,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -820,8 +795,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!isset($this->cfg)) {\n      return true;\n    }\n\n    if (isset($this->cfg['num_attempts']) && $this->cfg['num_attempts'] > $this->class_cfg['max_attempts']) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 959,
-            "endLine": 970,
+            "startLine": 962,
+            "endLine": 973,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -830,9 +805,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -851,8 +824,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      $this->db->update(\n        $this->class_cfg['tables']['users'],\n        [$this->fields['cfg'] => json_encode($this->cfg)],\n        [$this->fields['id'] => $this->id]\n      );\n    }\n\n    return $this;\n  }",
-            "startLine": 978,
-            "endLine": 989,
+            "startLine": 981,
+            "endLine": 992,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -861,9 +834,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -882,8 +853,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    if (null !== $this->cfg) {\n      $args = \\func_get_args();\n      if ((\\count($args) === 2) && \\is_string($attr)) {\n        \/** @var array $attr *\/\n        $attr = [$args[0] => $args[1]];\n      }\n\n      if (is_array($attr)) {\n        foreach ($attr as $key => $val){\n          if (\\is_string($key)) {\n            $this->cfg[$key] = $val;\n          }\n        }\n\n        $this->setSession(['cfg' => $this->cfg]);\n      }\n    }\n\n    return $this;\n  }",
-            "startLine": 997,
-            "endLine": 1018,
+            "startLine": 1000,
+            "endLine": 1021,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -892,9 +863,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -918,8 +887,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    if (null !== $this->cfg) {\n      if (\\is_string($attr)) {\n        \/** @var array $attr *\/\n        $attr = [$attr];\n      }\n\n      if (is_array($attr)) {\n        foreach ($attr as $key){\n          if (isset($key)) {\n            unset($this->cfg[$key]);\n          }\n        }\n\n        $this->setSession(['cfg' => $this->cfg]);\n      }\n    }\n\n    return $this;\n  }",
-            "startLine": 1027,
-            "endLine": 1047,
+            "startLine": 1030,
+            "endLine": 1050,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -928,9 +897,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -954,8 +921,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      $this->_user_info();\n      $this->_sess_info();\n    }\n\n    return $this;\n  }",
-            "startLine": 1055,
-            "endLine": 1063,
+            "startLine": 1058,
+            "endLine": 1066,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -964,9 +931,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -980,8 +945,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      return $this->auth;\n  }",
-            "startLine": 1071,
-            "endLine": 1074,
+            "startLine": 1074,
+            "endLine": 1077,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1004,8 +969,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      $this->_retrieve_session();\n      return $this->auth;\n    }\n\n    return false;\n  }",
-            "startLine": 1082,
-            "endLine": 1090,
+            "startLine": 1085,
+            "endLine": 1093,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1028,8 +993,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n\n    return null;\n  }",
-            "startLine": 1098,
-            "endLine": 1105,
+            "startLine": 1101,
+            "endLine": 1108,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1039,7 +1004,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1055,8 +1019,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      return $this->id_group;\n    }\n\n    return null;\n  }",
-            "startLine": 1113,
-            "endLine": 1120,
+            "startLine": 1116,
+            "endLine": 1123,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1066,7 +1030,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1082,8 +1045,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    if ($this->check()) {\n      return $this->db->update(\n        $this->class_cfg['tables']['hotlinks'],\n        [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],\n        [$this->class_cfg['arch']['hotlinks']['id'] => $id]\n      );\n    }\n\n    return 0;\n  }",
-            "startLine": 1128,
-            "endLine": 1139,
+            "startLine": 1131,
+            "endLine": 1142,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1092,9 +1055,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1118,8 +1079,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id, string $key)\n  {\n    if ($val = $this->db->rselect(\n      $this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n      ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id,\n      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]\n      ]\n    )\n    ) {\n      if (self::isMagicString($key, $val[$this->class_cfg['arch']['hotlinks']['magic']])) {\n        return $val['id_user'];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1149,
-            "endLine": 1167,
+            "startLine": 1152,
+            "endLine": 1170,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1129,7 +1090,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1164,8 +1124,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return (bool)$this->getSession('admin');\n  }",
-            "startLine": 1175,
-            "endLine": 1178,
+            "startLine": 1178,
+            "endLine": 1181,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1174,9 +1134,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1190,8 +1148,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return (bool)($this->isAdmin() || (bool)$this->getSession('dev'));\n  }",
-            "startLine": 1186,
-            "endLine": 1189,
+            "startLine": 1189,
+            "endLine": 1192,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1200,9 +1158,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1216,8 +1172,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return new User\\Manager($this);\n  }",
-            "startLine": 1197,
-            "endLine": 1200,
+            "startLine": 1200,
+            "endLine": 1203,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1240,8 +1196,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->getError() ? false : true;\n  }",
-            "startLine": 1208,
-            "endLine": 1211,
+            "startLine": 1211,
+            "endLine": 1214,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1287,8 +1243,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->auth = false;\n    $this->cfg  = [];\n    $this->closeSession();\n  }",
-            "startLine": 1219,
-            "endLine": 1224,
+            "startLine": 1222,
+            "endLine": 1227,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1311,8 +1267,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->_mailer) {\n      if (class_exists($this->class_cfg['mailer'])) {\n        $this->_mailer = new $this->class_cfg['mailer']();\n      }\n      else {\n        throw new \\Exception(X::_(\"Impossible to find the mailer class %s\", (string)$this->class_cfg['mailer']));\n      }\n    }\n\n    return $this->_mailer;\n  }",
-            "startLine": 1233,
-            "endLine": 1245,
+            "startLine": 1236,
+            "endLine": 1248,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1335,8 +1291,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $old_pass, string $new_pass)\n  {\n    if ($this->auth) {\n      $pwt         = $this->class_cfg['tables']['passwords'];\n      $pwa         = $this->class_cfg['arch']['passwords'];\n      $stored_pass = $this->db->selectOne(\n        $pwt, $pwa['pass'], [\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id\n        ], [\n        $this->class_cfg['arch']['passwords']['added'] => 'DESC'\n        ]\n      );\n      if ($this->_check_password($old_pass, $stored_pass)) {\n        return $this->forcePassword($new_pass);\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 1255,
-            "endLine": 1273,
+            "startLine": 1258,
+            "endLine": 1276,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1345,9 +1301,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1382,8 +1336,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($pass)\n  {\n    if ($this->id) {\n      return (bool)$this->db->insert(\n        $this->class_cfg['tables']['passwords'], [\n        $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,\n        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 1281,
-            "endLine": 1294,
+            "startLine": 1284,
+            "endLine": 1297,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1392,9 +1346,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1418,8 +1370,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($usr = NULL)\n  {\n    if ($this->auth) {\n      if (\\is_null($usr)) {\n        $usr = $this->getSession();\n      }\n      elseif (str::isUid($usr)) {\n        $mgr = $this->getManager();\n        $usr = $mgr->getUser($usr);\n      }\n\n      if (isset($this->class_cfg['show'], $usr[$this->class_cfg['show']])) {\n        return $usr[$this->class_cfg['show']];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1302,
-            "endLine": 1319,
+            "startLine": 1305,
+            "endLine": 1322,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1429,7 +1381,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1455,8 +1406,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->auth) {\n      $token = Str::genpwd(32, 16);\n      $f     =& $this->class_cfg['arch']['tokens'];\n      if ($this->db->insert(\n        $this->class_cfg['tables']['tokens'],\n        [\n          $f['id_session'] => $this->getIdSession(),\n          $f['content'] => $token,\n          $f['creation'] => X::microtime(),\n          $f['last'] => X::microtime()\n        ]\n      )\n      ) {\n        return $token;\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1327,
-            "endLine": 1347,
+            "startLine": 1330,
+            "endLine": 1350,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1466,7 +1417,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1482,8 +1432,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($usr = NULL)\n  {\n    if ($this->auth) {\n      if (\\is_null($usr)) {\n        $usr = $this->getSession();\n      }\n      elseif (str::isUid($usr) && ($mgr = $this->getManager())) {\n        $usr = $mgr->getUser($usr);\n      }\n\n      if (isset($this->fields['email'], $usr[$this->fields['email']])) {\n        return $usr[$this->fields['email']];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1355,
-            "endLine": 1371,
+            "startLine": 1358,
+            "endLine": 1374,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1493,7 +1443,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1519,8 +1468,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $file, string $name = NULL, $move = true)\n  {\n    if ($this->auth) {\n      $fs   = new File\\System();\n      $path = $this->getTmpDir().microtime(true).'\/';\n      if ($fs->isFile($file) && $fs->createPath($path)) {\n        $dest = $path.($name ?: X::basename($file));\n        if ($move) {\n          if ($fs->move($file, X::dirname($dest)) && $fs->rename(X::dirname($dest).'\/'.X::basename($file), X::basename($dest))) {\n            return $dest;\n          }\n        }\n        elseif ($fs->copy($file, $dest)) {\n          return $dest;\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1382,
-            "endLine": 1401,
+            "startLine": 1385,
+            "endLine": 1404,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1530,7 +1479,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1574,8 +1522,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return Util\\Enc::crypt($st, $enckey) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 1410,
-            "endLine": 1417,
+            "startLine": 1413,
+            "endLine": 1420,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1585,7 +1533,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1611,8 +1558,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return Util\\Enc::decrypt($st, $enckey) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 1426,
-            "endLine": 1433,
+            "startLine": 1429,
+            "endLine": 1436,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1622,7 +1569,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1648,8 +1594,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getInstance();\n  }",
-            "startLine": 1440,
-            "endLine": 1443,
+            "startLine": 1443,
+            "endLine": 1446,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1659,7 +1605,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "self",
                 null
             ],
             "parent": false,
@@ -1675,8 +1620,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return Str::genpwd(32, 16);\n  }",
-            "startLine": 1450,
-            "endLine": 1453,
+            "startLine": 1453,
+            "endLine": 1456,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1685,9 +1630,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1701,8 +1644,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $key = self::makeFingerprint();\n    return [\n      'key' => $key,\n      'hash' => hash('sha256', $key)\n    ];\n  }",
-            "startLine": 1461,
-            "endLine": 1468,
+            "startLine": 1464,
+            "endLine": 1471,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1711,9 +1654,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1727,8 +1668,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $key, string $hash)\n  {\n    return hash('sha256', $key) === $hash;\n  }",
-            "startLine": 1478,
-            "endLine": 1481,
+            "startLine": 1481,
+            "endLine": 1484,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1737,9 +1678,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1774,8 +1713,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->error) {\n      return [\n        'code' => $this->error,\n        'text' => $this->class_cfg['errors'][$this->error]\n      ];\n    }\n\n    return null;\n  }",
-            "startLine": 1506,
-            "endLine": 1516,
+            "startLine": 1509,
+            "endLine": 1519,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1785,7 +1724,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": {
@@ -1824,8 +1762,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $access_token, string $refresh_token, int $expires_in, string $account_name)\n  {\n    if ($this->id) {\n      $account_exists = $this->db->count(\n        $this->class_cfg['tables']['permission_accounts'],\n        [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      );\n      \n      if ($account_exists > 0 ){\n        throw new \\Exception(X::_('Account already exists!'));\n      }\n      \n      if ($this->db->insert(\n          $this->class_cfg['tables']['permission_accounts'], [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      )) {\n        return (bool)$this->db->insert(\n          $this->class_cfg['tables']['permission_tokens'], [\n            $this->class_cfg['arch']['permission_tokens']['id_account']    => $this->db->lastId(),\n            $this->class_cfg['arch']['permission_tokens']['access_token']  => $access_token,\n            $this->class_cfg['arch']['permission_tokens']['refresh_token'] => $refresh_token,\n            $this->class_cfg['arch']['permission_tokens']['expire']        => time() + $expires_in,\n          ]\n        );\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 2042,
-            "endLine": 2075,
+            "startLine": 2045,
+            "endLine": 2078,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1834,9 +1772,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1891,8 +1827,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $account_name)\n  {\n    if ($this->id) {\n      return $this->db->rselect(\n        $this->class_cfg['tables']['permission_accounts'],\n        $this->class_cfg['arch']['permission_accounts'],\n        [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 2077,
-            "endLine": 2091,
+            "startLine": 2080,
+            "endLine": 2094,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1925,8 +1861,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $account_name)\n  {\n    if ($this->id) {\n      if ($account = $this->getPermissionAccountFromName($account_name)) {\n        return $this->db->rselect(\n          $this->class_cfg['tables']['permission_tokens'],\n          $this->class_cfg['arch']['permission_tokens'],\n          [\n            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']],\n          ]\n        ); \n      }\n    }\n    \n    return false;\n  }",
-            "startLine": 2097,
-            "endLine": 2112,
+            "startLine": 2100,
+            "endLine": 2115,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1960,8 +1896,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $account_name, string $access_token, string $refresh_token, int $expire_in)\n  {\n    if ($this->id && $account = $this->getPermissionAccountFromName($account_name)) {\n        return $this->db->update(\n          $this->class_cfg['tables']['permission_tokens'], [\n          $this->class_cfg['arch']['permission_tokens']['access_token']   => $access_token,\n          $this->class_cfg['arch']['permission_tokens']['refresh_token']  => $refresh_token,\n          $this->class_cfg['arch']['permission_tokens']['expire']         => time() + $expire_in,\n        ], [\n            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']]\n          ]\n        );\n    }\n\n    return false;\n  }",
-            "startLine": 2114,
-            "endLine": 2129,
+            "startLine": 2117,
+            "endLine": 2132,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2021,8 +1957,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->api_request_output;\n  }",
-            "startLine": 2258,
-            "endLine": 2261,
+            "startLine": 2261,
+            "endLine": 2264,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2045,8 +1981,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $idUser = '')\n  {\n    return $this->db->selectOne([\n      'table' => $this->class_cfg['tables']['api_tokens'],\n      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],\n      'where' => [ \n        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id\n      ],\n      'order' => [[\n        'field' => $this->class_cfg['arch']['api_tokens']['last'],\n        'dir' => 'DESC'\n      ]]\n    ]);\n  }",
-            "startLine": 2263,
-            "endLine": 2276,
+            "startLine": 2266,
+            "endLine": 2279,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2056,7 +1992,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2082,8 +2017,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $idUser = '')\n  {\n    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [\n      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id\n    ]);\n  }",
-            "startLine": 2278,
-            "endLine": 2283,
+            "startLine": 2281,
+            "endLine": 2286,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2093,7 +2028,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2119,8 +2053,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id = '')\n  {\n    if ($cfg = $this->db->selectOne(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']['cfg'],\n      [\n        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id\n      ]\n    )) {\n      $cfg = json_decode($cfg);\n      return !empty($cfg->skip_verification);\n    }\n    return false;\n  }",
-            "startLine": 2285,
-            "endLine": 2298,
+            "startLine": 2288,
+            "endLine": 2301,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2129,9 +2063,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2155,8 +2087,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->db;\n  }",
-            "startLine": 2303,
-            "endLine": 2306,
+            "startLine": 2306,
+            "endLine": 2309,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2165,9 +2097,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Db"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2532,7 +2462,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "self",
                 null
             ],
             "parent": false,
@@ -2558,9 +2487,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2584,9 +2511,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2621,7 +2546,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2657,9 +2581,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2693,9 +2615,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2748,7 +2668,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2784,9 +2703,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3105,10 +3022,8 @@
             "show": "name",
             "mailer": "\\bbn\\Mail"
         },
-        "retriever_instance": {
-            "prev_time": null
-        },
-        "retriever_exists": true,
+        "retriever_instance": null,
+        "retriever_exists": false,
         "_mailer": null,
         "_just_login": false,
         "_encryption_key": null,

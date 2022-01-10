@@ -779,7 +779,7 @@ class Php extends bbn\Models\Cls\Basic
           $ret = null;
           if ($ele->hasReTurnType()) {
             $type = $ele->getReturnType();
-            $ret  = [$type->getName()];
+            //  $ret  = [$type->getName()];
             if ($type->allowsNull()) {
               $ret[] = null;
             }
@@ -823,7 +823,7 @@ class Php extends bbn\Models\Cls\Basic
     $ret = null;
     if ($method->hasReturnType()) {
       $type = $method->getReturnType();
-      $ret  = [$type->getName()];
+      //$ret  = [$type->getName()];
       if ($type->allowsNull()) {
         $ret[] = null;
       }

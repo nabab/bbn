@@ -37,9 +37,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "callable"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {

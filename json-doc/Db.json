@@ -28,7 +28,7 @@
     },
     "fileName": "\/Db.php",
     "startLine": 20,
-    "endLine": 3264,
+    "endLine": 3294,
     "contentConstructor": {
         "file": "bbn\\Db",
         "returns": null
@@ -94,9 +94,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -125,9 +123,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -167,7 +163,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -209,9 +204,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -241,7 +234,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -273,7 +265,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -305,7 +296,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -337,7 +327,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -368,9 +357,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -410,9 +397,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -471,7 +456,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -503,7 +487,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -545,9 +528,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -571,9 +552,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -669,7 +648,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -706,7 +684,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -756,9 +733,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -787,9 +762,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -828,9 +801,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -870,9 +841,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -901,9 +870,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -953,9 +920,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -984,9 +949,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1015,9 +978,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1046,9 +1007,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1077,9 +1036,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1108,9 +1065,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1139,9 +1094,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1165,9 +1118,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1236,9 +1187,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1262,9 +1211,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1303,9 +1250,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1369,9 +1314,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1412,7 +1355,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1465,7 +1407,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1510,9 +1451,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1556,7 +1495,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1606,9 +1544,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1649,7 +1585,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1691,9 +1626,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1733,9 +1666,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1779,9 +1710,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1822,7 +1751,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1882,9 +1810,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1958,7 +1884,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2013,7 +1938,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -2115,9 +2039,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2213,7 +2135,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2244,9 +2165,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2276,7 +2195,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -2359,7 +2277,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2452,7 +2369,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2535,7 +2451,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2628,7 +2543,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2711,7 +2625,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2879,7 +2792,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2957,7 +2869,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3014,7 +2925,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -3107,7 +3017,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -3180,7 +3089,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -3253,7 +3161,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -3326,7 +3233,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -3416,9 +3322,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3489,7 +3393,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3552,7 +3455,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3605,7 +3507,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3678,7 +3579,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3740,7 +3640,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3803,7 +3702,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3856,7 +3754,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -3904,7 +3801,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -4144,7 +4040,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4201,7 +4096,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4258,7 +4152,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4325,7 +4218,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4406,9 +4298,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -4448,9 +4338,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -4491,7 +4379,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4543,9 +4430,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -4585,9 +4470,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -4627,7 +4510,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4680,7 +4562,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4743,7 +4624,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -4795,9 +4675,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -4826,9 +4704,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -4858,7 +4734,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -4890,7 +4765,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -4937,7 +4811,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -4980,7 +4853,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -5017,9 +4889,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5086,9 +4956,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5128,9 +4996,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5170,9 +5036,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5212,9 +5076,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5249,9 +5111,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5290,9 +5150,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5326,9 +5184,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5362,9 +5218,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5403,9 +5257,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5444,9 +5296,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5485,9 +5335,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5531,9 +5379,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5576,9 +5422,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5621,9 +5465,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5666,9 +5508,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5729,9 +5569,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5776,9 +5614,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5821,9 +5657,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5866,9 +5700,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -5900,9 +5732,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $cfg)\n  {\n    return $this->language->alter($table, $cfg);\n  }",
-            "startLine": 2803,
-            "endLine": 2806,
+            "code": "function(string $table, array $cfg)\n  {\n    if (method_exists($this->language, 'alter')) {\n      return $this->language->alter($table, $cfg);\n    }\n\n    if ($st = $this->language->getAlterTable($table, $cfg)) {\n      return (int)$this->language->rawQuery($st);\n    }\n\n    return 0;\n  }",
+            "startLine": 2804,
+            "endLine": 2815,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5911,15 +5743,13 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -5928,7 +5758,7 @@
                 {
                     "name": "cfg",
                     "position": 1,
-                    "type": "",
+                    "type": "array",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -5936,9 +5766,70 @@
                 }
             ]
         },
+        "moveColumn": {
+            "name": "moveColumn",
+            "summary": "Moves the given column's position within a table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $table, string $column, array $cfg, string $after = NULL)\n  {\n    $this->ensureLanguageMethodExists('getMoveColumn');\n\n    if ($st = $this->language->getMoveColumn($table, $column, $cfg, $after)) {\n      return (int)$this->language->rawQuery($st);\n    }\n\n    return 0;\n  }",
+            "startLine": 2827,
+            "endLine": 2836,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "column",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "after",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
         "createUser": {
             "name": "createUser",
-            "summary": "Creates an user for a specific db.",
+            "summary": "Creates a user for a specific db.",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Db",
@@ -5946,8 +5837,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $user = NULL, string $pass = NULL, string $db = NULL)\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->createUser($user, $pass, $db);\n  }",
-            "startLine": 2824,
-            "endLine": 2829,
+            "startLine": 2854,
+            "endLine": 2859,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5956,9 +5847,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6000,8 +5889,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $user)\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->deleteUser($user);\n  }",
-            "startLine": 2846,
-            "endLine": 2851,
+            "startLine": 2876,
+            "endLine": 2881,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6010,9 +5899,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6036,8 +5923,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $user = '', string $host = '')\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getUsers($user, $host);\n  }",
-            "startLine": 2871,
-            "endLine": 2876,
+            "startLine": 2901,
+            "endLine": 2906,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6047,7 +5934,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6084,8 +5970,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $newName)\n  {\n    return $this->language->renameTable($table, $newName);\n  }",
-            "startLine": 2886,
-            "endLine": 2889,
+            "startLine": 2916,
+            "endLine": 2919,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6094,9 +5980,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6131,8 +6015,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table)\n  {\n    return $this->language->getTableComment($table);\n  }",
-            "startLine": 2898,
-            "endLine": 2901,
+            "startLine": 2928,
+            "endLine": 2931,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6141,9 +6025,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6168,8 +6050,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $database = '', string $type = '')\n  {\n    return $this->language->dbSize($database, $type);\n  }",
-            "startLine": 2910,
-            "endLine": 2913,
+            "startLine": 2940,
+            "endLine": 2943,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6178,9 +6060,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6213,8 +6093,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $type = '')\n  {\n    return $this->language->tableSize($table, $type);\n  }",
-            "startLine": 2923,
-            "endLine": 2926,
+            "startLine": 2953,
+            "endLine": 2956,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6223,9 +6103,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6258,8 +6136,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table = '', string $database = '')\n  {\n    return $this->language->status($table, $database);\n  }",
-            "startLine": 2936,
-            "endLine": 2939,
+            "startLine": 2966,
+            "endLine": 2969,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6301,8 +6179,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getUid();\n  }",
-            "startLine": 2947,
-            "endLine": 2950,
+            "startLine": 2977,
+            "endLine": 2980,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6312,7 +6190,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -6333,8 +6210,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getRow(...\\func_get_args());\n  }",
-            "startLine": 2979,
-            "endLine": 2982,
+            "startLine": 3009,
+            "endLine": 3012,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6344,7 +6221,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6360,8 +6236,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getRows(...\\func_get_args());\n  }",
-            "startLine": 2992,
-            "endLine": 2995,
+            "startLine": 3022,
+            "endLine": 3025,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6371,7 +6247,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6392,8 +6267,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getIrow(...\\func_get_args());\n  }",
-            "startLine": 3014,
-            "endLine": 3017,
+            "startLine": 3044,
+            "endLine": 3047,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6403,7 +6278,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6424,8 +6298,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getIrows(...\\func_get_args());\n  }",
-            "startLine": 3040,
-            "endLine": 3043,
+            "startLine": 3070,
+            "endLine": 3073,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6435,7 +6309,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6456,8 +6329,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getByColumns(...\\func_get_args());\n  }",
-            "startLine": 3067,
-            "endLine": 3070,
+            "startLine": 3097,
+            "endLine": 3100,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6467,7 +6340,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6488,8 +6360,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->getObject(...\\func_get_args());\n  }",
-            "startLine": 3086,
-            "endLine": 3089,
+            "startLine": 3116,
+            "endLine": 3119,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6499,7 +6371,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -6524,8 +6395,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getObject(...\\func_get_args());\n  }",
-            "startLine": 3106,
-            "endLine": 3109,
+            "startLine": 3136,
+            "endLine": 3139,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6535,7 +6406,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -6556,8 +6426,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->language->getObjects(...\\func_get_args());\n  }",
-            "startLine": 3140,
-            "endLine": 3143,
+            "startLine": 3170,
+            "endLine": 3173,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6567,7 +6437,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6583,8 +6452,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $database)\n  {\n    return $this->language->createDatabase(...\\func_get_args());\n  }",
-            "startLine": 3152,
-            "endLine": 3155,
+            "startLine": 3182,
+            "endLine": 3185,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6593,9 +6462,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6619,8 +6486,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $database)\n  {\n    return $this->language->dropDatabase($database);\n  }",
-            "startLine": 3164,
-            "endLine": 3167,
+            "startLine": 3194,
+            "endLine": 3197,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6629,9 +6496,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6655,8 +6520,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (method_exists($this->language, __FUNCTION__)) {\n      $this->language->enableLast();\n    }\n  }",
-            "startLine": 3173,
-            "endLine": 3178,
+            "startLine": 3203,
+            "endLine": 3208,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6679,8 +6544,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (method_exists($this->language, __FUNCTION__)) {\n      $this->language->disableLast();\n    }\n  }",
-            "startLine": 3184,
-            "endLine": 3189,
+            "startLine": 3214,
+            "endLine": 3219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6703,8 +6568,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getRealLastParams();\n  }",
-            "startLine": 3195,
-            "endLine": 3200,
+            "startLine": 3225,
+            "endLine": 3230,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6714,7 +6579,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6730,8 +6594,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->realLast();\n  }",
-            "startLine": 3207,
-            "endLine": 3212,
+            "startLine": 3237,
+            "endLine": 3242,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6741,7 +6605,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -6757,8 +6620,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getLastParams();\n  }",
-            "startLine": 3219,
-            "endLine": 3224,
+            "startLine": 3249,
+            "endLine": 3254,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6768,7 +6631,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6784,8 +6646,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getLastValues();\n  }",
-            "startLine": 3231,
-            "endLine": 3236,
+            "startLine": 3261,
+            "endLine": 3266,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6795,7 +6657,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -6811,8 +6672,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getQueryValues($cfg);\n  }",
-            "startLine": 3244,
-            "endLine": 3249,
+            "startLine": 3274,
+            "endLine": 3279,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6821,9 +6682,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -6858,7 +6717,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "self",
                 null
             ],
             "parent": false,
@@ -6884,9 +6742,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         }
@@ -6902,7 +6758,7 @@
         "retriever_exists": true
     },
     "constants": null,
-    "numMethods": 153,
+    "numMethods": 154,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 3,
@@ -6928,8 +6784,8 @@
             "pgsql": "nf nf-dev-postgresql",
             "sqlite": "nf nf-dev-sqllite"
         },
-        "retriever_instance": {},
-        "retriever_exists": true,
+        "retriever_instance": null,
+        "retriever_exists": false,
         "language": null,
         "engine": null,
         "_cache_prefix": null,

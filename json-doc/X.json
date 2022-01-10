@@ -9,7 +9,7 @@
     "interfaces": [],
     "fileName": "\/X.php",
     "startLine": 21,
-    "endLine": 3383,
+    "endLine": 3387,
     "contentConstructor": null,
     "methods": {
         "increment": {
@@ -118,9 +118,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -163,9 +161,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -199,9 +195,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -225,9 +219,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -261,9 +253,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "float"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -292,9 +282,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -339,9 +327,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -410,7 +396,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "bool",
                 null
             ],
             "parent": false,
@@ -470,7 +455,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "bool",
                 null
             ],
             "parent": false,
@@ -530,7 +514,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "bool",
                 null
             ],
             "parent": false,
@@ -592,7 +575,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -656,7 +638,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -719,9 +700,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "stdClass"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -823,9 +802,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -876,7 +853,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -919,7 +895,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -961,9 +936,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1002,9 +975,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1084,9 +1055,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1146,9 +1115,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1183,9 +1150,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1209,9 +1174,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1235,9 +1198,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1261,9 +1222,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1287,9 +1246,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1313,9 +1270,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1339,9 +1294,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1365,9 +1318,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1434,9 +1385,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1479,9 +1428,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1515,9 +1462,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1551,9 +1496,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1596,9 +1539,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1843,9 +1784,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1904,9 +1843,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2024,9 +1961,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2074,9 +2009,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2128,9 +2061,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "float"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2188,7 +2119,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2399,9 +2329,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2461,9 +2389,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -2623,9 +2549,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2664,9 +2588,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2725,9 +2647,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2770,9 +2690,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2846,9 +2764,7 @@
             "returnsReference": false,
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2930,9 +2846,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3085,9 +2999,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3110,9 +3022,9 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data, string $file, bool $with_titles = true, array $cfg = [])\n  {\n    if (!class_exists('\\\\PhpOffice\\\\PhpSpreadsheet\\\\Spreadsheet')) {\n      throw new \\Exception(X::_(\"You need the PhpOffice library to use this function\"));\n    }\n\n    $excel    = new \\PhpOffice\\PhpSpreadsheet\\Spreadsheet();\n    $sheet    = $excel->getActiveSheet();\n    $ow       = new \\PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx($excel);\n    $can_save = false;\n    if (empty($cfg)) {\n      $todo    = [];\n      $checked = false;\n      foreach ($data as $d) {\n        if (!$checked && self::isAssoc($d)) {\n          if ($with_titles) {\n            $line1 = [];\n            $line2 = [];\n            foreach ($d as $k => $v) {\n              $line1[] = $k;\n              $line2[] = '';\n            }\n\n            $todo[] = $line1;\n            $todo[] = $line2;\n          }\n\n          $checked = true;\n        }\n\n        $todo[] = array_values($d);\n      }\n\n      if (count($todo)) {\n        $sheet->fromArray($todo, null, 'A1');\n        $excel->getDefaultStyle()->getNumberFormat()->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n        $can_save = true;\n      }\n    }\n    else {\n      foreach ($cfg['fields'] as $i => $field) {\n        \/\/ Get cell object\n        $cell = $sheet->getCellByColumnAndRow($i + 1, 1);\n        \/\/ Get colum name\n        $col_idx = $cell->getColumn();\n        \/\/ Set auto width to the column\n        $sheet->getColumnDimension($col_idx)->setAutoSize(true);\n        \/\/ Cell style object\n        $style = $sheet->getStyle(\"$col_idx:$col_idx\");\n        \/\/ Get number format object\n        $format = $style->getNumberFormat();\n        \/\/ Set the vertical alignment to center\n        $style->getAlignment()->setVertical(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::VERTICAL_TOP);\n        \/\/ Set the correct data type\n        switch ($field['type']) {\n          case 'integer':\n            \/\/ Set code's format to number\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_NUMBER);\n            break;\n          case 'decimal':\n            \/\/ Set code's format to decimal\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_NUMBER_00);\n            break;\n          case 'money':\n            \/\/ Set code's format to currency\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_CURRENCY_EUR);\n            break;\n          case 'date':\n            \/\/ Set code's format to date\n            $format->setFormatCode('dd\/mm\/yyyy');\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'datetime':\n            \/\/ Set code's format to datetime\n            $format->setFormatCode('dd\/mm\/yyyy hh:mm');\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'boolean':\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'string':\n          default:\n            \/\/ Set code's format to text\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n            \/\/ Set wrap text\n            $style->getAlignment()->setWrapText(true);\n            break;\n        }\n\n        if ($with_titles) {\n          \/\/$cell = $sheet->getCellByColumnAndRow($i+1, 1);\n          $style = $cell->getStyle();\n          \/\/ Set code's format to text\n          $style->getNumberFormat()->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n          \/\/ Set the horizontal alignment to center\n          $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n          \/\/ Set bold to true\n          $style->getFont()->setBold(true);\n          \/\/ Set the column's title\n          $cell->setValue($field['title'] ?? $field['field']);\n        }\n      }\n\n      if (isset($cfg['map'], $cfg['map']['callable'])\n          && is_callable($cfg['map']['callable'])\n      ) {\n        array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);\n      }\n\n      $sheet->fromArray($data, null, 'A' . ($with_titles ? '2' : '1'));\n      $can_save = true;\n    }\n\n    if ($can_save\n        && \\bbn\\File\\Dir::createPath(self::dirname($file))\n    ) {\n      $ow->save($file);\n      return \\is_file($file);\n    }\n\n    return false;\n  }",
+            "code": "function(array $data, string $file, bool $with_titles = true, array $cfg = [])\n  {\n    if (!class_exists('\\\\PhpOffice\\\\PhpSpreadsheet\\\\Spreadsheet')) {\n      throw new \\Exception(X::_(\"You need the PhpOffice library to use this function\"));\n    }\n\n    $excel    = new \\PhpOffice\\PhpSpreadsheet\\Spreadsheet();\n    $sheet    = $excel->getActiveSheet();\n    $ow       = new \\PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx($excel);\n    $can_save = false;\n    if (empty($cfg)) {\n      $todo    = [];\n      $checked = false;\n      foreach ($data as $d) {\n        if (!$checked && self::isAssoc($d)) {\n          if ($with_titles) {\n            $line1 = [];\n            $line2 = [];\n            foreach ($d as $k => $v) {\n              $line1[] = $k;\n              $line2[] = '';\n            }\n\n            $todo[] = $line1;\n            $todo[] = $line2;\n          }\n\n          $checked = true;\n        }\n\n        $todo[] = array_values($d);\n      }\n\n      if (count($todo)) {\n        $sheet->fromArray($todo, null, 'A1');\n        $excel->getDefaultStyle()->getNumberFormat()->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n        $can_save = true;\n      }\n    }\n    else {\n      foreach ($cfg['fields'] as $i => $field) {\n        \/\/ Get cell object\n        $cell = $sheet->getCellByColumnAndRow($i + 1, 0);\n        \/\/ Get colum name\n        $col_idx = $cell->getColumn();\n        \/\/ Set auto width to the column\n        $sheet->getColumnDimension($col_idx)->setAutoSize(true);\n        \/\/ Cell style object\n        $style = $sheet->getStyle(\"$col_idx:$col_idx\");\n        \/\/ Get number format object\n        $format = $style->getNumberFormat();\n        \/\/ Set the vertical alignment to center\n        $style->getAlignment()->setVertical(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::VERTICAL_TOP);\n        \/\/ Set the correct data type\n        switch ($field['type']) {\n          case 'integer':\n            \/\/ Set code's format to number\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_NUMBER);\n            break;\n          case 'decimal':\n            \/\/ Set code's format to decimal\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_NUMBER_00);\n            break;\n          case 'money':\n            \/\/ Set code's format to currency\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);\n            break;\n          case 'date':\n            \/\/ Set code's format to date\n            $format->setFormatCode('dd\/mm\/yyyy');\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'datetime':\n            \/\/ Set code's format to datetime\n            $format->setFormatCode('dd\/mm\/yyyy hh:mm');\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'boolean':\n            \/\/ Set the horizontal alignment to center\n            $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n            break;\n          case 'phone':\n            \/\/ Set the custom format\n            $format->setFormatCode('+#');\n            break;\n          case 'string':\n          default:\n            \/\/ Set code's format to text\n            $format->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n            \/\/ Set wrap text\n            $style->getAlignment()->setWrapText(true);\n            break;\n        }\n\n        if ($with_titles) {\n          $cell  = $sheet->getCellByColumnAndRow($i + 1, 1);\n          $style = $cell->getStyle();\n          \/\/ Set code's format to text\n          $style->getNumberFormat()->setFormatCode(\\PhpOffice\\PhpSpreadsheet\\Style\\NumberFormat::FORMAT_TEXT);\n          \/\/ Set the horizontal alignment to center\n          $style->getAlignment()->setHorizontal(\\PhpOffice\\PhpSpreadsheet\\Style\\Alignment::HORIZONTAL_CENTER);\n          \/\/ Set bold to true\n          $style->getFont()->setBold(true);\n          \/\/ Set the column's title\n          $cell->setValue($field['title'] ?? $field['field']);\n        }\n      }\n\n      if (isset($cfg['map'], $cfg['map']['callable'])\n          && is_callable($cfg['map']['callable'])\n      ) {\n        array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);\n      }\n\n      $sheet->fromArray($data, null, 'A' . ($with_titles ? '2' : '1'));\n      $can_save = true;\n    }\n\n    if ($can_save\n        && \\bbn\\File\\Dir::createPath(self::dirname($file))\n    ) {\n      $ow->save($file);\n      return \\is_file($file);\n    }\n\n    return false;\n  }",
             "startLine": 2609,
-            "endLine": 2733,
+            "endLine": 2737,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3121,9 +3033,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3176,8 +3086,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($binary = false, $hyphens = false)\n  {\n    $tmp = sprintf(\n      $hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',\n      \/\/ 32 bits for \"time_low\"\n      mt_rand(0, 0xffff), mt_rand(0, 0xffff),\n      \/\/ 16 bits for \"time_mid\"\n      mt_rand(0, 0xffff),\n      \/\/ 16 bits for \"time_hi_and_version\",\n      \/\/ four most significant bits holds version number 4\n      mt_rand(0, 0x0fff) | 0x4000,\n      \/\/ 16 bits, 8 bits for \"clk_seq_hi_res\",\n      \/\/ 8 bits for \"clk_seq_low\",\n      \/\/ two most significant bits holds zero and one for variant DCE1.1\n      mt_rand(0, 0x3fff) | 0x8000,\n      \/\/ 48 bits for \"node\"\n      mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)\n    );\n    return $binary ? hex2bin($tmp) : $tmp;\n  }",
-            "startLine": 2743,
-            "endLine": 2762,
+            "startLine": 2747,
+            "endLine": 2766,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3186,9 +3096,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3228,8 +3136,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    if (\\is_array($st) || \\is_object($st)) {\n      foreach ($st as &$s) {\n        $s = self::convertUids($s);\n      }\n    }\n    elseif (\\bbn\\Str::isUid($st)) {\n      $st = hex2bin($st);\n    }\n\n    return $st;\n  }",
-            "startLine": 2784,
-            "endLine": 2796,
+            "startLine": 2788,
+            "endLine": 2800,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3267,8 +3175,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($v1, $v2, string $op = '===', int $pr = 4)\n  {\n    $v1 = round((float)$v1 * pow(10, $pr));\n    $v2 = round((float)$v2 * pow(10, $pr));\n    switch ($op) {\n      case '===':\n        return $v1 === $v2;\n      case '==':\n        return $v1 == $v2;\n      case '>=':\n        return $v1 >= $v2;\n      case '<=':\n        return $v1 <= $v2;\n      case '>':\n        return $v1 > $v2;\n      case '<':\n        return $v1 < $v2;\n    }\n\n    return false;\n  }",
-            "startLine": 2819,
-            "endLine": 2839,
+            "startLine": 2823,
+            "endLine": 2843,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3277,9 +3185,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3334,8 +3240,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($json)\n  {\n\n    $jsonLength = strlen($json);\n    $escaped = false;\n    $opened_b = 0;\n    $opened_cb = 0;\n    $unescaped = false;\n    $squotes = false;\n    $dquotes = false;\n    $current = '';\n    $end_value = false;\n    $end_prop = false;\n    $last_quotes = '';\n    $prop = false;\n    $last_char = '';\n    for ($i = 0; $i < $jsonLength; $i++) {\n      \/\/var_dump($a);\n      $add = '';\n      $a = $json[$i];\n      switch ($a) {\n        case '\\\\':\n          if ($escaped) {\n            $escaped = false;\n            $unescaped = true;\n          }\n          else {\n            $escaped = true;\n          }\n          break;\n        case '\"':\n          if (!$escaped && !$squotes) {\n            $dquotes = !$dquotes;\n            $last_quotes = '\"';\n          }\n          break;\n        case \"'\":\n          if (!$escaped && !$dquotes) {\n            $squotes = !$squotes;\n            $last_quotes = \"'\";\n          }\n          break;\n        case '{':\n          if (!$dquotes && !$squotes) {\n            $opened_cb++;\n            $last_quotes = \"\";\n          }\n          break;\n        case '}':\n          if (!$dquotes && !$squotes) {\n            $opened_cb--;\n            $end_value = true;\n            if ($last_char === ',') {\n              $newJSON = substr($newJSON, 0, -1);\n            }\n          }\n          break;\n        case '[':\n          if (!$dquotes && !$squotes) {\n            $opened_b++;\n            $last_quotes = \"\";\n          }\n          break;\n        case ']':\n          if (!$dquotes && !$squotes) {\n            $opened_b--;\n            $end_value = true;\n            if ($last_char === ',') {\n              $newJSON = substr($newJSON, 0, -1);\n            }\n          }\n          break;\n        case ':':\n          if (!$dquotes && !$squotes) {\n            $end_prop = true;\n          }\n          break;\n        case ',':\n          if (!$dquotes && !$squotes) {\n            $end_value = true;\n          }\n          break;\n        case '\/':\n          if ($last_char !== '\\\\') {\n            \/\/$current .= '\\\\';\n          }\n          break;\n        default:\n          if ($escaped) {\n            $escaped = false;\n          }\n          if ($unescaped) {\n            $unescaped = false;\n          }\n      }\n      if ($end_prop) {\n        if ($last_quotes === '\"') {\n          $add .= $current;\n        }\n        elseif ($last_quotes === \"'\") {\n          $current = trim($current);\n          $add .= '\"'.Str::escapeDquote(Str::unescapeSquote(substr($current, 1, -1))).'\":';\n        }\n        else {\n          $add .= '\"'.Str::escapeDquote($current).'\":';\n        }\n\n        $end_prop = false;\n      }\n      elseif ($end_value) {\n        if ($current) {\n          if ($last_quotes) {\n            $current = trim($current);\n            $add .= '\"'.Str::escapeDquote(substr($current, 1, -1)).'\"';\n          }\n          else {\n            $add .= Str::escapeDquote($current);\n          }\n\n          if ($a !== ' ') {\n            $add .= $a;\n          }\n        }\n        else {\n          $current .= $a;\n        }\n        $last_quotes = \"\";\n        $end_value = false;\n      }\n      elseif (!$dquotes && !$squotes && (($a === '[') || ($a === '{'))) {\n        $add .= $a;\n      }\n      elseif ($dquotes || $squotes || ($a !== ' ')) {\n        $current .= $a;\n      }\n\n      if ($add) {\n        $newJSON .= $add;\n        $current = '';\n      }\n\n      if ($a !== ' ') {\n        $last_char = $a;\n      }\n    }\n\n    if ($current) {\n      $newJSON .= $current;\n    }\n\n    return $newJSON;\n  }",
-            "startLine": 2841,
-            "endLine": 2992,
+            "startLine": 2845,
+            "endLine": 2996,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3373,8 +3279,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $arr, $json = true)\n  {\n    $res = [];\n    foreach ($arr as $i => $a) {\n      if (is_array($a)) {\n        $res[$i] = self::jsonBase64Encode($a, false);\n      }\n      elseif (is_string($a)) {\n        $res[$i] = base64_encode($a);\n      }\n      else{\n        $res[$i] = $a;\n      }\n    }\n\n    return $json ? json_encode($res) : $res;\n  }",
-            "startLine": 3012,
-            "endLine": 3028,
+            "startLine": 3016,
+            "endLine": 3032,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3421,8 +3327,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    $res = \\is_string($st) ? json_decode($st, true) : $st;\n    if (\\is_array($res)) {\n      foreach ($res as $i => $a) {\n        if (\\is_array($a)) {\n          $res[$i] = self::jsonBase64Decode($a);\n        }\n        elseif (\\is_string($a)) {\n          $res[$i] = base64_decode($a);\n        }\n        else{\n          $res[$i] = $a;\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 3047,
-            "endLine": 3067,
+            "startLine": 3051,
+            "endLine": 3071,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3432,7 +3338,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -3463,8 +3368,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $ar)\n  {\n    if (empty($ar) || !isset($ar[0]) || !\\count($ar[0])) {\n      return $ar;\n    }\n\n    $cols     = array_keys($ar[0]);\n    $idx      = array_shift($cols);\n    $num_cols = \\count($cols);\n    $res      = [];\n    foreach ($ar as $d) {\n      $index = $d[$idx];\n      unset($d[$idx]);\n      $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];\n    }\n\n    return $res;\n  }",
-            "startLine": 3092,
-            "endLine": 3109,
+            "startLine": 3096,
+            "endLine": 3113,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3473,9 +3378,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3504,8 +3407,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $ar, string $glue = '')\n  {\n    return implode($glue, $ar);\n  }",
-            "startLine": 3129,
-            "endLine": 3132,
+            "startLine": 3133,
+            "endLine": 3136,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3514,9 +3417,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3554,8 +3455,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st, string $separator)\n  {\n    return explode($separator, $st);\n  }",
-            "startLine": 3152,
-            "endLine": 3155,
+            "startLine": 3156,
+            "endLine": 3159,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3564,9 +3465,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3604,8 +3503,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $st, string $separator)\n  {\n    return explode($separator, $st);\n  }",
-            "startLine": 3175,
-            "endLine": 3178,
+            "startLine": 3179,
+            "endLine": 3182,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3614,9 +3513,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3654,8 +3551,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($subject, $search, int $start = 0)\n  {\n    $res = false;\n    if (is_array($subject)) {\n      $i = 0;\n      foreach ($subject as $s) {\n        if (($i >= $start) && ($s === $search)) {\n          $res = $i;\n          break;\n        }\n        else{\n          $i++;\n        }\n      }\n    }\n    elseif (is_string($subject)) {\n      $res = strpos($subject, $search, $start);\n    }\n\n    return $res === false ? -1 : $res;\n  }",
-            "startLine": 3205,
-            "endLine": 3225,
+            "startLine": 3209,
+            "endLine": 3229,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3664,9 +3561,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3713,8 +3608,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($subject, $search, int $start = NULL)\n  {\n    $res = false;\n    if (is_array($subject)) {\n      $i = count($subject) - 1;\n      if ($i) {\n        if ($start > 0) {\n          if ($start > $i) {\n            return -1;\n          }\n\n          $i = $start;\n        }\n        elseif ($start < 0) {\n          $i -= $start;\n          if ($i < 0) {\n            return -1;\n          }\n        }\n\n        foreach ($subject as $s) {\n          if (($i <= $start) && ($s === $search)) {\n            $res = $i;\n            break;\n          }\n          else{\n            $i--;\n          }\n        }\n      }\n    }\n    elseif (is_string($subject)) {\n      if ($start > 0) {\n        $start = strlen($subject) - (strlen($subject) - $start);\n      }\n\n      $res = strrpos($subject, $search, $start);\n    }\n\n    return $res === false ? -1 : $res;\n  }",
-            "startLine": 3251,
-            "endLine": 3291,
+            "startLine": 3255,
+            "endLine": 3295,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3723,9 +3618,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3772,8 +3665,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $wrote = false;\n    foreach (func_get_args() as $a) {\n      if ($a === null) {\n        $st = 'null';\n      }\n      elseif ($a === true) {\n        $st = 'true';\n      }\n      elseif ($a === false) {\n        $st = 'false';\n      }\n      elseif (\\bbn\\Str::isNumber($a)) {\n        $st = $a;\n      }\n      elseif (!is_string($a)) {\n        $st = self::getDump($a);\n      }\n      else {\n        $st = $a;\n      }\n\n      if ($st) {\n        $wrote = true;\n        echo $st.PHP_EOL;\n      }\n    }\n\n    if ($wrote) {\n      \/\/ob_end_flush();\n    }\n  }",
-            "startLine": 3323,
-            "endLine": 3355,
+            "startLine": 3327,
+            "endLine": 3359,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3796,8 +3689,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($name, $arguments)\n  {\n    if ((strpos($name, 'is_') === 0) && function_exists($name)) {\n      $res = null;\n      foreach ($arguments as $a) {\n        $res = $name($a);\n        if (!$res) {\n          return $res;\n        }\n      }\n\n      return $res;\n    }\n\n    if (!method_exists(self::class, $name)) {\n      throw new \\Exception(self::_(\"Undefined Method $name\"));\n    }\n  }",
-            "startLine": 3363,
-            "endLine": 3380,
+            "startLine": 3367,
+            "endLine": 3384,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

@@ -19,8 +19,8 @@
     ],
     "interfaces": [],
     "fileName": "\/Mvc\/Model.php",
-    "startLine": 25,
-    "endLine": 525,
+    "startLine": 29,
+    "endLine": 555,
     "contentConstructor": {
         "file": "bbn\\Mvc\\Model",
         "returns": null
@@ -41,8 +41,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bbn\\Db $db, array $info, bbn\\Mvc\\Controller $ctrl, bbn\\Mvc $mvc)\n  {\n    if (isset($info['path']) && $this->checkPath($info['path'])) {\n      if ($db) {\n        parent::__construct($db);\n      }\n\n      $this->cacheInit();\n      $this->_ctrl = $ctrl;\n      $this->_mvc  = $mvc;\n      $this->inc = &$mvc->inc;\n      if (is_file($info['file'])) {\n        $this->_path        = $info['path'];\n        $this->_file        = $info['file'];\n        $this->_checkers    = $info['checkers'] ?? [];\n        $this->_plugin_name = $info['plugin_name'] ?? null;\n        $this->_plugin      = $info['plugin'] ?? null;\n      }\n    }\n    else{\n        $this->error(\"The model \". ($info['path'] ?? null) .\" doesn't exist\");\n    }\n  }",
-            "startLine": 95,
-            "endLine": 117,
+            "startLine": 99,
+            "endLine": 121,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -93,8 +93,8 @@
                     "position": 0,
                     "type": "bbn\\Db",
                     "required": true,
-                    "has_default": true,
-                    "default": null,
+                    "has_default": false,
+                    "default": "",
                     "default_name": "",
                     "description": "The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books\/466565 or html\/home)<\/em>"
                 },
@@ -139,9 +139,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $vars = NULL, bool $check_empty = false)\n  {\n    if (isset($this->data['res'], $this->data['res'])) {\n      if (is_array($vars)) {\n        return bbn\\X::hasProps($this->data, $vars, $check_empty);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 125,
-            "endLine": 136,
+            "code": "function(array $vars = NULL, bool $check_empty = false)\n  {\n    if (isset($this->data['res'], $this->data['res'])) {\n      if (is_array($vars)) {\n        return X::hasProps($this->data, $vars, $check_empty);\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "startLine": 129,
+            "endLine": 140,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -150,9 +150,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -186,8 +184,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $type = 'public')\n  {\n    if ($this->_ctrl && ($this->_ctrl->getPath() === $path)) {\n      if ($type === 'cli') {\n        return $this->_mvc->isCli();\n      }\n\n      if ($type === $this->_ctrl->getMode()) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 144,
-            "endLine": 157,
+            "startLine": 148,
+            "endLine": 161,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -196,9 +194,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -231,8 +227,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl ? $this->_ctrl->getPath() : false;\n  }",
-            "startLine": 163,
-            "endLine": 166,
+            "startLine": 167,
+            "endLine": 170,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -254,9 +250,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $var, bool $check_empty = false)\n  {\n    return bbn\\X::hasProp($this->data, $var, $check_empty);\n  }",
-            "startLine": 174,
-            "endLine": 177,
+            "code": "function(string $var, bool $check_empty = false)\n  {\n    return X::hasProp($this->data, $var, $check_empty);\n  }",
+            "startLine": 178,
+            "endLine": 181,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -265,9 +261,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -300,9 +294,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $vars, bool $check_empty = false)\n  {\n    return bbn\\X::hasProps($this->data, $vars, $check_empty);\n  }",
-            "startLine": 185,
-            "endLine": 188,
+            "code": "function(array $vars, bool $check_empty = false)\n  {\n    return X::hasProps($this->data, $vars, $check_empty);\n  }",
+            "startLine": 189,
+            "endLine": 192,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -311,9 +305,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -347,8 +339,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin_path)\n  {\n    $this->_ctrl->registerPluginClasses($plugin_path);\n    return $this;\n  }",
-            "startLine": 195,
-            "endLine": 199,
+            "startLine": 199,
+            "endLine": 203,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -357,9 +349,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -382,9 +372,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data = NULL)\n  {\n    if (\\is_null($data)) {\n      $data = [];\n    }\n\n    $this->data = $data;\n    if ($this->_plugin) {\n      $router = Router::getInstance();\n      if ($textDomain = $router->getLocaleDomain($this->_plugin_name)) {\n        $oldTextDomain = textdomain(null);\n        if ($textDomain !== $oldTextDomain) {\n          textdomain($textDomain);\n        }\n        else {\n          unset($oldTextDomain);\n        }\n      }\n    }\n\n    $res = bbn\\Mvc::includeModel($this->_file, $this);\n    if (!empty($oldTextDomain)) {\n      textdomain($oldTextDomain);\n    }\n\n    return $res ?: null;\n  }",
-            "startLine": 206,
-            "endLine": 232,
+            "code": "function(array $data = NULL)\n  {\n    if (\\is_null($data)) {\n      $data = [];\n    }\n\n    $this->data = $data;\n    if ($this->_plugin) {\n      $router = Router::getInstance();\n      if ($textDomain = $router->getLocaleDomain($this->_plugin_name)) {\n        $oldTextDomain = textdomain(null);\n        if ($textDomain !== $oldTextDomain) {\n          textdomain($textDomain);\n        }\n        else {\n          unset($oldTextDomain);\n        }\n      }\n    }\n\n    $res = Mvc::includeModel($this->_file, $this);\n    if (!empty($oldTextDomain)) {\n      textdomain($oldTextDomain);\n    }\n\n    return $res ?: null;\n  }",
+            "startLine": 210,
+            "endLine": 236,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -394,7 +384,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -420,8 +409,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->getContent(...\\func_get_args());\n  }",
-            "startLine": 239,
-            "endLine": 242,
+            "startLine": 243,
+            "endLine": 246,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -431,7 +420,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -447,8 +435,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->getModel(...\\func_get_args());\n  }",
-            "startLine": 251,
-            "endLine": 254,
+            "startLine": 255,
+            "endLine": 258,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -458,11 +446,116 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
             "arguments": []
+        },
+        "getCustomModelGroup": {
+            "name": "getCustomModelGroup",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Mvc\\Model",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $path, string $plugin, array $data = NULL)\n  {\n    return $this->_ctrl->getCustomModelGroup(...\\func_get_args());\n  }",
+            "startLine": 261,
+            "endLine": 264,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getDataError": {
+            "name": "getDataError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Mvc\\Model",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array|string $propNames, string $errorMsg = NULL, bool $checkEmpty = true)\n  {\n    if (!$errorMsg) {\n      $errorMsg = \"A value must be given for the field %s\";\n    }\n\n    $propNames = (array)$propNames;\n    foreach ($propNames as $p) {\n      if (!$this->hasData($p, $checkEmpty)) {\n        return [\n          'success' => false,\n          'error'  => X::_($errorMsg, $p)\n        ];\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 267,
+            "endLine": 284,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "propNames",
+                    "position": 0,
+                    "type": "arraystring|",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "errorMsg",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "checkEmpty",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
         },
         "getCachedModel": {
             "name": "getCachedModel",
@@ -474,8 +567,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->getCachedModel(...\\func_get_args());\n  }",
-            "startLine": 263,
-            "endLine": 266,
+            "startLine": 293,
+            "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -485,7 +578,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -501,8 +593,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, array $data = [], string $plugin = NULL, int $ttl = 0)\n  {\n    return $this->_ctrl->getPluginModel(...\\func_get_args());\n  }",
-            "startLine": 278,
-            "endLine": 281,
+            "startLine": 308,
+            "endLine": 311,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -512,7 +604,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -565,8 +656,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, array $data, string $plugin, string $subplugin, int $ttl = 0)\n  {\n    return $this->_ctrl->getSubpluginModel(...\\func_get_args());\n  }",
-            "startLine": 294,
-            "endLine": 297,
+            "startLine": 324,
+            "endLine": 327,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -576,7 +667,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -595,8 +685,8 @@
                     "position": 1,
                     "type": "array",
                     "required": true,
-                    "has_default": true,
-                    "default": [],
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 },
                 {
@@ -604,8 +694,8 @@
                     "position": 2,
                     "type": "string",
                     "required": true,
-                    "has_default": true,
-                    "default": null,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 },
                 {
@@ -638,8 +728,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $plugin, string $subplugin)\n  {\n    return $this->_ctrl->hasSubpluginModel(...\\func_get_args());\n  }",
-            "startLine": 308,
-            "endLine": 311,
+            "startLine": 338,
+            "endLine": 341,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -648,9 +738,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -692,8 +780,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->hasPlugin(...\\func_get_args());\n  }",
-            "startLine": 319,
-            "endLine": 322,
+            "startLine": 349,
+            "endLine": 352,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -702,9 +790,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -718,8 +804,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->isPlugin(...\\func_get_args());\n  }",
-            "startLine": 330,
-            "endLine": 333,
+            "startLine": 360,
+            "endLine": 363,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -728,9 +814,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -744,8 +828,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->pluginPath(...\\func_get_args());\n  }",
-            "startLine": 341,
-            "endLine": 344,
+            "startLine": 371,
+            "endLine": 374,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -755,7 +839,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -771,8 +854,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl->pluginUrl(...\\func_get_args());\n  }",
-            "startLine": 352,
-            "endLine": 355,
+            "startLine": 382,
+            "endLine": 385,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -782,7 +865,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -798,8 +880,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($name, $obj)\n  {\n    $this->_mvc->addInc($name, $obj);\n    return $this;\n  }",
-            "startLine": 363,
-            "endLine": 367,
+            "startLine": 393,
+            "endLine": 397,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -808,9 +890,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -842,9 +922,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($idx = NULL, $check_empty = false)\n  {\n      if (!\\is_array($this->data)) {\n        return false;\n      }\n\n      if (\\is_null($idx)) {\n        return !empty($this->data);\n      }\n\n      return \\bbn\\X::hasProps($this->data, (array)$idx, $check_empty);\n  }",
-            "startLine": 375,
-            "endLine": 386,
+            "code": "function($idx = NULL, $check_empty = false)\n  {\n      if (!\\is_array($this->data)) {\n        return false;\n      }\n\n      if (\\is_null($idx)) {\n        return !empty($this->data);\n      }\n\n      return X::hasProps($this->data, (array)$idx, $check_empty);\n  }",
+            "startLine": 405,
+            "endLine": 416,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -853,9 +933,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -888,8 +966,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data)\n  {\n        $this->data = $data;\n        return $this;\n  }",
-            "startLine": 395,
-            "endLine": 399,
+            "startLine": 425,
+            "endLine": 429,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -898,9 +976,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -924,8 +1000,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data)\n  {\n        $ar = \\func_get_args();\n      foreach ($ar as $d){\n        if (\\is_array($d)) {\n          $this->data = $this->hasData() ? array_merge($this->data, $d) : $d;\n        }\n      }\n\n        return $this;\n  }",
-            "startLine": 407,
-            "endLine": 417,
+            "startLine": 437,
+            "endLine": 447,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -934,9 +1010,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "self"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -960,8 +1034,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data = NULL, string $spec = '', $ttl = 10)\n  {\n    if ($this->_path) {\n      $d = $this->get($data);\n      $this->cacheSet($this->_cache_name($data, $spec), '', $d, $ttl);\n    }\n  }",
-            "startLine": 458,
-            "endLine": 464,
+            "startLine": 488,
+            "endLine": 494,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1012,8 +1086,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data = NULL, $spec = '')\n  {\n    if ($cn = $this->_cache_name($data, $spec)) {\n      $this->cacheDelete($cn, '');\n    }\n  }",
-            "startLine": 473,
-            "endLine": 478,
+            "startLine": 503,
+            "endLine": 508,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1055,8 +1129,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $data = NULL, string $spec = '', int $ttl = 10)\n  {\n    $model =& $this;\n    return $this->getSetFromCache(\n      function () use (&$model, $data) {\n        return $model->get($data);\n      }, $data, $spec, $ttl\n    );\n  }",
-            "startLine": 489,
-            "endLine": 497,
+            "startLine": 519,
+            "endLine": 527,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1107,8 +1181,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(Closure $fn, array $data = NULL, string $spec = '', int $ttl = 10)\n  {\n    if ($cn = $this->_cache_name($data, $spec)) {\n      return $this->cacheGetSet($fn, $cn, '', $ttl) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 509,
-            "endLine": 516,
+            "startLine": 539,
+            "endLine": 546,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1118,7 +1192,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1171,8 +1244,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin)\n  {\n    return $this->_mvc->applyLocale($plugin);\n  }",
-            "startLine": 519,
-            "endLine": 522,
+            "startLine": 549,
+            "endLine": 552,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1650,7 +1723,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1903,7 +1975,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1929,9 +2000,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1965,9 +2034,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1991,9 +2058,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2027,9 +2092,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2063,9 +2126,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2099,9 +2160,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2135,9 +2194,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2172,7 +2229,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2218,7 +2274,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2252,7 +2307,7 @@
                 "tags": [
                     {
                         "tag": "var",
-                        "type": "null|bbn\\Db"
+                        "type": "null|Db"
                     }
                 ]
             },
@@ -2300,7 +2355,7 @@
     },
     "staticProperties": [],
     "constants": null,
-    "numMethods": 53,
+    "numMethods": 55,
     "numProperties": 3,
     "numConstants": 0,
     "numStaticProperties": 0,

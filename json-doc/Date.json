@@ -17,7 +17,7 @@
     "interfaces": [],
     "fileName": "\/Date.php",
     "startLine": 18,
-    "endLine": 176,
+    "endLine": 232,
     "contentConstructor": null,
     "methods": {
         "isWindows": {
@@ -173,7 +173,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($date = '', $mode = '')\n  {\n\t\t\/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time *\/\n\t\tif ( empty($date) ){\n\t\t\t$idate = time();\n    }\n\t\telse if ( is_numeric($date) ){\n\t\t\t$idate = $date;\n    }\n\t\telse{\n\t\t\t$idate = strtotime($date);\n    }\n\t\t$is_windows = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? true : false;\n\t\tif ( $idate )\n\t\t{\n\t\t\t\/* Getting the time difference *\/\n\t\t\t$t = time();\n      \/\/if ( ($date('h') == 0) && ($date('i') == 0) && ($date('s', $ida) == 0) ){\n\t\t\t$h = localtime($idate, 1);\n\t\t\t$start_today = mktime(0, 0, 0);\n\t\t\t$end_today = $start_today + ( 24 * 3600 );\n\t\t\t$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;\n\t\t\t$only_date = ($mode === 'date') || ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;\n\t\t\tif ( $mode === 'idate' ){\n        $date_ok = $idate;\n      }\n\t\t\telse if ( $mode === 'dbdate' ){\n        $date_ok = date('Y-m-d H:i:s', $idate);\n      }\n      else if ( $mode === 'm' ){\n        $date_ok = $is_windows ? strftime(\"%m\", $idate) : strftime(\"%B\", $idate);\n      }\n      else if ( $mode === 'my' ){\n        $date_ok = $is_windows ? strftime(\"%m %Y\", $idate) : strftime(\"%B %Y\", $idate);\n      }\n\t\t\telse if ( $mode === 'wsdate' || $mode === 's' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = strftime('%H:%M', $idate);\n        }\n\t\t\t\telse{\n          $date_ok = $is_windows ? strftime('%d\/%m\/%y', $idate) : strftime('%x', $idate);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'r' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = strftime('%R', $idate);\n        }\n\t\t\t\telse{\n          $date_ok = $is_windows ? utf8_encode(strftime('%#d %b %Y', $idate)) : strftime('%e %b %Y', $idate);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'js' ){\n        $date_ok = date('D M d Y H:i:s O', $idate);\n\t\t\t}\n      else if ( ($mode === 'wdate') || ($mode === 'wdate') ){\n        $date_ok = $is_windows ? utf8_encode(strftime('%A %#d %B %Y', $idate)) : strftime('%A %e %B %Y', $idate);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '.strftime('%H:%M', $idate);\n        }\n      }\n      else {\n        $date_ok = $is_windows ? utf8_encode(strftime('%#d %B %Y', $idate)) : strftime('%e %B %Y', $idate);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '.strftime('%H:%M', $idate);\n        }\n      }\n\t\t\treturn $date_ok;\n\t\t}\n  }",
+            "code": "function($date = '', $mode = '', string $locale = NULL)\n  {\n\t\t\/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time *\/\n\t\tif ( empty($date) ){\n\t\t\t$idate = time();\n    }\n\t\telse if ( is_numeric($date) ){\n\t\t\t$idate = $date;\n    }\n\t\telse{\n\t\t\t$idate = strtotime($date);\n    }\n\n\t\tif ( $idate )\n\t\t{\n\t\t\t\/* Getting the time difference *\/\n\t\t\t$t = time();\n      \/\/if ( ($date('h') == 0) && ($date('i') == 0) && ($date('s', $ida) == 0) ){\n\t\t\t$h = localtime($idate, 1);\n\t\t\t$start_today = mktime(0, 0, 0);\n\t\t\t$end_today = $start_today + ( 24 * 3600 );\n\t\t\t$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;\n\t\t\t$only_date = ($mode === 'date') || ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;\n\t\t\tif ( $mode === 'idate' ){\n        $date_ok = $idate;\n      }\n\t\t\telse if ( $mode === 'dbdate' ){\n        $date_ok = date('Y-m-d H:i:s', $idate);\n      }\n      else if ( $mode === 'm' ){\n        $date_ok = self::intlDateFormat('MMMM', $idate, $locale);\n      }\n      else if ( $mode === 'my' ){\n        $date_ok = self::intlDateFormat('MMMM yyyy', $idate, $locale);\n      }\n\t\t\telse if ( $mode === 'wsdate' || $mode === 's' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n\t\t\t\telse{\n          $date_ok = self::intlDateFormat('dd\/MM\/yyyy', $idate, $locale);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'r' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n\t\t\t\telse{\n          $date_ok = self::intlDateFormat('d MMM yyyy', $idate, $locale);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'js' ){\n        $date_ok = date('D M d Y H:i:s O', $idate);\n\t\t\t}\n      else if ( ($mode === 'wdate') || ($mode === 'wdate') ){\n        $date_ok = self::intlDateFormat('EEEE d MMMM yyyy', $idate, $locale);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n      }\n      else {\n        $date_ok = self::intlDateFormat('d MMMM yyyy', $idate, $locale);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);;\n        }\n      }\n\t\t\treturn $date_ok;\n\t\t}\n  }",
             "startLine": 68,
             "endLine": 136,
             "isDeprecated": false,
@@ -182,7 +182,7 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": null,
             "parent": false,
@@ -204,6 +204,15 @@
                     "has_default": true,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
                 }
             ]
         },
@@ -216,16 +225,16 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($val = '')\n  {\n    $arr = [];\n    for ( $i = 1; $i <= 12; $i++ ){\n      $arr[$i] = self::monthName($i);\n    }\n    return X::buildOptions($arr, $val);\n  }",
-            "startLine": 138,
-            "endLine": 145,
+            "code": "function($val = '', string $local = NULL)\n  {\n    $arr = [];\n    for ( $i = 1; $i <= 12; $i++ ) {\n      $arr[$i] = self::monthName($i, $local);\n    }\n\n    return X::buildOptions($arr, $val);\n  }",
+            "startLine": 144,
+            "endLine": 152,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": null,
             "parent": false,
@@ -237,6 +246,15 @@
                     "required": false,
                     "has_default": true,
                     "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "local",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
@@ -250,16 +268,16 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($m)\n  {\n  }",
-            "startLine": 147,
-            "endLine": 149,
+            "code": "function($m, string $local = NULL)\n  {\n    return self::intlDateFormat('MMMM', strtotime(\"2012-$m-01\"), $local);\n  }",
+            "startLine": 160,
+            "endLine": 163,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": null,
             "parent": false,
@@ -271,6 +289,67 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "local",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "intlDateFormat": {
+            "name": "intlDateFormat",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Date",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $format, int $timestamp, string $local = NULL)\n  {\n    if (!extension_loaded('intl')) {\n      $formats_map = [\n        'MMMM' => 'F', \/\/ January\n        'd MMMM yyyy' => 'j F Y', \/\/ 8 December 2021\n        'EEEE d MMMM yyyy' => 'l j F Y', \/\/ Wednesday 8 December 2021\n        'd MMM yyyy' => 'j M Y', \/\/ 8 Dec 2021\n        'MMMM yyyy' => 'F Y', \/\/ December 2021\n        'dd\/MM\/yyyy' => 'd\/m\/Y', \/\/ 08\/09\/2021\n        'kk:mm' => 'H:i' \/\/ 09:09 or 14:10\n      ];\n\n      if (array_key_exists($format, $formats_map)) {\n        $format = $formats_map[$format];\n      }\n\n      return date($format, $timestamp);\n    }\n\n    if (!$local && defined('BBN_LOCALE')) {\n      $local = BBN_LOCALE;\n    }\n\n    $formatter = new \\IntlDateFormatter(\n      $local,\n      \\IntlDateFormatter::LONG,\n      \\IntlDateFormatter::LONG,\n      null,\n      null,\n      $format\n    );\n\n    return $formatter->format($timestamp);\n  }",
+            "startLine": 171,
+            "endLine": 205,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "format",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "timestamp",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "local",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
@@ -285,8 +364,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $date, string $firstweekday = 'monday')\n  {\n    $cut = substr($date, 0, 8);\n    $daylen = 86400;\n    $timestamp = strtotime($date);\n    $first = strtotime($cut . \"00\");\n    $elapsed = ($timestamp - $first) \/ $daylen;\n    $weeks = 1;\n    for ( $i = 1; $i <= $elapsed; $i++ ){\n      $dayfind = $cut . (strlen($i) < 2 ? '0' . $i : $i);\n      $daytimestamp = strtotime($dayfind);\n      $day = strtolower(date(\"l\", $daytimestamp));\n      if ( $day === strtolower($firstweekday) ){\n        $weeks++;\n      }\n    }\n    return $weeks;\n  }",
-            "startLine": 157,
-            "endLine": 174,
+            "startLine": 213,
+            "endLine": 230,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -295,9 +374,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -326,7 +403,7 @@
         "windows": null
     },
     "constants": null,
-    "numMethods": 8,
+    "numMethods": 9,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 1,

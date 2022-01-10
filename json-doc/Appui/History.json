@@ -35,7 +35,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -82,9 +81,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -127,9 +124,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -153,9 +148,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -179,9 +172,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -205,9 +196,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -232,7 +221,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "float",
                 null
             ],
             "parent": false,
@@ -268,9 +256,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -294,9 +280,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -330,9 +314,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -366,9 +348,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -402,9 +382,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -428,9 +406,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -465,7 +441,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "float",
                 null
             ],
             "parent": false,
@@ -491,9 +466,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -517,9 +490,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -554,9 +525,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -591,7 +560,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -617,9 +585,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -680,9 +646,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -796,7 +760,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -982,7 +945,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1107,7 +1069,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "float",
                 null
             ],
             "parent": false,
@@ -1153,7 +1114,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1199,7 +1159,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "float",
                 null
             ],
             "parent": false,
@@ -1305,9 +1264,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1403,7 +1360,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1449,7 +1405,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1494,9 +1449,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1559,9 +1512,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1583,8 +1534,7 @@
             "doc": {
                 "description": "@var boolean|string The history table's name",
                 "tags": []
-            },
-            "value": "apst_app.bbn_history_uids"
+            }
         },
         "table": {
             "static": true,
@@ -1592,8 +1542,7 @@
             "doc": {
                 "description": "@var boolean|string The history table's name",
                 "tags": []
-            },
-            "value": "apst_app.bbn_history"
+            }
         },
         "uids": {
             "static": true,
@@ -1619,14 +1568,13 @@
             "doc": {
                 "description": "@var boolean",
                 "tags": []
-            },
-            "value": true
+            }
         }
     },
     "staticProperties": {
         "db": {},
         "dbs": [
-            "__BBN__d1207f9860c866a15dc4ee50021af4a9__BBN__"
+            "__BBN__e087a3726ab0f98c89fd818a031cdb29__BBN__"
         ],
         "structures": [],
         "database_obj": null,
@@ -1749,109 +1697,22 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
-        "db": {},
-        "dbs": [
-            "__BBN__d1207f9860c866a15dc4ee50021af4a9__BBN__"
-        ],
+        "db": null,
+        "dbs": [],
         "structures": [],
         "database_obj": null,
-        "admin_db": "apst_app",
-        "user": "752a9b0ef5ca11e89b35005056014c9f",
+        "admin_db": "",
+        "user": null,
         "prefix": "bbn_",
         "date": null,
-        "ok": true,
+        "ok": false,
         "enabled": true,
-        "links": {
-            "apst_app.apst_adherents": [
-                "uid"
-            ],
-            "apst_app.apst_altares": [
-                "id"
-            ],
-            "apst_app.apst_attestations": [
-                "id"
-            ],
-            "apst_app.apst_baremes_annuels": [
-                "id"
-            ],
-            "apst_app.apst_changes": [
-                "id"
-            ],
-            "apst_app.apst_clotures": [
-                "id"
-            ],
-            "apst_app.apst_cotisations": [
-                "id"
-            ],
-            "apst_app.apst_cotisations_annuelles": [
-                "id"
-            ],
-            "apst_app.apst_demandes": [
-                "id"
-            ],
-            "apst_app.apst_demandes_documents": [
-                "id"
-            ],
-            "apst_app.apst_documents": [
-                "id"
-            ],
-            "apst_app.apst_infolegale": [
-                "id"
-            ],
-            "apst_app.apst_infolegale_events": [
-                "id"
-            ],
-            "apst_app.apst_infolegale_info": [
-                "id"
-            ],
-            "apst_app.apst_infos_complementaires": [
-                "id"
-            ],
-            "apst_app.apst_liens": [
-                "id"
-            ],
-            "apst_app.apst_marques": [
-                "id"
-            ],
-            "apst_app.apst_passages": [
-                "id"
-            ],
-            "apst_app.apst_stats": [
-                "id"
-            ],
-            "apst_app.bbn_addresses": [
-                "id"
-            ],
-            "apst_app.bbn_cron": [
-                "id"
-            ],
-            "apst_app.bbn_emailings": [
-                "id"
-            ],
-            "apst_app.bbn_events": [
-                "id"
-            ],
-            "apst_app.bbn_history": [
-                "ref"
-            ],
-            "apst_app.bbn_i18n": [
-                "id"
-            ],
-            "apst_app.bbn_i18n_exp": [
-                "id"
-            ],
-            "apst_app.bbn_options": [
-                "id"
-            ],
-            "apst_app.bbn_people": [
-                "id"
-            ]
-        },
-        "table_uids": "apst_app.bbn_history_uids",
-        "table": "apst_app.bbn_history",
+        "links": null,
+        "table_uids": false,
+        "table": false,
         "uids": "uids",
         "column": "bbn_active",
-        "is_used": true,
+        "is_used": false,
         "_error": null,
         "_last_error": null,
         "_debug": null

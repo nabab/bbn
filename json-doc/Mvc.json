@@ -16,7 +16,7 @@
     },
     "fileName": "\/Mvc.php",
     "startLine": 52,
-    "endLine": 1548,
+    "endLine": 1562,
     "contentConstructor": {
         "file": "bbn\\Mvc",
         "returns": null
@@ -66,9 +66,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -93,7 +91,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -119,9 +116,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -155,9 +150,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -181,9 +174,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -207,9 +198,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -243,9 +232,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -279,9 +266,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -315,9 +300,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -351,9 +334,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -423,7 +404,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -461,7 +441,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -508,7 +487,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -621,9 +599,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -647,9 +623,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -662,9 +636,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($url)\n  {\n    if (in_array($url, $this->authorized_routes, true)) {\n      return true;\n    }\n\n    foreach ($this->authorized_routes as $ar) {\n      if ((substr($ar, -1) === '*')\n          && (\n              (strlen($ar) === 1)\n              || (strpos($url, substr($ar, 0, -1)) === 0)\n          )\n      ) {\n        if (in_array($url, $this->forbidden_routes, true)) {\n          return false;\n        }\n\n        foreach ($this->forbidden_routes as $ar2) {\n          if ((substr($ar2, -1) === '*')\n              && (strpos($url, substr($ar2, 0, -1)) === 0)\n          ) {\n            return false;\n          }\n        }\n\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "code": "function($url)\n  {\n    if (in_array($url, $this->authorized_routes, true)) {\n      return true;\n    }\n\n    $has_allow_all   = false;\n    $auth_applicable = '';\n    foreach ($this->authorized_routes as $ar) {\n      if ($ar === '*') {\n        $has_allow_all = true;\n        continue;\n      }\n\n      if ((substr($ar, -1) === '*')\n          && (strpos($url, substr($ar, 0, -1)) === 0)\n      ) {\n        if (strlen($ar) > strlen($auth_applicable)) {\n          $auth_applicable = substr($ar, 0, -1);\n        }\n      }\n    }\n\n    if ($auth_applicable || $has_allow_all) {\n      foreach ($this->forbidden_routes as $forbidden) {\n        if ((substr($forbidden, -1) === '*')\n            && (strpos($url, substr($forbidden, 0, -1)) === 0)\n            \/\/ Should be as or more precise\n            && (strlen($auth_applicable) < strlen($forbidden))\n        ) {\n          return false;\n        }\n        elseif ($url === $forbidden) {\n          return false;\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
             "startLine": 486,
-            "endLine": 516,
+            "endLine": 527,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -673,9 +647,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -699,8 +671,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($root)\n  {\n    \/** @todo a proper verification of the path *\/\n    if (strpos($root, '\/', -1) === false) {\n      $root .= '\/';\n    }\n\n    $this->root = $root;\n  }",
-            "startLine": 525,
-            "endLine": 533,
+            "startLine": 536,
+            "endLine": 544,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -733,8 +705,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->root;\n  }",
-            "startLine": 541,
-            "endLine": 544,
+            "startLine": 552,
+            "endLine": 555,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -757,8 +729,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $locale)\n  {\n    $this->env->setLocale($locale);\n    $this->initLocaleDomain($this->info ? $this->info['plugin_name'] : null);\n  }",
-            "startLine": 547,
-            "endLine": 551,
+            "startLine": 558,
+            "endLine": 562,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -791,8 +763,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getLocale();\n  }",
-            "startLine": 554,
-            "endLine": 557,
+            "startLine": 565,
+            "endLine": 568,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -802,7 +774,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -818,8 +789,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($dir, $mode)\n  {\n    return $this->router->fetchDir($dir, $mode);\n  }",
-            "startLine": 560,
-            "endLine": 563,
+            "startLine": 571,
+            "endLine": 574,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -861,8 +832,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($dir, $mode, $plugin)\n  {\n    return $this->router->fetchCustomDir($dir, $mode, $plugin);\n  }",
-            "startLine": 566,
-            "endLine": 569,
+            "startLine": 577,
+            "endLine": 580,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -913,8 +884,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($bbn_inc_file, $bbn_inc_content, array $bbn_inc_data = [])\n  {\n    $randoms = [];\n    $_random = function ($i) use (&$randoms) {\n      if (!isset($randoms[$i])) {\n        $randoms[$i] = md5(Str::genpwd());\n      }\n\n      return $randoms[$i];\n    };\n    $fn      = function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {\n      if ($bbn_inc_content) {\n        ob_start();\n        if (\\count($bbn_inc_data)) {\n          foreach ($bbn_inc_data as $bbn_inc_key => $bbn_inc_val) {\n            $$bbn_inc_key = $bbn_inc_val;\n          }\n\n          unset($bbn_inc_key, $bbn_inc_val);\n        }\n\n        unset($bbn_inc_data);\n\n        \/*\n        try {\n          eval('?>'.$bbn_inc_content);\n        }\n        catch (\\Exception $e){\n          \/\/error_log($e->getMessage());\n          X::logError($e->getCode(), , $bbn_inc_file, 1);\n        }\n        *\/\n        eval('use bbn\\X as xx; use bbn\\Str as st; ?>' . $bbn_inc_content);\n\n        $c = ob_get_contents();\n        ob_end_clean();\n        return $c;\n      }\n\n      return '';\n    };\n\n    return $fn();\n  }",
-            "startLine": 572,
-            "endLine": 615,
+            "startLine": 583,
+            "endLine": 626,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -965,8 +936,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bool $r = false)\n  {\n    self::$db_in_controller = $r;\n  }",
-            "startLine": 638,
-            "endLine": 641,
+            "startLine": 649,
+            "endLine": 652,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -999,8 +970,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::$_is_debug;\n  }",
-            "startLine": 647,
-            "endLine": 650,
+            "startLine": 658,
+            "endLine": 661,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1023,8 +994,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($state = 1)\n  {\n    self::$_is_debug = (bool)$state;\n  }",
-            "startLine": 653,
-            "endLine": 656,
+            "startLine": 664,
+            "endLine": 667,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1057,8 +1028,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($db = NULL, $routes = [])\n  {\n    self::singletonInit($this);\n    self::initPath();\n    $this->env = new Environment();\n    if (\\is_object($db) && ($class = \\get_class($db)) && ($class === 'PDO' || strpos($class, '\\Db') !== false)) {\n      $this->db = $db;\n    } else {\n      $this->db = null;\n    }\n\n    $this->inc = new \\stdClass();\n    if (\\is_array($routes)) {\n      if (isset($routes['root'])) {\n        foreach ($routes['root'] as $url => &$route) {\n          if (isset($route['root']) && defined('BBN_' . strtoupper($route['root']) . '_PATH')) {\n            $route['path'] = constant('BBN_' . strtoupper($route['root']) . '_PATH') . $route['path'];\n          }\n\n          if (!empty($route['path']) && (substr($route['path'], -1) !== '\/')) {\n            $route['path'] .= '\/';\n          }\n\n          if (isset($route['path'])) {\n            $route['url'] = $url;\n            $this->registerPlugin($route);\n          }\n        }\n      }\n\n      if (isset($routes['allowed'])) {\n        $this->authorized_routes = $routes['allowed'];\n      }\n\n      if (isset($routes['forbidden'])) {\n        $this->forbidden_routes = $routes['forbidden'];\n      }\n    }\n\n    $this->initLocaleDomain();\n    $this->router = new Router($this, $routes);\n    $this->route();\n  }",
-            "startLine": 707,
-            "endLine": 749,
+            "startLine": 718,
+            "endLine": 760,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1102,8 +1073,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    self::destructSingleton();\n  }",
-            "startLine": 752,
-            "endLine": 755,
+            "startLine": 763,
+            "endLine": 766,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1126,8 +1097,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->info ? true : false;\n  }",
-            "startLine": 763,
-            "endLine": 766,
+            "startLine": 774,
+            "endLine": 777,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1150,8 +1121,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->plugins;\n  }",
-            "startLine": 769,
-            "endLine": 772,
+            "startLine": 780,
+            "endLine": 783,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1174,8 +1145,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin)\n  {\n    return isset($this->plugins[$plugin]);\n  }",
-            "startLine": 775,
-            "endLine": 778,
+            "startLine": 786,
+            "endLine": 789,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1208,8 +1179,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin)\n  {\n    \/** @todo This function! *\/\n    return isset($this->plugins[$plugin]);\n  }",
-            "startLine": 781,
-            "endLine": 785,
+            "startLine": 792,
+            "endLine": 796,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1242,8 +1213,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin, $raw = false)\n  {\n    if ($this->hasPlugin($plugin)) {\n      return $this->plugins[$plugin]['path'] . ($raw ? '' : 'src\/');\n    }\n  }",
-            "startLine": 788,
-            "endLine": 793,
+            "startLine": 799,
+            "endLine": 804,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1285,8 +1256,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($plugin)\n  {\n    return $this->hasPlugin($plugin) ? substr($this->plugins[$plugin]['url'], \\strlen($this->root)) : false;\n  }",
-            "startLine": 796,
-            "endLine": 799,
+            "startLine": 807,
+            "endLine": 810,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1319,8 +1290,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    foreach ($this->plugins as $name => $p) {\n      if (strpos($path, $p['url']) === 0) {\n        return $name;\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 802,
-            "endLine": 811,
+            "startLine": 813,
+            "endLine": 822,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1353,8 +1324,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, $root = NULL)\n  {\n    return $this->router->route($path, $mode, $root);\n  }",
-            "startLine": 827,
-            "endLine": 830,
+            "startLine": 838,
+            "endLine": 841,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1363,7 +1334,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                null
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1405,8 +1378,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->info['file'];\n  }",
-            "startLine": 833,
-            "endLine": 836,
+            "startLine": 844,
+            "endLine": 847,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1416,7 +1389,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1432,8 +1404,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getUrl();\n  }",
-            "startLine": 844,
-            "endLine": 847,
+            "startLine": 855,
+            "endLine": 858,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1443,7 +1415,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1459,8 +1430,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getRequest();\n  }",
-            "startLine": 850,
-            "endLine": 853,
+            "startLine": 861,
+            "endLine": 864,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1470,7 +1441,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1486,8 +1456,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getParams();\n  }",
-            "startLine": 856,
-            "endLine": 859,
+            "startLine": 867,
+            "endLine": 870,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1497,7 +1467,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1513,8 +1482,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getPost();\n  }",
-            "startLine": 862,
-            "endLine": 865,
+            "startLine": 873,
+            "endLine": 876,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1523,9 +1492,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1539,8 +1506,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getGet();\n  }",
-            "startLine": 868,
-            "endLine": 871,
+            "startLine": 879,
+            "endLine": 882,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1549,9 +1516,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1565,8 +1530,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getFiles();\n  }",
-            "startLine": 874,
-            "endLine": 877,
+            "startLine": 885,
+            "endLine": 888,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1575,9 +1540,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1591,8 +1554,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->getMode();\n  }",
-            "startLine": 880,
-            "endLine": 883,
+            "startLine": 891,
+            "endLine": 894,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1602,7 +1565,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -1618,8 +1580,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($mode)\n  {\n    return $this->env->setMode($mode);\n  }",
-            "startLine": 886,
-            "endLine": 889,
+            "startLine": 897,
+            "endLine": 900,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1652,8 +1614,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->env->isCli();\n  }",
-            "startLine": 892,
-            "endLine": 895,
+            "startLine": 903,
+            "endLine": 906,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1662,9 +1624,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1677,9 +1637,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path = '', $post = false, $arguments = false)\n  {\n    $this->env->simulate($path, $post, $arguments);\n    $this->is_routed     = false;\n    $this->is_controlled = null;\n    $this->info          = null;\n    $this->router->reset();\n    $this->route();\n    if ($arguments || !isset($this->info['args'])) {\n      $this->info['args'] = $arguments;\n    }\n\n    if (!$this->controller) {\n      throw new \\Exception(X::_('Controller is not set'));\n    }\n\n    $this->controller->reset($this->info);\n\n    return $this;\n  }",
-            "startLine": 904,
-            "endLine": 923,
+            "code": "function($path = '', $post = false, $arguments = false)\n  {\n    $this->env->simulate($path, $post, $arguments);\n    $this->is_routed     = false;\n    $this->is_controlled = null;\n    $this->info          = null;\n    $this->router->reset();\n    $this->route();\n    if ($arguments || !isset($this->info['args'])) {\n      $this->info['args'] = $arguments;\n    }\n\n    if ($this->controller) {\n      $this->controller->reset($this->info);\n    }\n\n\n    return $this;\n  }",
+            "startLine": 915,
+            "endLine": 933,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1731,8 +1691,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path = '', string $mode = 'html')\n  {\n    return array_key_exists($mode, self::$_loaded_views) && isset(self::$_loaded_views[$mode][$path]);\n  }",
-            "startLine": 931,
-            "endLine": 934,
+            "startLine": 941,
+            "endLine": 944,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1741,9 +1701,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1776,8 +1734,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, bbn\\Mvc\\View $view)\n  {\n    if (!array_key_exists($mode, self::$_loaded_views[$mode])) {\n      self::$_loaded_views[$mode] = [];\n    }\n\n    self::$_loaded_views[$mode][$path] = $view;\n  }",
-            "startLine": 943,
-            "endLine": 950,
+            "startLine": 953,
+            "endLine": 960,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1786,9 +1744,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "void"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1830,8 +1786,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode = 'html', array $data = NULL)\n  {\n    if (!router::isMode($mode) || !($path = Router::parse($path))) {\n      throw new \\Exception(\n        X::_(\"Incorrect mode $path $mode\")\n      );\n    }\n\n    $view = null;\n    if ($this->hasView($path, $mode)) {\n      $view = self::$_loaded_views[$mode][$path];\n    } elseif ($info = $this->router->route($path, $mode)) {\n      $view = new View($info);\n      $this->addToViews($path, $mode, $view);\n    }\n\n    if (\\is_object($view) && $view->check()) {\n      return $view->get($data);\n    }\n\n    return '';\n  }",
-            "startLine": 962,
-            "endLine": 983,
+            "startLine": 972,
+            "endLine": 993,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1882,8 +1838,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode = 'html')\n  {\n    if (!router::isMode($mode) || !($path = Router::parse($path))) {\n      return false;\n    }\n\n    if ($this->hasView($path, $mode)) {\n      return true;\n    }\n\n    if ($this->router->route($path, $mode)) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 993,
-            "endLine": 1008,
+            "startLine": 1003,
+            "endLine": 1018,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1892,9 +1848,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1927,8 +1881,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path)\n  {\n    if ($this->router->route($path, 'model')) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 1017,
-            "endLine": 1024,
+            "startLine": 1027,
+            "endLine": 1034,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1937,9 +1891,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1963,8 +1915,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $full_path, string $mode = 'html', array $data = NULL)\n  {\n    if (!router::isMode($mode) && ($full_path = Str::parsePath($full_path))) {\n      throw new \\Exception(\n        X::_(\"Incorrect mode $full_path $mode\")\n      );\n    }\n\n    if (($this->getMode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))) {\n      $full_path .= ($full_path === '' ? '' : '\/') . 'index';\n    }\n\n    $view = null;\n    if ($this->hasView($full_path, $mode)) {\n      $view = self::$_loaded_views[$mode][$full_path];\n    } elseif ($info = $this->router->route(X::basename($full_path), 'free-' . $mode, X::dirname($full_path))) {\n      $view = new View($info);\n      $this->addToViews($full_path, $mode, $view);\n    }\n\n    if (\\is_object($view) && $view->check()) {\n      return $view->get($data);\n    }\n\n    return '';\n  }",
-            "startLine": 1035,
-            "endLine": 1060,
+            "startLine": 1045,
+            "endLine": 1070,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2016,8 +1968,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $name)\n  {\n    return $this->router->getPluginFromComponent($name);\n  }",
-            "startLine": 1070,
-            "endLine": 1073,
+            "startLine": 1080,
+            "endLine": 1083,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2027,7 +1979,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2053,8 +2004,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $name)\n  {\n    return $this->router->routeComponent($name);\n  }",
-            "startLine": 1083,
-            "endLine": 1086,
+            "startLine": 1093,
+            "endLine": 1096,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2064,7 +2015,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2090,8 +2040,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, array $data, string $plugin)\n  {\n    if ($plugin && ($route = $this->router->routeCustomPlugin(Router::parse($path), $mode, $plugin))) {\n      $view = new View($route);\n      if ($view->check()) {\n        return \\is_array($data) ? $view->get($data) : $view->get();\n      }\n\n      return '';\n    }\n\n    return null;\n  }",
-            "startLine": 1099,
-            "endLine": 1111,
+            "startLine": 1109,
+            "endLine": 1121,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2101,7 +2051,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -2154,8 +2103,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $plugin)\n  {\n    return (bool)$this->router->routeCustomPlugin(router::parse($path), 'model', $plugin);\n  }",
-            "startLine": 1121,
-            "endLine": 1124,
+            "startLine": 1131,
+            "endLine": 1134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2164,9 +2113,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2199,8 +2146,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, array $data, bbn\\Mvc\\Controller $ctrl, string $plugin, int $ttl = NULL)\n  {\n    if (\n      $plugin\n      && ($route = $this->router->routeCustomPlugin(router::parse($path), 'model', $plugin))\n    ) {\n      $model = new Model($this->db, $route, $ctrl, $this);\n      if ($ttl) {\n        return $model->getFromCache($data, '', $ttl);\n      }\n\n      return $model->get($data);\n    }\n\n    return null;\n    \/*\n    throw new \\Exception(\n      X::_(\n        \"Impossible to find the find the model %s in the plugin %s\",\n        $path,\n        $plugin\n      )\n    );\n    *\/\n  }",
-            "startLine": 1138,
-            "endLine": 1162,
+            "startLine": 1148,
+            "endLine": 1172,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2210,7 +2157,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2272,8 +2218,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $plugin, string $subplugin)\n  {\n    return (bool)$this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin);\n  }",
-            "startLine": 1174,
-            "endLine": 1177,
+            "startLine": 1184,
+            "endLine": 1187,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2282,9 +2228,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2329,8 +2273,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, array $data, bbn\\Mvc\\Controller $ctrl, string $plugin, string $subplugin, int $ttl = NULL)\n  {\n    if (\n      $plugin\n      && $subplugin\n      && ($route = $this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin))\n    ) {\n      $model = new Model($this->db, $route, $ctrl, $this);\n      $res   = $ttl ? $model->getFromCache($data, '', $ttl) : $model->get($data);\n      return $res;\n    }\n\n    throw new \\Exception(\n      X::_(\n        \"Impossible to find the model %s from subplugin %s in plugin %s\",\n        $path,\n        $subplugin,\n        $plugin\n      )\n    );\n  }",
-            "startLine": 1192,
-            "endLine": 1212,
+            "startLine": 1202,
+            "endLine": 1222,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2340,7 +2284,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 5,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -2417,8 +2360,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, string $plugin)\n  {\n    return (bool)$this->router->routeCustomPlugin(Router::parse($path), $mode, $plugin);\n  }",
-            "startLine": 1215,
-            "endLine": 1218,
+            "startLine": 1225,
+            "endLine": 1228,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2427,9 +2370,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2471,8 +2412,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $mode, array $data, string $plugin)\n  {\n    return $this->customPluginView(router::parse($path), $mode, $data, $this->pluginName($plugin));\n  }",
-            "startLine": 1231,
-            "endLine": 1234,
+            "startLine": 1241,
+            "endLine": 1244,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2536,8 +2477,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, array $data, bbn\\Mvc\\Controller $ctrl)\n  {\n    if (($path = Router::parse($path)) && ($route = $this->router->route($path, 'model'))) {\n      $model = new Model($this->db, $route, $ctrl, $this);\n      return $model->get($data);\n    }\n\n    return [];\n  }",
-            "startLine": 1245,
-            "endLine": 1253,
+            "startLine": 1255,
+            "endLine": 1263,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2590,8 +2531,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, array $data, bbn\\Mvc\\Controller $ctrl)\n  {\n    $res = [];\n    if (($path = Router::parse($path))\n      && ($items = $this->fetchDir($path, 'model'))\n    ) {\n      foreach ($items as $it) {\n        $res[] = $this->getModel($it, $data, $ctrl);\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 1256,
-            "endLine": 1268,
+            "startLine": 1266,
+            "endLine": 1278,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2642,8 +2583,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $plugin, array $data, bbn\\Mvc\\Controller $ctrl)\n  {\n    $res = [];\n    if (($path = Router::parse($path))\n      && ($items = $this->fetchCustomDir($path, 'model', $plugin))\n    ) {\n      foreach ($items as $it) {\n        $res[$it] = $this->customPluginModel($it, $data, $ctrl, $plugin);\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 1271,
-            "endLine": 1283,
+            "startLine": 1281,
+            "endLine": 1293,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2652,9 +2593,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -2705,8 +2644,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, array $data, bbn\\Mvc\\Controller $ctrl, string $plugin, int $ttl = NULL)\n  {\n    return $this->customPluginModel(router::parse($path), $data, $ctrl, $this->pluginName($plugin), $ttl);\n  }",
-            "startLine": 1296,
-            "endLine": 1299,
+            "startLine": 1306,
+            "endLine": 1309,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2775,8 +2714,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, array $data, bbn\\Mvc\\Controller $ctrl, string $plugin, string $subplugin, int $ttl = NULL)\n  {\n    return $this->subpluginModel($path, $data, $ctrl, $plugin, $subplugin, $ttl);\n  }",
-            "startLine": 1313,
-            "endLine": 1316,
+            "startLine": 1323,
+            "endLine": 1326,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2854,8 +2793,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, array $data, bbn\\Mvc\\Controller $ctrl, int $ttl = 10)\n  {\n    if (\\is_null($data)) {\n      $data = $this->data;\n    }\n\n    if ($route = $this->router->route(router::parse($path), 'model')) {\n      $model = new Model($this->db, $route, $ctrl, $this);\n      return $model->getFromCache($data, '', $ttl);\n    }\n\n    return [];\n  }",
-            "startLine": 1326,
-            "endLine": 1338,
+            "startLine": 1336,
+            "endLine": 1348,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2915,8 +2854,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, array $data, bbn\\Mvc\\Controller $ctrl, $ttl = 10)\n  {\n    if (\\is_null($data)) {\n      $data = $this->data;\n    }\n\n    if ($route = $this->router->route(router::parse($path), 'model')) {\n      $model = new Model($this->db, $route, $ctrl, $this);\n      $model->setCache($data, '', $ttl);\n    }\n  }",
-            "startLine": 1348,
-            "endLine": 1358,
+            "startLine": 1358,
+            "endLine": 1368,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2976,8 +2915,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, array $data, bbn\\Mvc\\Controller $ctrl)\n  {\n    if (\\is_null($data)) {\n      $data = $this->data;\n    }\n\n    if ($route = $this->router->route(router::parse($path), 'model')) {\n      $model = new Model($this->db, $route, $ctrl, $this);\n      $model->deleteCache($data, '');\n    }\n  }",
-            "startLine": 1368,
-            "endLine": 1378,
+            "startLine": 1378,
+            "endLine": 1388,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3027,9 +2966,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $obj)\n  {\n    if (!isset($this->inc->{$name})) {\n      $this->inc->{$name} = $obj;\n    }\n  }",
-            "startLine": 1386,
-            "endLine": 1391,
+            "code": "function(string $name, object $obj)\n  {\n    if (isset($this->inc->{$name})) {\n      throw new \\Exception(X::_(\"Impossible to add twice the same property (%s) to inc\", $name));\n    }\n\n    $this->inc->{$name} = $obj;\n  }",
+            "startLine": 1396,
+            "endLine": 1403,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3044,7 +2983,7 @@
                 {
                     "name": "name",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3053,7 +2992,7 @@
                 {
                     "name": "obj",
                     "position": 1,
-                    "type": "",
+                    "type": "object",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -3076,8 +3015,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      $this->obj = new \\stdClass();\n      if (!\\is_array($this->info)) {\n        $this->log(\"No info in MVC\", $this->info);\n        throw new \\Exception(X::_(\"No info in MVC\"));\n      }\n\n      if (!$this->controller) {\n        $this->controller = new Controller($this, $this->info, $this->data);\n      }\n\n      $this->controller->process();\n    }\n  }",
-            "startLine": 1401,
-            "endLine": 1416,
+            "startLine": 1413,
+            "endLine": 1428,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3100,8 +3039,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check() && $this->controller) {\n      return $this->controller->hasContent();\n    }\n\n    return false;\n  }",
-            "startLine": 1424,
-            "endLine": 1431,
+            "startLine": 1436,
+            "endLine": 1443,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3124,8 +3063,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(callable $fn)\n  {\n    if ($this->check() && $this->controller) {\n      $this->controller->transform($fn);\n    }\n  }",
-            "startLine": 1439,
-            "endLine": 1444,
+            "startLine": 1451,
+            "endLine": 1456,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3157,9 +3096,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->check() && $this->controller) {\n      $obj = $this->controller->get();\n      if ($this->isCli()) {\n        if (isset($obj->content)) {\n          echo $obj->content;\n        }\n\n        exit();\n      }\n\n      if (\\is_array($obj)) {\n        $obj = X::toObject($obj);\n      }\n\n      if ((\\gettype($obj) !== 'object') || (\\get_class($obj) !== 'stdClass')) {\n        throw new \\Exception(X::_(\"Unexpected output: \" . \\gettype($obj)));\n      }\n\n      if ($this->obj && X::countProperties($this->obj)) {\n        $obj = X::mergeObjects($obj, $this->obj);\n      }\n\n      $output = new Output($obj, $this->getMode());\n      $output->run();\n    } else {\n      header('HTTP\/1.0 404 Not Found');\n      exit();\n    }\n  }",
-            "startLine": 1452,
-            "endLine": 1482,
+            "code": "function()\n  {\n    if ($this->check() && $this->controller) {\n      $obj = $this->controller->get();\n      if ($this->isCli()) {\n        if (isset($obj->content)) {\n          echo $obj->content;\n        }\n\n        exit();\n      }\n\n      if (\\is_array($obj)) {\n        $obj = X::toObject($obj);\n      }\n\n      if ((\\gettype($obj) !== 'object') || (\\get_class($obj) !== 'stdClass')) {\n        throw new \\Exception(X::_(\"Unexpected output: \" . \\gettype($obj)));\n      }\n\n      if ($this->obj && X::countProperties($this->obj)) {\n        $obj = X::mergeObjects($obj, $this->obj);\n      }\n\n      $output = new Output($obj, $this->getMode());\n      $output->run();\n    } else {\n      Output::statusHeader(404);\n    }\n  }",
+            "startLine": 1464,
+            "endLine": 1493,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3182,8 +3121,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (self::$db_in_controller && $this->db) {\n      return $this->db;\n    }\n\n    return null;\n  }",
-            "startLine": 1488,
-            "endLine": 1495,
+            "startLine": 1502,
+            "endLine": 1509,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3193,7 +3132,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "bbn\\Db",
                 null
             ],
             "parent": false,
@@ -3209,8 +3147,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    if ($this->check()) {\n      if ($this->router->getPrepath(false) === $path) {\n        return 1;\n      }\n\n      if ($this->env->setPrepath($path) && $this->router->setPrepath($path)) {\n        $this->params = $this->getParams();\n        return 1;\n      }\n    }\n\n    throw new \\Exception(\n      X::_(\"The setPrepath method cannot be used in this MVC\")\n    );\n  }",
-            "startLine": 1503,
-            "endLine": 1519,
+            "startLine": 1517,
+            "endLine": 1533,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3243,8 +3181,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ($this->check()) {\n      return $this->router->getPrepath();\n    }\n\n    return '';\n  }",
-            "startLine": 1525,
-            "endLine": 1532,
+            "startLine": 1539,
+            "endLine": 1546,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3267,8 +3205,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($type = 'root')\n  {\n    if ($this->check()) {\n      $routes = $this->router->getRoutes();\n      return $routes[$type] ?? false;\n    }\n\n    return false;\n  }",
-            "startLine": 1539,
-            "endLine": 1547,
+            "startLine": 1553,
+            "endLine": 1561,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3312,7 +3250,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "self",
                 null
             ],
             "parent": false,
@@ -3338,9 +3275,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -3389,7 +3324,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -3449,9 +3383,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3485,9 +3417,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -3511,9 +3441,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3547,9 +3475,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3583,9 +3509,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3619,9 +3543,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3655,9 +3577,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -3692,7 +3612,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -3738,7 +3657,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -3824,10 +3742,10 @@
         "_is_debug": true,
         "_app_name": "apst-app",
         "_app_prefix": "apst",
-        "_app_path": "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/",
+        "_app_path": "\/home\/nabab\/web\/domains\/apst-app\/app-ui\/",
         "_cur_path": "\/",
-        "_lib_path": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/",
-        "_data_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/data\/",
+        "_lib_path": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/",
+        "_data_path": "\/home\/nabab\/web\/domains\/apst-app\/data\/",
         "db_in_controller": true,
         "reserved": [
             "_private",
@@ -3877,41 +3795,27 @@
             "css": [],
             "js": []
         },
-        "_is_debug": true,
-        "_app_name": "apst-app",
-        "_app_prefix": "apst",
-        "_app_path": "\/home\/thomas\/domains\/apst-app.thomas.lan\/app-ui\/",
-        "_cur_path": "\/",
-        "_lib_path": "\/home\/thomas\/domains\/_COMPOSER\/dev\/vendor\/",
-        "_data_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/data\/",
-        "db_in_controller": true,
+        "_is_debug": false,
+        "_app_name": null,
+        "_app_prefix": null,
+        "_app_path": null,
+        "_cur_path": null,
+        "_lib_path": null,
+        "_data_path": null,
+        "db_in_controller": false,
         "reserved": [
             "_private",
             "_common",
             "_htaccess"
         ],
-        "singleton_instance": {
-            "inc": {
-                "options": {},
-                "session": {},
-                "user": {
-                    "prev_time": null
-                },
-                "pref": {},
-                "perm": {},
-                "outils": {}
-            },
-            "data": [],
-            "o": null,
-            "obj": {}
-        },
-        "singleton_exists": 1,
+        "singleton_instance": null,
+        "singleton_exists": false,
         "controller": null,
         "db": null,
         "env": null,
         "router": null,
         "info": null,
-        "root": null,
+        "root": "",
         "plugins": null,
         "loaded": {
             "views": {

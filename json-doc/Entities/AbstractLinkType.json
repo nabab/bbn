@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/Entities\/AbstractLinkType.php",
     "startLine": 11,
-    "endLine": 550,
+    "endLine": 530,
     "contentConstructor": {
         "file": "bbn\\Entities\\AbstractLinkType",
         "returns": null
@@ -83,9 +83,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $included_deleted = false)\n  {\n    $r = [];\n\n    if ($links = $this->fetch()) {\n      $id_tiers   = [];\n      $id_lieu    = [];\n      $id_options = [];\n\n      $f = $this->fields;\n      foreach ($links as $link) {\n        if ($link[$f['id_people']] !== null) {\n          $id_tiers[] = $this->parseId($link[$f['id_people']]);\n        }\n\n        if ($link[$f['id_address']] !== null) {\n          $id_lieu[] = $this->parseId($link[$f['id_address']]);\n        }\n\n        if ($link[$f['id_option']] !== null) {\n          $id_options[] = $this->parseId($link[$f['id_option']]);\n        }\n      }\n\n      \/\/ Here will fetch ALL linked items for all results in just 3 queries\n      \/\/ Then later will assign every link together\n      \/\/ To avoid executing too many queries\n      $tables = $this->class_cfg['tables'];\n\n      $people    = $this->fetchLinks($tables['people'], $id_tiers);\n      $addresses = $this->fetchLinks($tables['addresses'], $id_lieu);\n      $options   = $this->fetchLinks($tables['options'], $id_options);\n\n      foreach ($links as $link) {\n        $r[] = new Link(\n          $link,\n          $this->getLinkedItem($people, $link[$f['id_people']]),\n          $this->getLinkedItem($addresses, $link[$f['id_address']]),\n          $this->getLinkedItem($options, $link[$f['id_option']])\n        );\n      }\n    }\n\n    return $r;\n  }",
+            "code": "function(bool $included_deleted = false)\n  {\n    $r = [];\n\n    if ($links = $this->fetch()) {\n      $id_tiers   = [];\n      $id_lieu    = [];\n      $id_options = [];\n\n      $f = $this->fields;\n      foreach ($links as $link) {\n        $id_tiers[]   = $this->parseId($link[$f['id_people']]) ?? '';\n        $id_lieu[]    = $this->parseId($link[$f['id_address']]) ?? '';\n        $id_options[] = $this->parseId($link[$f['id_option']]) ?? '';\n      }\n\n      \/\/ Here will fetch ALL linked items for all results in just 3 queries\n      \/\/ Then later will assign every link together\n      \/\/ To avoid executing too many queries\n      $tables = $this->class_cfg['tables'];\n\n      $people    = $this->fetchLinks($tables['people'], $id_tiers);\n      $addresses = $this->fetchLinks($tables['addresses'], $id_lieu);\n      $options   = $this->fetchLinks($tables['options'], $id_options);\n\n      foreach ($links as $link) {\n        $r[] = new Link(\n          $link,\n          $this->getLinkedItem($people, $link[$f['id_people']]),\n          $this->getLinkedItem($addresses, $link[$f['id_address']]),\n          $this->getLinkedItem($options, $link[$f['id_option']])\n        );\n      }\n    }\n\n    return $r;\n  }",
             "startLine": 151,
-            "endLine": 195,
+            "endLine": 187,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -94,9 +94,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -120,9 +118,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ($link = $this->fetch('one', [$this->fields['id'] => $id])) {\n      $f      = $this->fields;\n      $tables = $this->class_cfg['tables'];\n\n      $people = $link[$f['id_people']] !== null\n        ? $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']])], 'one')\n        : null;\n\n      $address = $link[$f['id_address']] !== null\n        ? $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']])], 'one')\n        : null;\n\n      $option = $link[$f['id_option']] !== null\n        ? $this->fetchLinks($tables['options'], [$this->parseId($link[$f['id_option']])], 'one')\n        : null;\n\n      return new Link($link, $people, $address, $option);\n    }\n\n    return null;\n  }",
-            "startLine": 204,
-            "endLine": 226,
+            "code": "function($id)\n  {\n    if ($link = $this->fetch('one', [$this->fields['id'] => $id])) {\n      $f      = $this->fields;\n      $tables = $this->class_cfg['tables'];\n      return new Link(\n        $link,\n        $this->fetchLinks($tables['people'], [$this->parseId($link[$f['id_people']]) ?? ''], 'one'),\n        $this->fetchLinks($tables['addresses'], [$this->parseId($link[$f['id_address']]) ?? ''], 'one'),\n        $this->fetchLinks($tables['options'], [$this->parseId($link['id_option']) ?? ''], 'one'),\n      );\n    }\n\n    return null;\n  }",
+            "startLine": 196,
+            "endLine": 210,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -132,7 +130,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "bbn\\Entities\\Link",
                 null
             ],
             "parent": false,
@@ -158,8 +155,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_tiers)\n  {\n    if ($id = $this->fetch('field', [\n      $this->fields['id_people'] => $id_tiers\n    ], $this->fields['id'])) {\n      return $id;\n    }\n\n    return null;\n  }",
-            "startLine": 233,
-            "endLine": 242,
+            "startLine": 217,
+            "endLine": 226,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -169,7 +166,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -195,8 +191,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_lieu)\n  {\n    if ($id = $this->fetch('field', [\n      $this->fields['id_address'] => $id_lieu\n    ], $this->fields['id'])) {\n      return $id;\n    }\n\n    return null;\n  }",
-            "startLine": 249,
-            "endLine": 258,
+            "startLine": 233,
+            "endLine": 242,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -206,7 +202,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -232,8 +227,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bool $included_deleted = false)\n  {\n    return $this->db->count(\n      $this->class_table, [\n        $this->fields['id_entity'] => $this->entity->getId(),\n        $this->fields['type_link'] => $this->type\n      ]\n    );\n  }",
-            "startLine": 264,
-            "endLine": 272,
+            "startLine": 248,
+            "endLine": 256,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -243,7 +238,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -270,8 +264,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n     $f = $this->fields;\n    if (($cfg = $this->input($cfg)) && (isset($cfg[$f['id_people']]) || isset($cfg[$f['id_address']]))) {\n      $param = [];\n      foreach ($cfg as $k => $v){\n        if (!in_array($k, $this->fields)) {\n          $param[$k] = $v;\n          unset($cfg[$k]);\n        }\n      }\n\n      if (!empty($param)) {\n        $cfg[$f['cfg']] = json_encode($param);\n      }\n\n      $cfg[$f['id_entity']] = $this->entity->getId();\n      $cfg[$f['type_link']]   = $this->type;\n\n      if (\\array_key_exists($f['id'], $cfg)) {\n        unset($cfg[$f['id']]);\n      }\n\n      if ($this->db->insert($this->class_table, $cfg)) {\n        return $this->output($this->db->lastId());\n      }\n\n      $this->error(\"Insert\", false);\n      return false;\n    }\n\n    $this->error(\"Insert\");\n    return false;\n  }",
-            "startLine": 279,
-            "endLine": 312,
+            "startLine": 263,
+            "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -304,8 +298,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    $f = $this->fields;\n    if (($cfg = $this->input($cfg))\n        && isset($cfg[$f['id']])\n        && (isset($cfg[$f['id_people']]) || isset($cfg[$f['id_address']]))\n    ) {\n      $param = [];\n      foreach ($cfg as $k => $v){\n        if (!in_array($k, $this->fields)) {\n          $param[$k] = $v;\n          unset($cfg[$k]);\n        }\n      }\n\n      $cfg[$f['cfg']] = json_encode($param);\n\n      $id = $cfg[$f['id']];\n      unset($cfg[$f['id']]);\n\n      if ($this->db->update($this->class_table, $cfg, [\n        $f['id'] => $id, $f['id_entity'] => $this->entity->getId()]\n      )) {\n        return $this->output($id);\n      }\n\n      $this->error(\"Update\", false);\n      return false;\n    }\n\n    $this->error(\"Update\");\n    return false;\n  }",
-            "startLine": 320,
-            "endLine": 352,
+            "startLine": 304,
+            "endLine": 336,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -338,8 +332,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    if ($id instanceof Link) {\n      $r    = $id;\n      $link = (array)$id->link;\n    }\n    elseif ($r = $this->get($id)) {\n      $link = (array)$r->link;\n    }\n    else {\n      return null;\n    }\n\n    foreach ($link as $k => $v) {\n      switch ($k) {\n        case $this->fields['id_people']:\n          $link[$k] = $this->entity->fnom((array)$r->people);\n          break;\n        case $this->fields['id_address']:\n          $link[$k] = $this->entity->fadresse((array)$r->address);\n          break;\n        case $this->fields['id_entity']:\n          $cfg = $this->class_cfg;\n          $f   = $cfg['arch']['entities'];\n          $link[$k] = $this->db->selectOne($cfg['tables']['entities'], $f['name'], [\n            $f['id'] => $v\n          ]);\n          break;\n      }\n    }\n\n    return $link;\n  }",
-            "startLine": 359,
-            "endLine": 391,
+            "startLine": 343,
+            "endLine": 375,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -349,7 +343,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -375,8 +368,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bool $included_deleted = false)\n  {\n    $r = [];\n    if ($liens = $this->getAll($included_deleted)) {\n      foreach ($liens as $lien){\n        array_push($r, $this->get_st($lien));\n      }\n    }\n\n    return $r;\n  }",
-            "startLine": 397,
-            "endLine": 407,
+            "startLine": 381,
+            "endLine": 391,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -385,9 +378,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -412,8 +403,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(bool $included_deleted = false)\n  {\n    return $this->db->getColumnValues(\n      $this->class_table, $this->fields['id'], [\n        $this->fields['id_entity'] => $this->entity->getId(),\n        $this->fields['type_link'] => $this->type\n      ]\n    );\n  }",
-            "startLine": 413,
-            "endLine": 421,
+            "startLine": 397,
+            "endLine": 405,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -423,7 +414,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -450,8 +440,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    $param = [\n      $this->fields['id_entity'] => $this->entity->getId(),\n      $this->fields['id'] => $id,\n      $this->fields['type_link'] => $this->type\n    ];\n\n    if ($this->db->delete($this->class_table, $param)) {\n      return $id;\n    }\n\n    $this->error(\"Delete\");\n    return false;\n  }",
-            "startLine": 428,
-            "endLine": 442,
+            "startLine": 412,
+            "endLine": 426,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -484,8 +474,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($message, $die = true)\n  {\n    $this->entity->error(\"Error while executing $message with \".get_class($this), $die);\n  }",
-            "startLine": 448,
-            "endLine": 451,
+            "startLine": 432,
+            "endLine": 435,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -537,9 +527,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -622,7 +610,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -658,9 +645,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {

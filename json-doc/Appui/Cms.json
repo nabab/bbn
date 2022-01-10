@@ -9,7 +9,7 @@
     "interfaces": [],
     "fileName": "\/Appui\/Cms.php",
     "startLine": 16,
-    "endLine": 692,
+    "endLine": 763,
     "contentConstructor": {
         "file": "bbn\\Appui\\Cms",
         "returns": null
@@ -24,9 +24,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, bbn\\Appui\\Note $note = NULL)\n  {\n      parent::__construct($db);\n      $this->event = new Event($this->db);\n      $this->opt   = Option::getInstance();\n    if (!self::$_id_event) {\n        $id = $this->opt->fromCode('publication', 'event', 'appui');\n        self::_set_id_event($id);\n    }\n    if (!$note) {\n        $this->note = new Note($this->db);\n    }\n    else {\n        $this->note = $note;\n    }\n\n      $this->class_cfg = X::mergeArrays(\n          $this->note->getClassCfg(),\n          $this->event->getClassCfg()\n      );\n  }",
-            "startLine": 71,
-            "endLine": 91,
+            "code": "function(bbn\\Db $db, bbn\\Appui\\Note $note = NULL)\n  {\n    parent::__construct($db);\n    $this->event = new Event($this->db);\n    $this->opt   = Option::getInstance();\n    if (!self::$_id_event) {\n      $id = $this->opt->fromCode('publication', 'types', 'event', 'appui');\n      self::_set_id_event($id);\n    }\n    if (!$note) {\n      $this->note = new Note($this->db);\n    }\n    else {\n      $this->note = $note;\n    }\n\n    $this->class_cfg = X::mergeArrays(\n        $this->note->getClassCfg(),\n        $this->event->getClassCfg()\n    );\n  }",
+            "startLine": 87,
+            "endLine": 107,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -102,8 +102,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($limit, $start)\n  {\n      $cfg                         = $this->note->getLastVersionCfg();\n      $cf                          = $this->note->getClassCfg();\n      $cf_ev                       = $this->event->getClassCfg();\n      $cfg['fields'][]             = $cf_ev['arch']['events']['start'];\n      $cfg['fields'][]             = $cf_ev['arch']['events']['end'];\n      $cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);\n      $cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);\n      $cfg['join'][]               = [\n          'table' => $cf['tables']['events'],\n          'on' => [\n              [\n                  'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),\n                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])\n              ]\n          ]\n      ];\n\n      $cfg['join'][] = [\n          'table' => $cf_ev['tables']['events'],\n          'on' => [\n              [\n                  'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),\n                  'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])\n              ]\n          ]\n      ];\n\n      $cfg['join'][] = [\n          'table' => $cf['tables']['url'],\n          'on' => [\n              [\n                  'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),\n                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])\n              ]\n          ]\n      ];\n\n      $total        = $this->db->count($cfg);\n      $cfg['where'] = [\n          'conditions' => [\n              [\n                  'field' => 'start',\n                  'operator' => '<=',\n                  'exp' => 'NOW()'\n              ]\n          ]\n      ];\n\n      $cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];\n      $cfg['limit'] = $limit;\n      $cfg['start'] = $start;\n\n      return [\n          'data' => $this->db->rselectAll($cfg),\n          'query' => $this->db->last(),\n          'total' => $total\n      ];\n  }",
-            "startLine": 94,
-            "endLine": 153,
+            "startLine": 110,
+            "endLine": 169,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -112,9 +112,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -147,8 +145,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($limit, $start)\n  {\n      $cfg                         = $this->note->getLastVersionCfg();\n      $cf                          = $this->note->getClassCfg();\n      $cf_ev                       = $this->event->getClassCfg();\n      $cfg['fields'][]             = $cf_ev['arch']['events']['start'];\n      $cfg['fields'][]             = $cf_ev['arch']['events']['end'];\n      $cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);\n      $cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);\n      $cfg['join'][]               = [\n          'table' => $cf['tables']['events'],\n          'on' => [\n              [\n                  'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),\n                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])\n              ]\n          ]\n      ];\n\n      $cfg['join'][] = [\n          'table' => $cf_ev['tables']['events'],\n          'on' => [\n              [\n                  'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),\n                  'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])\n              ]\n          ]\n      ];\n\n      $cfg['join'][] = [\n          'table' => $cf['tables']['url'],\n          'on' => [\n              [\n                  'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),\n                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])\n              ]\n          ]\n      ];\n\n      $total        = $this->db->count($cfg);\n      $cfg['where'] = [\n          'conditions' => [\n              [\n                  'field' => 'start',\n                  'operator' => '>',\n                  'exp' => 'NOW()'\n              ]\n          ]\n      ];\n\n      $cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];\n      $cfg['limit'] = $limit;\n      $cfg['start'] = $start;\n\n      return [\n          'data' => $this->db->rselectAll($cfg),\n          'total' => $total\n      ];\n  }",
-            "startLine": 155,
-            "endLine": 213,
+            "startLine": 171,
+            "endLine": 229,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -157,9 +155,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -192,8 +188,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n    $res = [];\n    if (!empty($id_note) && ($note = $this->note->get($id_note))) {\n        $res          = $note;\n        $res['url']   = $this->note->getUrl($id_note);\n        $res['start'] = $this->getStart($id_note);\n        $res['end']   = $this->getEnd($id_note);\n        $res['tags']  = $this->note->getTags($id_note);\n        $res['items'] = $note['content'] ? json_decode($note['content'], true) : [];\n    }\n\n    return $res;\n  }",
-            "startLine": 221,
-            "endLine": 234,
+            "startLine": 237,
+            "endLine": 250,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -202,9 +198,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -219,6 +213,40 @@
                 }
             ]
         },
+        "getLastVersionCfg": {
+            "name": "getLastVersionCfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Cms",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bool $with_content = false)\n  {\n    $cfg = $this->note->getLastVersionCfg($with_content);\n    $cfg['fields'][]             = 'url';\n    $cfg['fields'][]             = 'start';\n    $cfg['fields'][]             = 'end';\n    $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';\n    $cfg['where']['mime']        = 'json\/bbn-cms';\n    $cfg['where']['private']     = 0;\n    $cfg['join'][] = [\n      'table' => $this->class_cfg['tables']['url'],\n      'type' => 'left',\n      'on' => [[\n          'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),\n          'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])\n      ]],\n    ];\n    $cfg['join'][] = [\n        'table' => $this->class_cfg['tables']['notes_events'],\n        'type' => 'left',\n        'on' => [[\n            'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),\n            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])\n        ]]\n    ];\n    $cfg['join'][] = [\n        'table' => $this->class_cfg['tables']['events'],\n        'type' => 'left',\n        'on' => [[\n            'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),\n            'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])\n        ]]\n    ];\n    $cfg['join'][] = [\n        'table' => $this->class_cfg['tables']['notes_medias'],\n        'type' => 'left',\n        'on' => [[\n            'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),\n            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])\n        ]]\n    ];\n    $cfg['group_by'] = [$this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])];\n\n    return $cfg;\n  }",
+            "startLine": 253,
+            "endLine": 297,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "with_content",
+                    "position": 0,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
         "getAll": {
             "name": "getAll",
             "summary": "Returns all the notes of type 'pages'.",
@@ -228,9 +256,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0)\n  {\n      $cfg = $this->note->getLastVersionCfg();\n    if (!$with_content) {\n        array_pop($cfg['fields']);\n    }\n\n      $cfg['limit']                = $limit;\n      $cfg['start']                = $start >= 0 ? $start : 0;\n      $cfg['fields'][]             = 'url';\n      $cfg['fields'][]             = 'start';\n      $cfg['fields'][]             = 'end';\n      $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';\n      $cfg['where']['mime']        = 'json\/bbn-cms';\n      $cfg['where']['private']     = 0;\n    if (!empty($filter)) {\n        $cfg['having'] = $filter;\n    }\n\n    if (!empty($order)) {\n        $cfg['order'] = $order;\n    }\n\n      $cfg['join'][] = [\n          'table' => $this->class_cfg['tables']['url'],\n          'type' => 'left',\n          'on' => [[\n              'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),\n              'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])\n          ]],\n      ];\n      $cfg['join'][] = [\n          'table' => $this->class_cfg['tables']['notes_events'],\n          'type' => 'left',\n          'on' => [[\n              'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),\n              'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])\n          ]]\n      ];\n      $cfg['join'][] = [\n          'table' => $this->class_cfg['tables']['events'],\n          'type' => 'left',\n          'on' => [[\n              'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),\n              'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])\n          ]]\n      ];\n      $cfg['join'][] = [\n          'table' => $this->class_cfg['tables']['notes_medias'],\n          'type' => 'left',\n          'on' => [[\n              'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),\n              'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])\n          ]]\n      ];\n\n      $total = $this->db->count($cfg);\n      $data  = $this->db->rselectAll($cfg);\n\n      return [\n          'query' => $this->db->last(),\n          'data' => $data,\n          'total' => $total\n      ];\n  }",
-            "startLine": 246,
-            "endLine": 310,
+            "code": "function(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0)\n  {\n    $cfg = $this->getLastVersionCfg($with_content);\n    $cfg['limit'] = $limit;\n    $cfg['start'] = $start >= 0 ? $start : 0;\n    if (!empty($filter)) {\n        $cfg['having'] = $filter;\n    }\n\n    if (!empty($order)) {\n        $cfg['order'] = $order;\n    }\n\n    $total = $this->db->count($cfg);\n    $data  = $this->db->rselectAll($cfg);\n\n    return [\n      'query' => $this->db->last(),\n      'data' => $data,\n      'total' => $total\n    ];\n  }",
+            "startLine": 309,
+            "endLine": 330,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -239,9 +267,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -302,8 +328,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (!$this->noteType) {\n        $this->noteType = $this->opt->fromCode('pages', 'types', 'note', 'appui');\n    }\n\n      return $this->noteType;\n  }",
-            "startLine": 318,
-            "endLine": 325,
+            "startLine": 338,
+            "endLine": 345,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -312,9 +338,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "string"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -328,8 +352,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      return $this->note->countByType($this->getNoteType());\n  }",
-            "startLine": 332,
-            "endLine": 335,
+            "startLine": 352,
+            "endLine": 355,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -338,9 +362,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -354,8 +376,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $url, bool $force = false)\n  {\n    if (($id_note = $this->note->urlToId($url)) && ($force || $this->isPublished($id_note))) {\n      return $this->get($id_note);\n    }\n\n    return null;\n  }",
-            "startLine": 344,
-            "endLine": 351,
+            "startLine": 364,
+            "endLine": 371,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -365,7 +387,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -400,8 +421,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n    if ($id_event = $this->note->getEventIdFromNote($id_note)) {\n      if (\n              $event = $this->db->rselect([\n                    'table' => $this->class_cfg['table'],\n                    'fields' => [],\n                    'where' => [\n                        'conditions' => [[\n                            'field' => $this->fields['id'],\n                            'value' => $id_event\n                        ]]],\n                    ])\n      ) {\n        \/\/if the event is not in bbn_notes_events it inserts the row\n        $this->note->insertNoteEvent($id_note, $id_event);\n        $event['id_note'] = $id_note;\n        return $event;\n      }\n    }\n\n      return null;\n  }",
-            "startLine": 361,
-            "endLine": 383,
+            "startLine": 381,
+            "endLine": 403,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -435,8 +456,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n    if ($event = $this->getEvent($id_note)) {\n        return $event[$this->class_cfg['arch']['events']['start']] ?? null;\n    }\n\n      return null;\n  }",
-            "startLine": 392,
-            "endLine": 399,
+            "startLine": 412,
+            "endLine": 419,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -446,7 +467,6 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -473,8 +493,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n    if ($event = $this->getEvent($id_note)) {\n        return $event[$this->class_cfg['arch']['events']['end']] ?? null;\n    }\n      return null;\n  }",
-            "startLine": 408,
-            "endLine": 414,
+            "startLine": 428,
+            "endLine": 434,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -513,8 +533,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n      $now = strtotime(date('Y-m-d H:i:s'));\n      $cfg = $this->class_cfg;\n\n    if ($event = $this->getEvent($id_note)) {\n      if (\n            isset($event[$cfg['arch']['events']['start']]) &&\n            (is_null($event[$cfg['arch']['events']['end']]) || (strtotime($event[$cfg['arch']['events']['end']]) > $now)) &&\n            $this->note->hasUrl($id_note)\n      ) {\n        return true;\n      }\n    }\n\n      return false;\n  }",
-            "startLine": 424,
-            "endLine": 440,
+            "startLine": 444,
+            "endLine": 460,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -523,9 +543,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -550,8 +568,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note, array $cfg)\n  {\n    if ($this->note->get($id_note) && !$this->isPublished($id_note)) {\n        \/\/if $url is given it updates the note_url\n      if (!empty($cfg['url'])) {\n        try {\n            $this->setUrl($id_note, $cfg['url']);\n        }\n        catch (\\Exception $e) {\n            return [\n                'error' => $e->getMessage()\n            ];\n        }\n      }\n      if (!empty($this->note->hasUrl($id_note))) {\n        if (empty($this->getEvent($id_note))) {\n          return $this->setEvent($id_note, [\n              'start'   => $cfg['start'] ?? date('Y-m-d H:i:s'),\n              'end'     => $cfg['end'] ?? null,\n              'id_type' => $cfg['id_type'] ?? self::$_id_event ?? null\n          ]);\n        } else {\n            \/\/case update\n            return $this->updateEvent($id_note, [\n                'start'   => $cfg['start'] ?? date('Y-m-d H:i:s'),\n                'end'     => $cfg['end'] ?? null,\n                'id_type' => $cfg['id_type'] ?? self::$_id_event ?? null\n            ]);\n        }\n      } else {\n          return false;\n      }\n    }\n\n      return false;\n  }",
-            "startLine": 449,
-            "endLine": 484,
+            "startLine": 469,
+            "endLine": 504,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -594,8 +612,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n    if ($event = $this->getEvent($id_note)) {\n        $cfg = $this->class_cfg;\n      if (\n              $this->db->delete(\n                  $this->class_cfg['tables']['notes_events'],\n                  [$this->class_cfg['arch']['notes_events']['id_note'] => $id_note]\n              )\n      ) {\n        return (bool)$this->db->delete(\n            $this->class_cfg['tables']['events'],\n            [$this->class_cfg['arch']['events']['id'] => $event['id']]\n        );\n      }\n    }\n\n      return false;\n  }",
-            "startLine": 492,
-            "endLine": 510,
+            "startLine": 512,
+            "endLine": 530,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -604,9 +622,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -631,8 +647,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note, string $url, $ignore = false)\n  {\n    if ($tmp = $this->note->urlToId($url)) {\n      if ($ignore && ($tmp === $id_note)) {\n        return 0;\n      }\n\n      throw new \\Exception(X::_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));\n    }\n\n    if (!$this->note->get($id_note)) {\n      throw new \\Exception(X::_('Impossible to find the given note'));\n    }\n\n    return $this->note->insertOrUpdateUrl($id_note, $url);\n  }",
-            "startLine": 521,
-            "endLine": 536,
+            "startLine": 541,
+            "endLine": 556,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -642,7 +658,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "bool",
                 null
             ],
             "parent": false,
@@ -687,8 +702,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n      $success = false;\n\n    if ($this->isPublished($id_note)) {\n        $this->unpublish($id_note);\n    }\n\n    if ($this->note->get($id_note) && $this->note->deleteUrl($id_note)) {\n      $success = true;\n    }\n\n      return $success;\n  }",
-            "startLine": 545,
-            "endLine": 558,
+            "startLine": 565,
+            "endLine": 578,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -697,9 +712,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -723,9 +736,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_note, array $cfg = [])\n  {\n    if (!array_key_exists('start', $cfg)) {\n      return null;\n    }\n\n    if (empty($cfg['start'])) {\n        return $this->unpublish($id_note);\n    }\n\n    if (($note = $this->note->get($id_note)) && ($this->_check_date($cfg['start'], $cfg['end'] ?? null))) {\n      if (empty($this->getEvent($id_note))) {\n        $fields = $this->class_cfg['arch']['events'];\n          \/\/if a type is not given it inserts the event as page\n        if (\n                $id_event = $this->event->insert([\n              $fields['name']    => $note['title'] ?? '',\n              $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,\n              $fields['start']   => $cfg['start'],\n              $fields['end']     => $cfg['end'] ?? null\n                ])\n        ) {\n          return $this->note->insertNoteEvent($id_note, $id_event);\n        }\n      } else {\n          return $this->updateEvent($id_note, $cfg);\n      }\n    }\n\n      return null;\n  }",
-            "startLine": 568,
-            "endLine": 598,
+            "code": "function(string $id_note, array $cfg = [])\n  {\n    if (!array_key_exists('start', $cfg)) {\n      throw new \\Exception(X::_(\"A start date is mandatory for CMS event (even null)\"));\n    }\n\n    if (empty($cfg['start'])) {\n      return $this->unpublish($id_note);\n    }\n\n    if (!($note = $this->note->get($id_note))) {\n      throw new \\Exception(X::_(\"The note %s does not exist\", $id_note));\n    }\n    \n    if (!$this->_check_date($cfg['start'], $cfg['end'] ?? null)) {\n      throw new \\Exception(X::_(\"The dates don't work... End before start?\"));\n    }\n\n    if (empty($this->getEvent($id_note))) {\n      $fields = $this->class_cfg['arch']['events'];\n        \/\/if a type is not given it inserts the event as page\n      if (\n        $id_event = $this->event->insert([\n          $fields['name']    => $note['title'] ?? '',\n          $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,\n          $fields['start']   => $cfg['start'],\n          $fields['end']     => $cfg['end'] ?? null\n      ])) {\n        return $this->note->insertNoteEvent($id_note, $id_event);\n      }\n      else {\n        X::log([\n          $fields['name']    => $note['title'] ?? '',\n          $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,\n          $fields['start']   => $cfg['start'],\n          $fields['end']     => $cfg['end'] ?? null\n        ], 'cmsss');\n        throw new \\Exception(X::_(\"Impossible to insert the event\"));\n      }\n    }\n    else {\n      return $this->updateEvent($id_note, $cfg);\n    }\n\n    return null;\n  }",
+            "startLine": 588,
+            "endLine": 633,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -768,8 +781,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note, array $cfg = [])\n  {\n    if (!array_key_exists('start', $cfg) || !array_key_exists('end', $cfg)) {\n      return false;\n    }\n\n    if ($this->_check_date($cfg['start'], $cfg['end'])) {\n      if ($event = $this->getEvent($id_note)) {\n        if (\n            (strtotime($cfg['start']) !== strtotime($event['start'])) ||\n            (strtotime($cfg['end']) !== strtotime($event['end']) )\n        ) {\n          $cfg['id_type'] = $cfg['id_type'] ?? self::$_id_event ?? null;\n          return $this->event->edit($event['id'], $cfg);\n        } else {\n          return true;\n        }\n      }\n    }\n\n      return false;\n  }",
-            "startLine": 607,
-            "endLine": 628,
+            "startLine": 642,
+            "endLine": 663,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -779,7 +792,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "bool",
                 null
             ],
             "parent": false,
@@ -815,8 +827,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note, string $title, string $content)\n  {\n      return $this->note->insertVersion($id_note, $title, $content);\n  }",
-            "startLine": 639,
-            "endLine": 642,
+            "startLine": 674,
+            "endLine": 677,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -826,7 +838,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -861,6 +872,50 @@
                 }
             ]
         },
+        "setType": {
+            "name": "setType",
+            "summary": "Changes the type of the note",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Cms",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_note, string $type)\n  {\n      return $this->note->setType($id_note, $type);\n  }",
+            "startLine": 687,
+            "endLine": 690,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_note",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "note"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "set": {
             "name": "set",
             "summary": "Sets content, title, start and end for the given URL.",
@@ -870,20 +925,18 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url, string $title, string $content, string $start = NULL, string $end = NULL)\n  {\n    if (!($cfg = $this->get($url))) {\n        throw new \\Exception(X::_(\"Impossible to find the article with URL\") . ' ' . $url);\n    }\n\n      $change = 0;\n    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content)) {\n        $change += (int)$this->setContent($cfg['id_note'], $title, $content);\n    }\n    if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {\n        $change += (int)$this->setEvent($cfg['id_note'], $start, $end);\n    }\n      return $change ? true : false;\n  }",
-            "startLine": 655,
-            "endLine": 669,
+            "code": "function(string $url, string $title, string $content, string $start = NULL, string $end = NULL, array $tags = NULL, string $id_type = NULL)\n  {\n    string $title,\n    string $content,\n    string $start = null,\n    string $end = null,\n    array $tags = null,\n    string $id_type = null\n  ): bool\n  {\n    if (!($cfg = $this->getByUrl($url, true))) {\n      throw new \\Exception(X::_(\"Impossible to find the article with URL\") . ' ' . $url);\n    }\n\n    $change = 0;\n    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content)) {\n      $change += (int)$this->setContent($cfg['id_note'], $title, $content);\n    }\n\n    if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {\n      $change += (int)$this->setEvent($cfg['id_note'], [\n        'start' => $start,\n        'end' => $end\n      ]);\n    }\n\n    if (is_array($tags)) {\n      $change += $this->note->setTags($cfg['id_note'], $tags);\n    }\n\n    if ($id_type && ($cfg['id_type'] !== $id_type)) {\n      $change += $this->setType($cfg['id_note'], $id_type);\n    }\n\n    return $change ? true : false;\n  }",
+            "startLine": 705,
+            "endLine": 740,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 5,
+            "numberOfParameters": 7,
             "numberOfRequiredParameters": 3,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -930,6 +983,25 @@
                     "has_default": true,
                     "default": null,
                     "default_name": ""
+                },
+                {
+                    "name": "tags",
+                    "position": 5,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "id_type",
+                    "position": 6,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "type"
                 }
             ]
         },
@@ -943,8 +1015,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_note)\n  {\n    if ($note = $this->note->get($id_note)) {\n      if ($this->note->getUrl($id_note)) {\n        $this->removeUrl($id_note);\n      }\n\n      if (!empty($this->note->remove($note['id']))) {\n          return true;\n      }\n    }\n      return false;\n  }",
-            "startLine": 679,
-            "endLine": 691,
+            "startLine": 750,
+            "endLine": 762,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -953,9 +1025,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -1410,7 +1480,7 @@
         "_id_event": null
     },
     "constants": null,
-    "numMethods": 29,
+    "numMethods": 31,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 1,

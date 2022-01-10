@@ -33,7 +33,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "stdClass",
                 null
             ],
             "parent": false,
@@ -111,7 +110,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -199,7 +197,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -277,7 +274,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -365,7 +361,6 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -443,7 +438,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -606,7 +600,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -659,7 +652,6 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -747,7 +739,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -815,7 +806,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -870,7 +860,6 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -916,7 +905,6 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,
@@ -980,7 +968,6 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                "int",
                 null
             ],
             "parent": false,

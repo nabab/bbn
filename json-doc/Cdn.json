@@ -141,9 +141,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",

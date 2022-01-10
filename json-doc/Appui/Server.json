@@ -17,8 +17,8 @@
     ],
     "interfaces": [],
     "fileName": "\/Appui\/Server.php",
-    "startLine": 23,
-    "endLine": 905,
+    "startLine": 24,
+    "endLine": 1075,
     "contentConstructor": {
         "file": "bbn\\Appui\\Server",
         "returns": null
@@ -33,9 +33,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg)\n  {\n    $this->cacheInit();\n    self::optionalInit();\n    if (\\is_string($cfg)) {\n      $opt = self::getOption($cfg, 'servers');\n      $psw = new Passwords(Db::getInstance());\n      $cfg = [\n        'user' => $opt['user'] ?? null,\n        'pass' => !empty($opt['id']) ? $psw->get($opt['id']) : null,\n        'host' => $opt['code'] ?? null\n      ];\n    }\n\n    if (empty($cfg['user'])) {\n      throw new \\Exception(_('The username is mandatory'));\n    }\n\n    if (empty($cfg['pass'])) {\n      throw new \\Exception(_('The password is mandatory'));\n    }\n\n    $this->opt             = Option::getInstance();\n    $this->user            = $cfg['user'];\n    $this->pass            = $cfg['pass'];\n    $this->hostname        = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n    $this->cacheNamePrefix = $this->hostname . '\/';\n    $this->virtualmin      = new Virtualmin([\n      'user' => $this->user,\n      'pass' => $this->pass,\n      'host' => $this->hostname,\n      'mode' => 'virtualmin'\n    ]);\n    $this->webmin          = new Webmin([\n      'user' => $this->user,\n      'pass' => $this->pass,\n      'host' => $this->hostname\n    ]);\n    if (!empty($cfg['cloudmin'])) {\n      $this->webmin = new Cloudmin([\n        'user' => $this->user,\n        'pass' => $this->pass,\n        'host' => $this->hostname\n      ]);\n    }\n  }",
-            "startLine": 57,
-            "endLine": 102,
+            "code": "function($cfg)\n  {\n    $this->cacheInit();\n    self::optionalInit();\n    if (\\is_string($cfg)) {\n      $opt = self::getOption($cfg, 'servers');\n      $psw = new Passwords(Db::getInstance());\n      $cfg = [\n        'user' => $opt['user'] ?? null,\n        'pass' => !empty($opt['id']) ? $psw->get($opt['id']) : null,\n        'host' => $opt['code'] ?? null\n      ];\n    }\n\n    if (empty($cfg['user'])) {\n      throw new \\Exception(_('The username is mandatory'));\n    }\n\n    if (empty($cfg['pass'])) {\n      throw new \\Exception(_('The password is mandatory'));\n    }\n\n    $this->opt             = Option::getInstance();\n    $this->user            = $cfg['user'];\n    $this->pass            = $cfg['pass'];\n    $this->hostname        = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n    $this->cacheNamePrefix = $this->hostname . '\/';\n    $this->mainDataPath    = self::getMainDataPath();\n    $this->dataPath        = $this->mainDataPath . $this->hostname . '\/';\n    if (!\\is_file($this->mainDataPath . 'servers.sqlite')) {\n      bbn\\File\\Dir::createPath($this->mainDataPath);\n      $db = new SQLite3($this->mainDataPath . 'servers.sqlite');\n      $db->exec(\"CREATE TABLE queue (\n        id INTEGER PRIMARY KEY,\n        server VARCHAR (150) NOT NULL,\n        created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n        user VARCHAR (32),\n        method VARCHAR (100) NOT NULL,\n        args TEXT,\n        hash TEXT NOT NULL,\n        start DATETIME,\n        [end] DATETIME,\n        failed INTEGER (1) DEFAULT (0),\n        active INTEGER (1) DEFAULT (1)\n      );\");\n    }\n    $this->db         = new bbn\\Db([\n      'engine' => 'sqlite',\n      'db' => $this->mainDataPath . 'servers.sqlite'\n    ]);\n    $this->virtualmin = new Virtualmin([\n      'user' => $this->user,\n      'pass' => $this->pass,\n      'host' => $this->hostname,\n      'mode' => 'virtualmin'\n    ]);\n    $this->webmin          = new Webmin([\n      'user' => $this->user,\n      'pass' => $this->pass,\n      'host' => $this->hostname\n    ]);\n    if (!empty($cfg['cloudmin'])) {\n      $this->webmin = new Cloudmin([\n        'user' => $this->user,\n        'pass' => $this->pass,\n        'host' => $this->hostname\n      ]);\n    }\n  }",
+            "startLine": 67,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -68,8 +68,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $mode = '', string $domain = '')\n  {\n    if (empty($mode) || ($mode === 'info') || $this->virtualmin->isInfoProp($mode)) {\n      $this->cacheInfo($this->virtualmin->isInfoProp($mode) ? ['search' => $mode] : []);\n    }\n\n    if (empty($mode) || ($mode === 'uptime')) {\n      $this->cacheUptime();\n    }\n\n    if (empty($mode) || ($mode === 'domains')) {\n      $this->cacheListDomains($domain);\n    }\n\n    if (empty($mode) || ($mode === 'subdomains')) {\n      $this->cacheListSubDomains($domain);\n    }\n\n    if (empty($mode) || ($mode === 'admins')) {\n      $this->cacheListAdmins($domain);\n    }\n\n    if (empty($mode) || ($mode === 'users')) {\n      $this->cacheListUsers($domain);\n    }\n\n    if (empty($mode) || ($mode === 'dns')) {\n      $this->cacheListDns($domain);\n    }\n\n    if (empty($mode) || ($mode === 'backups')) {\n      $this->cacheListBackups($domain);\n    }\n\n    if (empty($mode) || ($mode === 'features_template')) {\n      $this->cacheListFeaturesTemplate($domain);\n    }\n  }",
-            "startLine": 112,
-            "endLine": 149,
+            "startLine": 145,
+            "endLine": 182,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -111,8 +111,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, string $domain = '')\n  {\n    return $this->getCache($path, false, $domain) !== false;\n  }",
-            "startLine": 158,
-            "endLine": 161,
+            "startLine": 191,
+            "endLine": 194,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -121,9 +121,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -156,8 +154,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $path, bool $force = false, string $domain = '')\n  {\n    $c = $this->cacheNamePrefix . (empty($domain) ? '' : \"domains\/$domain\/\") . $path;\n    if ($force || ($this->cacheGet($c) === false)) {\n      $this->makeCache($path, $domain);\n    }\n    return $this->cacheGet($c);\n  }",
-            "startLine": 171,
-            "endLine": 178,
+            "startLine": 204,
+            "endLine": 211,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -208,8 +206,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->virtualmin;\n  }",
-            "startLine": 185,
-            "endLine": 188,
+            "startLine": 218,
+            "endLine": 221,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -218,9 +216,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Api\\Virtualmin"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -234,8 +230,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->cloudmin;\n  }",
-            "startLine": 195,
-            "endLine": 198,
+            "startLine": 228,
+            "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -245,7 +241,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "bbn\\Api\\Cloudmin",
                 null
             ],
             "parent": false,
@@ -261,8 +256,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->webmin;\n  }",
-            "startLine": 205,
-            "endLine": 208,
+            "startLine": 238,
+            "endLine": 241,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -271,9 +266,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Api\\Webmin"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -287,8 +280,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $service)\n  {\n    if ($this->webmin && $this->webmin->startService($service)) {\n      return $this->collectInfo();\n    }\n    return false;\n  }",
-            "startLine": 216,
-            "endLine": 222,
+            "startLine": 249,
+            "endLine": 255,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -297,9 +290,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -324,8 +315,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $service)\n  {\n    if ($this->webmin && $this->webmin->stopService($service)) {\n      return $this->collectInfo();\n    }\n    return false;\n  }",
-            "startLine": 230,
-            "endLine": 236,
+            "startLine": 263,
+            "endLine": 269,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -334,9 +325,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -361,8 +350,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $service)\n  {\n    if ($this->webmin && $this->webmin->restartService($service)) {\n      return $this->collectInfo();\n    }\n    return false;\n  }",
-            "startLine": 244,
-            "endLine": 250,
+            "startLine": 277,
+            "endLine": 283,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -371,9 +360,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -398,8 +385,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->virtualmin ? (bool)$this->virtualmin->collectInfo() : false;\n  }",
-            "startLine": 257,
-            "endLine": 260,
+            "startLine": 290,
+            "endLine": 293,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -408,9 +395,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -424,8 +409,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $domain, bool $state = true)\n  {\n    if (\n        (!empty($state)\n          && $this->virtualmin->enable_domain(['domain' => $domain]))\n        || (empty($state)\n          && $this->virtualmin->disable_domain(['domain' => $domain])\n        )\n    ) {\n      $domains = $this->getCache('domains');\n      $this->makeCache('', $domain);\n      if (\n          !\\is_null($idx = X::find($domains, ['name' => $domain]))\n          && !empty($domains[$idx]['parent_domain'])\n      ) {\n        $this->makeCache('subdomains', $domains[$idx]['parent_domain']);\n      }\n      self::makeGlobalDomainsCache();\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 270,
-            "endLine": 291,
+            "startLine": 303,
+            "endLine": 324,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -434,9 +419,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -469,8 +452,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $domainData)\n  {\n    if (empty($domainData['name'])) {\n      throw new \\Error(_('The \"name\" property is mandatory'));\n    }\n    if (empty($domainData['type'])) {\n      throw new \\Error(_('The \"type\" property is mandatory'));\n    }\n    $args = [\n      'domain' => $domainData['name']\n    ];\n    if (!empty($domainData['description'])) {\n      $args['desc'] = $domainData['description'];\n    }\n\n    switch ($domainData['type']) {\n      case 'top':\n        if (empty($domainData['password'])) {\n          throw new \\Error(_('The \"password\" property is mandatory'));\n        }\n        $args['pass'] = $domainData['password'];\n        $features = $this->getCache('features_template');\n        break;\n      case 'sub':\n        if (empty($domainData['parent'])) {\n          throw new \\Error(_('The \"parent\" property is mandatory'));\n        }\n        $args['parent'] = $domainData['parent'];\n        $features       = $this->getCache('features_template', false, $domainData['parent']);\n        break;\n      case 'alias':\n        if (empty($domainData['parent'])) {\n          throw new \\Error(_('The \"parent\" property is mandatory'));\n        }\n        $args['alias'] = $domainData['parent'];\n        $features      = $this->getCache('features_template_alias', false, $domainData['parent']);\n        break;\n    }\n\n    if (!empty($features)) {\n      foreach ($features as $f) {\n        if (\n            (strtolower($f['automatic']) === 'yes')\n            && (strtolower($f['enabled']) === 'yes')\n            && (strtolower($f['default']) === 'yes')\n        ) {\n          $args[$f['name']] = 1;\n        }\n      }\n\n      if (!empty($domainData['features'])) {\n        $args = X::mergeArrays(\n            $args,\n            \\array_filter($domainData['features'], function ($v, $k) use ($features) {\n              $f = X::getRow($features, ['name' => $k]);\n              return !empty($v)\n                && !empty($f)\n                && (strtolower($f['enabled']) === 'yes');\n            }, ARRAY_FILTER_USE_BOTH)\n        );\n      }\n    }\n\n    if ($this->virtualmin->create_domain($args)) {\n      $this->makeCache('', $domainData['name']);\n      if (!empty($domainData['parent'])) {\n        $this->makeCache('subdomains', $domainData['parent']);\n      }\n      self::makeGlobalDomainsCache();\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 299,
-            "endLine": 371,
+            "startLine": 332,
+            "endLine": 404,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -479,9 +462,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -506,8 +487,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $domainData)\n  {\n    if (empty($domainData['name'])) {\n      throw new \\Error(_('The \"name\" property is mandatory'));\n    }\n\n    if (empty($domainData['type'])) {\n      throw new \\Error(_('The \"type\" property is mandatory'));\n    }\n\n    if (!($domains = $this->getCache('domains'))) {\n      throw new \\Error(_('No domains cache found'));\n    }\n\n    if (!($oldDomain = X::getRow($domains, ['name' => $domainData['name']]))) {\n      throw new \\Error(_('Domain not found into cache'));\n    }\n\n    $args = ['domain' => $domainData['name']];\n    if (\n        isset($domainData['description'])\n        && ($domainData['description'] !== $oldDomain['description'])\n    ) {\n      $args['desc'] = $domainData['description'];\n    }\n\n    switch ($domainData['type']) {\n      case 'top':\n        if (!empty($domainData['password'])) {\n          $args['pass'] = $domainData['password'];\n        }\n        $features = $this->getCache('features_template');\n        break;\n      case 'sub':\n        $features = $this->getCache('features_template', false, $domainData['parent']);\n        break;\n      case 'alias':\n        $features = $this->getCache('features_template_alias', false, $domainData['parent']);\n        break;\n    }\n\n    if (\n        isset($domainData['serverQuota'])\n        && ($domainData['serverQuota'] !== $oldDomain['server_block_quota'])\n        && !(($domainData['serverQuota'] === 0)\n          && ($oldDomain['server_block_quota'] === 'Unlimited'))\n    ) {\n      $args['quota'] = $domainData['serverQuota'] === 0 ? 'UNLIMITED' : ($domainData['serverQuota'] \/ 1024);\n    }\n\n    if (\n        isset($domainData['userQuota'])\n        && ($domainData['userQuota'] !== $oldDomain['user_block_quota'])\n        && !(($domainData['userQuota'] === 0)\n          && ($oldDomain['user_block_quota'] === 'Unlimited'))\n    ) {\n      $args['uquota'] = $domainData['userQuota'] === 0 ? 'UNLIMITED' : ($domainData['userQuota'] \/ 1024);\n    }\n\n    if (\n        (count($args) > 1)\n        && !$this->virtualmin->modify_domain($args)\n    ) {\n      return false;\n    }\n\n    \/\/ Features\n    if (!empty($features) && !empty($domainData['features'])) {\n      $args              = ['domain' => $domainData['name']];\n      $oldFeatures       = explode(' ', $oldDomain['features']);\n      $featuresToEnable  = \\array_filter($domainData['features'], function ($v, $k) use ($features, $oldFeatures) {\n        $f = X::getRow($features, ['name' => $k]);\n        return !empty($v)\n          && !empty($f)\n          && (strtolower($f['enabled']) === 'yes')\n          && !\\in_array($k, $oldFeatures);\n      }, ARRAY_FILTER_USE_BOTH);\n      $featuresToDisable = \\array_map(function ($f) {\n        return 1;\n      }, \\array_filter($domainData['features'], function ($v, $k) use ($features, $oldFeatures) {\n        $f = X::getRow($features, ['name' => $k]);\n        return empty($v)\n          && !empty($f)\n          && (strtolower($f['enabled']) === 'yes')\n          && \\in_array($k, $oldFeatures);\n      }, ARRAY_FILTER_USE_BOTH));\n\n      if (\n          !empty($featuresToEnable)\n          && !$this->virtualmin->enable_feature(X::mergeArrays($featuresToEnable, $args))\n      ) {\n        return false;\n      }\n\n      if (\n          !empty($featuresToDisable)\n          && !$this->virtualmin->disable_feature(X::mergeArrays($featuresToDisable, $args))\n      ) {\n        return false;\n      }\n    }\n    $this->makeCache('', $domainData['name']);\n    if (!empty($oldDomain['parent_domain'])) {\n      $this->makeCache('subdomains', $oldDomain['parent_domain']);\n    }\n    self::makeGlobalDomainsCache();\n    return true;\n  }",
-            "startLine": 379,
-            "endLine": 486,
+            "startLine": 412,
+            "endLine": 519,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -516,9 +497,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -543,8 +522,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $domain)\n  {\n    if (\n        ($domains = $this->getCache('domains'))\n        && $this->virtualmin->delete_domain(['domain' => $domain])\n    ) {\n      if (!\\is_null($idx = X::find($domains, ['name' => $domain]))) {\n        if (!empty($domains[$idx]['parent_domain'])) {\n          $this->makeCache('subdomains', $domains[$idx]['parent_domain']);\n        }\n        array_splice($domains, $idx, 1);\n        $this->cacheSet(\n            $this->cacheNamePrefix . 'domains',\n            '',\n            $domains,\n            0\n        );\n        $this->cacheDelete($this->cacheNamePrefix . \"domains\/$domain\");\n        self::makeGlobalDomainsCache();\n      }\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 493,
-            "endLine": 516,
+            "startLine": 526,
+            "endLine": 549,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -553,9 +532,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -579,8 +556,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $domain, string $newDomain)\n  {\n    if (\n        $this->virtualmin->unsetJson()->rename_domain([\n          'domain' => $domain,\n          'new-domain' => $newDomain,\n          'auto-user' => 1,\n          'auto-home' => 1,\n          'auto-prefix' => 1\n        ])\n    ) {\n      $this->virtualmin->setJson();\n      $this->makeCache('', $newDomain);\n      $domains = $this->getCache('domains');\n      if (!\\is_null($idx = X::find($domains, ['name' => $domain]))) {\n        if (!empty($domains[$idx]['parent_domain'])) {\n          $this->makeCache('subdomains', $domains[$idx]['parent_domain']);\n        }\n        array_splice($domains, $idx, 1);\n        $this->cacheSet(\n            $this->cacheNamePrefix . 'domains',\n            '',\n            $domains,\n            0\n        );\n        $this->cacheDelete($this->cacheNamePrefix . \"domains\/$domain\");\n      }\n      self::makeGlobalDomainsCache();\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 526,
-            "endLine": 557,
+            "startLine": 559,
+            "endLine": 590,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -589,9 +566,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -625,8 +600,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $domain, string $newDomain)\n  {\n    if (\n        $this->virtualmin->clone_domain([\n          'domain' => $domain,\n          'newdomain' => $newDomain\n        ])\n    ) {\n      $this->makeCache('', $newDomain);\n      $domains = $this->getCache('domains');\n      if (\n          !\\is_null($idx = X::find($domains, ['name' => $domain]))\n          && !empty($domains[$idx]['parent_domain'])\n      ) {\n        $this->makeCache('subdomains', $domains[$idx]['parent_domain']);\n      }\n      self::makeGlobalDomainsCache();\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 567,
-            "endLine": 587,
+            "startLine": 600,
+            "endLine": 620,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -635,9 +610,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": [
                 {
@@ -661,6 +634,49 @@
                 }
             ]
         },
+        "addToQueue": {
+            "name": "addToQueue",
+            "summary": "Adds the given action to the queue",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $method, array $args = [])\n  {\n    $user = bbn\\User::getInstance();\n    if (\n        !$this->checkQueueHash($method, $args)\n        && $this->db->insert('queue', [\n          'server' => $this->hostname,\n          'hash' => $this->getQueueHash($method, $args),\n          'method' => $method,\n          'args' => \\json_encode($args),\n          'user' => $user->getId() ?: null\n        ])\n    ) {\n      return $this->db->lastId();\n    }\n    return false;\n  }",
+            "startLine": 629,
+            "endLine": 645,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "method",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "args",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
         "makeGlobalDomainsCache": {
             "name": "makeGlobalDomainsCache",
             "summary": "Makes global domains cache",
@@ -671,8 +687,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $cache   = Cache::getEngine();\n    $domains = [];\n    $servers = self::getOptions('servers');\n    if (!empty($servers)) {\n      foreach ($servers as $server) {\n        if (\n            !empty($server['code'])\n            && ($serverDomains = $cache->get(self::CACHE_NAME . '\/' . $server['code'] . '\/domains'))\n        ) {\n          foreach ($serverDomains as $sd) {\n            $backups              = $cache->get(self::CACHE_NAME . '\/' . $server['code'] . '\/domains\/' . $sd['name'] . '\/backups') ?: [];\n            $domains[$sd['name']] = X::mergeArrays($sd, [\n              'hostname' => $server['code'],\n              'admins' => $cache->get(self::CACHE_NAME . '\/' . $server['code'] . '\/domains\/' . $sd['name'] . '\/admins') ?: [],\n              'users' => $cache->get(self::CACHE_NAME . '\/' . $server['code'] . '\/domains\/' . $sd['name'] . '\/users') ?: [],\n              'dns' => $cache->get(self::CACHE_NAME . '\/' . $server['code'] . '\/domains\/' . $sd['name'] . '\/dns') ?: [],\n              'backups_succeeded' =>  !empty($backups) ? $backups['succeeded'] : [],\n              'backups_failed' =>  !empty($backups) ? $backups['failed'] : []\n            ]);\n          }\n        }\n      }\n      ksort($domains);\n      $domains = \\array_values($domains);\n    }\n    $cache->set(self::CACHE_NAME . '\/domains', $domains);\n    return $domains;\n  }",
-            "startLine": 595,
-            "endLine": 624,
+            "startLine": 653,
+            "endLine": 682,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -681,9 +697,55 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "getMainDataPath": {
+            "name": "getMainDataPath",
+            "summary": "Gets the data path of the appui-server plugin",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Server",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return bbn\\Mvc::getDataPath('appui-server');\n  }",
+            "startLine": 689,
+            "endLine": 692,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "processQueue": {
+            "name": "processQueue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Server",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $dbPath = \\bbn\\Appui\\Server::getMainDataPath() . 'servers.sqlite';\n    if (is_file($dbPath)) {\n      $db = new \\bbn\\Db([\n        'engine' => 'sqlite',\n        'db' => $dbPath\n      ]);\n      $running = (bool)$db->select([\n        'table' => 'queue',\n        'fields' => [],\n        'where' => [\n          'conditions' => [[\n            'field' => 'active',\n            'value' => 1\n          ], [\n            'field' => 'failed',\n            'value' => 0\n          ], [\n            'field' => 'start',\n            'operator' => 'isnotnull'\n          ], [\n            'field' => 'end',\n            'operator' => 'isnull'\n          ]]\n        ]\n      ]);\n      if ($running) {\n        return false;\n      }\n      $queue = $db->rselectAll([\n        'table' => 'queue',\n        'fields' => [],\n        'where' => [\n          'conditions' => [[\n            'field' => 'active',\n            'value' => 1\n          ], [\n            'field' => 'failed',\n            'value' => 0\n          ], [\n            'field' => 'start',\n            'operator' => 'isnull'\n          ]]\n        ]\n          ]);\n      if (!empty($queue)) {\n        foreach ($queue as $q) {\n          if (!empty($q['server'])) {\n            $server = new bbn\\Appui\\Server($q['server']);\n            if (\\method_exists($server, $q['method'])) {\n              $db->update('queue', ['start' => date('Y-m-d H:i:s')], ['id' => $q['id']]);\n              $args = \\json_decode($q['args'], true);\n              if ($server->{$q['method']}(...$args)) {\n                $set = [\n                  'end' => date('Y-m-d H:i:s')\n                ];\n              }\n              else {\n                $set = [\n                  'end' => date('Y-m-d H:i:s'),\n                  'failed' => 1\n                ];\n              }\n              $db->update('queue', $set, ['id' => $q['id']]);\n            }\n          }\n        }\n      }\n    }\n  }",
+            "startLine": 695,
+            "endLine": 765,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -755,9 +817,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Appui\\Option"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -926,7 +986,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -952,9 +1011,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -978,9 +1035,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -1005,7 +1060,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1032,7 +1086,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "array",
                 null
             ],
             "parent": false,
@@ -1070,7 +1123,7 @@
         "option_appui_id": null
     },
     "constants": [],
-    "numMethods": 33,
+    "numMethods": 36,
     "numProperties": 0,
     "numConstants": 1,
     "numStaticProperties": 3,
@@ -1099,6 +1152,9 @@
         "cloudmin": null,
         "webmin": null,
         "cacheNamePrefix": null,
+        "mainDataPath": null,
+        "dataPath": null,
+        "db": null,
         "_cache_prefix": null,
         "cache_engine": null,
         "options": null

@@ -35,9 +35,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "returns": null,
             "parent": false,
             "arguments": []
         },
@@ -485,7 +483,6 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                "string",
                 null
             ],
             "parent": false,
@@ -495,7 +492,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"p770C16Jxac85x4Nk8G279yik8\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"fJf58ysw0Rm870EVq8H1HDh8N\"}"
     },
     "constants": null,
     "numMethods": 17,
