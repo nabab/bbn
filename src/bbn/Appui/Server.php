@@ -120,13 +120,13 @@ class Server
       'host' => $this->hostname,
       'mode' => 'virtualmin'
     ]);
-    $this->webmin          = new Webmin([
+    $this->webmin     = new Webmin([
       'user' => $this->user,
       'pass' => $this->pass,
       'host' => $this->hostname
     ]);
     if (!empty($cfg['cloudmin'])) {
-      $this->webmin = new Cloudmin([
+      $this->webmin   = new Cloudmin([
         'user' => $this->user,
         'pass' => $this->pass,
         'host' => $this->hostname
@@ -626,14 +626,14 @@ class Server
    * @param array $args
    * @return int!false
    */
-  public function addToQueue(string $method, array $args = [])
+  public function addToTasksQueue(string $method, array $args = [])
   {
     $user = bbn\User::getInstance();
     if (
-        !$this->checkQueueHash($method, $args)
+        !$this->checkQueueTaskHash($method, $args)
         && $this->db->insert('queue', [
           'server' => $this->hostname,
-          'hash' => $this->getQueueHash($method, $args),
+          'hash' => $this->getQueueTaskHash($method, $args),
           'method' => $method,
           'args' => \json_encode($args),
           'user' => $user->getId() ?: null
@@ -642,6 +642,52 @@ class Server
       return $this->db->lastId();
     }
     return false;
+  }
+
+
+  /**
+   * Removes a taks from the queue
+   * @param int $id The task ID
+   * @return bool
+   */
+  public function removeFromTasksQueue(int $id): bool
+  {
+    return (bool)$this->db->update('queue', ['active' => 0], ['id' => $id]);
+  }
+
+
+  /**
+   * Sets the start field of a task element on the queue
+   * @param int $id The task ID
+   * @param string $date The date to set
+   * @return bool
+   */
+  public function setQueueTaskStart(int $id, ?string $date = null): bool
+  {
+    return (bool)$this->db->update('queue', ['start' => $date ?: date('Y-m-d H:i:s')], ['id' => $id]);
+  }
+
+
+  /**
+   * Sets the end field of a task element on the queue
+   * @param int $id The task ID
+   * @param string $date The date to set
+   * @return bool
+   */
+  public function setQueueTaskEnd(int $id, ?string $date = null): bool
+  {
+    return (bool)$this->db->update('queue', ['end' => $date ?: date('Y-m-d H:i:s')], ['id' => $id]);
+  }
+
+
+  /**
+   * Sets a task element on the queue as failed
+   * @param int $id The task ID
+   * @return bool
+   */
+  public function setQueueTaskFailed(int $id): bool
+  {
+    return (bool)$this->db->update('queue', ['failed' => 1], ['id' => $id]);
   }
 
 
@@ -691,16 +737,92 @@ class Server
     return bbn\Mvc::getDataPath('appui-server');
   }
 
-
-  public static function processQueue()
+  /**
+   * Returns an instance of bbn\Db of the tasks queue database
+   * @return bbn\Db|null
+   */
+  public static function getDb(): ?bbn\Db
   {
-    $dbPath = \bbn\Appui\Server::getMainDataPath() . 'servers.sqlite';
+    $dbPath = bbn\Appui\Server::getMainDataPath() . 'servers.sqlite';
     if (is_file($dbPath)) {
-      $db = new \bbn\Db([
+      return new bbn\Db([
         'engine' => 'sqlite',
         'db' => $dbPath
       ]);
-      $running = (bool)$db->select([
+    }
+    return null;
+  }
+
+  /**
+   * Process the tasks queue
+   * @return void
+   */
+  public static function processTasksQueue()
+  {
+    $appPath = bbn\Mvc::getAppPath();
+    $db = self::getDb();
+    if (!empty($db) && is_dir($appPath)) {
+      if ($queue = self::getCurrentTasksQueue()) {
+        foreach ($queue as $q) {
+          if (!empty($q['server'])) {
+            $running = self::getRunningTasks();
+            if (empty($running)
+              || (bbn\X::find($running, ['server' => $q['server']]) === null)
+            ) {
+              exec(sprintf('php -f %srouter.php %s "%s"',
+                $appPath,
+                bbn\Mvc::getPluginUrl('appui-server') . '/action',
+                bbn\Str::escapeDquotes(json_encode($q))
+              ));
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Gets the current tasks queueu
+   * @return array
+   */
+  public static function getCurrentTasksQueue(): array
+  {
+    if ($db = self::getDb()) {
+      return $db->rselectAll([
+        'table' => 'queue',
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'active',
+            'value' => 1
+          ], [
+            'field' => 'failed',
+            'value' => 0
+          ], [
+            'field' => 'start',
+            'operator' => 'isnull'
+          ], [
+            'field' => 'end',
+            'operator' => 'isnull'
+          ]]
+        ],
+        'group_by' => ['server'],
+        'order' => ['id' => 'asc']
+      ]);
+    }
+    return [];
+  }
+
+
+  /**
+   * Gets the running tasks
+   * @return array
+   */
+  public static function getRunningTasks(): array
+  {
+    if ($db = self::getDb()) {
+      return $db->rselectAll([
         'table' => 'queue',
         'fields' => [],
         'where' => [
@@ -717,51 +839,11 @@ class Server
             'field' => 'end',
             'operator' => 'isnull'
           ]]
-        ]
+        ],
+        'order' => ['id' => 'asc']
       ]);
-      if ($running) {
-        return false;
-      }
-      $queue = $db->rselectAll([
-        'table' => 'queue',
-        'fields' => [],
-        'where' => [
-          'conditions' => [[
-            'field' => 'active',
-            'value' => 1
-          ], [
-            'field' => 'failed',
-            'value' => 0
-          ], [
-            'field' => 'start',
-            'operator' => 'isnull'
-          ]]
-        ]
-          ]);
-      if (!empty($queue)) {
-        foreach ($queue as $q) {
-          if (!empty($q['server'])) {
-            $server = new bbn\Appui\Server($q['server']);
-            if (\method_exists($server, $q['method'])) {
-              $db->update('queue', ['start' => date('Y-m-d H:i:s')], ['id' => $q['id']]);
-              $args = \json_decode($q['args'], true);
-              if ($server->{$q['method']}(...$args)) {
-                $set = [
-                  'end' => date('Y-m-d H:i:s')
-                ];
-              }
-              else {
-                $set = [
-                  'end' => date('Y-m-d H:i:s'),
-                  'failed' => 1
-                ];
-              }
-              $db->update('queue', $set, ['id' => $q['id']]);
-            }
-          }
-        }
-      }
     }
+    return [];
   }
 
 
@@ -771,13 +853,27 @@ class Server
    * @param array $args
    * @return bool
    */
-  private function checkQueueHash(string $method, array $args = [])
+  private function checkQueueTaskHash(string $method, array $args = [])
   {
-    $hash = $this->getQueueHash($method, $args);
-    return (bool)$this->db->selectOne('queue', 'id', [
-      'server' => $this->hostname,
-      'hash' => $hash,
-      'active' => 1
+    $hash = $this->getQueueTaskHash($method, $args);
+    return (bool)$this->db->selectOne([
+      'table' => 'queue',
+      'fields' => ['id'],
+      'where' => [
+        'conditions' => [[
+          'field' => 'server',
+          'value' => $this->hostname
+        ], [
+          'field' => 'hash',
+          'value' => $hash
+        ], [
+          'field' => 'active',
+          'value' => 1
+        ], [
+          'field' => 'end',
+          'operator' => 'isnull'
+        ]]
+      ]
     ]);
   }
 
@@ -788,7 +884,7 @@ class Server
    * @param array $args
    * @return string
    */
-  private function getQueueHash(string $method, array $args = []): string
+  private function getQueueTaskHash(string $method, array $args = []): string
   {
     return \md5($method . \json_encode($args));
   }
