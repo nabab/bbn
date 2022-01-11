@@ -3149,7 +3149,7 @@
                                 "action": "forceRefresh"
                             }
                         ],
-                        "itemComponent": "appui-server-widget-domains"
+                        "component": "appui-server-widget-domains"
                       },
                       {
                         "text": "FileSystem",
