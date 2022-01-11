@@ -312,9 +312,7 @@ class Cms extends bbn\Models\Cls\Db
     $cfg['limit'] = $limit;
     $cfg['start'] = $start >= 0 ? $start : 0;
     if (!empty($filter)) {
-      $cfg['where']['conditions'][] = [
-        'conditions' => $filter
-      ];
+      $cfg['having'] = $filter;
     }
 
     if (!empty($order)) {

@@ -256,7 +256,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0)\n  {\n    $cfg = $this->getLastVersionCfg($with_content);\n    $cfg['limit'] = $limit;\n    $cfg['start'] = $start >= 0 ? $start : 0;\n    if (!empty($filter)) {\n        $cfg['having'] = $filter;\n    }\n\n    if (!empty($order)) {\n        $cfg['order'] = $order;\n    }\n\n    $total = $this->db->count($cfg);\n    $data  = $this->db->rselectAll($cfg);\n\n    return [\n      'query' => $this->db->last(),\n      'data' => $data,\n      'total' => $total\n    ];\n  }",
+            "code": "function(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0)\n  {\n    $cfg = $this->getLastVersionCfg($with_content);\n    $cfg['limit'] = $limit;\n    $cfg['start'] = $start >= 0 ? $start : 0;\n    if (!empty($filter)) {\n      $cfg['having'] = $filter;\n    }\n\n    if (!empty($order)) {\n        $cfg['order'] = $order;\n    }\n\n    $total = $this->db->count($cfg);\n    $data  = $this->db->rselectAll($cfg);\n\n    return [\n      'query' => $this->db->last(),\n      'data' => $data,\n      'total' => $total\n    ];\n  }",
             "startLine": 309,
             "endLine": 330,
             "isDeprecated": false,

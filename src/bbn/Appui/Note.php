@@ -740,9 +740,12 @@ class Note extends bbn\Models\Cls\Db
         ],
       ]],
       'where' => [
-        [
-          'field' => 'versions2.' . $cf['arch']['versions']['version'],
-          'operator' => 'isnull',
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => 'versions2.' . $cf['arch']['versions']['version'],
+            'operator' => 'isnull',
+          ]
         ]
       ],
       'group_by' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
