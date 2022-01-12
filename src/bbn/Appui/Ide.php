@@ -195,7 +195,11 @@ class Ide
   /**
    * Checks if a repository is a Component manager
    *
+<<<<<<< HEAD
    * @param array|string $rep
+=======
+   * @param string|array $rep
+>>>>>>> Fixed docblocks
    * @return bool
    */
   public function isComponent($rep)

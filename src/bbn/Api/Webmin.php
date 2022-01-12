@@ -168,7 +168,7 @@ class Webmin
    * Undocumented function
    * @param string $command The command
    * @param array $args The command arguments
-   * @return stream_context
+   * @return resource
    */
   private function getContext(string $command, $args = [])
   {
