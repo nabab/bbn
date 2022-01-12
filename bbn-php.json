@@ -751,6 +751,178 @@
             },
             {
                 "type": "class",
+                "value": "Nextcloud",
+                "text": "Nextcloud",
+                "url": "bbn-php\/doc\/class\/Api\/Nextcloud",
+                "lastmod": 1641997237,
+                "desc": "Instantiate the class Nextcloud by connecting the given user to the given url",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/__construct",
+                        "desc": "Instantiate the class Nextcloud by connecting the given user to the given url"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "copy",
+                        "value": "copy",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/copy",
+                        "desc": "Copies the given file or folder to the given destination, if the given destination already exists throws an error."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "delete",
+                        "value": "delete",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/delete",
+                        "desc": "Deletes the given file or folder"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "download",
+                        "value": "download",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/download",
+                        "desc": "Download the given file"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "exists",
+                        "value": "exists",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/exists",
+                        "desc": "Returns true if the given $path exists"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "filemtime",
+                        "value": "filemtime",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/filemtime",
+                        "desc": "Returns the date of last modification of the given path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getContents",
+                        "value": "getContents",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getContents",
+                        "desc": "Returns the content of the given file"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getFile",
+                        "value": "getFile",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getFile",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getFiles",
+                        "value": "getFiles",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getFiles",
+                        "desc": "Returns the fies contained in the given $path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getItems",
+                        "value": "getItems",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getItems",
+                        "desc": "Returns an array of items contained in the given path, if no path is given it returns the root content, if the argument $detailed is given includes details of size and last modification time in the item"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getRealPath",
+                        "value": "getRealPath",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getRealPath",
+                        "desc": "Returns the real path."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getSize",
+                        "value": "getSize",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getSize",
+                        "desc": "Returns the size of the given dir or file, if no path is given it returns the size of the root folder"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "getSystemPath",
+                        "value": "getSystemPath",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/getSystemPath",
+                        "desc": "Returns the system path."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "isDir",
+                        "value": "isDir",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/isDir",
+                        "desc": "Returns true if the given $path corresponds to a directory."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "isFile",
+                        "value": "isFile",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/isFile",
+                        "desc": "Returns true if the given $path corresponds to a file."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "mkdir",
+                        "value": "mkdir",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/mkdir",
+                        "desc": "Creates a dir at the given path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "rename",
+                        "value": "rename",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/rename",
+                        "desc": "Renames files or folder from the $old name to the $new name-"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Api\/Nextcloud",
+                        "text": "upload",
+                        "value": "upload",
+                        "lastmod": 1641997237,
+                        "url": "bbn-php\/doc\/method\/Api\/Nextcloud\/upload",
+                        "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
                 "value": "Paybox",
                 "text": "Paybox",
                 "url": "bbn-php\/doc\/class\/Api\/Paybox",
@@ -1732,7 +1904,7 @@
                 "value": "Cms",
                 "text": "Cms",
                 "url": "bbn-php\/doc\/class\/Appui\/Cms",
-                "lastmod": 1641902574,
+                "lastmod": 1641964511,
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
@@ -1740,7 +1912,7 @@
                         "class": "Appui\/Cms",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/__construct",
                         "desc": "Cms constructor."
                     },
@@ -1749,7 +1921,7 @@
                         "class": "Appui\/Cms",
                         "text": "countAll",
                         "value": "countAll",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/countAll",
                         "desc": "Returns the number of all the notes of type 'pages'."
                     },
@@ -1758,7 +1930,7 @@
                         "class": "Appui\/Cms",
                         "text": "delete",
                         "value": "delete",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/delete",
                         "desc": "Deletes the given note and unpublish it if published."
                     },
@@ -1767,7 +1939,7 @@
                         "class": "Appui\/Cms",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/get",
                         "desc": "Returns the note from its id, with its URL, start and end date of publication."
                     },
@@ -1776,7 +1948,7 @@
                         "class": "Appui\/Cms",
                         "text": "getAll",
                         "value": "getAll",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getAll",
                         "desc": "Returns all the notes of type 'pages'."
                     },
@@ -1785,7 +1957,7 @@
                         "class": "Appui\/Cms",
                         "text": "getByUrl",
                         "value": "getByUrl",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getByUrl",
                         "desc": "If the given url correspond to a published note returns the id."
                     },
@@ -1794,7 +1966,7 @@
                         "class": "Appui\/Cms",
                         "text": "getEnd",
                         "value": "getEnd",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getEnd",
                         "desc": "If  an event linked to the note exists it returns the end date."
                     },
@@ -1803,7 +1975,7 @@
                         "class": "Appui\/Cms",
                         "text": "getEvent",
                         "value": "getEvent",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getEvent",
                         "desc": "Returns the object event of the given note."
                     },
@@ -1812,7 +1984,7 @@
                         "class": "Appui\/Cms",
                         "text": "getLastVersionCfg",
                         "value": "getLastVersionCfg",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getLastVersionCfg",
                         "desc": ""
                     },
@@ -1821,7 +1993,7 @@
                         "class": "Appui\/Cms",
                         "text": "getLatest",
                         "value": "getLatest",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getLatest",
                         "desc": ""
                     },
@@ -1830,7 +2002,7 @@
                         "class": "Appui\/Cms",
                         "text": "getNext",
                         "value": "getNext",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getNext",
                         "desc": ""
                     },
@@ -1839,7 +2011,7 @@
                         "class": "Appui\/Cms",
                         "text": "getNoteType",
                         "value": "getNoteType",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getNoteType",
                         "desc": "Returns the 'pages' note type ID from options, which should always be the type of the CMS notes."
                     },
@@ -1848,7 +2020,7 @@
                         "class": "Appui\/Cms",
                         "text": "getStart",
                         "value": "getStart",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getStart",
                         "desc": "If an event linked to the note exists it returns the start date."
                     },
@@ -1857,7 +2029,7 @@
                         "class": "Appui\/Cms",
                         "text": "isPublished",
                         "value": "isPublished",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/isPublished",
                         "desc": "If the note has a corresponding event in bbn_events and the date of start is before now,"
                     },
@@ -1866,7 +2038,7 @@
                         "class": "Appui\/Cms",
                         "text": "publish",
                         "value": "publish",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/publish",
                         "desc": "Publish a note."
                     },
@@ -1875,7 +2047,7 @@
                         "class": "Appui\/Cms",
                         "text": "removeUrl",
                         "value": "removeUrl",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/removeUrl",
                         "desc": "Removes the url corresponding to the given id_note from bbn_notes_url."
                     },
@@ -1884,7 +2056,7 @@
                         "class": "Appui\/Cms",
                         "text": "set",
                         "value": "set",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/set",
                         "desc": "Sets content, title, start and end for the given URL."
                     },
@@ -1893,7 +2065,7 @@
                         "class": "Appui\/Cms",
                         "text": "setContent",
                         "value": "setContent",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setContent",
                         "desc": "Adds a new version to the given note with the new content"
                     },
@@ -1902,7 +2074,7 @@
                         "class": "Appui\/Cms",
                         "text": "setEvent",
                         "value": "setEvent",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setEvent",
                         "desc": "Inserts in bbn_events and bbn_notes_events the information relative to the publication of the given note."
                     },
@@ -1911,7 +2083,7 @@
                         "class": "Appui\/Cms",
                         "text": "setType",
                         "value": "setType",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setType",
                         "desc": "Changes the type of the note"
                     },
@@ -1920,7 +2092,7 @@
                         "class": "Appui\/Cms",
                         "text": "setUrl",
                         "value": "setUrl",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setUrl",
                         "desc": "Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note."
                     },
@@ -1929,7 +2101,7 @@
                         "class": "Appui\/Cms",
                         "text": "unpublish",
                         "value": "unpublish",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/unpublish",
                         "desc": "Unpublish a note."
                     },
@@ -1938,7 +2110,7 @@
                         "class": "Appui\/Cms",
                         "text": "updateEvent",
                         "value": "updateEvent",
-                        "lastmod": 1641902574,
+                        "lastmod": 1641964511,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/updateEvent",
                         "desc": "Updates the event relative to the given note."
                     }
@@ -3601,6 +3773,529 @@
             },
             {
                 "type": "class",
+                "value": "Ide",
+                "text": "Ide",
+                "url": "bbn-php\/doc\/class\/Appui\/Ide",
+                "lastmod": 1641997290,
+                "desc": "Created by BBN Solutions.",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/__construct",
+                        "desc": "ide constructor."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "changePermByReal",
+                        "value": "changePermByReal",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/changePermByReal",
+                        "desc": "Changes permissions to a file\/dir from the old and new real file\/dir's path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "copy",
+                        "value": "copy",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/copy",
+                        "desc": "Copies a file or a folder."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "create",
+                        "value": "create",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/create",
+                        "desc": "Creates a new file|directory"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "createAction",
+                        "value": "createAction",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/createAction",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "createMvc",
+                        "value": "createMvc",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/createMvc",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "createMvcJs",
+                        "value": "createMvcJs",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/createMvcJs",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "createMvcVue",
+                        "value": "createMvcVue",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/createMvcVue",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "createPermByReal",
+                        "value": "createPermByReal",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/createPermByReal",
+                        "desc": "Creates a permission option from a real file\/dir's path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "decipherPath",
+                        "value": "decipherPath",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/decipherPath",
+                        "desc": "Replaces the constant at the first part of the path with its value."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "delete",
+                        "value": "delete",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/delete",
+                        "desc": "Renames a file or a folder."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "deletePerm",
+                        "value": "deletePerm",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/deletePerm",
+                        "desc": "Deletes permission from a real file's path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getAppPath",
+                        "value": "getAppPath",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getAppPath",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getDataPath",
+                        "value": "getDataPath",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getDataPath",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getDefaultRepository",
+                        "value": "getDefaultRepository",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getDefaultRepository",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getFilePermissions",
+                        "value": "getFilePermissions",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getFilePermissions",
+                        "desc": "Gets file's permissions"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getFilePreferences",
+                        "value": "getFilePreferences",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getFilePreferences",
+                        "desc": "Gets file's preferences"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getLastError",
+                        "value": "getLastError",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getLastError",
+                        "desc": "Returns last recorded error, and null if none."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getLibPath",
+                        "value": "getLibPath",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getLibPath",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getNameProject",
+                        "value": "getNameProject",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getNameProject",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getOrigin",
+                        "value": "getOrigin",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getOrigin",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getRecentFiles",
+                        "value": "getRecentFiles",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getRecentFiles",
+                        "desc": "return list files preferences"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getRepositories",
+                        "value": "getRepositories",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getRepositories",
+                        "desc": "Makes the repositories' configurations."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getRootPath",
+                        "value": "getRootPath",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getRootPath",
+                        "desc": "Gets the real root path from a repository's id as recorded in the options."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getTheme",
+                        "value": "getTheme",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getTheme",
+                        "desc": "Get theme current of the project"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getType",
+                        "value": "getType",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getType",
+                        "desc": "Returns all data of type repository"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "getTypes",
+                        "value": "getTypes",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/getTypes",
+                        "desc": "Returns all data of all types repository"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "hasError",
+                        "value": "hasError",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/hasError",
+                        "desc": "Returns true if the error function has been called."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "history",
+                        "value": "history",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/history",
+                        "desc": "Returns all backups of a file."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "init",
+                        "value": "init",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/init",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isCliFromUrl",
+                        "value": "isCliFromUrl",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isCliFromUrl",
+                        "desc": "Checks if is a Cli from URL"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isComponent",
+                        "value": "isComponent",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isComponent",
+                        "desc": "Checks if a repository is a Component manager"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isComponentFromUrl",
+                        "value": "isComponentFromUrl",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isComponentFromUrl",
+                        "desc": "Checks if a repository is a Component from URL"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isLibFromUrl",
+                        "value": "isLibFromUrl",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isLibFromUrl",
+                        "desc": "Checks if is a Lib from URL"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isMVC",
+                        "value": "isMVC",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isMVC",
+                        "desc": "Checks if a repository is a MVC"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isMVCFromUrl",
+                        "value": "isMVCFromUrl",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isMVCFromUrl",
+                        "desc": "Checks if a repository is a MVC from URL"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isPlugin",
+                        "value": "isPlugin",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isPlugin",
+                        "desc": "check if $path is of a plugin"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "isProject",
+                        "value": "isProject",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/isProject",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "listTabsWithFile",
+                        "value": "listTabsWithFile",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/listTabsWithFile",
+                        "desc": "Function that returns the list of tab that contains a file or not for mvc and component"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "load",
+                        "value": "load",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/load",
+                        "desc": "(Load)s a file."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "move",
+                        "value": "move",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/move",
+                        "desc": "Moves a file or a folder."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "movePermByReal",
+                        "value": "movePermByReal",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/movePermByReal",
+                        "desc": "Moves permissions to a file\/dir from the old and new real file\/dir's path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "realToPerm",
+                        "value": "realToPerm",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/realToPerm",
+                        "desc": "Returns the permission's id from a real file\/dir's path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "realToUrl",
+                        "value": "realToUrl",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/realToUrl",
+                        "desc": "Returns the file's URL from the real file's path."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "rename",
+                        "value": "rename",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/rename",
+                        "desc": "Renames a file or a folder."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "repository",
+                        "value": "repository",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/repository",
+                        "desc": "Gets a repository's configuration."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "repositoryById",
+                        "value": "repositoryById",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/repositoryById",
+                        "desc": "Returns the repository object basing on the given id"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "repositoryFromUrl",
+                        "value": "repositoryFromUrl",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/repositoryFromUrl",
+                        "desc": "Returns the repository's name or object from an URL."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "save",
+                        "value": "save",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/save",
+                        "desc": "Saves a file."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "search",
+                        "value": "search",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/search",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "searchAll",
+                        "value": "searchAll",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/searchAll",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "setProject",
+                        "value": "setProject",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/setProject",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "setRecentFile",
+                        "value": "setRecentFile",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/setRecentFile",
+                        "desc": "Create or update bit recent file preference"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "setTheme",
+                        "value": "setTheme",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/setTheme",
+                        "desc": "Function for set preference theme for every single project"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "tabsOfTypeProject",
+                        "value": "tabsOfTypeProject",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/tabsOfTypeProject",
+                        "desc": "Returns the tabs of type repository"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "tracking",
+                        "value": "tracking",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/tracking",
+                        "desc": "Add or update option file in repository"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Ide",
+                        "text": "urlToReal",
+                        "value": "urlToReal",
+                        "lastmod": 1641997290,
+                        "url": "bbn-php\/doc\/method\/Appui\/Ide\/urlToReal",
+                        "desc": "Gets the real file's path from an URL"
+                    }
+                ]
+            },
+            {
+                "type": "class",
                 "value": "Imessages",
                 "text": "Imessages",
                 "url": "bbn-php\/doc\/class\/Appui\/Imessages",
@@ -4911,6 +5606,223 @@
             },
             {
                 "type": "class",
+                "value": "Medias",
+                "text": "Medias",
+                "url": "bbn-php\/doc\/class\/Appui\/Medias",
+                "lastmod": 1641997389,
+                "desc": "",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/__construct",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "browse",
+                        "value": "browse",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/browse",
+                        "desc": "Gets an array of medias."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "browseByGroup",
+                        "value": "browseByGroup",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/browseByGroup",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "count",
+                        "value": "count",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/count",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "delete",
+                        "value": "delete",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/delete",
+                        "desc": "Deletes the given media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getByUrl",
+                        "value": "getByUrl",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getByUrl",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getImageUrl",
+                        "value": "getImageUrl",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getImageUrl",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getMedia",
+                        "value": "getMedia",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMedia",
+                        "desc": "Returns the object of the media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getMediaPath",
+                        "value": "getMediaPath",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMediaPath",
+                        "desc": "Returns the path of the given id_media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getPath",
+                        "value": "getPath",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getPath",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getThumbPath",
+                        "value": "getThumbPath",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbPath",
+                        "desc": "Returns the path to the img for the given $path and size"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getThumbsName",
+                        "value": "getThumbsName",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsName",
+                        "desc": "Returns the name of the thumb file corresponding to the given name and size"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getThumbsPath",
+                        "value": "getThumbsPath",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsPath",
+                        "desc": "If the thumbs files exists for this path it returns an array of the the thumbs filename"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "getThumbsSizes",
+                        "value": "getThumbsSizes",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsSizes",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "insert",
+                        "value": "insert",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/insert",
+                        "desc": "Adds a new media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "isImage",
+                        "value": "isImage",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/isImage",
+                        "desc": "Returns true if the given path is an image"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "removeThumbs",
+                        "value": "removeThumbs",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/removeThumbs",
+                        "desc": "Remove the thumbs files"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "setImageRoot",
+                        "value": "setImageRoot",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/setImageRoot",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "setUrl",
+                        "value": "setUrl",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/setUrl",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "update",
+                        "value": "update",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/update",
+                        "desc": "updates the title or the name or the title of the given media at the level of the file and database"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "updateContent",
+                        "value": "updateContent",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/updateContent",
+                        "desc": "Updates the content of the media when it's deleted and replaced in the bbn-upload"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "updateDb",
+                        "value": "updateDb",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/updateDb",
+                        "desc": "Updates the media on the databases"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "zip",
+                        "value": "zip",
+                        "lastmod": 1641997389,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/zip",
+                        "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
                 "value": "Menu",
                 "text": "Menu",
                 "url": "bbn-php\/doc\/class\/Appui\/Menu",
@@ -5131,6 +6043,367 @@
                         "value": "tree",
                         "lastmod": 1639280106,
                         "url": "bbn-php\/doc\/method\/Appui\/Menu\/tree",
+                        "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
+                "value": "Note",
+                "text": "Note",
+                "url": "bbn-php\/doc\/class\/Appui\/Note",
+                "lastmod": 1641997509,
+                "desc": "Created by PhpStorm.",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/__construct",
+                        "desc": "Note constructor."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "addMedia",
+                        "value": "addMedia",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/addMedia",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "addMediaToNote",
+                        "value": "addMediaToNote",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/addMediaToNote",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "browse",
+                        "value": "browse",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/browse",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "copy",
+                        "value": "copy",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/copy",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "count",
+                        "value": "count",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/count",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "countByType",
+                        "value": "countByType",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/countByType",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "deleteUrl",
+                        "value": "deleteUrl",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/deleteUrl",
+                        "desc": "Deletes url for the given note."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "get",
+                        "value": "get",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/get",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getByType",
+                        "value": "getByType",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getByType",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getEventIdFromNote",
+                        "value": "getEventIdFromNote",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getEventIdFromNote",
+                        "desc": "Returns event id for the given note."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getExcerpt",
+                        "value": "getExcerpt",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getExcerpt",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getFull",
+                        "value": "getFull",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getFull",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getLang",
+                        "value": "getLang",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getLang",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getLastVersionCfg",
+                        "value": "getLastVersionCfg",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getLastVersionCfg",
+                        "desc": "Returns the configuration to have the last version for each note"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getMediaInstance",
+                        "value": "getMediaInstance",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaInstance",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getMediaNotes",
+                        "value": "getMediaNotes",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaNotes",
+                        "desc": "returns all the notes linked to the media."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getMedias",
+                        "value": "getMedias",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getMedias",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getMediasNotes",
+                        "value": "getMediasNotes",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediasNotes",
+                        "desc": "Selects from db all medias that have the property content not null and a correspondent existing file."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getNoteIdFromEvent",
+                        "value": "getNoteIdFromEvent",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getNoteIdFromEvent",
+                        "desc": "Returns note id for the given event."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getUrl",
+                        "value": "getUrl",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getUrl",
+                        "desc": "Returns the url of the note."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "getVersions",
+                        "value": "getVersions",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/getVersions",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "hasMedias",
+                        "value": "hasMedias",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/hasMedias",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "hasUrl",
+                        "value": "hasUrl",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/hasUrl",
+                        "desc": "Returns true if the note is linked to an url."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "insert",
+                        "value": "insert",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/insert",
+                        "desc": "Creates a new note in the database"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "insertNoteEvent",
+                        "value": "insertNoteEvent",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/insertNoteEvent",
+                        "desc": "If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "insertOrUpdateUrl",
+                        "value": "insertOrUpdateUrl",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/insertOrUpdateUrl",
+                        "desc": "Insert the given url to the note if has no url and update it otherwise."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "insertVersion",
+                        "value": "insertVersion",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/insertVersion",
+                        "desc": "Adds a new version to the given note."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "latest",
+                        "value": "latest",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/latest",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "media2version",
+                        "value": "media2version",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/media2version",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "remove",
+                        "value": "remove",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/remove",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "removeMedia",
+                        "value": "removeMedia",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/removeMedia",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "removeNoteEvent",
+                        "value": "removeNoteEvent",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/removeNoteEvent",
+                        "desc": "Removes the row corresponding to the given arguments from bbn_notes_events."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "setLang",
+                        "value": "setLang",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/setLang",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "setType",
+                        "value": "setType",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/setType",
+                        "desc": "Changes the type of the note"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "update",
+                        "value": "update",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/update",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "urlExists",
+                        "value": "urlExists",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/urlExists",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "urlToId",
+                        "value": "urlToId",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/urlToId",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Note",
+                        "text": "urlToNote",
+                        "value": "urlToNote",
+                        "lastmod": 1641997509,
+                        "url": "bbn-php\/doc\/method\/Appui\/Note\/urlToNote",
                         "desc": ""
                     }
                 ]
@@ -6882,10 +8155,47 @@
             },
             {
                 "type": "class",
+                "value": "Search",
+                "text": "Search",
+                "url": "bbn-php\/doc\/class\/Appui\/Search",
+                "lastmod": 1641997599,
+                "desc": "",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Appui\/Search",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641997599,
+                        "url": "bbn-php\/doc\/method\/Appui\/Search\/__construct",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Search",
+                        "text": "get",
+                        "value": "get",
+                        "lastmod": 1641997599,
+                        "url": "bbn-php\/doc\/method\/Appui\/Search\/get",
+                        "desc": "Launch the search and return the results."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Search",
+                        "text": "register",
+                        "value": "register",
+                        "lastmod": 1641997599,
+                        "url": "bbn-php\/doc\/method\/Appui\/Search\/register",
+                        "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
                 "value": "Server",
                 "text": "Server",
                 "url": "bbn-php\/doc\/class\/Appui\/Server",
-                "lastmod": 1639280106,
+                "lastmod": 1641927498,
                 "desc": "Server class",
                 "items": [
                     {
@@ -6893,17 +8203,17 @@
                         "class": "Appui\/Server",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/__construct",
                         "desc": "Constructor."
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Server",
-                        "text": "addToQueue",
-                        "value": "addToQueue",
-                        "lastmod": 1639280106,
-                        "url": "bbn-php\/doc\/method\/Appui\/Server\/addToQueue",
+                        "text": "addToTasksQueue",
+                        "value": "addToTasksQueue",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/addToTasksQueue",
                         "desc": "Adds the given action to the queue"
                     },
                     {
@@ -6911,7 +8221,7 @@
                         "class": "Appui\/Server",
                         "text": "cloneDomain",
                         "value": "cloneDomain",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/cloneDomain",
                         "desc": "Clones a domain"
                     },
@@ -6920,7 +8230,7 @@
                         "class": "Appui\/Server",
                         "text": "collectInfo",
                         "value": "collectInfo",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/collectInfo",
                         "desc": "Re-collect server info"
                     },
@@ -6929,7 +8239,7 @@
                         "class": "Appui\/Server",
                         "text": "createDomain",
                         "value": "createDomain",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/createDomain",
                         "desc": "Creates a new domain"
                     },
@@ -6938,7 +8248,7 @@
                         "class": "Appui\/Server",
                         "text": "deleteDomain",
                         "value": "deleteDomain",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/deleteDomain",
                         "desc": "Deletes a domain"
                     },
@@ -6947,7 +8257,7 @@
                         "class": "Appui\/Server",
                         "text": "editDomain",
                         "value": "editDomain",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/editDomain",
                         "desc": "Edites a domain"
                     },
@@ -6956,7 +8266,7 @@
                         "class": "Appui\/Server",
                         "text": "getCache",
                         "value": "getCache",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/getCache",
                         "desc": "Gets data from the cache"
                     },
@@ -6965,25 +8275,52 @@
                         "class": "Appui\/Server",
                         "text": "getCloudmin",
                         "value": "getCloudmin",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/getCloudmin",
                         "desc": "Gets Cloudmin instance"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Server",
+                        "text": "getCurrentTasksQueue",
+                        "value": "getCurrentTasksQueue",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/getCurrentTasksQueue",
+                        "desc": "Gets the current tasks queueu"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
+                        "text": "getDb",
+                        "value": "getDb",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/getDb",
+                        "desc": "Returns an instance of bbn\\Db of the tasks queue database"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
                         "text": "getMainDataPath",
                         "value": "getMainDataPath",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/getMainDataPath",
                         "desc": "Gets the data path of the appui-server plugin"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Server",
+                        "text": "getRunningTasks",
+                        "value": "getRunningTasks",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/getRunningTasks",
+                        "desc": "Gets the running tasks"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
                         "text": "getVirtualmin",
                         "value": "getVirtualmin",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/getVirtualmin",
                         "desc": "Gets Virtualmin instance"
                     },
@@ -6992,7 +8329,7 @@
                         "class": "Appui\/Server",
                         "text": "getWebmin",
                         "value": "getWebmin",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/getWebmin",
                         "desc": "Gets Webmin instance"
                     },
@@ -7001,7 +8338,7 @@
                         "class": "Appui\/Server",
                         "text": "hasCache",
                         "value": "hasCache",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/hasCache",
                         "desc": "Checks if the cache file exists"
                     },
@@ -7010,7 +8347,7 @@
                         "class": "Appui\/Server",
                         "text": "makeCache",
                         "value": "makeCache",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/makeCache",
                         "desc": "Makes the cache for this server"
                     },
@@ -7019,25 +8356,34 @@
                         "class": "Appui\/Server",
                         "text": "makeGlobalDomainsCache",
                         "value": "makeGlobalDomainsCache",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/makeGlobalDomainsCache",
                         "desc": "Makes global domains cache"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Server",
-                        "text": "processQueue",
-                        "value": "processQueue",
-                        "lastmod": 1639280106,
-                        "url": "bbn-php\/doc\/method\/Appui\/Server\/processQueue",
-                        "desc": ""
+                        "text": "processTasksQueue",
+                        "value": "processTasksQueue",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/processTasksQueue",
+                        "desc": "Process the tasks queue"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
+                        "text": "removeFromTasksQueue",
+                        "value": "removeFromTasksQueue",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/removeFromTasksQueue",
+                        "desc": "Removes a taks from the queue"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Server",
                         "text": "renameDomain",
                         "value": "renameDomain",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/renameDomain",
                         "desc": "Renames a domain"
                     },
@@ -7046,7 +8392,7 @@
                         "class": "Appui\/Server",
                         "text": "restartService",
                         "value": "restartService",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/restartService",
                         "desc": "Restart a service"
                     },
@@ -7055,16 +8401,43 @@
                         "class": "Appui\/Server",
                         "text": "setDomainState",
                         "value": "setDomainState",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/setDomainState",
                         "desc": "Enables\/Disables a domain"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Server",
+                        "text": "setQueueTaskEnd",
+                        "value": "setQueueTaskEnd",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/setQueueTaskEnd",
+                        "desc": "Sets the end field of a task element on the queue"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
+                        "text": "setQueueTaskFailed",
+                        "value": "setQueueTaskFailed",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/setQueueTaskFailed",
+                        "desc": "Sets a task element on the queue as failed"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
+                        "text": "setQueueTaskStart",
+                        "value": "setQueueTaskStart",
+                        "lastmod": 1641927498,
+                        "url": "bbn-php\/doc\/method\/Appui\/Server\/setQueueTaskStart",
+                        "desc": "Sets the start field of a task element on the queue"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Server",
                         "text": "startService",
                         "value": "startService",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/startService",
                         "desc": "Start a service"
                     },
@@ -7073,7 +8446,7 @@
                         "class": "Appui\/Server",
                         "text": "stopService",
                         "value": "stopService",
-                        "lastmod": 1639280106,
+                        "lastmod": 1641927498,
                         "url": "bbn-php\/doc\/method\/Appui\/Server\/stopService",
                         "desc": "Stop a service"
                     }
@@ -11399,6 +12772,187 @@
                         "value": "__construct",
                         "lastmod": 1639280106,
                         "url": "bbn-php\/doc\/method\/Db\/Json\/__construct",
+                        "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
+                "value": "Query",
+                "text": "Query",
+                "url": "bbn-php\/doc\/class\/Db\/Query",
+                "lastmod": 1641998115,
+                "desc": "",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/__construct",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "_fetchAll",
+                        "value": "_fetchAll",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/_fetchAll",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "columnCount",
+                        "value": "columnCount",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/columnCount",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "execute",
+                        "value": "execute",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/execute",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "fetch",
+                        "value": "fetch",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/fetch",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "fetchColumn",
+                        "value": "fetchColumn",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/fetchColumn",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "fetchObject",
+                        "value": "fetchObject",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/fetchObject",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getByColumns",
+                        "value": "getByColumns",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getByColumns",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getColumnMeta",
+                        "value": "getColumnMeta",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getColumnMeta",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getIrow",
+                        "value": "getIrow",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getIrow",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getIrows",
+                        "value": "getIrows",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getIrows",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getObj",
+                        "value": "getObj",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getObj",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getObject",
+                        "value": "getObject",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getObject",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getObjects",
+                        "value": "getObjects",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getObjects",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getRow",
+                        "value": "getRow",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getRow",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "getRows",
+                        "value": "getRows",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/getRows",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "init",
+                        "value": "init",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/init",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "nextRowset",
+                        "value": "nextRowset",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/nextRowset",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Db\/Query",
+                        "text": "rowCount",
+                        "value": "rowCount",
+                        "lastmod": 1641998115,
+                        "url": "bbn-php\/doc\/method\/Db\/Query\/rowCount",
                         "desc": ""
                     }
                 ]
@@ -17374,6 +18928,277 @@
                         "lastmod": 1639280106,
                         "url": "bbn-php\/doc\/method\/Mvc\/Environment\/simulate",
                         "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
+                "value": "Model",
+                "text": "Model",
+                "url": "bbn-php\/doc\/class\/Mvc\/Model",
+                "lastmod": 1641998169,
+                "desc": "Model View Controller Class",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/__construct",
+                        "desc": "Models are always recreated and reincluded, even if they have from the same path"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "addData",
+                        "value": "addData",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/addData",
+                        "desc": "Merges the existing data if there is with this one. Chainable."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "addInc",
+                        "value": "addInc",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/addInc",
+                        "desc": "Adds a property to the MVC object inc if it has not been declared."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "applyLocale",
+                        "value": "applyLocale",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/applyLocale",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "checkAction",
+                        "value": "checkAction",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/checkAction",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "deleteCache",
+                        "value": "deleteCache",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/deleteCache",
+                        "desc": "Deletes a cache with the given data."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "get",
+                        "value": "get",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/get",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getCachedModel",
+                        "value": "getCachedModel",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getCachedModel",
+                        "desc": "This will get the cached model. There is no order for the arguments."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getContent",
+                        "value": "getContent",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getContent",
+                        "desc": "This will get a the content of a file located within the controller data path."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getControllerPath",
+                        "value": "getControllerPath",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getControllerPath",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getCustomModelGroup",
+                        "value": "getCustomModelGroup",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getCustomModelGroup",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getDataError",
+                        "value": "getDataError",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getDataError",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getFromCache",
+                        "value": "getFromCache",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getFromCache",
+                        "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the closure."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getModel",
+                        "value": "getModel",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getModel",
+                        "desc": "This will get the model. There is no order for the arguments."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getPluginModel",
+                        "value": "getPluginModel",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getPluginModel",
+                        "desc": "Retrieves a model of a the plugin."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getSetFromCache",
+                        "value": "getSetFromCache",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getSetFromCache",
+                        "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "getSubpluginModel",
+                        "value": "getSubpluginModel",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/getSubpluginModel",
+                        "desc": "Get a sub plugin model (a plugin inside the plugin directory of another plugin)."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "hasData",
+                        "value": "hasData",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasData",
+                        "desc": "Checks if data exists or if a specific index exists in the data"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "hasPlugin",
+                        "value": "hasPlugin",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasPlugin",
+                        "desc": "Returns true if plugin exists and false otherwise."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "hasSubpluginModel",
+                        "value": "hasSubpluginModel",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasSubpluginModel",
+                        "desc": "Returns true if the subplugin model exists."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "hasVar",
+                        "value": "hasVar",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasVar",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "hasVars",
+                        "value": "hasVars",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasVars",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "isControlledBy",
+                        "value": "isControlledBy",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/isControlledBy",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "isPlugin",
+                        "value": "isPlugin",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/isPlugin",
+                        "desc": "Returns true if plugin exists and false otherwise."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "pluginPath",
+                        "value": "pluginPath",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/pluginPath",
+                        "desc": "Returns the path of the given plugin."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "pluginUrl",
+                        "value": "pluginUrl",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/pluginUrl",
+                        "desc": "Returns the URL part of the given plugin."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "registerPluginClasses",
+                        "value": "registerPluginClasses",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/registerPluginClasses",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "setCache",
+                        "value": "setCache",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/setCache",
+                        "desc": "Sets a cache from the given data."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Mvc\/Model",
+                        "text": "setData",
+                        "value": "setData",
+                        "lastmod": 1641998169,
+                        "url": "bbn-php\/doc\/method\/Mvc\/Model\/setData",
+                        "desc": "Sets the data. Chainable. Should be useless as $this->data is public. Chainable."
                     }
                 ]
             },

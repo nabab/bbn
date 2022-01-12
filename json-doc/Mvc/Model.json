@@ -512,7 +512,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array|string $propNames, string $errorMsg = NULL, bool $checkEmpty = true)\n  {\n    if (!$errorMsg) {\n      $errorMsg = \"A value must be given for the field %s\";\n    }\n\n    $propNames = (array)$propNames;\n    foreach ($propNames as $p) {\n      if (!$this->hasData($p, $checkEmpty)) {\n        return [\n          'success' => false,\n          'error'  => X::_($errorMsg, $p)\n        ];\n      }\n    }\n\n    return null;\n  }",
+            "code": "function($propNames, string $errorMsg = NULL, bool $checkEmpty = true)\n  {\n    if (!$errorMsg) {\n      $errorMsg = \"A value must be given for the field %s\";\n    }\n\n    $propNames = (array)$propNames;\n    foreach ($propNames as $p) {\n      if (!$this->hasData($p, $checkEmpty)) {\n        return [\n          'success' => false,\n          'error'  => X::_($errorMsg, $p)\n        ];\n      }\n    }\n\n    return null;\n  }",
             "startLine": 267,
             "endLine": 284,
             "isDeprecated": false,
@@ -531,7 +531,7 @@
                 {
                     "name": "propNames",
                     "position": 0,
-                    "type": "arraystring|",
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

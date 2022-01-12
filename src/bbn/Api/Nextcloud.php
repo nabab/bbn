@@ -356,7 +356,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
         }
 
         // both
-        return [...$dirs, ...$files];
+        return array_merge($dirs, $files);
       }  
     }
     else {

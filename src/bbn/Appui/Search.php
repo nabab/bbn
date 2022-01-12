@@ -267,18 +267,16 @@ class Search
             'conditions' => [
               $processed_cfg['filters'],
               [
-                'conditions' => [
-                  ...array_map(
-                    function ($value, $key) {
-                      return [
-                        'field' => $key,
-                        'operator' => '=',
-                        'value' => $value
-                      ];
-                    },
-                    $previous_result, array_keys($previous_result)
-                  )
-                ]
+                'conditions' => array_map(
+                  function ($value, $key) {
+                    return [
+                      'field' => $key,
+                      'operator' => '=',
+                      'value' => $value
+                    ];
+                  },
+                  $previous_result, array_keys($previous_result)
+                )
               ]
             ]
           ];

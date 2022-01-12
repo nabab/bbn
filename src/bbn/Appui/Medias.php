@@ -132,10 +132,10 @@ class Medias extends bbn\Models\Cls\Db
   }
 
   /**
-   * @param array|null $media
+   * @param string|array|null $media
    * @return string
    */
-  public function getPath(string|array $media = null): string
+  public function getPath($media = null): string
   {
     if ($media && !is_array($media)) {
       $media = $this->getMedia($media);
@@ -414,7 +414,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string|array $media
    * @return array
    */
-  public function getThumbsSizes(string|array $media): array
+  public function getThumbsSizes($media): array
   {
     if (!is_array($media)) {
       $media = $this->getMedia($media);

@@ -44,7 +44,8 @@ class Note extends bbn\Models\Cls\Db
       'notes_medias' => 'bbn_notes_medias',
       'medias' => 'bbn_medias',
       'notes_tags' => 'bbn_notes_tags',
-      'url' => 'bbn_notes_url',
+      'notes_url' => 'bbn_notes_url',
+      'url' => 'bbn_url',
       'notes_events' => 'bbn_notes_events'
     ],
     'arch' => [
@@ -97,9 +98,16 @@ class Note extends bbn\Models\Cls\Db
         'id_note' => 'id_note',
         'id_tag' => 'id_tag',
       ],
-      'url' => [
-        'url' => 'url',
+      'notes_url' => [
+        'id_url' => 'id_url',
         'id_note' => 'id_note',
+      ],
+      'url' => [
+        'id' => 'id',
+        'url' => 'url',
+        'num_display' => 'num_display',
+        'id_table' => 'id_table',
+        'redirect' => 'redirect'
       ],
     ],
     'paths' => [
@@ -203,7 +211,9 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
-   * @param $title
+   * Creates a new note in the database
+   * 
+   * @param string|array $title The title or the whole config in an indexed array
    * @param string $content
    * @param string|null $type
    * @param bool $private
@@ -216,7 +226,7 @@ class Note extends bbn\Models\Cls\Db
    * @return string|null
    */
   public function insert(
-    string|array $title,
+    $title,
     string $content = '',
     string $type = null,
     bool $private = false,
@@ -564,7 +574,24 @@ class Note extends bbn\Models\Cls\Db
 
     $cf = &$this->class_cfg;
 
-    $res = $this->db->selectOne($cf['tables']['url'], $cf['arch']['url']['id_note'], [$cf['arch']['url']['url'] => $url]);
+    $res = $this->db->selectOne([
+      'tables' => [$cf['tables']['url']],
+      'fields' => ['id_note'],
+      'join' => [
+        [
+          'table' => $cf['tables']['notes_url'],
+          'on' => [
+            [
+              'field' => 'id_url',
+              'exp' => $this->db->cfn($cf['arch']['url']['id'], $cf['tables']['url'], true)
+            ]
+          ]
+        ]
+      ],
+      'where' => [
+        $cf['arch']['url']['url'] => $url
+      ]
+    ]);
 
     return $res ?: null;
   }
@@ -597,16 +624,12 @@ class Note extends bbn\Models\Cls\Db
    */
   public function hasUrl(string $id_note): bool
   {
-    if ($this->db->selectOne(
-      $this->class_cfg['tables']['url'],
-      $this->class_cfg['arch']['url']['url'],
+    return (bool)$this->db->count(
+      $this->class_cfg['tables']['notes_url'],
       [
-        $this->class_cfg['arch']['url']['id_note'] => $id_note
+        $this->class_cfg['arch']['notes_url']['id_note'] => $id_note
       ]
-    )) {
-      return true;
-    }
-    return false;
+    );
   }
 
   /**
@@ -617,18 +640,19 @@ class Note extends bbn\Models\Cls\Db
    */
   public function getUrl(string $id_note): ?string
   {
-    if ($this->hasUrl($id_note)) {
-      return $this->db->selectOne([
-        'table' => $this->class_cfg['tables']['url'],
-        'fields' => [$this->class_cfg['arch']['url']['url']],
-        'where'  => [
-          'conditions' => [[
-            'field' => $this->class_cfg['arch']['url']['id_note'],
-            'value' => $id_note
-          ]]
-        ]
-      ]);
+    $id_url = $this->db->selectOne(
+      $this->class_cfg['tables']['notes_url'],
+      $this->class_cfg['arch']['notes_url']['id_url'],
+      [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
+    );
+    if ($id_url) {
+      return $this->db->selectOne(
+        $this->class_cfg['tables']['url'],
+        $this->class_cfg['arch']['url']['url'],
+        [$this->class_cfg['arch']['url']['id'] => $id_url]
+      );
     }
+
     return null;
   }
 

@@ -8,7 +8,7 @@
     <!-- syntax: <require file="/path/to/file.php" /> -->
     <bootstrap/>
 
-    <php version="7.4" />
+    <php version="8.0" />
     
     <!-- A phpDox project to process, you can have multiple projects in one config file -->
     <project name="BBN Library" source="${basedir}/src" workdir="${basedir}/build/phpdox/xml">

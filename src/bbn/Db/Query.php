@@ -210,7 +210,7 @@ class Query extends \PDOStatement implements Actions
    * @param array  $ctor_args
    * @return mixed
    */
-  public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): object|false
+  public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
     return bbn\Str::correctTypes(parent::fetchObject($class_name,$ctor_args));

@@ -246,7 +246,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array|string $rep)\n  {\n    \/\/$rep = $this->repositories($rep);\n    if (is_string($rep)) {\n      $rep = $this->repository($rep);\n    }\n    if ($rep && isset($rep['tabs']) && ($rep['alias_code'] === \"components\")) {\n      return true;\n    }\n\n    return false;\n  }",
+            "code": "function($rep)\n  {\n    \/\/$rep = $this->repositories($rep);\n    if (is_string($rep)) {\n      $rep = $this->repository($rep);\n    }\n    if ($rep && isset($rep['tabs']) && ($rep['alias_code'] === \"components\")) {\n      return true;\n    }\n\n    return false;\n  }",
             "startLine": 201,
             "endLine": 212,
             "isDeprecated": false,
@@ -263,7 +263,7 @@
                 {
                     "name": "rep",
                     "position": 0,
-                    "type": "arraystring|",
+                    "type": "",
                     "required": true,
                     "has_default": false,
                     "default": "",

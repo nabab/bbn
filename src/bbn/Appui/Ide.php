@@ -195,10 +195,10 @@ class Ide
   /**
    * Checks if a repository is a Component manager
    *
-   * @param string $rep
+   * @param array|string $rep
    * @return bool
    */
-  public function isComponent(string|array $rep)
+  public function isComponent($rep)
   {
     //$rep = $this->repositories($rep);
     if (is_string($rep)) {

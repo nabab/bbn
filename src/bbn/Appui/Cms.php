@@ -137,13 +137,23 @@ class Cms extends bbn\Models\Cls\Db
       ];
 
       $cfg['join'][] = [
-          'table' => $cf['tables']['url'],
+          'table' => $cf['tables']['notes_url'],
           'on' => [
               [
-                  'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),
+                  'field' => $this->db->cfn($cf['arch']['notes_url']['id_note'], $cf['tables']['notes_url']),
                   'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
               ]
           ]
+      ];
+
+      $cfg['join'][] = [
+        'table' => $cf['tables']['url'],
+        'on' => [
+            [
+                'field' => $this->db->cfn($cf['arch']['url']['id'], $cf['tables']['url']),
+                'exp' => $this->db->cfn($cf['arch']['notes_url']['id_url'], $cf['tables']['notes_url'])
+            ]
+        ]
       ];
 
       $total        = $this->db->count($cfg);
@@ -198,13 +208,23 @@ class Cms extends bbn\Models\Cls\Db
       ];
 
       $cfg['join'][] = [
-          'table' => $cf['tables']['url'],
+          'table' => $cf['tables']['notes_url'],
           'on' => [
               [
-                  'field' => $this->db->cfn($cf['arch']['url']['id_note'], $cf['tables']['url']),
+                  'field' => $this->db->cfn($cf['arch']['notes_url']['id_note'], $cf['tables']['notes_url']),
                   'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
               ]
           ]
+      ];
+
+      $cfg['join'][] = [
+        'table' => $cf['tables']['url'],
+        'on' => [
+            [
+                'field' => $this->db->cfn($cf['arch']['url']['id'], $cf['tables']['url']),
+                'exp' => $this->db->cfn($cf['arch']['notes_url']['id_url'], $cf['tables']['notes_url'])
+            ]
+        ]
       ];
 
       $total        = $this->db->count($cfg);
@@ -260,12 +280,33 @@ class Cms extends bbn\Models\Cls\Db
     $cfg['where']['mime']        = 'json/bbn-cms';
     $cfg['where']['private']     = 0;
     $cfg['join'][] = [
+        'table' => $this->class_cfg['tables']['notes_url'],
+        'type' => 'left',
+        'on' => [
+            [
+                'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
+                'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+            ]
+        ]
+    ];
+    $cfg['join'][] = [
       'table' => $this->class_cfg['tables']['url'],
       'type' => 'left',
       'on' => [[
-          'field' => $this->db->cfn($this->class_cfg['arch']['url']['id_note'], $this->class_cfg['tables']['url']),
-          'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+          'field' => $this->db->cfn($this->class_cfg['arch']['url']['id'], $this->class_cfg['tables']['url']),
+          'exp' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_url'], $this->class_cfg['tables']['notes_url'])
       ]],
+    ];
+
+    $cfg['join'][] = [
+      'table' => $this->class_cfg['tables']['url'],
+      'type' => 'left',
+      'on' => [
+          [
+              'field' => $this->db->cfn($this->class_cfg['arch']['url']['id'], $this->class_cfg['tables']['url']),
+              'exp' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_url'], $this->class_cfg['tables']['notes_url'])
+          ]
+      ]
     ];
     $cfg['join'][] = [
         'table' => $this->class_cfg['tables']['notes_events'],

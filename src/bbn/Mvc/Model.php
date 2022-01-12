@@ -264,7 +264,7 @@ class Model extends DbClass
   }
 
 
-  public function getDataError(array|string $propNames, ?string $errorMsg = null, bool $checkEmpty = true): ?array
+  public function getDataError($propNames, ?string $errorMsg = null, bool $checkEmpty = true): ?array
   {
     if (!$errorMsg) {
       $errorMsg = "A value must be given for the field %s";

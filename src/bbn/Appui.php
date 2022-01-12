@@ -101,7 +101,7 @@ class Appui
   /** @var Appui\Menu */
   private $_currentMenu;
 
-  /** @var null|array */
+  /** @var array */
   private $_info;
 
 
