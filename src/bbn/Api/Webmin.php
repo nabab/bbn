@@ -70,9 +70,9 @@ class Webmin
 
   /**
    * Gets the hostname
-   * @return string
+   * @return string|null
    */
-  public function getHostname(): string
+  public function getHostname(): ?string
   {
     return $this->callCommand('webmin::get_system_hostname');
   }

@@ -214,6 +214,10 @@ trait Common
   }
 
 
+  /**
+   * Sets the 'asJson' property as true
+   * @return self
+   */
   public function setJson()
   {
     $this->asJson = true;
@@ -221,10 +225,24 @@ trait Common
   }
 
 
+  /**
+   * Sets the 'asJson' property as false
+   * @return self
+   */
   public function unsetJson()
   {
     $this->asJson = false;
     return $this;
+  }
+
+
+  /**
+   * Test server connection
+   * @return bool
+   */
+  public function testConnection(): bool
+  {
+    return (bool)shell_exec($this->getHeaderUrl() . "'");
   }
 
 
