@@ -25,7 +25,7 @@ trait Server
    * @param int|string $id The server ID
    * @return array
    */
-  public function getServer(int | string $id): array
+  public function getServer($id): array
   {
     return $this->_callCommand(Str::isInteger($id) ? "server/$id" : $id);
   }
@@ -57,7 +57,7 @@ trait Server
    * @param int|string $id The disk ID
    * @return array
    */
-  public function getDiskInfo(int | string $id): array
+  public function getDiskInfo($id): array
   {
     return $this->_callCommand(Str::isInteger($id) ? "server/hardware/disk/$id" : $id);
   }
@@ -68,7 +68,7 @@ trait Server
    * @param int|string $id The disk ID
    * @return array
    */
-  public function getRaidInfo(int | string $id): array
+  public function getRaidInfo($id): array
   {
     return $this->_callCommand(Str::isInteger($id) ? "server/hardware/raidController/$id" : $id);
   }
@@ -79,7 +79,7 @@ trait Server
    * @param int|string $id The server ID
    * @return array
    */
-  public function getProductInfo(int | string $id): array
+  public function getProductInfo($id): array
   {
     return $this->_callCommand(Str::isInteger($id) ? "server/product/$id" : $id);
   }
