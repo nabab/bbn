@@ -127,7 +127,7 @@ class Cms extends bbn\Models\Cls\Db
       ];
 
       $cfg['join'][] = [
-          'table' => $cf_ev['tables']['events'],
+          'table' => $cf_ev['table'],
           'on' => [
               [
                   'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
@@ -298,16 +298,6 @@ class Cms extends bbn\Models\Cls\Db
       ]],
     ];
 
-    $cfg['join'][] = [
-      'table' => $this->class_cfg['tables']['url'],
-      'type' => 'left',
-      'on' => [
-          [
-              'field' => $this->db->cfn($this->class_cfg['arch']['url']['id'], $this->class_cfg['tables']['url']),
-              'exp' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_url'], $this->class_cfg['tables']['notes_url'])
-          ]
-      ]
-    ];
     $cfg['join'][] = [
         'table' => $this->class_cfg['tables']['notes_events'],
         'type' => 'left',

@@ -105,8 +105,8 @@ class Note extends bbn\Models\Cls\Db
       'url' => [
         'id' => 'id',
         'url' => 'url',
-        'num_display' => 'num_display',
-        'id_table' => 'id_table',
+        'num_calls' => 'num_calls',
+        'type_url' => 'type_url',
         'redirect' => 'redirect'
       ],
     ],
@@ -677,6 +677,7 @@ class Note extends bbn\Models\Cls\Db
     if ($url && substr($url, 0, 1) === '/') {
       $url = substr($url, 1);
     }
+
 
     if (!$this->hasUrl($id_note)) {
       return $this->db->insert(

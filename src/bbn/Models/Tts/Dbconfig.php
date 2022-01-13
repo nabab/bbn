@@ -29,21 +29,31 @@ trait Dbconfig
 
 
   /**
-   * @param $id
+   * @param array|string $id
    * @return bool
    */
-  public function exists($id): bool
+  public function exists($filter): bool
   {
     if (!$this->class_table_index) {
       throw new \Exception(X::_("The table index parameter should be defined"));
     }
 
-    $res = $this->db->count(
-      $this->class_table, [
-      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id
-      ]
-    );
-    return (bool)$res;
+    $f = $this->class_cfg['arch'][$this->class_table_index];
+    if (is_string($filter)) {
+      $cfg = [$f['id'] => $filter];
+    }
+    elseif (is_array($filter)) {
+      $cfg = $filter;
+    }
+
+    if (!empty($cfg) && $arr = $this->db->count(
+      $this->class_table,
+      $cfg
+    )) {
+      return true;
+    }
+
+    return false;
   }
 
 
@@ -143,23 +153,29 @@ trait Dbconfig
    *
    * @return array|null
    */
-  public function select(string $id): ?array
+  public function select($filter): ?array
   {
-    if ($this->exists($id)) {
-      $f = $this->class_cfg['arch'][$this->class_table_index];
-      if ($arr = $this->db->rselect(
-        $this->class_table, array_values($f), [
-          $f['id'] => $id
-        ]
-      )) {
-        if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {
-          $cfg = json_decode($arr[$f['cfg']], true);
-          $arr = array_merge($cfg, $arr);
-          unset($arr[$f['cfg']]);
-        }
+    $f = $this->class_cfg['arch'][$this->class_table_index];
+    if (is_string($filter)) {
+      $cfg = [$f['id'] => $filter];
+    }
+    elseif (is_array($filter)) {
+      $cfg = $filter;
+    }
 
-        return $arr;
+
+    if (!empty($cfg) && $arr = $this->db->rselect(
+      $this->class_table,
+      array_values($f),
+      $cfg
+    )) {
+      if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {
+        $cfg = json_decode($arr[$f['cfg']], true);
+        $arr = array_merge($cfg, $arr);
+        unset($arr[$f['cfg']]);
       }
+
+      return $arr;
     }
 
     return null;
@@ -168,20 +184,51 @@ trait Dbconfig
 
 
   /**
-   * Returns an array of rows from the table for the given conditions.
+   * Returns the number of rows from the table for the given conditions.
    *
-   * @param array $cond
+   * @param array $filter
    *
-   * @return array
+   * @return int
    */
-  public function selectAll(array $cond): array
+  public function count(array $filter = []): int
   {
     if (!$this->class_table_index) {
       throw new \Exception(X::_("The table index parameter should be defined"));
     }
 
-    $f = $this->class_cfg['arch'][$this->class_table_index];
-    if ($arrs = $this->db->rselectAll($this->class_table, array_values($f), $cond)) {
+    return $this->db->count($this->class_table, $filter);
+  }
+
+
+  /**
+   * Returns an array of rows from the table for the given conditions.
+   *
+   * @param array $filter
+   * @param array $order
+   * @param array $limit
+   * @param array $start
+   *
+   * @return array
+   */
+  public function selectAll(array $filter, array $order = [], int $limit = 0, int $start = 0): array
+  {
+    if (!$this->class_table_index) {
+      throw new \Exception(X::_("The table index parameter should be defined"));
+    }
+
+    $cfg = [
+      'table' => $this->class_table,
+      'fields' => $this->class_cfg['arch'][$this->class_table_index],
+      'where' => $filter,
+      'order' => $order
+    ];
+
+    if ($limit) {
+      $cfg['limit'] = $limit;
+      $cfg['start'] = $start;
+    }
+
+    if ($arrs = $this->db->rselectAll($cfg)) {
       foreach ($arrs as &$arr) {
         if (!empty($f['cfg']) && !empty($arr[$f['cfg']])) {
           $cfg = json_decode($arr[$f['cfg']], true);

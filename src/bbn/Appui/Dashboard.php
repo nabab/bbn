@@ -170,7 +170,7 @@ class Dashboard
         $this->archPref['id_alias'] => !empty($d[$this->archPref['id_alias']]) ? $d[$this->archPref['id_alias']] : null,
         $this->archPref['id_user'] => !empty($d[$this->archPref['id_user']]) ? $d[$this->archPref['id_user']] : null,
         $this->archPref['id_group'] => !empty($d[$this->archPref['id_group']]) ? $d[$this->archPref['id_group']] : null,
-        $this->archPref['public'] => $d[$this->archPref['public']] ?? 0,
+        $this->archPref['public'] => empty($d[$this->archPref['public']]) ? 0 : 1,
         $this->archPref['cfg'] => ($cfg = $this->pref->getCfg(false, $d)) ? json_encode($cfg) : null
       ]
     )) {
