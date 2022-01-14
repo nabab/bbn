@@ -63,6 +63,9 @@ class Server
   /** @var string The last error */
   private $lastError = '';
 
+  /** @var bool Indicates whether the class should connect to the server when needed */
+  private $online = true;
+
 
   /**
    * Constructor.
@@ -116,9 +119,6 @@ class Server
         'host' => $this->hostname
       ]);
     }
-    if (!$this->virtualmin->testConnection()) {
-      throw new \Exception(sprintf(_('Connection with server "%s" failed'), $this->hostname));
-    }
   }
 
 
@@ -131,40 +131,45 @@ class Server
    */
   public function makeCache(string $mode = '', string $domain = '')
   {
-    if (empty($mode) || ($mode === 'info') || $this->virtualmin->isInfoProp($mode)) {
-      $this->cacheInfo($this->virtualmin->isInfoProp($mode) ? ['search' => $mode] : []);
-    }
+    if ($this->online) {
+      if (!$this->virtualmin->testConnection()) {
+        throw new \Exception(sprintf(_('Connection with server "%s" failed'), $this->hostname));
+      }
+      if (empty($mode) || ($mode === 'info') || $this->virtualmin->isInfoProp($mode)) {
+        $this->cacheInfo($this->virtualmin->isInfoProp($mode) ? ['search' => $mode] : []);
+      }
 
-    if (empty($mode) || ($mode === 'uptime')) {
-      $this->cacheUptime();
-    }
+      if (empty($mode) || ($mode === 'uptime')) {
+        $this->cacheUptime();
+      }
 
-    if (empty($mode) || ($mode === 'domains')) {
-      $this->cacheListDomains($domain);
-    }
+      if (empty($mode) || ($mode === 'domains')) {
+        $this->cacheListDomains($domain);
+      }
 
-    if (empty($mode) || ($mode === 'subdomains')) {
-      $this->cacheListSubDomains($domain);
-    }
+      if (empty($mode) || ($mode === 'subdomains')) {
+        $this->cacheListSubDomains($domain);
+      }
 
-    if (empty($mode) || ($mode === 'admins')) {
-      $this->cacheListAdmins($domain);
-    }
+      if (empty($mode) || ($mode === 'admins')) {
+        $this->cacheListAdmins($domain);
+      }
 
-    if (empty($mode) || ($mode === 'users')) {
-      $this->cacheListUsers($domain);
-    }
+      if (empty($mode) || ($mode === 'users')) {
+        $this->cacheListUsers($domain);
+      }
 
-    if (empty($mode) || ($mode === 'dns')) {
-      $this->cacheListDns($domain);
-    }
+      if (empty($mode) || ($mode === 'dns')) {
+        $this->cacheListDns($domain);
+      }
 
-    if (empty($mode) || ($mode === 'backups')) {
-      $this->cacheListBackups($domain);
-    }
+      if (empty($mode) || ($mode === 'backups')) {
+        $this->cacheListBackups($domain);
+      }
 
-    if (empty($mode) || ($mode === 'features_template')) {
-      $this->cacheListFeaturesTemplate($domain);
+      if (empty($mode) || ($mode === 'features_template')) {
+        $this->cacheListFeaturesTemplate($domain);
+      }
     }
   }
 
@@ -191,7 +196,7 @@ class Server
   public function getCache(string $path, bool $force = false, string $domain = '')
   {
     $c = $this->cacheNamePrefix . (empty($domain) ? '' : "domains/$domain/") . $path;
-    if ($force || ($this->cacheGet($c) === false)) {
+    if (($force || ($this->cacheGet($c) === false)) && !$this->offline) {
       $this->makeCache($path, $domain);
     }
     return $this->cacheGet($c);
@@ -225,6 +230,28 @@ class Server
   public function getWebmin(): bbn\Api\Webmin
   {
     return $this->webmin;
+  }
+
+
+  /**
+   * Sets the property 'online' to false
+   * @return self
+   */
+  public function setOffline(): bbn\Appui\Server
+  {
+    $this->online = false;
+    return $this;
+  }
+
+
+  /**
+   * Sets the property 'online' to true
+   * @return self
+   */
+  public function setOnline(): bbn\Appui\Server
+  {
+    $this->online = true;
+    return $this;
   }
 
 
@@ -688,10 +715,10 @@ class Server
   public function setQueueTaskFailed(int $id, string $error = ''): bool
   {
     return (bool)$this->db->update('queue', [
-      'failed' => 1
-    ], [
-      'id' => $id,
+      'failed' => 1,
       'error' => $error
+    ], [
+      'id' => $id
     ]);
   }
 
