@@ -93,7 +93,7 @@ class Search
 
   public function __construct(Model $model, array $cfg = [])
   {
-    $this->ctrl   = $ctrl;
+    //$this->ctrl   = $ctrl;
     // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
     $this->db     = Db::getInstance();
     $this->user   = User::getInstance();
