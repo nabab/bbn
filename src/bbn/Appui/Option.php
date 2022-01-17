@@ -3947,6 +3947,10 @@ class Option extends bbn\Models\Cls\Db
    */
   public function jsCategories($id = null)
   {
+    if (!$id) {
+      $id = $this->default;
+    }
+
     if ($tmp = $this->cacheGet($id, __FUNCTION__)) {
       return $tmp;
     }

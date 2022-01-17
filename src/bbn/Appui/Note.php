@@ -12,6 +12,7 @@ namespace bbn\Appui;
 use bbn;
 use bbn\Str;
 use bbn\X;
+use Exception;
 
 if (!\defined('BBN_DATA_PATH')) {
   die('The constant BBN_DATA_PATH must be defined in order to use Note');
@@ -45,7 +46,6 @@ class Note extends bbn\Models\Cls\Db
       'medias' => 'bbn_medias',
       'notes_tags' => 'bbn_notes_tags',
       'notes_url' => 'bbn_notes_url',
-      'url' => 'bbn_url',
       'notes_events' => 'bbn_notes_events'
     ],
     'arch' => [
@@ -57,7 +57,6 @@ class Note extends bbn\Models\Cls\Db
         'id_option' => 'id_option',
         'mime' => 'mime',
         'lang' => 'lang',
-        'excerpt' => 'excerpt',
         'private' => 'private',
         'locked' => 'locked',
         'pinned' => 'pinned',
@@ -67,8 +66,10 @@ class Note extends bbn\Models\Cls\Db
       'versions' => [
         'id_note' => 'id_note',
         'version' => 'version',
+        'latest' => 'latest',
         'title' => 'title',
         'content' => 'content',
+        'excerpt' => 'excerpt',
         'id_user' => 'id_user',
         'creation' => 'creation',
       ],
@@ -101,14 +102,7 @@ class Note extends bbn\Models\Cls\Db
       'notes_url' => [
         'id_url' => 'id_url',
         'id_note' => 'id_note',
-      ],
-      'url' => [
-        'id' => 'id',
-        'url' => 'url',
-        'num_calls' => 'num_calls',
-        'type_url' => 'type_url',
-        'redirect' => 'redirect'
-      ],
+      ]
     ],
     'paths' => [
       'medias' => 'media/',
@@ -129,6 +123,8 @@ class Note extends bbn\Models\Cls\Db
   {
     parent::__construct($db);
     $this->_init_class_cfg(self::$default_class_cfg);
+    $this->url = new Url($this->db);
+    $this->class_cfg = X::mergeArrays($this->url->getClassCfg(), $this->class_cfg);
     self::optionalInit();
     $this->taggerInit(
       $this->class_cfg['tables']['notes_tags'],
@@ -183,12 +179,13 @@ class Note extends bbn\Models\Cls\Db
       if (Str::isJson($content)) {
         $ct = json_decode($content, true);
         foreach ($ct as $n => $c) {
-          if (is_string($c)) {
-            if (is_string($n)) {
-              $excerpt .= $n . ': ';
+          if (is_string($c) && in_array($n, ['title', 'text', 'html'])) {
+            if (Str::isHTML($c)) {
+              $excerpt .= Str::html2text($c, strpos($c, PHP_EOL) > 0) . PHP_EOL . PHP_EOL;
             }
-
-            $excerpt .= Str::html2text($c, strpos($c, PHP_EOL) > 0) . PHP_EOL . PHP_EOL;
+            else {
+              $excerpt .= $c;
+            }
           } elseif (is_array($c)) {
             foreach ($c as $k => $v) {
               if (is_string($v)) {
@@ -201,8 +198,12 @@ class Note extends bbn\Models\Cls\Db
             }
           }
         }
-      } else {
+      }
+      elseif (Str::isHTML($content)) {
         $excerpt .= Str::html2text($content);
+      }
+      elseif (is_string($content)) {
+        $excerpt .= $content;
       }
     }
 
@@ -228,63 +229,68 @@ class Note extends bbn\Models\Cls\Db
   public function insert(
     $title,
     string $content = '',
-    string $type = null,
+    string $id_type = null,
     bool $private = false,
     bool $locked = false,
-    string $parent = null,
-    string $alias = null,
+    string $id_parent = null,
+    string $id_alias = null,
     string $mime = '',
     string $lang = '',
-    string $id_option = null
+    string $id_option = null,
+    string $excerpt = ''
   ) {
     if (is_array($title)) {
+      $cfg = $title;
+    }
+    else {
       $props = [
         'title',
         'content',
-        'type',
+        'excerpt',
+        'id_type',
         'id_option',
         'private',
         'locked',
-        'parent',
-        'alias',
+        'id_parent',
+        'id_alias',
         'mime',
         'lang'
       ];
-      $tmp = $title;
-      foreach ($tmp as $prop => $t) {
-        if (X::indexOf($props, $prop) > -1) {
-          $$prop = $t;
-        }
+      $cfg = [];
+      foreach ($props as $prop) {
+        $cfg[$prop] = $$prop;
       }
     }
 
-    if (empty($content)) {
+    if (empty($cfg['content']) && empty($cfg['title'])) {
       return null;
     }
 
-    if (empty($lang) && defined('BBN_LANG')) {
-      $lang = BBN_LANG;
+    if (empty($cfg['lang']) && defined('BBN_LANG')) {
+      $cfg['lang'] = BBN_LANG;
     }
 
     $cf = &$this->class_cfg;
-    if (is_null($type)) {
-      $type = self::getOptionId('personal', 'types');
+    if (is_null($cfg['id_type'])) {
+      $cfg['id_type'] = self::getOptionId('personal', 'types');
     }
 
-    $excerpt = $this->getExcerpt($title, $content);
+    if (!$excerpt) {
+      $cfg['excerpt'] = $this->getExcerpt($title, $content);
+    }
+
     $id_note = false;
 
     if (($usr = bbn\User::getInstance())
       && $this->db->insert(
         $cf['table'],
         [
-          $cf['arch']['notes']['id_parent'] => $parent,
-          $cf['arch']['notes']['id_alias'] => $alias,
-          $cf['arch']['notes']['id_type'] => $type,
-          $cf['arch']['notes']['id_option'] => $id_option,
-          $cf['arch']['notes']['excerpt'] => $excerpt,
-          $cf['arch']['notes']['private'] => !empty($private) ? 1 : 0,
-          $cf['arch']['notes']['locked'] => !empty($locked) ? 1 : 0,
+          $cf['arch']['notes']['id_parent'] => $cfg['id_parent'],
+          $cf['arch']['notes']['id_alias'] => $cfg['id_alias'],
+          $cf['arch']['notes']['id_type'] => $cfg['id_type'],
+          $cf['arch']['notes']['id_option'] => $cfg['id_option'],
+          $cf['arch']['notes']['private'] => !empty($cfg['private']) ? 1 : 0,
+          $cf['arch']['notes']['locked'] => !empty($cfg['locked']) ? 1 : 0,
           $cf['arch']['notes']['creator'] => $usr->getId(),
           $cf['arch']['notes']['mime'] => $mime,
           $cf['arch']['notes']['lang'] => $lang
@@ -292,7 +298,7 @@ class Note extends bbn\Models\Cls\Db
       )
       && ($id_note = $this->db->lastId())
     ) {
-      $this->insertVersion($id_note, $title, $content);
+      $this->insertVersion($id_note, $title, $content, $excerpt);
     }
 
     return $id_note;
@@ -307,12 +313,19 @@ class Note extends bbn\Models\Cls\Db
    * @param string $content
    * @return int|null
    */
-  public function insertVersion(string $id_note, string $title, string $content): ?int
+  public function insertVersion(string $id_note, string $title = '', string $content = '', string $excerpt = ''): ?int
   {
-    if ($this->check() && ($usr = bbn\User::getInstance()) && ($note = $this->get($id_note))) {
+    if ($this->check()
+        && ($usr = bbn\User::getInstance())
+        && ($note = $this->get($id_note))
+        && ($title || $content)
+    ) {
       $cf     = &$this->class_cfg;
       $latest = $note['version'] ?? 0;
-      if (!$latest || ($note['content'] !== $content) || ($note['title'] !== $title)) {
+      if (!$latest 
+          || ($note['content'] !== $content)
+          || ($note['title'] !== $title)
+      ) {
         $next = $latest + 1;
       }
 
@@ -500,10 +513,6 @@ class Note extends bbn\Models\Cls\Db
   public function getFull(string $id, int $version = null): ?array
   {
     $cf = &$this->class_cfg;
-    if (!\is_int($version)) {
-      $version = $this->latest($id);
-    }
-
     if ($res = $this->db->rselect(
       [
         'table' => $cf['table'],
@@ -511,13 +520,13 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['id'],
           $cf['arch']['notes']['id_parent'],
           $cf['arch']['notes']['id_alias'],
-          $cf['arch']['notes']['excerpt'],
           $cf['arch']['notes']['id_type'],
           $cf['arch']['notes']['id_option'],
           $cf['arch']['notes']['private'],
           $cf['arch']['notes']['locked'],
           $cf['arch']['notes']['pinned'],
           $cf['arch']['versions']['version'],
+          $cf['arch']['versions']['excerpt'],
           $cf['arch']['versions']['title'],
           $cf['arch']['versions']['content'],
           $cf['arch']['versions']['id_user'],
@@ -536,14 +545,19 @@ class Note extends bbn\Models\Cls\Db
           ],
         ]],
         'where' => [
-          'conditions' => [[
-            'field' => $cf['arch']['notes']['id'],
-            'value' => $id,
-          ]],
+          'conditions' => [
+            [
+              'field' => $cf['arch']['notes']['id'],
+              'value' => $id,
+            ], [
+              'field' => $cf['arch']['versions']['latest'],
+              'value' => 1
+            ]
+          ],
         ],
       ]
     )) {
-      $res['medias'] = $this->getMedias($id, $version);
+      $res['medias'] = $this->getMedias($id, $res['version']);
 
       return $res;
     }
@@ -568,32 +582,16 @@ class Note extends bbn\Models\Cls\Db
    */
   public function urlToId(string $url): ?string
   {
-    if (!$url) {
-      return null;
+    if ($id_url = $this->url->retrieveUrl($url)) {
+      $cf = &$this->class_cfg;
+      return $this->db->selectOne(
+        $cf['tables']['notes_url'],
+        $cf['arch']['notes_url']['id_note'], 
+        [$cf['arch']['notes_url']['id_url'] => $id_url]
+      );
     }
 
-    $cf = &$this->class_cfg;
-
-    $res = $this->db->selectOne([
-      'tables' => [$cf['tables']['url']],
-      'fields' => ['id_note'],
-      'join' => [
-        [
-          'table' => $cf['tables']['notes_url'],
-          'on' => [
-            [
-              'field' => 'id_url',
-              'exp' => $this->db->cfn($cf['arch']['url']['id'], $cf['tables']['url'], true)
-            ]
-          ]
-        ]
-      ],
-      'where' => [
-        $cf['arch']['url']['url'] => $url
-      ]
-    ]);
-
-    return $res ?: null;
+    return null;
   }
 
 
@@ -646,11 +644,7 @@ class Note extends bbn\Models\Cls\Db
       [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
     );
     if ($id_url) {
-      return $this->db->selectOne(
-        $this->class_cfg['tables']['url'],
-        $this->class_cfg['arch']['url']['url'],
-        [$this->class_cfg['arch']['url']['id'] => $id_url]
-      );
+      return $this->url->getUrl($id_url);
     }
 
     return null;
@@ -674,28 +668,36 @@ class Note extends bbn\Models\Cls\Db
         );
     }
 
-    if ($url && substr($url, 0, 1) === '/') {
-      $url = substr($url, 1);
+    $url = $this->url->sanitize($url);
+
+    if (!$url) {
+      throw new Exception(X::_("The URL can't be empty"));
     }
 
+    $old_url = $this->getUrl($id_note);
+    if (!$old_url) {
+      if (!($id_url = $this->url->add($url, 'note'))) {
+        throw new Exception(X::_("Impossible to create the URL %s", $url));
+      }
 
-    if (!$this->hasUrl($id_note)) {
       return $this->db->insert(
-        $this->class_cfg['tables']['url'],
+        $this->class_cfg['tables']['notes_url'],
         [
-          $this->class_cfg['arch']['url']['url']     => $url,
-          $this->class_cfg['arch']['url']['id_note'] => $id_note
+          $this->class_cfg['arch']['notes_url']['id_url']  => $id_url,
+          $this->class_cfg['arch']['notes_url']['id_note'] => $id_note
         ]
       );
     }
 
-    return $this->db->update(
-      $this->class_cfg['tables']['url'],
-      [$this->class_cfg['arch']['url']['url'] => $url],
-      [
-        $this->class_cfg['arch']['url']['id_note'] => $id_note
-      ]
-    );
+    if ($old_url !== $url) {
+      return $this->db->update(
+        $this->class_cfg['tables']['url'],
+        [$this->class_cfg['arch']['url']['url'] => $url],
+        [
+          $this->class_cfg['arch']['url']['url'] => $old_url
+        ]
+      );
+    }
 }
 
   /**
@@ -706,15 +708,21 @@ class Note extends bbn\Models\Cls\Db
    */
   public function deleteUrl(string $id_note)
   {
-    return $this->db->delete([
-      'table' => $this->class_cfg['tables']['url'],
-      'where' => [
-        'conditions' => [[
-          'field' => $this->class_cfg['arch']['url']['id_note'],
-          'value' => $id_note
-        ]]
-      ]
-    ]);
+    $id_url = $this->db->rselect(
+      $this->class_cfg['tables']['notes_url'],
+      $this->class_cfg['arch']['notes_url']['id_url'],
+      [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
+    );
+
+    if ($id_url) {
+      $this->db->delete(
+        $this->class_cfg['tables']['notes_url'],
+        [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
+      );
+      return (bool)$this->url->delete($id_url);
+    }
+
+    throw new Exception(X::_("Impossible to retrieve the URL for id_note %s", $id_note));
   }
 
 
@@ -730,58 +738,37 @@ class Note extends bbn\Models\Cls\Db
     $res = [
       'tables' => [$cf['table']],
       'fields' => [
-        'versions1.' . $cf['arch']['versions']['id_note'],
+        'versions.' . $cf['arch']['versions']['id_note'],
         $cf['arch']['notes']['id_type'],
         $cf['arch']['notes']['id_option'],
-        'versions1.' . $cf['arch']['versions']['version'],
-        'versions1.' . $cf['arch']['versions']['title'],
-        'versions1.' . $cf['arch']['versions']['id_user'],
-        'versions1.' . $cf['arch']['versions']['creation'],
-        'versions1.' . $cf['arch']['versions']['content']
+        'versions.' . $cf['arch']['versions']['version'],
+        'versions.' . $cf['arch']['versions']['excerpt'],
+        'versions.' . $cf['arch']['versions']['title'],
+        'versions.' . $cf['arch']['versions']['id_user'],
+        'versions.' . $cf['arch']['versions']['creation'],
+        'versions.' . $cf['arch']['versions']['content']
       ],
       'join' => [[
         'table' => $cf['tables']['versions'],
-        'type' => 'left',
-        'alias' => 'versions1',
+        'alias' => 'versions',
         'on' => [
           'conditions' => [[
             'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            'exp' => 'versions1.' . $cf['arch']['versions']['id_note'],
-          ]],
-        ],
-      ], [
-        'table' => $cf['tables']['versions'],
-        'type' => 'left',
-        'alias' => 'versions2',
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            'exp' => 'versions2.' . $cf['arch']['versions']['id_note'],
+            'exp' => 'versions.' . $cf['arch']['versions']['id_note'],
           ], [
-            'field' => 'versions1.' . $cf['arch']['versions']['version'],
-            'operator' => '<',
-            'exp' => 'versions2.' . $cf['arch']['versions']['version'],
+            'field' => 'versions.' . $cf['arch']['versions']['latest'],
+            'value' => 1
           ]],
         ],
       ]],
       'where' => [
         'logic' => 'AND',
         'conditions' => [
-          [
-            'field' => 'versions2.' . $cf['arch']['versions']['version'],
-            'operator' => 'isnull',
-          ]
         ]
       ],
-      'group_by' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
-      'order' => [[
-        'field' => 'versions1.' . $cf['arch']['versions']['version'],
-        'dir' => 'DESC',
-      ], [
-        'field' => 'versions1.' . $cf['arch']['versions']['creation'],
-        'dir' => 'DESC',
-      ]]
+      'group_by' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table'])
     ];
+
     if (!$with_content) {
       array_pop($res['fields']);
     }
@@ -1131,18 +1118,18 @@ class Note extends bbn\Models\Cls\Db
       $grid_cfg = [
         'table' => $cf['table'],
         'fields' => [
-          $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['id_parent'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['id_alias'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['id_type'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['mime'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['lang'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['private'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['locked'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['excerpt'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['pinned'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
-          $db->cfn($cf['arch']['notes']['active'], $cf['table']),
+          $db->cfn($this->fields['id'], $cf['table']),
+          $db->cfn($this->fields['id_parent'], $cf['table']),
+          $db->cfn($this->fields['id_alias'], $cf['table']),
+          $db->cfn($this->fields['id_type'], $cf['table']),
+          $db->cfn($this->fields['mime'], $cf['table']),
+          $db->cfn($this->fields['lang'], $cf['table']),
+          $db->cfn($this->fields['private'], $cf['table']),
+          $db->cfn($this->fields['locked'], $cf['table']),
+          $db->cfn($this->fields['pinned'], $cf['table']),
+          $db->cfn($this->fields['creator'], $cf['table']),
+          $db->cfn($this->fields['active'], $cf['table']),
+          'last_version.' . $cf['arch']['versions']['excerpt'],
           'first_version.' . $cf['arch']['versions']['creation'],
           'last_version.' . $cf['arch']['versions']['title'],
           'last_version.' . $cf['arch']['versions']['id_user'],
@@ -1167,23 +1154,11 @@ class Note extends bbn\Models\Cls\Db
             'conditions' => [[
               'field' => 'last_version.' . $cf['arch']['versions']['id_note'],
               'operator' => '=',
-              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            ]],
-          ],
-        ], [
-          'table' => $cf['tables']['versions'],
-          'alias' => 'test_version',
-          'type' => 'left',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'test_version.' . $cf['arch']['versions']['id_note'],
-              'operator' => '=',
-              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
+              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
             ], [
-              'field' => 'last_version.' . $cf['arch']['versions']['version'],
-              'operator' => '<',
-              'exp' => 'test_version.' . $cf['arch']['versions']['version'],
+              'field' => 'last_version.' . $cf['arch']['versions']['latest'],
+              'operator' => '=',
+              'value' => 1
             ]],
           ],
         ], [
@@ -1210,9 +1185,6 @@ class Note extends bbn\Models\Cls\Db
           'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
           'operator' => '=',
           'value' => 0,
-        ], [
-          'field' => 'test_version.' . $cf['arch']['versions']['version'],
-          'operator' => 'isnull',
         ]],
         'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
         'order' => [[
