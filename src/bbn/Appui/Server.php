@@ -60,6 +60,13 @@ class Server
   /** @var string The internal SQLite database */
   private $db;
 
+  /** @var string The last error */
+  private $lastError = '';
+
+  /** @var bool Indicates whether the class should connect to the server when needed */
+  private $online = true;
+
+
   /**
    * Constructor.
    * @param array $cfg
@@ -93,27 +100,7 @@ class Server
     $this->cacheNamePrefix = $this->hostname . '/';
     $this->mainDataPath    = self::getMainDataPath();
     $this->dataPath        = $this->mainDataPath . $this->hostname . '/';
-    if (!\is_file($this->mainDataPath . 'servers.sqlite')) {
-      bbn\File\Dir::createPath($this->mainDataPath);
-      $db = new SQLite3($this->mainDataPath . 'servers.sqlite');
-      $db->exec("CREATE TABLE queue (
-        id INTEGER PRIMARY KEY,
-        server VARCHAR (150) NOT NULL,
-        created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-        user VARCHAR (32),
-        method VARCHAR (100) NOT NULL,
-        args TEXT,
-        hash TEXT NOT NULL,
-        start DATETIME,
-        [end] DATETIME,
-        failed INTEGER (1) DEFAULT (0),
-        active INTEGER (1) DEFAULT (1)
-      );");
-    }
-    $this->db         = new bbn\Db([
-      'engine' => 'sqlite',
-      'db' => $this->mainDataPath . 'servers.sqlite'
-    ]);
+    $this->db         = self::getDb();
     $this->virtualmin = new Virtualmin([
       'user' => $this->user,
       'pass' => $this->pass,
@@ -126,7 +113,7 @@ class Server
       'host' => $this->hostname
     ]);
     if (!empty($cfg['cloudmin'])) {
-      $this->webmin   = new Cloudmin([
+      $this->cloudmin   = new Cloudmin([
         'user' => $this->user,
         'pass' => $this->pass,
         'host' => $this->hostname
@@ -144,40 +131,45 @@ class Server
    */
   public function makeCache(string $mode = '', string $domain = '')
   {
-    if (empty($mode) || ($mode === 'info') || $this->virtualmin->isInfoProp($mode)) {
-      $this->cacheInfo($this->virtualmin->isInfoProp($mode) ? ['search' => $mode] : []);
-    }
+    if ($this->online) {
+      if (!$this->virtualmin->testConnection()) {
+        throw new \Exception(sprintf(_('Connection with server "%s" failed'), $this->hostname));
+      }
+      if (empty($mode) || ($mode === 'info') || $this->virtualmin->isInfoProp($mode)) {
+        $this->cacheInfo($this->virtualmin->isInfoProp($mode) ? ['search' => $mode] : []);
+      }
 
-    if (empty($mode) || ($mode === 'uptime')) {
-      $this->cacheUptime();
-    }
+      if (empty($mode) || ($mode === 'uptime')) {
+        $this->cacheUptime();
+      }
 
-    if (empty($mode) || ($mode === 'domains')) {
-      $this->cacheListDomains($domain);
-    }
+      if (empty($mode) || ($mode === 'domains')) {
+        $this->cacheListDomains($domain);
+      }
 
-    if (empty($mode) || ($mode === 'subdomains')) {
-      $this->cacheListSubDomains($domain);
-    }
+      if (empty($mode) || ($mode === 'subdomains')) {
+        $this->cacheListSubDomains($domain);
+      }
 
-    if (empty($mode) || ($mode === 'admins')) {
-      $this->cacheListAdmins($domain);
-    }
+      if (empty($mode) || ($mode === 'admins')) {
+        $this->cacheListAdmins($domain);
+      }
 
-    if (empty($mode) || ($mode === 'users')) {
-      $this->cacheListUsers($domain);
-    }
+      if (empty($mode) || ($mode === 'users')) {
+        $this->cacheListUsers($domain);
+      }
 
-    if (empty($mode) || ($mode === 'dns')) {
-      $this->cacheListDns($domain);
-    }
+      if (empty($mode) || ($mode === 'dns')) {
+        $this->cacheListDns($domain);
+      }
 
-    if (empty($mode) || ($mode === 'backups')) {
-      $this->cacheListBackups($domain);
-    }
+      if (empty($mode) || ($mode === 'backups')) {
+        $this->cacheListBackups($domain);
+      }
 
-    if (empty($mode) || ($mode === 'features_template')) {
-      $this->cacheListFeaturesTemplate($domain);
+      if (empty($mode) || ($mode === 'features_template')) {
+        $this->cacheListFeaturesTemplate($domain);
+      }
     }
   }
 
@@ -204,7 +196,7 @@ class Server
   public function getCache(string $path, bool $force = false, string $domain = '')
   {
     $c = $this->cacheNamePrefix . (empty($domain) ? '' : "domains/$domain/") . $path;
-    if ($force || ($this->cacheGet($c) === false)) {
+    if (($force || ($this->cacheGet($c) === false)) && !$this->offline) {
       $this->makeCache($path, $domain);
     }
     return $this->cacheGet($c);
@@ -238,6 +230,28 @@ class Server
   public function getWebmin(): bbn\Api\Webmin
   {
     return $this->webmin;
+  }
+
+
+  /**
+   * Sets the property 'online' to false
+   * @return self
+   */
+  public function setOffline(): bbn\Appui\Server
+  {
+    $this->online = false;
+    return $this;
+  }
+
+
+  /**
+   * Sets the property 'online' to true
+   * @return self
+   */
+  public function setOnline(): bbn\Appui\Server
+  {
+    $this->online = true;
+    return $this;
   }
 
 
@@ -472,6 +486,7 @@ class Server
         (count($args) > 1)
         && !$this->virtualmin->modify_domain($args)
     ) {
+      $this->lastError = $this->virtualmin->error;
       return false;
     }
 
@@ -500,6 +515,7 @@ class Server
           !empty($featuresToEnable)
           && !$this->virtualmin->enable_feature(X::mergeArrays($featuresToEnable, $args))
       ) {
+        $this->lastError = $this->virtualmin->error;
         return false;
       }
 
@@ -507,6 +523,7 @@ class Server
           !empty($featuresToDisable)
           && !$this->virtualmin->disable_feature(X::mergeArrays($featuresToDisable, $args))
       ) {
+        $this->lastError = $this->virtualmin->error;
         return false;
       }
     }
@@ -544,6 +561,9 @@ class Server
         self::makeGlobalDomainsCache();
       }
       return true;
+    }
+    else {
+      $this->lastError = $this->virtualmin->error;
     }
     return false;
   }
@@ -586,6 +606,9 @@ class Server
       self::makeGlobalDomainsCache();
       return true;
     }
+    else {
+      $this->lastError = $this->virtualmin->error;
+    }
     return false;
   }
 
@@ -615,6 +638,9 @@ class Server
       }
       self::makeGlobalDomainsCache();
       return true;
+    }
+    else {
+      $this->lastError = $this->virtualmin->error;
     }
     return false;
   }
@@ -683,11 +709,27 @@ class Server
   /**
    * Sets a task element on the queue as failed
    * @param int $id The task ID
+   * @param string $error The error message
    * @return bool
    */
-  public function setQueueTaskFailed(int $id): bool
+  public function setQueueTaskFailed(int $id, string $error = ''): bool
   {
-    return (bool)$this->db->update('queue', ['failed' => 1], ['id' => $id]);
+    return (bool)$this->db->update('queue', [
+      'failed' => 1,
+      'error' => $error
+    ], [
+      'id' => $id
+    ]);
+  }
+
+
+  /**
+   * Gets the value of the 'lastError' property
+   * @return string
+   */
+  public function getLastError(): string
+  {
+    return $this->lastError;
   }
 
 
@@ -743,8 +785,7 @@ class Server
    */
   public static function getDb(): ?bbn\Db
   {
-    $dbPath = bbn\Appui\Server::getMainDataPath() . 'servers.sqlite';
-    if (is_file($dbPath)) {
+    if ($dbPath = self::makeDb()) {
       return new bbn\Db([
         'engine' => 'sqlite',
         'db' => $dbPath
@@ -752,6 +793,7 @@ class Server
     }
     return null;
   }
+
 
   /**
    * Process the tasks queue
@@ -762,7 +804,7 @@ class Server
     $appPath = bbn\Mvc::getAppPath();
     $db = self::getDb();
     if (!empty($db) && is_dir($appPath)) {
-      if ($queue = self::getCurrentTasksQueue()) {
+      if ($queue = self::getCurrentTasksQueue(true)) {
         foreach ($queue as $q) {
           if (!empty($q['server'])) {
             $running = self::getRunningTasks();
@@ -786,7 +828,7 @@ class Server
    * Gets the current tasks queueu
    * @return array
    */
-  public static function getCurrentTasksQueue(): array
+  public static function getCurrentTasksQueue(bool $group = false): array
   {
     if ($db = self::getDb()) {
       return $db->rselectAll([
@@ -807,7 +849,7 @@ class Server
             'operator' => 'isnull'
           ]]
         ],
-        'group_by' => ['server'],
+        'group_by' => !empty($group) ? ['server'] : [],
         'order' => ['id' => 'asc']
       ]);
     }
@@ -1166,6 +1208,36 @@ class Server
     }
   }
 
+
+  /**
+   * Makes the SQLite database and returns its path
+   * @return null|string
+   */
+  private static function makeDb(): ?string
+  {
+    if ($mainDataPath = self::getMainDataPath()) {
+      $path = $mainDataPath . 'servers.sqlite';
+      if (!\is_file($path) && bbn\File\Dir::createPath($mainDataPath)) {
+        $db = new SQLite3($path);
+        $db->exec("CREATE TABLE queue (
+          id INTEGER PRIMARY KEY,
+          server VARCHAR (150) NOT NULL,
+          created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+          user VARCHAR (32),
+          method VARCHAR (100) NOT NULL,
+          args TEXT,
+          hash TEXT NOT NULL,
+          start DATETIME,
+          [end] DATETIME,
+          failed INTEGER (1) DEFAULT (0),
+          error TEXT,
+          active INTEGER (1) DEFAULT (1)
+        );");
+      }
+      return \is_file($path) ? $path : null;
+    }
+    return null;
+  }
 
 
 }
