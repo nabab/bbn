@@ -138,7 +138,7 @@ class Medias extends bbn\Models\Cls\Db
   public function getPath($media = null): string
   {
     if ($media && !is_array($media)) {
-      $media = $this->getMedia($media);
+      $media = $this->getMedia($media, true);
     }
 
     if (!isset($this->path)) {
