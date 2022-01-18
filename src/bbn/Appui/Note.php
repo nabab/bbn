@@ -21,11 +21,9 @@ if (!\defined('BBN_DATA_PATH')) {
 class Note extends bbn\Models\Cls\Db
 {
   use bbn\Models\Tts\References;
-
   use bbn\Models\Tts\Optional;
-
   use bbn\Models\Tts\Dbconfig;
-
+  use bbn\Models\Tts\Url;
   use bbn\Models\Tts\Tagger;
 
   private $medias;
@@ -107,6 +105,7 @@ class Note extends bbn\Models\Cls\Db
     'paths' => [
       'medias' => 'media/',
     ],
+    'urlItemField' => 'id_note'
   ];
 
   /** @var array $class_cfg */
@@ -123,8 +122,6 @@ class Note extends bbn\Models\Cls\Db
   {
     parent::__construct($db);
     $this->_init_class_cfg(self::$default_class_cfg);
-    $this->url = new Url($this->db);
-    $this->class_cfg = X::mergeArrays($this->url->getClassCfg(), $this->class_cfg);
     self::optionalInit();
     $this->taggerInit(
       $this->class_cfg['tables']['notes_tags'],
@@ -306,7 +303,7 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
-   * Adds a new version to the given note.
+   * Adds a new version to the given note if it's different from the last, and returns the latest version.
    *
    * @param string $id_note
    * @param string $title
@@ -323,8 +320,9 @@ class Note extends bbn\Models\Cls\Db
       $cf     = &$this->class_cfg;
       $latest = $note['version'] ?? 0;
       if (!$latest 
-          || ($note['content'] !== $content)
-          || ($note['title'] !== $title)
+          || ($note['content'] != $content)
+          || ($note['title'] != $title)
+          || ($note['excerpt'] != $excerpt)
       ) {
         $next = $latest + 1;
       }
@@ -335,18 +333,22 @@ class Note extends bbn\Models\Cls\Db
           [
             $cf['arch']['versions']['id_note'] => $id_note,
             $cf['arch']['versions']['version'] => $next,
+            $cf['arch']['versions']['latest'] => 1,
             $cf['arch']['versions']['title'] => $title,
             $cf['arch']['versions']['content'] => $content,
+            $cf['arch']['versions']['excerpt'] => $excerpt ?: '',
             $cf['arch']['versions']['id_user'] => $usr->getId(),
             $cf['arch']['versions']['creation'] => date('Y-m-d H:i:s'),
           ]
         )
       ) {
-        $excerpt = $this->getExcerpt($title, $content);
         $this->db->update(
-          $cf['table'],
-          [$cf['arch']['notes']['excerpt'] => $excerpt],
-          [$cf['arch']['notes']['id'] => $id_note]
+          $cf['tables']['versions'],
+          [$cf['arch']['versions']['latest'] => 0],
+          [
+            $cf['arch']['versions']['id_note'] => $id_note,
+            ['version', '!=', $next]
+          ]
         );
 
         return $next;
@@ -481,7 +483,8 @@ class Note extends bbn\Models\Cls\Db
 
       if ($simple) {
         unset($res[$cf['arch']['versions']['content']]);
-      } else {
+      }
+      else {
         if ($medias = $this->db->getColumnValues(
           $cf['tables']['notes_medias'],
           $cf['arch']['notes_medias']['id_media'],
@@ -568,35 +571,6 @@ class Note extends bbn\Models\Cls\Db
 
   /**
    * @param string $url
-   * @return bool
-   */
-  public function urlExists(string $url): bool
-  {
-    return (bool)$this->urlToId($url);
-  }
-
-
-  /**
-   * @param string $url
-   * @return string|null
-   */
-  public function urlToId(string $url): ?string
-  {
-    if ($id_url = $this->url->retrieveUrl($url)) {
-      $cf = &$this->class_cfg;
-      return $this->db->selectOne(
-        $cf['tables']['notes_url'],
-        $cf['arch']['notes_url']['id_note'], 
-        [$cf['arch']['notes_url']['id_url'] => $id_url]
-      );
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @param string $url
    * @param bool $full
    * @return array|null
    */
@@ -613,42 +587,6 @@ class Note extends bbn\Models\Cls\Db
     return null;
   }
 
-  /**
-   * Returns true if the note is linked to an url.
-   *
-   * @param string $id_note
-   * @return bool
-   *
-   */
-  public function hasUrl(string $id_note): bool
-  {
-    return (bool)$this->db->count(
-      $this->class_cfg['tables']['notes_url'],
-      [
-        $this->class_cfg['arch']['notes_url']['id_note'] => $id_note
-      ]
-    );
-  }
-
-  /**
-   * Returns the url of the note.
-   *
-   * @param string $id_note
-   * @return string|null
-   */
-  public function getUrl(string $id_note): ?string
-  {
-    $id_url = $this->db->selectOne(
-      $this->class_cfg['tables']['notes_url'],
-      $this->class_cfg['arch']['notes_url']['id_url'],
-      [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
-    );
-    if ($id_url) {
-      return $this->url->getUrl($id_url);
-    }
-
-    return null;
-  }
 
   /**
    * Insert the given url to the note if has no url and update it otherwise.
@@ -668,62 +606,9 @@ class Note extends bbn\Models\Cls\Db
         );
     }
 
-    $url = $this->url->sanitize($url);
-
-    if (!$url) {
-      throw new Exception(X::_("The URL can't be empty"));
-    }
-
-    $old_url = $this->getUrl($id_note);
-    if (!$old_url) {
-      if (!($id_url = $this->url->add($url, 'note'))) {
-        throw new Exception(X::_("Impossible to create the URL %s", $url));
-      }
-
-      return $this->db->insert(
-        $this->class_cfg['tables']['notes_url'],
-        [
-          $this->class_cfg['arch']['notes_url']['id_url']  => $id_url,
-          $this->class_cfg['arch']['notes_url']['id_note'] => $id_note
-        ]
-      );
-    }
-
-    if ($old_url !== $url) {
-      return $this->db->update(
-        $this->class_cfg['tables']['url'],
-        [$this->class_cfg['arch']['url']['url'] => $url],
-        [
-          $this->class_cfg['arch']['url']['url'] => $old_url
-        ]
-      );
-    }
-}
-
-  /**
-   * Deletes url for the given note.
-   *
-   * @param string $id_note
-   * @return int|null
-   */
-  public function deleteUrl(string $id_note)
-  {
-    $id_url = $this->db->rselect(
-      $this->class_cfg['tables']['notes_url'],
-      $this->class_cfg['arch']['notes_url']['id_url'],
-      [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
-    );
-
-    if ($id_url) {
-      $this->db->delete(
-        $this->class_cfg['tables']['notes_url'],
-        [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
-      );
-      return (bool)$this->url->delete($id_url);
-    }
-
-    throw new Exception(X::_("Impossible to retrieve the URL for id_note %s", $id_note));
+    return $this->setUrl($id_note, $url);
   }
+
 
 
   /**

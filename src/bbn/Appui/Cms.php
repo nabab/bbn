@@ -10,6 +10,7 @@
  //the notes inserted with appui/notes have to be type 'pages'
 namespace bbn\Appui;
 
+use Exception;
 use bbn\X;
 use bbn\Db;
 use bbn\Models\Tts\Cache;
@@ -65,7 +66,7 @@ class Cms extends DbCls
 
     $start = strtotime($start);
     if (!$start) {
-      throw new \Exception(X::_("The end date is not valid"));
+      throw new Exception(X::_("The end date is not valid"));
     }
 
     if (empty($end)) {
@@ -74,11 +75,11 @@ class Cms extends DbCls
 
     $end = strtotime($end);
     if (!$end) {
-      throw new \Exception(X::_("The end date is not valid"));
+      throw new Exception(X::_("The end date is not valid"));
     }
 
     if ($end <= $start) {
-      //throw new \Exception(X::_("The end date is before the start"));
+      //throw new Exception(X::_("The end date is before the start"));
       return false;
     }
 
@@ -90,7 +91,7 @@ class Cms extends DbCls
    *
    * @param Db $db
    * @param null $notes
-   * @throws \Exception
+   * @throws Exception
    */
   public function __construct(Db $db, Note $note = null)
   {
@@ -226,7 +227,7 @@ class Cms extends DbCls
    * @param int   $limit
    * @param int   $start
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0): array
   {
@@ -387,7 +388,7 @@ class Cms extends DbCls
         try {
             $this->setUrl($id_note, $cfg['url']);
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
             return [
                 'error' => $e->getMessage()
             ];
@@ -449,7 +450,7 @@ class Cms extends DbCls
    * @param string $id_note
    * @param string $url
    * @return Boolean
-   * @throws \Exception
+   * @throws Exception
    */
   public function setUrl(string $id_note, string $url, $ignore = false): ?bool
   {
@@ -458,11 +459,11 @@ class Cms extends DbCls
         return 0;
       }
 
-      throw new \Exception(X::_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
+      throw new Exception(X::_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
     }
 
     if (!$this->note->get($id_note)) {
-      throw new \Exception(X::_('Impossible to find the given note'));
+      throw new Exception(X::_('Impossible to find the given note'));
     }
 
     return $this->note->insertOrUpdateUrl($id_note, $url);
@@ -501,7 +502,7 @@ class Cms extends DbCls
   public function setEvent(string $id_note, array $cfg = [])
   {
     if (!array_key_exists('start', $cfg)) {
-      throw new \Exception(X::_("A start date is mandatory for CMS event (even null)"));
+      throw new Exception(X::_("A start date is mandatory for CMS event (even null)"));
     }
 
     if (empty($cfg['start'])) {
@@ -509,11 +510,11 @@ class Cms extends DbCls
     }
 
     if (!($note = $this->note->get($id_note))) {
-      throw new \Exception(X::_("The note %s does not exist", $id_note));
+      throw new Exception(X::_("The note %s does not exist", $id_note));
     }
     
     if (!$this->_check_date($cfg['start'], $cfg['end'] ?? null)) {
-      throw new \Exception(X::_("The dates don't work... End before start?"));
+      throw new Exception(X::_("The dates don't work... End before start?"));
     }
 
     if (empty($this->getEvent($id_note))) {
@@ -535,7 +536,7 @@ class Cms extends DbCls
           $fields['start']   => $cfg['start'],
           $fields['end']     => $cfg['end'] ?? null
         ], 'cmsss');
-        throw new \Exception(X::_("Impossible to insert the event"));
+        throw new Exception(X::_("Impossible to insert the event"));
       }
     }
     else {
@@ -584,9 +585,9 @@ class Cms extends DbCls
    * @param string $content
    * @return null|int The number of affected rows (1 if ok)
    */
-  public function setContent(string $id_note, string $title, string $content, string $except = ''): ?int
+  public function setContent(string $id_note, string $title, string $content, string $excerpt = ''): ?int
   {
-      return $this->note->insertVersion($id_note, $title, $content);
+      return $this->note->insertVersion($id_note, $title, $content, $excerpt);
   }
 
 
@@ -609,6 +610,7 @@ class Cms extends DbCls
      * @param string $url
      * @param string $title
      * @param string $content
+     * @param string $excerpt
      * @param string $start
      * @param string $end
      * @param array $tags
@@ -616,22 +618,37 @@ class Cms extends DbCls
      * @return bool Returns true if something has been modified.
      */
   public function set(
-    string $url,
-    string $title,
-    string $content,
+    $url,
+    string $title = '',
+    string $content = '',
+    string $excerpt = '',
     string $start = null,
     string $end = null,
     array $tags = null,
     string $id_type = null
   ): bool
   {
-    if (!($cfg = $this->getByUrl($url, true))) {
-      throw new \Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
+    if (is_array($url)) {
+      $tmp = $url;
+      foreach ($tmp as $k => $v) {
+        $$k = $v;
+      }
+    }
+
+    if (!is_string($url) || empty($url)) {
+      throw new Exception(X::_("The CMS article MUST have a URL"));
+    }
+
+    if (!empty($id_note)) {
+      $cfg = $this->get($id_note);
+    }
+    elseif (!($cfg = $this->getByUrl($url, true))) {
+      throw new Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
     }
 
     $change = 0;
-    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content)) {
-      $change += (int)$this->setContent($cfg['id_note'], $title, $content);
+    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content) || ($cfg['excerpt'] !== $excerpt)) {
+      $change += (int)$this->setContent($cfg['id_note'], $title, $content, $excerpt);
     }
 
     if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {

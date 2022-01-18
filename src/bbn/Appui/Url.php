@@ -47,6 +47,17 @@ class Url extends bbn\Models\Cls\Db
   }
 
 
+  public function set(string $url, string $type_url, string $id_url = null) : bool
+  {
+    if ($id_url && ($url = $this->sanitize($url))) {
+      return (bool)$this->update($id_url, [
+        'url' => $url
+      ]);
+    }
+
+    return (bool)$this->add($url, $type_url);
+  }
+
   public function add(string $url, string $type_url, string $prefix = ''): ?string
   {
     if ($url = $this->sanitize($url, $prefix)) {
