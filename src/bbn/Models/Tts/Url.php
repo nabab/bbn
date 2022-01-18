@@ -185,7 +185,7 @@ trait Url
   public function setUrl(string $id_item, string $url, string $type = null): bool
   {
     $this->checkUrlCfg();
-    if (!($url = $this->sanitize($url))) {
+    if (!($url = $this->sanitizeUrl($url))) {
       throw new Exception(X::_("The URL can't be empty"));
     }
 
@@ -223,7 +223,6 @@ trait Url
   public function addUrl(string $id_item, string $url, string $prefix = '', string $type = null): bool
   {
     $this->checkUrlCfg();
-
     if (!$type && !$this->urlType) {
       throw new Exception(X::_("You have no type set and no default type for the class %s"), __CLASS__);
     }
@@ -251,6 +250,7 @@ trait Url
    */
   public function hasUrl(string $id_item): bool
   {
+    $this->checkUrlCfg();
     return (bool)$this->db->count(
       $this->urlTable,
       [$this->class_cfg['urlItemField'] => $id_item]
@@ -266,11 +266,7 @@ trait Url
    */
   public function deleteUrl(string $id_item)
   {
-
-    $this->db->count(
-      $this->urlTable,
-      [$this->class_cfg['urlItemField'] => $id_item]
-    );
+    $this->checkUrlCfg();
     $id_url = $this->db->selectOne(
       $this->urlTable,
       $this->urlFields['id_url'],
@@ -286,6 +282,13 @@ trait Url
     }
 
     throw new Exception(X::_("Impossible to retrieve the URL for item %s", $id_item));
+  }
+
+
+  public function sanitizeUrl(string $url): string
+  {
+    $this->checkUrlCfg();
+    return $this->url->sanitizeUrl();
   }
 
 }
