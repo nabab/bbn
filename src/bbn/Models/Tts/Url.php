@@ -261,33 +261,31 @@ trait Url
   /**
    * Deletes url for the given note.
    *
-   * @param string $id_note
+   * @param string $id_item
    * @return int|null
    */
-  public function deleteUrl(string $id_note)
+  public function deleteUrl(string $id_item)
   {
 
     $this->db->count(
       $this->urlTable,
       [$this->class_cfg['urlItemField'] => $id_item]
     );
-    $id_url = $this->db->rselect(
-      $this->class_cfg['tables']['notes_url'],
-      $this->class_cfg['arch']['notes_url']['id_url'],
-      [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
+    $id_url = $this->db->selectOne(
+      $this->urlTable,
+      $this->urlFields['id_url'],
+      [$this->class_cfg['urlItemField'] => $id_item]
     );
 
     if ($id_url) {
       $this->db->delete(
-        $this->class_cfg['tables']['notes_url'],
-        [$this->class_cfg['arch']['notes_url']['id_note'] => $id_note]
+        $this->urlTable,
+        [$this->class_cfg['urlItemField'] => $id_item]
       );
       return (bool)$this->url->delete($id_url);
     }
 
-    throw new Exception(X::_("Impossible to retrieve the URL for id_note %s", $id_note));
+    throw new Exception(X::_("Impossible to retrieve the URL for item %s", $id_item));
   }
-
-
 
 }
