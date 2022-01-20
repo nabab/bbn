@@ -1,16 +1,23 @@
 <?php
 namespace bbn\Appui;
 
+use Exception;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\User;
 use bbn\File\System;
+use bbn\File\Image;
+use bbn\Appui\Option;
+
 
 class Medias extends bbn\Models\Cls\Db
 {
-    use
-    bbn\Models\Tts\References,
-    bbn\Models\Tts\Dbconfig;
+  use bbn\Models\Tts\References;
+  use bbn\Models\Tts\Dbconfig;
+  use bbn\Models\Tts\Url;
 
   protected static
     /** @var array */
@@ -40,8 +47,7 @@ class Medias extends bbn\Models\Cls\Db
         ],
         'medias_url' => [
           'id_media' => 'id_media',
-          'url' => 'url',
-          'shared' => 'shared'
+          'id_url' => 'id_url'
         ],
         'medias_tags' => [
           'id_media' => 'id_media',
@@ -58,13 +64,13 @@ class Medias extends bbn\Models\Cls\Db
           'id_group' => 'id_group',
           'position' => 'position'
         ]
-      ]
+      ],
+      'urlItemField' => 'id_media'
     ];
 
-  private
-    $opt,
-    $usr,
-    $opt_id;
+  private $opt;
+  private $usr;
+  private $opt_id;
 
   protected $path;
 
@@ -84,6 +90,16 @@ class Medias extends bbn\Models\Cls\Db
   /** @var string $imageRoot */
   protected $imageRoot;
 
+  public function __construct(Db $db)
+  {
+    parent::__construct($db);
+    $this->_init_class_cfg();
+    $this->opt    = Option::getInstance();
+    $this->usr    = User::getInstance();
+    $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
+    $this->fs     = new System();
+  }
+
   public function setImageRoot(string $root): bool
   {
     if ($root) {
@@ -102,33 +118,16 @@ class Medias extends bbn\Models\Cls\Db
   public function getImageUrl(string $id = null): string
   {
     if ($this->exists($id)) {
-      if (!$this->imageRoot) {
-        $this->imageRoot = bbn\Mvc::getPluginUrl('appui-note').'/media/image/';
+      if ($url = $this->getUrl($id)) {
+        return $url;
       }
 
-      $cfg = $this->getClassCfg();
-      $url = $this->db->selectOne(
-        $cfg['tables']['medias_url'],
-        $cfg['arch']['medias_url']['url'],
-        [$cfg['arch']['medias_url']['id_media'] => $id]
-      );
-
-      if ($url) {
-        return $url;
+      if (!$this->imageRoot) {
+        $this->imageRoot = Mvc::getPluginUrl('appui-note').'/media/image/';
       }
 
       return $this->imageRoot . (string)$id;
     }
-  }
-
-  public function __construct(bbn\Db $db)
-  {
-    parent::__construct($db);
-    $this->_init_class_cfg();
-    $this->opt    = bbn\Appui\Option::getInstance();
-    $this->usr    = bbn\User::getInstance();
-    $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
-    $this->fs     = new System();
   }
 
   /**
@@ -142,7 +141,7 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     if (!isset($this->path)) {
-      $this->path = bbn\Mvc::getDataPath('appui-note').'media';
+      $this->path = Mvc::getDataPath('appui-note').'media';
     }
 
     $path = $this->path;
@@ -165,21 +164,21 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function browse(array $cfg, int $limit = 20, int $start = 0): ?array
   {
-    if ($user = bbn\User::getInstance()) {
+    if ($user = User::getInstance()) {
       $cf = $this->getClassCfg();
       $ct = $cf['arch']['medias'];
       $filters = [];
       if (isset($cfg['filters'], $cfg['filters']['conditions'])) {
         $filters = $cfg['filters']['conditions'];
       }
-      if (($pvtIdx = \bbn\X::find($filters, ['field' => $ct['private']])) === null) {
+      if (($pvtIdx = X::find($filters, ['field' => $ct['private']])) === null) {
         $filters[] = [
           'field' => $ct['private'],
           'value' => 0
         ];
       }
       else {
-        $userIdx = \bbn\X::find($filters, ['field' => $ct['id_user']]);
+        $userIdx = X::find($filters, ['field' => $ct['id_user']]);
         $id_user = $user->getId();
         if (!empty($filters[$pvtIdx]['value'])) {
           if ($userIdx === null) {
@@ -256,7 +255,7 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function count(array $filter = []): ?int
   {
-    if ($user = bbn\User::getInstance()) {
+    if ($user = User::getInstance()) {
       $cf = $this->getClassCfg();
       $ct = $cf['arch']['medias'];
       if (!isset($filter[$ct['private']])) {
@@ -281,7 +280,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param boolean $private
    * @param string|null $excerpt
    * @return string|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function insert(
       string $file,
@@ -299,7 +298,7 @@ class Medias extends bbn\Models\Cls\Db
     ) {
       $content = null;
       if (!$this->fs->isFile($file)) {
-        throw new \Exception(X::_("Impossible to find the file %s", $file));
+        throw new Exception(X::_("Impossible to find the file %s", $file));
       }
 
       if ($private) {
@@ -307,14 +306,14 @@ class Medias extends bbn\Models\Cls\Db
           return null;
         }
 
-        $root = bbn\Mvc::getUserDataPath($this->usr->getId(), 'appui-note');
+        $root = Mvc::getUserDataPath($this->usr->getId(), 'appui-note');
       }
       else {
-        $root = bbn\Mvc::getDataPath('appui-note');
+        $root = Mvc::getDataPath('appui-note');
       }
 
       $root   .= 'media/';
-      $path    = bbn\X::makeStoragePath($root, '', 0, $this->fs);
+      $path    = X::makeStoragePath($root, '', 0, $this->fs);
       $dpath   = substr($path, strlen($root));
       $name    = X::basename($file);
       $mime    = mime_content_type($file) ?: null;
@@ -341,7 +340,7 @@ class Medias extends bbn\Models\Cls\Db
           $cf['arch']['medias']['created'] => date('Y-m-d H:i:s')
         ]
       )) {
-        throw new \Exception(X::_("Impossible to insert the media in the database"));
+        throw new Exception(X::_("Impossible to insert the media in the database"));
       }
 
       $id = $this->db->lastId();
@@ -352,58 +351,13 @@ class Medias extends bbn\Models\Cls\Db
         );
         $new_file = $path.$id.'/'.X::basename($file);
         if (strpos($mime, 'image/') === 0) {
-          $image = new \bbn\File\Image($new_file, $this->fs);
+          $image = new Image($new_file, $this->fs);
           $image->thumbs($path.$id, $this->thumbs_sizes);
         }
       }
 
 
       return $id;
-    }
-
-    return null;
-  }
-
-
-  /**
-   * @param string $id_media
-   * @param string $url
-   * @param int $shared
-   * @return int|null
-   * @throws \Exception
-   */
-  public function getByUrl(string $url)
-  {
-    $cf =& $this->class_cfg;
-    return $this->db->selectOne(
-      $cf['tables']['medias_url'],
-      $cf['arch']['medias_url']['id_media'],
-      [
-        $cf['arch']['medias_url']['url'] => $url
-      ]
-    );
-  }
-
-
-  /**
-   * @param string $id_media
-   * @param string $url
-   * @param int $shared
-   * @return int|null
-   * @throws \Exception
-   */
-  public function setUrl(string $id_media, string $url, int $shared = 0)
-  {
-    if ($this->exists($id_media)) {
-      $cf =& $this->class_cfg;
-      return $this->db->insertIgnore(
-        $cf['tables']['medias_url'],
-        [
-          $cf['arch']['medias_url']['id_media'] => $id_media,
-          $cf['arch']['medias_url']['url'] => $url,
-          $cf['arch']['medias_url']['shared'] => $shared
-        ]
-      );
     }
 
     return null;
@@ -421,14 +375,14 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     if (!is_array($media)) {
-      throw new \Exception("Impossible to find the media in the database");
+      throw new Exception("Impossible to find the media in the database");
     }
 
     if (!($path = $this->getPath($media))) {
-      throw new \Exception("Impossible to retrieve the path");
+      throw new Exception("Impossible to retrieve the path");
     }
     
-    $list = \bbn\File\Dir::getFiles(X::dirname($path));
+    $list = $this->fs->getFiles(X::dirname($path));
     if (count($list) > 1) {
       $sizes = [];
       foreach ($list as $l) {
@@ -537,7 +491,7 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function delete(string $id)
   {
-    if (\bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       $cf    =& $this->class_cfg;
       $media =  $this->getMedia($id, true);
 
@@ -547,7 +501,7 @@ class Medias extends bbn\Models\Cls\Db
           && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])
       ) {
         if ($this->fs->delete($path, false)) {
-          bbn\X::cleanStoragePath($path);
+          X::cleanStoragePath($path);
         }
 
         return true;
@@ -588,7 +542,7 @@ class Medias extends bbn\Models\Cls\Db
   public function getMedia(string $id, bool $details = false, int $width = null)
   {
     $cf =& $this->class_cfg;
-    if (\bbn\Str::isUid($id)
+    if (Str::isUid($id)
         && ($link_type = $this->opt->fromCode('link', $this->opt_id))
         && ($media = $this->db->rselect($cf['table'], $cf['arch']['medias'], [$cf['arch']['medias']['id'] => $id]))
         && ($link_type !== $media[$cf['arch']['medias']['type']])
@@ -614,7 +568,7 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     if (is_array($medias)
-        && \bbn\File\Dir::createPath(X::dirname($dest))
+        && $this->fs->createPath(X::dirname($dest))
         && ($zip = new \ZipArchive())
         && ((        is_file($dest)
         && ($zip->open($dest, \ZipArchive::OVERWRITE) === true))
@@ -646,7 +600,7 @@ class Medias extends bbn\Models\Cls\Db
     $new = [];
     //the old media
     $old  = $this->getMedia($id_media, true);
-    $root = bbn\Mvc::getDataPath('appui-note').'media/';
+    $root = Mvc::getDataPath('appui-note').'media/';
     if ($old
         && (($old['name'] !== $name) || ($old['title'] !== $title))
     ) {
@@ -735,7 +689,7 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function updateContent(string $id_media, int $ref, string $oldName, string $newName, string $title)
   {
-    $tmp_path  = \bbn\Mvc::getUserTmpPath().$ref.'/'.$oldName;
+    $tmp_path  = Mvc::getUserTmpPath().$ref.'/'.$oldName;
     $new_media = [];
     if ($this->fs->isFile($tmp_path)) {
       $file_content = file_get_contents($tmp_path);
@@ -745,7 +699,7 @@ class Medias extends bbn\Models\Cls\Db
         $full_path = $this->getMediaPath($id_media, $newName);
         if ($this->fs->putContents($full_path, $file_content)) {
           if ($this->isImage($full_path)) {
-            $image = new \bbn\File\Image($full_path);
+            $image = new Image($full_path);
             $this->removeThumbs($old_path);
             $image->thumbs(X::dirname($full_path), $this->thumbs_sizes, '_%s', true);
             $media['is_image'] = true;

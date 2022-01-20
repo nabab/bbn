@@ -551,6 +551,16 @@ class Str
   }
 
 
+  public static function isHTML($st)
+  {
+    if (\is_string($st) && !empty($st)) {
+      return strip_tags($st) !== $st;
+    }
+
+    return false;
+  }
+
+
   /**
    * Checks if the string is a json string.
    *

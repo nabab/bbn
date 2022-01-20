@@ -10,25 +10,34 @@
  //the notes inserted with appui/notes have to be type 'pages'
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
 use bbn\X;
+use bbn\Db;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Cls\Db as DbCls;
 
-class Cms extends bbn\Models\Cls\Db
+
+class Cms extends DbCls
 {
-    /** @var Note A Note instance. */
-    protected $note;
+  use Cache;
 
-    /** @var Option An Option instance. */
-    protected $opt;
+  /** @var Note A Note instance. */
+  protected $note;
 
-    /** @var Event En Event instance. */
-    protected $event;
+  /** @var Option An Option instance. */
+  protected $opt;
+
+  /** @var Event En Event instance. */
+  protected $event;
+
+  /** @var Note A Note instance. */
+  protected $url;
 
   /** @var array $class_cfg */
   protected $class_cfg;
 
-    /** @var string The option's ID of the type of notes for CMS (pages) */
-    protected $noteType;
+  /** @var string The option's ID of the type of notes for CMS (pages) */
+  protected $noteType;
 
   private static $_id_event;
 
@@ -57,7 +66,7 @@ class Cms extends bbn\Models\Cls\Db
 
     $start = strtotime($start);
     if (!$start) {
-      throw new \Exception(X::_("The end date is not valid"));
+      throw new Exception(X::_("The end date is not valid"));
     }
 
     if (empty($end)) {
@@ -66,11 +75,11 @@ class Cms extends bbn\Models\Cls\Db
 
     $end = strtotime($end);
     if (!$end) {
-      throw new \Exception(X::_("The end date is not valid"));
+      throw new Exception(X::_("The end date is not valid"));
     }
 
     if ($end <= $start) {
-      //throw new \Exception(X::_("The end date is before the start"));
+      //throw new Exception(X::_("The end date is before the start"));
       return false;
     }
 
@@ -80,15 +89,17 @@ class Cms extends bbn\Models\Cls\Db
   /**
    * Cms constructor.
    *
-   * @param bbn\Db $db
+   * @param Db $db
    * @param null $notes
-   * @throws \Exception
+   * @throws Exception
    */
-  public function __construct(bbn\Db $db, Note $note = null)
+  public function __construct(Db $db, Note $note = null)
   {
     parent::__construct($db);
+    $this->cacheInit();
     $this->event = new Event($this->db);
     $this->opt   = Option::getInstance();
+    $this->url   = new Url($this->db);
     if (!self::$_id_event) {
       $id = $this->opt->fromCode('publication', 'types', 'event', 'appui');
       self::_set_id_event($id);
@@ -101,152 +112,33 @@ class Cms extends bbn\Models\Cls\Db
     }
 
     $this->class_cfg = X::mergeArrays(
-        $this->note->getClassCfg(),
-        $this->event->getClassCfg()
+      $this->note->getClassCfg(),
+      $this->url->getClassCfg(),
+      $this->event->getClassCfg()
     );
   }
 
 
-  public function getLatest($limit, $start): array
+  public function getLatest(array $filter = [], int $limit = 20, int $start = 0): array
   {
-      $cfg                         = $this->note->getLastVersionCfg();
-      $cf                          = $this->note->getClassCfg();
-      $cf_ev                       = $this->event->getClassCfg();
-      $cfg['fields'][]             = $cf_ev['arch']['events']['start'];
-      $cfg['fields'][]             = $cf_ev['arch']['events']['end'];
-      $cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);
-      $cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);
-      $cfg['join'][]               = [
-          'table' => $cf['tables']['events'],
-          'on' => [
-              [
-                  'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),
-                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
-              ]
-          ]
-      ];
+    $cfg = $this->getLastVersionCfg(false, true, $filter);
+    $cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
+    $cfg['limit'] = $limit;
+    $cfg['start'] = $start;
 
-      $cfg['join'][] = [
-          'table' => $cf_ev['table'],
-          'on' => [
-              [
-                  'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
-                  'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])
-              ]
-          ]
-      ];
+    $db =& $this->db;
+    $idx = md5(json_encode($filter));
+    $total = $this->cacheGetSet(function() use (&$db, $cfg) {
+      return $db->count($cfg);
+    }, $idx, 'total', 20);
 
-      $cfg['join'][] = [
-          'table' => $cf['tables']['notes_url'],
-          'on' => [
-              [
-                  'field' => $this->db->cfn($cf['arch']['notes_url']['id_note'], $cf['tables']['notes_url']),
-                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
-              ]
-          ]
-      ];
-
-      $cfg['join'][] = [
-        'table' => $cf['tables']['url'],
-        'on' => [
-            [
-                'field' => $this->db->cfn($cf['arch']['url']['id'], $cf['tables']['url']),
-                'exp' => $this->db->cfn($cf['arch']['notes_url']['id_url'], $cf['tables']['notes_url'])
-            ]
-        ]
-      ];
-
-      $total        = $this->db->count($cfg);
-      $cfg['where'] = [
-          'conditions' => [
-              [
-                  'field' => 'start',
-                  'operator' => '<=',
-                  'exp' => 'NOW()'
-              ]
-          ]
-      ];
-
-      $cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
-      $cfg['limit'] = $limit;
-      $cfg['start'] = $start;
-
-      return [
-          'data' => $this->db->rselectAll($cfg),
-          'query' => $this->db->last(),
-          'total' => $total
-      ];
+    return [
+        'data' => $this->db->rselectAll($cfg),
+        'query' => $this->db->last(),
+        'total' => $total
+    ];
   }
 
-  public function getNext($limit, $start): array
-  {
-      $cfg                         = $this->note->getLastVersionCfg();
-      $cf                          = $this->note->getClassCfg();
-      $cf_ev                       = $this->event->getClassCfg();
-      $cfg['fields'][]             = $cf_ev['arch']['events']['start'];
-      $cfg['fields'][]             = $cf_ev['arch']['events']['end'];
-      $cfg['fields']['event_type'] = $this->db->cfn($cf_ev['arch']['events']['id_type'], $cf_ev['tables']['events']);
-      $cfg['fields']['event_name'] = $this->db->cfn($cf_ev['arch']['events']['name'], $cf_ev['tables']['events']);
-      $cfg['join'][]               = [
-          'table' => $cf['tables']['events'],
-          'on' => [
-              [
-                  'field' => $this->db->cfn($cf['arch']['events']['id_note'], $cf['tables']['events']),
-                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
-              ]
-          ]
-      ];
-
-      $cfg['join'][] = [
-          'table' => $cf_ev['tables']['events'],
-          'on' => [
-              [
-                  'field' => $this->db->cfn($cf['arch']['events']['id_event'], $cf['tables']['events']),
-                  'exp' => $this->db->cfn($cf_ev['arch']['events']['id'], $cf_ev['tables']['events'])
-              ]
-          ]
-      ];
-
-      $cfg['join'][] = [
-          'table' => $cf['tables']['notes_url'],
-          'on' => [
-              [
-                  'field' => $this->db->cfn($cf['arch']['notes_url']['id_note'], $cf['tables']['notes_url']),
-                  'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'])
-              ]
-          ]
-      ];
-
-      $cfg['join'][] = [
-        'table' => $cf['tables']['url'],
-        'on' => [
-            [
-                'field' => $this->db->cfn($cf['arch']['url']['id'], $cf['tables']['url']),
-                'exp' => $this->db->cfn($cf['arch']['notes_url']['id_url'], $cf['tables']['notes_url'])
-            ]
-        ]
-      ];
-
-      $total        = $this->db->count($cfg);
-      $cfg['where'] = [
-          'conditions' => [
-              [
-                  'field' => 'start',
-                  'operator' => '>',
-                  'exp' => 'NOW()'
-              ]
-          ]
-      ];
-
-      $cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
-      $cfg['limit'] = $limit;
-      $cfg['start'] = $start;
-
-      return [
-          'data' => $this->db->rselectAll($cfg),
-          'total' => $total
-      ];
-  }
 
   /**
    * Returns the note from its id, with its URL, start and end date of publication.
@@ -270,7 +162,7 @@ class Cms extends bbn\Models\Cls\Db
   }
 
 
-  public function getLastVersionCfg(bool $with_content = false)
+  public function getLastVersionCfg(bool $with_content = false, bool $published = true, array $filter = [])
   {
     $cfg = $this->note->getLastVersionCfg($with_content);
     $cfg['fields'][]             = 'url';
@@ -335,22 +227,23 @@ class Cms extends bbn\Models\Cls\Db
    * @param int   $limit
    * @param int   $start
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0): array
   {
-    $cfg = $this->getLastVersionCfg($with_content);
+    $cfg = $this->getLastVersionCfg($with_content, false, $filter);
     $cfg['limit'] = $limit;
     $cfg['start'] = $start >= 0 ? $start : 0;
-    if (!empty($filter)) {
-      $cfg['having'] = $filter;
-    }
 
     if (!empty($order)) {
-        $cfg['order'] = $order;
+      $cfg['order'] = $order;
     }
 
-    $total = $this->db->count($cfg);
+    $db =& $this->db;
+    $idx = md5(json_encode($filter));
+    $total = $this->cacheGetSet(function() use (&$db, $cfg) {
+      return $db->count($cfg);
+    }, $idx, 'total', 20);
     $data  = $this->db->rselectAll($cfg);
 
     return [
@@ -375,18 +268,8 @@ class Cms extends bbn\Models\Cls\Db
       return $this->noteType;
   }
 
-  /**
-   * Returns the number of all the notes of type 'pages'.
-   *
-   * @return int
-   */
-  public function countAll(): int
-  {
-      return $this->note->countByType($this->getNoteType());
-  }
 
-
- /**
+/**
  * If the given url correspond to a published note returns the id.
  *
  * @param string $url
@@ -430,16 +313,16 @@ class Cms extends bbn\Models\Cls\Db
       }
     }
 
-      return null;
+    return null;
   }
 
 
-    /**
-     * If an event linked to the note exists it returns the start date.
+  /**
+   * If an event linked to the note exists it returns the start date.
    *
-     * @param string $id_note
-     * @return string|null
-     */
+   * @param string $id_note
+   * @return string|null
+   */
   public function getStart(string $id_note): ?string
   {
     if ($event = $this->getEvent($id_note)) {
@@ -450,12 +333,12 @@ class Cms extends bbn\Models\Cls\Db
   }
 
 
-    /**
-     * If  an event linked to the note exists it returns the end date.
+  /**
+   * If  an event linked to the note exists it returns the end date.
    *
-     * @param string $id_note
-     * @return string|null
-     */
+   * @param string $id_note
+   * @return string|null
+   */
   public function getEnd(string $id_note)
   {
     if ($event = $this->getEvent($id_note)) {
@@ -474,8 +357,8 @@ class Cms extends bbn\Models\Cls\Db
    */
   public function isPublished(string $id_note): bool
   {
-      $now = strtotime(date('Y-m-d H:i:s'));
-      $cfg = $this->class_cfg;
+    $now = strtotime(date('Y-m-d H:i:s'));
+    $cfg = $this->class_cfg;
 
     if ($event = $this->getEvent($id_note)) {
       if (
@@ -487,16 +370,16 @@ class Cms extends bbn\Models\Cls\Db
       }
     }
 
-      return false;
+    return false;
   }
 
-    /**
-     * Publish a note.
+  /**
+   * Publish a note.
    *
-     * @param string $id_note
-     * @param array  $cfg
-     * @return bool|null|array
-     */
+   * @param string $id_note
+   * @param array  $cfg
+   * @return bool|null|array
+   */
   public function publish(string $id_note, array $cfg)
   {
     if ($this->note->get($id_note) && !$this->isPublished($id_note)) {
@@ -505,7 +388,7 @@ class Cms extends bbn\Models\Cls\Db
         try {
             $this->setUrl($id_note, $cfg['url']);
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
             return [
                 'error' => $e->getMessage()
             ];
@@ -567,7 +450,7 @@ class Cms extends bbn\Models\Cls\Db
    * @param string $id_note
    * @param string $url
    * @return Boolean
-   * @throws \Exception
+   * @throws Exception
    */
   public function setUrl(string $id_note, string $url, $ignore = false): ?bool
   {
@@ -576,11 +459,11 @@ class Cms extends bbn\Models\Cls\Db
         return 0;
       }
 
-      throw new \Exception(X::_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
+      throw new Exception(X::_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
     }
 
     if (!$this->note->get($id_note)) {
-      throw new \Exception(X::_('Impossible to find the given note'));
+      throw new Exception(X::_('Impossible to find the given note'));
     }
 
     return $this->note->insertOrUpdateUrl($id_note, $url);
@@ -619,7 +502,7 @@ class Cms extends bbn\Models\Cls\Db
   public function setEvent(string $id_note, array $cfg = [])
   {
     if (!array_key_exists('start', $cfg)) {
-      throw new \Exception(X::_("A start date is mandatory for CMS event (even null)"));
+      throw new Exception(X::_("A start date is mandatory for CMS event (even null)"));
     }
 
     if (empty($cfg['start'])) {
@@ -627,11 +510,11 @@ class Cms extends bbn\Models\Cls\Db
     }
 
     if (!($note = $this->note->get($id_note))) {
-      throw new \Exception(X::_("The note %s does not exist", $id_note));
+      throw new Exception(X::_("The note %s does not exist", $id_note));
     }
     
     if (!$this->_check_date($cfg['start'], $cfg['end'] ?? null)) {
-      throw new \Exception(X::_("The dates don't work... End before start?"));
+      throw new Exception(X::_("The dates don't work... End before start?"));
     }
 
     if (empty($this->getEvent($id_note))) {
@@ -653,7 +536,7 @@ class Cms extends bbn\Models\Cls\Db
           $fields['start']   => $cfg['start'],
           $fields['end']     => $cfg['end'] ?? null
         ], 'cmsss');
-        throw new \Exception(X::_("Impossible to insert the event"));
+        throw new Exception(X::_("Impossible to insert the event"));
       }
     }
     else {
@@ -702,9 +585,9 @@ class Cms extends bbn\Models\Cls\Db
    * @param string $content
    * @return null|int The number of affected rows (1 if ok)
    */
-  public function setContent(string $id_note, string $title, string $content): ?int
+  public function setContent(string $id_note, string $title, string $content, string $excerpt = ''): ?int
   {
-      return $this->note->insertVersion($id_note, $title, $content);
+      return $this->note->insertVersion($id_note, $title, $content, $excerpt);
   }
 
 
@@ -727,6 +610,7 @@ class Cms extends bbn\Models\Cls\Db
      * @param string $url
      * @param string $title
      * @param string $content
+     * @param string $excerpt
      * @param string $start
      * @param string $end
      * @param array $tags
@@ -734,22 +618,37 @@ class Cms extends bbn\Models\Cls\Db
      * @return bool Returns true if something has been modified.
      */
   public function set(
-    string $url,
-    string $title,
-    string $content,
+    $url,
+    string $title = '',
+    string $content = '',
+    string $excerpt = '',
     string $start = null,
     string $end = null,
     array $tags = null,
     string $id_type = null
   ): bool
   {
-    if (!($cfg = $this->getByUrl($url, true))) {
-      throw new \Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
+    if (is_array($url)) {
+      $tmp = $url;
+      foreach ($tmp as $k => $v) {
+        $$k = $v;
+      }
+    }
+
+    if (!is_string($url) || empty($url)) {
+      throw new Exception(X::_("The CMS article MUST have a URL"));
+    }
+
+    if (!empty($id_note)) {
+      $cfg = $this->get($id_note);
+    }
+    elseif (!($cfg = $this->getByUrl($url, true))) {
+      throw new Exception(X::_("Impossible to find the article with URL") . ' ' . $url);
     }
 
     $change = 0;
-    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content)) {
-      $change += (int)$this->setContent($cfg['id_note'], $title, $content);
+    if (($cfg['title'] !== $title) || ($cfg['content'] !== $content) || ($cfg['excerpt'] !== $excerpt)) {
+      $change += (int)$this->setContent($cfg['id_note'], $title, $content, $excerpt);
     }
 
     if (($cfg['start'] !== $start) || ($cfg['end'] !== $end)) {

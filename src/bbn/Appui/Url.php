@@ -4,6 +4,7 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use Exception;
 
 class Url extends bbn\Models\Cls\Db
 {
@@ -19,7 +20,7 @@ class Url extends bbn\Models\Cls\Db
       'url' => [
         'id' => 'id',
         'url' => 'url',
-        'num_display' => 'num_display',
+        'num_calls' => 'num_calls',
         'type_url' => 'type_url',
         'redirect' => 'redirect'
       ]
@@ -46,6 +47,17 @@ class Url extends bbn\Models\Cls\Db
   }
 
 
+  public function set(string $url, string $type_url, string $id_url = null) : bool
+  {
+    if ($id_url && ($url = $this->sanitize($url))) {
+      return (bool)$this->update($id_url, [
+        'url' => $url
+      ]);
+    }
+
+    return (bool)$this->add($url, $type_url);
+  }
+
   public function add(string $url, string $type_url, string $prefix = ''): ?string
   {
     if ($url = $this->sanitize($url, $prefix)) {
@@ -62,13 +74,42 @@ class Url extends bbn\Models\Cls\Db
   public function addRedirect(string $url, string $id_url): ?string
   {
     if ($url = $this->sanitize($url)
-        && !$this->select($url)
-        && ($cfg = $this->select($id_url))
+        && !$this->rselect([$this->fields['url'] => $url])
+        && ($cfg = $this->rselect($id_url))
     ) {
       return $this->insert([
         $this->fields['url'] => $url,
         $this->fields['type_url'] => $cfg['type_url']
       ]);
+    }
+
+    return null;
+  }
+
+
+  public function getRedirect(string $url): ?string
+  {
+    if (($url = $this->sanitize($url))
+        && ($redirect = $this->selectOne($this->fields['redirect'], [$this->fields['url'] => $url]))
+    ) {
+      if ($this->selectOne($this->fields['redirect'], [$this->fields['id'] => $redirect])) {
+        throw new Exception(X::_("You can't redirect a redirected URL (%s)", $url));
+      }
+      return $this->selectOne($this->fields['url'], $redirect);
+    }
+
+    return null;
+  }
+
+
+  public function getRedirectById(string $id): ?string
+  {
+    if ($redirect = $this->selectOne($this->fields['redirect'], $id)) {
+      if ($this->selectOne($this->fields['redirect'], [$this->fields['id'] => $redirect])) {
+        throw new Exception(X::_("You can't redirect a redirected URL (ID %s)", $id));
+      }
+
+      return $redirect;
     }
 
     return null;
@@ -82,6 +123,90 @@ class Url extends bbn\Models\Cls\Db
     }
 
     return false;
+  }
+
+
+  /**
+   * Returns the url of the given row
+   *
+   * @param string $id_url
+   * @param bool $full
+   * @param bool $followRedirect
+   * @return string|array|null
+   */
+  public function retrieveUrl(string $url, bool $full = false, bool $followRedirect = true): mixed
+  {
+    if ($url = $this->sanitize($url)) {
+      $original = $url;
+      if ($followRedirect && ($tmp = $this->getRedirect($url))) {
+        $original = $url;
+        $url = $tmp;
+      }
+
+      if (!$full) {
+        return $this->urlToId($url);
+      }
+
+      if ($data = $this->rselect([$this->fields['url'] => $url])) {
+        if ($followRedirect) {
+          return array_merge($data, ['original' => $original]);
+        }
+
+        return $data;
+      }
+    }
+
+    return null;
+  }
+
+
+  public function urlToId(string $url): ?string
+  {
+    if ($url = $this->sanitize($url)) {
+      return $this->selectOne($this->fields['id'], [$this->fields['url'] => $url]);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the url of the given row
+   *
+   * @param string $id_url
+   * @return array|null
+   */
+  public function getFullUrl(string $id_url, bool $followRedirect = true): ?array
+  {
+    if ($id_url && $followRedirect && ($tmp = $this->getRedirectById($id_url))) {
+      $id_url = $tmp;
+    }
+
+    if ($id_url && ($data = $this->select($id_url))) {
+      return $data;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the url of the given row
+   *
+   * @param string $id_url
+   * @return string|null
+   */
+  public function getUrl(string $id_url, bool $followRedirect = true): ?string
+  {
+    if ($id_url && $followRedirect && ($tmp = $this->getRedirectById($id_url))) {
+      $id_url = $tmp;
+    }
+
+    if ($id_url) {
+      return $this->selectOne($this->fields['url'], $id_url);
+    }
+
+    return null;
   }
 
 }

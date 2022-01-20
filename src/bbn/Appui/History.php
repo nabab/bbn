@@ -602,8 +602,6 @@ MYSQL;
     }
     else if (
       ($db = self::_get_db()) &&
-      ($dbc = self::_get_database()) &&
-      ($model = $dbc->modelize($table)) &&
       ($cfg = self::getTableCfg($table))
     ){
       // Time is after last modification: the current is given
@@ -620,22 +618,24 @@ MYSQL;
       else {
         // No columns = All columns
         if ( \count($columns) === 0 ){
-          $columns = array_keys($model['fields']);
+          $columns = array_keys($cfg['fields']);
         }
         $r = [];
         //die(var_dump($columns, $model['fields']));
         foreach ( $columns as $col ){
           $tmp = null;
-          if ( isset($model['fields'][$col]['id_option']) ){
+          if ( isset($cfg['fields'][$col]['id_option']) ){
             if ($tmp = $db->rselect(self::$table, ['val', 'ref'], [
               'uid' => $id,
-              'col' => $model['fields'][$col]['id_option'],
+              'col' => $cfg['fields'][$col]['id_option'],
               'opr' => 'UPDATE',
-              ['tst', '>', $when]
+              ['tst', '>', $when],
+              ['tst' => 'ASC']
             ])) {
               $r[$col] = $tmp['ref'] ?: $tmp['val'];
             }
           }
+
           if (!$tmp) {
             $r[$col] = $db->selectOne($table, $col, [
               $cfg['primary'] => $id

@@ -47,46 +47,6 @@ trait Url
 
 
   /**
-   * initialize the trait's props
-   *
-   * @return void
-   */
-  protected function initUrl(): void
-  {
-    if (!$this->isInitUrl
-        && $this->db
-        && $this->class_cfg
-        && $this->class_table_index
-        && $this->class_cfg['tables'][$this->class_table_index . '_url']
-        && $this->class_cfg['urlItemField']
-    ) {
-      $this->urlTableIdx = $this->class_table_index . '_url';
-      $this->urlTable    = $this->class_cfg['tables'][$this->urlTableIdx];
-      $this->urlFields   = $this->class_cfg['arch'][$this->urlTableIdx];
-      if (X::hasProps($this->urlFields, ['id_url', $this->class_cfg['urlItemField']], true)) {
-        $this->url = new urlCls($this->db);
-      }
-      $this->isInitUrl = true;
-    }
-  }
-
-
-  /**
-   * Checks if the class has been correctly initialized and throws an exception if not
-   *
-   * @return void
-   */
-  protected function checkUrlCfg(): void
-  {
-    $this->initUrl();
-    if (!$this->url) {
-      throw new Exception(X::_("The class is missing configuration to make use of URL"));
-    }
-  }
-
-
-
-  /**
    * Returns the URL corresponding to the given item's ID
    *
    * @param string $id_item
@@ -185,7 +145,7 @@ trait Url
   public function setUrl(string $id_item, string $url, string $type = null): bool
   {
     $this->checkUrlCfg();
-    if (!($url = $this->sanitize($url))) {
+    if (!($url = $this->sanitizeUrl($url))) {
       throw new Exception(X::_("The URL can't be empty"));
     }
 
@@ -223,7 +183,6 @@ trait Url
   public function addUrl(string $id_item, string $url, string $prefix = '', string $type = null): bool
   {
     $this->checkUrlCfg();
-
     if (!$type && !$this->urlType) {
       throw new Exception(X::_("You have no type set and no default type for the class %s"), __CLASS__);
     }
@@ -251,6 +210,7 @@ trait Url
    */
   public function hasUrl(string $id_item): bool
   {
+    $this->checkUrlCfg();
     return (bool)$this->db->count(
       $this->urlTable,
       [$this->class_cfg['urlItemField'] => $id_item]
@@ -266,11 +226,7 @@ trait Url
    */
   public function deleteUrl(string $id_item)
   {
-
-    $this->db->count(
-      $this->urlTable,
-      [$this->class_cfg['urlItemField'] => $id_item]
-    );
+    $this->checkUrlCfg();
     $id_url = $this->db->selectOne(
       $this->urlTable,
       $this->urlFields['id_url'],
@@ -289,5 +245,55 @@ trait Url
   }
 
 
+  /**
+   * Trims the slashes and removes double slashes if any.
+   *
+   * @param string $url
+   * @return string
+   */
+  public function sanitizeUrl(string $url): string
+  {
+    $this->checkUrlCfg();
+    return $this->url->sanitizeUrl();
+  }
+
+
+  /**
+   * initialize the trait's props
+   *
+   * @return void
+   */
+  protected function initUrl(): void
+  {
+    if (!$this->isInitUrl
+        && $this->db
+        && $this->class_cfg
+        && $this->class_table_index
+        && $this->class_cfg['tables'][$this->class_table_index . '_url']
+        && $this->class_cfg['urlItemField']
+    ) {
+      $this->urlTableIdx = $this->class_table_index . '_url';
+      $this->urlTable    = $this->class_cfg['tables'][$this->urlTableIdx];
+      $this->urlFields   = $this->class_cfg['arch'][$this->urlTableIdx];
+      if (X::hasProps($this->urlFields, ['id_url', $this->class_cfg['urlItemField']], true)) {
+        $this->url = new urlCls($this->db);
+      }
+      $this->isInitUrl = true;
+    }
+  }
+
+
+  /**
+   * Checks if the class has been correctly initialized and throws an exception if not
+   *
+   * @return void
+   */
+  protected function checkUrlCfg(): void
+  {
+    $this->initUrl();
+    if (!$this->url) {
+      throw new Exception(X::_("The class is missing configuration to make use of URL"));
+    }
+  }
 
 }
