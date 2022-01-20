@@ -516,6 +516,10 @@ class Note extends bbn\Models\Cls\Db
   public function getFull(string $id, int $version = null): ?array
   {
     $cf = &$this->class_cfg;
+    if (!\is_int($version)) {
+      $version = $this->latest($id) ?: 1;
+    }
+
     if ($res = $this->db->rselect(
       [
         'table' => $cf['table'],
@@ -552,9 +556,6 @@ class Note extends bbn\Models\Cls\Db
             [
               'field' => $cf['arch']['notes']['id'],
               'value' => $id,
-            ], [
-              'field' => $cf['arch']['versions']['latest'],
-              'value' => 1
             ]
           ],
         ],
@@ -684,9 +685,6 @@ class Note extends bbn\Models\Cls\Db
       ], [
         'field' => $db->cfn($cf['arch']['notes']['active'], $cf['table']),
         'value' => 1,
-      ], [
-        'field' => 'versions2.' . $cf['arch']['versions']['version'],
-        'operator' => 'isnull',
       ]];
       if (Str::isUid($id_user)) {
         $where[] = [

@@ -135,7 +135,7 @@ trait Dbconfig
     }
 
     if ($addCfg) {
-      $data = array_merge($this->select($id), $data);
+      $data = array_merge($this->rselect($id), $data);
     }
 
     if ($data = $this->prepare($data)) {
