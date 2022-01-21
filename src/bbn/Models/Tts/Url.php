@@ -17,6 +17,13 @@ trait Url
   protected $isInitUrl = false;
 
   /**
+  * The default type for the links, must be set in the construct
+   *
+   * @var string
+   */
+  protected $urlType;
+
+  /**
    * The name of the table associating the items from the current class and the URLs
    *
    * @var string
@@ -36,7 +43,6 @@ trait Url
    * @var array
    */
   protected $urlFields;
-
 
   /**
    * The url object
@@ -150,12 +156,12 @@ trait Url
     }
 
     if (!($id_url = $this->url->retrieveUrl($url))
-        && (!$id_url = $this->url->add($url, $type))
+        && (!$id_url = $this->url->add($url, $type ?: $this->urlType))
     ) {
       throw new Exception(X::_("Impossible to add the URL %s", $url));
     }
 
-    if ($checkItem = $this->getUrlItem($id_url)) {
+    if ($checkItem = $this->urlToId($id_url)) {
       if ($checkItem !== $id_item) {
         throw new Exception(X::_("The URL is already in use by another item"));
       }
@@ -254,7 +260,7 @@ trait Url
   public function sanitizeUrl(string $url): string
   {
     $this->checkUrlCfg();
-    return $this->url->sanitizeUrl();
+    return $this->url->sanitize($url);
   }
 
 
@@ -271,10 +277,12 @@ trait Url
         && $this->class_table_index
         && $this->class_cfg['tables'][$this->class_table_index . '_url']
         && $this->class_cfg['urlItemField']
+        && $this->class_cfg['urlTypeValue']
     ) {
       $this->urlTableIdx = $this->class_table_index . '_url';
       $this->urlTable    = $this->class_cfg['tables'][$this->urlTableIdx];
       $this->urlFields   = $this->class_cfg['arch'][$this->urlTableIdx];
+      $this->urlType     = $this->class_cfg['urlTypeValue'];
       if (X::hasProps($this->urlFields, ['id_url', $this->class_cfg['urlItemField']], true)) {
         $this->url = new urlCls($this->db);
       }

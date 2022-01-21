@@ -105,12 +105,12 @@ class Note extends bbn\Models\Cls\Db
     'paths' => [
       'medias' => 'media/',
     ],
-    'urlItemField' => 'id_note'
+    'urlItemField' => 'id_note',
+    'urlTypeValue' => 'note'
   ];
 
   /** @var array $class_cfg */
   protected $class_cfg;
-
 
   /**
    * Note constructor.
@@ -123,6 +123,7 @@ class Note extends bbn\Models\Cls\Db
     parent::__construct($db);
     $this->_init_class_cfg(self::$default_class_cfg);
     self::optionalInit();
+    $this->defaultUrlType = 'note';
     $this->taggerInit(
       $this->class_cfg['tables']['notes_tags'],
       [

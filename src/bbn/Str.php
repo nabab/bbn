@@ -1822,7 +1822,7 @@ class Str
   public static function sanitizeHtml(string $html, array $allowed_tags = [], array $allowed_attr = []): string
   {
     if (!self::$_htmlSanitizer) {
-      $config = HTMLPurifier_Config::createDefault();
+      $config = \HTMLPurifier_Config::createDefault();
       $config->set('Core', 'Encoding', 'UTF-8');
       //$config->set('HTML', 'Doctype', 'HTML 4.01 Transitional');
       if (defined('PURIFIER_CACHE')) {
@@ -1833,7 +1833,7 @@ class Str
         $config->set('Cache', 'DefinitionImpl', null);
       }
 
-      self::$_htmlSanitizer = new HTMLPurifier($config);
+      self::$_htmlSanitizer = new \HTMLPurifier($config);
     }
 
     return self::$_htmlSanitizer->purify($html);

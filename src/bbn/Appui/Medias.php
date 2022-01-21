@@ -65,7 +65,8 @@ class Medias extends bbn\Models\Cls\Db
           'position' => 'position'
         ]
       ],
-      'urlItemField' => 'id_media'
+      'urlItemField' => 'id_media',
+      'urlTypeValue' => 'media'
     ];
 
   private $opt;
