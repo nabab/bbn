@@ -1,0 +1,493 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Models\\Tts\\Url",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Models\/Tts\/Url.php",
+    "startLine": 9,
+    "endLine": 299,
+    "contentConstructor": null,
+    "methods": {
+        "getUrl": {
+            "name": "getUrl",
+            "summary": "Returns the URL corresponding to the given item's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_item, bool $followRedirect = true)\n  {\n    $this->checkUrlCfg();\n    if ($id_url = $this->db->selectOne($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ])) {\n      return $this->url->getUrl($id_url, $followRedirect);\n    }\n\n    return null;\n  }",
+            "startLine": 56,
+            "endLine": 66,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "item"
+                },
+                {
+                    "name": "followRedirect",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "edirect"
+                }
+            ]
+        },
+        "urlExists": {
+            "name": "urlExists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $url)\n  {\n    return (bool)$this->getUrlId($url);\n  }",
+            "startLine": 73,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "urlToId": {
+            "name": "urlToId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $url)\n  {\n    $this->checkUrlCfg();\n    if ($id_url = $this->getUrlId($url)) {\n      return $this->db->selectOne($this->urlTable, $this->class_cfg['urlItemField'], [\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return null;\n  }",
+            "startLine": 83,
+            "endLine": 93,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "idToUrl": {
+            "name": "idToUrl",
+            "summary": "Returns the ID of the URL for the given item",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_item)\n  {\n    $this->checkUrlCfg();\n    return $this->db->selectOne($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ]);\n  }",
+            "startLine": 102,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "item"
+                }
+            ]
+        },
+        "getUrlId": {
+            "name": "getUrlId",
+            "summary": "Returns a URL's id based on its URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $url)\n  {\n    $this->checkUrlCfg();\n    return $this->url->retrieveUrl($url);\n  }",
+            "startLine": 117,
+            "endLine": 121,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getFullUrl": {
+            "name": "getFullUrl",
+            "summary": "Returns the whole content of the URL row based on its ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_url)\n  {\n    $this->checkUrlCfg();\n    return $this->url->select($id_url);\n  }",
+            "startLine": 130,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "url"
+                }
+            ]
+        },
+        "setUrl": {
+            "name": "setUrl",
+            "summary": "Adds or replace a URL for a given item's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_item, string $url, string $type = NULL)\n  {\n    $this->checkUrlCfg();\n    if (!($url = $this->sanitizeUrl($url))) {\n      throw new Exception(X::_(\"The URL can't be empty\"));\n    }\n\n    if (!($id_url = $this->url->retrieveUrl($url))\n        && (!$id_url = $this->url->add($url, $type))\n    ) {\n      throw new Exception(X::_(\"Impossible to add the URL %s\", $url));\n    }\n\n    if ($checkItem = $this->getUrlItem($id_url)) {\n      if ($checkItem !== $id_item) {\n        throw new Exception(X::_(\"The URL is already in use by another item\"));\n      }\n    }\n    else {\n      return (bool)$this->db->insert($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item,\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return true;\n  }",
+            "startLine": 145,
+            "endLine": 171,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "item"
+                },
+                {
+                    "name": "url",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "addUrl": {
+            "name": "addUrl",
+            "summary": "Creates a new URL for a given item's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_item, string $url, string $prefix = '', string $type = NULL)\n  {\n    $this->checkUrlCfg();\n    if (!$type && !$this->urlType) {\n      throw new Exception(X::_(\"You have no type set and no default type for the class %s\"), __CLASS__);\n    }\n\n    if ($id_url = $this->url->add($url, $type ?: $this->urlType, $prefix)) {\n      $this->db->delete($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item\n      ]);\n      return (bool)$this->db->insert($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item,\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return false;\n  }",
+            "startLine": 183,
+            "endLine": 201,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "item"
+                },
+                {
+                    "name": "url",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "prefix",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "hasUrl": {
+            "name": "hasUrl",
+            "summary": "Returns true if the item is linked to an url.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_item)\n  {\n    $this->checkUrlCfg();\n    return (bool)$this->db->count(\n      $this->urlTable,\n      [$this->class_cfg['urlItemField'] => $id_item]\n    );\n  }",
+            "startLine": 211,
+            "endLine": 218,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "item"
+                }
+            ]
+        },
+        "deleteUrl": {
+            "name": "deleteUrl",
+            "summary": "Deletes url for the given note.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id_item)\n  {\n    $this->checkUrlCfg();\n    $id_url = $this->db->selectOne(\n      $this->urlTable,\n      $this->urlFields['id_url'],\n      [$this->class_cfg['urlItemField'] => $id_item]\n    );\n\n    if ($id_url) {\n      $this->db->delete(\n        $this->urlTable,\n        [$this->class_cfg['urlItemField'] => $id_item]\n      );\n      return (bool)$this->url->delete($id_url);\n    }\n\n    throw new Exception(X::_(\"Impossible to retrieve the URL for item %s\", $id_item));\n  }",
+            "startLine": 227,
+            "endLine": 245,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_item",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "item"
+                }
+            ]
+        },
+        "sanitizeUrl": {
+            "name": "sanitizeUrl",
+            "summary": "Trims the slashes and removes double slashes if any.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Models\\Tts\\Url",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $url)\n  {\n    $this->checkUrlCfg();\n    return $this->url->sanitizeUrl();\n  }",
+            "startLine": 254,
+            "endLine": 258,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "numMethods": 11,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "isInitUrl": false,
+        "urlTable": null,
+        "urlTableIdx": null,
+        "urlFields": null,
+        "url": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Models\\Tts",
+    "shortName": "Url",
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

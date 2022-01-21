@@ -30,6 +30,14 @@ class Str
 
 
   /**
+   * HTML purifier if needed only one instance is created.
+   *
+   * @var ?\HTMLPurifier
+   */
+  private static $_htmlSanitizer = null;
+
+
+  /**
    * Converts any type of variable to a string.
    *
    * ```php
@@ -314,16 +322,12 @@ class Str
   public static function cut(string $st, int $max = 15): string
   {
     $st = self::cast($st);
-    $st = mb_ereg_replace('&nbsp;', ' ', $st);
+    $st = self::html2text($st);
     $st = mb_ereg_replace('\n', ' ', $st);
-    $st = strip_tags($st);
-    $st = html_entity_decode($st, ENT_QUOTES, 'UTF-8');
     $st = self::cleanSpaces($st);
     if (mb_strlen($st) >= $max) {
       // Chars forbidden to finish with a string
       $chars = [' ', '.'];
-      // Final chars
-      $ends = [];
       // The string gets cut at $max
       $st = mb_substr($st, 0, $max);
       while (\in_array(substr($st, -1), $chars)){
@@ -1746,7 +1750,7 @@ class Str
    */
   public static function html2text(string $st, bool $nl = true): string
   {
-    $st = trim($st);
+    $st = trim(self::sanitizeHtml($st));
     if (empty($st)) {
       return '';
     }
@@ -1804,6 +1808,35 @@ class Str
     }
 
     return str_replace(PHP_EOL, '<br>', $st);
+  }
+
+
+  /**
+   * Remove malicious code and makes HTML standard compliant.
+   *
+   * @param string $html
+   * @param array $allowed_tags
+   * @param array $allowed_attr
+   * @return string
+   */
+  public static function sanitizeHtml(string $html, array $allowed_tags = [], array $allowed_attr = []): string
+  {
+    if (!self::$_htmlSanitizer) {
+      $config = HTMLPurifier_Config::createDefault();
+      $config->set('Core', 'Encoding', 'UTF-8');
+      //$config->set('HTML', 'Doctype', 'HTML 4.01 Transitional');
+      if (defined('PURIFIER_CACHE')) {
+        $config->set('Cache', 'SerializerPath', PURIFIER_CACHE);
+      }
+      else {
+        # Disable the cache entirely
+        $config->set('Cache', 'DefinitionImpl', null);
+      }
+
+      self::$_htmlSanitizer = new HTMLPurifier($config);
+    }
+
+    return self::$_htmlSanitizer->purify($html);
   }
 
 

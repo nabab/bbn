@@ -273,7 +273,7 @@ class Medias extends bbn\Models\Cls\Db
   /**
    * Adds a new media
    *
-   * @param string $name
+   * @param string $file
    * @param array|null $content
    * @param string $title
    * @param string $type

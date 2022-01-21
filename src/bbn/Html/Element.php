@@ -576,9 +576,10 @@ class Element
   public function text($txt=null)
   {
     if ( !\is_null($txt) ){
-      $this->text = strip_tags($txt);
+      $this->text = bbn\Str::html2text($txt);
       return $this;
     }
+
     return $this->text;
   }
   

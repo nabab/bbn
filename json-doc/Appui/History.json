@@ -933,7 +933,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $table, string $id, $when, array $columns = [])\n  {\n    if ( !($when = self::validDate($when)) ){\n      self::_report_error(\"The date $when is incorrect\", __CLASS__, __LINE__);\n    }\n    else if (\n      ($db = self::_get_db()) &&\n      ($dbc = self::_get_database()) &&\n      ($model = $dbc->modelize($table)) &&\n      ($cfg = self::getTableCfg($table))\n    ){\n      \/\/ Time is after last modification: the current is given\n      self::disable();\n      if ( $when >= time() ){\n        $r = $db->rselect($table, $columns, [\n          $cfg['primary'] => $id\n        ]) ?: null;\n      }\n      \/\/ Time is before creation: null is given\n      else if ( $when < self::getCreationDate($table, $id) ){\n        $r = null;\n      }\n      else {\n        \/\/ No columns = All columns\n        if ( \\count($columns) === 0 ){\n          $columns = array_keys($model['fields']);\n        }\n        $r = [];\n        \/\/die(var_dump($columns, $model['fields']));\n        foreach ( $columns as $col ){\n          $tmp = null;\n          if ( isset($model['fields'][$col]['id_option']) ){\n            if ($tmp = $db->rselect(self::$table, ['val', 'ref'], [\n              'uid' => $id,\n              'col' => $model['fields'][$col]['id_option'],\n              'opr' => 'UPDATE',\n              ['tst', '>', $when]\n            ])) {\n              $r[$col] = $tmp['ref'] ?: $tmp['val'];\n            }\n          }\n          if (!$tmp) {\n            $r[$col] = $db->selectOne($table, $col, [\n              $cfg['primary'] => $id\n            ]);\n          }\n        }\n      }\n      self::enable();\n      return $r;\n    }\n    return null;\n  }",
+            "code": "function(string $table, string $id, $when, array $columns = [])\n  {\n    if ( !($when = self::validDate($when)) ){\n      self::_report_error(\"The date $when is incorrect\", __CLASS__, __LINE__);\n    }\n    else if (\n      ($db = self::_get_db()) &&\n      ($cfg = self::getTableCfg($table))\n    ){\n      \/\/ Time is after last modification: the current is given\n      self::disable();\n      if ( $when >= time() ){\n        $r = $db->rselect($table, $columns, [\n          $cfg['primary'] => $id\n        ]) ?: null;\n      }\n      \/\/ Time is before creation: null is given\n      else if ( $when < self::getCreationDate($table, $id) ){\n        $r = null;\n      }\n      else {\n        \/\/ No columns = All columns\n        if ( \\count($columns) === 0 ){\n          $columns = array_keys($cfg['fields']);\n        }\n        $r = [];\n        \/\/die(var_dump($columns, $model['fields']));\n        foreach ( $columns as $col ){\n          $tmp = null;\n          if ( isset($cfg['fields'][$col]['id_option']) ){\n            if ($tmp = $db->rselect(self::$table, ['val', 'ref'], [\n              'uid' => $id,\n              'col' => $cfg['fields'][$col]['id_option'],\n              'opr' => 'UPDATE',\n              ['tst', '>', $when],\n              ['tst' => 'ASC']\n            ])) {\n              $r[$col] = $tmp['ref'] ?: $tmp['val'];\n            }\n          }\n\n          if (!$tmp) {\n            $r[$col] = $db->selectOne($table, $col, [\n              $cfg['primary'] => $id\n            ]);\n          }\n        }\n      }\n      self::enable();\n      return $r;\n    }\n    return null;\n  }",
             "startLine": 598,
             "endLine": 650,
             "isDeprecated": false,
@@ -1663,10 +1663,16 @@
             "apst_app.bbn_i18n_exp": [
                 "id"
             ],
+            "apst_app.bbn_notes": [
+                "id"
+            ],
             "apst_app.bbn_options": [
                 "id"
             ],
             "apst_app.bbn_people": [
+                "id"
+            ],
+            "apst_app.bbn_url": [
                 "id"
             ]
         },
