@@ -342,7 +342,7 @@ class Appui
       $routes             = $this->getRoutes();
       $user               = $this->getUser();
       $preferences        = $this->getPreferences();
-      $this->_currentPerm = new User\Permissions($routes['root']);
+      $this->_currentPerm = new User\Permissions($routes);
     }
 
     return $this->_currentPerm;
@@ -773,44 +773,19 @@ class Appui
         $id_plugin = $id;
       }
       else {
+        $pluginTemplate = $o->fromCode('plugin', 'list', 'templates', 'optiopns', 'appui');
         $id_plugin = $o->add(
           [
             'code' => $name,
             'text' => $title,
-            'id_parent' => $id_parent
+            'id_parent' => $id_parent,
+            'id_alias' => $pluginTemplate
           ]
         );
 
         if (!$id_plugin) {
           throw new Exception(X::_("Impossible to add the plugin")." $name");
         }
-
-        $perm_id = $o->add(
-          [
-          'id_parent' => $id_plugin,
-          'code' => 'permissions',
-          'text' => 'Permissions'
-          ]
-        );
-        if (!$perm_id) {
-          throw new Exception(X::_("Impossible to add the permission for the plugin")." $name");
-        }
-
-        // Other options under permissions
-        $o->add(
-          [
-          'id_parent' => $perm_id,
-          'code' => 'options',
-          'text' => 'Options'
-          ]
-        );
-        $o->add(
-          [
-          'id_parent' => $perm_id,
-          'code' => 'plugins',
-          'text' => 'Plugins'
-          ]
-        );
       }
     }
 
@@ -1979,7 +1954,6 @@ class Appui
         $installer->report("No new options from templates");
       }
 
-      $cache    = Cache::getEngine();
       $cache->deleteAll('');
 
       if ($res = $this->updatePermissions()) {

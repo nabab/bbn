@@ -2758,63 +2758,65 @@
             "icon": "nf nf-mdi-file_tree",
             "items": [
               {
-                "text": "Plugins",
-                "code": "plugins",
-                "icon": "nf nf-mdi-puzzle",
-                "items": [
-                  {
-                    "cfg": {
-                      "show_code": 1,
-                      "show_icon": 1,
-                      "sortable": 1,
-                      "allow_children": 1,
-                      "inheritance": "cascade",
-                      "i18n": "en"
-                    },
-                    "text": "Permissions",
-                    "code": "permissions",
-                    "icon": "nf nf-fa-key",
-                    "items": [
-                      {
-                        "num": 1,
-                        "text": "Access",
-                        "code": "access",
-                        "id_alias": ["access", "permissions", "appui"],
-                        "icon": "nf nf-mdi-door"
-                      },
-                      {
-                        "num": 2,
-                        "text": "Plugins",
-                        "code": "plugins",
-                        "id_alias": ["plugins", "permissions", "appui"],
-                        "icon": "nf nf-mdi-puzzle"
-                      },
-                      {
-                        "num": 3,
-                        "text": "Options",
-                        "code": "options",
-                        "id_alias": ["options", "permissions", "appui"],
-                        "icon": "nf nf-fa-cogs"
-                      }
-                    ]
-                  }, {
-                    "cfg": {
-                      "show_code": 1,
-                      "show_icon": 1,
-                      "allow_children": 1,
-                      "show_alias": 1,
-                      "id_root_alias": ["appui"]
-                    },
-                    "text": "Plugins",
-                    "code": "plugins",
-                    "icon": "nf nf-mdi-puzzle"
-                  }
-                ]
-              },
-              {
                 "text": "List",
                 "code": "list",
-                "icon": "nf nf-fa-list"
+                "icon": "nf nf-fa-list",
+                "items": [
+                  {
+                    "text": "Plugin",
+                    "code": "plugin",
+                    "icon": "nf nf-mdi-puzzle",
+                    "items": [
+                      {
+                        "cfg": {
+                          "show_code": 1,
+                          "show_icon": 1,
+                          "sortable": 1,
+                          "allow_children": 1,
+                          "inheritance": "cascade",
+                          "i18n": "en"
+                        },
+                        "text": "Permissions",
+                        "code": "permissions",
+                        "icon": "nf nf-fa-key",
+                        "items": [
+                          {
+                            "num": 1,
+                            "text": "Access",
+                            "code": "access",
+                            "id_alias": ["access", "permissions", "appui"],
+                            "icon": "nf nf-mdi-door"
+                          },
+                          {
+                            "num": 2,
+                            "text": "Plugins",
+                            "code": "plugins",
+                            "id_alias": ["plugins", "permissions", "appui"],
+                            "icon": "nf nf-mdi-puzzle"
+                          },
+                          {
+                            "num": 3,
+                            "text": "Options",
+                            "code": "options",
+                            "id_alias": ["options", "permissions", "appui"],
+                            "icon": "nf nf-fa-cogs"
+                          }
+                        ]
+                      }, {
+                        "cfg": {
+                          "show_code": 1,
+                          "show_icon": 1,
+                          "allow_children": 1,
+                          "show_alias": 1,
+                          "id_root_alias": ["appui"]
+                        },
+                        "text": "Plugins",
+                        "code": "plugins",
+                        "icon": "nf nf-mdi-puzzle"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }

@@ -3649,7 +3649,7 @@ class Option extends bbn\Models\Cls\Db
   public function import(array $options, $id_parent = null, array &$todo = null)
   {
     if (is_array($id_parent)) {
-      $id_parent = $this->fromCode(...$id_parent);
+      $id_parent = $this->fromCode($id_parent);
     }
     elseif (null === $id_parent) {
       $id_parent = $this->default;
@@ -4049,10 +4049,10 @@ class Option extends bbn\Models\Cls\Db
   {
     if (($pluginAlias = $this->fromCode('plugin', 'list', 'templates', 'option', 'appui'))
         && ($export = $this->export($pluginAlias, 'sfull'))) {
-      $idPlugins = $this->getAliases($pluginAlias);
+      $idPlugins = $this->getAliasItems($pluginAlias);
       $res = 0;
       foreach ($idPlugins as $idPlugin) {
-        $res += (int)$this->import($export, $idPlugin);
+        $res += (int)$this->import($export['items'], $idPlugin);
       }
 
       return $res;
