@@ -6,6 +6,7 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\X;
+use Exception;
 use PhpOffice\PhpWord\Element\PageBreakTest;
 
 /**
@@ -4046,27 +4047,46 @@ class Option extends bbn\Models\Cls\Db
    */
   public function updatePlugins(): ?int
   {
-    if (defined('BBN_APPUI')
-        && ($ids = $this->items('plugins', 'templates', 'option', 'appui'))
-    ) {
+    if (($pluginAlias = $this->fromCode('plugin', 'list', 'templates', 'option', 'appui'))
+        && ($export = $this->export($pluginAlias, 'sfull'))) {
+      $idPlugins = $this->getAliases($pluginAlias);
       $res = 0;
-      $all = $this->items('plugins') ?? [];
-      foreach ($this->fullOptions('appui') ?? [] as $a) {
-        if (!empty($a['plugin'])) {
-          $all[] = $a[$this->fields['id']];
-        }
-      }
-
-      foreach ($ids as $id) {
-        if ($export = $this->export($id, 'sfull')) {
-          $export[$this->fields['id_alias']] = $this->getCodePath($id);
-          foreach ($all as $plugin) {
-            $res += (int)$this->import($export, $plugin);
-          }
-        }
+      foreach ($idPlugins as $idPlugin) {
+        $res += (int)$this->import($export, $idPlugin);
       }
 
       return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @param string|null $id
+   * @return int|null
+   */
+  public function applyTemplate(string $id = null): ?int
+  {
+    if (!defined('BBN_APPUI')) {
+      throw new Exception(X::_("Impossible to apply a template without appui defined"));
+    }
+
+    if (!($idAlias = $this->alias($id))) {
+      throw new Exception(X::_("Impossible to apply a template, the option must be aliased"));
+    }
+
+    $templateParent = $this->parent($idAlias);
+    if (!$templateParent['id_alias']) {
+      throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
+    }
+
+    if ($templateParent['id_alias'] !== $this->fromCode('list', 'templates', 'option', 'appui')) {
+      throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
+    }
+
+    if (($export = $this->export($idAlias, 'sfull')) && !empty($export['items'])) {
+      return (int)$this->import($export['items'], $id);
     }
 
     return null;

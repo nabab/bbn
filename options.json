@@ -20,6 +20,7 @@
         "text": "API",
         "code": "api",
         "icon": "nf nf-mdi-lan_connect",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "plugin": true
       },
       {
@@ -31,6 +32,7 @@
         },
         "text": "Billing",
         "code": "billing",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-credit_card",
         "plugin": true
       },
@@ -43,6 +45,7 @@
         },
         "text": "CDN",
         "code": "cdn",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-cube",
         "plugin": true
       },
@@ -55,6 +58,7 @@
         },
         "text": "Chat",
         "code": "chat",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-oct-comment_discussion",
         "plugin": true
       },
@@ -67,6 +71,7 @@
         },
         "text": "Clipboard",
         "code": "clipboard",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-clipboard_outline",
         "plugin": true
       },
@@ -79,6 +84,7 @@
         },
         "text": "Components",
         "code": "component",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fae-molecule",
         "plugin": true
       },
@@ -91,6 +97,7 @@
         },
         "text": "Configuration",
         "code": "config",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-cog",
         "plugin": true
       },
@@ -103,6 +110,7 @@
         },
         "text": "Core",
         "code": "core",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-custom-electron",
         "plugin": true,
         "items": [
@@ -229,6 +237,7 @@
         },
         "text": "CRM",
         "code": "crm",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-oct-organization",
         "plugin": true
       },
@@ -241,6 +250,7 @@
         },
         "text": "CRON",
         "code": "cron",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-clock_start",
         "plugin": true,
         "items": [
@@ -283,6 +293,7 @@
         },
         "text": "Dashboard",
         "code": "dashboard",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-dashboard",
         "plugin": true,
         "items": [
@@ -427,6 +438,7 @@
         },
         "text": "Databases",
         "code": "database",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-database",
         "plugin": true,
         "items": [
@@ -698,6 +710,7 @@
         },
         "text": "eMails",
         "code": "email",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-at",
         "plugin": true,
         "items": [ 
@@ -813,6 +826,7 @@
         },
         "text": "Entity",
         "code": "entity",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-dev-codepen",
         "plugin": true
       },
@@ -825,6 +839,7 @@
         },
         "text": "Events",
         "code": "event",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-oct-calendar",
         "plugin": true,
         "items": [
@@ -861,6 +876,7 @@
         },
         "text": "Explorer",
         "code": "explorer",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-magnify",
         "plugin": true
       },
@@ -873,6 +889,7 @@
         },
         "text": "Finder",
         "code": "finder",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-apple_finder",
         "plugin": true,
         "items": [
@@ -895,6 +912,7 @@
         },
         "text": "GDPR",
         "code": "gdpr",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-playlist_check",
         "plugin": true
       },
@@ -907,6 +925,7 @@
         },
         "text": "History",
         "code": "history",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-history",
         "plugin": true,
         "items": [
@@ -949,6 +968,7 @@
         },
         "text": "HR",
         "code": "hr",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-users",
         "plugin": true,
         "items": [
@@ -1034,6 +1054,7 @@
         },
         "text": "I.D.E.",
         "code": "ide",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-code",
         "plugin": true,
         "items": [
@@ -1635,6 +1656,7 @@
         },
         "text": "Internationalization",
         "code": "i18n",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-translate",
         "plugin": true,
         "items": [
@@ -2392,6 +2414,7 @@
         },
         "text": "Mailings",
         "code": "mailing",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-oct-mail",
         "plugin": true,
         "items": [
@@ -2423,6 +2446,7 @@
         },
         "text": "Masks",
         "code": "masks",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-guy_fawkes_mask",
         "plugin": true,
         "tekname": "ltypes"
@@ -2436,6 +2460,7 @@
         },
         "text": "Meeting",
         "code": "meeting",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-webcam",
         "plugin": true
       },
@@ -2447,6 +2472,7 @@
         },
         "text": "Menus",
         "code": "menu",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-menu",
         "plugin": true,
         "items": [
@@ -2479,6 +2505,7 @@
         },
         "text": "Monitor",
         "code": "monitor",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-heart_pulse",
         "plugin": true
       },
@@ -2492,6 +2519,7 @@
         },
         "text": "Notes",
         "code": "note",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-pencil_square_o",
         "plugin": true,
         "items": [
@@ -2666,6 +2694,7 @@
         },
         "text": "Notifications",
         "code": "notification",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-exclamation",
         "plugin": true,
         "items": [
@@ -2701,6 +2730,7 @@
         },
         "text": "Observers",
         "code": "observers",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-binoculars"
       },
       {
@@ -2712,6 +2742,7 @@
         },
         "text": "Options",
         "code": "option",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-format_list_checks",
         "plugin": true,
         "items": [
@@ -2841,6 +2872,7 @@
         },
         "text": "Projects",
         "code": "project",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-sitemap",
         "plugin": true,
         "items": [
@@ -3083,6 +3115,7 @@
         "text": "Server",
         "code": "server",
         "plugin": true,
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-server",
         "items": [
           {
@@ -3251,6 +3284,7 @@
         },
         "text": "Social",
         "code": "social",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-google_circles_extended"
       },
       {
@@ -3263,6 +3297,7 @@
         "text": "Spreadsheet",
         "plugin": true,
         "code": "spreadsheet",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-grid"
       },
       {
@@ -3275,6 +3310,7 @@
         "text": "Statistic",
         "plugin": true,
         "code": "statistic",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-bar_chart",
         "tekname": "stats",
         "items": [
@@ -3326,6 +3362,7 @@
         },
         "text": "Styles",
         "code": "style",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-dev-css3"
       },
       {
@@ -3337,6 +3374,7 @@
         },
         "text": "Tables",
         "code": "tables",
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-table"
       },
       {
@@ -3350,6 +3388,7 @@
         "text": "Tasks (project management)",
         "code": "task",
         "plugin": true,
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-oct-tasklist",
         "tekname": "tasks",
         "items": [
@@ -3582,6 +3621,7 @@
         "text": "User and Group",
         "code": "usergroup",
         "plugin": true,
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-user_circle",
         "items": [
           {
@@ -3633,6 +3673,7 @@
         "text": "Write",
         "code": "write",
         "plugin": true,
+        "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-fa-pencil_square_o",
         "items": [
           {

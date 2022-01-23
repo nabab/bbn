@@ -2,6 +2,7 @@
 
 namespace bbn;
 
+use Exception;
 use bbn\Util\Enc;
 
 /**
@@ -305,7 +306,7 @@ class Appui
           return;
         }
 
-        throw new \Exception("Impossible to fiond the admin user");
+        throw new Exception("Impossible to fiond the admin user");
       }
 
 
@@ -384,7 +385,7 @@ class Appui
    *
    * @param bool $throwError wil throw an error if set to true instead of returning false
    *
-   * @throws \Exception
+   * @throws Exception
    * @return bool
    */
   public function check(bool $throwError = false): bool
@@ -394,7 +395,7 @@ class Appui
       foreach (self::$vars as $v) {
         if (!array_key_exists($v, $this->_current)) {
           if ($throwError) {
-            throw new \Exception(X::_("The parameter %s is not defined", $v));
+            throw new Exception(X::_("The parameter %s is not defined", $v));
           }
 
           $ok = false;
@@ -475,11 +476,11 @@ class Appui
     if ($this->check()) {
       if (empty($hostname) && empty($servname)) {
         if (!defined('BBN_HOSTNAME')) {
-          throw new \Exception(X::_("No hostname defined"));
+          throw new Exception(X::_("No hostname defined"));
         }
 
         if (!defined('BBN_SERVER_NAME')) {
-          throw new \Exception(X::_("No server name defined"));
+          throw new Exception(X::_("No server name defined"));
         }
 
         $hostname = BBN_HOSTNAME;
@@ -704,7 +705,7 @@ class Appui
       return (bool)$this->_currentFs->putContents($file, $content);
     }
     else {
-      throw new \Exception(X::_("Impossible to get the settings"));
+      throw new Exception(X::_("Impossible to get the settings"));
     }
 
     return false;
@@ -774,13 +775,14 @@ class Appui
       else {
         $id_plugin = $o->add(
           [
-          'code' => $name,
-          'text' => $title,
-          'id_parent' => $id_parent
+            'code' => $name,
+            'text' => $title,
+            'id_parent' => $id_parent
           ]
         );
+
         if (!$id_plugin) {
-          throw new \Exception(X::_("Impossible to add the plugin")." $name");
+          throw new Exception(X::_("Impossible to add the plugin")." $name");
         }
 
         $perm_id = $o->add(
@@ -791,7 +793,7 @@ class Appui
           ]
         );
         if (!$perm_id) {
-          throw new \Exception(X::_("Impossible to add the permission for the plugin")." $name");
+          throw new Exception(X::_("Impossible to add the permission for the plugin")." $name");
         }
 
         // Other options under permissions
@@ -900,7 +902,7 @@ class Appui
             }
           }
           else {
-            throw new \Exception(X::_("Unreadable database file in plugin %s", $plugin['name']));
+            throw new Exception(X::_("Unreadable database file in plugin %s", $plugin['name']));
           }
         }
       }
@@ -940,7 +942,7 @@ class Appui
             }
           }
           else {
-            throw new \Exception(X::_("The options file in %s is corrupted", $plugin['name']));
+            throw new Exception(X::_("The options file in %s is corrupted", $plugin['name']));
           }
         }
       }
@@ -975,7 +977,7 @@ class Appui
             }
           }
           else {
-            throw new \Exception(X::_("The permission file in %s is corrupted", $plugin['name']));
+            throw new Exception(X::_("The permission file in %s is corrupted", $plugin['name']));
           }
         }
       }
@@ -1011,7 +1013,7 @@ class Appui
             $menus[$plugin['name']] = $list;
           }
           else {
-            throw new \Exception(X::_("The database file in %s is corrupted", $plugin['name']));
+            throw new Exception(X::_("The database file in %s is corrupted", $plugin['name']));
           }
         }
       }
@@ -1106,8 +1108,8 @@ class Appui
         try {
           Enc::generateCertFiles($path);
         }
-        catch (\Exception $e) {
-          throw new \Exception(X::_("Failed to create SSL certificate").': '.$e->getMessage());
+        catch (Exception $e) {
+          throw new Exception(X::_("Failed to create SSL certificate").': '.$e->getMessage());
         }
       }
 
@@ -1131,7 +1133,7 @@ class Appui
     // creates the Database
     $db->createDatabase($this->_current['database']);
     if (!$db->change($this->_current['database'])) {
-      throw new \Exception(X::_("The database %s doesn't exist", $this->_current['database']));
+      throw new Exception(X::_("The database %s doesn't exist", $this->_current['database']));
     }
 
     // Getting the existing tables
@@ -1145,7 +1147,7 @@ class Appui
           $db->query($q);
           $db_err = $db->getLastError();
           if ($db_err) {
-            throw new \Exception($db_err);
+            throw new Exception($db_err);
           }
           elseif ('table' === $type) {
             $num++;
@@ -1261,7 +1263,7 @@ class Appui
     }
 
     if (!$id) {
-      throw new \Exception("Impossible to create the root option");
+      throw new Exception("Impossible to create the root option");
     }
 
     return $id;
@@ -1285,7 +1287,7 @@ class Appui
     }
 
     if (!$id_client) {
-      throw new \Exception("Impossible to create the client");
+      throw new Exception("Impossible to create the client");
     }
 
     return $id_client;
@@ -1347,7 +1349,7 @@ class Appui
     }
 
     if (!$id_project) {
-      throw new \Exception("Impossible to create the project");
+      throw new Exception("Impossible to create the project");
     }
 
     return $id_project;
@@ -1372,7 +1374,7 @@ class Appui
       }
 
       if (!$id_env) {
-        throw new \Exception("Impossible to retrieve the environment ID");
+        throw new Exception("Impossible to retrieve the environment ID");
       }
 
       if ($id_env
@@ -1400,7 +1402,7 @@ class Appui
     }
 
     if (!$id_app) {
-      throw new \Exception("Impossible to create the application row");
+      throw new Exception("Impossible to create the application row");
     }
 
     return $id_app;
@@ -1444,7 +1446,7 @@ class Appui
     }
 
     if (!$id_appui_user) {
-      throw new \Exception("Impossible to create the client");
+      throw new Exception("Impossible to create the client");
     }
 
     return $id_appui_user;
@@ -1463,12 +1465,12 @@ class Appui
       $root = $this->getOptionRoot();
       $file = $this->libPath().'bbn/bbn/options.json';
       if (!$this->_currentFs->exists($file)) {
-        throw new \Exception("Impossible to find the file options");
+        throw new Exception("Impossible to find the file options");
       }
 
       $appui_options = $this->_currentFs->decodeContents($file, 'json', true);
       if (!$appui_options) {
-        throw new \Exception("Impossible to decode the file options");
+        throw new Exception("Impossible to decode the file options");
       }
 
       $res += (int)$opt->import($appui_options, $root);
@@ -1529,7 +1531,7 @@ class Appui
       $perm_routes = [];
       $routes      = $this->getRoutes();
       foreach ($routes['root'] as $u => $r) {
-        $r['path']       = BBN_LIB_PATH.$r['path'].'/';
+        $r['path']       = BBN_LIB_PATH . $r['path'].'/';
         $r['url']        = $u;
         $perm_routes[$u] = $r;
       }
@@ -1572,8 +1574,8 @@ class Appui
         ]
       );
     }
-    catch (\Exception $e) {
-      throw new \Exception(X::_("The application didn't register!").PHP_EOL.$e->getMessage());
+    catch (Exception $e) {
+      throw new Exception(X::_("The application didn't register!").PHP_EOL.$e->getMessage());
     }
 
     if (!empty($reg) && !empty($reg['id_app'])) {
@@ -1647,7 +1649,7 @@ class Appui
           }
         }
         else {
-          throw new \Exception(X::_("Impossible to add the menu element %s!", $m['text']));
+          throw new Exception(X::_("Impossible to add the menu element %s!", $m['text']));
         }
       }
 
@@ -1685,7 +1687,7 @@ class Appui
     $idDashboard = $opt_class->fromCode('dashboard', 'appui');
     $routes      = $this->getRoutes();
     if (!($idList = $opt_class->fromCode('list', $idDashboard))) {
-      throw new \Exception(X::_("Id list not found"));
+      throw new Exception(X::_("Id list not found"));
     }
 
     if (!($idPluginsDashboard = $pref_class->addToGroup(
@@ -1695,7 +1697,7 @@ class Appui
       ]
     ))
     ) {
-      throw new \Exception(X::_("Plugins dashboard not found"));
+      throw new Exception(X::_("Plugins dashboard not found"));
     }
     else {
       $pref_class->makePublic($idPluginsDashboard);
@@ -1724,7 +1726,7 @@ class Appui
       ]
     ))
     ) {
-      throw new \Exception(X::_("Default dashboard not found"));
+      throw new Exception(X::_("Default dashboard not found"));
     }
     else {
       $pref_class->makePublic($idDefaultDashboard);
@@ -1851,7 +1853,7 @@ class Appui
   public function install(\Installer $installer, array $cfg, int $step = null): bool
   {
     if (!method_exists($installer, 'report')) {
-      throw new \Exception(X::_("The installer is invalid"));
+      throw new Exception(X::_("The installer is invalid"));
     }
 
     $installer->report(' ');
@@ -1896,7 +1898,7 @@ class Appui
     try {
       $this->getPublicKey(true);
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $installer->report('Failed to create SSL certificate: '.$e->getMessage(), false, true);
     }
 
@@ -1908,7 +1910,7 @@ class Appui
     try {
       $this->createDatabase();
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $installer->report($e->getMessage(), false, true);
     }
 
@@ -1970,18 +1972,21 @@ class Appui
         $installer->report('No new option imported');
       }
 
-      if ($res = $this->updatePermissions()) {
-        $installer->report("{$res} Permissions created");
-      }
-      else {
-        $installer->report('No new permissions created');
-      }
-
       if ($res = $this->updateTemplates()) {
         $installer->report("{$res} options from templates");
       }
       else {
         $installer->report("No new options from templates");
+      }
+
+      $cache    = Cache::getEngine();
+      $cache->deleteAll('');
+
+      if ($res = $this->updatePermissions()) {
+        $installer->report("{$res} Permissions created");
+      }
+      else {
+        $installer->report('No new permissions created');
       }
 
       if ($this->getProject()) {
