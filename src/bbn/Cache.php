@@ -2,6 +2,8 @@
 namespace bbn;
 
 use Closure;
+use Exception;
+use Opis\Closure\SerializableClosure;
 
 /**
  * Universal caching class: called once per request, it holds the cache system.
@@ -165,7 +167,7 @@ class Cache
       }
     }
 
-    throw new \Exception(
+    throw new Exception(
       X::_("Wrong ttl parameter")
     );
   }
@@ -208,7 +210,7 @@ class Cache
     /** @todo APC doesn't work */
     $engine = 'files';
     if (self::$is_init) {
-      throw new \Exception(
+      throw new Exception(
         X::_("Only one cache object can be called. Use static function Cache::getEngine()")
       );
     }
@@ -307,7 +309,14 @@ class Cache
         return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);
       }
       else {
-        return (bool)$this->fs->delete($dir.'.bbn.cache');
+        try {
+          $res = $this->fs->delete($dir.'.bbn.cache');
+        }
+        catch (Exception $e) {
+          $res = false;
+        }
+
+        return (bool)$res;
       }
     }
     elseif (self::$type) {
@@ -546,7 +555,7 @@ class Cache
      * @param int      $ttl  The cache length
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
   public function getSet(callable $fn, string $item, int $ttl = 0)
   {
@@ -580,7 +589,7 @@ class Cache
             try {
               $data = $fn();
             }
-            catch (\Exception $e) {
+            catch (Exception $e) {
               unlink($tmp_file);
               throw $e;
             }
@@ -702,10 +711,10 @@ class Cache
    * @param callable $function
    * @return string
    */
-  public function serializeFunction(\Closure $function): string
+  public function serializeFunction(Closure $function): string
   {
     return serialize(
-      new \Opis\Closure\SerializableClosure($function)
+      new SerializableClosure($function)
     );
   }
 

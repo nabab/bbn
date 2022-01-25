@@ -1792,7 +1792,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param bool $merge_config
    * @return int|null
    */
-  public function updateBit(string $id, array $cfg, $merge_config): ?int
+  public function updateBit(string $id, array $cfg, bool $merge_config = true): ?int
   {
     if (\bbn\Str::isUid($id)) {
       $c = $this->class_cfg['arch']['user_options_bits'];
