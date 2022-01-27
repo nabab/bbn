@@ -38,7 +38,7 @@ class Medias extends bbn\Models\Cls\Db
           'mimetype' => 'mimetype',
           'name' => 'name',
           'title' => 'title',
-          'excerpt' => 'excerpt',
+          'description' => 'description',
           'content' => 'content',
           'private' => 'private',
           'created' => 'created',
@@ -279,7 +279,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $title
    * @param string $type
    * @param boolean $private
-   * @param string|null $excerpt
+   * @param string|null $description
    * @return string|null
    * @throws Exception
    */
@@ -289,7 +289,7 @@ class Medias extends bbn\Models\Cls\Db
       string $title = '',
       string $type = 'file',
       bool $private = false,
-      string $excerpt = null
+      string $description = null
   ): ?string
   {
     $cf =& $this->class_cfg;
@@ -334,7 +334,7 @@ class Medias extends bbn\Models\Cls\Db
           $cf['arch']['medias']['type'] => $id_type,
           $cf['arch']['medias']['mimetype'] => $mime,
           $cf['arch']['medias']['title'] => $title,
-          $cf['arch']['medias']['excerpt'] => $excerpt,
+          $cf['arch']['medias']['description'] => $description,
           $cf['arch']['medias']['name'] => $name ?? null,
           $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,
           $cf['arch']['medias']['private'] => $private ? 1 : 0,
@@ -722,6 +722,107 @@ class Medias extends bbn\Models\Cls\Db
 
     return $new_media;
 
+  }
+
+
+  /**
+   * Replaces the content of the media
+   * @param string $id
+   * @param string $file
+   * @return array|false
+   */
+  public function replaceContent(string $id, string $file)
+  {
+    if (!$this->fs->isFile($file)) {
+      throw new Exception(X::_("Impossible to find the file %s", $file));
+    }
+    if (($ext = Str::fileExt($file))
+      && ($media = $this->getMedia($id, true))
+    ) {
+      $cf      =& $this->class_cfg;
+      $root    = Mvc::getDataPath('appui-note') . 'media/';
+      $path    = $media[$cf['arch']['medias']['content']]['path'];
+      $oldFile = $root . $path . $media[$cf['arch']['medias']['name']];
+      $name    = X::basename($file);
+      $title   = $media[$cf['arch']['medias']['title']];
+      $mime    = mime_content_type($file) ?: null;
+      $content = [
+        'path' => $path,
+        'size' => $this->fs->filesize($file),
+        'extension' => $ext
+      ];
+      if (empty($title)) {
+        $title = trim(str_replace(['-', '_', '+'], ' ', X::basename($file, ".$ext")));
+      }
+      if (!$this->db->update(
+        $cf['table'],
+        [
+          $cf['arch']['medias']['mimetype'] => $mime,
+          $cf['arch']['medias']['title'] => $title,
+          $cf['arch']['medias']['name'] => $name,
+          $cf['arch']['medias']['content'] => json_encode($content)
+        ],
+        [
+          $cf['arch']['medias']['id'] => $id
+        ]
+      )) {
+        throw new Exception(X::_("Impossible to update the media in the database"));
+      }
+      $this->removeThumbs($oldFile);
+      $this->fs->delete($oldFile);
+      if (strpos($mime, 'image/') === 0) {
+        $image = new Image($file, $this->fs);
+        $image->thumbs($root . $path . $id, $this->thumbs_sizes);
+      }
+      $this->fs->move(
+        $file,
+        $root . $path . $id
+      );
+      return $this->getMedia($id, true);
+    }
+    return false;
+  }
+
+
+  /**
+   * Sets the title of the media
+   * @param string $id
+   * @param string $title
+   * return bool
+   */
+  public function setTitle(string $id, string $title): bool
+  {
+    $cf =& $this->class_cfg;
+    return (bool)$this->db->update(
+      $cf['table'],
+      [
+        $cf['arch']['medias']['title'] => $title
+      ],
+      [
+        $cf['arch']['medias']['id'] => $id
+      ]
+    );
+  }
+
+
+  /**
+   * Sets the description of the media
+   * @param string $id
+   * @param string $description
+   * return bool
+   */
+  public function setDescription(string $id, string $description): bool
+  {
+    $cf =& $this->class_cfg;
+    return (bool)$this->db->update(
+      $cf['table'],
+      [
+        $cf['arch']['medias']['description'] => $description
+      ],
+      [
+        $cf['arch']['medias']['id'] => $id
+      ]
+    );
   }
 
 
