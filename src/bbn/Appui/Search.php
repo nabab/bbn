@@ -3,12 +3,13 @@
 namespace bbn\Appui;
 
 use bbn\Db;
+use bbn\X;
+use bbn\User;
+use bbn\Tpl;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\Dbconfig;
 use bbn\Mvc\Model;
-use bbn\User;
 use bbn\Util\Timer;
-use bbn\X;
 use Opis\Closure\SerializableClosure;
 
 class Search
@@ -308,6 +309,18 @@ class Search
           $a['score'] = $item['score'];
           if (!empty($item['component'])) {
             $a['component'] = $item['component'];
+          }
+
+          if (!empty($item['options'])) {
+            $a['options'] = $item['options'];
+          }
+
+          if (!empty($item['url'])) {
+            $a['url'] = Tpl::render($item['url'], $a);
+          }
+
+          if (!empty($item['action'])) {
+            $a['action'] = $item['action'];
           }
         });
         $results['data'] = array_merge($results['data'], $search_results);

@@ -30,8 +30,11 @@ class Cms extends DbCls
   /** @var Event En Event instance. */
   protected $event;
 
-  /** @var Note A Note instance. */
+  /** @var Url An Url instance. */
   protected $url;
+
+  /** @var Media A Media instance. */
+  protected $media;
 
   /** @var array $class_cfg */
   protected $class_cfg;
@@ -100,6 +103,7 @@ class Cms extends DbCls
     $this->event = new Event($this->db);
     $this->opt   = Option::getInstance();
     $this->url   = new Url($this->db);
+    $this->media = new Medias($this->db);
     if (!self::$_id_event) {
       $id = $this->opt->fromCode('publication', 'types', 'event', 'appui');
       self::_set_id_event($id);
@@ -146,16 +150,19 @@ class Cms extends DbCls
    * @param string $id_note
    * @return array
    */
-  public function get(string $id_note): array
+  public function get(string $id_note, bool $with_medias = false): array
   {
     $res = [];
     if (!empty($id_note) && ($note = $this->note->get($id_note))) {
-        $res          = $note;
-        $res['url']   = $this->note->getUrl($id_note);
-        $res['start'] = $this->getStart($id_note);
-        $res['end']   = $this->getEnd($id_note);
-        $res['tags']  = $this->note->getTags($id_note);
-        $res['items'] = $note['content'] ? json_decode($note['content'], true) : [];
+      $res          = $note;
+      $res['url']   = $this->note->getUrl($id_note);
+      $res['start'] = $this->getStart($id_note);
+      $res['end']   = $this->getEnd($id_note);
+      $res['tags']  = $this->note->getTags($id_note);
+      $res['items'] = $note['content'] ? json_decode($note['content'], true) : [];
+      if ($with_medias) {
+        $res['medias'] = $this->note->getMedias($id_note);
+      }
     }
 
     return $res;
