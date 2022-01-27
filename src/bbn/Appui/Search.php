@@ -198,6 +198,10 @@ class Search
               foreach ($alts as $i => $alt) {
                 $tmp = $content;
                 $tmp['cfg'] = X::mergeArrays($tmp['cfg'], $alt);
+                if (!empty($alt['score'])) {
+                  $tmp['score'] = $alt['score'];
+                }
+
                 $result[] = X::mergeArrays($tmp, [
                   'file' => $item['file'] ?? null,
                   'signature' => ($item['signature'] ?? '') . '-' . ($i + 1)
@@ -245,6 +249,7 @@ class Search
     }
 
     $results = [
+      'done' => [],
       'data' => []
     ];
 
@@ -303,6 +308,7 @@ class Search
       }
 
       $item = $config_array[$i];
+      X::log($item, 'search');
       $item['cfg']['limit'] = $limit - count($results['data']);
       if ($search_results = $this->db->rselectAll($item['cfg'])) {
         array_walk($search_results, function (&$a) use ($item) {
