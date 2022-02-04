@@ -129,7 +129,7 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function addRoom(string $server, string $name, $idUser = null, $idGroup = null): ?string
+  public function addRoom(string $server, string $name, $idUser = null, $idGroup = null, array $moderators = []): ?string
   {
     $idServer = self::getOptionId($server, 'list');
     if (!$idServer) {
@@ -153,14 +153,71 @@ class Meeting extends bbn\Models\Cls\Db
         'last_duration' => 0
       ])
     ])) {
-      return $this->db->lastId();
+      $idRoom = $this->db->lastId();
+      if (!empty($moderators)) {
+        foreach ($moderators as $mod) {
+          $this->addModerator($mod, $idRoom);
+        }
+      }
+      return $idRoom;
     }
     return null;
   }
 
 
-  public function updateRoom()
-  {}
+  public function editRoom(string $idRoom, string $name, $idUser = null, $idGroup = null, array $moderators = []): bool
+  {
+    $old = $this->getRoom($idRoom);
+    if (!$old) {
+      throw new \Exception(sprintf(_('Room not found %s'), $idRoom));
+    }
+    $toUpd = [];
+    if (($old[$this->prefFields['id_user']] !== $idUser)){
+      $toUpd[$this->prefFields['id_user']] = $idUser;
+    }
+    if (($old[$this->prefFields['id_group']] !== $idGroup)){
+      $toUpd[$this->prefFields['id_group']] = $idGroup;
+    }
+    $public = !empty($idUser) || !empty($idGroup) ? 0 : 1;
+    if (($old[$this->prefFields['public']] !== $public)){
+      $toUpd[$this->prefFields['public']] = $public;
+    }
+    if (($old[$this->prefFields['text']] !== $name)){
+      if ($this->db->selectOne($this->prefTable, $this->prefFields['id'], [
+        [$this->prefFields['text'], '=', $name],
+        [$this->prefFields['id_option'], '=', $old[$this->prefFields['id_option']]],
+        [$this->prefFields['id'], '!=', $idRoom]
+      ])) {
+        throw new \Error(sprintf(_('The room %s already exists'), $name));
+      }
+      $toUpd[$this->prefFields['text']] = $name;
+    }
+    if (!empty($toUpd)
+      && !$this->db->update($this->prefTable, $toUpd, [$this->prefFields['id'] => $idRoom])
+    ) {
+      return false;
+    }
+    if (!empty($moderators)) {
+      $oldModerators = $this->getModerators($idRoom);
+      if (!empty($oldModerators)) {
+        foreach ($oldModerators as $m) {
+          if (!\in_array($m, $moderators, true)
+            && !$this->removeModerator($m, $idRoom)
+          ) {
+            throw new \Exception(sprintf(_('Error during the elimination of the moderator %s from the room %s'), $m, $idRoom));
+          }
+        }
+      }
+      foreach ($moderators as $m) {
+        if (!\in_array($m, $oldModerators, true)
+            && !$this->addModerator($m, $idRoom)
+          ) {
+            throw new \Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
+          }
+      }
+    }
+    return true;
+  }
 
 
   public function removeRoom(string $idRoom): ?int
@@ -232,19 +289,26 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function getModerators(string $idRoom): ?array
+  public function getModerators(string $idRoom, bool $full = false): ?array
   {
     $userCfg = \bbn\User::getInstance()->getClassCfg();
     $userFields = $userCfg['arch']['users'];
-    return $this->db->rselectAll([
-      'table' => $this->prefTable,
-      'fields' => [
-        $this->db->colFullName($userFields['id'], $userCfg['table']),
+    $fields = [
+      $this->db->colFullName($userFields['id'], $userCfg['table'])
+    ];
+    $method = 'getColumnValues';
+    if (!empty($full)) {
+      $method = 'rselectAll';
+      $fields = \array_merge($fields, [
         $this->db->colFullName($userFields['id_group'], $userCfg['table']),
-        $this->db->colFullName($userFields['email'], $userCfg['table']),
-        $this->db->colFullName($userFields['username'], $userCfg['table']),
-        $this->db->colFullName($userFields['login'], $userCfg['table'])
-      ],
+          $this->db->colFullName($userFields['email'], $userCfg['table']),
+          $this->db->colFullName($userFields['username'], $userCfg['table']),
+          $this->db->colFullName($userFields['login'], $userCfg['table'])
+      ]);
+    }
+    return $this->db->{$method}([
+      'table' => $this->prefTable,
+      'fields' => $fields,
       'join' => [[
         'table' => $userCfg['table'],
         'on' => [
