@@ -15,6 +15,7 @@ use bbn\Str;
 class Meeting extends bbn\Models\Cls\Db
 {
   use bbn\Models\Tts\Optional;
+  use bbn\Models\Tts\Dbconfig;
 
   private $opt;
 
@@ -26,6 +27,23 @@ class Meeting extends bbn\Models\Cls\Db
 
   private $passCls;
 
+  /** @var array Database architecture schema */
+  protected static $default_class_cfg = [
+    'table' => 'bbn_meeting_participants',
+    'tables' => [
+      'participants' => 'bbn_meeting_participants'
+    ],
+    'arch' => [
+      'participants' => [
+        'id' => 'id',
+        'id_user' => 'id_user',
+        'id_room' => 'id_room',
+        'joined' => 'joined',
+        'leaved' => 'leaved'
+      ]
+    ]
+  ];
+
   /**
    * Constructor.
    * @param \bbn\Db $db
@@ -33,6 +51,7 @@ class Meeting extends bbn\Models\Cls\Db
   public function __construct(\bbn\Db $db)
   {
     parent::__construct($db);
+    $this->_init_class_cfg();
     self::optionalInit();
     $this->opt = self::getOptionsObject();
     $optCfg = $this->opt->getClassCfg();
@@ -68,7 +87,7 @@ class Meeting extends bbn\Models\Cls\Db
   public function getRooms(string $server, string $idUser = null, string $idGroup = null)
   {
     if (!Str::isUid($server)) {
-      $server = $this->opt->fromCode($server);
+      $server = $this->getOptionId($server);
     }
     if (!Str::isUid($server)) {
       throw new \Error(_('The server id given is not a uuid'));
@@ -78,6 +97,9 @@ class Meeting extends bbn\Models\Cls\Db
         'field' => $this->prefFields['id_option'],
         'value' => $server
       ], [
+        'field' => $this->prefFields['id_alias'],
+        'operator' => 'isnull'
+      ], [
         'logic' => 'OR',
         'conditions' => [[
           'field' => $this->prefFields['public'],
@@ -86,13 +108,13 @@ class Meeting extends bbn\Models\Cls\Db
       ]]
     ];
     if (!empty($idUser)) {
-      $where['conditions'][1]['conditions'][] = [
+      $where['conditions'][2]['conditions'][] = [
         'field' => $this->prefFields['id_user'],
         'value' => $idUser
       ];
     }
     if (!empty($idGroup)) {
-      $where['conditions'][1]['conditions'][] = [
+      $where['conditions'][2]['conditions'][] = [
         'field' => $this->prefFields['id_group'],
         'value' => $idGroup
       ];
@@ -100,7 +122,11 @@ class Meeting extends bbn\Models\Cls\Db
     $rooms = $this->db->rselectAll([
       'table' => $this->prefTable,
       'fields' => [],
-      'where' => $where
+      'where' => $where,
+      'order' => [[
+        'field' => $this->prefFields['text'],
+        'dir' => 'ASC'
+      ]]
     ]);
     if (!empty($rooms)) {
       foreach ($rooms as $i => $r) {
@@ -109,6 +135,80 @@ class Meeting extends bbn\Models\Cls\Db
           $rooms[$i] = \array_merge($rooms[$i], \json_decode($r[$this->prefFields['cfg']], true));
           unset($rooms[$i][$this->prefFields['cfg']]);
         }
+      }
+    }
+    return $rooms;
+  }
+
+
+  public function getAllRooms(string $idUser = null, string $idGroup = null, bool $moderators = true): ?array
+  {
+    $servers = $this->getOptionsIds('list');
+    if (!empty($servers)) {
+      $servers = \array_values($servers);
+      $serverWhere = [];
+      if (\count($servers) > 1) {
+        $serverWhere['logic'] = 'OR';
+        $serverWhere['conditions'] = [];
+        foreach ($servers as $s) {
+          $serverWhere['conditions'][] = [
+            'field' => $this->prefFields['id_option'],
+            'value' => $s
+          ];
+        }
+      }
+      else {
+        $serverWhere['field'] = $this->prefFields['id_option'];
+        $serverWhere['value'] = $servers[0];
+      }
+    }
+    $where = [
+      'conditions' => [[
+        'field' => $this->prefFields['id_alias'],
+        'operator' => 'isnull'
+      ], $serverWhere, [
+        'logic' => 'OR',
+        'conditions' => [[
+          'field' => $this->prefFields['public'],
+          'value' => 1
+        ]]
+      ]]
+    ];
+    if (!empty($idUser)) {
+      $where['conditions'][2]['conditions'][] = [
+        'field' => $this->prefFields['id_user'],
+        'value' => $idUser
+      ];
+    }
+    if (!empty($idGroup)) {
+      $where['conditions'][2]['conditions'][] = [
+        'field' => $this->prefFields['id_group'],
+        'value' => $idGroup
+      ];
+    }
+    $rooms = $this->db->rselectAll([
+      'table' => $this->prefTable,
+      'fields' => [],
+      'where' => $where,
+      'order' => [[
+        'field' => $this->prefFields['text'],
+        'dir' => 'ASC'
+      ]]
+    ]);
+    if (!empty($rooms)) {
+      foreach ($rooms as $i => $r) {
+        if (!empty($moderators)) {
+          $r['moderators'] = $this->getModerators($r[$this->prefFields['id']]);
+        }
+        if (Str::isJson($r[$this->prefFields['cfg']])) {
+          $r = \array_merge($r, \json_decode($r[$this->prefFields['cfg']], true));
+          unset($r[$this->prefFields['cfg']]);
+        }
+        $r['participants'] = $this->getParticipants($r[$this->prefFields['id']]);
+        $r['live'] = !empty(\array_filter($r['participants'], function($p) use($r){
+          return \in_array($p, $r['moderators'], true);
+        }));
+        $rooms[$i] = $r;
       }
     }
     return $rooms;
@@ -126,6 +226,20 @@ class Meeting extends bbn\Models\Cls\Db
       throw new \Error(sprintf(_('No group found for the user %s'), $idUser));
     }
     return $this->getRooms($server, $idUser, $idGroup);
+  }
+
+
+  public function getAllUserRooms(string $idUser)
+  {
+    $user = \bbn\User::getInstance();
+    $userManager = $user->getManager();
+    $userData = $userManager->getUser($idUser);
+    $userCfg = $user->getClassCfg();
+    $idGroup = $userData[$userCfg['arch']['users']['id_group']] ?? false;
+    if (empty($idGroup)) {
+      throw new \Error(sprintf(_('No group found for the user %s'), $idUser));
+    }
+    return $this->getAllRooms($idUser, $idGroup);
   }
 
 
@@ -197,6 +311,18 @@ class Meeting extends bbn\Models\Cls\Db
     ) {
       return false;
     }
+    // Force re-create the moderator's token if the room's name has changed
+    if (\array_key_exists($this->prefFields['text'], $toUpd)) {
+      $oldModerators = $this->getModerators($idRoom);
+      foreach ($oldModerators as $m) {
+        if (!$this->removeModerator($m, $idRoom)) {
+          throw new \Exception(sprintf(_('Error during the elimination of the moderator %s from the room %s'), $m, $idRoom));
+        }
+        if (!$this->addModerator($m, $idRoom)) {
+          throw new \Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
+        }
+      }
+    }
     if (!empty($moderators)) {
       $oldModerators = $this->getModerators($idRoom);
       if (!empty($oldModerators)) {
@@ -210,10 +336,10 @@ class Meeting extends bbn\Models\Cls\Db
       }
       foreach ($moderators as $m) {
         if (!\in_array($m, $oldModerators, true)
-            && !$this->addModerator($m, $idRoom)
-          ) {
-            throw new \Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
-          }
+          && !$this->addModerator($m, $idRoom)
+        ) {
+          throw new \Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
+        }
       }
     }
     return true;
@@ -283,6 +409,20 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
+  public function getModeratorToken(string $idUser, string $idRoom): ?string
+  {
+    if (($m = $this->getModerator($idUser, $idRoom))
+      && ($u = \bbn\User::getInstance())
+    ) {
+      $idModerator = $m[$this->prefFields['id']];
+      if ($t = $this->passCls->userGet($idModerator, $u)) {
+        return $t;
+      }
+    }
+    return null;
+  }
+
+
   public function isModerator(string $idUser, string $idRoom): bool
   {
     return (bool)$this->getModerator($idUser, $idRoom);
@@ -327,6 +467,44 @@ class Meeting extends bbn\Models\Cls\Db
           'value' => $idRoom
         ]]
       ]
+    ]);
+  }
+
+
+  public function setJoined(string $idUser, string $idRoom): ?string
+  {
+    $fields = $this->class_cfg['arch']['participants'];
+    $this->setLeaved($idUser, $idRoom);
+    if ($this->db->insert($this->class_cfg['table'], [
+      $fields['id_user'] => $idUser,
+      $fields['id_room'] => $idRoom,
+      $fields['joined'] => date('Y-m-d H:i:s')
+    ])) {
+      return $this->db->lastId();
+    }
+    return null;
+  }
+
+
+  public function setLeaved(string $idUser, string $idRoom): bool
+  {
+    $fields = $this->class_cfg['arch']['participants'];
+    return (bool)$this->db->update($this->class_cfg['table'], [
+      $fields['leaved'] => date('Y-m-d H:i:s')
+    ], [
+      $fields['id_user'] => $idUser,
+      $fields['id_room'] => $idRoom,
+      $fields['leaved'] => null
+    ]);
+  }
+
+
+  public function getParticipants(string $idRoom): array
+  {
+    $fields = $this->class_cfg['arch']['participants'];
+    return $this->db->getColumnValues($this->class_cfg['table'], $fields['id_user'], [
+      $fields['id_room'] => $idRoom,
+      $fields['leaved'] => null
     ]);
   }
 
