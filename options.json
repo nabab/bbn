@@ -2615,9 +2615,23 @@
             ]
           },
           {
+            "cfg": {
+              "show_code": 1,
+              "allow_children": 1
+            },
             "text": "Bookmarks",
             "code": "bookmarks",
-            "icon": "nf nf-oct-bookmark"
+            "icon": "nf nf-oct-bookmark",
+            "items": [
+              {
+                "cfg": {
+                  "show_code": 1,
+                  "allow_children": 1
+                },
+                "text": "Bookmarks list",
+                "code": "list"
+              }
+            ]
           },
           {
             "cfg": {

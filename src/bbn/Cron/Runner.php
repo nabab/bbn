@@ -522,6 +522,6 @@ class Runner extends bbn\Models\Cls\Basic
 
   private function isTestingEnvironment(): bool
   {
-    return defined('BBN_TESTING_EVN') && BBN_TESTING_EVN === true;
+    return !defined('BBN_IS_PROD') || (BBN_IS_PROD === false);
   }
 }

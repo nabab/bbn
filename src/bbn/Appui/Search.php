@@ -204,6 +204,7 @@ class Search
 
                 $result[] = X::mergeArrays($tmp, [
                   'file' => $item['file'] ?? null,
+                  'alternative' => $i + 1,
                   'signature' => ($item['signature'] ?? '') . '-' . ($i + 1)
                 ]);
               }

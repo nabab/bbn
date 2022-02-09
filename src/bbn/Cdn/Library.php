@@ -559,6 +559,7 @@ SQL,
           'npm' => $info['npm'],
           'mode' => $info['mode'],
           'name' => $info['name'],
+          'fname' => $info['fname'],
           'path' => $path,
           'files' => []
         ];

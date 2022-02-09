@@ -499,12 +499,12 @@ JS;
         $tmp = $c['code'];
         if (empty($this->cfg['nocompil'])) {
           $tmp = <<<JS
-window.bbnAddGlobalScript(function(){
+window.bbnAddGlobalScript(function() {
   // $num
   window.bbnLoadFile("$c[dir]/$c[file]");
-  var bbn_language = "{$this->cfg['lang']}",
-      bbn_root_dir = "$c[dir]/",
-      bbn_root_url = "$root_url";
+  let bbn_language = "{$this->cfg['lang']}";
+  let bbn_root_dir = "$c[dir]/";
+  let bbn_root_url = "$root_url";
       $tmp
 });
 JS;
