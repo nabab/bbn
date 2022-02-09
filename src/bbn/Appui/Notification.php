@@ -845,7 +845,7 @@ class Notification extends bbn\Models\Cls\Db
         && ($id_user = $id_user ?: ($notification[$this->fields['id_user']] ?? $this->user->getId()))
         && bbn\Str::isUid($id_user)
         && ($ucfg = $this->user->getClassCfg())
-        && ($ocfg = $this->opt->getClassCfg())
+        && ($pcfg = $this->pref->getClassCfg())
         && ($user = $this->db->select(
           $ucfg['table'], [
           $ucfg['arch']['users']['id_group'],
@@ -862,15 +862,30 @@ class Notification extends bbn\Models\Cls\Db
         return true;
       }
 
-      if (($id_perm = $this->db->selectOne($ocfg['table'], $ocfg['arch']['options']['id'], [$ocfg['arch']['options']['code'] => 'opt'.$id_opt]))
-          && ($perm = $this->opt->option($id_perm))
-      ) {
-        if (!empty($perm['public'])) {
-          return true;
-        }
-
-        return $this->pref->userHas($id_perm, $id_user)
-          || $this->pref->groupHas($id_perm, $user->{$ucfg['arch']['users']['id_group']});
+      if (($id_perm = $this->perms->optionToPermission($id_opt))) {
+      	$parch = $pcfg['arch']['user_options'];
+        return (bool)$this->db->selectOne([
+          'table' => $pcfg['table'],
+          'fields' => ['id'],
+          'where' => [
+            'conditions' => [[
+                'field' => $parch['id_option'],
+                'value' => $id_perm
+                  ], [
+                'logic' => 'OR',
+                'conditions' => [[
+                  'field' => $parch['public'],
+                  'value' => 1
+                ], [
+                  'field' => $parch['id_user'],
+                  'value' => $id_user
+                ], [
+                  'field' => $parch['id_group'],
+                  'value' => $user->{$ucfg['arch']['users']['id_group']}
+                ]]
+            ]]
+          ]
+        ]);
       }
     }
 
