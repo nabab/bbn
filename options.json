@@ -2462,7 +2462,14 @@
         "code": "meeting",
         "id_alias": ["plugin", "list", "templates", "option", "appui"],
         "icon": "nf nf-mdi-webcam",
-        "plugin": true
+        "plugin": true,
+        "items": [
+          {
+            "text": "List",
+            "code": "list",
+            "icon": "nf nf-fa-server"
+          }
+        ]
       },
       {
         "cfg": {

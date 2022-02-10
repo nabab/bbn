@@ -29,13 +29,13 @@ class Meeting extends bbn\Models\Cls\Db
 
   /** @var array Database architecture schema */
   protected static $default_class_cfg = [
-    'table' => 'bbn_meeting',
+    'table' => 'bbn_meetings',
     'tables' => [
-      'meeting' => 'bbn_meeting',
-      'participants' => 'bbn_meeting_participants'
+      'meetings' => 'bbn_meetings',
+      'participants' => 'bbn_meetings_participants'
     ],
     'arch' => [
-      'meeting' => [
+      'meetings' => [
         'id' => 'id',
         'id_room' => 'id_room',
         'id_tmp' => 'id_tmp',
@@ -220,6 +220,8 @@ class Meeting extends bbn\Models\Cls\Db
           $r['participants'] = [];
         }
         $r['live'] = !empty($idMeeting);
+        $last = $this->getLastMeeting($r[$this->prefFields['id']]);
+        $r['last'] = !empty($last) ? $last[$this->class_cfg['arch']['meetings']['started']] : '';
         $rooms[$i] = $r;
       }
     }
@@ -274,9 +276,7 @@ class Meeting extends bbn\Models\Cls\Db
       $this->prefFields['id_group'] => $idGroup,
       $this->prefFields['public'] => empty($idUser) && empty($idGroup) ? 1 : 0,
       $this->prefFields['cfg'] => \json_encode([
-        'created' => date('Y-m-d H:i:s'),
-        'last_use' => '',
-        'last_duration' => 0
+        'created' => date('Y-m-d H:i:s')
       ])
     ])) {
       $idRoom = $this->db->lastId();
@@ -511,14 +511,20 @@ class Meeting extends bbn\Models\Cls\Db
   public function setLeaved(string $idMeeting, string $idTmp, string $idUser = null): bool
   {
     $fields = $this->class_cfg['arch']['participants'];
-    return (bool)$this->db->update($this->class_cfg['tables']['participants'], [
+    if ($this->db->update($this->class_cfg['tables']['participants'], [
       $fields['leaved'] => date('Y-m-d H:i:s')
     ], [
       $fields['id_user'] => $idUser,
       $fields['id_tmp'] => $idTmp,
       $fields['id_meeting'] => $idMeeting,
       $fields['leaved'] => null
-    ]);
+    ])) {
+      if (!$this->getParticipants($idMeeting)) {
+        $this->stopMeeting($idMeeting);
+      }
+      return true;
+    }
+    return false;
   }
 
 
@@ -537,7 +543,7 @@ class Meeting extends bbn\Models\Cls\Db
     if ($idMeeting = $this->getStartedMeeting($idRoom)) {
       return $idMeeting;
     }
-    $fields = $this->class_cfg['arch']['meeting'];
+    $fields = $this->class_cfg['arch']['meetings'];
     if (!$this->db->insert($this->class_cfg['table'], [
       $fields['id_room'] => $idRoom,
       $fields['started'] => date('Y-m-d H:i:s')
@@ -555,7 +561,7 @@ class Meeting extends bbn\Models\Cls\Db
       throw new \Error(sprintf(_('Meeting not found with the id %s'), $idMeeting));
     }
     $date = date('Y-m-d H:i:s');
-    $fields = $this->class_cfg['arch']['meeting'];
+    $fields = $this->class_cfg['arch']['meetings'];
     if (\is_null($m[$fields['ended']])
       && !$this->db->update($this->class_cfg['table'], [
         $fields['ended'] => $date
@@ -577,7 +583,7 @@ class Meeting extends bbn\Models\Cls\Db
 
   public function getStartedMeeting(string $idRoom): ?string
   {
-    $fields = $this->class_cfg['arch']['meeting'];
+    $fields = $this->class_cfg['arch']['meetings'];
     return $this->db->selectOne([
       'table' => $this->class_cfg['table'],
       'fields' => [$fields['id']],
@@ -594,13 +600,28 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
+  public function getLastMeeting(string $idRoom): ?array
+  {
+    return $this->db->rselect(
+      $this->class_cfg['table'],
+      [],
+      [
+        $this->class_cfg['arch']['meetings']['id_room'] => $idRoom
+      ],
+      [
+        $this->class_cfg['arch']['meetings']['started'] => 'DESC'
+      ]
+    );
+  }
+
+
   public function getMeeting(string $idMeeting): ?array
   {
     return $this->db->rselect(
       $this->class_cfg['table'],
       [],
       [
-        $this->class_cfg['arch']['meeting']['id'] => $idMeeting
+        $this->class_cfg['arch']['meetings']['id'] => $idMeeting
       ]
     );
   }
@@ -612,7 +633,7 @@ class Meeting extends bbn\Models\Cls\Db
       $this->class_cfg['table'],
       [],
       [
-        $this->class_cfg['arch']['meeting']['id_tmp'] => $idTmp
+        $this->class_cfg['arch']['meetings']['id_tmp'] => $idTmp
       ]
     );
   }
