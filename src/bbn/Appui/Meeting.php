@@ -3,6 +3,7 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\Str;
+use bbn\X;
 
 /**
  * Meeting management in Appui
@@ -47,6 +48,7 @@ class Meeting extends bbn\Models\Cls\Db
         'id_meeting' => 'id_meeting',
         'id_tmp' => 'id_tmp',
         'id_user' => 'id_user',
+        'invited' => 'invited',
         'joined' => 'joined',
         'leaved' => 'leaved'
       ]
@@ -150,7 +152,7 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function getAllRooms(string $idUser = null, string $idGroup = null, bool $moderators = true): ?array
+  public function getAllRooms(string $idUser = null, string $idGroup = null): ?array
   {
     $servers = $this->getOptionsIds('list');
     if (!empty($servers)) {
@@ -204,20 +206,67 @@ class Meeting extends bbn\Models\Cls\Db
         'dir' => 'ASC'
       ]]
     ]);
+    if (!empty($idUser)) {
+      $meetingsTable = $this->class_cfg['tables']['meetings'];
+      $meetingsFields = $this->class_cfg['arch']['meetings'];
+      $partsTable = $this->class_cfg['tables']['participants'];
+      $partsFields = $this->class_cfg['arch']['participants'];
+      $t = $this;
+      if ($roomsInvited = $this->db->rselectAll([
+        'table' => $this->prefTable,
+        'fields' => \array_map(function($f) use ($t){
+          return $t->db->colFullName($f, $t->prefTable);
+        }, $this->prefFields),
+        'join' => [[
+          'table' => $meetingsTable,
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->colFullName($meetingsFields['id_room'], $meetingsTable),
+              'exp' => $this->db->colFullName($this->prefFields['id'], $this->prefTable)
+            ]]
+          ]
+        ], [
+          'table' => $partsTable,
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->colFullName($meetingsFields['id'], $meetingsTable),
+              'exp' => $this->db->colFullName($partsFields['id_meeting'], $partsTable)
+            ]]
+          ]
+        ]],
+        'where' => [
+          'conditions' => [[
+            'field' => $this->db->colFullName($partsFields['id_user'], $partsTable),
+            'value' => $idUser
+          ], [
+            'field' => $this->db->colFullName($partsFields['invited'], $partsTable),
+            'value' => 1
+          ]]
+        ],
+        'group_by' => [$this->db->colFullName($meetingsFields['id_room'], $meetingsTable)]
+      ])) {
+        foreach ($roomsInvited as $r) {
+          if (X::find($rooms, [$this->prefFields['id'] => $r[$this->prefFields['id']]]) === null) {
+            $rooms[] = $r;
+          }
+        }
+      }
+    }
+    X::sortBy($rooms, $this->prefFields['text'], 'asc');
     if (!empty($rooms)) {
       foreach ($rooms as $i => $r) {
-        if (!empty($moderators)) {
-          $r['moderators'] = $this->getModerators($r[$this->prefFields['id']]);
-        }
+        $r['moderators'] = $this->getModerators($r[$this->prefFields['id']]);
         if (Str::isJson($r[$this->prefFields['cfg']])) {
           $r = \array_merge($r, \json_decode($r[$this->prefFields['cfg']], true));
           unset($r[$this->prefFields['cfg']]);
         }
         if ($idMeeting = $this->getStartedMeeting($r[$this->prefFields['id']])) {
           $r['participants'] = $this->getParticipants($idMeeting);
+          $r['invited'] = $this->getInvited($idMeeting);
         }
         else {
           $r['participants'] = [];
+          $r['invited'] = [];
         }
         $r['live'] = !empty($idMeeting);
         $last = $this->getLastMeeting($r[$this->prefFields['id']]);
@@ -494,14 +543,45 @@ class Meeting extends bbn\Models\Cls\Db
     }
     if (!empty($idMeeting)) {
       $fields = $this->class_cfg['arch']['participants'];
-      $this->setLeaved($idMeeting, $idTmp, $idUser);
-      if ($this->db->insert($this->class_cfg['tables']['participants'], [
-        $fields['id_meeting'] => $idMeeting,
-        $fields['id_user'] => $idUser,
-        $fields['id_tmp'] => $idTmp,
-        $fields['joined'] => date('Y-m-d H:i:s')
+      $table = $this->class_cfg['tables']['participants'];
+      if ($invited = $this->db->selectOne([
+        'table' => $table,
+        'fields' => [$fields['id']],
+        'where' => [
+          'conditions' => [[
+            'field' => $fields['id_meeting'],
+            'value' => $idMeeting
+          ], [
+            'field' => $fields['id_user'],
+            'value' => $idUser
+          ], [
+            'field' => $fields['invited'],
+            'value' => 1
+          ], [
+            'field' => $fields['joined'],
+            'operator' => 'isnull'
+          ]]
+        ]
       ])) {
-        return $this->db->lastId();
+        if ($this->db->update($table, [
+          $fields['id_tmp'] => $idTmp,
+          $fields['joined'] => date('Y-m-d H:i:s')
+        ], [
+          $fields['id'] => $invited
+        ])) {
+          return $invited;
+        }
+      }
+      else {
+        $this->setLeaved($idMeeting, $idTmp, $idUser);
+        if ($this->db->insert($table, [
+          $fields['id_meeting'] => $idMeeting,
+          $fields['id_user'] => $idUser,
+          $fields['id_tmp'] => $idTmp,
+          $fields['joined'] => date('Y-m-d H:i:s')
+        ])) {
+          return $this->db->lastId();
+        }
       }
     }
     return null;
@@ -531,9 +611,41 @@ class Meeting extends bbn\Models\Cls\Db
   public function getParticipants(string $idMeeting): array
   {
     $fields = $this->class_cfg['arch']['participants'];
-    return $this->db->rselectAll($this->class_cfg['tables']['participants'], [], [
-      $fields['id_meeting'] => $idMeeting,
-      $fields['leaved'] => null
+    return $this->db->rselectAll([
+      'table' => $this->class_cfg['tables']['participants'],
+      'fields' => [],
+      'where' => [
+        'conditions' => [[
+          'field' => $fields['id_meeting'],
+          'value' => $idMeeting
+        ], [
+          'field' => $fields['leaved'],
+          'operator' => 'isnull'
+        ], [
+          'field' => $fields['joined'],
+          'operator' => 'isnotnull'
+        ]]
+      ]
+    ]);
+  }
+
+
+  public function getInvited(string $idMeeting): array
+  {
+    $fields = $this->class_cfg['arch']['participants'];
+    return $this->db->getColumnValues([
+      'table' => $this->class_cfg['tables']['participants'],
+      'fields' => [$fields['id_user']],
+      'where' => [
+        'conditions' => [[
+          'field' => $fields['id_meeting'],
+          'value' => $idMeeting
+        ], [
+          'field' => $fields['invited'],
+          'value' => 1
+        ]]
+      ],
+      'group_by' => [$fields['id_user']]
     ]);
   }
 
@@ -636,6 +748,37 @@ class Meeting extends bbn\Models\Cls\Db
         $this->class_cfg['arch']['meetings']['id_tmp'] => $idTmp
       ]
     );
+  }
+
+
+  public function inviteUser(string $idMeeting, string $idUser): bool
+  {
+    $fields = $this->class_cfg['arch']['participants'];
+    $table = $this->class_cfg['tables']['participants'];
+    $exists = $this->db->selectOne([
+      'table' => $table,
+      'fields' => [$fields['id']],
+      'where' => [
+        'conditions' => [[
+          'field' => $fields['id_meeting'],
+          'value' => $idMeeting
+        ], [
+          'field' => $fields['id_user'],
+          'value' => $idUser
+        ], [
+          'field' => $fields['invited'],
+          'value' => 1
+        ]]
+      ]
+    ]);
+    if (!empty($exists)) {
+      return true;
+    }
+    return (bool)$this->db->insert($table, [
+      $fields['id_meeting'] => $idMeeting,
+      $fields['id_user'] => $idUser,
+      $fields['invited'] => 1
+    ]);
   }
 
 
