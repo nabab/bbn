@@ -126,7 +126,7 @@ class Cms extends DbCls
   public function getLatest(array $filter = [], int $limit = 20, int $start = 0): array
   {
     $cfg = $this->getLastVersionCfg(false, true, $filter);
-    $cfg['order'] = [['field' => 'start', 'dir' => 'DESC']];
+    $cfg['order'] = [['field' => 'bbn_events.start', 'dir' => 'DESC']];
     $cfg['limit'] = $limit;
     $cfg['start'] = $start;
 
@@ -176,8 +176,45 @@ class Cms extends DbCls
     $cfg['fields'][]             = 'start';
     $cfg['fields'][]             = 'end';
     $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';
-    $cfg['where']['mime']        = 'json/bbn-cms';
-    $cfg['where']['private']     = 0;
+    $cfg['where']['conditions'][] = [
+      'field' => 'mime',
+      'value' => 'json/bbn-cms'
+    ];
+    $cfg['where']['conditions'][] = [
+      'field' => 'private',
+      'value' => 0
+    ];
+    if ($published) {
+      $cfg['where']['conditions'][] = [
+        'field' => 'bbn_events.start',
+        'operator' => '<=',
+        'value' => date('Y-m-d')
+      ];
+      $cfg['where']['conditions'][] = [
+        'logic' => 'OR',
+        'conditions' => [
+          [
+            'field' => 'bbn_events.end',
+            'operator' => '>=',
+            'value' => date('Y-m-d')
+          ], [
+            'field' => 'bbn_events.end',
+            'operator' => 'isnull',
+          ]
+        ]
+      ];
+    }
+
+    if (!empty($filter)) {
+      if (!isset($filter['conditions'])) {
+        $filter = [
+          'conditions' => $filter
+        ];
+      }
+
+      $cfg['where']['conditions'][] = $filter;
+   }
+
     $cfg['join'][] = [
         'table' => $this->class_cfg['tables']['notes_url'],
         'type' => 'left',
