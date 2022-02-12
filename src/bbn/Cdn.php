@@ -459,8 +459,8 @@ class Cdn extends Models\Cls\Basic
     window.bbnLoadedFiles = [];
     window.bbnMinified = $test;
     window.bbnLoadFile = (file) => {
-      if ( file.substr(0, 1) === '/' ){
-        file = file.substr(1);
+      if ( file.substring(0, 1) === '/' ){
+        file = file.substring(1);
       }
       if (
         (window.bbnLoadedFiles !== undefined) &&
