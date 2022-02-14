@@ -2335,7 +2335,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $html, array $allowed_tags = [], array $allowed_attr = [])\n  {\n    if (!self::$_htmlSanitizer) {\n      $config = HTMLPurifier_Config::createDefault();\n      $config->set('Core', 'Encoding', 'UTF-8');\n      \/\/$config->set('HTML', 'Doctype', 'HTML 4.01 Transitional');\n      if (defined('PURIFIER_CACHE')) {\n        $config->set('Cache', 'SerializerPath', PURIFIER_CACHE);\n      }\n      else {\n        # Disable the cache entirely\n        $config->set('Cache', 'DefinitionImpl', null);\n      }\n\n      self::$_htmlSanitizer = new HTMLPurifier($config);\n    }\n\n    return self::$_htmlSanitizer->purify($html);\n  }",
+            "code": "function(string $html, array $allowed_tags = [], array $allowed_attr = [])\n  {\n    if (!self::$_htmlSanitizer) {\n      $config = \\HTMLPurifier_Config::createDefault();\n      $config->set('Core', 'Encoding', 'UTF-8');\n      \/\/$config->set('HTML', 'Doctype', 'HTML 4.01 Transitional');\n      if (defined('PURIFIER_CACHE')) {\n        $config->set('Cache', 'SerializerPath', PURIFIER_CACHE);\n      }\n      else {\n        # Disable the cache entirely\n        $config->set('Cache', 'DefinitionImpl', null);\n      }\n\n      self::$_htmlSanitizer = new \\HTMLPurifier($config);\n    }\n\n    return self::$_htmlSanitizer->purify($html);\n  }",
             "startLine": 1822,
             "endLine": 1840,
             "isDeprecated": false,

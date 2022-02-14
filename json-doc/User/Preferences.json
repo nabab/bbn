@@ -2132,7 +2132,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, array $cfg, $merge_config)\n  {\n    if (\\bbn\\Str::isUid($id)) {\n      $c = $this->class_cfg['arch']['user_options_bits'];\n      if (\\array_key_exists($c['id'], $cfg)) {\n        unset($cfg[$c['id']]);\n      }\n\n      if (!empty($cfg[$c['cfg']]) && \\bbn\\Str::isJson($cfg[$c['cfg']])) {\n        $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);\n      }\n\n      $to_cfg = $this->getBitCfg(null, $cfg[$c['cfg']] ?? $cfg);\n      if (isset($to_cfg['items'])) {\n        unset($to_cfg['items']);\n      }\n\n      $update   = [];\n      $from_cfg = $this->getBitCfg($id);\n      if (!empty($to_cfg)) {\n        if ($merge_config && !empty($from_cfg)) {\n          $update['cfg'] = json_encode(array_merge($from_cfg, $to_cfg));\n        }\n        else {\n          $update['cfg'] = json_encode($to_cfg);\n        }\n      }\n      elseif (!$merge_config) {\n        $update['cfg'] = null;\n      }\n\n      if (isset($cfg[$c['id_parent']])) {\n        $update[$c['id_parent']] = $cfg[$c['id_parent']];\n      }\n      if (isset($cfg[$c['id_option']])) {\n        $update[$c['id_option']] = $cfg[$c['id_option']];\n      }\n      if (isset($cfg[$c['num']])) {\n        $update[$c['num']] = $cfg[$c['num']];\n      }\n      if (isset($cfg[$c['text']])) {\n        $update[$c['text']] = $cfg[$c['text']];\n      }\n\n      return count($update) ? $this->db->update(\n          $this->class_cfg['tables']['user_options_bits'],\n          $update,\n          [$c['id'] => $id]\n      ) : 0;\n    }\n\n    return null;\n  }",
+            "code": "function(string $id, array $cfg, bool $merge_config = true)\n  {\n    if (\\bbn\\Str::isUid($id)) {\n      $c = $this->class_cfg['arch']['user_options_bits'];\n      if (\\array_key_exists($c['id'], $cfg)) {\n        unset($cfg[$c['id']]);\n      }\n\n      if (!empty($cfg[$c['cfg']]) && \\bbn\\Str::isJson($cfg[$c['cfg']])) {\n        $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);\n      }\n\n      $to_cfg = $this->getBitCfg(null, $cfg[$c['cfg']] ?? $cfg);\n      if (isset($to_cfg['items'])) {\n        unset($to_cfg['items']);\n      }\n\n      $update   = [];\n      $from_cfg = $this->getBitCfg($id);\n      if (!empty($to_cfg)) {\n        if ($merge_config && !empty($from_cfg)) {\n          $update['cfg'] = json_encode(array_merge($from_cfg, $to_cfg));\n        }\n        else {\n          $update['cfg'] = json_encode($to_cfg);\n        }\n      }\n      elseif (!$merge_config) {\n        $update['cfg'] = null;\n      }\n\n      if (isset($cfg[$c['id_parent']])) {\n        $update[$c['id_parent']] = $cfg[$c['id_parent']];\n      }\n      if (isset($cfg[$c['id_option']])) {\n        $update[$c['id_option']] = $cfg[$c['id_option']];\n      }\n      if (isset($cfg[$c['num']])) {\n        $update[$c['num']] = $cfg[$c['num']];\n      }\n      if (isset($cfg[$c['text']])) {\n        $update[$c['text']] = $cfg[$c['text']];\n      }\n\n      return count($update) ? $this->db->update(\n          $this->class_cfg['tables']['user_options_bits'],\n          $update,\n          [$c['id'] => $id]\n      ) : 0;\n    }\n\n    return null;\n  }",
             "startLine": 1795,
             "endLine": 1847,
             "isDeprecated": false,
@@ -2142,7 +2142,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 3,
-            "numberOfRequiredParameters": 3,
+            "numberOfRequiredParameters": 2,
             "returns": [
                 null
             ],
@@ -2171,10 +2171,10 @@
                 {
                     "name": "merge_config",
                     "position": 2,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
                     "default_name": "",
                     "description": "config"
                 }

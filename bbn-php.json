@@ -1986,7 +1986,7 @@
                 "value": "Cms",
                 "text": "Cms",
                 "url": "bbn-php\/doc\/class\/Appui\/Cms",
-                "lastmod": 1642679034,
+                "lastmod": 1644623621,
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
@@ -1994,7 +1994,7 @@
                         "class": "Appui\/Cms",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/__construct",
                         "desc": "Cms constructor."
                     },
@@ -2003,7 +2003,7 @@
                         "class": "Appui\/Cms",
                         "text": "delete",
                         "value": "delete",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/delete",
                         "desc": "Deletes the given note and unpublish it if published."
                     },
@@ -2012,7 +2012,7 @@
                         "class": "Appui\/Cms",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/get",
                         "desc": "Returns the note from its id, with its URL, start and end date of publication."
                     },
@@ -2021,7 +2021,7 @@
                         "class": "Appui\/Cms",
                         "text": "getAll",
                         "value": "getAll",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getAll",
                         "desc": "Returns all the notes of type 'pages'."
                     },
@@ -2030,7 +2030,7 @@
                         "class": "Appui\/Cms",
                         "text": "getByUrl",
                         "value": "getByUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getByUrl",
                         "desc": "If the given url correspond to a published note returns the id."
                     },
@@ -2039,7 +2039,7 @@
                         "class": "Appui\/Cms",
                         "text": "getEnd",
                         "value": "getEnd",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getEnd",
                         "desc": "If  an event linked to the note exists it returns the end date."
                     },
@@ -2048,7 +2048,7 @@
                         "class": "Appui\/Cms",
                         "text": "getEvent",
                         "value": "getEvent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getEvent",
                         "desc": "Returns the object event of the given note."
                     },
@@ -2057,7 +2057,7 @@
                         "class": "Appui\/Cms",
                         "text": "getLastVersionCfg",
                         "value": "getLastVersionCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getLastVersionCfg",
                         "desc": ""
                     },
@@ -2066,7 +2066,7 @@
                         "class": "Appui\/Cms",
                         "text": "getLatest",
                         "value": "getLatest",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getLatest",
                         "desc": ""
                     },
@@ -2075,7 +2075,7 @@
                         "class": "Appui\/Cms",
                         "text": "getNoteType",
                         "value": "getNoteType",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getNoteType",
                         "desc": "Returns the 'pages' note type ID from options, which should always be the type of the CMS notes."
                     },
@@ -2084,7 +2084,7 @@
                         "class": "Appui\/Cms",
                         "text": "getStart",
                         "value": "getStart",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/getStart",
                         "desc": "If an event linked to the note exists it returns the start date."
                     },
@@ -2093,7 +2093,7 @@
                         "class": "Appui\/Cms",
                         "text": "isPublished",
                         "value": "isPublished",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/isPublished",
                         "desc": "If the note has a corresponding event in bbn_events and the date of start is before now,"
                     },
@@ -2102,7 +2102,7 @@
                         "class": "Appui\/Cms",
                         "text": "publish",
                         "value": "publish",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/publish",
                         "desc": "Publish a note."
                     },
@@ -2111,7 +2111,7 @@
                         "class": "Appui\/Cms",
                         "text": "removeUrl",
                         "value": "removeUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/removeUrl",
                         "desc": "Removes the url corresponding to the given id_note from bbn_notes_url."
                     },
@@ -2120,7 +2120,7 @@
                         "class": "Appui\/Cms",
                         "text": "set",
                         "value": "set",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/set",
                         "desc": "Sets content, title, start and end for the given URL."
                     },
@@ -2129,7 +2129,7 @@
                         "class": "Appui\/Cms",
                         "text": "setContent",
                         "value": "setContent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setContent",
                         "desc": "Adds a new version to the given note with the new content"
                     },
@@ -2138,7 +2138,7 @@
                         "class": "Appui\/Cms",
                         "text": "setEvent",
                         "value": "setEvent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setEvent",
                         "desc": "Inserts in bbn_events and bbn_notes_events the information relative to the publication of the given note."
                     },
@@ -2147,7 +2147,7 @@
                         "class": "Appui\/Cms",
                         "text": "setType",
                         "value": "setType",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setType",
                         "desc": "Changes the type of the note"
                     },
@@ -2156,7 +2156,7 @@
                         "class": "Appui\/Cms",
                         "text": "setUrl",
                         "value": "setUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/setUrl",
                         "desc": "Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note."
                     },
@@ -2165,7 +2165,7 @@
                         "class": "Appui\/Cms",
                         "text": "unpublish",
                         "value": "unpublish",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/unpublish",
                         "desc": "Unpublish a note."
                     },
@@ -2174,7 +2174,7 @@
                         "class": "Appui\/Cms",
                         "text": "updateEvent",
                         "value": "updateEvent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1644623621,
                         "url": "bbn-php\/doc\/method\/Appui\/Cms\/updateEvent",
                         "desc": "Updates the event relative to the given note."
                     }
@@ -5673,7 +5673,7 @@
                 "value": "Medias",
                 "text": "Medias",
                 "url": "bbn-php\/doc\/class\/Appui\/Medias",
-                "lastmod": 1642690418,
+                "lastmod": 1644415151,
                 "desc": "",
                 "items": [
                     {
@@ -5681,7 +5681,7 @@
                         "class": "Appui\/Medias",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/__construct",
                         "desc": ""
                     },
@@ -5690,7 +5690,7 @@
                         "class": "Appui\/Medias",
                         "text": "browse",
                         "value": "browse",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/browse",
                         "desc": "Gets an array of medias."
                     },
@@ -5699,7 +5699,7 @@
                         "class": "Appui\/Medias",
                         "text": "browseByGroup",
                         "value": "browseByGroup",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/browseByGroup",
                         "desc": ""
                     },
@@ -5708,7 +5708,7 @@
                         "class": "Appui\/Medias",
                         "text": "count",
                         "value": "count",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/count",
                         "desc": ""
                     },
@@ -5717,7 +5717,7 @@
                         "class": "Appui\/Medias",
                         "text": "delete",
                         "value": "delete",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/delete",
                         "desc": "Deletes the given media"
                     },
@@ -5726,7 +5726,7 @@
                         "class": "Appui\/Medias",
                         "text": "getImageUrl",
                         "value": "getImageUrl",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getImageUrl",
                         "desc": ""
                     },
@@ -5735,7 +5735,7 @@
                         "class": "Appui\/Medias",
                         "text": "getMedia",
                         "value": "getMedia",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMedia",
                         "desc": "Returns the object of the media"
                     },
@@ -5744,7 +5744,7 @@
                         "class": "Appui\/Medias",
                         "text": "getMediaPath",
                         "value": "getMediaPath",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMediaPath",
                         "desc": "Returns the path of the given id_media"
                     },
@@ -5753,7 +5753,7 @@
                         "class": "Appui\/Medias",
                         "text": "getPath",
                         "value": "getPath",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getPath",
                         "desc": ""
                     },
@@ -5762,7 +5762,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbPath",
                         "value": "getThumbPath",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbPath",
                         "desc": "Returns the path to the img for the given $path and size"
                     },
@@ -5771,7 +5771,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbsName",
                         "value": "getThumbsName",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsName",
                         "desc": "Returns the name of the thumb file corresponding to the given name and size"
                     },
@@ -5780,7 +5780,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbsPath",
                         "value": "getThumbsPath",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsPath",
                         "desc": "If the thumbs files exists for this path it returns an array of the the thumbs filename"
                     },
@@ -5789,7 +5789,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbsSizes",
                         "value": "getThumbsSizes",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsSizes",
                         "desc": ""
                     },
@@ -5798,7 +5798,7 @@
                         "class": "Appui\/Medias",
                         "text": "insert",
                         "value": "insert",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/insert",
                         "desc": "Adds a new media"
                     },
@@ -5807,7 +5807,7 @@
                         "class": "Appui\/Medias",
                         "text": "isImage",
                         "value": "isImage",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/isImage",
                         "desc": "Returns true if the given path is an image"
                     },
@@ -5816,25 +5816,52 @@
                         "class": "Appui\/Medias",
                         "text": "removeThumbs",
                         "value": "removeThumbs",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/removeThumbs",
                         "desc": "Remove the thumbs files"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Medias",
+                        "text": "replaceContent",
+                        "value": "replaceContent",
+                        "lastmod": 1644415151,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/replaceContent",
+                        "desc": "Replaces the content of the media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
+                        "text": "setDescription",
+                        "value": "setDescription",
+                        "lastmod": 1644415151,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/setDescription",
+                        "desc": "Sets the description of the media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
                         "text": "setImageRoot",
                         "value": "setImageRoot",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/setImageRoot",
                         "desc": ""
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Medias",
+                        "text": "setTitle",
+                        "value": "setTitle",
+                        "lastmod": 1644415151,
+                        "url": "bbn-php\/doc\/method\/Appui\/Medias\/setTitle",
+                        "desc": "Sets the title of the media"
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Medias",
                         "text": "update",
                         "value": "update",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/update",
                         "desc": "updates the title or the name or the title of the given media at the level of the file and database"
                     },
@@ -5843,7 +5870,7 @@
                         "class": "Appui\/Medias",
                         "text": "updateContent",
                         "value": "updateContent",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/updateContent",
                         "desc": "Updates the content of the media when it's deleted and replaced in the bbn-upload"
                     },
@@ -5852,7 +5879,7 @@
                         "class": "Appui\/Medias",
                         "text": "updateDb",
                         "value": "updateDb",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/updateDb",
                         "desc": "Updates the media on the databases"
                     },
@@ -5861,8 +5888,252 @@
                         "class": "Appui\/Medias",
                         "text": "zip",
                         "value": "zip",
-                        "lastmod": 1642690418,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/zip",
+                        "desc": ""
+                    }
+                ]
+            },
+            {
+                "type": "class",
+                "value": "Meeting",
+                "text": "Meeting",
+                "url": "bbn-php\/doc\/class\/Appui\/Meeting",
+                "lastmod": 1644626569,
+                "desc": "Meeting management in Appui",
+                "items": [
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "__construct",
+                        "value": "__construct",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/__construct",
+                        "desc": "Constructor."
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "addModerator",
+                        "value": "addModerator",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/addModerator",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "addRoom",
+                        "value": "addRoom",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/addRoom",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "checkModeratorToken",
+                        "value": "checkModeratorToken",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/checkModeratorToken",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "editRoom",
+                        "value": "editRoom",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/editRoom",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getAllRooms",
+                        "value": "getAllRooms",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getAllRooms",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getAllUserRooms",
+                        "value": "getAllUserRooms",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getAllUserRooms",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getInvited",
+                        "value": "getInvited",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getInvited",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getLastMeeting",
+                        "value": "getLastMeeting",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getLastMeeting",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getMeeting",
+                        "value": "getMeeting",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getMeeting",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getMeetingByTmp",
+                        "value": "getMeetingByTmp",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getMeetingByTmp",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getModerators",
+                        "value": "getModerators",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getModerators",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getModeratorToken",
+                        "value": "getModeratorToken",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getModeratorToken",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getParticipants",
+                        "value": "getParticipants",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getParticipants",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getRoom",
+                        "value": "getRoom",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getRoom",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getRooms",
+                        "value": "getRooms",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getRooms",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getStartedMeeting",
+                        "value": "getStartedMeeting",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getStartedMeeting",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "getUserRooms",
+                        "value": "getUserRooms",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/getUserRooms",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "inviteUser",
+                        "value": "inviteUser",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/inviteUser",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "isModerator",
+                        "value": "isModerator",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/isModerator",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "removeModerator",
+                        "value": "removeModerator",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/removeModerator",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "removeRoom",
+                        "value": "removeRoom",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/removeRoom",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "setJoined",
+                        "value": "setJoined",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/setJoined",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "setLeaved",
+                        "value": "setLeaved",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/setLeaved",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "startMeeting",
+                        "value": "startMeeting",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/startMeeting",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Meeting",
+                        "text": "stopMeeting",
+                        "value": "stopMeeting",
+                        "lastmod": 1644626569,
+                        "url": "bbn-php\/doc\/method\/Appui\/Meeting\/stopMeeting",
                         "desc": ""
                     }
                 ]
@@ -6098,7 +6369,7 @@
                 "value": "Note",
                 "text": "Note",
                 "url": "bbn-php\/doc\/class\/Appui\/Note",
-                "lastmod": 1642679034,
+                "lastmod": 1642740805,
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
@@ -6106,7 +6377,7 @@
                         "class": "Appui\/Note",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/__construct",
                         "desc": "Note constructor."
                     },
@@ -6115,7 +6386,7 @@
                         "class": "Appui\/Note",
                         "text": "addMedia",
                         "value": "addMedia",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/addMedia",
                         "desc": ""
                     },
@@ -6124,7 +6395,7 @@
                         "class": "Appui\/Note",
                         "text": "addMediaToNote",
                         "value": "addMediaToNote",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/addMediaToNote",
                         "desc": ""
                     },
@@ -6133,7 +6404,7 @@
                         "class": "Appui\/Note",
                         "text": "browse",
                         "value": "browse",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/browse",
                         "desc": ""
                     },
@@ -6142,7 +6413,7 @@
                         "class": "Appui\/Note",
                         "text": "copy",
                         "value": "copy",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/copy",
                         "desc": ""
                     },
@@ -6151,7 +6422,7 @@
                         "class": "Appui\/Note",
                         "text": "count",
                         "value": "count",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/count",
                         "desc": ""
                     },
@@ -6160,7 +6431,7 @@
                         "class": "Appui\/Note",
                         "text": "countByType",
                         "value": "countByType",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/countByType",
                         "desc": ""
                     },
@@ -6169,7 +6440,7 @@
                         "class": "Appui\/Note",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/get",
                         "desc": ""
                     },
@@ -6178,7 +6449,7 @@
                         "class": "Appui\/Note",
                         "text": "getByType",
                         "value": "getByType",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getByType",
                         "desc": ""
                     },
@@ -6187,7 +6458,7 @@
                         "class": "Appui\/Note",
                         "text": "getEventIdFromNote",
                         "value": "getEventIdFromNote",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getEventIdFromNote",
                         "desc": "Returns event id for the given note."
                     },
@@ -6196,7 +6467,7 @@
                         "class": "Appui\/Note",
                         "text": "getExcerpt",
                         "value": "getExcerpt",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getExcerpt",
                         "desc": ""
                     },
@@ -6205,7 +6476,7 @@
                         "class": "Appui\/Note",
                         "text": "getFull",
                         "value": "getFull",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getFull",
                         "desc": ""
                     },
@@ -6214,7 +6485,7 @@
                         "class": "Appui\/Note",
                         "text": "getLang",
                         "value": "getLang",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getLang",
                         "desc": ""
                     },
@@ -6223,7 +6494,7 @@
                         "class": "Appui\/Note",
                         "text": "getLastVersionCfg",
                         "value": "getLastVersionCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getLastVersionCfg",
                         "desc": "Returns the configuration to have the last version for each note"
                     },
@@ -6232,7 +6503,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediaInstance",
                         "value": "getMediaInstance",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaInstance",
                         "desc": ""
                     },
@@ -6241,7 +6512,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediaNotes",
                         "value": "getMediaNotes",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaNotes",
                         "desc": "returns all the notes linked to the media."
                     },
@@ -6250,7 +6521,7 @@
                         "class": "Appui\/Note",
                         "text": "getMedias",
                         "value": "getMedias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMedias",
                         "desc": ""
                     },
@@ -6259,7 +6530,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediasNotes",
                         "value": "getMediasNotes",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediasNotes",
                         "desc": "Selects from db all medias that have the property content not null and a correspondent existing file."
                     },
@@ -6268,7 +6539,7 @@
                         "class": "Appui\/Note",
                         "text": "getNoteIdFromEvent",
                         "value": "getNoteIdFromEvent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getNoteIdFromEvent",
                         "desc": "Returns note id for the given event."
                     },
@@ -6277,7 +6548,7 @@
                         "class": "Appui\/Note",
                         "text": "getVersions",
                         "value": "getVersions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getVersions",
                         "desc": ""
                     },
@@ -6286,7 +6557,7 @@
                         "class": "Appui\/Note",
                         "text": "hasMedias",
                         "value": "hasMedias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/hasMedias",
                         "desc": ""
                     },
@@ -6295,7 +6566,7 @@
                         "class": "Appui\/Note",
                         "text": "insert",
                         "value": "insert",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insert",
                         "desc": "Creates a new note in the database"
                     },
@@ -6304,7 +6575,7 @@
                         "class": "Appui\/Note",
                         "text": "insertNoteEvent",
                         "value": "insertNoteEvent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertNoteEvent",
                         "desc": "If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row."
                     },
@@ -6313,7 +6584,7 @@
                         "class": "Appui\/Note",
                         "text": "insertOrUpdateUrl",
                         "value": "insertOrUpdateUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertOrUpdateUrl",
                         "desc": "Insert the given url to the note if has no url and update it otherwise."
                     },
@@ -6322,7 +6593,7 @@
                         "class": "Appui\/Note",
                         "text": "insertVersion",
                         "value": "insertVersion",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertVersion",
                         "desc": "Adds a new version to the given note if it's different from the last, and returns the latest version."
                     },
@@ -6331,7 +6602,7 @@
                         "class": "Appui\/Note",
                         "text": "latest",
                         "value": "latest",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/latest",
                         "desc": ""
                     },
@@ -6340,7 +6611,7 @@
                         "class": "Appui\/Note",
                         "text": "media2version",
                         "value": "media2version",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/media2version",
                         "desc": ""
                     },
@@ -6349,7 +6620,7 @@
                         "class": "Appui\/Note",
                         "text": "remove",
                         "value": "remove",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/remove",
                         "desc": ""
                     },
@@ -6358,7 +6629,7 @@
                         "class": "Appui\/Note",
                         "text": "removeMedia",
                         "value": "removeMedia",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeMedia",
                         "desc": ""
                     },
@@ -6367,7 +6638,7 @@
                         "class": "Appui\/Note",
                         "text": "removeNoteEvent",
                         "value": "removeNoteEvent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeNoteEvent",
                         "desc": "Removes the row corresponding to the given arguments from bbn_notes_events."
                     },
@@ -6376,7 +6647,7 @@
                         "class": "Appui\/Note",
                         "text": "setLang",
                         "value": "setLang",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setLang",
                         "desc": ""
                     },
@@ -6385,7 +6656,7 @@
                         "class": "Appui\/Note",
                         "text": "setType",
                         "value": "setType",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setType",
                         "desc": "Changes the type of the note"
                     },
@@ -6394,7 +6665,7 @@
                         "class": "Appui\/Note",
                         "text": "update",
                         "value": "update",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/update",
                         "desc": ""
                     },
@@ -6403,7 +6674,7 @@
                         "class": "Appui\/Note",
                         "text": "urlToNote",
                         "value": "urlToNote",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740805,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/urlToNote",
                         "desc": ""
                     }
@@ -6414,7 +6685,7 @@
                 "value": "Notification",
                 "text": "Notification",
                 "url": "bbn-php\/doc\/class\/Appui\/Notification",
-                "lastmod": 1639280106,
+                "lastmod": 1644415151,
                 "desc": "",
                 "items": [
                     {
@@ -6422,7 +6693,7 @@
                         "class": "Appui\/Notification",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/__construct",
                         "desc": ""
                     },
@@ -6431,7 +6702,7 @@
                         "class": "Appui\/Notification",
                         "text": "_user_has_permission",
                         "value": "_user_has_permission",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/_user_has_permission",
                         "desc": ""
                     },
@@ -6440,7 +6711,7 @@
                         "class": "Appui\/Notification",
                         "text": "contUnread",
                         "value": "contUnread",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/contUnread",
                         "desc": ""
                     },
@@ -6449,7 +6720,7 @@
                         "class": "Appui\/Notification",
                         "text": "create",
                         "value": "create",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/create",
                         "desc": ""
                     },
@@ -6458,7 +6729,7 @@
                         "class": "Appui\/Notification",
                         "text": "delete",
                         "value": "delete",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/delete",
                         "desc": ""
                     },
@@ -6467,7 +6738,7 @@
                         "class": "Appui\/Notification",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/get",
                         "desc": ""
                     },
@@ -6476,7 +6747,7 @@
                         "class": "Appui\/Notification",
                         "text": "getCfg",
                         "value": "getCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/getCfg",
                         "desc": ""
                     },
@@ -6485,7 +6756,7 @@
                         "class": "Appui\/Notification",
                         "text": "getIdContent",
                         "value": "getIdContent",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/getIdContent",
                         "desc": ""
                     },
@@ -6494,7 +6765,7 @@
                         "class": "Appui\/Notification",
                         "text": "getLastId",
                         "value": "getLastId",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/getLastId",
                         "desc": ""
                     },
@@ -6503,7 +6774,7 @@
                         "class": "Appui\/Notification",
                         "text": "getListByUser",
                         "value": "getListByUser",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/getListByUser",
                         "desc": ""
                     },
@@ -6512,7 +6783,7 @@
                         "class": "Appui\/Notification",
                         "text": "getUnread",
                         "value": "getUnread",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/getUnread",
                         "desc": ""
                     },
@@ -6521,7 +6792,7 @@
                         "class": "Appui\/Notification",
                         "text": "getUnreadIds",
                         "value": "getUnreadIds",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/getUnreadIds",
                         "desc": ""
                     },
@@ -6530,7 +6801,7 @@
                         "class": "Appui\/Notification",
                         "text": "insert",
                         "value": "insert",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/insert",
                         "desc": ""
                     },
@@ -6539,7 +6810,7 @@
                         "class": "Appui\/Notification",
                         "text": "insertByOption",
                         "value": "insertByOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/insertByOption",
                         "desc": ""
                     },
@@ -6548,7 +6819,7 @@
                         "class": "Appui\/Notification",
                         "text": "notify",
                         "value": "notify",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/notify",
                         "desc": ""
                     },
@@ -6557,7 +6828,7 @@
                         "class": "Appui\/Notification",
                         "text": "process",
                         "value": "process",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/process",
                         "desc": ""
                     },
@@ -6566,7 +6837,7 @@
                         "class": "Appui\/Notification",
                         "text": "read",
                         "value": "read",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/read",
                         "desc": ""
                     },
@@ -6575,7 +6846,7 @@
                         "class": "Appui\/Notification",
                         "text": "readAll",
                         "value": "readAll",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/readAll",
                         "desc": ""
                     },
@@ -6584,7 +6855,7 @@
                         "class": "Appui\/Notification",
                         "text": "setCfg",
                         "value": "setCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644415151,
                         "url": "bbn-php\/doc\/method\/Appui\/Notification\/setCfg",
                         "desc": ""
                     }
@@ -6677,7 +6948,7 @@
                 "value": "Option",
                 "text": "Option",
                 "url": "bbn-php\/doc\/class\/Appui\/Option",
-                "lastmod": 1642679034,
+                "lastmod": 1642964221,
                 "desc": "",
                 "items": [
                     {
@@ -6685,7 +6956,7 @@
                         "class": "Appui\/Option",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/__construct",
                         "desc": "Constructor"
                     },
@@ -6694,7 +6965,7 @@
                         "class": "Appui\/Option",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/add",
                         "desc": "Creates a new option or a new hierarchy by adding row(s) in the options' table"
                     },
@@ -6703,7 +6974,7 @@
                         "class": "Appui\/Option",
                         "text": "alias",
                         "value": "alias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/alias",
                         "desc": "Returns the id_alias relative to the given id_option"
                     },
@@ -6712,7 +6983,7 @@
                         "class": "Appui\/Option",
                         "text": "analyzeOut",
                         "value": "analyzeOut",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/analyzeOut",
                         "desc": ""
                     },
@@ -6721,16 +6992,25 @@
                         "class": "Appui\/Option",
                         "text": "apply",
                         "value": "apply",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/apply",
                         "desc": "Applies a function to children of an option and updates the database"
                     },
                     {
                         "type": "method",
                         "class": "Appui\/Option",
+                        "text": "applyTemplate",
+                        "value": "applyTemplate",
+                        "lastmod": 1642964221,
+                        "url": "bbn-php\/doc\/method\/Appui\/Option\/applyTemplate",
+                        "desc": ""
+                    },
+                    {
+                        "type": "method",
+                        "class": "Appui\/Option",
                         "text": "categories",
                         "value": "categories",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/categories",
                         "desc": "Retourne la liste des cat\u00e9gories sous forme de tableau index\u00e9 sur son `id`"
                     },
@@ -6739,7 +7019,7 @@
                         "class": "Appui\/Option",
                         "text": "check",
                         "value": "check",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/check",
                         "desc": ""
                     },
@@ -6748,7 +7028,7 @@
                         "class": "Appui\/Option",
                         "text": "code",
                         "value": "code",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/code",
                         "desc": "Returns an option's code"
                     },
@@ -6757,7 +7037,7 @@
                         "class": "Appui\/Option",
                         "text": "codeIds",
                         "value": "codeIds",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/codeIds",
                         "desc": "* Returns an array of ids for a given parent"
                     },
@@ -6766,7 +7046,7 @@
                         "class": "Appui\/Option",
                         "text": "codeOptions",
                         "value": "codeOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/codeOptions",
                         "desc": "Returns an array of full options arrays for a given parent"
                     },
@@ -6775,7 +7055,7 @@
                         "class": "Appui\/Option",
                         "text": "count",
                         "value": "count",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/count",
                         "desc": "Returns the number of children for a given option"
                     },
@@ -6784,7 +7064,7 @@
                         "class": "Appui\/Option",
                         "text": "deleteCache",
                         "value": "deleteCache",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/deleteCache",
                         "desc": "Deletes the options' cache, specifically for an ID or globally"
                     },
@@ -6793,7 +7073,7 @@
                         "class": "Appui\/Option",
                         "text": "duplicate",
                         "value": "duplicate",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/duplicate",
                         "desc": "Copies and insert an option into a target option"
                     },
@@ -6802,7 +7082,7 @@
                         "class": "Appui\/Option",
                         "text": "export",
                         "value": "export",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/export",
                         "desc": ""
                     },
@@ -6811,7 +7091,7 @@
                         "class": "Appui\/Option",
                         "text": "exportDb",
                         "value": "exportDb",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/exportDb",
                         "desc": "Converts an option or a hierarchy to a multi-level array with JSON values"
                     },
@@ -6820,7 +7100,7 @@
                         "class": "Appui\/Option",
                         "text": "findI18n",
                         "value": "findI18n",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/findI18n",
                         "desc": "Returns an array containing all options that have the property i18n set"
                     },
@@ -6829,7 +7109,7 @@
                         "class": "Appui\/Option",
                         "text": "findI18nOption",
                         "value": "findI18nOption",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/findI18nOption",
                         "desc": "returns an array containing the option (having the property i18n set) corresponding to the given id"
                     },
@@ -6838,7 +7118,7 @@
                         "class": "Appui\/Option",
                         "text": "findPermissions",
                         "value": "findPermissions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/findPermissions",
                         "desc": "Returns an array of _permissions_ from origin $id"
                     },
@@ -6847,7 +7127,7 @@
                         "class": "Appui\/Option",
                         "text": "fixOrder",
                         "value": "fixOrder",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fixOrder",
                         "desc": "Sets the order configuration for each option of a sortable given parent"
                     },
@@ -6856,7 +7136,7 @@
                         "class": "Appui\/Option",
                         "text": "flatOptions",
                         "value": "flatOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/flatOptions",
                         "desc": ""
                     },
@@ -6865,7 +7145,7 @@
                         "class": "Appui\/Option",
                         "text": "fromCode",
                         "value": "fromCode",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fromCode",
                         "desc": "Gets an option ID from diverse combinations of elements:"
                     },
@@ -6874,7 +7154,7 @@
                         "class": "Appui\/Option",
                         "text": "fromPath",
                         "value": "fromPath",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fromPath",
                         "desc": "Returns the closest ID option from a _path_ of codes, with separator and optional id_parent"
                     },
@@ -6883,7 +7163,7 @@
                         "class": "Appui\/Option",
                         "text": "fromRootCode",
                         "value": "fromRootCode",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fromRootCode",
                         "desc": ""
                     },
@@ -6892,7 +7172,7 @@
                         "class": "Appui\/Option",
                         "text": "fullCategories",
                         "value": "fullCategories",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullCategories",
                         "desc": "Retourne toutes les caract\u00e9ristiques des options d'une cat\u00e9gorie donn\u00e9e dans un tableau index\u00e9 sur leur `id`"
                     },
@@ -6901,7 +7181,7 @@
                         "class": "Appui\/Option",
                         "text": "fullOptions",
                         "value": "fullOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptions",
                         "desc": "Returns an array of full options arrays for a given parent"
                     },
@@ -6910,7 +7190,7 @@
                         "class": "Appui\/Option",
                         "text": "fullOptionsByCode",
                         "value": "fullOptionsByCode",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsByCode",
                         "desc": "Returns code-indexed array of full options arrays for a given parent"
                     },
@@ -6919,7 +7199,7 @@
                         "class": "Appui\/Option",
                         "text": "fullOptionsById",
                         "value": "fullOptionsById",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsById",
                         "desc": "Returns an id-indexed array of full options arrays for a given parent"
                     },
@@ -6928,7 +7208,7 @@
                         "class": "Appui\/Option",
                         "text": "fullOptionsCfg",
                         "value": "fullOptionsCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsCfg",
                         "desc": "Returns an array of full options with the config in arrays for a given parent"
                     },
@@ -6937,7 +7217,7 @@
                         "class": "Appui\/Option",
                         "text": "fullOptionsRef",
                         "value": "fullOptionsRef",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullOptionsRef",
                         "desc": "Returns each individual full option plus the children of options having this as alias."
                     },
@@ -6946,7 +7226,7 @@
                         "class": "Appui\/Option",
                         "text": "fullSoptions",
                         "value": "fullSoptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullSoptions",
                         "desc": "Returns an array of full options arrays for a given grandparent"
                     },
@@ -6955,7 +7235,7 @@
                         "class": "Appui\/Option",
                         "text": "fullTree",
                         "value": "fullTree",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullTree",
                         "desc": "Returns a full hierarchical structure of options from a given option"
                     },
@@ -6964,7 +7244,7 @@
                         "class": "Appui\/Option",
                         "text": "fullTreeRef",
                         "value": "fullTreeRef",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fullTreeRef",
                         "desc": ""
                     },
@@ -6973,7 +7253,7 @@
                         "class": "Appui\/Option",
                         "text": "fusion",
                         "value": "fusion",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/fusion",
                         "desc": "Merges an option $src into an existing option $dest"
                     },
@@ -6982,7 +7262,7 @@
                         "class": "Appui\/Option",
                         "text": "getAliases",
                         "value": "getAliases",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliases",
                         "desc": ""
                     },
@@ -6991,7 +7271,7 @@
                         "class": "Appui\/Option",
                         "text": "getAliasFullOptions",
                         "value": "getAliasFullOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliasFullOptions",
                         "desc": ""
                     },
@@ -7000,7 +7280,7 @@
                         "class": "Appui\/Option",
                         "text": "getAliasItems",
                         "value": "getAliasItems",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliasItems",
                         "desc": ""
                     },
@@ -7009,7 +7289,7 @@
                         "class": "Appui\/Option",
                         "text": "getAliasOptions",
                         "value": "getAliasOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getAliasOptions",
                         "desc": ""
                     },
@@ -7018,7 +7298,7 @@
                         "class": "Appui\/Option",
                         "text": "getCfg",
                         "value": "getCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getCfg",
                         "desc": "Returns a formatted content of the cfg column as an array"
                     },
@@ -7027,7 +7307,7 @@
                         "class": "Appui\/Option",
                         "text": "getClassCfg",
                         "value": "getClassCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getClassCfg",
                         "desc": "Returns the configuration array of the class with the table structure"
                     },
@@ -7036,7 +7316,7 @@
                         "class": "Appui\/Option",
                         "text": "getCodePath",
                         "value": "getCodePath",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getCodePath",
                         "desc": ""
                     },
@@ -7045,7 +7325,7 @@
                         "class": "Appui\/Option",
                         "text": "getCodes",
                         "value": "getCodes",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getCodes",
                         "desc": "Returns an array of options in the form id => code"
                     },
@@ -7054,7 +7334,7 @@
                         "class": "Appui\/Option",
                         "text": "getDefault",
                         "value": "getDefault",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getDefault",
                         "desc": "Returns the ID of the default option ($id_parent used when not provided)"
                     },
@@ -7063,7 +7343,7 @@
                         "class": "Appui\/Option",
                         "text": "getIdParent",
                         "value": "getIdParent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getIdParent",
                         "desc": "Returns the parent option's ID"
                     },
@@ -7072,7 +7352,7 @@
                         "class": "Appui\/Option",
                         "text": "getOptions",
                         "value": "getOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getOptions",
                         "desc": "Returns the existing instance if there is"
                     },
@@ -7081,7 +7361,7 @@
                         "class": "Appui\/Option",
                         "text": "getParentCfg",
                         "value": "getParentCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getParentCfg",
                         "desc": "Returns a formatted content of the cfg column as an array from the option's parent"
                     },
@@ -7090,7 +7370,7 @@
                         "class": "Appui\/Option",
                         "text": "getPathArray",
                         "value": "getPathArray",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getPathArray",
                         "desc": "Returns an array of codes for each option between $id and $root without $root's code"
                     },
@@ -7099,7 +7379,7 @@
                         "class": "Appui\/Option",
                         "text": "getProp",
                         "value": "getProp",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getProp",
                         "desc": "Get an option's single property"
                     },
@@ -7108,7 +7388,7 @@
                         "class": "Appui\/Option",
                         "text": "getRawCfg",
                         "value": "getRawCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getRawCfg",
                         "desc": "Returns the raw content of the cfg column for the given option."
                     },
@@ -7117,7 +7397,7 @@
                         "class": "Appui\/Option",
                         "text": "getRoot",
                         "value": "getRoot",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getRoot",
                         "desc": "Returns the ID of the root option - mother of all"
                     },
@@ -7126,7 +7406,7 @@
                         "class": "Appui\/Option",
                         "text": "getValue",
                         "value": "getValue",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/getValue",
                         "desc": ""
                     },
@@ -7135,7 +7415,7 @@
                         "class": "Appui\/Option",
                         "text": "hasPermission",
                         "value": "hasPermission",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/hasPermission",
                         "desc": "Checks whether an option has _permissions_ in its parent cfg"
                     },
@@ -7144,7 +7424,7 @@
                         "class": "Appui\/Option",
                         "text": "import",
                         "value": "import",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/import",
                         "desc": "Insert into the option table an exported array of options"
                     },
@@ -7153,7 +7433,7 @@
                         "class": "Appui\/Option",
                         "text": "init",
                         "value": "init",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/init",
                         "desc": ""
                     },
@@ -7162,7 +7442,7 @@
                         "class": "Appui\/Option",
                         "text": "isParent",
                         "value": "isParent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/isParent",
                         "desc": "Return true if row with ID $id_parent is parent at any level of row with ID $id"
                     },
@@ -7171,7 +7451,7 @@
                         "class": "Appui\/Option",
                         "text": "isSortable",
                         "value": "isSortable",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/isSortable",
                         "desc": "Tells if an option has its config set as sortable or no"
                     },
@@ -7180,7 +7460,7 @@
                         "class": "Appui\/Option",
                         "text": "items",
                         "value": "items",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/items",
                         "desc": "Returns an array of the children's IDs of the given option sorted by order or text"
                     },
@@ -7189,7 +7469,7 @@
                         "class": "Appui\/Option",
                         "text": "itemsRef",
                         "value": "itemsRef",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/itemsRef",
                         "desc": "Returns each individual item plus the children of items having this as alias."
                     },
@@ -7198,7 +7478,7 @@
                         "class": "Appui\/Option",
                         "text": "itext",
                         "value": "itext",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/itext",
                         "desc": "Returns translation of an option's text"
                     },
@@ -7207,7 +7487,7 @@
                         "class": "Appui\/Option",
                         "text": "jsCategories",
                         "value": "jsCategories",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/jsCategories",
                         "desc": "Retourne toutes les caract\u00e9ristiques des options d'une cat\u00e9gorie donn\u00e9e dans un tableau index\u00e9 sur leur `id`"
                     },
@@ -7216,7 +7496,7 @@
                         "class": "Appui\/Option",
                         "text": "map",
                         "value": "map",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/map",
                         "desc": "Applies a function to children of an option"
                     },
@@ -7225,7 +7505,7 @@
                         "class": "Appui\/Option",
                         "text": "mapCfg",
                         "value": "mapCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/mapCfg",
                         "desc": "Applies a function to children of an option, with the cfg array included"
                     },
@@ -7234,7 +7514,7 @@
                         "class": "Appui\/Option",
                         "text": "merge",
                         "value": "merge",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/merge",
                         "desc": "Updates an option's row by merging the data and cfg."
                     },
@@ -7243,7 +7523,7 @@
                         "class": "Appui\/Option",
                         "text": "move",
                         "value": "move",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/move",
                         "desc": "Changes the id_parent of an option"
                     },
@@ -7252,7 +7532,7 @@
                         "class": "Appui\/Option",
                         "text": "nativeOption",
                         "value": "nativeOption",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/nativeOption",
                         "desc": "Returns an option's row as stored in its original form in the database"
                     },
@@ -7261,7 +7541,7 @@
                         "class": "Appui\/Option",
                         "text": "nativeOptions",
                         "value": "nativeOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/nativeOptions",
                         "desc": ""
                     },
@@ -7270,7 +7550,7 @@
                         "class": "Appui\/Option",
                         "text": "nativeTree",
                         "value": "nativeTree",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/nativeTree",
                         "desc": "Returns a hierarchical structure as stored in its original form in the database"
                     },
@@ -7279,7 +7559,7 @@
                         "class": "Appui\/Option",
                         "text": "opAlias",
                         "value": "opAlias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/opAlias",
                         "desc": "Returns the merge between an option and its alias as an array."
                     },
@@ -7288,7 +7568,7 @@
                         "class": "Appui\/Option",
                         "text": "option",
                         "value": "option",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/option",
                         "desc": "Returns an option's full content as an array."
                     },
@@ -7297,7 +7577,7 @@
                         "class": "Appui\/Option",
                         "text": "optionNoAlias",
                         "value": "optionNoAlias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/optionNoAlias",
                         "desc": "Returns an option's full content as an array without its values changed by id_alias"
                     },
@@ -7306,7 +7586,7 @@
                         "class": "Appui\/Option",
                         "text": "options",
                         "value": "options",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/options",
                         "desc": "Returns an array of options in the form id => text"
                     },
@@ -7315,7 +7595,7 @@
                         "class": "Appui\/Option",
                         "text": "optionsByAlias",
                         "value": "optionsByAlias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/optionsByAlias",
                         "desc": "Returns an array of options based on their id_alias"
                     },
@@ -7324,7 +7604,7 @@
                         "class": "Appui\/Option",
                         "text": "optionsByCode",
                         "value": "optionsByCode",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/optionsByCode",
                         "desc": "Returns an array of children options in the form code => text"
                     },
@@ -7333,7 +7613,7 @@
                         "class": "Appui\/Option",
                         "text": "optionsRef",
                         "value": "optionsRef",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/optionsRef",
                         "desc": "Returns each individual option plus the children of options having this as alias."
                     },
@@ -7342,7 +7622,7 @@
                         "class": "Appui\/Option",
                         "text": "order",
                         "value": "order",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/order",
                         "desc": "Returns the order of an option. Updates it if a position is given, and cascades"
                     },
@@ -7351,7 +7631,7 @@
                         "class": "Appui\/Option",
                         "text": "parent",
                         "value": "parent",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/parent",
                         "desc": "Returns the parent's option as {@link option()}"
                     },
@@ -7360,7 +7640,7 @@
                         "class": "Appui\/Option",
                         "text": "parents",
                         "value": "parents",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/parents",
                         "desc": "Returns an array of id_parents from the option selected to root"
                     },
@@ -7369,7 +7649,7 @@
                         "class": "Appui\/Option",
                         "text": "rawOption",
                         "value": "rawOption",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/rawOption",
                         "desc": "Returns an option's row as stored in its original form in the database, including cfg"
                     },
@@ -7378,7 +7658,7 @@
                         "class": "Appui\/Option",
                         "text": "rawOptions",
                         "value": "rawOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/rawOptions",
                         "desc": "Returns an option's items as stored in its original form in the database, including cfg"
                     },
@@ -7387,7 +7667,7 @@
                         "class": "Appui\/Option",
                         "text": "rawTree",
                         "value": "rawTree",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/rawTree",
                         "desc": "Returns a hierarchical structure as stored in its original form in the database"
                     },
@@ -7396,7 +7676,7 @@
                         "class": "Appui\/Option",
                         "text": "remove",
                         "value": "remove",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/remove",
                         "desc": "Deletes a row from the options table, deletes the cache and fix order if needed"
                     },
@@ -7405,7 +7685,7 @@
                         "class": "Appui\/Option",
                         "text": "removeFull",
                         "value": "removeFull",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/removeFull",
                         "desc": "Deletes an option row with all it's hierarchical structure from the options table and deletes the cache."
                     },
@@ -7414,7 +7694,7 @@
                         "class": "Appui\/Option",
                         "text": "sequence",
                         "value": "sequence",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/sequence",
                         "desc": "Returns an array of id_parents from the selected root to the given id_option"
                     },
@@ -7423,7 +7703,7 @@
                         "class": "Appui\/Option",
                         "text": "set",
                         "value": "set",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/set",
                         "desc": "Updates an option's row (without changing cfg)"
                     },
@@ -7432,7 +7712,7 @@
                         "class": "Appui\/Option",
                         "text": "setAlias",
                         "value": "setAlias",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setAlias",
                         "desc": "Sets the alias of an option"
                     },
@@ -7441,7 +7721,7 @@
                         "class": "Appui\/Option",
                         "text": "setCfg",
                         "value": "setCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setCfg",
                         "desc": "Sets the cfg column of a given option in the table through an array"
                     },
@@ -7450,7 +7730,7 @@
                         "class": "Appui\/Option",
                         "text": "setCode",
                         "value": "setCode",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setCode",
                         "desc": "Sets the code of an option"
                     },
@@ -7459,7 +7739,7 @@
                         "class": "Appui\/Option",
                         "text": "setDefault",
                         "value": "setDefault",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setDefault",
                         "desc": "Makes an option act as if it was the root option"
                     },
@@ -7468,7 +7748,7 @@
                         "class": "Appui\/Option",
                         "text": "setProp",
                         "value": "setProp",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setProp",
                         "desc": "Updates option's properties derived from the value column"
                     },
@@ -7477,7 +7757,7 @@
                         "class": "Appui\/Option",
                         "text": "setText",
                         "value": "setText",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setText",
                         "desc": "Sets the text of an option"
                     },
@@ -7486,7 +7766,7 @@
                         "class": "Appui\/Option",
                         "text": "setValue",
                         "value": "setValue",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/setValue",
                         "desc": ""
                     },
@@ -7495,7 +7775,7 @@
                         "class": "Appui\/Option",
                         "text": "siblings",
                         "value": "siblings",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/siblings",
                         "desc": ""
                     },
@@ -7504,7 +7784,7 @@
                         "class": "Appui\/Option",
                         "text": "soptions",
                         "value": "soptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/soptions",
                         "desc": "Returns an id-indexed array of options in the form id => text for a given grandparent"
                     },
@@ -7513,7 +7793,7 @@
                         "class": "Appui\/Option",
                         "text": "text",
                         "value": "text",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/text",
                         "desc": "Returns an option's text"
                     },
@@ -7522,7 +7802,7 @@
                         "class": "Appui\/Option",
                         "text": "textValueCategories",
                         "value": "textValueCategories",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/textValueCategories",
                         "desc": "Retourne la liste des cat\u00e9gories index\u00e9e sur leur `id` sous la forme d'un tableau text\/value"
                     },
@@ -7531,7 +7811,7 @@
                         "class": "Appui\/Option",
                         "text": "textValueOptions",
                         "value": "textValueOptions",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/textValueOptions",
                         "desc": "Returns an option's children array of id and text in a user-defined indexed array"
                     },
@@ -7540,7 +7820,7 @@
                         "class": "Appui\/Option",
                         "text": "toPath",
                         "value": "toPath",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/toPath",
                         "desc": "Concatenates the codes and separator $sep of a line of options"
                     },
@@ -7549,7 +7829,7 @@
                         "class": "Appui\/Option",
                         "text": "tree",
                         "value": "tree",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/tree",
                         "desc": "Returns a simple hierarchical structure with just text, id and items"
                     },
@@ -7558,7 +7838,7 @@
                         "class": "Appui\/Option",
                         "text": "treeIds",
                         "value": "treeIds",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/treeIds",
                         "desc": "Returns a flat array of all IDs found in a hierarchical structure (except the top one)"
                     },
@@ -7567,7 +7847,7 @@
                         "class": "Appui\/Option",
                         "text": "unsetCfg",
                         "value": "unsetCfg",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/unsetCfg",
                         "desc": "Unsets the cfg column (sets it to null)"
                     },
@@ -7576,7 +7856,7 @@
                         "class": "Appui\/Option",
                         "text": "unsetProp",
                         "value": "unsetProp",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/unsetProp",
                         "desc": "Unset option's properties taken from the value column"
                     },
@@ -7585,7 +7865,7 @@
                         "class": "Appui\/Option",
                         "text": "updateAllTemplates",
                         "value": "updateAllTemplates",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/updateAllTemplates",
                         "desc": ""
                     },
@@ -7594,7 +7874,7 @@
                         "class": "Appui\/Option",
                         "text": "updatePlugins",
                         "value": "updatePlugins",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/updatePlugins",
                         "desc": ""
                     },
@@ -7603,7 +7883,7 @@
                         "class": "Appui\/Option",
                         "text": "updateTemplate",
                         "value": "updateTemplate",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642964221,
                         "url": "bbn-php\/doc\/method\/Appui\/Option\/updateTemplate",
                         "desc": ""
                     }
@@ -8159,7 +8439,7 @@
                 "value": "Search",
                 "text": "Search",
                 "url": "bbn-php\/doc\/class\/Appui\/Search",
-                "lastmod": 1642679020,
+                "lastmod": 1643310418,
                 "desc": "",
                 "items": [
                     {
@@ -8167,7 +8447,7 @@
                         "class": "Appui\/Search",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1642679020,
+                        "lastmod": 1643310418,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/__construct",
                         "desc": ""
                     },
@@ -8176,7 +8456,7 @@
                         "class": "Appui\/Search",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1642679020,
+                        "lastmod": 1643310418,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/get",
                         "desc": "Launch the search and return the results."
                     },
@@ -8185,7 +8465,7 @@
                         "class": "Appui\/Search",
                         "text": "register",
                         "value": "register",
-                        "lastmod": 1642679020,
+                        "lastmod": 1643310418,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/register",
                         "desc": ""
                     }
@@ -9226,7 +9506,7 @@
                 "value": "Url",
                 "text": "Url",
                 "url": "bbn-php\/doc\/class\/Appui\/Url",
-                "lastmod": 1642679034,
+                "lastmod": 1642740241,
                 "desc": "",
                 "items": [
                     {
@@ -9234,7 +9514,7 @@
                         "class": "Appui\/Url",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/__construct",
                         "desc": ""
                     },
@@ -9243,7 +9523,7 @@
                         "class": "Appui\/Url",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/add",
                         "desc": ""
                     },
@@ -9252,7 +9532,7 @@
                         "class": "Appui\/Url",
                         "text": "addRedirect",
                         "value": "addRedirect",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/addRedirect",
                         "desc": ""
                     },
@@ -9261,7 +9541,7 @@
                         "class": "Appui\/Url",
                         "text": "getFullUrl",
                         "value": "getFullUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/getFullUrl",
                         "desc": "Returns the url of the given row"
                     },
@@ -9270,7 +9550,7 @@
                         "class": "Appui\/Url",
                         "text": "getRedirect",
                         "value": "getRedirect",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/getRedirect",
                         "desc": ""
                     },
@@ -9279,7 +9559,7 @@
                         "class": "Appui\/Url",
                         "text": "getRedirectById",
                         "value": "getRedirectById",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/getRedirectById",
                         "desc": ""
                     },
@@ -9288,7 +9568,7 @@
                         "class": "Appui\/Url",
                         "text": "getUrl",
                         "value": "getUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/getUrl",
                         "desc": "Returns the url of the given row"
                     },
@@ -9297,7 +9577,7 @@
                         "class": "Appui\/Url",
                         "text": "retrieveUrl",
                         "value": "retrieveUrl",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/retrieveUrl",
                         "desc": "Returns the url of the given row"
                     },
@@ -9306,7 +9586,7 @@
                         "class": "Appui\/Url",
                         "text": "sanitize",
                         "value": "sanitize",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/sanitize",
                         "desc": ""
                     },
@@ -9315,7 +9595,7 @@
                         "class": "Appui\/Url",
                         "text": "set",
                         "value": "set",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/set",
                         "desc": ""
                     },
@@ -9324,7 +9604,7 @@
                         "class": "Appui\/Url",
                         "text": "urlExists",
                         "value": "urlExists",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/urlExists",
                         "desc": ""
                     },
@@ -9333,7 +9613,7 @@
                         "class": "Appui\/Url",
                         "text": "urlToId",
                         "value": "urlToId",
-                        "lastmod": 1642679034,
+                        "lastmod": 1642740241,
                         "url": "bbn-php\/doc\/method\/Appui\/Url\/urlToId",
                         "desc": ""
                     }
@@ -9488,7 +9768,7 @@
                 "value": "Library",
                 "text": "Library",
                 "url": "bbn-php\/doc\/class\/Cdn\/Library",
-                "lastmod": 1639280106,
+                "lastmod": 1644189028,
                 "desc": "PHP version 7",
                 "items": [
                     {
@@ -9496,7 +9776,7 @@
                         "class": "Cdn\/Library",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644189028,
                         "url": "bbn-php\/doc\/method\/Cdn\/Library\/__construct",
                         "desc": "Constructor."
                     },
@@ -9505,7 +9785,7 @@
                         "class": "Cdn\/Library",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644189028,
                         "url": "bbn-php\/doc\/method\/Cdn\/Library\/add",
                         "desc": "Adds a new library to the config."
                     },
@@ -9514,7 +9794,7 @@
                         "class": "Cdn\/Library",
                         "text": "getConfig",
                         "value": "getConfig",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644189028,
                         "url": "bbn-php\/doc\/method\/Cdn\/Library\/getConfig",
                         "desc": "Creates the configuration and returns it."
                     },
@@ -9523,7 +9803,7 @@
                         "class": "Cdn\/Library",
                         "text": "getDependencies",
                         "value": "getDependencies",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644189028,
                         "url": "bbn-php\/doc\/method\/Cdn\/Library\/getDependencies",
                         "desc": "Returns the dependencies from the given library version."
                     },
@@ -9532,7 +9812,7 @@
                         "class": "Cdn\/Library",
                         "text": "info",
                         "value": "info",
-                        "lastmod": 1639280106,
+                        "lastmod": 1644189028,
                         "url": "bbn-php\/doc\/method\/Cdn\/Library\/info",
                         "desc": "Returns all the informations stored about a library."
                     }
@@ -10216,7 +10496,7 @@
                 "value": "Runner",
                 "text": "Runner",
                 "url": "bbn-php\/doc\/class\/Cron\/Runner",
-                "lastmod": 1639280106,
+                "lastmod": 1643374152,
                 "desc": "Cron runner.",
                 "items": [
                     {
@@ -10224,7 +10504,7 @@
                         "class": "Cron\/Runner",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/__construct",
                         "desc": "Runner constructor."
                     },
@@ -10233,7 +10513,7 @@
                         "class": "Cron\/Runner",
                         "text": "check",
                         "value": "check",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/check",
                         "desc": ""
                     },
@@ -10242,7 +10522,7 @@
                         "class": "Cron\/Runner",
                         "text": "getData",
                         "value": "getData",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/getData",
                         "desc": "Returns the $data property."
                     },
@@ -10251,7 +10531,7 @@
                         "class": "Cron\/Runner",
                         "text": "output",
                         "value": "output",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/output",
                         "desc": ""
                     },
@@ -10260,7 +10540,7 @@
                         "class": "Cron\/Runner",
                         "text": "poll",
                         "value": "poll",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/poll",
                         "desc": "Returns the $data property."
                     },
@@ -10269,7 +10549,7 @@
                         "class": "Cron\/Runner",
                         "text": "run",
                         "value": "run",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/run",
                         "desc": ""
                     },
@@ -10278,7 +10558,7 @@
                         "class": "Cron\/Runner",
                         "text": "runAll",
                         "value": "runAll",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/runAll",
                         "desc": ""
                     },
@@ -10287,7 +10567,7 @@
                         "class": "Cron\/Runner",
                         "text": "runTask",
                         "value": "runTask",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/runTask",
                         "desc": ""
                     },
@@ -10296,7 +10576,7 @@
                         "class": "Cron\/Runner",
                         "text": "runTaskSystem",
                         "value": "runTaskSystem",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/runTaskSystem",
                         "desc": ""
                     },
@@ -10305,7 +10585,7 @@
                         "class": "Cron\/Runner",
                         "text": "shutdown",
                         "value": "shutdown",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643374152,
                         "url": "bbn-php\/doc\/method\/Cron\/Runner\/shutdown",
                         "desc": ""
                     }
@@ -18180,7 +18460,7 @@
                         "value": "Url",
                         "text": "Url",
                         "url": "bbn-php\/doc\/trait\/Models\/Tts\/Url",
-                        "lastmod": 1642679332,
+                        "lastmod": 1642740934,
                         "desc": "Remains false until initUrl is executed for preventing it's executed twice",
                         "items": [
                             {
@@ -18188,7 +18468,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "addUrl",
                                 "value": "addUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/addUrl",
                                 "desc": "Creates a new URL for a given item's ID"
                             },
@@ -18197,7 +18477,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "deleteUrl",
                                 "value": "deleteUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/deleteUrl",
                                 "desc": "Deletes url for the given note."
                             },
@@ -18206,7 +18486,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "getFullUrl",
                                 "value": "getFullUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/getFullUrl",
                                 "desc": "Returns the whole content of the URL row based on its ID"
                             },
@@ -18215,7 +18495,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "getUrl",
                                 "value": "getUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/getUrl",
                                 "desc": "Returns the URL corresponding to the given item's ID"
                             },
@@ -18224,7 +18504,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "getUrlId",
                                 "value": "getUrlId",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/getUrlId",
                                 "desc": "Returns a URL's id based on its URL"
                             },
@@ -18233,7 +18513,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "hasUrl",
                                 "value": "hasUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/hasUrl",
                                 "desc": "Returns true if the item is linked to an url."
                             },
@@ -18242,7 +18522,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "idToUrl",
                                 "value": "idToUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/idToUrl",
                                 "desc": "Returns the ID of the URL for the given item"
                             },
@@ -18251,7 +18531,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "sanitizeUrl",
                                 "value": "sanitizeUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/sanitizeUrl",
                                 "desc": "Trims the slashes and removes double slashes if any."
                             },
@@ -18260,7 +18540,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "setUrl",
                                 "value": "setUrl",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/setUrl",
                                 "desc": "Adds or replace a URL for a given item's ID"
                             },
@@ -18269,7 +18549,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "urlExists",
                                 "value": "urlExists",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/urlExists",
                                 "desc": ""
                             },
@@ -18278,7 +18558,7 @@
                                 "class": "Models\/Tts\/Url",
                                 "text": "urlToId",
                                 "value": "urlToId",
-                                "lastmod": 1642679332,
+                                "lastmod": 1642740934,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Url\/urlToId",
                                 "desc": ""
                             }
@@ -21459,7 +21739,7 @@
                 "value": "Preferences",
                 "text": "Preferences",
                 "url": "bbn-php\/doc\/class\/User\/Preferences",
-                "lastmod": 1639280106,
+                "lastmod": 1643035331,
                 "desc": "",
                 "items": [
                     {
@@ -21467,7 +21747,7 @@
                         "class": "User\/Preferences",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/__construct",
                         "desc": "Preferences constructor."
                     },
@@ -21476,7 +21756,7 @@
                         "class": "User\/Preferences",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/add",
                         "desc": "Adds a new preference for the given option for the current user and returns the new preference ID."
                     },
@@ -21485,7 +21765,7 @@
                         "class": "User\/Preferences",
                         "text": "addBit",
                         "value": "addBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/addBit",
                         "desc": "Adds a bit to a preference"
                     },
@@ -21494,7 +21774,7 @@
                         "class": "User\/Preferences",
                         "text": "addLink",
                         "value": "addLink",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/addLink",
                         "desc": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query"
                     },
@@ -21503,7 +21783,7 @@
                         "class": "User\/Preferences",
                         "text": "addToGroup",
                         "value": "addToGroup",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/addToGroup",
                         "desc": "Adds a new preference for the given option for the current user."
                     },
@@ -21512,7 +21792,7 @@
                         "class": "User\/Preferences",
                         "text": "delete",
                         "value": "delete",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/delete",
                         "desc": "Deletes the given preference."
                     },
@@ -21521,7 +21801,7 @@
                         "class": "User\/Preferences",
                         "text": "deleteBit",
                         "value": "deleteBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/deleteBit",
                         "desc": "Deletes a preference's bit"
                     },
@@ -21530,7 +21810,7 @@
                         "class": "User\/Preferences",
                         "text": "deleteBits",
                         "value": "deleteBits",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/deleteBits",
                         "desc": "Deletes all bits from a preference"
                     },
@@ -21539,7 +21819,7 @@
                         "class": "User\/Preferences",
                         "text": "deleteGroupOption",
                         "value": "deleteGroupOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/deleteGroupOption",
                         "desc": "Deletes all the given group's preferences for the given option"
                     },
@@ -21548,7 +21828,7 @@
                         "class": "User\/Preferences",
                         "text": "deleteUserOption",
                         "value": "deleteUserOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/deleteUserOption",
                         "desc": "Deletes all the given or current user's preferences for the given option"
                     },
@@ -21557,7 +21837,7 @@
                         "class": "User\/Preferences",
                         "text": "explodeBitCfg",
                         "value": "explodeBitCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/explodeBitCfg",
                         "desc": ""
                     },
@@ -21566,7 +21846,7 @@
                         "class": "User\/Preferences",
                         "text": "fixBitsOrder",
                         "value": "fixBitsOrder",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/fixBitsOrder",
                         "desc": ""
                     },
@@ -21575,7 +21855,7 @@
                         "class": "User\/Preferences",
                         "text": "fullOptions",
                         "value": "fullOptions",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/fullOptions",
                         "desc": "Returns all the children IDs of the given code with their property and their preferences."
                     },
@@ -21584,7 +21864,7 @@
                         "class": "User\/Preferences",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/get",
                         "desc": "Returns the current user's preference based on the given id, his own profile and his group."
                     },
@@ -21593,7 +21873,7 @@
                         "class": "User\/Preferences",
                         "text": "getAll",
                         "value": "getAll",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getAll",
                         "desc": "Returns an array of the current user's preferences based on the given id_option, his own profile and his group's."
                     },
@@ -21602,7 +21882,7 @@
                         "class": "User\/Preferences",
                         "text": "getAllNotMine",
                         "value": "getAllNotMine",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getAllNotMine",
                         "desc": "Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option."
                     },
@@ -21611,7 +21891,7 @@
                         "class": "User\/Preferences",
                         "text": "getBit",
                         "value": "getBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getBit",
                         "desc": "Returns a single preference's bit"
                     },
@@ -21620,7 +21900,7 @@
                         "class": "User\/Preferences",
                         "text": "getBitCfg",
                         "value": "getBitCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getBitCfg",
                         "desc": "Gets the bit's cfg array, normalized either from the DB or from the $cfg argument"
                     },
@@ -21629,7 +21909,7 @@
                         "class": "User\/Preferences",
                         "text": "getBits",
                         "value": "getBits",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getBits",
                         "desc": "Returns the bits list of a preference"
                     },
@@ -21638,7 +21918,7 @@
                         "class": "User\/Preferences",
                         "text": "getBitsByIdOption",
                         "value": "getBitsByIdOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getBitsByIdOption",
                         "desc": "Returns the bits list of an option's id"
                     },
@@ -21647,7 +21927,7 @@
                         "class": "User\/Preferences",
                         "text": "getBitsOrder",
                         "value": "getBitsOrder",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getBitsOrder",
                         "desc": ""
                     },
@@ -21656,7 +21936,7 @@
                         "class": "User\/Preferences",
                         "text": "getByBit",
                         "value": "getByBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getByBit",
                         "desc": "Gets a preference row from a bit ID"
                     },
@@ -21665,7 +21945,7 @@
                         "class": "User\/Preferences",
                         "text": "getByOption",
                         "value": "getByOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getByOption",
                         "desc": "Returns the current user's preference and the config if second parameter set to true, based on the given option id, his own profile and his group."
                     },
@@ -21674,7 +21954,7 @@
                         "class": "User\/Preferences",
                         "text": "getCfg",
                         "value": "getCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getCfg",
                         "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument."
                     },
@@ -21683,7 +21963,7 @@
                         "class": "User\/Preferences",
                         "text": "getCfgByOption",
                         "value": "getCfgByOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getCfgByOption",
                         "desc": "Gets the cfg array, normalized either from the DB or from the $cfg argument."
                     },
@@ -21692,7 +21972,7 @@
                         "class": "User\/Preferences",
                         "text": "getClassCfg",
                         "value": "getClassCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getClassCfg",
                         "desc": "Returns an array describing the structures of the tables for the class."
                     },
@@ -21701,7 +21981,7 @@
                         "class": "User\/Preferences",
                         "text": "getFullBits",
                         "value": "getFullBits",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getFullBits",
                         "desc": "Returns the hierarchical bits list of a preference"
                     },
@@ -21710,7 +21990,7 @@
                         "class": "User\/Preferences",
                         "text": "getGroup",
                         "value": "getGroup",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getGroup",
                         "desc": "Returns the Id of the current group."
                     },
@@ -21719,7 +21999,7 @@
                         "class": "User\/Preferences",
                         "text": "getIdByBit",
                         "value": "getIdByBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getIdByBit",
                         "desc": "Gets the preference's ID from a bit ID"
                     },
@@ -21728,7 +22008,7 @@
                         "class": "User\/Preferences",
                         "text": "getLinks",
                         "value": "getLinks",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getLinks",
                         "desc": "Gets the preferences which have the option's $id as id_link."
                     },
@@ -21737,7 +22017,7 @@
                         "class": "User\/Preferences",
                         "text": "getMaxBitNum",
                         "value": "getMaxBitNum",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getMaxBitNum",
                         "desc": "Gets the maximum num value of the user option's bits."
                     },
@@ -21746,7 +22026,7 @@
                         "class": "User\/Preferences",
                         "text": "getPreferences",
                         "value": "getPreferences",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getPreferences",
                         "desc": ""
                     },
@@ -21755,7 +22035,7 @@
                         "class": "User\/Preferences",
                         "text": "getShared",
                         "value": "getShared",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getShared",
                         "desc": "Returns an array"
                     },
@@ -21764,7 +22044,7 @@
                         "class": "User\/Preferences",
                         "text": "getTree",
                         "value": "getTree",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getTree",
                         "desc": "Returns a preference and its hierarchical bits list"
                     },
@@ -21773,7 +22053,7 @@
                         "class": "User\/Preferences",
                         "text": "getUser",
                         "value": "getUser",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/getUser",
                         "desc": "Returns the Id of the current user."
                     },
@@ -21782,7 +22062,7 @@
                         "class": "User\/Preferences",
                         "text": "groupHas",
                         "value": "groupHas",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/groupHas",
                         "desc": "Checks if a group has the given preference."
                     },
@@ -21791,7 +22071,7 @@
                         "class": "User\/Preferences",
                         "text": "has",
                         "value": "has",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/has",
                         "desc": "Returns true if the current user can access a preference, false otherwise."
                     },
@@ -21800,7 +22080,7 @@
                         "class": "User\/Preferences",
                         "text": "isAuthorized",
                         "value": "isAuthorized",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/isAuthorized",
                         "desc": "Checks if the given user or the current user is authorized to access a user_option."
                     },
@@ -21809,7 +22089,7 @@
                         "class": "User\/Preferences",
                         "text": "items",
                         "value": "items",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/items",
                         "desc": "Return all the IDs of the children of the given option where the user has a preference in the user's order."
                     },
@@ -21818,7 +22098,7 @@
                         "class": "User\/Preferences",
                         "text": "makePublic",
                         "value": "makePublic",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/makePublic",
                         "desc": "Makes (or unmakes) the given preference public."
                     },
@@ -21827,7 +22107,7 @@
                         "class": "User\/Preferences",
                         "text": "moveBit",
                         "value": "moveBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/moveBit",
                         "desc": "Moves a bit."
                     },
@@ -21836,7 +22116,7 @@
                         "class": "User\/Preferences",
                         "text": "nextBitNum",
                         "value": "nextBitNum",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/nextBitNum",
                         "desc": ""
                     },
@@ -21845,7 +22125,7 @@
                         "class": "User\/Preferences",
                         "text": "option",
                         "value": "option",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/option",
                         "desc": ""
                     },
@@ -21854,7 +22134,7 @@
                         "class": "User\/Preferences",
                         "text": "options",
                         "value": "options",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/options",
                         "desc": "Returns all children of the given code with they own attributes."
                     },
@@ -21863,7 +22143,7 @@
                         "class": "User\/Preferences",
                         "text": "order",
                         "value": "order",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/order",
                         "desc": "Changes the position of the given option among its sortable list."
                     },
@@ -21872,7 +22152,7 @@
                         "class": "User\/Preferences",
                         "text": "orderBit",
                         "value": "orderBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/orderBit",
                         "desc": "Orders a bit."
                     },
@@ -21881,7 +22161,7 @@
                         "class": "User\/Preferences",
                         "text": "retrieveGroupIds",
                         "value": "retrieveGroupIds",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/retrieveGroupIds",
                         "desc": "Returns preferences' IDs from the option's ID and the given group ID."
                     },
@@ -21890,7 +22170,7 @@
                         "class": "User\/Preferences",
                         "text": "retrieveIds",
                         "value": "retrieveIds",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/retrieveIds",
                         "desc": "Returns all preferences' IDs from the option's ID."
                     },
@@ -21899,7 +22179,7 @@
                         "class": "User\/Preferences",
                         "text": "retrieveUserIds",
                         "value": "retrieveUserIds",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/retrieveUserIds",
                         "desc": "Returns preferences' IDs from the option's ID and the given user ID."
                     },
@@ -21908,7 +22188,7 @@
                         "class": "User\/Preferences",
                         "text": "set",
                         "value": "set",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/set",
                         "desc": "Sets the preference config for the current user by the preference's ID and returns the number of rows change."
                     },
@@ -21917,7 +22197,7 @@
                         "class": "User\/Preferences",
                         "text": "setByOption",
                         "value": "setByOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setByOption",
                         "desc": "Sets the preference row for the current user by the option's ID"
                     },
@@ -21926,7 +22206,7 @@
                         "class": "User\/Preferences",
                         "text": "setCfg",
                         "value": "setCfg",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setCfg",
                         "desc": "Sets (or unsets) the cfg field of a given preference based on its ID"
                     },
@@ -21935,7 +22215,7 @@
                         "class": "User\/Preferences",
                         "text": "setGroup",
                         "value": "setGroup",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setGroup",
                         "desc": "Changes the current group and return the changed preferences class."
                     },
@@ -21944,7 +22224,7 @@
                         "class": "User\/Preferences",
                         "text": "setLink",
                         "value": "setLink",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setLink",
                         "desc": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query"
                     },
@@ -21953,7 +22233,7 @@
                         "class": "User\/Preferences",
                         "text": "setText",
                         "value": "setText",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setText",
                         "desc": "Sets (or unsets) the text field of the given preference and returns the result of the executed query"
                     },
@@ -21962,7 +22242,7 @@
                         "class": "User\/Preferences",
                         "text": "setUser",
                         "value": "setUser",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/setUser",
                         "desc": "Changes the current user and return the changed preferences class."
                     },
@@ -21971,7 +22251,7 @@
                         "class": "User\/Preferences",
                         "text": "shareWithGroup",
                         "value": "shareWithGroup",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/shareWithGroup",
                         "desc": "Shares (or unshares) the given preference to the given group."
                     },
@@ -21980,7 +22260,7 @@
                         "class": "User\/Preferences",
                         "text": "shareWithUser",
                         "value": "shareWithUser",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/shareWithUser",
                         "desc": "Shares (or unshares) the given preference to the given user"
                     },
@@ -21989,7 +22269,7 @@
                         "class": "User\/Preferences",
                         "text": "text",
                         "value": "text",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/text",
                         "desc": ""
                     },
@@ -21998,7 +22278,7 @@
                         "class": "User\/Preferences",
                         "text": "textValue",
                         "value": "textValue",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/textValue",
                         "desc": ""
                     },
@@ -22007,7 +22287,7 @@
                         "class": "User\/Preferences",
                         "text": "update",
                         "value": "update",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/update",
                         "desc": "Sets the preference row for the current user by the preference's ID and returns the number of rows change."
                     },
@@ -22016,7 +22296,7 @@
                         "class": "User\/Preferences",
                         "text": "updateBit",
                         "value": "updateBit",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/updateBit",
                         "desc": "Updates a preference's bit"
                     },
@@ -22025,7 +22305,7 @@
                         "class": "User\/Preferences",
                         "text": "updateByOption",
                         "value": "updateByOption",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/updateByOption",
                         "desc": ""
                     },
@@ -22034,7 +22314,7 @@
                         "class": "User\/Preferences",
                         "text": "userHas",
                         "value": "userHas",
-                        "lastmod": 1639280106,
+                        "lastmod": 1643035331,
                         "url": "bbn-php\/doc\/method\/User\/Preferences\/userHas",
                         "desc": "Checks if a user has the given preference."
                     }
@@ -22765,7 +23045,7 @@
         "value": "Cache",
         "text": "Cache",
         "url": "bbn-php\/doc\/class\/Cache",
-        "lastmod": 1639280106,
+        "lastmod": 1643119186,
         "desc": "Universal caching class: called once per request, it holds the cache system.",
         "items": [
             {
@@ -22773,7 +23053,7 @@
                 "class": "Cache",
                 "text": "__construct",
                 "value": "__construct",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/__construct",
                 "desc": "Constructor - this is a singleton: it can't be called more then once."
             },
@@ -22782,7 +23062,7 @@
                 "class": "Cache",
                 "text": "clear",
                 "value": "clear",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/clear",
                 "desc": "Deletes all the cache globally."
             },
@@ -22791,7 +23071,7 @@
                 "class": "Cache",
                 "text": "delete",
                 "value": "delete",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/delete",
                 "desc": "Removes the given item from the cache."
             },
@@ -22800,7 +23080,7 @@
                 "class": "Cache",
                 "text": "deleteAll",
                 "value": "deleteAll",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/deleteAll",
                 "desc": "Deletes all the cache from the given path or globally if none is given."
             },
@@ -22809,7 +23089,7 @@
                 "class": "Cache",
                 "text": "get",
                 "value": "get",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/get",
                 "desc": "Returns the cache value, false otherwise."
             },
@@ -22818,7 +23098,7 @@
                 "class": "Cache",
                 "text": "getCache",
                 "value": "getCache",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/getCache",
                 "desc": "Returns the cache object (and creates one of the given type if it doesn't exist)."
             },
@@ -22827,7 +23107,7 @@
                 "class": "Cache",
                 "text": "getEngine",
                 "value": "getEngine",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/getEngine",
                 "desc": "Alias of get_cache."
             },
@@ -22836,7 +23116,7 @@
                 "class": "Cache",
                 "text": "getSet",
                 "value": "getSet",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/getSet",
                 "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function."
             },
@@ -22845,7 +23125,7 @@
                 "class": "Cache",
                 "text": "getType",
                 "value": "getType",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/getType",
                 "desc": "Returns the type of cache engine running in the class."
             },
@@ -22854,7 +23134,7 @@
                 "class": "Cache",
                 "text": "has",
                 "value": "has",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/has",
                 "desc": "Checks whether a valid cache exists for the given item."
             },
@@ -22863,7 +23143,7 @@
                 "class": "Cache",
                 "text": "hash",
                 "value": "hash",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/hash",
                 "desc": "Returns the hash of the given item."
             },
@@ -22872,7 +23152,7 @@
                 "class": "Cache",
                 "text": "info",
                 "value": "info",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/info",
                 "desc": ""
             },
@@ -22881,7 +23161,7 @@
                 "class": "Cache",
                 "text": "isChanged",
                 "value": "isChanged",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/isChanged",
                 "desc": "Checks if the value of the item corresponds to the given hash."
             },
@@ -22890,7 +23170,7 @@
                 "class": "Cache",
                 "text": "isNew",
                 "value": "isNew",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/isNew",
                 "desc": "Checks whether or not the given item is more recent than the given timestamp."
             },
@@ -22899,7 +23179,7 @@
                 "class": "Cache",
                 "text": "items",
                 "value": "items",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/items",
                 "desc": ""
             },
@@ -22908,7 +23188,7 @@
                 "class": "Cache",
                 "text": "makeHash",
                 "value": "makeHash",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/makeHash",
                 "desc": "Makes a unique hash out of whatever value which will be used to check if the value has changed."
             },
@@ -22917,7 +23197,7 @@
                 "class": "Cache",
                 "text": "serializeFunction",
                 "value": "serializeFunction",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/serializeFunction",
                 "desc": ""
             },
@@ -22926,7 +23206,7 @@
                 "class": "Cache",
                 "text": "set",
                 "value": "set",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/set",
                 "desc": "Stores the given value in the cache for as long as says the TTL."
             },
@@ -22935,7 +23215,7 @@
                 "class": "Cache",
                 "text": "stat",
                 "value": "stat",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/stat",
                 "desc": ""
             },
@@ -22944,7 +23224,7 @@
                 "class": "Cache",
                 "text": "timestamp",
                 "value": "timestamp",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/timestamp",
                 "desc": "Returns the timestamp of the given item."
             },
@@ -22953,7 +23233,7 @@
                 "class": "Cache",
                 "text": "ttl",
                 "value": "ttl",
-                "lastmod": 1639280106,
+                "lastmod": 1643119186,
                 "url": "bbn-php\/doc\/method\/Cache\/ttl",
                 "desc": "Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments."
             }
@@ -22964,7 +23244,7 @@
         "value": "Cdn",
         "text": "Cdn",
         "url": "bbn-php\/doc\/class\/Cdn",
-        "lastmod": 1639280106,
+        "lastmod": 1644673655,
         "desc": "PHP version 7",
         "items": [
             {
@@ -22972,7 +23252,7 @@
                 "class": "Cdn",
                 "text": "__construct",
                 "value": "__construct",
-                "lastmod": 1639280106,
+                "lastmod": 1644673655,
                 "url": "bbn-php\/doc\/method\/Cdn\/__construct",
                 "desc": "Constructor."
             },
@@ -22981,7 +23261,7 @@
                 "class": "Cdn",
                 "text": "check",
                 "value": "check",
-                "lastmod": 1639280106,
+                "lastmod": 1644673655,
                 "url": "bbn-php\/doc\/method\/Cdn\/check",
                 "desc": ""
             },
@@ -22990,7 +23270,7 @@
                 "class": "Cdn",
                 "text": "checkCache",
                 "value": "checkCache",
-                "lastmod": 1639280106,
+                "lastmod": 1644673655,
                 "url": "bbn-php\/doc\/method\/Cdn\/checkCache",
                 "desc": ""
             },
@@ -22999,7 +23279,7 @@
                 "class": "Cdn",
                 "text": "getCfg",
                 "value": "getCfg",
-                "lastmod": 1639280106,
+                "lastmod": 1644673655,
                 "url": "bbn-php\/doc\/method\/Cdn\/getCfg",
                 "desc": ""
             },
@@ -23008,7 +23288,7 @@
                 "class": "Cdn",
                 "text": "output",
                 "value": "output",
-                "lastmod": 1639280106,
+                "lastmod": 1644673655,
                 "url": "bbn-php\/doc\/method\/Cdn\/output",
                 "desc": ""
             },
@@ -23017,7 +23297,7 @@
                 "class": "Cdn",
                 "text": "process",
                 "value": "process",
-                "lastmod": 1639280106,
+                "lastmod": 1644673655,
                 "url": "bbn-php\/doc\/method\/Cdn\/process",
                 "desc": ""
             }
@@ -25509,7 +25789,7 @@
         "value": "Str",
         "text": "Str",
         "url": "bbn-php\/doc\/class\/Str",
-        "lastmod": 1642725131,
+        "lastmod": 1642739867,
         "desc": "Class text",
         "items": [
             {
@@ -25517,7 +25797,7 @@
                 "class": "Str",
                 "text": "asVar",
                 "value": "asVar",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/asVar",
                 "desc": "Places quotes around a string"
             },
@@ -25526,7 +25806,7 @@
                 "class": "Str",
                 "text": "cast",
                 "value": "cast",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/cast",
                 "desc": "Converts any type of variable to a string."
             },
@@ -25535,7 +25815,7 @@
                 "class": "Str",
                 "text": "changeCase",
                 "value": "changeCase",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/changeCase",
                 "desc": "Converts the case of a string."
             },
@@ -25544,7 +25824,7 @@
                 "class": "Str",
                 "text": "checkFilename",
                 "value": "checkFilename",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/checkFilename",
                 "desc": "Checks if a string doesn't contain a filesystem path."
             },
@@ -25553,7 +25833,7 @@
                 "class": "Str",
                 "text": "checkJson",
                 "value": "checkJson",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/checkJson",
                 "desc": "Checks whether a JSON string is valid or not. If $return_error is set to true, the error will be returned."
             },
@@ -25562,7 +25842,7 @@
                 "class": "Str",
                 "text": "checkName",
                 "value": "checkName",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/checkName",
                 "desc": "Checks if a string complies with SQL naming convention."
             },
@@ -25571,7 +25851,7 @@
                 "class": "Str",
                 "text": "checkPath",
                 "value": "checkPath",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/checkPath",
                 "desc": "Checks if every bit of a string doesn't contain a filesystem path."
             },
@@ -25580,7 +25860,7 @@
                 "class": "Str",
                 "text": "cleanSpaces",
                 "value": "cleanSpaces",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/cleanSpaces",
                 "desc": "Trims, and removes extra spaces (all more than one)"
             },
@@ -25589,7 +25869,7 @@
                 "class": "Str",
                 "text": "convertSize",
                 "value": "convertSize",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/convertSize",
                 "desc": "Converts size from one unit to another."
             },
@@ -25598,7 +25878,7 @@
                 "class": "Str",
                 "text": "correctTypes",
                 "value": "correctTypes",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/correctTypes",
                 "desc": "If it looks like an int or float type, the string variable is converted into the correct type."
             },
@@ -25607,7 +25887,7 @@
                 "class": "Str",
                 "text": "cut",
                 "value": "cut",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/cut",
                 "desc": "Cuts a string (HTML and PHP tags stripped) to maximum length inserted."
             },
@@ -25616,7 +25896,7 @@
                 "class": "Str",
                 "text": "encodeDbname",
                 "value": "encodeDbname",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/encodeDbname",
                 "desc": "Returns a corrected string for database naming."
             },
@@ -25625,7 +25905,7 @@
                 "class": "Str",
                 "text": "encodeFilename",
                 "value": "encodeFilename",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/encodeFilename",
                 "desc": "Returns a cross-platform filename for the file."
             },
@@ -25634,7 +25914,7 @@
                 "class": "Str",
                 "text": "escape",
                 "value": "escape",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escape",
                 "desc": "Synonym of \"escape_squotes\"."
             },
@@ -25643,7 +25923,7 @@
                 "class": "Str",
                 "text": "escapeAllQuotes",
                 "value": "escapeAllQuotes",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeAllQuotes",
                 "desc": "Escapes all quotes (single and double) from a given string."
             },
@@ -25652,7 +25932,7 @@
                 "class": "Str",
                 "text": "escapeApo",
                 "value": "escapeApo",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeApo",
                 "desc": "Synonym of \"escape_squotes\"."
             },
@@ -25661,7 +25941,7 @@
                 "class": "Str",
                 "text": "escapeDquote",
                 "value": "escapeDquote",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeDquote",
                 "desc": "Synonym of \"escape_dquotes\"."
             },
@@ -25670,7 +25950,7 @@
                 "class": "Str",
                 "text": "escapeDquotes",
                 "value": "escapeDquotes",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeDquotes",
                 "desc": "Escapes the string in double quotes."
             },
@@ -25679,7 +25959,7 @@
                 "class": "Str",
                 "text": "escapeQuote",
                 "value": "escapeQuote",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeQuote",
                 "desc": "Synonym of \"escape_dquotes\"."
             },
@@ -25688,7 +25968,7 @@
                 "class": "Str",
                 "text": "escapeQuotes",
                 "value": "escapeQuotes",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeQuotes",
                 "desc": "Synonym of \"escape_dquotes\"."
             },
@@ -25697,7 +25977,7 @@
                 "class": "Str",
                 "text": "escapeSquote",
                 "value": "escapeSquote",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeSquote",
                 "desc": "Synonym of \"escape_squotes\"."
             },
@@ -25706,7 +25986,7 @@
                 "class": "Str",
                 "text": "escapeSquotes",
                 "value": "escapeSquotes",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/escapeSquotes",
                 "desc": "Escapes the string in quotes."
             },
@@ -25715,7 +25995,7 @@
                 "class": "Str",
                 "text": "export",
                 "value": "export",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/export",
                 "desc": "Returns a variable in a mode that is directly usable by PHP."
             },
@@ -25724,7 +26004,7 @@
                 "class": "Str",
                 "text": "fileExt",
                 "value": "fileExt",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/fileExt",
                 "desc": "Returns the file extension."
             },
@@ -25733,7 +26013,7 @@
                 "class": "Str",
                 "text": "genpwd",
                 "value": "genpwd",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/genpwd",
                 "desc": "Returns a random password."
             },
@@ -25742,7 +26022,7 @@
                 "class": "Str",
                 "text": "getNumbers",
                 "value": "getNumbers",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/getNumbers",
                 "desc": "Extracts all digits from a string."
             },
@@ -25751,7 +26031,7 @@
                 "class": "Str",
                 "text": "hasSlash",
                 "value": "hasSlash",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/hasSlash",
                 "desc": "Returns \"true\" if slash or backslash are present."
             },
@@ -25760,7 +26040,7 @@
                 "class": "Str",
                 "text": "html2text",
                 "value": "html2text",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/html2text",
                 "desc": "Converts HTML to text replacing paragraphs and brs with new lines."
             },
@@ -25769,7 +26049,7 @@
                 "class": "Str",
                 "text": "isBuid",
                 "value": "isBuid",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isBuid",
                 "desc": "Checks if the string is a valid binary UID string."
             },
@@ -25778,7 +26058,7 @@
                 "class": "Str",
                 "text": "isCleanPath",
                 "value": "isCleanPath",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isCleanPath",
                 "desc": "Checks if \".. \\\\\" or \"..\/\" is contained in the parameter and it will return false if true."
             },
@@ -25787,7 +26067,7 @@
                 "class": "Str",
                 "text": "isDateSql",
                 "value": "isDateSql",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isDateSql",
                 "desc": "Checks if the argument is in a valid SQL date format."
             },
@@ -25796,7 +26076,7 @@
                 "class": "Str",
                 "text": "isDecimal",
                 "value": "isDecimal",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isDecimal",
                 "desc": "Checks if the item is a decimal."
             },
@@ -25805,7 +26085,7 @@
                 "class": "Str",
                 "text": "isDomain",
                 "value": "isDomain",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isDomain",
                 "desc": "Checks if the argument is a valid domain name."
             },
@@ -25814,7 +26094,7 @@
                 "class": "Str",
                 "text": "isEmail",
                 "value": "isEmail",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isEmail",
                 "desc": "Checks if the string is the correct type of e-mail address."
             },
@@ -25823,7 +26103,7 @@
                 "class": "Str",
                 "text": "isHTML",
                 "value": "isHTML",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isHTML",
                 "desc": ""
             },
@@ -25832,7 +26112,7 @@
                 "class": "Str",
                 "text": "isInteger",
                 "value": "isInteger",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isInteger",
                 "desc": "Checks if the item is a integer."
             },
@@ -25841,7 +26121,7 @@
                 "class": "Str",
                 "text": "isIp",
                 "value": "isIp",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isIp",
                 "desc": "Checks if the argument is a valid ip address."
             },
@@ -25850,7 +26130,7 @@
                 "class": "Str",
                 "text": "isJson",
                 "value": "isJson",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isJson",
                 "desc": "Checks if the string is a json string."
             },
@@ -25859,7 +26139,7 @@
                 "class": "Str",
                 "text": "isNumber",
                 "value": "isNumber",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isNumber",
                 "desc": "Checks if the item is a number."
             },
@@ -25868,7 +26148,7 @@
                 "class": "Str",
                 "text": "isUid",
                 "value": "isUid",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isUid",
                 "desc": "Checks if the string is a valid UID string."
             },
@@ -25877,7 +26157,7 @@
                 "class": "Str",
                 "text": "isUrl",
                 "value": "isUrl",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/isUrl",
                 "desc": "Checks if the argument is a valid URL string."
             },
@@ -25886,7 +26166,7 @@
                 "class": "Str",
                 "text": "makeReadable",
                 "value": "makeReadable",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/makeReadable",
                 "desc": "Returns the argumented value, replacing not standard objects (not stdClass) by their class name."
             },
@@ -25895,7 +26175,7 @@
                 "class": "Str",
                 "text": "markdown2html",
                 "value": "markdown2html",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/markdown2html",
                 "desc": "Transforms a markdown string into HTML."
             },
@@ -25904,7 +26184,7 @@
                 "class": "Str",
                 "text": "parsePath",
                 "value": "parsePath",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/parsePath",
                 "desc": "Replaces backslash with slash in a path string. Forbids the use of ..\/"
             },
@@ -25913,7 +26193,7 @@
                 "class": "Str",
                 "text": "parseUrl",
                 "value": "parseUrl",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/parseUrl",
                 "desc": "Returns an array containing any of the various components of the URL that are present."
             },
@@ -25922,7 +26202,7 @@
                 "class": "Str",
                 "text": "removeAccents",
                 "value": "removeAccents",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/removeAccents",
                 "desc": "Replaces accented characters with their character without the accent."
             },
@@ -25931,7 +26211,7 @@
                 "class": "Str",
                 "text": "removeComments",
                 "value": "removeComments",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/removeComments",
                 "desc": "Removes the comments."
             },
@@ -25940,7 +26220,7 @@
                 "class": "Str",
                 "text": "replaceOnce",
                 "value": "replaceOnce",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/replaceOnce",
                 "desc": "Replaces part of a string. If the part is not found, the method returns the string without change."
             },
@@ -25949,7 +26229,7 @@
                 "class": "Str",
                 "text": "sanitize",
                 "value": "sanitize",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/sanitize",
                 "desc": "Strip special characters except the below:"
             },
@@ -25958,7 +26238,7 @@
                 "class": "Str",
                 "text": "sanitizeHtml",
                 "value": "sanitizeHtml",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/sanitizeHtml",
                 "desc": "Remove malicious code and makes HTML standard compliant."
             },
@@ -25967,7 +26247,7 @@
                 "class": "Str",
                 "text": "saySize",
                 "value": "saySize",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/saySize",
                 "desc": "Converts the bytes to another unit form."
             },
@@ -25976,7 +26256,7 @@
                 "class": "Str",
                 "text": "text2html",
                 "value": "text2html",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/text2html",
                 "desc": "Converts text to HTML replacing new lines with brs."
             },
@@ -25985,7 +26265,7 @@
                 "class": "Str",
                 "text": "toCamel",
                 "value": "toCamel",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/toCamel",
                 "desc": "Converts the given string to camel case."
             },
@@ -25994,7 +26274,7 @@
                 "class": "Str",
                 "text": "unescapeSquote",
                 "value": "unescapeSquote",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/unescapeSquote",
                 "desc": "Unescapes the string in quotes."
             },
@@ -26003,7 +26283,7 @@
                 "class": "Str",
                 "text": "unescapeSquotes",
                 "value": "unescapeSquotes",
-                "lastmod": 1642725131,
+                "lastmod": 1642739867,
                 "url": "bbn-php\/doc\/method\/Str\/unescapeSquotes",
                 "desc": "Unescapes the string in quotes."
             }
