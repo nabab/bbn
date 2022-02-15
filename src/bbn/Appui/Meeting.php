@@ -263,10 +263,12 @@ class Meeting extends bbn\Models\Cls\Db
         if ($idMeeting = $this->getStartedMeeting($r[$this->prefFields['id']])) {
           $r['participants'] = $this->getParticipants($idMeeting);
           $r['invited'] = $this->getInvited($idMeeting);
+          $r['liveMeeting'] = $idMeeting;
         }
         else {
           $r['participants'] = [];
           $r['invited'] = [];
+          $r['liveMeeting'] = null;
         }
         $r['live'] = !empty($idMeeting);
         $last = $this->getLastMeeting($r[$this->prefFields['id']]);
@@ -778,6 +780,25 @@ class Meeting extends bbn\Models\Cls\Db
       $fields['id_meeting'] => $idMeeting,
       $fields['id_user'] => $idUser,
       $fields['invited'] => 1
+    ]);
+  }
+
+
+  public function isMeeting(string $idMeeting): bool
+  {
+    $fields = $this->class_cfg['arch']['meetings'];;
+    return (bool)$this->db->selectOne([
+      'table' => $this->class_cfg['tables']['meetings'],
+      'fields' => [$fields['id']],
+      'where' => [
+        'conditions' => [[
+          'field' => $fields['id'],
+          'value' => $idMeeting
+        ], [
+          'field' => $fields['ended'],
+          'operator' => 'isnull'
+        ]]
+      ]
     ]);
   }
 
