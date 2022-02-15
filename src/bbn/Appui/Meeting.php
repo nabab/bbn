@@ -48,6 +48,7 @@ class Meeting extends bbn\Models\Cls\Db
         'id_meeting' => 'id_meeting',
         'id_tmp' => 'id_tmp',
         'id_user' => 'id_user',
+        'name' => 'name',
         'invited' => 'invited',
         'joined' => 'joined',
         'leaved' => 'leaved'
@@ -575,7 +576,7 @@ class Meeting extends bbn\Models\Cls\Db
         }
       }
       else {
-        $this->setLeaved($idMeeting, $idTmp, $idUser);
+        $this->setLeaved($idMeeting, $idTmp, $idUser, false);
         if ($this->db->insert($table, [
           $fields['id_meeting'] => $idMeeting,
           $fields['id_user'] => $idUser,
@@ -590,21 +591,52 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function setLeaved(string $idMeeting, string $idTmp, string $idUser = null): bool
+  public function setLeaved(string $idMeeting, string $idTmp, string $idUser = null, bool $close = true): bool
   {
     $fields = $this->class_cfg['arch']['participants'];
-    if ($this->db->update($this->class_cfg['tables']['participants'], [
-      $fields['leaved'] => date('Y-m-d H:i:s')
-    ], [
+    $where = [
       $fields['id_user'] => $idUser,
-      $fields['id_tmp'] => $idTmp,
       $fields['id_meeting'] => $idMeeting,
       $fields['leaved'] => null
-    ])) {
-      if (!$this->getParticipants($idMeeting)) {
+    ];
+    if (empty($idUser)) {
+      $where[$fields['id_tmp']] = $idTmp;
+    }
+    if ($this->db->update($this->class_cfg['tables']['participants'], [
+      $fields['leaved'] => date('Y-m-d H:i:s')
+    ], $where)) {
+      if (!empty($close) && !$this->getParticipants($idMeeting)) {
         $this->stopMeeting($idMeeting);
       }
       return true;
+    }
+    return false;
+  }
+
+
+  public function setParticipantName(string $idMeeting, string $idTmp, string $name): bool
+  {
+    $tableParts = $this->class_cfg['tables']['participants'];
+    $fieldsParts = $this->class_cfg['arch']['participants'];
+    $fieldsMeetings = $this->class_cfg['arch']['meetings'];
+    if ($meeting = $this->getMeeting($idMeeting)) {
+      $old = $this->db->rselect($tableParts, [], [
+        $fieldsParts['id_meeting'] => $idMeeting,
+        $fieldsParts['id_tmp'] => $idTmp
+      ]);
+      if (empty($old)
+        && ($idRoom = $meeting[$fieldsMeetings['id_room']])
+      ) {
+        $old = $this->setJoined($idRoom, $idTmp);
+      }
+      $idPart = \is_array($old) ? $old[$fieldsParts['id']] : $old;
+      if (!empty($old) && !empty($name)) {
+        return (bool)$this->db->update($tableParts, [
+          $fieldsParts['name'] => $name
+        ], [
+          $fieldsParts['id'] => $idPart
+        ]);
+      }
     }
     return false;
   }
