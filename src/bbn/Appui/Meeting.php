@@ -546,7 +546,7 @@ class Meeting extends bbn\Models\Cls\Db
     if (!empty($idMeeting)) {
       $fields = $this->class_cfg['arch']['participants'];
       $table = $this->class_cfg['tables']['participants'];
-      if ($invited = $this->db->selectOne([
+      if (!empty($idUser) && ($invited = $this->db->selectOne([
         'table' => $table,
         'fields' => [$fields['id']],
         'where' => [
@@ -564,7 +564,7 @@ class Meeting extends bbn\Models\Cls\Db
             'operator' => 'isnull'
           ]]
         ]
-      ])) {
+      ]))) {
         if ($this->db->update($table, [
           $fields['id_tmp'] => $idTmp,
           $fields['joined'] => date('Y-m-d H:i:s')
