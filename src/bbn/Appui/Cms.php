@@ -734,4 +734,30 @@ class Cms extends DbCls
     }
       return false;
   }
+
+
+  public function getTypes(): array
+  {
+    $o =& $this;
+    return $this->cacheGetSet(
+      function() use (&$o) {
+        $id_cms = $o->opt->fromCode('bbn-cms', 'editors', 'note', 'appui');
+        $arr = [];
+        foreach ($o->opt->fullOptions('types', 'note', 'appui') as $op) {
+          if ($op['id_alias'] === $id_cms) {
+            $arr[] = [
+              'text' => $op['text'],
+              'value' => $op['id'],
+              'prefix' => $op['prefix'] ?? ''
+            ];
+          }
+        }
+
+        return $arr;
+      },
+      'types',
+      '',
+      0
+    );
+  }
 }
