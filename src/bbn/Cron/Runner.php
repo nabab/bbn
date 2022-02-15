@@ -123,9 +123,7 @@ class Runner extends bbn\Models\Cls\Basic
         }
       }
     }
-    if (!$this->isTestingEnvironment()) {
-      exit();
-    }
+    exit();
   }
 
   /**
@@ -307,9 +305,7 @@ class Runner extends bbn\Models\Cls\Basic
             }
           }
         }
-        if (!$this->isTestingEnvironment()) {
-          sleep(1);
-        }
+        sleep(1);
         if ($this->timer->measure('users') > self::$user_timeout) {
           echo '?';
           //$admin->clean_tokens();
@@ -353,9 +349,6 @@ class Runner extends bbn\Models\Cls\Basic
               $this->cron->getManager()->unsetPid($r['id']);
             }
           }
-          if ($this->isTestingEnvironment()) {
-            return;
-          }
           exit();
         }
         if ($rows = $this->cron->getManager()->getNextRows(0)) {
@@ -370,9 +363,7 @@ class Runner extends bbn\Models\Cls\Basic
             $this->cron->getLauncher()->launch($param);
           }
         }
-        if (!$this->isTestingEnvironment()) {
-          sleep(10);
-        }
+        sleep(10);
       }
     }
   }
@@ -495,9 +486,7 @@ class Runner extends bbn\Models\Cls\Basic
       }
     }
 
-    if (!$this->isTestingEnvironment()) {
-      exit();
-    }
+    exit();
   }
 
 
