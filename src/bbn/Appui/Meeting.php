@@ -71,13 +71,16 @@ class Meeting extends bbn\Models\Cls\Db
       throw new \Error(_('No configuration found for the Option class'));
     }
     $this->optFields = $optCfg['arch']['options'];
-    $prefCfg = \bbn\User\Preferences::getInstance()->getClassCfg();
-    if (!$prefCfg) {
-      throw new \Error(_('No configuration found for the Preferences class'));
+    $pref = \bbn\User\Preferences::getInstance();
+    if (!empty($pref)) {
+      $prefCfg = $pref->getClassCfg();
+      if (!$prefCfg) {
+        throw new \Error(_('No configuration found for the Preferences class'));
+      }
+      $this->prefTable = $prefCfg['table'];
+      $this->prefFields = $prefCfg['arch']['user_options'];
+      $this->passCls = new \bbn\Appui\Passwords($this->db);
     }
-    $this->prefTable = $prefCfg['table'];
-    $this->prefFields = $prefCfg['arch']['user_options'];
-    $this->passCls = new \bbn\Appui\Passwords($this->db);
   }
 
 
@@ -773,15 +776,22 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function getMeetingByTmp(string $idTmp): ?array
+  public function getMeetingByTmp(string $idTmp, array $where = []): ?array
   {
-    return $this->db->rselect(
-      $this->class_cfg['table'],
-      [],
-      [
-        $this->class_cfg['arch']['meetings']['id_tmp'] => $idTmp
-      ]
-    );
+    $w = [
+      'conditions' => [[
+        'field' => $this->class_cfg['arch']['meetings']['id_tmp'],
+        'value' => $idTmp
+      ]]
+    ];
+    if (!empty($where)) {
+      $w['conditions'][] = $where;
+    }
+    return $this->db->rselect([
+      'table' => $this->class_cfg['table'],
+      'fields' => [],
+      'where' => $w
+    ]);
   }
 
 
@@ -832,6 +842,87 @@ class Meeting extends bbn\Models\Cls\Db
         ]]
       ]
     ]);
+  }
+
+
+  public function getParticipantsLogs(string $idMeeting): array
+  {
+    $logs = [];
+    $partsFields = $this->class_cfg['arch']['participants'];
+    $user = \bbn\User::getInstance();
+    if ($parts = $this->db->rselectAll([
+      'table' => $this->class_cfg['tables']['participants'],
+      'fields' => [],
+      'where' => [
+        'conditions' => [[
+          'field' => $partsFields['id_meeting'],
+          'value' => $idMeeting
+        ], [
+          'field' => $partsFields['joined'],
+          'operator' => 'isnotnull'
+        ], [
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => $partsFields['id_user'],
+            'operator' => 'isnotnull'
+          ], [
+            'field' => $partsFields['name'],
+            'operator' => 'isnotnull'
+          ]]
+        ]]
+      ]
+    ])) {
+      foreach ($parts as $part) {
+        $name = !empty($part[$partsFields['id_user']]) ?
+          $user->getName($part[$partsFields['id_user']]) :
+          ($part[$partsFields['name']] ?: 'Unknown external user');
+        $logs[] = [
+          'moment' => $part[$partsFields['joined']],
+          'text' => $name . ' ' . _('joined the meeting')
+        ];
+        if (!empty($part[$partsFields['leaved']])) {
+          $logs[] = [
+            'moment' => $part[$partsFields['leaved']],
+            'text' => $name . ' ' . _('left the meeting')
+          ];
+        }
+      }
+      X::sortBy($logs, 'moment', 'asc');
+    }
+    return $logs;
+  }
+
+
+  public function getMeetingsFromServer(string $server): array
+  {
+    $meetings = [];
+    $url = 'http://' . $server . ':8080/colibri/conferences';
+    if ($tmpMeetings = X::curl($url, null, [])) {
+      $tmpMeetings = \json_decode($tmpMeetings, true);
+      if (!empty($tmpMeetings)) {
+        foreach ($tmpMeetings as $meet) {
+          if ($m = X::curl($url . '/' . $meet['id'], null, [])) {
+            $m = \json_decode($m, true);
+            $parts = [];
+            if (!empty($m['contents'])) {
+              $conn = \array_values(\array_filter($m['contents'], function($c){
+                return \array_key_exists('sctpconnections', $c);
+              }));
+              $parts = !empty($conn) && !empty($conn[0]['sctpconnections']) ?
+                \array_map(function($p){
+                  return $p['endpoint'];
+                }, $conn[0]['sctpconnections']) :
+                [];
+            }
+            $meetings[$m['id']] = [
+              'id' => $m['id'],
+              'participants' => $parts
+            ];
+          }
+        }
+      }
+    }
+    return $meetings;
   }
 
 
