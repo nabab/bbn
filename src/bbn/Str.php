@@ -627,6 +627,17 @@ class Str
     return true;
   }
 
+  public static function getNameFromIndex($num) {
+    $numeric = $num % 26;
+    $letter = chr(65 + $numeric);
+    $num2 = intval($num / 26);
+    if ($num2 > 0) {
+        return self::getNameFromIndex($num2 - 1) . $letter;
+    } else {
+        return $letter;
+    }
+  }
+
 
   /**
    * Checks if the item is a integer.
@@ -650,6 +661,10 @@ class Str
     foreach ($args as $a){
       if (!is_string($a) && !is_int($a) && !is_float($a)) {
         return false;
+      }
+
+      if (is_float($a)) {
+        $a = (string)$a;
       }
 
       if (is_string($a)) {

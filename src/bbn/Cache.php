@@ -4,6 +4,8 @@ namespace bbn;
 use Closure;
 use Exception;
 use Opis\Closure\SerializableClosure;
+use Psr\SimpleCache\InvalidArgumentException;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * Universal caching class: called once per request, it holds the cache system.
@@ -15,14 +17,15 @@ use Opis\Closure\SerializableClosure;
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  */
 
-class Cache
+class Cache implements CacheInterface
 {
-
   protected static $is_init = false;
 
   protected static $type = null;
 
   protected static $max_wait = 10;
+
+  protected static $default_ttl = 60;
 
   protected static $engine;
 
@@ -144,6 +147,10 @@ class Cache
    */
   public static function ttl($ttl): int
   {
+    if (is_null($ttl)) {
+      return self::$default_ttl;
+    }
+
     if (Str::isInteger($ttl)) {
       return (int)$ttl;
     }
@@ -167,6 +174,11 @@ class Cache
       }
     }
 
+    ob_start();
+    var_dump($ttl);
+    $ttl = ob_get_contents();
+    ob_end_clean();
+    X::log($ttl);
     throw new Exception(
       X::_("Wrong ttl parameter")
     );
@@ -238,7 +250,7 @@ class Cache
    * @param string|int $ttl  The time-to-live value
    * @return bool
    */
-  public function has(string $item, $ttl = 0): bool
+  public function has($item, $ttl = null): bool
   {
     if (self::$type) {
       switch (self::$type){
@@ -271,7 +283,7 @@ class Cache
    * @param string $item The name of the item
    * @return bool
    */
-  public function delete(string $item): bool
+  public function delete($item): bool
   {
     if (self::$type) {
       switch (self::$type){
@@ -415,7 +427,7 @@ class Cache
    * @param int    $ttl  The length in seconds during which the value will be considered as valid
    * @return bool Returns true in case of success false otherwise
    */
-  public function set(string $item, $val, int $ttl = 10, float $exec = null): bool
+  public function set($item, $val, $ttl = null, float $exec = null): bool
   {
     if (self::$type) {
       $ttl  = self::ttl($ttl);
@@ -481,7 +493,7 @@ class Cache
    * @param int    $ttl  The cache length
    * @return null|array
    */
-  private function getRaw(string $item, int $ttl = 0, bool $force = false): ?array
+  private function getRaw(string $item, int $ttl = null, bool $force = false): ?array
   {
     switch (self::$type) {
       case 'apc':
@@ -537,7 +549,7 @@ class Cache
    * @param int    $ttl  The cache length
    * @return mixed
    */
-  public function get(string $item, int $ttl = 0)
+  public function get($item, $ttl = null)
   {
     if ($r = $this->getRaw($item, $ttl)) {
       return $r['value'];
@@ -557,7 +569,7 @@ class Cache
      * @return mixed
      * @throws Exception
      */
-  public function getSet(callable $fn, string $item, int $ttl = 0)
+  public function getSet(callable $fn, string $item, int $ttl = null)
   {
     switch (self::$type) {
       case 'apc':
@@ -716,6 +728,49 @@ class Cache
     return serialize(
       new SerializableClosure($function)
     );
+  }
+
+
+  public function getMultiple($keys, $default = null)
+  {
+    if (!is_iterable($keys)) {
+      throw new InvalidArgumentException("Keys must be iterable");
+    }
+
+    $res = [];
+    foreach ($keys as $k) {
+      $res[$k] = $this->has($k) ? $this->get($k) : $default;
+    }
+
+    return $res;
+  }
+
+
+  public function setMultiple($values, $ttl = null)
+  {
+    foreach ($values as $k => $v) {
+      if (!$this->set($k, $v, $ttl)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
+  public function deleteMultiple($keys)
+  {
+    if (!is_iterable($keys)) {
+      throw new InvalidArgumentException("Keys must be iterable");
+    }
+
+    foreach ($keys as $k) {
+      if (!$this->delete($k)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }
