@@ -48,6 +48,7 @@ class Meeting extends bbn\Models\Cls\Db
         'id_meeting' => 'id_meeting',
         'id_tmp' => 'id_tmp',
         'id_user' => 'id_user',
+        'name' => 'name',
         'invited' => 'invited',
         'joined' => 'joined',
         'leaved' => 'leaved'
@@ -70,13 +71,16 @@ class Meeting extends bbn\Models\Cls\Db
       throw new \Error(_('No configuration found for the Option class'));
     }
     $this->optFields = $optCfg['arch']['options'];
-    $prefCfg = \bbn\User\Preferences::getInstance()->getClassCfg();
-    if (!$prefCfg) {
-      throw new \Error(_('No configuration found for the Preferences class'));
+    $pref = \bbn\User\Preferences::getInstance();
+    if (!empty($pref)) {
+      $prefCfg = $pref->getClassCfg();
+      if (!$prefCfg) {
+        throw new \Error(_('No configuration found for the Preferences class'));
+      }
+      $this->prefTable = $prefCfg['table'];
+      $this->prefFields = $prefCfg['arch']['user_options'];
+      $this->passCls = new \bbn\Appui\Passwords($this->db);
     }
-    $this->prefTable = $prefCfg['table'];
-    $this->prefFields = $prefCfg['arch']['user_options'];
-    $this->passCls = new \bbn\Appui\Passwords($this->db);
   }
 
 
@@ -263,10 +267,12 @@ class Meeting extends bbn\Models\Cls\Db
         if ($idMeeting = $this->getStartedMeeting($r[$this->prefFields['id']])) {
           $r['participants'] = $this->getParticipants($idMeeting);
           $r['invited'] = $this->getInvited($idMeeting);
+          $r['liveMeeting'] = $idMeeting;
         }
         else {
           $r['participants'] = [];
           $r['invited'] = [];
+          $r['liveMeeting'] = null;
         }
         $r['live'] = !empty($idMeeting);
         $last = $this->getLastMeeting($r[$this->prefFields['id']]);
@@ -544,7 +550,7 @@ class Meeting extends bbn\Models\Cls\Db
     if (!empty($idMeeting)) {
       $fields = $this->class_cfg['arch']['participants'];
       $table = $this->class_cfg['tables']['participants'];
-      if ($invited = $this->db->selectOne([
+      if (!empty($idUser) && ($invited = $this->db->selectOne([
         'table' => $table,
         'fields' => [$fields['id']],
         'where' => [
@@ -562,7 +568,7 @@ class Meeting extends bbn\Models\Cls\Db
             'operator' => 'isnull'
           ]]
         ]
-      ])) {
+      ]))) {
         if ($this->db->update($table, [
           $fields['id_tmp'] => $idTmp,
           $fields['joined'] => date('Y-m-d H:i:s')
@@ -573,7 +579,7 @@ class Meeting extends bbn\Models\Cls\Db
         }
       }
       else {
-        $this->setLeaved($idMeeting, $idTmp, $idUser);
+        $this->setLeaved($idMeeting, $idTmp, $idUser, false);
         if ($this->db->insert($table, [
           $fields['id_meeting'] => $idMeeting,
           $fields['id_user'] => $idUser,
@@ -588,21 +594,52 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function setLeaved(string $idMeeting, string $idTmp, string $idUser = null): bool
+  public function setLeaved(string $idMeeting, string $idTmp, string $idUser = null, bool $close = true): bool
   {
     $fields = $this->class_cfg['arch']['participants'];
-    if ($this->db->update($this->class_cfg['tables']['participants'], [
-      $fields['leaved'] => date('Y-m-d H:i:s')
-    ], [
+    $where = [
       $fields['id_user'] => $idUser,
-      $fields['id_tmp'] => $idTmp,
       $fields['id_meeting'] => $idMeeting,
       $fields['leaved'] => null
-    ])) {
-      if (!$this->getParticipants($idMeeting)) {
+    ];
+    if (empty($idUser)) {
+      $where[$fields['id_tmp']] = $idTmp;
+    }
+    if ($this->db->update($this->class_cfg['tables']['participants'], [
+      $fields['leaved'] => date('Y-m-d H:i:s')
+    ], $where)) {
+      if (!empty($close) && !$this->getParticipants($idMeeting)) {
         $this->stopMeeting($idMeeting);
       }
       return true;
+    }
+    return false;
+  }
+
+
+  public function setParticipantName(string $idMeeting, string $idTmp, string $name): bool
+  {
+    $tableParts = $this->class_cfg['tables']['participants'];
+    $fieldsParts = $this->class_cfg['arch']['participants'];
+    $fieldsMeetings = $this->class_cfg['arch']['meetings'];
+    if ($meeting = $this->getMeeting($idMeeting)) {
+      $old = $this->db->rselect($tableParts, [], [
+        $fieldsParts['id_meeting'] => $idMeeting,
+        $fieldsParts['id_tmp'] => $idTmp
+      ]);
+      if (empty($old)
+        && ($idRoom = $meeting[$fieldsMeetings['id_room']])
+      ) {
+        $old = $this->setJoined($idRoom, $idTmp);
+      }
+      $idPart = \is_array($old) ? $old[$fieldsParts['id']] : $old;
+      if (!empty($old) && !empty($name)) {
+        return (bool)$this->db->update($tableParts, [
+          $fieldsParts['name'] => $name
+        ], [
+          $fieldsParts['id'] => $idPart
+        ]);
+      }
     }
     return false;
   }
@@ -739,15 +776,22 @@ class Meeting extends bbn\Models\Cls\Db
   }
 
 
-  public function getMeetingByTmp(string $idTmp): ?array
+  public function getMeetingByTmp(string $idTmp, array $where = []): ?array
   {
-    return $this->db->rselect(
-      $this->class_cfg['table'],
-      [],
-      [
-        $this->class_cfg['arch']['meetings']['id_tmp'] => $idTmp
-      ]
-    );
+    $w = [
+      'conditions' => [[
+        'field' => $this->class_cfg['arch']['meetings']['id_tmp'],
+        'value' => $idTmp
+      ]]
+    ];
+    if (!empty($where)) {
+      $w['conditions'][] = $where;
+    }
+    return $this->db->rselect([
+      'table' => $this->class_cfg['table'],
+      'fields' => [],
+      'where' => $w
+    ]);
   }
 
 
@@ -779,6 +823,106 @@ class Meeting extends bbn\Models\Cls\Db
       $fields['id_user'] => $idUser,
       $fields['invited'] => 1
     ]);
+  }
+
+
+  public function isMeeting(string $idMeeting): bool
+  {
+    $fields = $this->class_cfg['arch']['meetings'];;
+    return (bool)$this->db->selectOne([
+      'table' => $this->class_cfg['tables']['meetings'],
+      'fields' => [$fields['id']],
+      'where' => [
+        'conditions' => [[
+          'field' => $fields['id'],
+          'value' => $idMeeting
+        ], [
+          'field' => $fields['ended'],
+          'operator' => 'isnull'
+        ]]
+      ]
+    ]);
+  }
+
+
+  public function getParticipantsLogs(string $idMeeting): array
+  {
+    $logs = [];
+    $partsFields = $this->class_cfg['arch']['participants'];
+    $user = \bbn\User::getInstance();
+    if ($parts = $this->db->rselectAll([
+      'table' => $this->class_cfg['tables']['participants'],
+      'fields' => [],
+      'where' => [
+        'conditions' => [[
+          'field' => $partsFields['id_meeting'],
+          'value' => $idMeeting
+        ], [
+          'field' => $partsFields['joined'],
+          'operator' => 'isnotnull'
+        ], [
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => $partsFields['id_user'],
+            'operator' => 'isnotnull'
+          ], [
+            'field' => $partsFields['name'],
+            'operator' => 'isnotnull'
+          ]]
+        ]]
+      ]
+    ])) {
+      foreach ($parts as $part) {
+        $name = !empty($part[$partsFields['id_user']]) ?
+          $user->getName($part[$partsFields['id_user']]) :
+          ($part[$partsFields['name']] ?: 'Unknown external user');
+        $logs[] = [
+          'moment' => $part[$partsFields['joined']],
+          'text' => $name . ' ' . _('joined the meeting')
+        ];
+        if (!empty($part[$partsFields['leaved']])) {
+          $logs[] = [
+            'moment' => $part[$partsFields['leaved']],
+            'text' => $name . ' ' . _('left the meeting')
+          ];
+        }
+      }
+      X::sortBy($logs, 'moment', 'asc');
+    }
+    return $logs;
+  }
+
+
+  public function getMeetingsFromServer(string $server): array
+  {
+    $meetings = [];
+    $url = 'http://' . $server . ':8080/colibri/conferences';
+    if ($tmpMeetings = X::curl($url, null, [])) {
+      $tmpMeetings = \json_decode($tmpMeetings, true);
+      if (!empty($tmpMeetings)) {
+        foreach ($tmpMeetings as $meet) {
+          if ($m = X::curl($url . '/' . $meet['id'], null, [])) {
+            $m = \json_decode($m, true);
+            $parts = [];
+            if (!empty($m['contents'])) {
+              $conn = \array_values(\array_filter($m['contents'], function($c){
+                return \array_key_exists('sctpconnections', $c);
+              }));
+              $parts = !empty($conn) && !empty($conn[0]['sctpconnections']) ?
+                \array_map(function($p){
+                  return $p['endpoint'];
+                }, $conn[0]['sctpconnections']) :
+                [];
+            }
+            $meetings[$m['id']] = [
+              'id' => $m['id'],
+              'participants' => $parts
+            ];
+          }
+        }
+      }
+    }
+    return $meetings;
   }
 
 
