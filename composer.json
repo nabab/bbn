@@ -13,7 +13,7 @@
     }
   ],
   "require": {
-    "php": ">=7.4",
+    "php": ">=8.0",
     "ext-mbstring": "*",
     "ext-json": "*",
     "composer/composer": "2.1.14",
@@ -30,7 +30,7 @@
     "wapmorgan/unified-archive": "0.1.*",
     "pear/archive_tar": "1.4.*",
     "gettext/gettext": "4.8.1",
-    "nesbot/carbon": "2.*",
+    "nesbot/carbon": "2.57.*",
     "nikic/php-parser": "4.12.*",
     "sabre/dav": "4.1.*",
     "erusev/parsedown": "1.7.*",
