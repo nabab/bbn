@@ -875,7 +875,7 @@ class Meeting extends bbn\Models\Cls\Db
       foreach ($parts as $part) {
         $name = !empty($part[$partsFields['id_user']]) ?
           $user->getName($part[$partsFields['id_user']]) :
-          ($part[$partsFields['name']] ?: 'Unknown external user');
+          (!empty($part[$partsFields['name']]) ? sprintf('%s (%s)', $part[$partsFields['name']], _('External')) : _('Unknown external user'));
         $logs[] = [
           'moment' => $part[$partsFields['joined']],
           'text' => $name . ' ' . _('joined the meeting')
