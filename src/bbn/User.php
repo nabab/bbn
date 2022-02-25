@@ -413,6 +413,9 @@ class User extends Models\Cls\Basic
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
       $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';
       $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+      if (empty($this->user_agent)) {
+        X::log([X::isCli(), $_SERVER], 'user_sess');
+      }
 
       // Creating the session's variables if they don't exist yet
       $this->_init_session();

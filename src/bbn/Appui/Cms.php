@@ -160,6 +160,7 @@ class Cms extends DbCls
       $res['end']   = $this->getEnd($id_note);
       $res['tags']  = $this->note->getTags($id_note);
       $res['items'] = $note['content'] ? json_decode($note['content'], true) : [];
+      unset($note['content']);
       if ($with_medias) {
         $res['medias'] = $this->note->getMedias($id_note);
       }
@@ -184,6 +185,7 @@ class Cms extends DbCls
       'field' => 'private',
       'value' => 0
     ];
+
     if ($published) {
       $cfg['where']['conditions'][] = [
         'field' => 'bbn_events.start',
@@ -275,7 +277,19 @@ class Cms extends DbCls
    */
   public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0): array
   {
-    $cfg = $this->getLastVersionCfg($with_content, false, $filter);
+    $cfg       = $this->getLastVersionCfg($with_content, false, $filter);
+    $type_cond = [];
+    foreach ($this->getTypes() as $t) {
+      $type_cond[] = [
+        'field' => 'bbn_notes.id_type',
+        'value' => $t['value']
+      ];
+    }
+    $cfg['where']['conditions'][] = [
+      'logic' => 'OR',
+      'conditions' => $type_cond
+    ];
+
     $cfg['limit'] = $limit;
     $cfg['start'] = $start >= 0 ? $start : 0;
 

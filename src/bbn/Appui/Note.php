@@ -633,6 +633,8 @@ class Note extends bbn\Models\Cls\Db
         'versions.' . $cf['arch']['versions']['title'],
         'versions.' . $cf['arch']['versions']['id_user'],
         'versions.' . $cf['arch']['versions']['creation'],
+        'num_translations' => "COUNT(aliases.id)",
+        'num_variants' => "COUNT(parents.id)",
         'versions.' . $cf['arch']['versions']['content']
       ],
       'join' => [[
@@ -645,6 +647,26 @@ class Note extends bbn\Models\Cls\Db
           ], [
             'field' => 'versions.' . $cf['arch']['versions']['latest'],
             'value' => 1
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['notes'],
+        'alias' => 'parents',
+        'type'  => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => 'parents.' . $cf['arch']['notes']['id_parent'],
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['notes'],
+        'alias' => 'aliases',
+        'type'  => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => 'aliases.' . $cf['arch']['notes']['id_alias'],
           ]],
         ],
       ]],
