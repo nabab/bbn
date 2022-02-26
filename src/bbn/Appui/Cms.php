@@ -729,24 +729,37 @@ class Cms extends DbCls
 
 
 
-    /**
-     * Deletes the given note and unpublish it if published.
+  /**
+   * Deletes the given note and unpublish it if published.
    *
-     * @param string $id_note
-     * @return boolean
-     */
+   * @param string $id_note
+   * @return boolean
+   */
   public function delete(string $id_note): bool
   {
-    if ($note = $this->note->get($id_note)) {
+    if ($this->note->exists($id_note)) {
       if ($this->note->getUrl($id_note)) {
         $this->removeUrl($id_note);
       }
 
-      if (!empty($this->note->remove($note['id']))) {
-          return true;
+      foreach ($this->note->getAliases($id_note) as $id_alias) {
+        if ($this->note->getUrl($id_alias)) {
+          $this->removeUrl($id_alias);
+        }
+      }
+
+      foreach ($this->note->getChildren($id_note) as $id_child) {
+        if ($this->note->getUrl($id_child)) {
+          $this->removeUrl($id_child);
+        }
+      }
+
+      if (!empty($this->note->remove($id_note))) {
+        return true;
       }
     }
-      return false;
+
+    return false;
   }
 
 

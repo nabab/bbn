@@ -64,6 +64,7 @@ class Product extends DbCls
     ],
   ];
 
+
   public function __construct(Db $db, array $cfg = null)
   {
     // The database connection
@@ -75,6 +76,20 @@ class Product extends DbCls
     $this->cms   = new Cms($this->db, $this->note);
     $this->media = new Medias($this->db);
     $this->media->setImageRoot('/image/');
+  }
+
+
+  public function add($name, array $cfg = null): ?string
+  {
+    $dbcfg = $this->getClassCfg();
+    if ($this->insert($cfg['table'], [
+      $dbcfg['arch']['providers']['name'] => $name,
+      $dbcfg['arch']['providers']['cfg']  => $cfg ? json_encode($cfg) : null
+    ])) {
+      return $this->db->lastId();
+    }
+
+    return null;
   }
 
 }

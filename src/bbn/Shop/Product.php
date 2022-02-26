@@ -128,7 +128,7 @@ class Product extends DbCls
     ) {
       $all = $this->get($id);
       if ($public) {
-        unset($all['price_purchase']);
+        unset($all[$cfg['arch']['products']['price_purchase']]);
         $all['stock'] = (bool)$all['stock'];
       }
 
@@ -152,9 +152,13 @@ class Product extends DbCls
 
   public function add($data)
   {
-    if (!X::hasProps($data, ['product_type', 'id_provider', 'url', 'title'])) {
+    $cfg  = $this->getClassCfg();
+    $a = $cfg['arch']['products'];
+    $noteCfg = $this->note->getClassCfg();
+    if (!X::hasProps($data, [$a['product_type'], $a['id_provider'], 'url', $noteCfg['arch']['versions']['title']])) {
       throw new \Exception(_("Some mandatory fields are missing"));
     }
+
     if (!($type = $this->opt->fromCode('products', 'types', 'note', 'appui'))) {
       throw new \Exception(_("Impossible to retrieve the product type"));
     }
@@ -172,18 +176,18 @@ class Product extends DbCls
     )) {
       $this->cms->setUrl($id_note, $data['url']);
 
-      if ($this->db->insert('bbn_shop_products', [
-        'id_provider'    => $data['id_provider'],
-        'id_note'        => $id_note,
-        'id_main'        => $data['id_main'] ?? null,
-        'price_purchase' => $data['price_purchase'] ?? null,
-        'price'     => $data['price'] ?? null,
-        'dimensions'     => $data['dimensions'] ?? null,
-        'weight'         => $data['weight'] ?? null,
-        'product_type'   => $data['product_type'],
-        'id_edition'     => $data['id_edition'],
-        'stock'          => $data['stock'] ?? null,
-        'active'         => $data['active'] ?? 0
+      if ($this->db->insert($cfg['table'], [
+        $a['id_provider']    => $data['id_provider'],
+        $a['id_note']        => $id_note,
+        $a['id_main']        => $data['id_main'] ?? null,
+        $a['price_purchase'] => $data['price_purchase'] ?? null,
+        $a['price']          => $data['price'] ?? null,
+        $a['dimensions']     => $data['dimensions'] ?? null,
+        $a['weight']         => $data['weight'] ?? null,
+        $a['product_type']   => $data['product_type'],
+        $a['id_edition']     => $data['id_edition'],
+        $a['stock']          => $data['stock'] ?? null,
+        $a['active']         => $data['active'] ?? 0
       ])) {
         if (!empty($data['tags'])) {
           $this->note->setTags($id_note, $data['tags']);
@@ -208,7 +212,9 @@ class Product extends DbCls
 
   public function edit(array $data): int
   {
-    if ($this->db->selectOne('bbn_shop_products', 'id_note', ['id' => $data['id']])) {
+    $cfg  = $this->getClassCfg();
+    $a = $cfg['arch']['products'];
+    if ($this->db->selectOne($cfg['table'], $a['id_note'], [$a['id'] => $data['id']])) {
       $content = empty($data['items']) ? '[]' : json_encode($data['items']);
       $res = $this->cms->set($data['url'], $data['title'], $content, $data['excerpt'], $data['start'] ?? null, $data['end'] ?? null, $data['tags']);
       if (!empty($data['front_img'])) {
@@ -221,17 +227,18 @@ class Product extends DbCls
 
       //media upload end
       $res2 = $this->db->update('bbn_shop_products', [
-        'id_provider'    => $data['id_provider'],
-        'price_purchase' => $data['price_purchase'],
-        'price'     => $data['price'],
-        'dimensions'     => $data['dimensions'],
-        'weight'         => $data['weight'],
-        'product_type'        => $data['product_type'],
-        'id_edition'     => $data['id_edition'],
-        'stock'          => $data['stock'],
-        'active'         => $data['active'],
-        'front_img'      => $id_media,
-      ], ['id'           => $data['id']]);
+        $a['id_provider']    => $data['id_provider'],
+        $a['price_purchase'] => $data['price_purchase'],
+        $a['price']          => $data['price'],
+        $a['dimensions']     => $data['dimensions'],
+        $a['weight']         => $data['weight'],
+        $a['product_type']   => $data['product_type'],
+        $a['id_edition']     => $data['id_edition'],
+        $a['stock']          => $data['stock'],
+        $a['active']         => $data['active'],
+        $a['front_img']      => $id_media,
+      ], [
+        $a['id']           => $data['id']]);
       return $res || $res2 ? 1 : 0;
     }
 
@@ -239,10 +246,33 @@ class Product extends DbCls
   }
 
 
+  public function getVariants(string $id): array
+  {
+    $cfg  = $this->getClassCfg();
+    $a = $cfg['arch']['products'];
+    return $this->db->selectColumnValues($cfg['table'], $a['id'], [
+      $a['id_main'] => $id
+    ]);
+
+  }
+
+
+
   public function remove(string $id): int
   {
-    if ($id_note = $this->db->selectOne('bbn_shop_products', 'id_note', ['id' => $id])) {
-      $this->note->removeTags($id_note);
+    $sales = new Sales($this->db);
+    $total = $sales->getByProduct($id);
+    if ($total['num']) {
+      throw new Exception(_("Impossible to delete a product which has already been sold"));
+    }
+
+    $cfg  = $this->getClassCfg();
+    $a = $cfg['arch']['products'];
+    if ($id_note = $this->db->selectOne($cfg['table'], $a['id_note'], [$a['id'] => $id])) {
+      foreach ($this->getVariants($id) as $v) {
+        $this->remove($id);
+      }
+
       return $this->db->delete('bbn_shop_products', ['id' => $id]) && $this->cms->delete($id_note);
     }
 

@@ -894,6 +894,8 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
+   * Removes a row associating a given media and a given note.
+   * 
    * @param string $id_media
    * @param string $id_note
    * @param false $version
@@ -918,6 +920,32 @@ class Note extends bbn\Models\Cls\Db
       }
 
       return $this->db->delete($cf['tables']['notes_medias'], $filter);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Removes all the rows associating medias with a given note.
+   * 
+   * @param string $id_media
+   * @param string $id_note
+   * @param false $version
+   * @return int|null
+   * @throws \Exception
+   */
+  public function removeAllMedias(string $id_note)
+  {
+    $cf = &$this->class_cfg;
+    if (
+      $this->db->selectOne($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media])
+      && $this->exists($id_note)
+    ) {
+
+      return $this->db->delete($cf['tables']['notes_medias'], [
+        $cf['arch']['notes_medias']['id_note'] => $id_note
+      ]);
     }
 
     return null;
@@ -1143,6 +1171,44 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns an array of IDs of the notes which are aliases of the given ID.
+   *
+   * @param string $id_note
+   * @return array
+   */
+  public function getAliases(string $id_note): array
+  {
+    if (!$this->exists($id_note)) {
+      throw new Exception(_("Impossible to retrieve the note"));
+    }
+
+    $cf = &$this->class_cfg;
+    return $this->getColumnValues($cf['table'], $cf['arch']['notes']['id'], [
+      $cf['arch']['notes']['id_alias'] => $id_note
+    ]);
+  }
+
+
+  /**
+   * Returns an array of IDs of the notes which are children of the given ID.
+   *
+   * @param string $id_note
+   * @return array
+   */
+  public function getChildren(string $id_note): array
+  {
+    if (!$this->exists($id_note)) {
+      throw new Exception(_("Impossible to retrieve the note"));
+    }
+
+    $cf = &$this->class_cfg;
+    return $this->getColumnValues($cf['table'], $cf['arch']['notes']['id'], [
+      $cf['arch']['notes']['id_parent'] => $id_note
+    ]);
+  }
+
+
+  /**
    * @param string $id   The note's uid
    * @param bool   $keep Set it to true if you want change active property to 0 instead of delete the row from db
    *
@@ -1153,16 +1219,20 @@ class Note extends bbn\Models\Cls\Db
     if (Str::isUid($id)) {
       $cf = &$this->class_cfg;
       if (empty($keep)) {
-        if ($medias = $this->getMedias($id, true)) {
-          foreach ($medias as $m) {
-            $this->removeMedia($m['id'], $id, true);
-          }
+        $this->removeAllMedias($id);
+        $this->removeTags($id);
+        foreach ($this->getAliases($id) as $id_alias) {
+          $this->remove($id_alias);
+        }
+  
+        foreach ($this->getChildren($id) as $id_child) {
+          $this->remove($id_child);
         }
 
         $this->db->delete($cf['tables']['versions'], [$cf['arch']['versions']['id_note'] => $id]);
-
         return $this->db->delete($cf['table'], [$cf['arch']['notes']['id'] => $id]);
-      } else {
+      }
+      else {
         return $this->db->update($cf['table'], [$cf['arch']['notes']['active'] => 0], [$cf['arch']['notes']['id'] => $id]);
       }
     }
