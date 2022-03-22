@@ -158,7 +158,7 @@ class Controller implements Api
     if (isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
       $this->_path        = $info['path'];
       $this->_plugin      = $info['plugin'];
-      $this->_request     = $info['request'];
+      $this->_request     = $this->getRequest();
       $this->_file        = $info['file'];
       $this->_root        = $info['root'];
       $this->arguments    = $info['args'];
@@ -258,7 +258,7 @@ class Controller implements Api
    */
   public function getRequest()
   {
-    return $this->_request;
+    return $this->_mvc->getRequest();
   }
 
 

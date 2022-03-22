@@ -926,6 +926,7 @@ class X
    */
   public static function removeEmpty($arr, $remove_space = false)
   {
+    $isAssoc = X::isAssoc($arr);
     foreach ($arr as $k => $v) {
       if (\is_object($arr)) {
         if (\is_array($v) || \is_object($v)) {
@@ -954,6 +955,9 @@ class X
           unset($arr[$k]);
         }
       }
+    }
+    if (!$isAssoc) {
+      $arr = array_values($arr);
     }
 
     return $arr;

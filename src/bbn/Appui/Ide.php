@@ -171,6 +171,12 @@ class Ide
   }
 
 
+  public function getProject(): ?string
+  {
+    return $this->projects ? $this->projects->getId() : null;
+  }
+
+
   public function isProject(string $url)
   {
     $rep = $this->repositoryFromUrl($url);
@@ -933,9 +939,9 @@ class Ide
    *
    * @param string $file The real file/dir's path
    * @param string $type The type of real (file/dir)
-   * @return bool
+   * @return null|string
    */
-  public function createPermByReal(string $file, string $type = 'file'): bool
+  public function createPermByReal(string $file, string $type = 'file'): ?string
   {
     if (
       !empty($file)
@@ -945,24 +951,24 @@ class Ide
     ) {
       $is_file = $type === 'file';
       // Check if it's an external route
-      if (($root_path = $this->getAppPath() . 'mvc/public/')
-        && (strpos($file, $root_path) === 0)
-      ) {
+      $root_path = $this->getAppPath() . 'mvc/public/';
+      if (strpos($file, $root_path) === 0) {
         // Remove root path
         $f = substr($file, \strlen($root_path), \strlen($file) - 4);
-      } else {
+      }
+      else {
         foreach ($this->routes as $r) {
           if (strpos($file, $r['path']) === 0) {
             // Remove route
             $f = substr($file, strlen($r['path']) + strlen('src/mvc/public'), -4);
             // Add the route's name to path
-            $f = $r['url'] . '/' . $f;
+            $f = str_replace('//', '/', $r['url'] . '/' . $f);
             break;
           }
         }
       }
 
-      return (bool)$perm->fromPath($f, 'access', true);
+      return $perm->fromPath($f, 'access', true);
     }
 
     return false;
@@ -1077,7 +1083,7 @@ class Ide
     if (
       !empty($file)
       // It must be a controller
-      && (strpos($file, '/mvc/public/') !== false)
+      && (strpos($file, '/src/mvc/public/') !== false)
     ) {
       $is_file = $type === 'file';
       $plugin = false;
@@ -1099,7 +1105,7 @@ class Ide
             // Remove route
             $f = substr($file, \strlen($r['path']));
             // Remove /mvc/public
-            $f = substr($f, \strlen('src/mvc/public'));
+            $f = substr($f, \strlen('src/mvc/public/'));
             break;
           }
         }
@@ -1623,7 +1629,7 @@ class Ide
               $res .= 'mvc/';
             }
 
-            if ($rep['type'] !== 'components') {
+            if (!isset($rep['type']) || ($rep['type'] !== 'components')) {
               if (empty($this->isComponentFromUrl($url))) {
                 $res .= $tab['path'];
               }

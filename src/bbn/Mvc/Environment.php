@@ -185,7 +185,10 @@ class Environment
 
     $this->_url = implode('/', $this->_params ?: []);
     // This won't be changed after a reroute
-    $this->_request = $this->_url;
+    if (!$this->_request) {
+      $this->_request = $this->_url;
+    }
+
     if (!$this->_locale) {
       $this->setLocale();
     }

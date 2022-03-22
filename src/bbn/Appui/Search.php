@@ -257,43 +257,50 @@ class Search
     $this->timer->start('search');
 
     // If the search value has been done by the user before
-    if (($previous_search_id = $this->getPreviousSearchId($search_value))
-        && ($previous_search_results = $this->getPreviousSearchResults($previous_search_id))
-    ) {
-      $results_arch  = $this->class_cfg['arch']['search_results'];
-      foreach ($previous_search_results as $r) {
-        $item          = X::getRow($config_array, ['signature' => $r['signature']]);
-        $processed_cfg = $this->db->processCfg($item['cfg']);
-        // Get the results saved in the json field `result`
-        if (($previous_result = json_decode($r[$results_arch['result']], true))
-            && (X::hasProps($previous_result, $processed_cfg['fields']))
-        ) {
-          $cfg          = $item['cfg'];
-          $cfg['where'] = [
-            'logic' => 'AND',
-            'conditions' => [
-              $processed_cfg['filters'],
-              [
-                'conditions' => array_map(
-                  function ($value, $key) {
-                    return [
-                      'field' => $key,
-                      'operator' => '=',
-                      'value' => $value
-                    ];
-                  },
-                  $previous_result, array_keys($previous_result)
-                )
-              ]
-            ]
-          ];
+    if (!$step) {
+      if ($previous_search_id = $this->getSearchId($search_value)) {
+        $this->updateSearch($search_value);
+        if ($previous_search_results = $this->getPreviousSearchResults($previous_search_id)) {
+          $results_arch  = $this->class_cfg['arch']['search_results'];
+          foreach ($previous_search_results as $r) {
+            $item          = X::getRow($config_array, ['signature' => $r['signature']]);
+            $processed_cfg = $this->db->processCfg($item['cfg']);
+            // Get the results saved in the json field `result`
+            if (($previous_result = json_decode($r[$results_arch['result']], true))
+                && (X::hasProps($previous_result, $processed_cfg['fields']))
+            ) {
+              $cfg          = $item['cfg'];
+              $cfg['where'] = [
+                'logic' => 'AND',
+                'conditions' => [
+                  $processed_cfg['filters'],
+                  [
+                    'conditions' => array_map(
+                      function ($value, $key) {
+                        return [
+                          'field' => $key,
+                          'operator' => '=',
+                          'value' => $value
+                        ];
+                      },
+                      $previous_result, array_keys($previous_result)
+                    )
+                  ]
+                ]
+              ];
 
-          if ($add_to_top = $this->db->rselect($cfg)) {
-            $results['data'] = array_merge($results['data'], [$add_to_top]);
+              if ($add_to_top = $this->db->rselect($cfg)) {
+                $results['data'] = array_merge($results['data'], [$add_to_top]);
+              }
+            }
           }
         }
       }
+      else {
+        $id_search = $this->saveSearch($search_value);
+      }
     }
+
 
     //X::ddump($config_array, "DDDD", $this->executeFunctions($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
@@ -359,7 +366,7 @@ class Search
    * @param string $search_value
    * @return mixed
    */
-  protected function getPreviousSearchId(string $search_value)
+  protected function getSearchId(string $search_value)
   {
     return $this->db->selectOne([
       'table' => $this->class_table,
@@ -379,6 +386,32 @@ class Search
     ]);
   }
 
+
+  /**
+   * @param string $search_value
+   * @return mixed
+   */
+  protected function getSearchRow(string $search_value): ?array
+  {
+    return $this->db->rselect([
+      'table' => $this->class_table,
+      'fields' => [],
+      'where' => [
+        [
+          'field' => $this->fields['id_user'],
+          'operator' => '=',
+          'value' => $this->user->getId()
+        ],
+        [
+          'field' => $this->fields['value'],
+          'operator' => '=',
+          'value' => $search_value
+        ]
+      ]
+    ]);
+  }
+
+
   /**
    * @param string $search_value
    * @return mixed|null
@@ -393,6 +426,25 @@ class Search
     ]);
 
     return $insert ? $this->db->lastId() : null;
+  }
+
+
+  /**
+   * @param string $search_value
+   * @return int
+   */
+  protected function updateSearch(string $search_value): int
+  {
+    if ($row = $this->getSearchRow($search_value)) {
+      return $this->db->update($this->class_table, [
+        $this->fields['num'] => $row[$this->fields['num']] + 1,
+        $this->fields['last'] => date('Y-m-d H:i:s')
+      ], [
+        $this->fields['id'] => $row[$this->fields['id']]
+      ]);
+    }
+
+    return 0;
   }
 
 

@@ -72,7 +72,7 @@ class Grid extends bbn\Models\Cls\Cache
   private $query_time = 0;
 
   /**
-   * @var string The timer object
+   * @var bbn\Util\Timer The timer object
    */
   private $chrono;
 
@@ -334,6 +334,10 @@ class Grid extends bbn\Models\Cls\Cache
         $cfg['where'] = $this->cfg['where'];
         $this->num = $this->db->selectOne($cfg);
       }
+      elseif (is_int($this->count)) {
+        $this->num = $this->count;
+      }
+
       $this->count_time = $this->chrono->measure();
       $this->chrono->stop();
       $this->setCache([

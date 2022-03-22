@@ -748,9 +748,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     if (!empty($where['conditions'])) {
       foreach ($where['conditions'] as &$f){
+        // It's an imbricated condition
         if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
           $this->getValuesDesc($f, $cfg, $others);
         }
+        // Value is set
         elseif (array_key_exists('value', $f)) {
           $desc = [
             'primary' => false,
@@ -777,8 +779,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
                 && !empty($model['fields'][$fname]['type'])
               ) {
                 $desc = [
-                  'type' => $model[$fname]['type'],
-                  'maxlength' => $model[$fname]['maxlength'] ?? null,
+                  'type' => $model['fields'][$fname]['type'],
+                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
                   'operator' => $f['operator'] ?? null
                 ];
               }
@@ -839,12 +841,21 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
           }
           elseif (isset($cfg['available_fields'][$field])) {
-            $table  = $cfg['available_fields'][$field];
+            $table  = $cfg['tables_full'][$cfg['available_fields'][$field]];
             $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
             if ($table && $column && isset($cfg['models'][$table]['fields'][$column])) {
               $model = $cfg['models'][$table]['fields'][$column];
-              $res  .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") .
-                (!empty($cfg['available_fields'][$field]) ? $this->colFullName($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true) : $this->colSimpleName($column, true)
+              $res  .= PHP_EOL . 
+                  str_repeat(' ', $indent) . 
+                  (empty($res) ? '' : "$logic ") .
+                  (
+                    !empty($cfg['available_fields'][$field]) ?
+                      $this->colFullName(
+                        $cfg['fields'][$field] ?? $field,
+                        $cfg['available_fields'][$field],
+                        true
+                      )
+                      : $this->colSimpleName($column, true)
                 ) . ' ';
             }
             else {
