@@ -249,18 +249,14 @@ class Search
       $this->cacheSet($this->user->getId(), $cache_name, $config_array);
     }
 
-    $results = [
-      'done' => [],
-      'data' => []
-    ];
-
     $this->timer->start('search');
 
+    $id_search = $this->getSearchId($search_value);
     // If the search value has been done by the user before
     if (!$step) {
-      if ($previous_search_id = $this->getSearchId($search_value)) {
+      if ($id_search && false) {
         $this->updateSearch($search_value);
-        if ($previous_search_results = $this->getPreviousSearchResults($previous_search_id)) {
+        if ($previous_search_results = $this->getPreviousSearchResults($id_search)) {
           $results_arch  = $this->class_cfg['arch']['search_results'];
           foreach ($previous_search_results as $r) {
             $item          = X::getRow($config_array, ['signature' => $r['signature']]);
@@ -301,6 +297,11 @@ class Search
       }
     }
 
+    $results = [
+      'id'   => $id_search,
+      'done' => [],
+      'data' => []
+    ];
 
     //X::ddump($config_array, "DDDD", $this->executeFunctions($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
@@ -316,14 +317,18 @@ class Search
       }
 
       $item = $config_array[$i];
-      X::log($item, 'search');
       $item['cfg']['limit'] = $limit - count($results['data']);
       if ($search_results = $this->db->rselectAll($item['cfg'])) {
         array_walk($search_results, function (&$a) use ($item) {
-          $a['score'] = $item['score'];
           if (!empty($item['component'])) {
             $a['component'] = $item['component'];
           }
+          $b = $a;
+          unset($b['match']);
+          ksort($b);
+          $a['hash']      = md5(json_encode($b));
+          $a['score']     = $item['score'];
+          $a['signature'] = $item['signature'];
 
           if (!empty($item['options'])) {
             $a['options'] = $item['options'];
@@ -336,9 +341,20 @@ class Search
           if (!empty($item['action'])) {
             $a['action'] = $item['action'];
           }
-        });
-        $results['data'] = array_merge($results['data'], $search_results);
 
+        });
+
+        foreach ($search_results as $s) {
+          $row = X::find($results['data'], ['hash' => $s['hash']]);
+          if (!empty($results['data'][$row])) {
+            $results['data'][$row]['score'] += $s['score'];
+          }
+          else {
+            $results['data'][] = $s;
+          }
+        }
+
+        // There is certainly more
         if (count($search_results) === $item['cfg']['limit']) {
           $config_array[$i]['cfg']['start'] += $item['cfg']['limit'];
           // So the loop doesn't go on
@@ -366,23 +382,11 @@ class Search
    * @param string $search_value
    * @return mixed
    */
-  protected function getSearchId(string $search_value)
+  public function getSearchId(string $search_value)
   {
-    return $this->db->selectOne([
-      'table' => $this->class_table,
-      'fields' => [$this->fields['id']],
-      'where' => [
-        [
-          'field' => $this->fields['id_user'],
-          'operator' => '=',
-          'value' => $this->user->getId()
-        ],
-        [
-          'field' => $this->fields['value'],
-          'operator' => '=',
-          'value' => $search_value
-        ]
-      ]
+    return $this->db->selectOne($this->class_table, $this->fields['id'], [
+      $this->fields['id_user'] => $this->user->getId(),
+      $this->fields['value'] => $search_value
     ]);
   }
 
@@ -391,23 +395,11 @@ class Search
    * @param string $search_value
    * @return mixed
    */
-  protected function getSearchRow(string $search_value): ?array
+  public function getSearchRow(string $search_value): ?array
   {
-    return $this->db->rselect([
-      'table' => $this->class_table,
-      'fields' => [],
-      'where' => [
-        [
-          'field' => $this->fields['id_user'],
-          'operator' => '=',
-          'value' => $this->user->getId()
-        ],
-        [
-          'field' => $this->fields['value'],
-          'operator' => '=',
-          'value' => $search_value
-        ]
-      ]
+    return $this->db->rselect($this->class_table, [], [
+      $this->fields['id_user'] => $this->user->getId(),
+      $this->fields['value'] => $search_value
     ]);
   }
 
@@ -416,7 +408,7 @@ class Search
    * @param string $search_value
    * @return mixed|null
    */
-  protected function saveSearch(string $search_value)
+  public function saveSearch(string $search_value)
   {
     $insert = $this->db->insert($this->class_table, [
       $this->fields['id_user'] => $this->user->getId(),
@@ -433,7 +425,7 @@ class Search
    * @param string $search_value
    * @return int
    */
-  protected function updateSearch(string $search_value): int
+  public function updateSearch(string $search_value): int
   {
     if ($row = $this->getSearchRow($search_value)) {
       return $this->db->update($this->class_table, [
@@ -442,6 +434,48 @@ class Search
       ], [
         $this->fields['id'] => $row[$this->fields['id']]
       ]);
+    }
+
+    return 0;
+  }
+
+
+  /**
+   * Adds a result in the table when a result is selected.
+   * 
+   * @param string $id
+   * @param array $data
+   * @return int The number of affected rows (1 or 0)
+   */
+  public function setResult(string $id, array $data): int
+  {
+    if (!empty($data['signature'])
+        && ($row = $this->db->rselect($this->class_table, [], [
+          $this->fields['id'] => $id,
+          $this->fields['id_user'] => $this->user->getId()
+        ]))
+    ) {
+      $f =& $this->class_cfg['arch']['search_results'];
+      $result = $this->db->rselect($this->class_cfg['tables']['search_results'], [$f['id'], $f['num']], [
+        $f['id_search'] => $id,
+        $f['signature'] => $data['signature']
+      ]);
+      if ($result) {
+        return $this->db->update($this->class_cfg['tables']['search_results'], [
+          $f['num'] => $result['num'] + 1,
+          $f['last'] => time()
+        ], [
+          $f['id'] => $result['id']
+        ]);
+      }
+      else {
+        return $this->db->insert($this->class_cfg['tables']['search_results'], [
+          $f['id_search'] => $id,
+          $f['num'] => 1,
+          $f['signature'] => $data['signature'],
+          $f['result'] => serialize($data)
+        ]);
+      }
     }
 
     return 0;

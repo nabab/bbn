@@ -14,7 +14,7 @@ use bbn\Appui\Option;
 use bbn\Db;
 
 
-class Product extends DbCls
+class Provider extends DbCls
 {
   use Dbconfig;
 
