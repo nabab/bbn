@@ -76,7 +76,8 @@ class Compiler extends Basic
           $tmp = Minifier::minify($st, ['flaggedComments' => false]);
         }
         elseif ($lang === 'css') {
-          $tmp = $st;//CssMin::minify($st);
+          /** @todo Minification makes var() statements disappear! */
+          $tmp = Str::cleanSpaces($st);//CssMin::minify($st);
         }
       }
       catch (\Exception $e) {
