@@ -76,7 +76,7 @@ class Compiler extends Basic
           $tmp = Minifier::minify($st, ['flaggedComments' => false]);
         }
         elseif ($lang === 'css') {
-          $tmp = CssMin::minify($st);
+          $tmp = $st;//CssMin::minify($st);
         }
       }
       catch (\Exception $e) {
