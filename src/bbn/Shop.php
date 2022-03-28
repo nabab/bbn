@@ -132,37 +132,33 @@ class Shop extends Models\Cls\Db
   }
 
 
-  public function getList(array $filter = [], array $order = ['start' => 'DESC'], int $limit = 10, int $start = 0): ?array
+  public function getList(array $params = []): ?array
   {
+    if (empty($params['limit'])) {
+      $params['limit'] = 10;
+    }
+    if (empty($params['order'])) {
+      $params['order'] = ['start' => 'DESC'];
+    }
+
     $data = null;
     $cfg     = $this->product->getClassCfg();
     $noteCfg = $this->note->getClassCfg();
     $fields  = $cfg['arch']['products'];
     unset($fields['id_note']);
-    $filter_type = [
-      'conditions' => [
-        [
-          $noteCfg['arch']['notes']['id_type'] => $this->product->getTypeNote(),
-          'active' => 1
-        ]
-      ]
-    ];
-    if (!empty($filter)) {
-      $filter = [
-        'conditions' => [
-          $filter,
-          $filter_type
-        ]
-      ];
-    }
-    else {
-      $filter = $filter_type;
-    }
 
     $dbCfg = $this->cms->getLastVersionCfg();
     $dbCfg['where']['conditions'][] = [
       'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),
       'operator' => 'isnull'
+    ];
+    $dbCfg['where']['conditions'][] = [
+      'field' => $noteCfg['arch']['notes']['id_type'],
+      'value' => $this->product->getTypeNote()
+    ];
+    $dbCfg['where']['conditions'][] = [
+      'field' => 'active',
+      'value' => 1
     ];
     $dbCfg['join'][] = [
       'table' => $cfg['table'],
@@ -177,12 +173,7 @@ class Shop extends Models\Cls\Db
       ]
     ];
     $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);
-    $grid = new Grid($this->db, [
-      'filter' => $filter,
-      'limit' => $limit,
-      'order' => $order,
-      'start' => $start,
-    ], $dbCfg);
+    $grid = new Grid($this->db, $params, $dbCfg);
     $data = $grid->getDatatable();
     if ($data && $data['total']) {
       $editions = $this->product->getEditions();
