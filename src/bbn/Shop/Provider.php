@@ -53,10 +53,10 @@ class Provider extends DbCls
     ],
     'table' => 'bbn_shop_providers',
     'tables' => [
-      'products' => 'bbn_shop_providers'
+      'providers' => 'bbn_shop_providers'
     ],
     'arch' => [
-      'products' => [
+      'providers' => [
         'id' => 'id',
         'name' => 'name',
         'cfg' => 'cfg'
@@ -82,11 +82,40 @@ class Provider extends DbCls
   public function add($name, array $cfg = null): ?string
   {
     $dbcfg = $this->getClassCfg();
-    if ($this->insert($cfg['table'], [
+    if ($this->insert([
       $dbcfg['arch']['providers']['name'] => $name,
       $dbcfg['arch']['providers']['cfg']  => $cfg ? json_encode($cfg) : null
     ])) {
       return $this->db->lastId();
+    }
+
+    return null;
+  }
+
+
+  public function edit($id, array $data): ?string
+  {
+    $dbcfg = $this->getClassCfg();
+    if (!X::hasProps($data, ['name', 'id'])) {
+      return $this->db->update(
+        $dbcfg['table'],
+        [
+          $dbcfg['arch']['providers']['name'] => $data['name'],
+          $dbcfg['arch']['providers']['cfg']  => $data['cfg'] ? json_encode($data['cfg']) : null
+        ],
+        [$dbcfg['arch']['providers']['id'] => $id]
+      );
+    }
+
+    return null;
+  }
+
+
+  public function get(string $id): ?array
+  {
+    if ($res = $this->rselect($id)) {
+      $res['cfg'] = $res['cfg'] ? json_decode($res['cfg'], true) : [];
+      return $res;
     }
 
     return null;

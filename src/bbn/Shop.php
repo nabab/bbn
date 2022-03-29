@@ -12,12 +12,14 @@
 
 namespace bbn;
 
+use Exception;
 use bbn\Appui\Grid;
 use bbn\Appui\Medias;
 use bbn\Appui\Note;
 use bbn\Appui\Cms;
 use bbn\Appui\Option;
 use bbn\Shop\Product;
+use bbn\Shop\Provider;
 use bbn\Shop\Sales;
 
 /**
@@ -122,13 +124,35 @@ class Shop extends Models\Cls\Db
     // The database connection
     $this->db = $db;
     // Setting up the class configuration
-    $this->opt     = Option::getInstance();
-    $this->note    = new Note($this->db);
-    $this->cms     = new Cms($this->db, $this->note);
-    $this->medias  = new Medias($this->db);
-    $this->product = new Product($this->db, $cfg);
-    $this->sales   = new Sales($this->db);
+    $this->opt       = Option::getInstance();
+    $this->note      = new Note($this->db);
+    $this->cms       = new Cms($this->db, $this->note);
+    $this->medias    = new Medias($this->db);
+    $this->product   = new Product($this->db, $cfg);
+    $this->sales     = new Sales($this->db);
+    $this->providers = new Provider($this->db, $cfg['providers'] ?? []);
     //$this->medias->setImageRoot('/image/');
+  }
+
+
+  public function getProvidersList(array $params = []): array
+  {
+    $cfg  = $this->providers->getClassCfg();
+    $grid = new \bbn\Appui\Grid($this->db, $params, [
+      'tables' => $cfg['table'],
+      'fields' => $cfg['arch']['providers'],
+      'limit' => 100
+    ]);
+
+    if ($grid->check()) {
+      $res = $grid->getDatatable();
+      foreach ($res['data'] as &$d) {
+        $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];
+      }
+
+      unset($d);
+      return $res;
+    }
   }
 
 
