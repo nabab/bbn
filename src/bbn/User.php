@@ -342,6 +342,7 @@ class User extends Models\Cls\Basic
         }
 
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
+        $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];
 
         if (!$this->hasSkipVerification()) {
           // Verify that the code is correct
@@ -399,7 +400,9 @@ class User extends Models\Cls\Basic
         ]);
 
         // Now the user is authenticated
+        $this->auth = true;
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
+        $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];
 
         return $this->api_request_output = [
           'token'   => $params[$f['token']],
