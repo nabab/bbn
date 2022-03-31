@@ -451,6 +451,18 @@ class Note extends bbn\Models\Cls\Db
   }
 
 
+  public function getTitle(string $id): ?string
+  {
+    $cf = &$this->class_cfg;
+    return $this->db->selectOne(
+      $cf['tables']['versions'],
+      $cf['arch']['versions']['title'],
+      [$cf['arch']['versions']['id_note'] => $id],
+      [$cf['arch']['versions']['version'] => 'DESC']
+    );
+  }
+
+
   /**
    * @param string $id
    * @param int|null $version

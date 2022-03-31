@@ -67,6 +67,7 @@ class Product extends DbCls
         'weight' => 'weight',
         'product_type' => 'product_type',
         'id_edition' => 'id_edition',
+        'id_main' => 'id_main',
         'stock' => 'stock',
         'front_img' => 'front_img',
         'active' => 'active',
@@ -143,7 +144,9 @@ class Product extends DbCls
       $cfg  = $this->getClassCfg();
       $res  = $this->db->rselect($cfg['table'], [], [$cfg['arch']['products']['id'] => $id]);
       $note = $this->cms->get($res['id_note'], true);
-      return array_merge($note, $res);
+      $final = array_merge($note, $res);
+      $final['variants'] = $this->getVariantsList($final);
+      return $final;
     }
 
     return null;
@@ -250,10 +253,43 @@ class Product extends DbCls
   {
     $cfg  = $this->getClassCfg();
     $a = $cfg['arch']['products'];
-    return $this->db->selectColumnValues($cfg['table'], $a['id'], [
+    return $this->db->getColumnValues($cfg['table'], $a['id'], [
       $a['id_main'] => $id
     ]);
+  }
 
+
+
+  private function getVariantsList(array $product): array
+  {
+    $cfg  = $this->getClassCfg();
+    $cols = $cfg['arch']['products'];
+    $res  = [];
+    if ($product['id_main']) {
+      $id_note = $this->db->selectOne($cfg['table'], $cols['id_note'], [
+        $cols['id'] => $product['id_main']
+      ]);
+      $res[] = [
+        'value' => $product['id_main'],
+        'text'  => $this->note->getTitle($id_note),
+        'url'   => $this->note->getUrl($id_note)
+      ];
+    }
+
+    $all = $this->db->rselectAll($cfg['table'], [$cols['id'], $cols['id_note']], [
+      $cols['id_main'] => $product['id_main'] ?: $product['id']
+    ]);
+    foreach ($all as $a) {
+      if ($a['id'] !== $product['id']) {
+        $res[] = [
+          'value' => $a['id'],
+          'text'  => $this->note->getTitle($a['id_note']),
+          'url'   => $this->note->getUrl($a['id_note'])
+        ];
+      }
+    }
+
+    return $res;
   }
 
 
