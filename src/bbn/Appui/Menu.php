@@ -448,7 +448,7 @@ class Menu extends bbn\Models\Cls\Basic
 
         $d['path'] = $path;
         if (!empty($d['path'][0])) {
-          array_shift($d['path']);
+          //array_shift($d['path']);
         }
   
         if (!$d['numChildren']
