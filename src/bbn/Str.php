@@ -114,9 +114,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeAllQuotes($st): string
+  public static function escapeAllQuotes($st, $as_html = false): string
   {
-    return addcslashes(self::cast($st), "'\"\\\r\n\t");
+    return self::escapeDquotes(self::escapeSquotes($st, $as_html), $as_html);
   }
 
 
@@ -131,8 +131,12 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeDquotes($st): string
+  public static function escapeDquotes($st, $as_html = false): string
   {
+    if ($as_html) {
+      return str_replace('"', '&#34;', $st);
+    }
+
     return addcslashes(self::cast($st), "\"\\\r\n\t");
   }
 
@@ -148,9 +152,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeDquote($st): string
+  public static function escapeDquote($st, $as_html = false): string
   {
-    return self::escapeDquotes($st);
+    return self::escapeDquotes($st, $as_html);
   }
 
 
@@ -165,9 +169,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeQuote($st): string
+  public static function escapeQuote($st, $as_html = false): string
   {
-    return self::escapeDquotes($st);
+    return self::escapeAllQuotes($st, $as_html);
   }
 
 
@@ -182,9 +186,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeQuotes($st): string
+  public static function escapeQuotes($st, $as_html = false): string
   {
-    return self::escapeDquotes($st);
+    return self::escapeAllQuotes($st, $as_html);
   }
 
 
@@ -199,8 +203,12 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeSquotes($st): string
+  public static function escapeSquotes($st, $as_html = false): string
   {
+    if ($as_html) {
+      return str_replace("'", '&#39;', $st);
+    }
+
     return addcslashes(self::cast($st), "'\\\r\n\t");
   }
 
@@ -216,8 +224,12 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function unescapeSquotes($st): string
+  public static function unescapeSquotes($st, $as_html = false): string 
   {
+    if ($as_html) {
+      return str_replace('&#39;', "'", $st);
+    }
+
     return stripcslashes(self::cast($st));
   }
 
@@ -233,9 +245,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function unescapeSquote($st): string
+  public static function unescapeSquote($st, $as_html = false): string
   {
-    return self::unescapeSquotes($st);
+    return self::unescapeSquotes($st, $as_html);
   }
 
 
@@ -250,9 +262,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape($st): string
+  public static function escape($st, $as_html = false): string
   {
-    return self::escapeSquotes($st);
+    return self::escapeAllQuotes($st, $as_html);
   }
 
 
@@ -267,9 +279,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeApo($st): string
+  public static function escapeApo($st, $as_html = false): string
   {
-    return self::escapeSquotes($st);
+    return self::escapeSquotes($st, $as_html);
   }
 
 
@@ -284,9 +296,9 @@ class Str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escapeSquote($st): string
+  public static function escapeSquote($st, $as_html = false): string
   {
-    return self::escapeSquotes($st);
+    return self::escapeSquotes($st, $as_html);
   }
 
 
