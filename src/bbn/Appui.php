@@ -228,20 +228,38 @@ class Appui
   /**
    * Returns a Db object according to the current config, creates it if needed
    *
+   * @todo Attach history if configured
    * @return Db|null
    */
   public function getDb(): ?Db
   {
     if (!$this->_currentDb) {
-      $this->_currentDb = new Db(
-        [
-          'engine' => $this->_current['db_engine'],
-          'host' => $this->_current['db_host'] ?? '',
-          'user' => $this->_current['db_user'] ?? '',
-          'pass' => $this->_current['db_pass'] ?? '',
-          'error_mode' => 'continue'
-        ]
-      );
+      if (X::isDefined('BBN_DB_HOST', 'BBN_DB_ENGINE', 'BBN_DB_USER')
+          && ($this->_current['db_host'] == BBN_DB_HOST)
+          && ($this->_current['db_engine'] == BBN_DB_ENGINE)
+          && ($this->_current['db_user'] == BBN_DB_USER)
+      ) {
+        $db = Db::getInstance();
+      }
+      else {
+        $db = new Db(
+          [
+            'engine' => $this->_current['db_engine'],
+            'host' => $this->_current['db_host'] ?? '',
+            'user' => $this->_current['db_user'] ?? '',
+            'pass' => $this->_current['db_pass'] ?? '',
+            'error_mode' => 'continue'
+          ]
+        );
+      }
+
+      if ($db->check()) {
+        if (!empty($this->_current['database'])) {
+          $db->change($this->_current['database']);
+        }
+
+        $this->_currentDb = $db;
+      }
     }
 
     return $this->_currentDb;
@@ -251,7 +269,7 @@ class Appui
   /**
    * Returns a Db object according to the current config, creates it if needed
    *
-   * @return Db|null
+   * @return Appui\Option | null
    */
   public function getOption(): ?Appui\Option
   {
@@ -1223,16 +1241,24 @@ class Appui
   public function getOptionRoot(): string
   {
     $db = $this->getDb();
-    if (!($id = $db->selectOne('bbn_options', 'id', ['code' => 'root', 'id_parent' => null]))
-        && $db->insert(
-          'bbn_options',
-          [
-            'id_parent' => null,
-            'code' => 'root',
-            'text' => 'root',
-            'cfg' => '{"permissions":1}'
-          ]
-        )
+    $id = $db->selectOne(
+      'bbn_options',
+      'id',
+      [
+        'code' => 'root',
+        'id_parent' => null
+      ]
+    );
+
+    if (!$id && $db->insert(
+        'bbn_options',
+        [
+          'id_parent' => null,
+          'code' => 'root',
+          'text' => 'root',
+          'cfg' => '{"permissions":1}'
+        ]
+      )
     ) {
       $id = $db->lastId();
     }
@@ -1437,23 +1463,45 @@ class Appui
   {
     $res = 0;
     if ($opt = $this->getOption()) {
-      $root = $this->getOptionRoot();
-      $file = $this->libPath().'bbn/bbn/options.json';
-      if (!$this->_currentFs->exists($file)) {
-        throw new Exception("Impossible to find the file options");
+      $root   = $this->getOptionRoot();
+      if ($tmp = $this->getRoutes()) {
+        $routes = array_values($tmp['root']);
       }
 
-      $appui_options = $this->_currentFs->decodeContents($file, 'json', true);
-      if (!$appui_options) {
-        throw new Exception("Impossible to decode the file options");
-      }
+      $idx = X::find($routes, ['name' => 'appui-core']);
+      if ($routes[$idx]) {
+        $appui_options = [];
+        X::move($routes, $idx, 0);
+        foreach ($routes as $i => $r) {
+          $file = $this->libPath() . $r['path'] . '/src/cfg/options.json';
+          if ($this->_currentFs->exists($file)) {
+            $tmp = $this->_currentFs->decodeContents($file, 'json', true);
+            if (!$tmp) {
+              throw new Exception(X::_("Illegal JSON in %s", $file));
+            }
 
-      $res += (int)$opt->import($appui_options, $root);
-      if (!defined('BBN_APPUI')) {
-        define('BBN_APPUI', $opt->fromCode('appui'));
-      }
+            if ($i === 0) {
+              /** @var array */
+              $appui_options = $tmp;
+            }
+            else {
+              if (X::isAssoc($tmp)) {
+                $appui_options[0]['items'][] = $tmp;
+              }
+              else {
+                array_push($appui_options[0]['items'], ...$tmp);
+              }
+            }
+          }
+        }
 
-      $opt->deleteCache(null);
+        $res += (int)$opt->import($appui_options, $root);
+        if (!defined('BBN_APPUI')) {
+          define('BBN_APPUI', $opt->fromCode('appui'));
+        }
+
+        $opt->deleteCache(null);
+      }
     }
 
     return $res;

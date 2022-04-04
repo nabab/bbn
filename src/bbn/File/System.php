@@ -531,7 +531,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string $file     The file to get the content from
    * @param mixed  $decoder  A decoding function or an encoding type
    * @param bool   $as_array If set to true the result will be forced into an array
-   * @return null|string
+   * @return null|array
    */
   public function decodeContents(string $file, $decoder = null, $as_array = false): ?iterable
   {

@@ -140,6 +140,24 @@ class X
 
 
   /**
+   * Returns true if each string argument is defined as a constant
+   *
+   * @param string $name
+   * @return bool
+   */
+  public static function isDefined(string $name): bool
+  {
+    foreach (func_get_args() as $a) {
+      if (!is_string($a) || !defined($a)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
+  /**
    * Saves logs to a file.
    *
    * ```php

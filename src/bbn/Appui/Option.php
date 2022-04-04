@@ -2523,17 +2523,23 @@ class Option extends bbn\Models\Cls\Db
             && $force
             && (null !== $it[$c['code']])
         ) {
-          $res = (int)$this->db->update(
-            $this->class_cfg['table'],
-            [
-              $c['text'] => $it[$c['text']],
-              $c['id_alias'] => $it[$c['id_alias']],
-              $c['value'] => $it[$c['value']],
-              $c['num'] => $it[$c['num']] ?? null,
-              $c['cfg'] => $it[$c['cfg']] ?? null
-            ],
-            [$c['id'] => $id]
-          );
+          try {
+            $res = (int)$this->db->update(
+              $this->class_cfg['table'],
+              [
+                $c['text'] => $it[$c['text']],
+                $c['id_alias'] => $it[$c['id_alias']],
+                $c['value'] => $it[$c['value']],
+                $c['num'] => $it[$c['num']] ?? null,
+                $c['cfg'] => $it[$c['cfg']] ?? null
+              ],
+              [$c['id'] => $id]
+            );
+          }
+          catch (Exception $e) {
+            $this->log([X::_("Impossible to update the option"), $it]);
+            throw new Exception(X::_("Impossible to update the option"));
+          }
         }
 
         $values = [
@@ -2553,9 +2559,15 @@ class Option extends bbn\Models\Cls\Db
           $values[$c['id']] = $it[$c['id']];
         }
 
-        if (!$id
-            && ($res = (int)$this->db->insert($this->class_cfg['table'], $values))
-        ) {
+        if (!$id) {
+          try {
+            $res = (int)$this->db->insert($this->class_cfg['table'], $values);
+          }
+          catch (Exception $e) {
+            $this->log([X::_("Impossible to add the option"), $values]);
+            throw new Exception(X::_("Impossible to add the option"));
+          }
+
           $id = $this->db->lastId();
         }
 
