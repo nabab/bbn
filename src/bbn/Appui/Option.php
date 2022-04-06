@@ -3689,6 +3689,10 @@ class Option extends bbn\Models\Cls\Db
           }
         }
 
+        if (!is_array($o)) {
+          var_dump($o);
+          X::log($o);
+        }
         $o[$c['id_parent']] = $id_parent ?: $this->default;
         if (isset($o['items'])) {
           $items = $o['items'] ?: null;
