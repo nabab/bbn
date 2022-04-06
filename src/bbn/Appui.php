@@ -45,6 +45,9 @@ class Appui
   /** @var bool  */
   private $_checked = null;
 
+  /** @var bool  */
+  private $_is_installer = false;
+
   /** @var string */
   private $_settings_file;
 
@@ -234,7 +237,7 @@ class Appui
   public function getDb(): ?Db
   {
     if (!$this->_currentDb) {
-      if (X::isDefined('BBN_DB_HOST', 'BBN_DB_ENGINE', 'BBN_DB_USER')
+      if (!$this->_is_installer && X::isDefined('BBN_DB_HOST', 'BBN_DB_ENGINE', 'BBN_DB_USER')
           && ($this->_current['db_host'] == BBN_DB_HOST)
           && ($this->_current['db_engine'] == BBN_DB_ENGINE)
           && ($this->_current['db_user'] == BBN_DB_USER)
@@ -253,11 +256,13 @@ class Appui
         );
       }
 
-      if (!empty($this->_current['database'])) {
-        $db->change($this->_current['database']);
-      }
+      if ($db->check()) {
+        if (!empty($this->_current['database'])) {
+          $db->change($this->_current['database']);
+        }
 
-      $this->_currentDb = $db;
+        $this->_currentDb = $db;
+      }
     }
 
     return $this->_currentDb;
@@ -1876,6 +1881,8 @@ class Appui
     if (!method_exists($installer, 'report')) {
       throw new Exception(X::_("The installer is invalid"));
     }
+
+    $this->_is_installer = true;
 
     $installer->report(' ');
     $installer->report('Starting the initialization file');
