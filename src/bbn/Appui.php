@@ -253,13 +253,11 @@ class Appui
         );
       }
 
-      if ($db->check()) {
-        if (!empty($this->_current['database'])) {
-          $db->change($this->_current['database']);
-        }
-
-        $this->_currentDb = $db;
+      if (!empty($this->_current['database'])) {
+        $db->change($this->_current['database']);
       }
+
+      $this->_currentDb = $db;
     }
 
     return $this->_currentDb;
