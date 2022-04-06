@@ -3683,16 +3683,16 @@ class Option extends bbn\Models\Cls\Db
       foreach ($options as $i => $o) {
         $tmp   = [];
         $items = [];
+        /** @todo Temp solution */
+        if (!is_array($o)) {
+          continue;
+        }
         if (isset($o[$c['id']])) {
           if ($this->exists($o[$c['id']])) {
             unset($o[$c['id']]);
           }
         }
 
-        if (!is_array($o)) {
-          var_dump($o);
-          X::log([$o, $options]);
-        }
         $o[$c['id_parent']] = $id_parent ?: $this->default;
         if (isset($o['items'])) {
           $items = $o['items'] ?: null;
