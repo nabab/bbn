@@ -1498,6 +1498,8 @@ class Appui
           }
         }
 
+        X::log($appui_options);
+
         $res += (int)$opt->import($appui_options, $root);
         if (!defined('BBN_APPUI')) {
           define('BBN_APPUI', $opt->fromCode('appui'));

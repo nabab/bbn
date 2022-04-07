@@ -16,8 +16,8 @@
     ],
     "interfaces": [],
     "fileName": "\/Shop.php",
-    "startLine": 62,
-    "endLine": 336,
+    "startLine": 64,
+    "endLine": 351,
     "contentConstructor": {
         "file": "bbn\\Shop",
         "returns": null
@@ -37,9 +37,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->opt     = Option::getInstance();\n    $this->note    = new Note($this->db);\n    $this->cms     = new Cms($this->db, $this->note);\n    $this->medias  = new Medias($this->db);\n    $this->product = new Product($this->db, $cfg);\n    $this->sales   = new Sales($this->db);\n    \/\/$this->medias->setImageRoot('\/image\/');\n  }",
-            "startLine": 120,
-            "endLine": 132,
+            "code": "function(bbn\\Db $db, array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->opt       = Option::getInstance();\n    $this->note      = new Note($this->db);\n    $this->cms       = new Cms($this->db, $this->note);\n    $this->medias    = new Medias($this->db);\n    $this->product   = new Product($this->db, $cfg);\n    $this->sales     = new Sales($this->db);\n    $this->providers = new Provider($this->db, $cfg['providers'] ?? []);\n    \/\/$this->medias->setImageRoot('\/image\/');\n  }",
+            "startLine": 122,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -107,6 +107,40 @@
                 }
             ]
         },
+        "getProvidersList": {
+            "name": "getProvidersList",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $params = [])\n  {\n    $cfg  = $this->providers->getClassCfg();\n    $grid = new \\bbn\\Appui\\Grid($this->db, $params, [\n      'tables' => $cfg['table'],\n      'fields' => $cfg['arch']['providers'],\n      'limit' => 100\n    ]);\n\n    if ($grid->check()) {\n      $res = $grid->getDatatable();\n      foreach ($res['data'] as &$d) {\n        $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];\n      }\n\n      unset($d);\n      return $res;\n    }\n  }",
+            "startLine": 138,
+            "endLine": 156,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "params",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
         "getList": {
             "name": "getList",
             "summary": "",
@@ -116,16 +150,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $filter = [], array $order = array (\n  'start' => 'DESC',\n), int $limit = 10, int $start = 0)\n  {\n    $data = null;\n    $cfg     = $this->product->getClassCfg();\n    $noteCfg = $this->note->getClassCfg();\n    $fields  = $cfg['arch']['products'];\n    unset($fields['id_note']);\n    $filter_type = [\n      'conditions' => [\n        [\n          $noteCfg['arch']['notes']['id_type'] => $this->product->getTypeNote(),\n          'active' => 1\n        ]\n      ]\n    ];\n    if (!empty($filter)) {\n      $filter = [\n        'conditions' => [\n          $filter,\n          $filter_type\n        ]\n      ];\n    }\n    else {\n      $filter = $filter_type;\n    }\n\n    $dbCfg = $this->cms->getLastVersionCfg();\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n    $dbCfg['join'][] = [\n      'table' => $cfg['table'],\n      'on' => [\n        [\n          'field' => $this->db->cfn($noteCfg['arch']['notes']['id'], $noteCfg['table']),\n          'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n        ], [\n          'field' => $this->db->cfn($cfg['arch']['products']['active'], $cfg['table']),\n          'value' => 1\n        ]\n      ]\n    ];\n    $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);\n    $grid = new Grid($this->db, [\n      'filter' => $filter,\n      'limit' => $limit,\n      'order' => $order,\n      'start' => $start,\n    ], $dbCfg);\n    $data = $grid->getDatatable();\n    if ($data && $data['total']) {\n      $editions = $this->product->getEditions();\n      $types = $this->product->getTypes();\n      foreach ($data['data'] as &$d) {\n        $media = $d['front_img'] ? $this->medias->getMedia($d['front_img'], true) : [];\n        $d['image'] = $media['path'];\n        $d['edition'] = $editions[$d['id_edition']];\n        $d['type'] = $types[$d['product_type']];\n      }\n      unset($d);\n    }\n\n    return $data;\n  }",
-            "startLine": 135,
-            "endLine": 200,
+            "code": "function(array $params = [])\n  {\n    if (empty($params['limit'])) {\n      $params['limit'] = 10;\n    }\n    if (empty($params['order'])) {\n      $params['order'] = ['start' => 'DESC'];\n    }\n\n    $data = null;\n    $cfg     = $this->product->getClassCfg();\n    $noteCfg = $this->note->getClassCfg();\n    $fields  = $cfg['arch']['products'];\n    unset($fields['id_note']);\n\n    $dbCfg = $this->cms->getLastVersionCfg();\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n    $dbCfg['where']['conditions'][] = [\n      'field' => $noteCfg['arch']['notes']['id_type'],\n      'value' => $this->product->getTypeNote()\n    ];\n    $dbCfg['where']['conditions'][] = [\n      'field' => 'active',\n      'value' => 1\n    ];\n    $dbCfg['join'][] = [\n      'table' => $cfg['table'],\n      'on' => [\n        [\n          'field' => $this->db->cfn($noteCfg['arch']['notes']['id'], $noteCfg['table']),\n          'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n        ], [\n          'field' => $this->db->cfn($cfg['arch']['products']['active'], $cfg['table']),\n          'value' => 1\n        ]\n      ]\n    ];\n    $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);\n    $grid = new Grid($this->db, $params, $dbCfg);\n    $data = $grid->getDatatable();\n    if ($data && $data['total']) {\n      $editions = $this->product->getEditions();\n      $types = $this->product->getTypes();\n      foreach ($data['data'] as &$d) {\n        $media = $d['front_img'] ? $this->medias->getMedia($d['front_img'], true) : [];\n        $d['image'] = $media['path'];\n        $d['edition'] = $editions[$d['id_edition']];\n        $d['type'] = $types[$d['product_type']];\n      }\n      unset($d);\n    }\n\n    return $data;\n  }",
+            "startLine": 159,
+            "endLine": 215,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
                 null
@@ -133,41 +167,12 @@
             "parent": false,
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "params",
                     "position": 0,
                     "type": "array",
                     "required": false,
                     "has_default": true,
                     "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": {
-                        "start": "DESC"
-                    },
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 10,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
                     "default_name": ""
                 }
             ]
@@ -182,8 +187,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($tableCfg)\n  {\n    $cfg      = $this->product->getClassCfg();\n    $dbCfg    = $this->cms->getLastVersionCfg(false, false);\n    $notesCfg = $this->note->getClassCfg();\n\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n\n    $dbCfg['tables'] = [$cfg['table']];\n    array_unshift(\n      $dbCfg['join'],\n      [\n        'table' => $notesCfg['table'],\n        'on' => [\n          [\n            'field' => $this->db->cfn($notesCfg['arch']['notes']['id'], $notesCfg['table']),\n            'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n          ]\n        ]\n      ],\n      [\n        'type' => 'left',\n        'table' => $notesCfg['tables']['notes_tags'],\n        'on' => [\n          [\n            'field' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table']),\n            'exp' => $this->db->cfn($notesCfg['arch']['notes_tags']['id_note'], $notesCfg['tables']['notes_tags'], true),\n          ]\n        ]\n      ]\n    );\n  \n    array_unshift(\n      $dbCfg['fields'],\n      ...$this->db->getFieldsList($cfg['table'])\n    );\n  \n    $dbCfg['fields']['num_tags'] = 'COUNT(DISTINCT '.$this->db->cfn($notesCfg['arch']['notes_tags']['id_tag'], $notesCfg['tables']['notes_tags'], true).')';\n    $dbCfg['group_by'] = [$this->db->cfn($cfg['arch']['products']['id'], $cfg['table'])];\n    $grid = new \\bbn\\Appui\\Grid($this->db, $tableCfg, $dbCfg);\n    if ($grid->check()) {\n      $tmp_grid = $grid->getDatatable();\n  \n      $db     =& $this->db;\n      $medias =& $this->medias;\n      $tmp_grid['data'] = array_map(function($a) use (&$db, &$medias) {\n        $a['media'] = [];\n        if($product_medias = $db->rselectAll('bbn_notes_medias', [], ['id_note' => $a['id_note']])) {\n          foreach($product_medias as $p){\n            $a['media'][] = $medias->getMedia($p['id_media'], true);\n          }\n        }\n\n        $url = Mvc::getPluginUrl('appui-note').'\/media\/image\/';\n\n        if($a['front_img'] ){\n          $a['front_img'] = $medias->getMedia($a['front_img'], true);\n        }\n\n        $a['media'] = array_map(function($d)use(&$medias, $url) {\n          $d['is_image'] = false;\n          if ($d['content']) {\n            $full_path = $medias->getMediaPath($d['id']);\n            $d['full_path'] = $medias->getThumbs($full_path);\n            $d['path'] = $url.$d['id'];\n            $d['content'] = json_decode($d['content'], true);\n            $d['is_image'] = $medias->isImage($full_path);\n            if ($d['is_image']) {\n              $d['thumbs'] = $medias->getThumbsSizes($d['id']);\n            }\n          }\n          return $d;\n        }, $a['media']);\n        \/\/die(var_dump($a));\n  \n        $a['num_media'] = count($a['media']) ? count($a['media']) : 0;\n        $a['tags'] = [];\/\/$a['num_tags'] ? $notes->getTags($a['id_note']) : [];\n        return $a;\n      }, $tmp_grid['data']);\n\n      return $tmp_grid;\n    }\n  }",
-            "startLine": 203,
-            "endLine": 288,
+            "startLine": 218,
+            "endLine": 303,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -216,8 +221,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    $prod = $this->product->get($id);\n    if ($prod && $prod['id_note']) {\n      $note = $this->cms->get($prod['id_note'], true);\n      if (!empty($prod['front_img'])) {\n        $prod['front_img'] = $this->medias->getMedia($prod['front_img'], true);\n        $prod['source'] = $prod['front_img']['path'];\n      }\n\n      if ($note) {\n        $cfg      = $this->product->getClassCfg();\n        if (empty($prod['id_main'])) {\n          $prod['variants'] = [];\n          if ($variants = $this->db->getColumnValues($cfg['table'], $cfg['arch']['products']['id'], [\n            $cfg['arch']['products']['id_main'] => $id\n          ]));\n          foreach ($variants as $v) {\n            $prod['variants'][] = $this->getFullProduct($v);\n          }\n        }\n\n        $prod['sales'] = [\n          'total' => $this->sales->getByProduct($id),\n          'y'     => ['total' => 0, 'num' => 0],\n          'm'     => ['total' => 0, 'num' => 0],\n          'w'     => ['total' => 0, 'num' => 0],\n          'd'     => ['total' => 0, 'num' => 0],\n        ];\n\n        $keys = array_keys($prod['sales']);\n        for ($i = 0; $i < count($keys) - 1; $i++) {\n          if ($prod['sales'][$keys[$i]]['total']) {\n            $prod['sales'][$keys[$i + 1]] = $this->sales->getByProduct($id, $keys[$i + 1]);\n          }\n        }\n\n        return X::mergeArrays($note, $prod);\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 291,
-            "endLine": 333,
+            "startLine": 306,
+            "endLine": 348,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1184,7 +1189,7 @@
         "default_class_cfg": []
     },
     "constants": null,
-    "numMethods": 24,
+    "numMethods": 25,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 1,
