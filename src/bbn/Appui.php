@@ -1489,22 +1489,17 @@ class Appui
             if ($i === 0) {
               /** @var array */
               $appui_options = $tmp;
-              X::log([0, $appui_options]);
             }
             else {
               if (X::isAssoc($tmp)) {
                 $appui_options[0]['items'][] = $tmp;
-                X::log([1, $appui_options]);
               }
               else {
                 array_push($appui_options[0]['items'], ...$tmp);
-                X::log([2, $appui_options]);
               }
             }
           }
         }
-
-        X::log($appui_options);
 
         $res += (int)$opt->import($appui_options, $root);
         if (!defined('BBN_APPUI')) {

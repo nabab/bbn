@@ -2564,7 +2564,7 @@ class Option extends bbn\Models\Cls\Db
             $res = (int)$this->db->insert($this->class_cfg['table'], $values);
           }
           catch (Exception $e) {
-            $this->log([X::_("Impossible to add the option"), $values]);
+            X::log([X::_("Impossible to add the option"), $values], 'OptionAddErrors');
             throw new Exception(X::_("Impossible to add the option"));
           }
 
