@@ -1474,7 +1474,9 @@ class Appui
       $idx = X::find($routes, ['name' => 'appui-core']);
       if ($routes[$idx]) {
         $appui_options = [];
+        X::log($routes);
         X::move($routes, $idx, 0);
+        X::log($routes);
         foreach ($routes as $i => $r) {
           $file = $this->libPath() . $r['path'] . '/src/cfg/options.json';
           if ($this->_currentFs->exists($file)) {
