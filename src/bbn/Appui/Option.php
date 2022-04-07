@@ -3680,6 +3680,10 @@ class Option extends bbn\Models\Cls\Db
         $options = [$options];
       }
 
+      if (X::isAssoc($options)) {
+        $options = [$options];
+      }
+
       foreach ($options as $i => $o) {
         $tmp   = [];
         $items = [];
