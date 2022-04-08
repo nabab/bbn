@@ -3684,7 +3684,7 @@ class Option extends bbn\Models\Cls\Db
         $options = [$options];
       }
 
-      foreach ($options as $i => $o) {
+      foreach ($options as $o) {
         $tmp   = [];
         $items = [];
         /** @todo Temp solution */
@@ -3724,6 +3724,7 @@ class Option extends bbn\Models\Cls\Db
           }
         }
         else {
+          X::log($o);
           throw new \Exception(X::_("Error while importing: impossible to add"));
         }
       }
