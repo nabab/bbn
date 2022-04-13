@@ -425,6 +425,99 @@ class Dashboard
 
 
   /**
+   * Checks if the given id is an user's private widget
+   * @param string $id
+   * @return bool
+   */
+  public function isPvtWidget(string $id): bool
+  {
+    if (!Str::isUid($id)) {
+      throw new \Exception(_("The id must be a uuid"));
+    }
+    return ($bit = $this->pref->getBit($id)) && \is_null($bit[$this->archBits['id_option']]);
+  }
+
+
+  /**
+   * Adds an user's private widget
+   * @param array $widget
+   * @param string $idDashboard
+   * @return null|string
+   */
+  public function addPvtWidget(array $widget, string $idDashboard = ''): ?string
+  {
+    if (empty($idDashboard) && empty($this->id)) {
+      throw new \Exception(_('The dashboard ID is mandatory'));
+    }
+    if (empty($widget[$this->archBits['text']])) {
+      throw new \Exception(_('The widget name is mandatory'));
+    }
+    $idDashboard = $idDashboard ?: $this->id;
+    $userDash = $this->getUserDashboard($idDashboard);
+    if (empty($userDash)) {
+      if ($this->pref->shareWithUser($idDashboard, $this->user->getId())) {
+        $userDash = $this->getUserDashboard($idDashboard);
+      }
+    }
+    if (!empty($userDash)) {
+      $widget[$this->archBits['num']] = $this->pref->getMaxBitNum($idDashboard, null, true) ?: 1;
+      if ($this->pref->addBit($userDash['id'], $widget)) {
+        return $this->db->lastId();
+      }
+    }
+    return null;
+  }
+
+
+  /**
+   * Gets an user's private widget
+   * @param string $id
+   * @return null|array
+   */
+  public function getPvtWidget(string $id): ?array
+  {
+    if ($this->isPvtWidget($id)
+      && ($w = $this->pref->getBit($id))
+    ) {
+      $o = !empty($w['widget']) ? $w['widget'] : [];
+      $o = X::mergeArrays($o, [
+        $this->archBits['id'] => $w[$this->archBits['id']],
+        'key' => $w[$this->archBits['id']],
+        $this->archBits['text'] => $w[$this->archBits['text']],
+        $this->archBits['num'] => $w[$this->archBits['num']]
+      ]);
+      // Parse JSON properties
+      if (Str::isJson($o['buttonsRight'])) {
+        $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
+      }
+      if (Str::isJson($o['buttonsLeft'])) {
+        $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
+      }
+      if (Str::isJson($o['options'])) {
+        $o['options'] = \json_decode($o['options'], true);
+      }
+      // "hidden" property
+      if (!isset($o['hidden'])) {
+        $o['hidden'] = false;
+      }
+      return $o;
+    }
+    return null;
+  }
+
+
+  /**
+   * Deletes an user's private widget
+   * @param string $id
+   * @return bool
+   */
+  public function deletePvtWidget(string $id): bool
+  {
+    return $this->isPvtWidget($id) && $this->pref->deleteBit($id);
+  }
+
+
+  /**
    * Saves the widget configuration
    * @param array $data
    * @return string|bool
@@ -896,7 +989,8 @@ class Dashboard
     $widgetPrefs = [];
     if ((bool)$this->id) {
       // Looking for some preferences if he has some
-      if (($uDash = $this->getUserDashboard($this->id))
+      $uDash = $this->getUserDashboard($this->id);
+      if (!empty($uDash)
         && !empty($uDash[$this->archPref['cfg']])
         && Str::isJson($uDash[$this->archPref['cfg']])
         && ($uDashCfg = json_decode($uDash[$this->archPref['cfg']], true))
@@ -945,7 +1039,7 @@ class Dashboard
               if (Str::isJson($o['buttonsLeft'])) {
                 $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
               }
-              if (Str::isJson($o['buttonsRight'])) {
+              if (Str::isJson($o['options'])) {
                 $o['options'] = \json_decode($o['options'], true);
               }
 
@@ -965,6 +1059,47 @@ class Dashboard
 
               $res[] = $o;
             }
+          }
+        }
+      }
+      if (!empty($uDash)
+        && ($pvtWidgets = $this->pref->getBits($uDash[$this->archPref['id']], false))
+      ) {
+        foreach ($pvtWidgets as $w) {
+          if (\is_null($w['id_option'])) {
+            $o = !empty($w['widget']) ? $w['widget'] : [];
+            $o = X::mergeArrays($o, [
+              $this->archBits['id'] => $w[$this->archBits['id']],
+              'key' => $w[$this->archBits['id']],
+              $this->archBits['text'] => $w[$this->archBits['text']],
+              $this->archBits['num'] => $w[$this->archBits['num']]
+            ]);
+            // Set the widget's url
+            if (!empty($o['code'])) {
+              $o['url'] = $url . $o['code'];
+            }
+            // Get the preferences of the single widget
+            if (!empty($widgetPrefs[$o['key']])) {
+              $o = X::mergeArrays($o, $widgetPrefs[$o['key']]);
+            }
+            // Parse JSON properties
+            if (Str::isJson($o['buttonsRight'])) {
+              $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
+            }
+            if (Str::isJson($o['buttonsLeft'])) {
+              $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
+            }
+            if (Str::isJson($o['options'])) {
+              $o['options'] = \json_decode($o['options'], true);
+            }
+            // "hidden" property
+            if (!isset($o['hidden'])) {
+              $o['hidden'] = false;
+            }
+            if (!$with_code) {
+              unset($o[$this->archOpt['code']]);
+            }
+            $res[] = $o;
           }
         }
       }
