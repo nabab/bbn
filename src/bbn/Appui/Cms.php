@@ -160,6 +160,7 @@ class Cms extends DbCls
       $res['end']   = $this->getEnd($id_note);
       $res['tags']  = $this->note->getTags($id_note);
       $res['items'] = $note['content'] ? json_decode($note['content'], true) : [];
+      $res['id_media'] = $this->getDefaultMedia($id_note);
       unset($note['content']);
       if ($with_medias) {
         $res['medias'] = $this->note->getMedias($id_note);
@@ -170,7 +171,69 @@ class Cms extends DbCls
   }
 
 
-  public function getLastVersionCfg(bool $with_content = false, bool $published = true, array $filter = [])
+  /**
+   * Sets a media as the default for the given note
+   *
+   * @param string $id_note
+   * @param string $id_media
+   * @return boolean
+   */
+  public function setDefaultMedia(string $id_note, string $id_media): bool
+  {
+    $cfg = $this->note->getClassCfg();
+    if ($this->note->exists($id_note)) {
+      if ($old = $this->getDefaultMedia($id_note)) {
+        if ($id_media === $old) {
+          return true;
+        }
+
+        $this->db->update($cfg['tables']['notes_medias'], [
+          $cfg['arch']['notes_medias']['default_media'] => 0
+        ], [
+          $cfg['arch']['notes_medias']['id_note'] => $id_note
+        ]);
+      }
+
+      return (bool)$this->db->update($cfg['tables']['notes_medias'], [
+        $cfg['arch']['notes_medias']['default_media'] => 1
+      ], [
+        $cfg['arch']['notes_medias']['id_note'] => $id_note,
+        $cfg['arch']['notes_medias']['id_media'] => $id_media
+      ]);
+    }
+
+    throw new \Exception(X::_("The note doesn't exist"));
+  }
+
+
+  /**
+   * Returns the default media ID for the given note
+   *
+   * @param [type] $id_note ID of the note
+   * @return string|null
+   */
+  public function getDefaultMedia($id_note): ?string
+  {
+    $cfg = $this->note->getClassCfg();
+    return $this->db->selectOne(
+      $cfg['tables']['notes_medias'],
+      $cfg['arch']['notes_medias']['id_media'],
+      [
+        $cfg['arch']['notes_medias']['id_note'] => $id_note,
+        $cfg['arch']['notes_medias']['default_media'] => 1
+    ]);
+  }
+
+
+  /**
+   * Returns a database query configuration getting the latest note version
+   *
+   * @param boolean $with_content
+   * @param boolean $published
+   * @param array $filter
+   * @return array
+   */
+  public function getLastVersionCfg(bool $with_content = false, bool $published = true, array $filter = []): array
   {
     $cfg = $this->note->getLastVersionCfg($with_content);
     $cfg['fields'][]             = 'url';

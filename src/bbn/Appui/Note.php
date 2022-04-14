@@ -79,6 +79,7 @@ class Note extends bbn\Models\Cls\Db
         'id_user' => 'id_user',
         'comment' => 'comment',
         'creation' => 'creation',
+        'default_media' => 'default_media'
       ],
       'medias' => [
         'id' => 'id',
@@ -884,10 +885,14 @@ class Note extends bbn\Models\Cls\Db
    * @param int $version
    * @return int|null
    */
-  public function addMediaToNote(string $id_media, string $id_note, int $version): ?int
+  public function addMediaToNote(string $id_media, string $id_note, int $version = null, int $default = 0): ?int
   {
     if ($usr = bbn\User::getInstance()) {
       $cf = &$this->class_cfg;
+
+      if (!$version) {
+        $version = $this->latest($id_note) ?: 1;
+      }
 
       return $this->db->insert(
         $cf['tables']['notes_medias'],
@@ -897,6 +902,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes_medias']['id_media'] => $id_media,
           $cf['arch']['notes_medias']['id_user'] => $usr->getId(),
           $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
+          $cf['arch']['notes_medias']['default_media'] => $default
         ]
       );
     }
