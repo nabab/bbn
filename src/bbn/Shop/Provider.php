@@ -96,7 +96,7 @@ class Provider extends DbCls
   public function edit($id, array $data): ?string
   {
     $dbcfg = $this->getClassCfg();
-    if (!X::hasProps($data, ['name', 'id'])) {
+    if (X::hasProp($data, 'name', true)) {
       return $this->db->update(
         $dbcfg['table'],
         [

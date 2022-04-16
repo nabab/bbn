@@ -6,13 +6,14 @@ use bbn\Db;
 use bbn\X;
 use bbn\User;
 use bbn\Tpl;
+use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\Dbconfig;
 use bbn\Mvc\Model;
 use bbn\Util\Timer;
 use Opis\Closure\SerializableClosure;
 
-class Search
+class Search extends Basic
 {
   use Dbconfig, Cache;
 
@@ -267,7 +268,12 @@ class Search
 
       if ($previous_search_results = $this->getPreviousSearchResults($id_search)) {
         foreach ($previous_search_results as $r) {
-          $item          = X::getRow($config_array, ['signature' => $r['signature']]);
+          $item = X::getRow($config_array, ['signature' => $r['signature']]);
+          if (!$item) {
+            /** @todo isn't there something to delete here ? */
+            continue;
+          }
+
           $processed_cfg = $this->db->processCfg($item['cfg']);
           // Get the results saved in the json field `result`
           $ok = true;
