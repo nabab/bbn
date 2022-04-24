@@ -194,11 +194,31 @@ class Cms extends DbCls
         ]);
       }
 
-      return (bool)$this->db->update($cfg['tables']['notes_medias'], [
-        $cfg['arch']['notes_medias']['default_media'] => 1
-      ], [
+      return (bool)$this->db->insertUpdate($cfg['tables']['notes_medias'], [
+        $cfg['arch']['notes_medias']['default_media'] => 1,
         $cfg['arch']['notes_medias']['id_note'] => $id_note,
         $cfg['arch']['notes_medias']['id_media'] => $id_media
+      ]);
+    }
+
+    throw new \Exception(X::_("The note doesn't exist"));
+  }
+
+
+  /**
+   * Unsets the media as the default for the given note
+   *
+   * @param string $id_note
+   * @return boolean
+   */
+  public function unsetDefaultMedia(string $id_note): bool
+  {
+    $cfg = $this->note->getClassCfg();
+    if ($this->note->exists($id_note)) {
+      return (bool)$this->db->update($cfg['tables']['notes_medias'], [
+        $cfg['arch']['notes_medias']['default_media'] => 0
+      ], [
+        $cfg['arch']['notes_medias']['id_note'] => $id_note
       ]);
     }
 
@@ -736,6 +756,7 @@ class Cms extends DbCls
      * @param string $end
      * @param array $tags
      * @param string $id_type
+     * @param string $id_media
      * @return bool Returns true if something has been modified.
      */
   public function set(
@@ -746,7 +767,8 @@ class Cms extends DbCls
     string $start = null,
     string $end = null,
     array $tags = null,
-    string $id_type = null
+    string $id_type = null,
+    string $id_media = null
   ): bool
   {
     if (is_array($url)) {
@@ -780,11 +802,20 @@ class Cms extends DbCls
     }
 
     if (is_array($tags)) {
-      $change += $this->note->setTags($cfg['id_note'], $tags);
+      $change += (int)$this->note->setTags($cfg['id_note'], $tags);
     }
 
     if ($id_type && ($cfg['id_type'] !== $id_type)) {
-      $change += $this->setType($cfg['id_note'], $id_type);
+      $change += (int)$this->setType($cfg['id_note'], $id_type);
+    }
+
+    if ($id_media !== $cfg['id_media']) {
+      if ($id_media) {
+        $change += (int)$this->setDefaultMedia($id_note, $id_media);
+      }
+      else {
+        $change += (int)$this->unsetDefaultMedia($id_note);
+      }
     }
 
     return $change ? true : false;

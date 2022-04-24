@@ -75,7 +75,6 @@ class Note extends bbn\Models\Cls\Db
         'id' => 'id',
         'id_media' => 'id_media',
         'id_note' => 'id_note',
-        'version' => 'version',
         'id_user' => 'id_user',
         'comment' => 'comment',
         'creation' => 'creation',
@@ -503,8 +502,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['tables']['notes_medias'],
           $cf['arch']['notes_medias']['id_media'],
           [
-            $cf['arch']['notes_medias']['id_note'] => $id,
-            $cf['arch']['notes_medias']['version'] => $version,
+            $cf['arch']['notes_medias']['id_note'] => $id
           ]
         )) {
           $media         = $this->getMediaInstance();
@@ -741,8 +739,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['tables']['notes_medias'],
           $cf['arch']['notes_medias']['id_media'],
           [
-            $cf['arch']['notes_medias']['id_note'] => $note[$cf['arch']['versions']['id_note']],
-            $cf['arch']['notes_medias']['version'] => $note[$cf['arch']['versions']['version']],
+            $cf['arch']['notes_medias']['id_note'] => $note[$cf['arch']['versions']['id_note']]
           ]
         )) {
           $note['medias'] = [];
@@ -882,23 +879,18 @@ class Note extends bbn\Models\Cls\Db
   /**
    * @param string $id_media
    * @param string $id_note
-   * @param int $version
+   * @param int $default
    * @return int|null
    */
-  public function addMediaToNote(string $id_media, string $id_note, int $version = null, int $default = 0): ?int
+  public function addMediaToNote(string $id_media, string $id_note, int $default = 0): ?int
   {
     if ($usr = bbn\User::getInstance()) {
       $cf = &$this->class_cfg;
-
-      if (!$version) {
-        $version = $this->latest($id_note) ?: 1;
-      }
 
       return $this->db->insert(
         $cf['tables']['notes_medias'],
         [
           $cf['arch']['notes_medias']['id_note'] => $id_note,
-          $cf['arch']['notes_medias']['version'] => $version,
           $cf['arch']['notes_medias']['id_media'] => $id_media,
           $cf['arch']['notes_medias']['id_user'] => $usr->getId(),
           $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
@@ -916,28 +908,20 @@ class Note extends bbn\Models\Cls\Db
    * 
    * @param string $id_media
    * @param string $id_note
-   * @param false $version
    * @return int|null
    * @throws \Exception
    */
-  public function removeMedia(string $id_media, string $id_note, $version = false)
+  public function removeMedia(string $id_media, string $id_note): ?int
   {
     $cf = &$this->class_cfg;
     if (
       $this->db->selectOne($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media])
       && $this->exists($id_note)
     ) {
-      $filter = [
+      return $this->db->delete($cf['tables']['notes_medias'], [
         $cf['arch']['notes_medias']['id_note'] => $id_note,
-        $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
         $cf['arch']['notes_medias']['id_media'] => $id_media,
-      ];
-
-      if ($version === true) {
-        unset($filter[$cf['arch']['notes_medias']['version']]);
-      }
-
-      return $this->db->delete($cf['tables']['notes_medias'], $filter);
+      ]);
     }
 
     return null;
@@ -953,7 +937,7 @@ class Note extends bbn\Models\Cls\Db
    * @return int|null
    * @throws \Exception
    */
-  public function removeAllMedias(string $id_note)
+  public function removeAllMedias(string $id_note): ?int
   {
     $cf = &$this->class_cfg;
     if (
@@ -971,33 +955,6 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
-   * @param string $id_media
-   * @param string $id_note
-   * @param false $version
-   * @return bool
-   * @throws \Exception
-   */
-  public function media2version(string $id_media, string $id_note, $version = false)
-  {
-    $cf = &$this->class_cfg;
-
-    return !empty($id_media) &&
-      $this->db->selectOne($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media]) &&
-      $this->exists($id_note) &&
-      $this->db->insert(
-        $cf['tables']['notes_medias'],
-        [
-          $cf['arch']['notes_medias']['id_note'] => $id_note,
-          $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
-          $cf['arch']['notes_medias']['id_media'] => $id_media,
-          $cf['arch']['notes_medias']['id_user'] => \bbn\User::getInstance()->getId(),
-          $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
-        ]
-      );
-  }
-
-
-  /**
    * @param string $id_note
    * @param false $version
    * @param false $type
@@ -1010,15 +967,13 @@ class Note extends bbn\Models\Cls\Db
     $media = $this->getMediaInstance();
     $cf    = &$this->class_cfg;
     if ($this->exists($id_note)) {
-      $filter = [
-        $cf['arch']['notes_medias']['id_note'] => $id_note,
-        $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
-      ];
-      if ($version === true) {
-        unset($filter[$cf['arch']['notes_medias']['version']]);
-      }
-
-      if ($medias = $this->db->getColumnValues($cf['tables']['notes_medias'], $cf['arch']['notes_medias']['id_media'], $filter)) {
+      $medias = $this->db->getColumnValues(
+        $cf['tables']['notes_medias'],
+        $cf['arch']['notes_medias']['id_media'],
+        [
+          $cf['arch']['notes_medias']['id_note'] => $id_note
+        ]);
+      if ($medias) {
         foreach ($medias as $m) {
           $ret[] = $media->getMedia($m, true);
         }
@@ -1041,8 +996,7 @@ class Note extends bbn\Models\Cls\Db
     $cf = &$this->class_cfg;
     if ($this->exists($id_note)) {
       $where = [
-        $cf['arch']['notes_medias']['id_note'] => $id_note,
-        $cf['arch']['notes_medias']['version'] => $version ?: $this->latest($id_note),
+        $cf['arch']['notes_medias']['id_note'] => $id_note
       ];
       if (!empty($id_media) && Str::isUid($id_media)) {
         $where[$cf['arch']['notes_medias']['id_media']] = $id_media;
@@ -1347,10 +1301,9 @@ class Note extends bbn\Models\Cls\Db
     $notes = [];
     $cms   = new \bbn\Appui\Cms($this->db);
     $ids   = $this->db->rselectAll(
-      $this->class_cfg['tables']['notes_medias'],
+      $this->class_cfg['tables']['notes_medias']
       [
-        $this->class_cfg['arch']['notes_medias']['id_note'],
-        $this->class_cfg['arch']['notes_medias']['version'],
+        $this->class_cfg['arch']['notes_medias']['id_note']
       ],
       [
         $this->class_cfg['arch']['notes_medias']['id_media'] => $id_media,
