@@ -887,7 +887,7 @@ class Note extends bbn\Models\Cls\Db
     if ($usr = bbn\User::getInstance()) {
       $cf = &$this->class_cfg;
 
-      return $this->db->insert(
+      return $this->db->insertUpdate(
         $cf['tables']['notes_medias'],
         [
           $cf['arch']['notes_medias']['id_note'] => $id_note,

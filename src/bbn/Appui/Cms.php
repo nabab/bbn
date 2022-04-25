@@ -194,11 +194,7 @@ class Cms extends DbCls
         ]);
       }
 
-      return (bool)$this->db->insertUpdate($cfg['tables']['notes_medias'], [
-        $cfg['arch']['notes_medias']['default_media'] => 1,
-        $cfg['arch']['notes_medias']['id_note'] => $id_note,
-        $cfg['arch']['notes_medias']['id_media'] => $id_media
-      ]);
+      return (bool)$this->note->addMediaToNote($id_media, $id_note, 1);
     }
 
     throw new \Exception(X::_("The note doesn't exist"));
