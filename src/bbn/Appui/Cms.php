@@ -347,22 +347,29 @@ class Cms extends DbCls
   /**
    * Returns all the notes of type 'pages'.
    *
-   * @param bool  $with_content
-   * @param array $filter
-   * @param int   $limit
-   * @param int   $start
+   * @param bool   $with_content
+   * @param array  $filter
+   * @param array  $order
+   * @param int    $limit
+   * @param int    $start
+   * @param string $type
    * @return array
    * @throws Exception
    */
-  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0): array
+  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string $type = null): array
   {
     $cfg       = $this->getLastVersionCfg($with_content, false, $filter);
     $type_cond = [];
     foreach ($this->getTypes() as $t) {
-      $type_cond[] = [
-        'field' => 'bbn_notes.id_type',
-        'value' => $t['value']
-      ];
+      if (!$type || ($type === $t['value'])) {
+        $type_cond[] = [
+          'field' => 'bbn_notes.id_type',
+          'value' => $t['value']
+        ];
+      }
+    }
+    if (empty($type_cond)) {
+      throw new \Exception(X::_("Impossible to find a type %s", $type));
     }
     $cfg['where']['conditions'][] = [
       'logic' => 'OR',

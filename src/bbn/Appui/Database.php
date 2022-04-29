@@ -1535,7 +1535,7 @@ class Database extends bbn\Models\Cls\Cache
               // Incrementing the alias indexes as we'll use them
               $tIdx++;
               // Getting the model from the foreign table
-              $tmodel = $this->modelize($model['keys'][$c]['ref_table']);
+              $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
               // Looking for displayed columns configured
               if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {
                 $dcols = [];
