@@ -860,7 +860,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             }
             else {
               // Remove the alias from where and join but not in having except if it's a count
-              if (!$is_having && ($table === false) && isset($cfg['fields'][$field])) {
+              if (!$is_having && empty($table) && isset($cfg['fields'][$field])) {
                 $field = $cfg['fields'][$field];
                 // Same for exp in case it's an alias
                 if (!empty($f['exp']) && isset($cfg['fields'][$f['exp']])) {
