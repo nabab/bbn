@@ -80,8 +80,9 @@ class Mysql extends Sql
     }
     catch (\PDOException $e) {
       $err = X::_("Impossible to create the connection") .
-        " {$cfg['engine']}/Connection " . $this->getEngine() . " to {$this->host} "
-        . X::_("with the following error") . $e->getMessage();
+        " $cfg[engine] ".X::_("to")." {$this->host} "
+        . X::_("with the following error") . " " . $e->getMessage();
+        X::log($cfg);
       throw new \Exception($err);
     }
   }
@@ -93,7 +94,7 @@ class Mysql extends Sql
    */
   public function getConnection(array $cfg = []): ?array
   {
-    if (!X::hasProps($cfg, ['host', 'user'])) {
+    if (!X::hasProps($cfg, ['host', 'db'])) {
       if (!defined('BBN_DB_HOST')) {
         throw new \Exception(X::_("No DB host defined"));
       }
@@ -126,10 +127,11 @@ class Mysql extends Sql
 
     $cfg['code_db'] = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'] . '@' . $cfg['host'];
-    $cfg['args'] = ['mysql:host='
-      . (in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
-      . ';port=' . $cfg['port']
-      . (empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
+    $cfg['args'] = [
+      'mysql:'
+        . (empty($cfg['db']) ? '' : ('dbname=' . $cfg['db']). ';')
+        . 'host=' . (in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host']) . ';'
+        . 'port=' . $cfg['port'],
       $cfg['user'],
       $cfg['pass'],
       [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],

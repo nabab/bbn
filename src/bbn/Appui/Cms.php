@@ -256,6 +256,7 @@ class Cms extends DbCls
     $cfg['fields'][]             = 'start';
     $cfg['fields'][]             = 'end';
     $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';
+    $cfg['fields']['id_media']   = 'default_medias.id_media';
     $cfg['where']['conditions'][] = [
       'field' => 'mime',
       'value' => 'json/bbn-cms'
@@ -299,12 +300,10 @@ class Cms extends DbCls
     $cfg['join'][] = [
         'table' => $this->class_cfg['tables']['notes_url'],
         'type' => 'left',
-        'on' => [
-            [
-                'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
-                'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
-            ]
-        ]
+        'on' => [[
+            'field' => $this->db->cfn($this->class_cfg['arch']['notes_url']['id_note'], $this->class_cfg['tables']['notes_url']),
+            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+        ]]
     ];
     $cfg['join'][] = [
       'table' => $this->class_cfg['tables']['url'],
@@ -316,28 +315,40 @@ class Cms extends DbCls
     ];
 
     $cfg['join'][] = [
-        'table' => $this->class_cfg['tables']['notes_events'],
-        'type' => 'left',
-        'on' => [[
-            'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),
-            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
-        ]]
+      'table' => $this->class_cfg['tables']['notes_events'],
+      'type' => 'left',
+      'on' => [[
+          'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_note'], $this->class_cfg['tables']['notes_events']),
+          'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+      ]]
     ];
     $cfg['join'][] = [
-        'table' => $this->class_cfg['tables']['events'],
-        'type' => 'left',
-        'on' => [[
-            'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
-            'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
-        ]]
+      'table' => $this->class_cfg['tables']['events'],
+      'type' => 'left',
+      'on' => [[
+          'field' => $this->db->cfn($this->class_cfg['arch']['notes_events']['id_event'], $this->class_cfg['tables']['notes_events']),
+          'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
+      ]]
     ];
     $cfg['join'][] = [
-        'table' => $this->class_cfg['tables']['notes_medias'],
-        'type' => 'left',
-        'on' => [[
-            'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),
-            'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
-        ]]
+      'table' => $this->class_cfg['tables']['notes_medias'],
+      'type' => 'left',
+      'on' => [[
+          'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias']),
+          'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+      ]]
+    ];
+    $cfg['join'][] = [
+      'table' => $this->class_cfg['tables']['notes_medias'],
+      'alias' => 'default_medias',
+      'type' => 'left',
+      'on' => [[
+          'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], 'default_medias'),
+          'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
+        ], [
+          'field' => $this->db->cfn($this->class_cfg['arch']['notes_medias']['default_media'], 'default_medias'),
+          'value' => 1
+      ]]
     ];
     $cfg['group_by'] = [$this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])];
 
@@ -389,6 +400,11 @@ class Cms extends DbCls
       return $db->count($cfg);
     }, $idx, 'total', 20);
     $data  = $this->db->rselectAll($cfg);
+
+    foreach ($data as &$d) {
+      $d['front_img'] = $d['id_media'] ? $this->media->getMedia($d['id_media'], true) : null;
+
+    }
 
     return [
       'query' => $this->db->last(),

@@ -98,7 +98,7 @@ class Database extends bbn\Models\Cls\Cache
         throw new \Exception(X::_("Unknown engine")." ".$parent['code']);
       }
 
-      if (!isset($this->connections[$parent['code']][$cfg['code']])) {
+      if (!isset($this->connections[$parent['code']][$cfg['code'] . $db])) {
         switch ($parent['code']) {
           case 'mysql':
             if (strpos($cfg['code'], '@')) {
@@ -121,7 +121,7 @@ class Database extends bbn\Models\Cls\Cache
               }
 
               try {
-                $this->connections[$parent['code']][$cfg['code']] = new bbn\Db($db_cfg);
+                $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\Db($db_cfg);
               }
               catch (\Exception $e) {
                 throw new \Exception($e->getMessage());
@@ -145,7 +145,7 @@ class Database extends bbn\Models\Cls\Cache
               'db' => $cfg['path'].'/'.$db
             ];
             try {
-              $this->connections[$parent['code']][$cfg['code']] = new bbn\Db($db_cfg);
+              $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\Db($db_cfg);
             }
             catch (\Exception $e) {
               throw new \Exception($e->getMessage());
@@ -157,8 +157,8 @@ class Database extends bbn\Models\Cls\Cache
         }
       }
 
-      if (isset($this->connections[$parent['code']][$cfg['code']])) {
-        return $this->connections[$parent['code']][$cfg['code']];
+      if (isset($this->connections[$parent['code']][$cfg['code'] . $db])) {
+        return $this->connections[$parent['code']][$cfg['code'] . $db];
       }
     }
 
