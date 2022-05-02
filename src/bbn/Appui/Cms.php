@@ -885,11 +885,12 @@ class Cms extends DbCls
         $arr = [];
         foreach ($o->opt->fullOptions('types', 'note', 'appui') as $op) {
           if ($op['id_alias'] === $id_cms) {
-            $arr[] = [
+            unset($op['alias']);
+            $arr[] = array_merge($op, [
               'text' => $op['text'],
               'value' => $op['id'],
               'prefix' => $op['prefix'] ?? ''
-            ];
+            ]);
           }
         }
 
