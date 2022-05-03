@@ -756,28 +756,41 @@ class Cms extends DbCls
    *
    * @param string $id_note
    * @param string $type
-   * @return null|int The number of affected rows (1 if ok)
+   * @return int The number of affected rows (1 if ok)
    */
   public function setType(string $id_note, string $type): int
   {
-      return $this->note->setType($id_note, $type);
+    return $this->note->setType($id_note, $type);
   }
 
 
-    /**
-     * Sets content, title, start and end for the given URL.
-     *
-     * @param string $url
-     * @param string $title
-     * @param string $content
-     * @param string $excerpt
-     * @param string $start
-     * @param string $end
-     * @param array $tags
-     * @param string $id_type
-     * @param string $id_media
-     * @return bool Returns true if something has been modified.
-     */
+  /**
+   * Changes the id_option of the note
+   *
+   * @param string $id_note
+   * @param string $id_option
+   * @return int The number of affected rows (1 if ok)
+   */
+  public function setOption(string $id_note, string $id_option): int
+  {
+    return $this->note->setOption($id_note, $id_option);
+  }
+
+
+  /**
+   * Sets content, title, start and end for the given URL.
+   *
+   * @param string $url
+   * @param string $title
+   * @param string $content
+   * @param string $excerpt
+   * @param string $start
+   * @param string $end
+   * @param array $tags
+   * @param string $id_type
+   * @param string $id_media
+   * @return bool Returns true if something has been modified.
+   */
   public function set(
     $url,
     string $title = '',
@@ -787,7 +800,8 @@ class Cms extends DbCls
     string $end = null,
     array $tags = null,
     string $id_type = null,
-    string $id_media = null
+    string $id_media = null,
+    string $id_option = null
   ): bool
   {
     if (is_array($url)) {
@@ -826,6 +840,10 @@ class Cms extends DbCls
 
     if ($id_type && ($cfg['id_type'] !== $id_type)) {
       $change += (int)$this->setType($cfg['id_note'], $id_type);
+    }
+
+    if ($id_option && ($cfg['id_option'] !== $id_option)) {
+      $change += (int)$this->setOption($cfg['id_note'], $id_option);
     }
 
     if ($id_media !== $cfg['id_media']) {

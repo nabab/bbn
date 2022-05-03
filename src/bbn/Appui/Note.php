@@ -434,6 +434,24 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
+   * Changes the id_option of the note
+   *
+   * @param string $id_note
+   * @param string $id_option
+   * @return int The number of affected rows (1 if ok)
+   */
+  public function setOption(string $id_note, string $id_option): int
+  {
+    $cf = &$this->class_cfg;
+    return $this->db->update(
+      $cf['tables']['notes'],
+      [$cf['arch']['notes']['id_option'] => $id_option],
+      [$cf['arch']['notes']['id'] => $id_note]
+    );
+  }
+
+
+  /**
    * @param $id
    * @return mixed
    */
@@ -886,6 +904,14 @@ class Note extends bbn\Models\Cls\Db
   {
     if ($usr = bbn\User::getInstance()) {
       $cf = &$this->class_cfg;
+
+      if ($default) {
+        $this->db->update(
+          $cf['tables']['notes_medias'],
+          [$cf['arch']['notes_medias']['default_media'] => 0],
+          [$cf['arch']['notes_medias']['id_note'] => $id_note]
+        );
+      }
 
       return $this->db->insertUpdate(
         $cf['tables']['notes_medias'],

@@ -1570,11 +1570,13 @@ class Database extends bbn\Models\Cls\Cache
 
               if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
                 $f['option'] = $tf['option'];
-                $f['option']['editor'] = 'appui-database-table-browser';
-                $f['option']['options'] = [
-                  'table' => $model['keys'][$c]['ref_table'],
-                  'column' => $model['keys'][$c]['ref_column']
-                ];
+                if (!isset($f['option']['editor'])) {
+                  $f['option']['editor'] = 'appui-database-table-browser';
+                  $f['option']['options'] = [
+                    'table' => $model['keys'][$c]['ref_table'],
+                    'column' => $model['keys'][$c]['ref_column']
+                  ];
+                }
               }
 
               // Adding the JOIN part to the query
