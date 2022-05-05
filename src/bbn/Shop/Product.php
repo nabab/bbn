@@ -94,7 +94,7 @@ class Product extends DbCls
   {
     if (!$this->type_note) {
       $o = Option::getInstance();
-      $this->type_note = $o->fromCode('products', 'types', 'note', 'appui');
+      $this->type_note = $o->fromCode('products', 'types', 'note', 'plugins', 'shop', 'appui');
     }
 
     return $this->type_note;
@@ -162,7 +162,7 @@ class Product extends DbCls
       throw new \Exception(_("Some mandatory fields are missing"));
     }
 
-    if (!($type = $this->opt->fromCode('products', 'types', 'note', 'appui'))) {
+    if (!($type = $this->getTypeNote())) {
       throw new \Exception(_("Impossible to retrieve the product type"));
     }
 
