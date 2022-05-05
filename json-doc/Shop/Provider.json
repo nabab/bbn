@@ -148,7 +148,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, array $data)\n  {\n    $dbcfg = $this->getClassCfg();\n    if (!X::hasProps($data, ['name', 'id'])) {\n      return $this->db->update(\n        $dbcfg['table'],\n        [\n          $dbcfg['arch']['providers']['name'] => $data['name'],\n          $dbcfg['arch']['providers']['cfg']  => $data['cfg'] ? json_encode($data['cfg']) : null\n        ],\n        [$dbcfg['arch']['providers']['id'] => $id]\n      );\n    }\n\n    return null;\n  }",
+            "code": "function($id, array $data)\n  {\n    $dbcfg = $this->getClassCfg();\n    if (X::hasProp($data, 'name', true)) {\n      return $this->db->update(\n        $dbcfg['table'],\n        [\n          $dbcfg['arch']['providers']['name'] => $data['name'],\n          $dbcfg['arch']['providers']['cfg']  => $data['cfg'] ? json_encode($data['cfg']) : null\n        ],\n        [$dbcfg['arch']['providers']['id'] => $id]\n      );\n    }\n\n    return null;\n  }",
             "startLine": 96,
             "endLine": 111,
             "isDeprecated": false,

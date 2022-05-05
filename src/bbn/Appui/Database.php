@@ -1569,7 +1569,6 @@ class Database extends bbn\Models\Cls\Cache
               }
 
               if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
-                $f['option'] = $tf['option'];
                 if (!isset($f['option']['editor'])) {
                   $f['option']['editor'] = 'appui-database-table-browser';
                   $f['option']['options'] = [
