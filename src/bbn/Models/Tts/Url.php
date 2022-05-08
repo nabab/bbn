@@ -73,6 +73,29 @@ trait Url
 
 
   /**
+   * Returns the URL corresponding to the given item's ID
+   *
+   * @param string $id_item
+   * @param boolean $followRedirect
+   * @return string|null
+   */
+  public function getUrls(string $id_item, bool $followRedirect = true): array
+  {
+    $this->checkUrlCfg();
+    $res = [];
+    if ($id_urls = $this->db->getColumnValues($this->urlTable, $this->urlFields['id_url'], [
+      $this->class_cfg['urlItemField'] => $id_item
+    ])) {
+      foreach ($id_urls as $id_url) {
+        $res[] = $this->url->getUrl($id_url, $followRedirect);
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
    * @param string $url
    * @return bool
    */

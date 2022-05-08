@@ -18,6 +18,7 @@ class Medias extends bbn\Models\Cls\Db
   use bbn\Models\Tts\References;
   use bbn\Models\Tts\Dbconfig;
   use bbn\Models\Tts\Url;
+  use bbn\Models\Tts\Tagger;
 
   protected static
     /** @var array */
@@ -99,6 +100,14 @@ class Medias extends bbn\Models\Cls\Db
     $this->usr    = User::getInstance();
     $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
     $this->fs     = new System();
+    $this->defaultUrlType = 'media';
+    $this->taggerInit(
+      $this->class_cfg['tables']['medias_tags'],
+      [
+        'id_tag' => $this->class_cfg['arch']['medias_tags']['id_tag'],
+        'id_element' => $this->class_cfg['arch']['medias_tags']['id_media']
+      ]
+    );
   }
 
   public function setImageRoot(string $root): bool
@@ -389,7 +398,7 @@ class Medias extends bbn\Models\Cls\Db
       foreach ($list as $l) {
         preg_match('/.*\_w([0-9]*)\.[a-zA-Z]*$/', $l, $m);
         if (!empty($m) && !empty($m[1])) {
-          $sizes[] = $m[1];
+          $sizes[] = (int)$m[1];
         }
       }
       sort($sizes);
@@ -856,9 +865,9 @@ class Medias extends bbn\Models\Cls\Db
       $data['path'] = $this->getImageUrl($data['id']);
       $data['is_image'] = $this->isImage($full_path);
       if ($data['is_image']) {
-        $d['thumbs'] = $this->getThumbsSizes($data);
+        $data['thumbs'] = $this->getThumbsSizes($data);
         if ($width) {
-          foreach ($d['thumbs'] as $size) {
+          foreach ($data['thumbs'] as $size) {
             if ($size >= $width) {
               $dot = strrpos($data['file'], '.');
               $tmpFile = substr($data['file'], 0, $dot) . '_w' . $size .

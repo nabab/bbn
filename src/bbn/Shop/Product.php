@@ -94,7 +94,7 @@ class Product extends DbCls
   {
     if (!$this->type_note) {
       $o = Option::getInstance();
-      $this->type_note = $o->fromCode('products', 'types', 'note', 'plugins', 'shop', 'appui');
+      $this->type_note = $o->fromCode('products', 'types', 'appui-note', 'plugins', 'shop', 'appui');
     }
 
     return $this->type_note;

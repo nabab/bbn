@@ -237,25 +237,28 @@ class Note extends bbn\Models\Cls\Db
     string $id_option = null,
     string $excerpt = ''
   ) {
+    $props = [
+      'title',
+      'content',
+      'id_type',
+      'private',
+      'locked',
+      'id_parent',
+      'id_alias',
+      'mime',
+      'lang',
+      'id_option',
+      'excerpt'
+    ];
     if (is_array($title)) {
       $cfg = $title;
     }
     else {
-      $props = [
-        'title',
-        'content',
-        'excerpt',
-        'id_type',
-        'id_option',
-        'private',
-        'locked',
-        'id_parent',
-        'id_alias',
-        'mime',
-        'lang'
-      ];
       $cfg = [];
-      foreach ($props as $prop) {
+    }
+
+    foreach ($props as $prop) {
+      if (!array_key_exists($prop, $cfg)) {
         $cfg[$prop] = $$prop;
       }
     }
@@ -273,8 +276,8 @@ class Note extends bbn\Models\Cls\Db
       $cfg['id_type'] = self::getOptionId('personal', 'types');
     }
 
-    if (!$excerpt) {
-      $cfg['excerpt'] = $this->getExcerpt($title, $content);
+    if (!$cfg['excerpt']) {
+      $cfg['excerpt'] = $this->getExcerpt($cfg['title'], $cfg['content']);
     }
 
     $id_note = false;
@@ -290,13 +293,13 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['private'] => !empty($cfg['private']) ? 1 : 0,
           $cf['arch']['notes']['locked'] => !empty($cfg['locked']) ? 1 : 0,
           $cf['arch']['notes']['creator'] => $usr->getId(),
-          $cf['arch']['notes']['mime'] => $mime,
-          $cf['arch']['notes']['lang'] => $lang
+          $cf['arch']['notes']['mime'] => $cfg['mime'],
+          $cf['arch']['notes']['lang'] => $cfg['lang']
         ]
       )
       && ($id_note = $this->db->lastId())
     ) {
-      $this->insertVersion($id_note, $title, $content, $excerpt);
+      $this->insertVersion($id_note, $cfg['title'], $cfg['content'], $cfg['excerpt']);
     }
 
     return $id_note;

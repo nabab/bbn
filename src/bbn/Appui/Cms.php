@@ -355,6 +355,30 @@ class Cms extends DbCls
     return $cfg;
   }
 
+
+  /**
+   * Returns the whole information about the given media, including urls and tags
+   *
+   * @param string $id_media
+   * @param boolean $with_notes If true returns a list of the notes associated with the media
+   * @return array|null
+   */
+  public function getMedia(string $id_media, $with_notes = false): ?array
+  {
+    if ($media = $this->media->getMedia($id_media, true)) {
+      $media['urls'] = $this->media->getUrls($id_media);
+      $media['tags'] = $this->media->getTags($id_media);
+      if ($with_notes) {
+
+      }
+
+      return $media;
+    }
+
+    return null;
+  }
+
+
   /**
    * Returns all the notes of type 'pages'.
    *

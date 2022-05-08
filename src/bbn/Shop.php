@@ -135,6 +135,23 @@ class Shop extends Models\Cls\Db
   }
 
 
+  /**
+   * Returns the product type used in the notes.
+   *
+   * @return string
+   */
+  public function getProductTypeNote(): string
+  {
+    return $this->product->getTypeNote();
+  }
+
+
+  /**
+   * Returns the list of the providers in an array
+   *
+   * @param array $params
+   * @return array
+   */
   public function getProvidersList(array $params = []): array
   {
     $cfg  = $this->providers->getClassCfg();
