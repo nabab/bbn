@@ -123,6 +123,14 @@ class Cms extends DbCls
   }
 
 
+  /**
+   * Returns a list of the latest published articles
+   *
+   * @param array $filter
+   * @param integer $limit
+   * @param integer $start
+   * @return array
+   */
   public function getLatest(array $filter = [], int $limit = 20, int $start = 0): array
   {
     $cfg = $this->getLastVersionCfg(false, true, $filter);
@@ -438,11 +446,11 @@ class Cms extends DbCls
   }
 
 
-    /**
-     * Returns the 'pages' note type ID from options, which should always be the type of the CMS notes.
-     *
-     * @return string
-     */
+  /**
+   * Returns the 'pages' note type ID from options, which should always be the type of the CMS notes.
+   *
+   * @return string
+   */
   public function getNoteType(): string
   {
     if (!$this->noteType) {

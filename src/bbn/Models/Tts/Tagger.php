@@ -122,7 +122,7 @@ trait Tagger
   }
 
 
-  public function addTag(string $id_element, string $tag, string $lang = null, string $description = ''): int
+  public function addTag(string $id_element, string $tag, string $lang = '', string $description = ''): int
   {
     $this->taggerInit();
     $lang = $this->taggerGetLang($lang);
@@ -137,7 +137,7 @@ trait Tagger
       throw new Exception(X::_("Impossible to create the tag %s", $tag));
     }
 
-    return $this->db->insert(
+    return $this->db->insertIgnore(
       $this->taggerTable,
       [
         $this->taggerCols['id_element'] => $id_element,

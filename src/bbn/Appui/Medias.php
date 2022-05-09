@@ -164,6 +164,69 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
+  public function search($search, $cfg = [], int $limit = 20, int $start = 0): ?array
+  {
+    $cf = $this->getClassCfg();
+    $cft = $this->taggerObject->getClassCfg();
+
+    if (!isset($cfg['join'])) {
+      $cfg['join'] = [];
+    }
+
+    $cfg['join'][] = [
+      'type' => 'left',
+      'table' => $cf['tables']['medias_tags'],
+      'on' => [
+        [
+          'field' => $this->db->cfn($cf['arch']['medias_tags']['id_media'], $cf['tables']['medias_tags']),
+          'exp' => $this->db->cfn($cf['arch']['medias']['id'], $cf['tables']['medias'], true)
+        ]
+      ]
+    ];
+    $cfg['join'][] = [
+      'type' => 'left',
+      'table' => $cft['tables']['tags'],
+      'on' => [
+        [
+          'field' => $this->db->cfn($cf['arch']['medias_tags']['id_tag'], $cf['tables']['medias_tags']),
+          'exp' => $this->db->cfn($cft['arch']['tags']['id'], $cft['tables']['tags'], true)
+        ]
+      ]
+    ];
+    if (!isset($cfg['filters'])) {
+      $cfg['filters'] = [
+        'logic' => 'AND',
+        'conditions' => []
+      ];
+    }
+
+    $filter = [
+      'logic' => 'OR',
+      'conditions' => []
+    ];
+
+    $filter['conditions'][] = [
+      'field' => $this->db->cfn($cf['arch']['medias']['title'], $cf['tables']['medias']),
+      'operator' => 'contains',
+      'value' => $search
+    ];
+    $filter['conditions'][] = [
+      'field' => $this->db->cfn($cf['arch']['medias']['name'], $cf['tables']['medias']),
+      'operator' => 'contains',
+      'value' => $search
+    ];
+    $filter['conditions'][] = [
+      'field' => $this->db->cfn($cft['arch']['tags']['tag'], $cft['tables']['tags']),
+      'operator' => 'contains',
+      'value' => $search
+    ];
+
+    $cfg['filters']['conditions'][] = $filter;
+
+    return $this->browse($cfg, $limit, $start);
+  }
+
+
   /**
    * Gets an array of medias.
    *
@@ -180,6 +243,10 @@ class Medias extends bbn\Models\Cls\Db
       $filters = [];
       if (isset($cfg['filters'], $cfg['filters']['conditions'])) {
         $filters = $cfg['filters']['conditions'];
+        if ((count($filters) === 1) && ($filters[0]['field'] === $cf['arch']['medias']['title'])) {
+          unset($cfg['filters']);
+          return $this->search($filters[0]['value'], $cfg, $limit, $start);
+        }
       }
       if (($pvtIdx = X::find($filters, ['field' => $ct['private']])) === null) {
         $filters[] = [
@@ -229,6 +296,71 @@ class Medias extends bbn\Models\Cls\Db
       }
     }
     return null;
+  }
+
+
+  public function createGroup(string $text): string
+  {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups'];
+    $f = $cf['arch']['medias_groups'];
+    if ($this->db->insert($t, [
+      $f['text'] => Str::sanitizeHtml($text)
+    ])) {
+      return $this->db->lastId();
+    }
+  }
+
+
+  public function getGroup(string $id): string
+  {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups'];
+    $f = $cf['arch']['medias_groups'];
+    return $this->db->selectOne($t, $f['text'], [$f['id'] => $id]);
+  }
+
+
+  public function renameGroup(string $id, string $text): bool
+  {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups'];
+    $f = $cf['arch']['medias_groups'];
+    return (bool)$this->db->update($t, [
+      $f['text'] => Str::sanitizeHtml($text)
+    ], [
+      $f['id'] => $id
+    ]);
+  }
+
+
+  public function addToGroup(string $id_media, string $id_group, bool $addTag = false): bool
+  {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups_medias'];
+    $f = $cf['arch']['medias_groups_medias'];
+    $res = $this->db->insertIgnore($t, [
+      $f['id_group'] => $id_group,
+      $f['id_media'] => $id_media
+    ]);
+    if ($res && $addTag) {
+      $group = $this->getGroup($id_group);
+      $this->addTag($id_media, $group);
+    }
+
+    return (bool)$res;
+  }
+
+
+  public function removeFromGroup(string $id_media, string $id_group): bool
+  {
+    $cf = $this->getClassCfg();
+    $t = $cf['tables']['medias_groups_medias'];
+    $f = $cf['arch']['medias_groups_medias'];
+    return (bool)$this->db->deleteIgnore($t, [
+      $f['id_group'] => $id_group,
+      $f['id_media'] => $id_media
+    ]);
   }
 
 

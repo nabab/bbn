@@ -173,6 +173,12 @@ class Shop extends Models\Cls\Db
   }
 
 
+  /**
+   * Returns a list of the products for the shop (public)
+   *
+   * @param array $params
+   * @return array|null
+   */
   public function getList(array $params = []): ?array
   {
     if (empty($params['limit'])) {
@@ -232,7 +238,13 @@ class Shop extends Models\Cls\Db
   }
 
 
-  public function getAdminList($tableCfg)
+  /**
+   * Returns a list of the products for management.
+   *
+   * @param [type] $tableCfg
+   * @return array
+   */
+  public function getAdminList($tableCfg): array
   {
     $cfg      = $this->product->getClassCfg();
     $dbCfg    = $this->cms->getLastVersionCfg(false, false);
@@ -278,39 +290,12 @@ class Shop extends Models\Cls\Db
     if ($grid->check()) {
       $tmp_grid = $grid->getDatatable();
   
-      $db     =& $this->db;
-      $medias =& $this->medias;
-      $tmp_grid['data'] = array_map(function($a) use (&$db, &$medias) {
-        $a['media'] = [];
-        if($product_medias = $db->rselectAll('bbn_notes_medias', [], ['id_note' => $a['id_note']])) {
-          foreach($product_medias as $p){
-            $a['media'][] = $medias->getMedia($p['id_media'], true);
-          }
-        }
-
-        $url = Mvc::getPluginUrl('appui-note').'/media/image/';
-
-        if($a['front_img'] ){
-          $a['front_img'] = $medias->getMedia($a['front_img'], true);
-        }
-
-        $a['media'] = array_map(function($d)use(&$medias, $url) {
-          $d['is_image'] = false;
-          if ($d['content']) {
-            $full_path = $medias->getMediaPath($d['id']);
-            $d['full_path'] = $medias->getThumbs($full_path);
-            $d['path'] = $url.$d['id'];
-            $d['content'] = json_decode($d['content'], true);
-            $d['is_image'] = $medias->isImage($full_path);
-            if ($d['is_image']) {
-              $d['thumbs'] = $medias->getThumbsSizes($d['id']);
-            }
-          }
-          return $d;
-        }, $a['media']);
-        //die(var_dump($a));
-  
-        $a['num_media'] = count($a['media']) ? count($a['media']) : 0;
+      $cms   =& $this->cms;
+      $notes =& $this->note;
+      $tmp_grid['data'] = array_map(function($a) use (&$cms, &$notes) {
+        $a['medias'] = $notes->getMedias($a['id_note']);
+        $a['id_media'] = $cms->getDefaultMedia($a['id_note']);
+        $a['num_medias'] = count($a['medias']);
         $a['tags'] = [];//$a['num_tags'] ? $notes->getTags($a['id_note']) : [];
         return $a;
       }, $tmp_grid['data']);
@@ -320,6 +305,12 @@ class Shop extends Models\Cls\Db
   }
 
 
+  /**
+   * Returns all the informations about the given product
+   *
+   * @param string $id
+   * @return array|null
+   */
   public function getFullProduct(string $id): ?array
   {
     $prod = $this->product->get($id);

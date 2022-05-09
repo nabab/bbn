@@ -103,7 +103,7 @@ class Tag extends bbn\Models\Cls\Db
   {
     $table = $this->class_cfg['table'];
     $cf = $this->class_cfg['arch']['tags'];
-    if ($this->db->insert(
+    if ($this->db->insertIgnore(
       $table,
       [
         $cf['tag'] => $tag,

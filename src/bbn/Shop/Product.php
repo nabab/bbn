@@ -219,14 +219,18 @@ class Product extends DbCls
     $a = $cfg['arch']['products'];
     if ($this->db->selectOne($cfg['table'], $a['id_note'], [$a['id'] => $data['id']])) {
       $content = empty($data['items']) ? '[]' : json_encode($data['items']);
-      $res = $this->cms->set($data['url'], $data['title'], $content, $data['excerpt'], $data['start'] ?? null, $data['end'] ?? null, $data['tags']);
-      if (!empty($data['front_img'])) {
-        $file     = $data['front_img'];
-        $id_media = $file['id'];
-      }
-      else {
-        $id_media = null;
-      }
+      $res = $this->cms->set(
+        $data['url'],
+        $data['title'],
+        $content,
+        $data['excerpt'],
+        $data['start'] ?? null,
+        $data['end'] ?? null,
+        $data['tags'],
+        $data['id_type'],
+        $data['id_media'],
+        $data['id_option']
+      );
 
       //media upload end
       $res2 = $this->db->update('bbn_shop_products', [
@@ -238,8 +242,7 @@ class Product extends DbCls
         $a['product_type']   => $data['product_type'],
         $a['id_edition']     => $data['id_edition'],
         $a['stock']          => $data['stock'],
-        $a['active']         => $data['active'],
-        $a['front_img']      => $id_media,
+        $a['active']         => $data['active']
       ], [
         $a['id']           => $data['id']]);
       return $res || $res2 ? 1 : 0;
