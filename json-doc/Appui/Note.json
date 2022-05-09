@@ -3703,7 +3703,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_element, string $tag, string $lang = NULL, string $description = '')\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if ($tmp = $this->taggerObject->get($tag, $lang)) {\n      $id_tag = $tmp['id'];\n    }\n    else {\n      $id_tag = $this->taggerObject->add($tag, $lang, $description);\n    }\n\n    if (!$id_tag) {\n      throw new Exception(X::_(\"Impossible to create the tag %s\", $tag));\n    }\n\n    return $this->db->insert(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
+            "code": "function(string $id_element, string $tag, string $lang = '', string $description = '')\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if ($tmp = $this->taggerObject->get($tag, $lang)) {\n      $id_tag = $tmp['id'];\n    }\n    else {\n      $id_tag = $this->taggerObject->add($tag, $lang, $description);\n    }\n\n    if (!$id_tag) {\n      throw new Exception(X::_(\"Impossible to create the tag %s\", $tag));\n    }\n\n    return $this->db->insertIgnore(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
             "startLine": 125,
             "endLine": 147,
             "isDeprecated": false,
@@ -3741,7 +3741,7 @@
                     "type": "string",
                     "required": false,
                     "has_default": true,
-                    "default": null,
+                    "default": "",
                     "default_name": ""
                 },
                 {

@@ -226,7 +226,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $tag, string $lang = NULL, string $description = '')\n  {\n    $table = $this->class_cfg['table'];\n    $cf = $this->class_cfg['arch']['tags'];\n    if ($this->db->insert(\n      $table,\n      [\n        $cf['tag'] => $tag,\n        $cf['lang'] => $lang ?: $this->lang,\n        $cf['description'] => $description\n      ]\n    )) {\n      return $this->db->lastId();\n    }\n\n    return null;\n  }",
+            "code": "function(string $tag, string $lang = NULL, string $description = '')\n  {\n    $table = $this->class_cfg['table'];\n    $cf = $this->class_cfg['arch']['tags'];\n    if ($this->db->insertIgnore(\n      $table,\n      [\n        $cf['tag'] => $tag,\n        $cf['lang'] => $lang ?: $this->lang,\n        $cf['description'] => $description\n      ]\n    )) {\n      return $this->db->lastId();\n    }\n\n    return null;\n  }",
             "startLine": 102,
             "endLine": 118,
             "isDeprecated": false,

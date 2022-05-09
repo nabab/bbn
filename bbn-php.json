@@ -4851,7 +4851,7 @@
                 "value": "Medias",
                 "text": "Medias",
                 "url": "bbn-php\/doc\/class\/Appui\/Medias",
-                "lastmod": 1652020185,
+                "lastmod": 1652064811,
                 "desc": "",
                 "items": [
                     {
@@ -4859,7 +4859,7 @@
                         "class": "Appui\/Medias",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/__construct",
                         "desc": ""
                     },
@@ -4868,7 +4868,7 @@
                         "class": "Appui\/Medias",
                         "text": "browse",
                         "value": "browse",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/browse",
                         "desc": "Gets an array of medias."
                     },
@@ -4877,7 +4877,7 @@
                         "class": "Appui\/Medias",
                         "text": "browseByGroup",
                         "value": "browseByGroup",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/browseByGroup",
                         "desc": ""
                     },
@@ -4886,7 +4886,7 @@
                         "class": "Appui\/Medias",
                         "text": "count",
                         "value": "count",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/count",
                         "desc": ""
                     },
@@ -4895,7 +4895,7 @@
                         "class": "Appui\/Medias",
                         "text": "delete",
                         "value": "delete",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/delete",
                         "desc": "Deletes the given media"
                     },
@@ -4904,7 +4904,7 @@
                         "class": "Appui\/Medias",
                         "text": "getImageUrl",
                         "value": "getImageUrl",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getImageUrl",
                         "desc": ""
                     },
@@ -4913,7 +4913,7 @@
                         "class": "Appui\/Medias",
                         "text": "getMedia",
                         "value": "getMedia",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMedia",
                         "desc": "Returns the object of the media"
                     },
@@ -4922,7 +4922,7 @@
                         "class": "Appui\/Medias",
                         "text": "getMediaPath",
                         "value": "getMediaPath",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getMediaPath",
                         "desc": "Returns the path of the given id_media"
                     },
@@ -4931,7 +4931,7 @@
                         "class": "Appui\/Medias",
                         "text": "getPath",
                         "value": "getPath",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getPath",
                         "desc": ""
                     },
@@ -4940,7 +4940,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbPath",
                         "value": "getThumbPath",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbPath",
                         "desc": "Returns the path to the img for the given $path and size"
                     },
@@ -4949,7 +4949,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbsName",
                         "value": "getThumbsName",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsName",
                         "desc": "Returns the name of the thumb file corresponding to the given name and size"
                     },
@@ -4958,7 +4958,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbsPath",
                         "value": "getThumbsPath",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsPath",
                         "desc": "If the thumbs files exists for this path it returns an array of the the thumbs filename"
                     },
@@ -4967,7 +4967,7 @@
                         "class": "Appui\/Medias",
                         "text": "getThumbsSizes",
                         "value": "getThumbsSizes",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/getThumbsSizes",
                         "desc": ""
                     },
@@ -4976,7 +4976,7 @@
                         "class": "Appui\/Medias",
                         "text": "insert",
                         "value": "insert",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/insert",
                         "desc": "Adds a new media"
                     },
@@ -4985,7 +4985,7 @@
                         "class": "Appui\/Medias",
                         "text": "isImage",
                         "value": "isImage",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/isImage",
                         "desc": "Returns true if the given path is an image"
                     },
@@ -4994,7 +4994,7 @@
                         "class": "Appui\/Medias",
                         "text": "removeThumbs",
                         "value": "removeThumbs",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/removeThumbs",
                         "desc": "Remove the thumbs files"
                     },
@@ -5003,7 +5003,7 @@
                         "class": "Appui\/Medias",
                         "text": "replaceContent",
                         "value": "replaceContent",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/replaceContent",
                         "desc": "Replaces the content of the media"
                     },
@@ -5012,7 +5012,7 @@
                         "class": "Appui\/Medias",
                         "text": "setDescription",
                         "value": "setDescription",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/setDescription",
                         "desc": "Sets the description of the media"
                     },
@@ -5021,7 +5021,7 @@
                         "class": "Appui\/Medias",
                         "text": "setImageRoot",
                         "value": "setImageRoot",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/setImageRoot",
                         "desc": ""
                     },
@@ -5030,7 +5030,7 @@
                         "class": "Appui\/Medias",
                         "text": "setTitle",
                         "value": "setTitle",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/setTitle",
                         "desc": "Sets the title of the media"
                     },
@@ -5039,7 +5039,7 @@
                         "class": "Appui\/Medias",
                         "text": "update",
                         "value": "update",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/update",
                         "desc": "updates the title or the name or the title of the given media at the level of the file and database"
                     },
@@ -5048,7 +5048,7 @@
                         "class": "Appui\/Medias",
                         "text": "updateContent",
                         "value": "updateContent",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/updateContent",
                         "desc": "Updates the content of the media when it's deleted and replaced in the bbn-upload"
                     },
@@ -5057,7 +5057,7 @@
                         "class": "Appui\/Medias",
                         "text": "updateDb",
                         "value": "updateDb",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/updateDb",
                         "desc": "Updates the media on the databases"
                     },
@@ -5066,7 +5066,7 @@
                         "class": "Appui\/Medias",
                         "text": "zip",
                         "value": "zip",
-                        "lastmod": 1652020185,
+                        "lastmod": 1652064811,
                         "url": "bbn-php\/doc\/method\/Appui\/Medias\/zip",
                         "desc": ""
                     }
@@ -6536,7 +6536,7 @@
                 "value": "Tag",
                 "text": "Tag",
                 "url": "bbn-php\/doc\/class\/Appui\/Tag",
-                "lastmod": 1639280106,
+                "lastmod": 1652058635,
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
@@ -6544,7 +6544,7 @@
                         "class": "Appui\/Tag",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/__construct",
                         "desc": ""
                     },
@@ -6553,7 +6553,7 @@
                         "class": "Appui\/Tag",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/add",
                         "desc": "Adds a new tag."
                     },
@@ -6562,7 +6562,7 @@
                         "class": "Appui\/Tag",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/get",
                         "desc": ""
                     },
@@ -6571,7 +6571,7 @@
                         "class": "Appui\/Tag",
                         "text": "getAll",
                         "value": "getAll",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/getAll",
                         "desc": ""
                     },
@@ -6580,7 +6580,7 @@
                         "class": "Appui\/Tag",
                         "text": "getById",
                         "value": "getById",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/getById",
                         "desc": ""
                     },
@@ -6589,7 +6589,7 @@
                         "class": "Appui\/Tag",
                         "text": "remove",
                         "value": "remove",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/remove",
                         "desc": ""
                     },
@@ -6598,7 +6598,7 @@
                         "class": "Appui\/Tag",
                         "text": "setDescription",
                         "value": "setDescription",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/setDescription",
                         "desc": ""
                     },
@@ -6607,7 +6607,7 @@
                         "class": "Appui\/Tag",
                         "text": "setLang",
                         "value": "setLang",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/setLang",
                         "desc": ""
                     },
@@ -6616,7 +6616,7 @@
                         "class": "Appui\/Tag",
                         "text": "setTag",
                         "value": "setTag",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058635,
                         "url": "bbn-php\/doc\/method\/Appui\/Tag\/setTag",
                         "desc": ""
                     }
@@ -14407,7 +14407,7 @@
                         "value": "Tagger",
                         "text": "Tagger",
                         "url": "bbn-php\/doc\/trait\/Models\/Tts\/Tagger",
-                        "lastmod": 1639280106,
+                        "lastmod": 1652058690,
                         "desc": "Created by PhpStorm.",
                         "items": [
                             {
@@ -14415,7 +14415,7 @@
                                 "class": "Models\/Tts\/Tagger",
                                 "text": "addTag",
                                 "value": "addTag",
-                                "lastmod": 1639280106,
+                                "lastmod": 1652058690,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Tagger\/addTag",
                                 "desc": ""
                             },
@@ -14424,7 +14424,7 @@
                                 "class": "Models\/Tts\/Tagger",
                                 "text": "getTags",
                                 "value": "getTags",
-                                "lastmod": 1639280106,
+                                "lastmod": 1652058690,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Tagger\/getTags",
                                 "desc": ""
                             },
@@ -14433,7 +14433,7 @@
                                 "class": "Models\/Tts\/Tagger",
                                 "text": "removeTag",
                                 "value": "removeTag",
-                                "lastmod": 1639280106,
+                                "lastmod": 1652058690,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Tagger\/removeTag",
                                 "desc": ""
                             },
@@ -14442,7 +14442,7 @@
                                 "class": "Models\/Tts\/Tagger",
                                 "text": "removeTags",
                                 "value": "removeTags",
-                                "lastmod": 1639280106,
+                                "lastmod": 1652058690,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Tagger\/removeTags",
                                 "desc": ""
                             },
@@ -14451,7 +14451,7 @@
                                 "class": "Models\/Tts\/Tagger",
                                 "text": "setTags",
                                 "value": "setTags",
-                                "lastmod": 1639280106,
+                                "lastmod": 1652058690,
                                 "url": "bbn-php\/doc\/method\/Models\/Tts\/Tagger\/setTags",
                                 "desc": "Undocumented function"
                             }
