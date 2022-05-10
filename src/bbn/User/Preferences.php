@@ -1768,7 +1768,7 @@ class Preferences extends bbn\Models\Cls\Db
       $i = 0;
       foreach ($bits as $b) {
         if ($b['items']) {
-          $i += $this->deleteSubBits($b['id'], $id_user_option);
+          $i += $this->deleteSubBits($b['items'], $id_user_option);
         }
 
         $i += (int)$this->deleteBit($b['id']);
