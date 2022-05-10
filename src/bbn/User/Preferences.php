@@ -1792,7 +1792,7 @@ class Preferences extends bbn\Models\Cls\Db
     if (\bbn\Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
       $tree = $this->getTree($id_user_option);
       $i = 0;
-      if ($tree && empty($tree['items'])) {
+      if ($tree && !empty($tree['items'])) {
         foreach ($tree['items'] as $b) {
           $this->deleteSubBits($b['id'], $id_user_option);
           $i += (int)$this->deleteBit($b['id']);
