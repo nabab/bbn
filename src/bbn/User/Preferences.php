@@ -1752,13 +1752,31 @@ class Preferences extends bbn\Models\Cls\Db
   public function deleteBit(string $id): ?int
   {
     if (\bbn\Str::isUid($id)) {
-      return $this->db->delete(
+      return $this->db->deleteIgnore(
           $this->class_cfg['tables']['user_options_bits'],
           [$this->class_cfg['arch']['user_options_bits']['id'] => $id]
       );
     }
 
     return null;
+  }
+
+
+  protected function deleteSubBits(array $bits, string $id_user_option): int
+  {
+    if (\bbn\Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
+      $i = 0;
+      foreach ($bits as $b) {
+        if ($b['items']) {
+          $i += $this->deleteSubBits($b['id'], $id_user_option);
+        }
+
+        $i += (int)$this->deleteBit($b['id']);
+      }
+      return $i;
+    }
+
+    throw new Exception(X::_("Impossible to get the user optin"));
   }
 
 
@@ -1772,9 +1790,13 @@ class Preferences extends bbn\Models\Cls\Db
   public function deleteBits(string $id_user_option): ?int
   {
     if (\bbn\Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
+      $tree = $this->getTree($id_user_option);
       $i = 0;
-      foreach ($this->getBits($id_user_option) as $b) {
-        $i += (int)$this->deleteBit($b['id']);
+      if ($tree && empty($tree['items'])) {
+        foreach ($tree['items'] as $b) {
+          $this->deleteSubBits($b['id'], $id_user_option);
+          $i += (int)$this->deleteBit($b['id']);
+        }
       }
 
       return $i;
