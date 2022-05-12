@@ -1126,10 +1126,10 @@ class Note extends bbn\Models\Cls\Db
           'value' => 0,
         ]],
         'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-        'order' => [[
+        'order' => empty($cfg['order']) ? [[
           'field' => 'last_edit',
           'dir' => 'DESC',
-        ]],
+        ]] : $cfg['order'],
       ];
       if (!empty($cfg['fields'])) {
         $grid_cfg['fields'] = bbn\X::mergeArrays($grid_cfg['fields'], $cfg['fields']);
