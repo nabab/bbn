@@ -857,7 +857,7 @@ class Appui
     $st          = strtolower(Str::genpwd(4));
     foreach ($tables as $table => $structure) {
       foreach ($structure['keys'] as $k => $cfg) {
-        if (!empty($cfg['constraint'])) {
+        if (!empty($cfg['ref_column'])) {
           ++$i;
           $tables[$table]['keys'][$k]['constraint'] = "bbn_constraint_{$st}_{$i}";
         }
@@ -1040,7 +1040,7 @@ class Appui
     $st     = strtolower(Str::genpwd(4));
     foreach ($tables as $table => $structure) {
       foreach ($structure['keys'] as $k => $cfg) {
-        if (!empty($cfg['constraint'])) {
+        if (!empty($cfg['ref_column'])) {
           ++$i;
           $tables[$table]['keys'][$k]['constraint'] = "bbn_constraint_{$st}_{$i}";
         }
