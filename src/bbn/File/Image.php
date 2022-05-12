@@ -470,6 +470,10 @@ class Image extends bbn\File
      */
   public function getWidth()
   {
+    if ($this->w) {
+      return $this->w;
+    }
+
     if ($this->test()) {
       if (isset($this->w)) {
         return $this->w;
@@ -493,6 +497,10 @@ class Image extends bbn\File
      */
   public function getHeight()
   {
+    if ($this->h) {
+      return $this->h;
+    }
+
     if ($this->test()) {
       if (isset($this->h)) {
         return $this->h;

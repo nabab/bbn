@@ -998,7 +998,12 @@ class Medias extends bbn\Models\Cls\Db
       $data['is_image'] = $this->isImage($full_path);
       if ($data['is_image']) {
         $data['thumbs'] = $this->getThumbsSizes($data);
-        if ($width) {
+        $img = new \bbn\File\Image($full_path);
+        $data['dimensions'] = [
+          'w' => $img->getWidth(),
+          'h' => $img->getHeight()
+        ];
+        if ($width && ($width < $img->getWidth())) {
           foreach ($data['thumbs'] as $size) {
             if ($size >= $width) {
               $dot = strrpos($data['file'], '.');
