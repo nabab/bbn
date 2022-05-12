@@ -192,7 +192,8 @@ class Project extends bbn\Models\Cls\Db
           'id_option' => $rep['id'],
           'path' => $this->getRootPath($rep['name']),
           'code' => $rep['code'],
-          'language' => $rep['language'] ?? '',
+          'text' => $rep['text'],
+          'language' => $rep['language'] ?? ''
         ];
       }
     }

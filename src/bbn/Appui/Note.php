@@ -1050,6 +1050,8 @@ class Note extends bbn\Models\Cls\Db
       /** @var bbn\Db $db */
       $db       = &$this->db;
       $cf       = &$this->class_cfg;
+      $opt      = Option::getInstance();
+      $cfo      = $opt->getClassCfg();
       $grid_cfg = [
         'table' => $cf['table'],
         'fields' => [
@@ -1057,6 +1059,7 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($this->fields['id_parent'], $cf['table']),
           $db->cfn($this->fields['id_alias'], $cf['table']),
           $db->cfn($this->fields['id_type'], $cf['table']),
+          $db->cfn($this->fields['id_option'], $cf['table']),
           $db->cfn($this->fields['mime'], $cf['table']),
           $db->cfn($this->fields['lang'], $cf['table']),
           $db->cfn($this->fields['private'], $cf['table']),
@@ -1064,34 +1067,24 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($this->fields['pinned'], $cf['table']),
           $db->cfn($this->fields['creator'], $cf['table']),
           $db->cfn($this->fields['active'], $cf['table']),
-          'last_version.' . $cf['arch']['versions']['excerpt'],
+          $db->cfn($cf['arch']['versions']['version'], $cf['tables']['versions']),
+          $db->cfn($cf['arch']['versions']['title'], $cf['tables']['versions']),
+          $db->cfn($cf['arch']['versions']['excerpt'], $cf['tables']['versions']),
+          $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
           'first_version.' . $cf['arch']['versions']['creation'],
-          'last_version.' . $cf['arch']['versions']['title'],
-          'last_version.' . $cf['arch']['versions']['id_user'],
-          'last_edit' => 'last_version.' . $cf['arch']['versions']['creation'],
+          'last_edit' => $db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions']),
+          'option_name' => $db->cfn($cfo['arch']['options']['text'], $cfo['table'])
         ],
         'join' => [[
           'table' => $cf['tables']['versions'],
-          'alias' => 'versions',
           'on' => [
             'logic' => 'AND',
             'conditions' => [[
-              'field' => 'versions.' . $cf['arch']['versions']['id_note'],
+              'field' => $db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions']),
               'operator' => '=',
-              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            ]],
-          ],
-        ], [
-          'table' => $cf['tables']['versions'],
-          'alias' => 'last_version',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'last_version.' . $cf['arch']['versions']['id_note'],
-              'operator' => '=',
-              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
+              'exp' => $db->cfn($this->fields['id'], $cf['table'])
             ], [
-              'field' => 'last_version.' . $cf['arch']['versions']['latest'],
+              'field' => $db->cfn($cf['arch']['versions']['latest'], $cf['tables']['versions']),
               'operator' => '=',
               'value' => 1
             ]],
@@ -1109,6 +1102,17 @@ class Note extends bbn\Models\Cls\Db
               'field' => 'first_version.' . $cf['arch']['versions']['version'],
               'operator' => '=',
               'value' => 1,
+            ]],
+          ],
+        ], [
+          'table' => $cfo['tables']['options'],
+          'type' => 'left',
+          'on' => [
+            'logic' => 'AND',
+            'conditions' => [[
+              'field' => $db->cfn($cf['arch']['notes']['id_option'], $cf['table']),
+              'operator' => '=',
+              'exp' => $db->cfn($cfo['arch']['options']['id'], $cfo['tables']['options'], true),
             ]],
           ],
         ]],
