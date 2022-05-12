@@ -1071,7 +1071,7 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($cf['arch']['versions']['title'], $cf['tables']['versions']),
           $db->cfn($cf['arch']['versions']['excerpt'], $cf['tables']['versions']),
           $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
-          'first_version.' . $cf['arch']['versions']['creation'],
+          'creation' => 'first_version.' . $cf['arch']['versions']['creation'],
           'last_edit' => $db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions']),
           'option_name' => $db->cfn($cfo['arch']['options']['text'], $cfo['table'])
         ],
@@ -1125,11 +1125,7 @@ class Note extends bbn\Models\Cls\Db
           'operator' => '=',
           'value' => 0,
         ]],
-        'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-        'order' => empty($cfg['order']) ? [[
-          'field' => 'last_edit',
-          'dir' => 'DESC',
-        ]] : $cfg['order'],
+        'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
       ];
       if (!empty($cfg['fields'])) {
         $grid_cfg['fields'] = bbn\X::mergeArrays($grid_cfg['fields'], $cfg['fields']);
