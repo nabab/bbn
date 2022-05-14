@@ -779,6 +779,10 @@ class Appui
 
     /** @var Appui\Option */
     $o = $this->getOption();
+    if (!is_dir($this->libPath() . "/$name")) {
+      mkdir($this->appPath() . "plugins/$name");
+    }
+
     if (substr($name, 0, 6) === 'appui-') {
       $name   = substr($name, 6);
       $params = ['appui'];
