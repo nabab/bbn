@@ -1287,8 +1287,8 @@ class System extends bbn\Models\Cls\Basic
                 }
                 if ($has_ext) {
                   $ex = Str::fileExt($f, true);
-                  $tmp['ext'] = $is_dir ? '' : $ex[0];
-                  $tmp['basename'] = $ex[1];
+                  $tmp['ext'] = $is_dir ? '' : $ex[1];
+                  $tmp['basename'] = $ex[0];
                 }
               }
               else {
