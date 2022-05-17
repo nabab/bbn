@@ -454,18 +454,10 @@ class Task extends bbn\Models\Cls\Db
       ], ['chrono' => 'DESC']);
       $info['roles'] = $this->infoRoles($id);
       $info['notes'] = $with_comments ? $this->getComments($id) : $this->getCommentsIds($id);
-      $info['children'] = $this->db->rselectAll('bbn_tasks', [], ['id_parent' => $id, 'active' => 1]);
+      $info['children'] = $this->getChildren($id);
       $info['aliases'] = $this->db->rselectAll('bbn_tasks', ['id', 'title'], ['id_alias' => $id, 'active' => 1]);
       $info['num_children'] = \count($info['children']);
-      if ( $info['num_children'] ){
-        $info['has_children'] = 1;
-        foreach ( $info['children'] as $i => $c ){
-          $info['children'][$i]['num_children'] = $this->db->count('bbn_tasks', ['id_parent' => $c['id'], 'active' => 1]);
-        }
-      }
-      else{
-        $info['has_children'] = false;
-      }
+      $info['has_children'] = !empty($info['num_children']);
       $info['reference'] = false;
       if ( $this->references ){
         foreach ( $this->references as $table => $ref ){
@@ -480,9 +472,25 @@ class Task extends bbn\Models\Cls\Db
           }
         }
       }
+      if (!empty($info['id_parent'])) {
+        $info['parent'] = $this->info($info['id_parent'], $with_comments);
+      }
       return $info;
     }
   }
+
+  public function getChildren(string $id): array
+  {
+    if ($children = $this->db->rselectAll('bbn_tasks', [], ['id_parent' => $id, 'active' => 1], ['creation_date' => 'DESC'])) {
+      foreach ($children as $i => $c) {
+        $children[$i]['num_children'] = $this->db->count('bbn_tasks', ['id_parent' => $c['id'], 'active' => 1]);
+        $children[$i]['roles'] = $this->infoRoles($c['id']);
+      }
+      return $children;
+    }
+    return [];
+  }
+
   public function getState($id){
     if ( $this->exists($id) ){
       return $this->db->selectOne('bbn_tasks', 'state', ['id' => $id]);
