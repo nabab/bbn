@@ -181,6 +181,50 @@ class Menu extends bbn\Models\Cls\Basic
 
 
   /**
+   * Adds an user'shortcut from a router
+   *
+   * @param string $url An URL to append to the permission's URL
+   * @param string $text The text to show in the shortcut
+   * @param string $icon The icon to show in the shortcut
+   * @return string|null
+   */
+  public function addShortcutByUrl(string $url, string $text, string $icon): ?string
+  {
+    if ($info = $this->perm->fromPathInfo($url)) {
+      $id_option = $this->fromPath('shortcuts');
+      $c = $this->pref->getClassCfg();
+      $arch = $c['arch']['user_options_bits'];
+      if ($id_menu = $this->pref->getByOption($id_option)) {
+        $id_menu = $id_menu['id'];
+      }
+      else {
+        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => X::_('Shortcuts')]);
+      }
+
+      if (!empty($id_menu)) {
+        $shortcuts = $this->pref->getBits($id_menu, false, false);
+        if (X::getRow($shortcuts, [
+          'id_option' => $info['id'],
+          'url' => $info['param']
+        ])) {
+          return null;
+        }
+
+        return $this->pref->addBit($id_menu, [
+          $arch['id_option'] => $info['id'],
+          $arch['text'] => $text,
+          'url' => $info['param'],
+          'icon' => $icon,
+          $arch['num'] => $this->pref->nextBitNum($id_menu) ?: 1
+        ]);
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
    * Removes an user'shortcut
    *
    * @param string $id The shortcut's ID
@@ -209,11 +253,14 @@ class Menu extends bbn\Models\Cls\Basic
       $links = $this->pref->getBits($menu['id']);
       $res   = [];
       foreach ($links as $link){
-        if (($url = $this->toPath($link['id_option']))) {
+        if (empty($link['id_option'])) {
+          $this->pref->deleteBit($link['id']);
+        }
+        elseif ($url = $this->toPath($link['id_option'])) {
           $res[] = [
             'id' => $link['id'],
             'id_option' => $link['id_option'],
-            'url' => $url,
+            'url' => $url . (empty($link['url']) ? '' : '/' . $link['url']),
             'text' => $link['text'],
             'icon' => $link['icon'],
             'num' => $link['num']

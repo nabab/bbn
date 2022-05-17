@@ -122,6 +122,39 @@ class Appui
 
 
   /**
+   * Returns all the names of the constant according to this class configuration
+   *
+   * @return array
+   */
+  public static function getConstantNames(): array
+  {
+    $res = [];
+    foreach (self::$vars as $v) {
+      $res[] = 'BBN_' . strtoupper($v);
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Check that all the constants are defined to this class configuration
+   *
+   * @return bool
+   */
+  public static function checkConstantNamesExist(): bool
+  {
+    foreach (self::getConstantNames() as $v) {
+      if (!defined($v)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
+  /**
    * Unsets all the object created for the current environment if any
    *
    * @return void
@@ -891,19 +924,24 @@ class Appui
   {
     if (!$this->_dbFilesContent) {
       $routes   = $this->getRoutes();
-      $lib_path = $this->libPath();
       $tables   = [];
       foreach ($routes['root'] as $url => $plugin) {
-        $path = $lib_path.'bbn/'.$plugin['name'].'/src/cfg/';
-        if ($this->_currentFs->exists($path.'database.json')) {
-          if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
-            foreach ($list as $t => $it) {
-              $tables[$t] = $it;
+        $fn = $plugin['root'] . 'Path';
+        if (method_exists($this, $fn)) {
+          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          if ($this->_currentFs->exists($path.'database.json')) {
+            if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
+              foreach ($list as $t => $it) {
+                $tables[$t] = $it;
+              }
+            }
+            else {
+              throw new Exception(X::_("Unreadable database file in plugin %s", $plugin['name']));
             }
           }
-          else {
-            throw new Exception(X::_("Unreadable database file in plugin %s", $plugin['name']));
-          }
+        }
+        else {
+          throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
         }
       }
 
@@ -917,6 +955,43 @@ class Appui
   /**
    * Returns an array of tables with their structures from the database.json files in all plugins.
    *
+   * @return array
+   */
+  public function getStructureFilesContent(): array
+  {
+    if (!$this->_structureFilesContent) {
+      $routes   = $this->getRoutes();
+      $tables   = [];
+      foreach ($routes['root'] as $url => $plugin) {
+        $fn = $plugin['root'] . 'Path';
+        if (method_exists($this, $fn)) {
+          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          if ($this->_currentFs->exists($path.'database.json')) {
+            if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
+              foreach ($list as $t => $it) {
+                $tables[$t] = $it;
+              }
+            }
+            else {
+              throw new Exception(X::_("Unreadable database file in plugin %s", $plugin['name']));
+            }
+          }
+        }
+        else {
+          throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
+        }
+      }
+
+      $this->_structureFilesContent = $tables;
+    }
+
+    return $this->_structureFilesContent;
+  }
+
+
+  /**
+   * Returns an array of tables with their structures from the database.json files in all plugins.
+   *
    * @todo The options files need to be dispatched again through the plugins
    * @return array
    */
@@ -924,26 +999,31 @@ class Appui
   {
     if (!$this->_optionFilesContent) {
       $routes   = $this->getRoutes();
-      $lib_path = $this->libPath();
       $options  = [];
       foreach ($routes['root'] as $url => $plugin) {
-        $path = $lib_path.'bbn/'.$plugin['name'].'/src/cfg/';
-        if (('appui-core' !== $plugin['name'])
-            && ('appui-options' !== $plugin['name'])
-            && $this->_currentFs->exists($path.'nononononono.json')
-            /* && file_exists(BBN_LIB_PATH.'bbn/'.$p.'/src/cfg/options.json') */
-        ) {
-          if ($list = $this->_currentFs->decodeContents($path.'options.json', 'json', true)) {
-            if (X::isAssoc($list)) {
-              $options[] = $list;
+        $fn = $plugin['root'] . 'Path';
+        if (method_exists($this, $fn)) {
+          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          if (('appui-core' !== $plugin['name'])
+              && ('appui-options' !== $plugin['name'])
+              && $this->_currentFs->exists($path.'options.json')
+              /* && file_exists(BBN_LIB_PATH.'bbn/'.$p.'/src/cfg/options.json') */
+          ) {
+            if ($list = $this->_currentFs->decodeContents($path.'options.json', 'json', true)) {
+              if (X::isAssoc($list)) {
+                $options[] = $list;
+              }
+              else {
+                $options = array_merge($options, $list);
+              }
             }
             else {
-              $options = array_merge($options, $list);
+              throw new Exception(X::_("The options file in %s is corrupted", $plugin['name']));
             }
           }
-          else {
-            throw new Exception(X::_("The options file in %s is corrupted", $plugin['name']));
-          }
+        }
+        else {
+          throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
         }
       }
 
@@ -963,22 +1043,30 @@ class Appui
   {
     if (!$this->_permissionFilesContent) {
       $routes   = $this->getRoutes();
-      $lib_path = $this->libPath();
       $perms    = [];
       foreach ($routes['root'] as $url => $plugin) {
-        $path = $lib_path.'bbn/'.$plugin['name'].'/src/cfg/';
-        if ($this->_currentFs->exists($path.'permissions.json')) {
-          if ($list = $this->_currentFs->decodeContents($path.'permissions.json', 'json', true)) {
-            if (X::isAssoc($list)) {
-              $perms[] = $list;
+        $fn = $plugin['root'] . 'Path';
+        if (method_exists($this, $fn)) {
+          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          if ($this->_currentFs->exists($path.'permissions.json')) {
+            if ($list = $this->_currentFs->decodeContents($path.'permissions.json', 'json', true)) {
+              if (X::isAssoc($list)) {
+                $perms[] = $list;
+              }
+              else {
+                $perms = array_merge($perms, $list);
+              }
             }
             else {
-              $perms = array_merge($perms, $list);
+              throw new Exception(X::_("The permission file in %s is corrupted", $plugin['name']));
             }
           }
           else {
-            throw new Exception(X::_("The permission file in %s is corrupted", $plugin['name']));
+            throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
           }
+        }
+        else {
+          throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
         }
       }
 
@@ -1001,19 +1089,24 @@ class Appui
       $lib_path = $this->libPath();
       $menus    = [];
       foreach ($routes['root'] as $url => $plugin) {
-        if ($this->_currentFs->exists($lib_path.'bbn/'.$plugin['name'].'/src/cfg/menu.json')) {
-          $path = $lib_path.'bbn/'.$plugin['name'].'/src/cfg/';
+        $fn = $plugin['root'] . 'Path';
+        if (method_exists($this, $fn)) {
+          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          if ($this->_currentFs->exists($path.$plugin['path'].'/src/cfg/menu.json')) {
+            if ($list = $this->_currentFs->decodeContents($path.'menu.json', 'json', true)) {
+              foreach ($list['items'] as &$it) {
+                $it['link'] = $url.'/'.$it['link'];
+              }
 
-          if ($list = $this->_currentFs->decodeContents($path.'menu.json', 'json', true)) {
-            foreach ($list['items'] as &$it) {
-              $it['link'] = $url.'/'.$it['link'];
+              unset($it);
+              $menus[$plugin['name']] = $list;
             }
-
-            unset($it);
-            $menus[$plugin['name']] = $list;
+            else {
+              throw new Exception(X::_("The database file in %s is corrupted", $plugin['name']));
+            }
           }
           else {
-            throw new Exception(X::_("The database file in %s is corrupted", $plugin['name']));
+            throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
           }
         }
       }

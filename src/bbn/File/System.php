@@ -1285,7 +1285,13 @@ class System extends bbn\Models\Cls\Basic
                 if ($has_children && $is_dir) {
                   $tmp['num'] = count($this->getFiles($path . '/' . $f, true, $hidden));
                 }
-              } else {
+                if ($has_ext) {
+                  $ex = Str::fileExt($f['name'], true);
+                  $tmp['ext'] = $f['type'] === 'dir' ? '' : $ex[0];
+                  $tmp['basename'] = $ex[1];
+                }
+              }
+              else {
                 $tmp = $file;
               }
 

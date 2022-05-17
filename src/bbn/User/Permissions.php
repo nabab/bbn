@@ -139,9 +139,37 @@ class Permissions extends bbn\Models\Cls\Basic
    * @param string $type The type
    * @return null|string
    */
+  public function fromPathInfo(string $path): ?array
+  {
+    $bits = X::split(trim($path, ' /'), '/');
+    $remain = [];
+    while ($path) {
+      if ($id = $this->fromPath($path)) {
+        return [
+          'id'    => $id,
+          'path'  => $path,
+          'param' => X::join($remain, '/')
+        ];
+      }
+      array_unshift($remain, array_pop($bits));
+      $path = X::join($bits, '/');
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the option's ID corresponds to the given path.
+   *
+   * @todo The type shouldn't always be access as it's a path?
+   *
+   * @param string $path The path
+   * @param string $type The type
+   * @return null|string
+   */
   public function fromPath(string $path, $type = 'access', $create = false): ?string
   {
-    $opath  = $path;
     $parent = null;
     $root   = false;
     if (($type === 'access') && $this->plugins && !empty($path)) {
@@ -182,13 +210,14 @@ class Permissions extends bbn\Models\Cls\Basic
     $parts  = explode('/', trim($path, '/'));
     $parent = $root;
 
+    $path = '';
     foreach ($parts as $i => $p){
       $is_last = $i === (\count($parts) - 1);
       if (!empty($p)) {
         $prev_parent = $parent;
         // Adds a slash for each bit of the path except the last one
         $parent = $this->opt->fromCode($p.($is_last ? '' : '/'), $prev_parent);
-            // If not found looking for a subpermission
+        // If not found looking for a subpermission
         if (!$parent && !$is_last) {
           $parent = $this->opt->fromCode($p, $prev_parent);
         }
