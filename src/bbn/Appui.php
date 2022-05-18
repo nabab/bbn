@@ -1086,13 +1086,12 @@ class Appui
   {
     if (!$this->_menuFilesContent) {
       $routes   = $this->getRoutes();
-      $lib_path = $this->libPath();
       $menus    = [];
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
-          if ($this->_currentFs->exists($path.$plugin['path'].'/src/cfg/menu.json')) {
+          if ($this->_currentFs->exists($path . 'menu.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'menu.json', 'json', true)) {
               foreach ($list['items'] as &$it) {
                 $it['link'] = $url.'/'.$it['link'];
