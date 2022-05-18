@@ -928,7 +928,7 @@ class Appui
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
           if ($this->_currentFs->exists($path.'database.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
               foreach ($list as $t => $it) {
@@ -965,7 +965,7 @@ class Appui
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
           if ($this->_currentFs->exists($path.'database.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'database.json', 'json', true)) {
               foreach ($list as $t => $it) {
@@ -1003,7 +1003,7 @@ class Appui
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
           if (('appui-core' !== $plugin['name'])
               && ('appui-options' !== $plugin['name'])
               && $this->_currentFs->exists($path.'options.json')
@@ -1047,7 +1047,7 @@ class Appui
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
           if ($this->_currentFs->exists($path.'permissions.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'permissions.json', 'json', true)) {
               if (X::isAssoc($list)) {
@@ -1091,7 +1091,7 @@ class Appui
       foreach ($routes['root'] as $url => $plugin) {
         $fn = $plugin['root'] . 'Path';
         if (method_exists($this, $fn)) {
-          $path = $fn() . $plugin['path'] . '/src/cfg/';
+          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
           if ($this->_currentFs->exists($path.$plugin['path'].'/src/cfg/menu.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'menu.json', 'json', true)) {
               foreach ($list['items'] as &$it) {
