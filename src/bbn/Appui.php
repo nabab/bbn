@@ -1061,9 +1061,6 @@ class Appui
               throw new Exception(X::_("The permission file in %s is corrupted", $plugin['name']));
             }
           }
-          else {
-            throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
-          }
         }
         else {
           throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
@@ -1101,12 +1098,12 @@ class Appui
               $menus[$plugin['name']] = $list;
             }
             else {
-              throw new Exception(X::_("The database file in %s is corrupted", $plugin['name']));
+              throw new Exception(X::_("The menu file in %s is corrupted", $plugin['name']));
             }
           }
-          else {
-            throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
-          }
+        }
+        else {
+          throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
         }
       }
 
