@@ -20,6 +20,7 @@ class GitLab
   use GitLab\User;
   use GitLab\Project;
   use GitLab\Branch;
+  use GitLab\Issue;
 
   /** @var string The access token */
   protected $token;
