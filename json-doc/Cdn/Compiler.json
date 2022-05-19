@@ -18,6 +18,61 @@
     "fileName": "\/Cdn\/Compiler.php",
     "startLine": 33,
     "endLine": 634,
+    "numMethods": 17,
+    "numProperties": 1,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Cdn\\Common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_min_suffixes": [
+            ".min",
+            "-min",
+            ".pack",
+            ".prod"
+        ],
+        "types": {
+            "js": [
+                "js",
+                "ts"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        },
+        "cfg": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "prefix": "",
+        "fpath": "",
+        "furl": ""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Cdn",
+    "shortName": "Compiler",
     "contentConstructor": {
         "file": "bbn\\Cdn\\Compiler",
         "returns": null
@@ -908,61 +963,6 @@
         }
     },
     "constants": null,
-    "numMethods": 17,
-    "numProperties": 1,
-    "numConstants": 0,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Cdn\\Common"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Basic",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "_min_suffixes": [
-            ".min",
-            "-min",
-            ".pack",
-            ".prod"
-        ],
-        "types": {
-            "js": [
-                "js",
-                "ts"
-            ],
-            "css": [
-                "css",
-                "less",
-                "sass",
-                "scss"
-            ],
-            "html": [
-                "html",
-                "php"
-            ],
-            "lang": [
-                "lang"
-            ]
-        },
-        "cfg": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "prefix": "",
-        "fpath": "",
-        "furl": ""
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Cdn",
-    "shortName": "Compiler",
     "summary": "Compile files into single files, using javascript to call CSS when needed.",
     "description": "",
     "description_parts": []

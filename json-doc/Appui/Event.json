@@ -12,6 +12,111 @@
     "fileName": "\/Appui\/Event.php",
     "startLine": 6,
     "endLine": 692,
+    "numMethods": 35,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_events",
+            "tables": {
+                "events": "bbn_events",
+                "recurring": "bbn_events_recurring",
+                "exceptions": "bbn_events_exceptions",
+                "options": "bbn_options"
+            },
+            "arch": {
+                "events": {
+                    "id": "id",
+                    "id_parent": "id_parent",
+                    "id_type": "id_type",
+                    "start": "start",
+                    "end": "end",
+                    "name": "name",
+                    "recurring": "recurring",
+                    "cfg": "cfg"
+                },
+                "recurring": {
+                    "id": "id",
+                    "id_event": "id_event",
+                    "type": "type",
+                    "interval": "interval",
+                    "occurrences": "occurrences",
+                    "until": "until",
+                    "wd": "wd",
+                    "mw": "mw",
+                    "md": "md",
+                    "ym": "ym"
+                },
+                "exceptions": {
+                    "id": "id",
+                    "id_event": "id_event",
+                    "id_user": "id_user",
+                    "creation": "creation",
+                    "day": "day",
+                    "start": "start",
+                    "end": "end",
+                    "rescheduled": "rescheduled",
+                    "deleted": "deleted"
+                },
+                "options": {
+                    "id": "id"
+                }
+            },
+            "extra": {
+                "action": "action",
+                "recurrence": "recurrence",
+                "exception": "exception",
+                "old_start": "old_start",
+                "old_end": "old_end",
+                "exceptions": "exceptions"
+            }
+        },
+        "opt": null,
+        "usr": null,
+        "opt_id": null,
+        "recurrences": [
+            "daily,",
+            "weekly",
+            "monthly",
+            "yearly"
+        ],
+        "weekdays": {
+            "1": "monday",
+            "2": "tuesday",
+            "3": "wednesday",
+            "4": "thursday",
+            "5": "friday",
+            "6": "saturday",
+            "7": "sunday"
+        },
+        "class_cfg": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Event",
     "contentConstructor": {
         "file": "bbn\\Appui\\Event",
         "returns": null
@@ -1653,111 +1758,6 @@
         }
     },
     "constants": null,
-    "numMethods": 35,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_events",
-            "tables": {
-                "events": "bbn_events",
-                "recurring": "bbn_events_recurring",
-                "exceptions": "bbn_events_exceptions",
-                "options": "bbn_options"
-            },
-            "arch": {
-                "events": {
-                    "id": "id",
-                    "id_parent": "id_parent",
-                    "id_type": "id_type",
-                    "start": "start",
-                    "end": "end",
-                    "name": "name",
-                    "recurring": "recurring",
-                    "cfg": "cfg"
-                },
-                "recurring": {
-                    "id": "id",
-                    "id_event": "id_event",
-                    "type": "type",
-                    "interval": "interval",
-                    "occurrences": "occurrences",
-                    "until": "until",
-                    "wd": "wd",
-                    "mw": "mw",
-                    "md": "md",
-                    "ym": "ym"
-                },
-                "exceptions": {
-                    "id": "id",
-                    "id_event": "id_event",
-                    "id_user": "id_user",
-                    "creation": "creation",
-                    "day": "day",
-                    "start": "start",
-                    "end": "end",
-                    "rescheduled": "rescheduled",
-                    "deleted": "deleted"
-                },
-                "options": {
-                    "id": "id"
-                }
-            },
-            "extra": {
-                "action": "action",
-                "recurrence": "recurrence",
-                "exception": "exception",
-                "old_start": "old_start",
-                "old_end": "old_end",
-                "exceptions": "exceptions"
-            }
-        },
-        "opt": null,
-        "usr": null,
-        "opt_id": null,
-        "recurrences": [
-            "daily,",
-            "weekly",
-            "monthly",
-            "yearly"
-        ],
-        "weekdays": {
-            "1": "monday",
-            "2": "tuesday",
-            "3": "wednesday",
-            "4": "thursday",
-            "5": "friday",
-            "6": "saturday",
-            "7": "sunday"
-        },
-        "class_cfg": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Event",
     "summary": "",
     "description": "",
     "description_parts": []

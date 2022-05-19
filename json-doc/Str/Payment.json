@@ -10,6 +10,82 @@
     "fileName": "\/Str\/Payment.php",
     "startLine": 7,
     "endLine": 80,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "regexps": [
+            {
+                "mask": "0000 000000 00000",
+                "regex": "^3[47]\\d[0,13]",
+                "type": "American Express",
+                "icon": "payment-icon-americanexpress"
+            },
+            {
+                "mask": "0000 0000 0000 0000",
+                "regex": "^(?:6011|65\\d[0,2]|64[4-9]\\d?)\\d[0,12]",
+                "type": "Discover",
+                "icon": "payment-icon-discover"
+            },
+            {
+                "mask": "0000 000000 0000",
+                "regex": "^3(?:0([0-5]|9)|[689]\\d?)\\d[0,11]",
+                "type": "Diners Club",
+                "icon": "payment-icon-dinersclub"
+            },
+            {
+                "mask": "0000 0000 0000 0000",
+                "regex": "^(5[1-5]\\d[0,2]|22[2-9]\\d[0,1]|2[3-7]\\d[0,2])\\d[0,12]",
+                "type": "MasterCard",
+                "icon": "payment-icon-mastercard"
+            },
+            {
+                "mask": "0000 000000 00000",
+                "regex": "^(?:2131|1800)\\d[0,11]",
+                "type": "JCB",
+                "icon": "payment-icon-jcb"
+            },
+            {
+                "mask": "0000 0000 0000 0000",
+                "regex": "^(?:35\\d[0,2])\\d[0,12]",
+                "type": "JCB",
+                "icon": "payment-icon-jcb"
+            },
+            {
+                "mask": "0000 0000 0000 0000",
+                "regex": "^(?:5[0678]\\d[0,2]|6304|67\\d[0,2])\\d[0,12]",
+                "type": "Maestro",
+                "icon": "payment-icon-maestro"
+            },
+            {
+                "mask": "0000 0000 0000 0000",
+                "regex": "^4\\d[0,15]",
+                "type": "Visa",
+                "icon": "payment-icon-visa"
+            },
+            {
+                "mask": "0000 0000 0000 0000",
+                "regex": "^62\\d[0,14]",
+                "type": "Unionpay",
+                "icon": "payment-icon-unionpay"
+            }
+        ]
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Str",
+    "shortName": "Payment",
     "contentConstructor": null,
     "methods": {
         "check": {
@@ -152,82 +228,6 @@
         ]
     },
     "constants": null,
-    "numMethods": 2,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "regexps": [
-            {
-                "mask": "0000 000000 00000",
-                "regex": "^3[47]\\d[0,13]",
-                "type": "American Express",
-                "icon": "payment-icon-americanexpress"
-            },
-            {
-                "mask": "0000 0000 0000 0000",
-                "regex": "^(?:6011|65\\d[0,2]|64[4-9]\\d?)\\d[0,12]",
-                "type": "Discover",
-                "icon": "payment-icon-discover"
-            },
-            {
-                "mask": "0000 000000 0000",
-                "regex": "^3(?:0([0-5]|9)|[689]\\d?)\\d[0,11]",
-                "type": "Diners Club",
-                "icon": "payment-icon-dinersclub"
-            },
-            {
-                "mask": "0000 0000 0000 0000",
-                "regex": "^(5[1-5]\\d[0,2]|22[2-9]\\d[0,1]|2[3-7]\\d[0,2])\\d[0,12]",
-                "type": "MasterCard",
-                "icon": "payment-icon-mastercard"
-            },
-            {
-                "mask": "0000 000000 00000",
-                "regex": "^(?:2131|1800)\\d[0,11]",
-                "type": "JCB",
-                "icon": "payment-icon-jcb"
-            },
-            {
-                "mask": "0000 0000 0000 0000",
-                "regex": "^(?:35\\d[0,2])\\d[0,12]",
-                "type": "JCB",
-                "icon": "payment-icon-jcb"
-            },
-            {
-                "mask": "0000 0000 0000 0000",
-                "regex": "^(?:5[0678]\\d[0,2]|6304|67\\d[0,2])\\d[0,12]",
-                "type": "Maestro",
-                "icon": "payment-icon-maestro"
-            },
-            {
-                "mask": "0000 0000 0000 0000",
-                "regex": "^4\\d[0,15]",
-                "type": "Visa",
-                "icon": "payment-icon-visa"
-            },
-            {
-                "mask": "0000 0000 0000 0000",
-                "regex": "^62\\d[0,14]",
-                "type": "Unionpay",
-                "icon": "payment-icon-unionpay"
-            }
-        ]
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Str",
-    "shortName": "Payment",
     "summary": "",
     "description": "",
     "description_parts": []

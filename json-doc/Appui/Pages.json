@@ -13,6 +13,61 @@
     "fileName": "\/Appui\/Pages.php",
     "startLine": 5,
     "endLine": 89,
+    "numMethods": 23,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\References",
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_notes_pages",
+            "tables": {
+                "pages": "bbn_notes_pages"
+            },
+            "arch": {
+                "pages": {
+                    "url": "url",
+                    "id_note": "id_note"
+                }
+            },
+            "errors": {
+                "1": "Note inserting",
+                "2": "Page inserting"
+            }
+        },
+        "opt": null,
+        "opt_id": null,
+        "notes": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "references": null,
+        "references_select": "",
+        "references_join": "",
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Pages",
     "contentConstructor": {
         "file": "bbn\\Appui\\Pages",
         "returns": null
@@ -1126,61 +1181,6 @@
         }
     },
     "constants": null,
-    "numMethods": 23,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\References",
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_notes_pages",
-            "tables": {
-                "pages": "bbn_notes_pages"
-            },
-            "arch": {
-                "pages": {
-                    "url": "url",
-                    "id_note": "id_note"
-                }
-            },
-            "errors": {
-                "1": "Note inserting",
-                "2": "Page inserting"
-            }
-        },
-        "opt": null,
-        "opt_id": null,
-        "notes": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "references": null,
-        "references_select": "",
-        "references_join": "",
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Pages",
     "summary": "",
     "description": "",
     "description_parts": []

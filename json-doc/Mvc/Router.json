@@ -19,6 +19,86 @@
     "fileName": "\/Mvc\/Router.php",
     "startLine": 28,
     "endLine": 1163,
+    "numMethods": 40,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 6,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Mvc\\Common",
+        "bbn\\Models\\Tts\\Retriever"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_controllers": [
+            "cli",
+            "dom",
+            "content",
+            "public",
+            "private"
+        ],
+        "_filetypes": {
+            "model": [
+                "php"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "js": [
+                "js"
+            ],
+            "css": [
+                "css",
+                "less",
+                "scss"
+            ]
+        },
+        "_modes": [
+            "image",
+            "file",
+            "cli",
+            "private",
+            "dom",
+            "public",
+            "model",
+            "html",
+            "js",
+            "css"
+        ],
+        "_known": {
+            "cli": [],
+            "dom": [],
+            "public": [],
+            "private": [],
+            "model": [],
+            "html": [],
+            "js": [],
+            "css": [],
+            "component": []
+        },
+        "retriever_instance": null,
+        "retriever_exists": false,
+        "_textdomains": [],
+        "_mode": null,
+        "_prepath": null,
+        "_root": null,
+        "alt_root": false,
+        "_routes": [],
+        "_mvc": null,
+        "_plugin": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Mvc",
+    "shortName": "Router",
     "contentConstructor": {
         "file": "bbn\\Mvc\\Router",
         "returns": null
@@ -1551,86 +1631,6 @@
         "retriever_exists": true
     },
     "constants": null,
-    "numMethods": 40,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 6,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Mvc\\Common",
-        "bbn\\Models\\Tts\\Retriever"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "_controllers": [
-            "cli",
-            "dom",
-            "content",
-            "public",
-            "private"
-        ],
-        "_filetypes": {
-            "model": [
-                "php"
-            ],
-            "html": [
-                "html",
-                "php"
-            ],
-            "js": [
-                "js"
-            ],
-            "css": [
-                "css",
-                "less",
-                "scss"
-            ]
-        },
-        "_modes": [
-            "image",
-            "file",
-            "cli",
-            "private",
-            "dom",
-            "public",
-            "model",
-            "html",
-            "js",
-            "css"
-        ],
-        "_known": {
-            "cli": [],
-            "dom": [],
-            "public": [],
-            "private": [],
-            "model": [],
-            "html": [],
-            "js": [],
-            "css": [],
-            "component": []
-        },
-        "retriever_instance": null,
-        "retriever_exists": false,
-        "_textdomains": [],
-        "_mode": null,
-        "_prepath": null,
-        "_root": null,
-        "alt_root": false,
-        "_routes": [],
-        "_mvc": null,
-        "_plugin": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Mvc",
-    "shortName": "Router",
     "summary": "",
     "description": "",
     "description_parts": []

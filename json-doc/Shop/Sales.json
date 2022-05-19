@@ -12,6 +12,59 @@
     "fileName": "\/Shop\/Sales.php",
     "startLine": 12,
     "endLine": 148,
+    "numMethods": 22,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "errors": [],
+            "table": "bbn_shop_transactions",
+            "tables": {
+                "transactions": "bbn_shop_transactions"
+            },
+            "arch": {
+                "transactions": {
+                    "id": "id",
+                    "id_cart": "id_cart",
+                    "id_client": "id_client",
+                    "id_main": "id_main",
+                    "total": "total",
+                    "moment": "moment",
+                    "id_address": "id_address",
+                    "payment_type": "payment_type",
+                    "status": "status"
+                }
+            }
+        },
+        "cart": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Shop",
+    "shortName": "Sales",
     "contentConstructor": {
         "file": "bbn\\Shop\\Sales",
         "returns": null
@@ -1109,59 +1162,6 @@
         }
     },
     "constants": null,
-    "numMethods": 22,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "errors": [],
-            "table": "bbn_shop_transactions",
-            "tables": {
-                "transactions": "bbn_shop_transactions"
-            },
-            "arch": {
-                "transactions": {
-                    "id": "id",
-                    "id_cart": "id_cart",
-                    "id_client": "id_client",
-                    "id_main": "id_main",
-                    "total": "total",
-                    "moment": "moment",
-                    "id_address": "id_address",
-                    "payment_type": "payment_type",
-                    "status": "status"
-                }
-            }
-        },
-        "cart": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Shop",
-    "shortName": "Sales",
     "summary": "",
     "description": "",
     "description_parts": []

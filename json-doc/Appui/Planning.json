@@ -12,6 +12,60 @@
     "fileName": "\/Appui\/Planning.php",
     "startLine": 5,
     "endLine": 541,
+    "numMethods": 21,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_hr_planning",
+            "tables": {
+                "planning": "bbn_hr_planning",
+                "staff_events": "bbn_hr_staff_events"
+            },
+            "arch": {
+                "planning": {
+                    "id": "id",
+                    "id_staff": "id_staff",
+                    "id_event": "id_event",
+                    "id_alias": "id_alias",
+                    "alias": "alias"
+                },
+                "staff_events": {
+                    "id_staff": "id_staff",
+                    "id_event": "id_event",
+                    "note": "note",
+                    "status": "status"
+                }
+            }
+        },
+        "db": null,
+        "events": null,
+        "ecfg": null,
+        "options": null,
+        "ocfg": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Planning",
     "contentConstructor": {
         "file": "bbn\\Appui\\Planning",
         "returns": null
@@ -1000,60 +1054,6 @@
         }
     },
     "constants": null,
-    "numMethods": 21,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_hr_planning",
-            "tables": {
-                "planning": "bbn_hr_planning",
-                "staff_events": "bbn_hr_staff_events"
-            },
-            "arch": {
-                "planning": {
-                    "id": "id",
-                    "id_staff": "id_staff",
-                    "id_event": "id_event",
-                    "id_alias": "id_alias",
-                    "alias": "alias"
-                },
-                "staff_events": {
-                    "id_staff": "id_staff",
-                    "id_event": "id_event",
-                    "note": "note",
-                    "status": "status"
-                }
-            }
-        },
-        "db": null,
-        "events": null,
-        "ecfg": null,
-        "options": null,
-        "ocfg": null,
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Planning",
     "summary": "",
     "description": "",
     "description_parts": []

@@ -1,4 +1,5 @@
 <?php
+
 namespace bbn\Appui;
 
 use bbn;
@@ -47,7 +48,7 @@ class Url extends bbn\Models\Cls\Db
   }
 
 
-  public function set(string $url, string $type_url, string $id_url = null) : bool
+  public function set(string $url, string $type_url, string $id_url = null): bool
   {
     if ($id_url && ($url = $this->sanitize($url))) {
       return (bool)$this->update($id_url, [
@@ -73,7 +74,8 @@ class Url extends bbn\Models\Cls\Db
 
   public function addRedirect(string $url, string $id_url): ?string
   {
-    if ($url = $this->sanitize($url)
+    if (
+        $url = $this->sanitize($url)
         && !$this->rselect([$this->fields['url'] => $url])
         && ($cfg = $this->rselect($id_url))
     ) {
@@ -89,7 +91,8 @@ class Url extends bbn\Models\Cls\Db
 
   public function getRedirect(string $url): ?string
   {
-    if (($url = $this->sanitize($url))
+    if (
+        ($url = $this->sanitize($url))
         && ($redirect = $this->selectOne($this->fields['redirect'], [$this->fields['url'] => $url]))
     ) {
       if ($this->selectOne($this->fields['redirect'], [$this->fields['id'] => $redirect])) {
@@ -140,7 +143,7 @@ class Url extends bbn\Models\Cls\Db
       $original = $url;
       if ($followRedirect && ($tmp = $this->getRedirect($url))) {
         $original = $url;
-        $url = $tmp;
+        $url      = $tmp;
       }
 
       if (!$full) {
@@ -208,5 +211,4 @@ class Url extends bbn\Models\Cls\Db
 
     return null;
   }
-
 }

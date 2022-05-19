@@ -12,6 +12,62 @@
     "fileName": "\/Entities\/AbstractLinkType.php",
     "startLine": 11,
     "endLine": 530,
+    "numMethods": 21,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": true,
+    "isFinal": false,
+    "modifiers": 64,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_links",
+            "tables": {
+                "links": "bbn_links",
+                "people": "bbn_people",
+                "addresses": "bbn_addresses",
+                "options": "bbn_options",
+                "entities": "bbn_entities"
+            },
+            "arch": {
+                "links": {
+                    "id": "id",
+                    "id_entity": "id_entity",
+                    "type_link": "type_link",
+                    "id_people": "id_people",
+                    "id_address": "id_address",
+                    "id_option": "id_option",
+                    "cfg": "cfg"
+                },
+                "entities": {
+                    "id": "id",
+                    "name": "nom"
+                }
+            }
+        },
+        "db": null,
+        "entity": null,
+        "options": null,
+        "type": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Entities",
+    "shortName": "AbstractLinkType",
     "contentConstructor": {
         "file": "bbn\\Entities\\AbstractLinkType",
         "returns": null
@@ -883,62 +939,6 @@
         }
     },
     "constants": null,
-    "numMethods": 21,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": true,
-    "isFinal": false,
-    "modifiers": 64,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_links",
-            "tables": {
-                "links": "bbn_links",
-                "people": "bbn_people",
-                "addresses": "bbn_addresses",
-                "options": "bbn_options",
-                "entities": "bbn_entities"
-            },
-            "arch": {
-                "links": {
-                    "id": "id",
-                    "id_entity": "id_entity",
-                    "type_link": "type_link",
-                    "id_people": "id_people",
-                    "id_address": "id_address",
-                    "id_option": "id_option",
-                    "cfg": "cfg"
-                },
-                "entities": {
-                    "id": "id",
-                    "name": "nom"
-                }
-            }
-        },
-        "db": null,
-        "entity": null,
-        "options": null,
-        "type": null,
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Entities",
-    "shortName": "AbstractLinkType",
     "summary": "",
     "description": "",
     "description_parts": []

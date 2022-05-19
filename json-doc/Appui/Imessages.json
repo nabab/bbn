@@ -13,6 +13,69 @@
     "fileName": "\/Appui\/Imessages.php",
     "startLine": 13,
     "endLine": 444,
+    "numMethods": 27,
+    "numProperties": 0,
+    "numConstants": 5,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\References",
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_imessages",
+            "tables": {
+                "imessages": "bbn_imessages",
+                "users": "bbn_imessages_users"
+            },
+            "arch": {
+                "imessages": {
+                    "id": "id",
+                    "id_note": "id_note",
+                    "id_option": "id_option",
+                    "id_user": "id_user",
+                    "id_group": "id_group",
+                    "start": "start",
+                    "end": "end"
+                },
+                "users": {
+                    "id_imessage": "id_imessage",
+                    "id_user": "id_user",
+                    "hidden": "hidden",
+                    "moment": "moment"
+                }
+            }
+        },
+        "id_type": null,
+        "notes": null,
+        "options": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "references": null,
+        "references_select": "",
+        "references_join": "",
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Imessages",
     "contentConstructor": {
         "file": "bbn\\Appui\\Imessages",
         "returns": null
@@ -1307,69 +1370,6 @@
         "id_type": null
     },
     "constants": [],
-    "numMethods": 27,
-    "numProperties": 0,
-    "numConstants": 5,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\References",
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_imessages",
-            "tables": {
-                "imessages": "bbn_imessages",
-                "users": "bbn_imessages_users"
-            },
-            "arch": {
-                "imessages": {
-                    "id": "id",
-                    "id_note": "id_note",
-                    "id_option": "id_option",
-                    "id_user": "id_user",
-                    "id_group": "id_group",
-                    "start": "start",
-                    "end": "end"
-                },
-                "users": {
-                    "id_imessage": "id_imessage",
-                    "id_user": "id_user",
-                    "hidden": "hidden",
-                    "moment": "moment"
-                }
-            }
-        },
-        "id_type": null,
-        "notes": null,
-        "options": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "references": null,
-        "references_select": "",
-        "references_join": "",
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Imessages",
     "summary": "",
     "description": "",
     "description_parts": []

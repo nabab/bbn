@@ -12,6 +12,35 @@
     "fileName": "\/User\/Session.php",
     "startLine": 28,
     "endLine": 367,
+    "numMethods": 19,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 3,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Singleton"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "name": "apst-app",
+        "singleton_instance": null,
+        "singleton_exists": false,
+        "was_opened": false,
+        "once_opened": false,
+        "data": null,
+        "id": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\User",
+    "shortName": "Session",
     "contentConstructor": {
         "file": "bbn\\User\\Session",
         "returns": null
@@ -611,35 +640,6 @@
         "singleton_exists": 1
     },
     "constants": null,
-    "numMethods": 19,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 3,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Singleton"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "name": "apst-app",
-        "singleton_instance": null,
-        "singleton_exists": false,
-        "was_opened": false,
-        "once_opened": false,
-        "data": null,
-        "id": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\User",
-    "shortName": "Session",
     "summary": "",
     "description": "",
     "description_parts": []

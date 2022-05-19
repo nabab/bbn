@@ -29,6 +29,43 @@
     "fileName": "\/Db.php",
     "startLine": 20,
     "endLine": 3294,
+    "numMethods": 154,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 3,
+    "interfaceNames": [
+        "bbn\\Db\\Actions",
+        "Stringable"
+    ],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Cache",
+        "bbn\\Models\\Tts\\Retriever"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "engines": {
+            "mysql": "nf nf-dev-mysql",
+            "pgsql": "nf nf-dev-postgresql",
+            "sqlite": "nf nf-dev-sqllite"
+        },
+        "retriever_instance": null,
+        "retriever_exists": false,
+        "language": null,
+        "engine": null,
+        "_cache_prefix": null,
+        "cache_engine": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "Db",
     "contentConstructor": {
         "file": "bbn\\Db",
         "returns": null
@@ -6758,43 +6795,6 @@
         "retriever_exists": true
     },
     "constants": null,
-    "numMethods": 154,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 3,
-    "interfaceNames": [
-        "bbn\\Db\\Actions",
-        "Stringable"
-    ],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Cache",
-        "bbn\\Models\\Tts\\Retriever"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "engines": {
-            "mysql": "nf nf-dev-mysql",
-            "pgsql": "nf nf-dev-postgresql",
-            "sqlite": "nf nf-dev-sqllite"
-        },
-        "retriever_instance": null,
-        "retriever_exists": false,
-        "language": null,
-        "engine": null,
-        "_cache_prefix": null,
-        "cache_engine": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn",
-    "shortName": "Db",
     "summary": "Half ORM half DB management, the simplest class for data queries.",
     "description": "Hello world!",
     "description_parts": [

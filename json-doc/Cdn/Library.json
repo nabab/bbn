@@ -18,6 +18,57 @@
     "fileName": "\/Cdn\/Library.php",
     "startLine": 213,
     "endLine": 695,
+    "numMethods": 5,
+    "numProperties": 7,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Cdn\\Common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "types": {
+            "js": [
+                "js",
+                "ts"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        },
+        "db": null,
+        "libs": [],
+        "js": [],
+        "css": [],
+        "lang": "en",
+        "theme": false,
+        "vars": [],
+        "prefix": "",
+        "fpath": "",
+        "furl": ""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Cdn",
+    "shortName": "Library",
     "contentConstructor": {
         "file": "bbn\\Cdn\\Library",
         "returns": null
@@ -311,57 +362,6 @@
         }
     },
     "constants": null,
-    "numMethods": 5,
-    "numProperties": 7,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Cdn\\Common"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "types": {
-            "js": [
-                "js",
-                "ts"
-            ],
-            "css": [
-                "css",
-                "less",
-                "sass",
-                "scss"
-            ],
-            "html": [
-                "html",
-                "php"
-            ],
-            "lang": [
-                "lang"
-            ]
-        },
-        "db": null,
-        "libs": [],
-        "js": [],
-        "css": [],
-        "lang": "en",
-        "theme": false,
-        "vars": [],
-        "prefix": "",
-        "fpath": "",
-        "furl": ""
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Cdn",
-    "shortName": "Library",
     "summary": "Library retriever tool.",
     "description": "Allows to create a whole configuratiuon based on libraries names and versions.\n\nYou first create the object with a database connection to the CDN database:\n\n```php\n$db = new \\bbn\\Db([\n  'engine' => 'sqlite',\n  'db' => BBN_CDN_DB\n]);\n$lib = new \\bbn\\Cdn\\Library($db, 'fr');\n```\n\nIt can give you information about the given library:\n\n```php\n$info = $lib->info('moment|2.12.0')\n\/\/ {\n\/\/     \"name\": \"moment\",\n\/\/     \"fname\": \"moment\",\n\/\/     \"title\": \"Moment\",\n\/\/     \"latest\": \"2.12.0\",\n\/\/     \"website\": \"http:\/\/momentjs.com\/\",\n\/\/     \"last_update\": \"2016-04-17 19:24:33\",\n\/\/     \"last_check\": \"2016-04-17 19:24:33\",\n\/\/     \"id\": 146,\n\/\/     \"version\": \"2.12.0\",\n\/\/     \"content\": {\n\/\/         \"files\": [\n\/\/             \"moment-with-locales.min.js\",\n\/\/         ],\n\/\/         \"lang\": [\n\/\/         ],\n\/\/         \"theme_files\": [\n\/\/         ],\n\/\/     },\n\/\/     \"internal\": 0,\n\/\/     \"prepend\": [\n\/\/     ],\n\/\/ }\n```\n\nOr you can add all the libraries you want:\n\n```php\n$lib->add('jquery-ui') \/\/ jQuery will also be added\n    ->add('axios', false); \/\/ no dependency will be added here\n```\n\nThen get an array of all the files needed to be loaded:\n\n```php\n$cfg = $lib->getConfig()\n\/\/ {\n\/\/     \"libraries\": {\n\/\/         \"axios\": \"v0.19.2\",\n\/\/         \"animate-css\": \"3.7.2\",\n\/\/         \"moment\": \"2.12.0\",\n\/\/         \"bbnjs\": \"1.0.1\",\n\/\/         \"vuejs\": \"v2.6.10\",\n\/\/         \"bbn-vue\": \"2.0.2\",\n\/\/     },\n\/\/     \"prepend\": {\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/01-basic.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/02-background.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/03-text.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/04-border.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/05-padding.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/06-margin.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/07-align.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/08-radius.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/09-dimension.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/10-position.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/11-align.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/11-containers.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/12-state.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/13-components.less\": [\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/default.less\",\n\/\/             \"lib\/bbnjs\/1.0.1\/src\/css\/themes\/dark.less\",\n\/\/         ],\n\/\/     },\n\/\/     \"js\": [\n\/\/         \"lib\/axios\/v0.19.2\/dist\/axios.min.js\",\n\/\/         \"lib\/moment\/2.12.0\/moment-with-locales.min.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/bbn.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/functions.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/env\/_def.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/var\/_def.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/var\/diacritic.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/_def.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/ajax.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/form.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/history.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/init.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/locale.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/misc.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/object.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/size.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/string.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/style.js\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/fn\/type.js\",\n\/\/         \"lib\/vuejs\/v2.6.10\/dist\/vue.min.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/vars.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/methods.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/basic.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/empty.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/dimensions.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/position.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/dropdown.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/keynav.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/toggle.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/localStorage.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/data.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/dataEditor.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/events.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/list.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/memory.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/input.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/resizer.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/close.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/field.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/view.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/observer.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/keepCool.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins\/url.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/mixins.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/defaults.js\",\n\/\/         \"lib\/bbn-vue\/2.0.2\/src\/init.js\",\n\/\/     ],\n\/\/     \"css\": [\n\/\/         \"lib\/animate-css\/3.7.2\/animate.min.css\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/01-basic.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/02-background.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/03-text.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/04-border.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/05-padding.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/06-margin.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/07-align.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/08-radius.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/09-dimension.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/10-position.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/11-align.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/11-containers.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/12-state.less\",\n\/\/         \"lib\/bbnjs\/1.0.1\/src\/css\/13-components.less\",\n\/\/     ],\n\/\/ }\n```",
     "description_parts": [

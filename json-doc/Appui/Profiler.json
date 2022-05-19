@@ -14,6 +14,57 @@
     "fileName": "\/Appui\/Profiler.php",
     "startLine": 14,
     "endLine": 197,
+    "numMethods": 27,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "delay": 2,
+        "default_class_cfg": {
+            "table": "bbn_profiler",
+            "tables": {
+                "bbn_profiler": "bbn_profiler"
+            },
+            "arch": {
+                "bbn_profiler": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "url": "url",
+                    "time": "time",
+                    "length": "length",
+                    "content": "content"
+                }
+            }
+        },
+        "is_started": false,
+        "chrono": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Profiler",
     "contentConstructor": {
         "file": "bbn\\Appui\\Profiler",
         "returns": null
@@ -1246,57 +1297,6 @@
         }
     },
     "constants": null,
-    "numMethods": 27,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "delay": 2,
-        "default_class_cfg": {
-            "table": "bbn_profiler",
-            "tables": {
-                "bbn_profiler": "bbn_profiler"
-            },
-            "arch": {
-                "bbn_profiler": {
-                    "id": "id",
-                    "id_user": "id_user",
-                    "url": "url",
-                    "time": "time",
-                    "length": "length",
-                    "content": "content"
-                }
-            }
-        },
-        "is_started": false,
-        "chrono": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Profiler",
     "summary": "Class chat",
     "description": "",
     "description_parts": []

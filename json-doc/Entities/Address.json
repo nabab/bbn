@@ -12,6 +12,53 @@
     "fileName": "\/Entities\/Address.php",
     "startLine": 7,
     "endLine": 197,
+    "numMethods": 18,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_addresses",
+            "tables": {
+                "addresses": "bbn_addresses"
+            },
+            "arch": {
+                "addresses": {
+                    "id": "id",
+                    "address": "address",
+                    "postcode": "postcode",
+                    "city": "city",
+                    "country": "country",
+                    "phone": "phone",
+                    "email": "email",
+                    "fulladdress": "fulladdress",
+                    "cfg": "cfg"
+                }
+            },
+            "country": ""
+        },
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Entities",
+    "shortName": "Address",
     "contentConstructor": {
         "file": "bbn\\Entities\\Address",
         "returns": null
@@ -802,53 +849,6 @@
         }
     },
     "constants": null,
-    "numMethods": 18,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_addresses",
-            "tables": {
-                "addresses": "bbn_addresses"
-            },
-            "arch": {
-                "addresses": {
-                    "id": "id",
-                    "address": "address",
-                    "postcode": "postcode",
-                    "city": "city",
-                    "country": "country",
-                    "phone": "phone",
-                    "email": "email",
-                    "fulladdress": "fulladdress",
-                    "cfg": "cfg"
-                }
-            },
-            "country": ""
-        },
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Entities",
-    "shortName": "Address",
     "summary": "",
     "description": "",
     "description_parts": []

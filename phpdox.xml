@@ -76,9 +76,9 @@
                 <!--</source> -->
 
                 <!-- add phploc output -->
-                <source type="phploc">
+                <!--source type="phploc">
 		    <file name="logs/phploc.xml" />
-		</source>
+		</source-->
                 
                 <!-- git vcs information >
                 <source type="git">
@@ -94,20 +94,19 @@
                  -->
 
                 <!-- PHPMessDetector -->
-                <source type="pmd">
+                <!--source type="pmd">
                     <file name="logs/pmd-cpd.xml" />
-                </source>
+                </source-->
                 
 		<!-- PHPUnit Coverage XML -->
                 <!-- <source type="phpunit">  -->
                 <!-- <coverage path="" /> -->
                 <!--           @path - the directory where the xml code coverage report can be found -->
                 <!--</source>-->
-                <!--
-                <source type="phpunit">
-                    <filter directory="${phpDox.project.source}" />
-                </source>
-                -->
+	<!--source type="phpunit">
+		<coverage path="${basedir}" />
+		<filter directory="${basedir}" />
+                </source-->
 
             </enrich>
 

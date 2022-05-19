@@ -12,6 +12,63 @@
     "fileName": "\/Shop\/Cart.php",
     "startLine": 12,
     "endLine": 55,
+    "numMethods": 21,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "errors": [],
+            "table": "bbn_shop_cart",
+            "tables": {
+                "cart": "bbn_shop_cart",
+                "cart_products": "bbn_shop_cart_products"
+            },
+            "arch": {
+                "cart": {
+                    "id": "id",
+                    "id_session": "id_session",
+                    "id_client": "id_client",
+                    "creation": "creation"
+                },
+                "cart_products": {
+                    "id": "id",
+                    "id_cart": "id_cart",
+                    "id_product": "id_product",
+                    "quantity": "quantity",
+                    "amount": "amount",
+                    "date_added": "date_added"
+                }
+            }
+        },
+        "type_note": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Shop",
+    "shortName": "Cart",
     "contentConstructor": {
         "file": "bbn\\Shop\\Cart",
         "returns": null
@@ -1059,63 +1116,6 @@
         }
     },
     "constants": null,
-    "numMethods": 21,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "errors": [],
-            "table": "bbn_shop_cart",
-            "tables": {
-                "cart": "bbn_shop_cart",
-                "cart_products": "bbn_shop_cart_products"
-            },
-            "arch": {
-                "cart": {
-                    "id": "id",
-                    "id_session": "id_session",
-                    "id_client": "id_client",
-                    "creation": "creation"
-                },
-                "cart_products": {
-                    "id": "id",
-                    "id_cart": "id_cart",
-                    "id_product": "id_product",
-                    "quantity": "quantity",
-                    "amount": "amount",
-                    "date_added": "date_added"
-                }
-            }
-        },
-        "type_note": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Shop",
-    "shortName": "Cart",
     "summary": "",
     "description": "",
     "description_parts": []

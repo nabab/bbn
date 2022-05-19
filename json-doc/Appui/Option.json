@@ -21,6 +21,70 @@
     "fileName": "\/Appui\/Option.php",
     "startLine": 35,
     "endLine": 4541,
+    "numMethods": 123,
+    "numProperties": 0,
+    "numConstants": 1,
+    "numStaticProperties": 3,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Retriever",
+        "bbn\\Models\\Tts\\Cache",
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "errors": [],
+            "table": "bbn_options",
+            "tables": {
+                "options": "bbn_options"
+            },
+            "arch": {
+                "options": {
+                    "id": "id",
+                    "id_parent": "id_parent",
+                    "id_alias": "id_alias",
+                    "num": "num",
+                    "text": "text",
+                    "code": "code",
+                    "value": "value",
+                    "cfg": "cfg"
+                }
+            }
+        },
+        "retriever_instance": null,
+        "retriever_exists": false,
+        "is_init": false,
+        "non_selected": [
+            "cfg"
+        ],
+        "_local_cache": [],
+        "class_cfg": null,
+        "root": null,
+        "default": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_cache_prefix": null,
+        "cache_engine": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Option",
     "contentConstructor": {
         "file": "bbn\\Appui\\Option",
         "returns": null
@@ -5502,70 +5566,6 @@
         "retriever_exists": true
     },
     "constants": [],
-    "numMethods": 123,
-    "numProperties": 0,
-    "numConstants": 1,
-    "numStaticProperties": 3,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Retriever",
-        "bbn\\Models\\Tts\\Cache",
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "errors": [],
-            "table": "bbn_options",
-            "tables": {
-                "options": "bbn_options"
-            },
-            "arch": {
-                "options": {
-                    "id": "id",
-                    "id_parent": "id_parent",
-                    "id_alias": "id_alias",
-                    "num": "num",
-                    "text": "text",
-                    "code": "code",
-                    "value": "value",
-                    "cfg": "cfg"
-                }
-            }
-        },
-        "retriever_instance": null,
-        "retriever_exists": false,
-        "is_init": false,
-        "non_selected": [
-            "cfg"
-        ],
-        "_local_cache": [],
-        "class_cfg": null,
-        "root": null,
-        "default": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_cache_prefix": null,
-        "cache_engine": null,
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Option",
     "summary": "An all-in-one hierarchical options management system",
     "description": "This class allows to:\n---------------------\n* manage a **hierarchical** table of options\n* retrieve, edit, add, remove options\n* grab a whole tree\n* apply functions on group of options\n* add user-defined properties\n* set option configuration and applies it to all its children\n* And many more...",
     "description_parts": [

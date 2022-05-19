@@ -14,6 +14,29 @@
     "fileName": "\/Api\/Permissions\/MolliePermissions.php",
     "startLine": 10,
     "endLine": 111,
+    "numMethods": 5,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [
+        "bbn\\Api\\Permissions\\ApiPermissionsContract"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "cfg": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\Permissions",
+    "shortName": "MolliePermissions",
     "contentConstructor": {
         "file": "bbn\\Api\\Permissions\\MolliePermissions",
         "returns": null
@@ -174,29 +197,6 @@
     "properties": null,
     "staticProperties": [],
     "constants": null,
-    "numMethods": 5,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 0,
-    "interfaceNames": [
-        "bbn\\Api\\Permissions\\ApiPermissionsContract"
-    ],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "cfg": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Api\\Permissions",
-    "shortName": "MolliePermissions",
     "summary": "",
     "description": "",
     "description_parts": []

@@ -10,15 +10,6 @@
     "fileName": "\/Models\/Tts\/Report.php",
     "startLine": 13,
     "endLine": 22,
-    "contentConstructor": null,
-    "methods": null,
-    "properties": null,
-    "staticProperties": {
-        "_error": null,
-        "_last_error": null,
-        "_debug": null
-    },
-    "constants": null,
     "numMethods": 0,
     "numProperties": 0,
     "numConstants": 0,
@@ -42,6 +33,15 @@
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Report",
+    "contentConstructor": null,
+    "methods": null,
+    "properties": null,
+    "staticProperties": {
+        "_error": null,
+        "_last_error": null,
+        "_debug": null
+    },
+    "constants": null,
     "summary": "",
     "description": "",
     "description_parts": []

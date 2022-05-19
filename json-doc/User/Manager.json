@@ -17,6 +17,51 @@
     "fileName": "\/User\/Manager.php",
     "startLine": 22,
     "endLine": 1162,
+    "numMethods": 46,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "admin_group": null,
+        "dev_group": null,
+        "messages": {
+            "creation": {
+                "subject": "Account created",
+                "link": "",
+                "text": "\nA new user has been created for you.<br>\nPlease click the link below in order to activate your account:<br>\n%1$s"
+            },
+            "password": {
+                "subject": "Password change",
+                "link": "",
+                "text": "\nYou can click the following link to change your password:<br>\n%1$s"
+            },
+            "hotlink": {
+                "subject": "Hotlink",
+                "link": "",
+                "text": "\nYou can click the following link to access directly your account:<br>\n%1$s"
+            }
+        },
+        "hotlink_length": 86400,
+        "list_fields": null,
+        "usrcls": null,
+        "mailer": false,
+        "db": null,
+        "class_cfg": false
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\User",
+    "shortName": "Manager",
     "contentConstructor": {
         "file": "bbn\\User\\Manager",
         "returns": null
@@ -1840,51 +1885,6 @@
         "dev_group": null
     },
     "constants": null,
-    "numMethods": 46,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "admin_group": null,
-        "dev_group": null,
-        "messages": {
-            "creation": {
-                "subject": "Account created",
-                "link": "",
-                "text": "\nA new user has been created for you.<br>\nPlease click the link below in order to activate your account:<br>\n%1$s"
-            },
-            "password": {
-                "subject": "Password change",
-                "link": "",
-                "text": "\nYou can click the following link to change your password:<br>\n%1$s"
-            },
-            "hotlink": {
-                "subject": "Hotlink",
-                "link": "",
-                "text": "\nYou can click the following link to access directly your account:<br>\n%1$s"
-            }
-        },
-        "hotlink_length": 86400,
-        "list_fields": null,
-        "usrcls": null,
-        "mailer": false,
-        "db": null,
-        "class_cfg": false
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\User",
-    "shortName": "Manager",
     "summary": "A class for managing users",
     "description": "",
     "description_parts": []

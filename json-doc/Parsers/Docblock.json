@@ -15,6 +15,288 @@
     "fileName": "\/Parsers\/Docblock.php",
     "startLine": 13,
     "endLine": 359,
+    "numMethods": 6,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "all_tags": {
+            "common": {
+                "author": [
+                    "text"
+                ],
+                "copyright": [
+                    "text"
+                ],
+                "deprecated": [
+                    "text"
+                ],
+                "example": [
+                    "text"
+                ],
+                "ignore": [],
+                "license": [
+                    "text"
+                ],
+                "link": [
+                    "text"
+                ],
+                "package": [
+                    "text"
+                ],
+                "return": [
+                    "type",
+                    "description"
+                ],
+                "returns": [
+                    "type",
+                    "description"
+                ],
+                "since": [
+                    "text"
+                ],
+                "throws": [
+                    "type",
+                    "description"
+                ],
+                "todo": [
+                    "text"
+                ],
+                "version": [
+                    "text"
+                ]
+            },
+            "js": {
+                "abstract": [],
+                "access": [
+                    "text"
+                ],
+                "alias": [],
+                "arg": "param",
+                "argument": "param",
+                "async": [],
+                "augments": [],
+                "borrows": [],
+                "callback": [],
+                "class": [],
+                "classdesc": [],
+                "const": "constant",
+                "constant": [],
+                "constructor": "class",
+                "constructs": [],
+                "default": [
+                    "text"
+                ],
+                "defaultValue": "default",
+                "description": [
+                    "text"
+                ],
+                "emits": "fires",
+                "enum": [],
+                "event": [
+                    "name"
+                ],
+                "exception": "throws",
+                "exports": [],
+                "extends": "augments",
+                "external": [],
+                "file": [
+                    "text"
+                ],
+                "fileoverview": "file",
+                "fires": [
+                    "name"
+                ],
+                "func": "function",
+                "function": [
+                    "name"
+                ],
+                "generator": [],
+                "global": [],
+                "hidecontructor": [],
+                "host": "external",
+                "implements": [],
+                "inner": [],
+                "instance": [],
+                "interface": [],
+                "kind": [],
+                "lends": [],
+                "linkcode": "link",
+                "linkplain": "link",
+                "listens": [],
+                "member": [],
+                "memberof": [
+                    "name"
+                ],
+                "method": "function",
+                "mixes": [],
+                "mixin": [
+                    "name"
+                ],
+                "module": [],
+                "name": [
+                    "name"
+                ],
+                "namespace": [],
+                "override": [],
+                "overview": "file",
+                "param": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "private": [],
+                "prop": "property",
+                "property": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "protected": [],
+                "public": [],
+                "readonly": [],
+                "requires": [],
+                "see": [
+                    "name"
+                ],
+                "static": [],
+                "summary": [
+                    "text"
+                ],
+                "this": [],
+                "tutorial": [],
+                "type": [
+                    "type"
+                ],
+                "typedef": [],
+                "var": "member",
+                "variation": [],
+                "virtual": "abstract",
+                "yield": "yields",
+                "yields": []
+            },
+            "vue": {
+                "component": [
+                    "name"
+                ],
+                "computed": [
+                    "name"
+                ],
+                "data": [
+                    "type",
+                    "default",
+                    "name",
+                    "description"
+                ],
+                "emits": [
+                    "name"
+                ],
+                "method": [
+                    "name"
+                ],
+                "prop": [
+                    "type",
+                    "default",
+                    "name"
+                ],
+                "required": [
+                    "text"
+                ],
+                "watch": [
+                    "name",
+                    "description"
+                ]
+            },
+            "php": {
+                "api": [],
+                "category": [
+                    "text"
+                ],
+                "filesource": [],
+                "global": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "internal": [
+                    "text"
+                ],
+                "method": [
+                    "text"
+                ],
+                "package": [
+                    "text"
+                ],
+                "param": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "property": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "property-read": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "property-write": [
+                    "type",
+                    "name",
+                    "description"
+                ],
+                "see": [
+                    "text"
+                ],
+                "source": [
+                    "text"
+                ],
+                "subpackage": [
+                    "text"
+                ],
+                "uses": [
+                    "text"
+                ],
+                "var": [
+                    "type",
+                    "name",
+                    "description"
+                ]
+            }
+        },
+        "multiple": [
+            "author",
+            "param",
+            "example",
+            "emits",
+            "fires"
+        ],
+        "source": "",
+        "mode": "",
+        "modes": [
+            "js",
+            "vue",
+            "php"
+        ],
+        "tags": null,
+        "parsed": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Parsers",
+    "shortName": "Docblock",
     "contentConstructor": {
         "file": "bbn\\Parsers\\Docblock",
         "returns": null
@@ -474,288 +756,6 @@
         ]
     },
     "constants": null,
-    "numMethods": 6,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "all_tags": {
-            "common": {
-                "author": [
-                    "text"
-                ],
-                "copyright": [
-                    "text"
-                ],
-                "deprecated": [
-                    "text"
-                ],
-                "example": [
-                    "text"
-                ],
-                "ignore": [],
-                "license": [
-                    "text"
-                ],
-                "link": [
-                    "text"
-                ],
-                "package": [
-                    "text"
-                ],
-                "return": [
-                    "type",
-                    "description"
-                ],
-                "returns": [
-                    "type",
-                    "description"
-                ],
-                "since": [
-                    "text"
-                ],
-                "throws": [
-                    "type",
-                    "description"
-                ],
-                "todo": [
-                    "text"
-                ],
-                "version": [
-                    "text"
-                ]
-            },
-            "js": {
-                "abstract": [],
-                "access": [
-                    "text"
-                ],
-                "alias": [],
-                "arg": "param",
-                "argument": "param",
-                "async": [],
-                "augments": [],
-                "borrows": [],
-                "callback": [],
-                "class": [],
-                "classdesc": [],
-                "const": "constant",
-                "constant": [],
-                "constructor": "class",
-                "constructs": [],
-                "default": [
-                    "text"
-                ],
-                "defaultValue": "default",
-                "description": [
-                    "text"
-                ],
-                "emits": "fires",
-                "enum": [],
-                "event": [
-                    "name"
-                ],
-                "exception": "throws",
-                "exports": [],
-                "extends": "augments",
-                "external": [],
-                "file": [
-                    "text"
-                ],
-                "fileoverview": "file",
-                "fires": [
-                    "name"
-                ],
-                "func": "function",
-                "function": [
-                    "name"
-                ],
-                "generator": [],
-                "global": [],
-                "hidecontructor": [],
-                "host": "external",
-                "implements": [],
-                "inner": [],
-                "instance": [],
-                "interface": [],
-                "kind": [],
-                "lends": [],
-                "linkcode": "link",
-                "linkplain": "link",
-                "listens": [],
-                "member": [],
-                "memberof": [
-                    "name"
-                ],
-                "method": "function",
-                "mixes": [],
-                "mixin": [
-                    "name"
-                ],
-                "module": [],
-                "name": [
-                    "name"
-                ],
-                "namespace": [],
-                "override": [],
-                "overview": "file",
-                "param": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "private": [],
-                "prop": "property",
-                "property": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "protected": [],
-                "public": [],
-                "readonly": [],
-                "requires": [],
-                "see": [
-                    "name"
-                ],
-                "static": [],
-                "summary": [
-                    "text"
-                ],
-                "this": [],
-                "tutorial": [],
-                "type": [
-                    "type"
-                ],
-                "typedef": [],
-                "var": "member",
-                "variation": [],
-                "virtual": "abstract",
-                "yield": "yields",
-                "yields": []
-            },
-            "vue": {
-                "component": [
-                    "name"
-                ],
-                "computed": [
-                    "name"
-                ],
-                "data": [
-                    "type",
-                    "default",
-                    "name",
-                    "description"
-                ],
-                "emits": [
-                    "name"
-                ],
-                "method": [
-                    "name"
-                ],
-                "prop": [
-                    "type",
-                    "default",
-                    "name"
-                ],
-                "required": [
-                    "text"
-                ],
-                "watch": [
-                    "name",
-                    "description"
-                ]
-            },
-            "php": {
-                "api": [],
-                "category": [
-                    "text"
-                ],
-                "filesource": [],
-                "global": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "internal": [
-                    "text"
-                ],
-                "method": [
-                    "text"
-                ],
-                "package": [
-                    "text"
-                ],
-                "param": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "property": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "property-read": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "property-write": [
-                    "type",
-                    "name",
-                    "description"
-                ],
-                "see": [
-                    "text"
-                ],
-                "source": [
-                    "text"
-                ],
-                "subpackage": [
-                    "text"
-                ],
-                "uses": [
-                    "text"
-                ],
-                "var": [
-                    "type",
-                    "name",
-                    "description"
-                ]
-            }
-        },
-        "multiple": [
-            "author",
-            "param",
-            "example",
-            "emits",
-            "fires"
-        ],
-        "source": "",
-        "mode": "",
-        "modes": [
-            "js",
-            "vue",
-            "php"
-        ],
-        "tags": null,
-        "parsed": []
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Parsers",
-    "shortName": "Docblock",
     "summary": "Documentation block parser",
     "description": "",
     "description_parts": []

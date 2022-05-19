@@ -12,6 +12,46 @@
     "fileName": "\/Appui\/Database.php",
     "startLine": 15,
     "endLine": 1742,
+    "numMethods": 69,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 3,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Optional"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Cache",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "optional_is_init": false,
+        "option_root_id": null,
+        "option_appui_id": null,
+        "o": null,
+        "pw": null,
+        "connections": {
+            "mysql": [],
+            "postgre": [],
+            "sqlite": []
+        },
+        "db": null,
+        "_cache_prefix": null,
+        "cacher": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "options": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Database",
     "contentConstructor": {
         "file": "bbn\\Appui\\Database",
         "returns": null
@@ -3268,46 +3308,6 @@
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 69,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 3,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Cache",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null,
-        "o": null,
-        "pw": null,
-        "connections": {
-            "mysql": [],
-            "postgre": [],
-            "sqlite": []
-        },
-        "db": null,
-        "_cache_prefix": null,
-        "cacher": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "options": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Database",
     "summary": "",
     "description": "",
     "description_parts": []

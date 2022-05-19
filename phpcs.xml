@@ -65,7 +65,10 @@
 
 <rule ref="PSR12">
     <exclude name="Squiz.PHP.DisallowComparisonAssignment"/>
-    <exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace"/>
+    <!--exclude name="Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace"/-->
+    <exclude name="PEAR.Functions.FunctionDeclaration"/>
+
+	    
 </rule>
 <!--rule ref="PSR2.ControlStructures.ElseIfDeclaration"/>
 <rule ref="PSR2.ControlStructures.SwitchDeclaration">

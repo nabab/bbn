@@ -166,17 +166,6 @@ class Php extends bbn\Models\Cls\Basic
         'fileName' => substr($rc->getFileName(), strlen($path)),
         'startLine' => $rc->getStartLine(),
         'endLine' => $rc->getEndLine(),
-        'contentConstructor' => !empty($constructor) ? array_filter(
-            $this->analyzeMethod($constructor->name, $rc),
-            function ($m, $i) {
-                return in_array($i, ['file', 'returns']);
-            },
-            ARRAY_FILTER_USE_BOTH
-        ) : null,
-        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,
-        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,
-        'staticProperties' => $statprops,
-        'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null,
         'numMethods' => $methods ? count($methods) : 0,
         'numProperties' => $props ? count($props) : 0,
         'numConstants' => $constants ? count($constants) : 0,
@@ -198,7 +187,18 @@ class Php extends bbn\Models\Cls\Basic
         'extensionName' => $rc->getExtensionName(),
         'namespace' => $rc->inNamespace(),
         'namespaceName' => $rc->getNamespaceName(),
-        'shortName' => $rc->getShortName()
+        'shortName' => $rc->getShortName(),
+        'contentConstructor' => !empty($constructor) ? array_filter(
+            $this->analyzeMethod($constructor->name, $rc),
+            function ($m, $i) {
+                return in_array($i, ['file', 'returns']);
+            },
+            ARRAY_FILTER_USE_BOTH
+        ) : null,
+        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,
+        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,
+        'staticProperties' => $statprops,
+        'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
       ];
       if (
           $res['doc']

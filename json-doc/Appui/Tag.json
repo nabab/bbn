@@ -13,6 +13,63 @@
     "fileName": "\/Appui\/Tag.php",
     "startLine": 15,
     "endLine": 153,
+    "numMethods": 29,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig",
+        "bbn\\Models\\Tts\\Cache"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "errors": [],
+            "table": "bbn_tags",
+            "tables": {
+                "tags": "bbn_tags"
+            },
+            "arch": {
+                "tags": {
+                    "id": "id",
+                    "tag": "tag",
+                    "lang": "lang",
+                    "description": "description"
+                },
+                "relations": {
+                    "id_tag_orig": "tag",
+                    "id_tag_dest": "lang",
+                    "relationship": "relationship"
+                }
+            }
+        },
+        "all": null,
+        "lang": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null,
+        "_cache_prefix": null,
+        "cache_engine": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Tag",
     "contentConstructor": {
         "file": "bbn\\Appui\\Tag",
         "returns": null
@@ -1396,63 +1453,6 @@
         }
     },
     "constants": null,
-    "numMethods": 29,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig",
-        "bbn\\Models\\Tts\\Cache"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "errors": [],
-            "table": "bbn_tags",
-            "tables": {
-                "tags": "bbn_tags"
-            },
-            "arch": {
-                "tags": {
-                    "id": "id",
-                    "tag": "tag",
-                    "lang": "lang",
-                    "description": "description"
-                },
-                "relations": {
-                    "id_tag_orig": "tag",
-                    "id_tag_dest": "lang",
-                    "relationship": "relationship"
-                }
-            }
-        },
-        "all": null,
-        "lang": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null,
-        "_cache_prefix": null,
-        "cache_engine": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Tag",
     "summary": "",
     "description": "",
     "description_parts": []

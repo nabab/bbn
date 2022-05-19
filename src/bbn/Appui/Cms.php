@@ -133,13 +133,13 @@ class Cms extends DbCls
    */
   public function getLatest(array $filter = [], int $limit = 20, int $start = 0): array
   {
-    $cfg = $this->getLastVersionCfg(false, true, $filter);
+    $cfg          = $this->getLastVersionCfg(false, true, $filter);
     $cfg['order'] = [['field' => 'bbn_events.start', 'dir' => 'DESC']];
     $cfg['limit'] = $limit;
     $cfg['start'] = $start;
 
-    $db =& $this->db;
-    $idx = md5(json_encode($filter));
+    $db    =& $this->db;
+    $idx   = md5(json_encode($filter));
     $total = $this->cacheGetSet(function() use (&$db, $cfg) {
       return $db->count($cfg);
     }, $idx, 'total', 20);
@@ -162,12 +162,12 @@ class Cms extends DbCls
   {
     $res = [];
     if (!empty($id_note) && ($note = $this->note->get($id_note))) {
-      $res          = $note;
-      $res['url']   = $this->note->getUrl($id_note);
-      $res['start'] = $this->getStart($id_note);
-      $res['end']   = $this->getEnd($id_note);
-      $res['tags']  = $this->note->getTags($id_note);
-      $res['items'] = $note['content'] ? json_decode($note['content'], true) : [];
+      $res             = $note;
+      $res['url']      = $this->note->getUrl($id_note);
+      $res['start']    = $this->getStart($id_note);
+      $res['end']      = $this->getEnd($id_note);
+      $res['tags']     = $this->note->getTags($id_note);
+      $res['items']    = $note['content'] ? json_decode($note['content'], true) : [];
       $res['id_media'] = $this->getDefaultMedia($id_note);
       unset($note['content']);
       if ($with_medias) {
@@ -245,7 +245,7 @@ class Cms extends DbCls
       [
         $cfg['arch']['notes_medias']['id_note'] => $id_note,
         $cfg['arch']['notes_medias']['default_media'] => 1
-    ]);
+      ]);
   }
 
 
@@ -259,12 +259,12 @@ class Cms extends DbCls
    */
   public function getLastVersionCfg(bool $with_content = false, bool $published = true, array $filter = []): array
   {
-    $cfg = $this->note->getLastVersionCfg($with_content);
-    $cfg['fields'][]             = 'url';
-    $cfg['fields'][]             = 'start';
-    $cfg['fields'][]             = 'end';
-    $cfg['fields']['num_medias'] = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';
-    $cfg['fields']['id_media']   = 'default_medias.id_media';
+    $cfg                          = $this->note->getLastVersionCfg($with_content);
+    $cfg['fields'][]              = 'url';
+    $cfg['fields'][]              = 'start';
+    $cfg['fields'][]              = 'end';
+    $cfg['fields']['num_medias']  = 'COUNT(' . $this->db->cfn($this->class_cfg['arch']['notes_medias']['id_note'], $this->class_cfg['tables']['notes_medias'], true) . ')';
+    $cfg['fields']['id_media']    = 'default_medias.id_media';
     $cfg['where']['conditions'][] = [
       'field' => 'mime',
       'value' => 'json/bbn-cms'
@@ -303,7 +303,7 @@ class Cms extends DbCls
       }
 
       $cfg['where']['conditions'][] = $filter;
-   }
+    }
 
     $cfg['join'][] = [
         'table' => $this->class_cfg['tables']['notes_url'],
@@ -322,7 +322,7 @@ class Cms extends DbCls
       ]],
     ];
 
-    $cfg['join'][] = [
+    $cfg['join'][]   = [
       'table' => $this->class_cfg['tables']['notes_events'],
       'type' => 'left',
       'on' => [[
@@ -330,7 +330,7 @@ class Cms extends DbCls
           'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
       ]]
     ];
-    $cfg['join'][] = [
+    $cfg['join'][]   = [
       'table' => $this->class_cfg['tables']['events'],
       'type' => 'left',
       'on' => [[
@@ -338,7 +338,7 @@ class Cms extends DbCls
           'exp' => $this->db->cfn($this->class_cfg['arch']['events']['id'], $this->class_cfg['tables']['events'])
       ]]
     ];
-    $cfg['join'][] = [
+    $cfg['join'][]   = [
       'table' => $this->class_cfg['tables']['notes_medias'],
       'type' => 'left',
       'on' => [[
@@ -346,7 +346,7 @@ class Cms extends DbCls
           'exp' => $this->db->cfn($this->class_cfg['arch']['notes']['id'], $this->class_cfg['tables']['notes'])
       ]]
     ];
-    $cfg['join'][] = [
+    $cfg['join'][]   = [
       'table' => $this->class_cfg['tables']['notes_medias'],
       'alias' => 'default_medias',
       'type' => 'left',
@@ -412,8 +412,16 @@ class Cms extends DbCls
       }
     }
     if (empty($type_cond)) {
-      throw new \Exception(X::_("Impossible to find a type %s", $type));
+      if (!($opt = Note::getOptionsObject()->option($type))) {
+        throw new \Exception(X::_("Impossible to find a type %s", $type));
+      }
+
+      $type_cond[] = [
+        'field' => 'bbn_notes.id_type',
+        'value' => $type
+      ];
     }
+
     $cfg['where']['conditions'][] = [
       'logic' => 'OR',
       'conditions' => $type_cond
@@ -426,8 +434,8 @@ class Cms extends DbCls
       $cfg['order'] = $order;
     }
 
-    $db =& $this->db;
-    $idx = md5(json_encode($filter));
+    $db    =& $this->db;
+    $idx   = md5(json_encode($filter));
     $total = $this->cacheGetSet(function() use (&$db, $cfg) {
       return $db->count($cfg);
     }, $idx, 'total', 20);
@@ -461,12 +469,12 @@ class Cms extends DbCls
   }
 
 
-/**
- * If the given url correspond to a published note returns the id.
- *
- * @param string $url
- * @return string|null
- */
+  /**
+   * If the given url correspond to a published note returns the id.
+   *
+   * @param string $url
+   * @return string|null
+   */
   public function getByUrl(string $url, bool $force = false): ?array
   {
     if (($id_note = $this->note->urlToId($url)) && ($force || $this->isPublished($id_note))) {
@@ -718,7 +726,7 @@ class Cms extends DbCls
           $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,
           $fields['start']   => $cfg['start'],
           $fields['end']     => $cfg['end'] ?? null
-      ])) {
+        ])) {
         return $this->note->insertNoteEvent($id_note, $id_event);
       }
       else {
@@ -930,9 +938,9 @@ class Cms extends DbCls
   {
     $o =& $this;
     return $this->cacheGetSet(
-      function() use (&$o) {
+      function () use (&$o) {
         $id_cms = $o->opt->fromCode('bbn-cms', 'editors', 'note', 'appui');
-        $arr = [];
+        $arr    = [];
         foreach ($o->opt->fullOptions('types', 'note', 'appui') as $op) {
           if ($op['id_alias'] === $id_cms) {
             unset($op['alias']);

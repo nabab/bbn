@@ -18,6 +18,56 @@
     "fileName": "\/Cdn\/Config.php",
     "startLine": 26,
     "endLine": 471,
+    "numMethods": 12,
+    "numProperties": 1,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Cdn\\Common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_language": "en",
+        "types": {
+            "js": [
+                "js",
+                "ts"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        },
+        "cfg": [],
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "prefix": "",
+        "fpath": "",
+        "furl": ""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Cdn",
+    "shortName": "Config",
     "contentConstructor": {
         "file": "bbn\\Cdn\\Config",
         "returns": null
@@ -634,56 +684,6 @@
         }
     },
     "constants": null,
-    "numMethods": 12,
-    "numProperties": 1,
-    "numConstants": 0,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Cdn\\Common"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Basic",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_language": "en",
-        "types": {
-            "js": [
-                "js",
-                "ts"
-            ],
-            "css": [
-                "css",
-                "less",
-                "sass",
-                "scss"
-            ],
-            "html": [
-                "html",
-                "php"
-            ],
-            "lang": [
-                "lang"
-            ]
-        },
-        "cfg": [],
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "prefix": "",
-        "fpath": "",
-        "furl": ""
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Cdn",
-    "shortName": "Config",
     "summary": "Makes a usable configuration array out of a request string.",
     "description": "",
     "description_parts": []

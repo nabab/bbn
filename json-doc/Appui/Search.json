@@ -13,6 +13,69 @@
     "fileName": "\/Appui\/Search.php",
     "startLine": 16,
     "endLine": 624,
+    "numMethods": 29,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 2,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig",
+        "bbn\\Models\\Tts\\Cache"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_search",
+            "tables": {
+                "search": "bbn_search",
+                "search_results": "bbn_search_results"
+            },
+            "arch": {
+                "search": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "value": "value",
+                    "num": "num",
+                    "last": "last"
+                },
+                "search_results": {
+                    "id": "id",
+                    "id_search": "id_search",
+                    "num": "num",
+                    "last": "last",
+                    "signature": "signature",
+                    "result": "result"
+                }
+            }
+        },
+        "functions": [],
+        "cfg_cache_name": "search_content",
+        "search_cache_name": "search_%s",
+        "search_cfg": [],
+        "time_limit": 20,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null,
+        "_cache_prefix": null,
+        "cache_engine": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Search",
     "contentConstructor": {
         "file": "bbn\\Appui\\Search",
         "returns": null
@@ -1353,69 +1416,6 @@
         "functions": []
     },
     "constants": null,
-    "numMethods": 29,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 2,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig",
-        "bbn\\Models\\Tts\\Cache"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Basic",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_search",
-            "tables": {
-                "search": "bbn_search",
-                "search_results": "bbn_search_results"
-            },
-            "arch": {
-                "search": {
-                    "id": "id",
-                    "id_user": "id_user",
-                    "value": "value",
-                    "num": "num",
-                    "last": "last"
-                },
-                "search_results": {
-                    "id": "id",
-                    "id_search": "id_search",
-                    "num": "num",
-                    "last": "last",
-                    "signature": "signature",
-                    "result": "result"
-                }
-            }
-        },
-        "functions": [],
-        "cfg_cache_name": "search_content",
-        "search_cache_name": "search_%s",
-        "search_cfg": [],
-        "time_limit": 20,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null,
-        "_cache_prefix": null,
-        "cache_engine": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Search",
     "summary": "",
     "description": "",
     "description_parts": []

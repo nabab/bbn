@@ -86,7 +86,8 @@ class Project extends bbn\Models\Cls\Db
     $file_environment = $appPath . 'cfg/environment';
     if ($this->fs->isFile($file_environment . '.json')) {
       $envs = \json_decode($this->fs->getContents($file_environment . '.json'), true);
-    } elseif ($this->fs->isFile($file_environment . '.yml')) {
+    }
+    elseif ($this->fs->isFile($file_environment . '.yml')) {
       try {
         $envs = yaml_parse($this->fs->getContents($file_environment . '.yml'));
       } catch (\Exception $e) {
@@ -260,7 +261,8 @@ class Project extends bbn\Models\Cls\Db
     if (empty($langs)) {
       $primaries = $this->getPrimariesLangs();
       $langs     = $primaries;
-      $id_langs  = $this->id_langs;
+    }
+    if (!empty($langs)) {
       $res       = [];
       foreach ($langs as $l) {
         if ($id_opt = $this->options->add(
@@ -271,6 +273,7 @@ class Project extends bbn\Models\Cls\Db
             'id_alias' => $l['id'],
           ]
         )) {
+          $l['id'] = $id_opt;
           $res[] = $l;
         }
       }

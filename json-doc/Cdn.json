@@ -18,6 +18,76 @@
     "fileName": "\/Cdn.php",
     "startLine": 55,
     "endLine": 741,
+    "numMethods": 13,
+    "numProperties": 3,
+    "numConstants": 3,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Cdn\\Common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "types": {
+            "js": [
+                "js",
+                "ts"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        },
+        "mode": null,
+        "db": null,
+        "extensions": [
+            "js",
+            "css"
+        ],
+        "files": [],
+        "dir": null,
+        "cache_path": "cache\/",
+        "cache_length": 3600,
+        "file_mtime": null,
+        "request": null,
+        "o": null,
+        "url": "",
+        "hash": null,
+        "language": null,
+        "cfg": null,
+        "list": null,
+        "cp": null,
+        "ext": "",
+        "alert": null,
+        "code": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "prefix": "",
+        "fpath": "",
+        "furl": ""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "Cdn",
     "contentConstructor": {
         "file": "bbn\\Cdn",
         "returns": null
@@ -675,76 +745,6 @@
         }
     },
     "constants": [],
-    "numMethods": 13,
-    "numProperties": 3,
-    "numConstants": 3,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Cdn\\Common"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Basic",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "types": {
-            "js": [
-                "js",
-                "ts"
-            ],
-            "css": [
-                "css",
-                "less",
-                "sass",
-                "scss"
-            ],
-            "html": [
-                "html",
-                "php"
-            ],
-            "lang": [
-                "lang"
-            ]
-        },
-        "mode": null,
-        "db": null,
-        "extensions": [
-            "js",
-            "css"
-        ],
-        "files": [],
-        "dir": null,
-        "cache_path": "cache\/",
-        "cache_length": 3600,
-        "file_mtime": null,
-        "request": null,
-        "o": null,
-        "url": "",
-        "hash": null,
-        "language": null,
-        "cfg": null,
-        "list": null,
-        "cp": null,
-        "ext": "",
-        "alert": null,
-        "code": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "prefix": "",
-        "fpath": "",
-        "furl": ""
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn",
-    "shortName": "Cdn",
     "summary": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
     "description": "### Generates in a cache directory a javascript or CSS file based on the request received.\n\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n\n\n\n\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n\n```php\n$cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n$cdn->process();\nif ( $cdn->check() ){\n  $cdn->output();\n}\n```",
     "description_parts": [

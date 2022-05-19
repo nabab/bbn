@@ -12,6 +12,58 @@
     "fileName": "\/Shop\/Client.php",
     "startLine": 17,
     "endLine": 80,
+    "numMethods": 21,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "errors": [],
+            "table": "bbn_shop_providers",
+            "tables": {
+                "products": "bbn_shop_providers"
+            },
+            "arch": {
+                "products": {
+                    "id": "id",
+                    "name": "name",
+                    "cfg": "cfg"
+                }
+            }
+        },
+        "medias": null,
+        "cms": null,
+        "note": null,
+        "opt": null,
+        "lang": null,
+        "type_note": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Shop",
+    "shortName": "Client",
     "contentConstructor": {
         "file": "bbn\\Shop\\Client",
         "returns": null
@@ -1049,58 +1101,6 @@
         }
     },
     "constants": null,
-    "numMethods": 21,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 1,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "errors": [],
-            "table": "bbn_shop_providers",
-            "tables": {
-                "products": "bbn_shop_providers"
-            },
-            "arch": {
-                "products": {
-                    "id": "id",
-                    "name": "name",
-                    "cfg": "cfg"
-                }
-            }
-        },
-        "medias": null,
-        "cms": null,
-        "note": null,
-        "opt": null,
-        "lang": null,
-        "type_note": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Shop",
-    "shortName": "Client",
     "summary": "",
     "description": "",
     "description_parts": []

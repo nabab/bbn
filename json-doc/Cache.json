@@ -20,6 +20,36 @@
     "fileName": "\/Cache.php",
     "startLine": 20,
     "endLine": 776,
+    "numMethods": 24,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 5,
+    "interfaceNames": [
+        "Psr\\SimpleCache\\CacheInterface"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "is_init": false,
+        "type": null,
+        "max_wait": 10,
+        "default_ttl": 60,
+        "engine": null,
+        "path": null,
+        "obj": null,
+        "fs": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "Cache",
     "contentConstructor": {
         "file": "bbn\\Cache",
         "returns": null
@@ -935,36 +965,6 @@
         "engine": {}
     },
     "constants": null,
-    "numMethods": 24,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 5,
-    "interfaceNames": [
-        "Psr\\SimpleCache\\CacheInterface"
-    ],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "is_init": false,
-        "type": null,
-        "max_wait": 10,
-        "default_ttl": 60,
-        "engine": null,
-        "path": null,
-        "obj": null,
-        "fs": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn",
-    "shortName": "Cache",
     "summary": "Universal caching class: called once per request, it holds the cache system.",
     "description": "",
     "description_parts": []

@@ -14,6 +14,30 @@
     "fileName": "\/Api\/Git.php",
     "startLine": 13,
     "endLine": 323,
+    "numMethods": 50,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [
+        "Cz\\Git\\IGit"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "Cz\\Git\\GitRepository",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "repository": null,
+        "cwd": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api",
+    "shortName": "Git",
     "contentConstructor": {
         "file": "Cz\\Git\\GitRepository",
         "returns": null
@@ -3581,30 +3605,6 @@
     "properties": null,
     "staticProperties": [],
     "constants": null,
-    "numMethods": 50,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 0,
-    "interfaceNames": [
-        "Cz\\Git\\IGit"
-    ],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "Cz\\Git\\GitRepository",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "repository": null,
-        "cwd": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Api",
-    "shortName": "Git",
     "summary": "",
     "description": "",
     "description_parts": []

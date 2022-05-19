@@ -3,7 +3,20 @@
 namespace bbn;
 
 use Exception;
+use stdClass;
+
+use bbn\File\System;
 use bbn\Util\Enc;
+use bbn\Db;
+use bbn\User;
+use bbn\User\Preferences;
+use bbn\User\Permissions;
+use bbn\Appui\Menu;
+use bbn\Appui\Option;
+use bbn\Appui\Passwords;
+use bbn\Appui\Api;
+use bbn\Appui\Dashboard;
+use bbn\Appui\Database;
 
 /**
  * The class which deals with App-UI configuration.
@@ -84,25 +97,25 @@ class Appui
   /** @var Db */
   private $_currentDb;
 
-  /** @var Appui\Option */
+  /** @var Option */
   private $_currentOption;
 
   /** @var User */
   private $_currentUser;
 
-  /** @var User\Preferences */
+  /** @var Preferences */
   private $_currentPref;
 
-  /** @var User\Permissions */
+  /** @var Permissions */
   private $_currentPerm;
 
-  /** @var File\System */
+  /** @var System */
   private $_currentFs;
 
-  /** @var Appui\Passwords */
+  /** @var Passwords */
   private $_currentPass;
 
-  /** @var Appui\Menu */
+  /** @var Menu */
   private $_currentMenu;
 
   /** @var array */
@@ -113,9 +126,9 @@ class Appui
    * Constructor
    *
    * @param null|array       $cfg An initial configuration
-   * @param null|File\System $fs  A File System connection for the given config.
+   * @param null|System $fs  A File System connection for the given config.
    */
-  public function __construct(array $cfg = null, File\System $fs = null)
+  public function __construct(array $cfg = null, System $fs = null)
   {
     $this->setConfig($cfg, $fs);
   }
@@ -182,13 +195,13 @@ class Appui
    * Sets the whole current config.
    *
    * @param array|null       $cfg An application configuration
-   * @param File\System|null $fs  A filesystem object accessing the config path
+   * @param System|null $fs  A filesystem object accessing the config path
    * @return void
    */
-  public function setConfig(array $cfg = null, File\System $fs = null)
+  public function setConfig(array $cfg = null, System $fs = null)
   {
     $this->unsetConfig();
-    $this->_currentFs = $fs ?? new File\System();
+    $this->_currentFs = $fs ?? new System();
     $has_cfg          = (bool)$cfg;
     foreach (self::$vars as $v) {
       if ($has_cfg) {
@@ -305,12 +318,12 @@ class Appui
   /**
    * Returns a Db object according to the current config, creates it if needed
    *
-   * @return Appui\Option | null
+   * @return Option | null
    */
-  public function getOption(): ?Appui\Option
+  public function getOption(): ?Option
   {
     if (!$this->_currentOption) {
-      $this->_currentOption = new Appui\Option($this->getDb());
+      $this->_currentOption = new Option($this->getDb());
     }
 
     return $this->_currentOption;
@@ -373,12 +386,12 @@ class Appui
   /**
    * Returns a Db object according for the current config, creates it if needed
    *
-   * @return User\Preferences
+   * @return Preferences
    */
-  public function getPreferences(): ?User\Preferences
+  public function getPreferences(): ?Preferences
   {
     if (!$this->_currentPref) {
-      $this->_currentPref = new User\Preferences($this->getDb());
+      $this->_currentPref = new Preferences($this->getDb());
     }
 
     return $this->_currentPref;
@@ -388,15 +401,15 @@ class Appui
   /**
    * Returns a Db object according for the current config, creates it if needed
    *
-   * @return User\Permissions
+   * @return Permissions
    */
-  public function getPermissions(): ?User\Permissions
+  public function getPermissions(): ?Permissions
   {
     if (!$this->_currentPerm) {
       $routes             = $this->getRoutes();
       $user               = $this->getUser();
       $preferences        = $this->getPreferences();
-      $this->_currentPerm = new User\Permissions($routes);
+      $this->_currentPerm = new Permissions($routes);
     }
 
     return $this->_currentPerm;
@@ -406,12 +419,12 @@ class Appui
   /**
    * Returns a Password object according for the current config, creates it if needed
    *
-   * @return Appui\Passwords
+   * @return Passwords
    */
-  public function getPassword(): Appui\Passwords
+  public function getPassword(): Passwords
   {
     if (!$this->_currentPass) {
-      $this->_currentPass = new Appui\Passwords($this->getDb());
+      $this->_currentPass = new Passwords($this->getDb());
     }
 
     return $this->_currentPass;
@@ -421,12 +434,12 @@ class Appui
   /**
    * Returns a menu instance accordin to the current configuration
    *
-   * @return \Appui\Menu
+   * @return Menu
    */
-  public function getMenu(): Appui\Menu
+  public function getMenu(): Menu
   {
     if (!$this->_currentMenu) {
-      $this->_currentMenu = new Appui\Menu();
+      $this->_currentMenu = new Menu();
     }
 
     return $this->_currentMenu;
@@ -810,7 +823,7 @@ class Appui
       $title = $name;
     }
 
-    /** @var Appui\Option */
+    /** @var Option */
     $o = $this->getOption();
     if (!is_dir($this->libPath() . "/$name")) {
       mkdir($this->appPath() . "plugins/$name");
@@ -1676,7 +1689,7 @@ class Appui
   {
     $user       = $this->getUser();
     $db         = $this->getDb();
-    $api        = new Appui\Api($user, $db);
+    $api        = new Api($user, $db);
     $pass       = $this->getPassword();
     $rsa        = $this->getPublicKey();
     $id_project = $this->getProject();
@@ -1854,7 +1867,7 @@ class Appui
       $pref_class->makePublic($idDefaultDashboard);
     }
 
-    $dashboard = new Appui\Dashboard($idPluginsDashboard);
+    $dashboard = new Dashboard($idPluginsDashboard);
     $plugins   = array_map(
       function ($r) {
         return $r['name'];
@@ -1901,7 +1914,7 @@ class Appui
     $opt_class      = $this->getOption();
     $pass           = $this->getPassword();
     $id_appui_user  = $this->getInternalUser();
-    $dbc            = new Appui\Database($db);
+    $dbc            = new Database($db);
     $id_connections = $opt_class->fromCode(
       'connections',
       $this->_current['db_engine'],
@@ -1968,11 +1981,11 @@ class Appui
   /**
    * Installs an app-ui instance after the installation of composer and directories structure.
    *
-   * @param \Installer $installer An installer object coming from the previously executed script.
+   * @param stdClass $installer An installer object coming from the previously executed script.
    * @param array|null $cfg       The configuration comuing from the post.
    * @return bool
    */
-  public function install(\Installer $installer, array $cfg, int $step = null): bool
+  public function install(stdClass $installer, array $cfg, int $step = null): bool
   {
     if (!method_exists($installer, 'report')) {
       throw new Exception(X::_("The installer is invalid"));

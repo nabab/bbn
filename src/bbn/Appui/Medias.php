@@ -20,9 +20,8 @@ class Medias extends bbn\Models\Cls\Db
   use bbn\Models\Tts\Url;
   use bbn\Models\Tts\Tagger;
 
-  protected static
     /** @var array */
-    $default_class_cfg = [
+    protected static $default_class_cfg = [
       'table' => 'bbn_medias',
       'tables' => [
         'medias' => 'bbn_medias',
@@ -992,13 +991,13 @@ class Medias extends bbn\Models\Cls\Db
     if (!empty($data['content'])) {
       $data['content'] = json_decode($data['content'], true);
       $full_path = $this->getPath($data);
-      $data['file'] = $full_path;
+      $data['file']      = $full_path;
       $data['full_path'] = $this->getThumbPath($full_path);
-      $data['path'] = $this->getImageUrl($data['id']);
-      $data['is_image'] = $this->isImage($full_path);
+      $data['path']      = $this->getImageUrl($data['id']);
+      $data['is_image']  = $this->isImage($full_path);
       if ($data['is_image']) {
-        $data['thumbs'] = $this->getThumbsSizes($data);
-        $img = new \bbn\File\Image($full_path);
+        $data['thumbs']     = $this->getThumbsSizes($data);
+        $img                = new \bbn\File\Image($full_path);
         $data['dimensions'] = [
           'w' => $img->getWidth(),
           'h' => $img->getHeight()
@@ -1006,7 +1005,7 @@ class Medias extends bbn\Models\Cls\Db
         if ($width && ($width < $img->getWidth())) {
           foreach ($data['thumbs'] as $size) {
             if ($size >= $width) {
-              $dot = strrpos($data['file'], '.');
+              $dot     = strrpos($data['file'], '.');
               $tmpFile = substr($data['file'], 0, $dot) . '_w' . $size .
                 strtolower(substr($data['file'], $dot));
               if ($this->fs->isFile($tmpFile) && $this->isImage($tmpFile)) {
@@ -1019,5 +1018,4 @@ class Medias extends bbn\Models\Cls\Db
       }
     }
   }
-
 }

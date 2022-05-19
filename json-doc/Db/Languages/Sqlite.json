@@ -33,6 +33,167 @@
     "fileName": "\/Db\/Languages\/Sqlite.php",
     "startLine": 22,
     "endLine": 1338,
+    "numMethods": 146,
+    "numProperties": 7,
+    "numConstants": 0,
+    "numStaticProperties": 10,
+    "interfaceNames": [
+        "bbn\\Db\\SqlEngines",
+        "bbn\\Db\\Engines",
+        "bbn\\Db\\EnginesApi",
+        "bbn\\Db\\SqlFormatters",
+        "Stringable"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Db\\Languages\\Sql",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "operators": [
+            "!=",
+            "=",
+            "<>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "like",
+            "clike",
+            "slike",
+            "not",
+            "is",
+            "is not",
+            "in",
+            "between",
+            "not like"
+        ],
+        "numeric_types": [
+            "integer",
+            "real"
+        ],
+        "date_types": [],
+        "types": [
+            "integer",
+            "real",
+            "text",
+            "blob"
+        ],
+        "interoperability": {
+            "tinyint": "integer",
+            "smallint": "integer",
+            "mediumint": "integer",
+            "int": "integer",
+            "bigint": "integer",
+            "decimal": "real",
+            "float": "real",
+            "double": "real",
+            "bit": "",
+            "char": "",
+            "varchar": "text",
+            "binary": "blob",
+            "varbinary": "blob",
+            "tinyblob": "blob",
+            "blob": "blob",
+            "mediumblob": "blob",
+            "longblob": "blob",
+            "tinytext": "text",
+            "text": "text",
+            "mediumtext": "text",
+            "longtext": "text",
+            "enum": "text",
+            "set": "text",
+            "date": "text",
+            "time": "text",
+            "datetime": "text",
+            "timestamp": "integer",
+            "year": "integer",
+            "json": "text"
+        },
+        "aggr_functions": [
+            "AVG",
+            "COUNT",
+            "GROUP_CONCAT",
+            "MAX",
+            "MIN",
+            "SUM"
+        ],
+        "write_kinds": [
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "DROP",
+            "ALTER",
+            "CREATE"
+        ],
+        "structure_kinds": [
+            "DROP",
+            "ALTER",
+            "CREATE"
+        ],
+        "LINE": "---------------------------------------------------------------------------------",
+        "_has_error_all": false,
+        "sqlite_keys_enabled": false,
+        "host": null,
+        "connection_code": null,
+        "qte": "\"",
+        "cache": [],
+        "cache_renewal": 3600,
+        "queries": [],
+        "list_queries": [],
+        "_triggers_disabled": false,
+        "id_just_inserted": null,
+        "last_insert_id": null,
+        "last_params": {
+            "sequences": false,
+            "values": false
+        },
+        "last_query": null,
+        "last_real_query": null,
+        "last_real_params": {
+            "sequences": false,
+            "values": false
+        },
+        "_last_enabled": true,
+        "max_queries": 50,
+        "length_queries": 60,
+        "hash_contour": "__BBN__",
+        "hash": null,
+        "cfgs": [],
+        "_triggers": {
+            "SELECT": {
+                "before": [],
+                "after": []
+            },
+            "INSERT": {
+                "before": [],
+                "after": []
+            },
+            "UPDATE": {
+                "before": [],
+                "after": []
+            },
+            "DELETE": {
+                "before": [],
+                "after": []
+            }
+        },
+        "last_cfg": null,
+        "_fancy": 1,
+        "current": null,
+        "_has_error": false,
+        "last_error": null,
+        "on_error": "exception",
+        "cache_engine": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db\\Languages",
+    "shortName": "Sqlite",
     "contentConstructor": {
         "file": "bbn\\Db\\Languages\\Sqlite",
         "returns": null
@@ -11932,167 +12093,6 @@
         "_has_error_all": false
     },
     "constants": null,
-    "numMethods": 146,
-    "numProperties": 7,
-    "numConstants": 0,
-    "numStaticProperties": 10,
-    "interfaceNames": [
-        "bbn\\Db\\SqlEngines",
-        "bbn\\Db\\Engines",
-        "bbn\\Db\\EnginesApi",
-        "bbn\\Db\\SqlFormatters",
-        "Stringable"
-    ],
-    "isInterface": false,
-    "traitNames": [],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Db\\Languages\\Sql",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "operators": [
-            "!=",
-            "=",
-            "<>",
-            "<",
-            "<=",
-            ">",
-            ">=",
-            "like",
-            "clike",
-            "slike",
-            "not",
-            "is",
-            "is not",
-            "in",
-            "between",
-            "not like"
-        ],
-        "numeric_types": [
-            "integer",
-            "real"
-        ],
-        "date_types": [],
-        "types": [
-            "integer",
-            "real",
-            "text",
-            "blob"
-        ],
-        "interoperability": {
-            "tinyint": "integer",
-            "smallint": "integer",
-            "mediumint": "integer",
-            "int": "integer",
-            "bigint": "integer",
-            "decimal": "real",
-            "float": "real",
-            "double": "real",
-            "bit": "",
-            "char": "",
-            "varchar": "text",
-            "binary": "blob",
-            "varbinary": "blob",
-            "tinyblob": "blob",
-            "blob": "blob",
-            "mediumblob": "blob",
-            "longblob": "blob",
-            "tinytext": "text",
-            "text": "text",
-            "mediumtext": "text",
-            "longtext": "text",
-            "enum": "text",
-            "set": "text",
-            "date": "text",
-            "time": "text",
-            "datetime": "text",
-            "timestamp": "integer",
-            "year": "integer",
-            "json": "text"
-        },
-        "aggr_functions": [
-            "AVG",
-            "COUNT",
-            "GROUP_CONCAT",
-            "MAX",
-            "MIN",
-            "SUM"
-        ],
-        "write_kinds": [
-            "INSERT",
-            "UPDATE",
-            "DELETE",
-            "DROP",
-            "ALTER",
-            "CREATE"
-        ],
-        "structure_kinds": [
-            "DROP",
-            "ALTER",
-            "CREATE"
-        ],
-        "LINE": "---------------------------------------------------------------------------------",
-        "_has_error_all": false,
-        "sqlite_keys_enabled": false,
-        "host": null,
-        "connection_code": null,
-        "qte": "\"",
-        "cache": [],
-        "cache_renewal": 3600,
-        "queries": [],
-        "list_queries": [],
-        "_triggers_disabled": false,
-        "id_just_inserted": null,
-        "last_insert_id": null,
-        "last_params": {
-            "sequences": false,
-            "values": false
-        },
-        "last_query": null,
-        "last_real_query": null,
-        "last_real_params": {
-            "sequences": false,
-            "values": false
-        },
-        "_last_enabled": true,
-        "max_queries": 50,
-        "length_queries": 60,
-        "hash_contour": "__BBN__",
-        "hash": null,
-        "cfgs": [],
-        "_triggers": {
-            "SELECT": {
-                "before": [],
-                "after": []
-            },
-            "INSERT": {
-                "before": [],
-                "after": []
-            },
-            "UPDATE": {
-                "before": [],
-                "after": []
-            },
-            "DELETE": {
-                "before": [],
-                "after": []
-            }
-        },
-        "last_cfg": null,
-        "_fancy": 1,
-        "current": null,
-        "_has_error": false,
-        "last_error": null,
-        "on_error": "exception",
-        "cache_engine": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Db\\Languages",
-    "shortName": "Sqlite",
     "summary": "Database Class",
     "description": "",
     "description_parts": []

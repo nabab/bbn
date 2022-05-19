@@ -13,6 +13,70 @@
     "fileName": "\/Db\/History.php",
     "startLine": 12,
     "endLine": 1633,
+    "numMethods": 47,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 5,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Report",
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_history",
+            "tables": {
+                "history": "bbn_history",
+                "history_uids": "bbn_history_uids"
+            },
+            "arch": {
+                "history": {
+                    "opr": "opr",
+                    "uid": "uid",
+                    "col": "col",
+                    "val": "val",
+                    "ref": "ref",
+                    "tst": "tst",
+                    "usr": "usr",
+                    "dt": "dt"
+                },
+                "history_uids": {
+                    "bbn_uid": "bbn_uid",
+                    "bbn_table": "bbn_table",
+                    "bbn_active": "bbn_active"
+                }
+            },
+            "conditions": []
+        },
+        "instances": [],
+        "_error": null,
+        "_last_error": null,
+        "_debug": null,
+        "database_obj": null,
+        "admin_db": "",
+        "enabled": true,
+        "enabled_count": 0,
+        "disabled_count": 0,
+        "date": null,
+        "structures": [],
+        "class_cfg": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Db",
+    "shortName": "History",
     "contentConstructor": {
         "file": "bbn\\Db\\History",
         "returns": null
@@ -2018,70 +2082,6 @@
         "_debug": null
     },
     "constants": null,
-    "numMethods": 47,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 5,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Report",
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_history",
-            "tables": {
-                "history": "bbn_history",
-                "history_uids": "bbn_history_uids"
-            },
-            "arch": {
-                "history": {
-                    "opr": "opr",
-                    "uid": "uid",
-                    "col": "col",
-                    "val": "val",
-                    "ref": "ref",
-                    "tst": "tst",
-                    "usr": "usr",
-                    "dt": "dt"
-                },
-                "history_uids": {
-                    "bbn_uid": "bbn_uid",
-                    "bbn_table": "bbn_table",
-                    "bbn_active": "bbn_active"
-                }
-            },
-            "conditions": []
-        },
-        "instances": [],
-        "_error": null,
-        "_last_error": null,
-        "_debug": null,
-        "database_obj": null,
-        "admin_db": "",
-        "enabled": true,
-        "enabled_count": 0,
-        "disabled_count": 0,
-        "date": null,
-        "structures": [],
-        "class_cfg": null,
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Db",
-    "shortName": "History",
     "summary": "",
     "description": "",
     "description_parts": []

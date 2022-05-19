@@ -2,7 +2,7 @@
 
 namespace bbn\Api;
 
-use bbn\Cache;
+use Error;
 use stdClass;
 
 /**
@@ -36,11 +36,11 @@ class Webmin
   public function __construct(array $cfg)
   {
     if (empty($cfg['user'])) {
-      throw new \Error(_('The username is mandatory'));
+      throw new Error(_('The username is mandatory'));
     }
 
     if (empty($cfg['pass'])) {
-      throw new \Error(_('The password is mandatory'));
+      throw new Error(_('The password is mandatory'));
     }
 
     $this->cacheInit();
@@ -92,7 +92,7 @@ class Webmin
    * Gets notifications
    * @return object
    */
-  public function getNotifications(): object
+  public function getNotifications(): stdClass // There was object bringing an error in doc parsing
   {
     return $this->callCommand('webmin::get_webmin_notifications');
   }

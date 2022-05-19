@@ -17,6 +17,75 @@
     "fileName": "\/Mvc.php",
     "startLine": 52,
     "endLine": 1562,
+    "numMethods": 97,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 12,
+    "interfaceNames": [
+        "bbn\\Mvc\\Api"
+    ],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Singleton",
+        "bbn\\Mvc\\Common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_loaded_views": {
+            "html": [],
+            "css": [],
+            "js": []
+        },
+        "_is_debug": false,
+        "_app_name": null,
+        "_app_prefix": null,
+        "_app_path": null,
+        "_cur_path": null,
+        "_lib_path": null,
+        "_data_path": null,
+        "db_in_controller": false,
+        "reserved": [
+            "_private",
+            "_common",
+            "_htaccess"
+        ],
+        "singleton_instance": null,
+        "singleton_exists": false,
+        "controller": null,
+        "db": null,
+        "env": null,
+        "router": null,
+        "info": null,
+        "root": "",
+        "plugins": null,
+        "loaded": {
+            "views": {
+                "html": [],
+                "css": [],
+                "js": []
+            },
+            "models": [],
+            "ctrls": []
+        },
+        "authorized_routes": [],
+        "forbidden_routes": [],
+        "inc": null,
+        "data": [],
+        "o": null,
+        "obj": null,
+        "_mvc": null,
+        "_plugin": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "Mvc",
     "contentConstructor": {
         "file": "bbn\\Mvc",
         "returns": null
@@ -3770,75 +3839,6 @@
         "singleton_exists": 1
     },
     "constants": null,
-    "numMethods": 97,
-    "numProperties": 5,
-    "numConstants": 0,
-    "numStaticProperties": 12,
-    "interfaceNames": [
-        "bbn\\Mvc\\Api"
-    ],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Singleton",
-        "bbn\\Mvc\\Common"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": null,
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "_loaded_views": {
-            "html": [],
-            "css": [],
-            "js": []
-        },
-        "_is_debug": false,
-        "_app_name": null,
-        "_app_prefix": null,
-        "_app_path": null,
-        "_cur_path": null,
-        "_lib_path": null,
-        "_data_path": null,
-        "db_in_controller": false,
-        "reserved": [
-            "_private",
-            "_common",
-            "_htaccess"
-        ],
-        "singleton_instance": null,
-        "singleton_exists": false,
-        "controller": null,
-        "db": null,
-        "env": null,
-        "router": null,
-        "info": null,
-        "root": "",
-        "plugins": null,
-        "loaded": {
-            "views": {
-                "html": [],
-                "css": [],
-                "js": []
-            },
-            "models": [],
-            "ctrls": []
-        },
-        "authorized_routes": [],
-        "forbidden_routes": [],
-        "inc": null,
-        "data": [],
-        "o": null,
-        "obj": null,
-        "_mvc": null,
-        "_plugin": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn",
-    "shortName": "Mvc",
     "summary": "MVC",
     "description": "",
     "description_parts": []

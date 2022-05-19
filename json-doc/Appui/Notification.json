@@ -13,6 +13,81 @@
     "fileName": "\/Appui\/Notification.php",
     "startLine": 7,
     "endLine": 896,
+    "numMethods": 52,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 4,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Optional",
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_notifications",
+            "tables": {
+                "notifications": "bbn_notifications",
+                "content": "bbn_notifications_content"
+            },
+            "arch": {
+                "notifications": {
+                    "id": "id",
+                    "id_content": "id_content",
+                    "id_user": "id_user",
+                    "web": "web",
+                    "browser": "browser",
+                    "mail": "mail",
+                    "mobile": "mobile",
+                    "read": "read",
+                    "dt_web": "dt_web",
+                    "dt_browser": "dt_browser",
+                    "dt_mail": "dt_mail",
+                    "dt_mobile": "dt_mobile",
+                    "dt_read": "dt_read"
+                },
+                "content": {
+                    "id": "id",
+                    "id_option": "id_option",
+                    "title": "title",
+                    "content": "content",
+                    "creation": "creation"
+                }
+            }
+        },
+        "optional_is_init": false,
+        "option_root_id": null,
+        "option_appui_id": null,
+        "opt": null,
+        "user": null,
+        "pref": null,
+        "perms": null,
+        "cfg": null,
+        "lastDbId": null,
+        "lastId": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "options": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Notification",
     "contentConstructor": {
         "file": "bbn\\Appui\\Notification",
         "returns": null
@@ -2158,81 +2233,6 @@
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 52,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 4,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional",
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_notifications",
-            "tables": {
-                "notifications": "bbn_notifications",
-                "content": "bbn_notifications_content"
-            },
-            "arch": {
-                "notifications": {
-                    "id": "id",
-                    "id_content": "id_content",
-                    "id_user": "id_user",
-                    "web": "web",
-                    "browser": "browser",
-                    "mail": "mail",
-                    "mobile": "mobile",
-                    "read": "read",
-                    "dt_web": "dt_web",
-                    "dt_browser": "dt_browser",
-                    "dt_mail": "dt_mail",
-                    "dt_mobile": "dt_mobile",
-                    "dt_read": "dt_read"
-                },
-                "content": {
-                    "id": "id",
-                    "id_option": "id_option",
-                    "title": "title",
-                    "content": "content",
-                    "creation": "creation"
-                }
-            }
-        },
-        "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null,
-        "opt": null,
-        "user": null,
-        "pref": null,
-        "perms": null,
-        "cfg": null,
-        "lastDbId": null,
-        "lastId": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "options": null,
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Notification",
     "summary": "",
     "description": "",
     "description_parts": []

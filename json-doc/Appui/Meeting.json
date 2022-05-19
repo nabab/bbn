@@ -19,6 +19,74 @@
     "fileName": "\/Appui\/Meeting.php",
     "startLine": 16,
     "endLine": 1014,
+    "numMethods": 65,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 4,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Models\\Tts\\Optional",
+        "bbn\\Models\\Tts\\Dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\Models\\Cls\\Db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_class_cfg": {
+            "table": "bbn_meetings",
+            "tables": {
+                "meetings": "bbn_meetings",
+                "participants": "bbn_meetings_participants"
+            },
+            "arch": {
+                "meetings": {
+                    "id": "id",
+                    "id_room": "id_room",
+                    "id_tmp": "id_tmp",
+                    "started": "started",
+                    "ended": "ended"
+                },
+                "participants": {
+                    "id": "id",
+                    "id_meeting": "id_meeting",
+                    "id_tmp": "id_tmp",
+                    "id_user": "id_user",
+                    "name": "name",
+                    "invited": "invited",
+                    "joined": "joined",
+                    "leaved": "leaved"
+                }
+            }
+        },
+        "optional_is_init": false,
+        "option_root_id": null,
+        "option_appui_id": null,
+        "opt": null,
+        "optFields": null,
+        "prefTable": null,
+        "prefFields": null,
+        "passCls": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "options": null,
+        "_is_init_class_cfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui",
+    "shortName": "Meeting",
     "contentConstructor": {
         "file": "bbn\\Appui\\Meeting",
         "returns": null
@@ -2679,74 +2747,6 @@
         "option_appui_id": null
     },
     "constants": null,
-    "numMethods": 65,
-    "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 4,
-    "interfaceNames": [],
-    "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional",
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
-    "traitAliases": [],
-    "isTrait": false,
-    "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
-    "parentClass": "bbn\\Models\\Cls\\Db",
-    "isSubclassOf": false,
-    "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_meetings",
-            "tables": {
-                "meetings": "bbn_meetings",
-                "participants": "bbn_meetings_participants"
-            },
-            "arch": {
-                "meetings": {
-                    "id": "id",
-                    "id_room": "id_room",
-                    "id_tmp": "id_tmp",
-                    "started": "started",
-                    "ended": "ended"
-                },
-                "participants": {
-                    "id": "id",
-                    "id_meeting": "id_meeting",
-                    "id_tmp": "id_tmp",
-                    "id_user": "id_user",
-                    "name": "name",
-                    "invited": "invited",
-                    "joined": "joined",
-                    "leaved": "leaved"
-                }
-            }
-        },
-        "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null,
-        "opt": null,
-        "optFields": null,
-        "prefTable": null,
-        "prefFields": null,
-        "passCls": null,
-        "db": null,
-        "errors": [],
-        "error": false,
-        "debug": false,
-        "log": [],
-        "options": null,
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
-    },
-    "isIterable": false,
-    "extensionName": false,
-    "namespaceName": "bbn\\Appui",
-    "shortName": "Meeting",
     "summary": "Meeting management in Appui",
     "description": "",
     "description_parts": []
