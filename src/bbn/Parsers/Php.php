@@ -820,12 +820,24 @@ class Php extends bbn\Models\Cls\Basic
    */
   private function _get_method_info(\ReflectionMethod $method)
   {
-    $ret = null;
+    $ret = [];
     if ($method->hasReturnType()) {
       $type = $method->getReturnType();
-      //$ret  = [$type->getName()];
       if ($type->allowsNull()) {
         $ret[] = null;
+      }
+
+      if (method_exists($type, 'getTypes')) {
+        foreach ($type->getTypes() as $stype) {
+          if (method_exists($type, 'getName')) {
+            if (!in_array($stype->getName(), $ret)) {
+              $ret[] = $stype->getName();
+            }
+          }
+        }
+      }
+      else {
+        $ret[]  = $type->getName();
       }
     }
 
