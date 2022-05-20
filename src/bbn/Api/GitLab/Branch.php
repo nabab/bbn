@@ -15,7 +15,7 @@ trait Branch
    */
   public function getBranches($project): array
   {
-    return $this->request($this->host . $this->projectURL . $project . '/repository/' . $this->branchURL);
+    return $this->request($this->projectURL . $project . '/repository/' . $this->branchURL);
   }
 
 
@@ -27,7 +27,7 @@ trait Branch
    */
   public function getBranch($project, string $branch): array
   {
-    return $this->request($this->host . $this->projectURL . $project . '/repository/' . $this->branchURL . $branch);
+    return $this->request($this->projectURL . $project . '/repository/' . $this->branchURL . $branch);
   }
 
 

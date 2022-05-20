@@ -31,6 +31,9 @@ class GitLab
   /** @var string The last error */
   protected $lastError = '';
 
+  /** @var string The last request made */
+  protected $lastRequest = '';
+
   /**
    * Constructor.
    * @param array $cfg
@@ -75,7 +78,7 @@ class GitLab
   private function request($url): array
   {
     // Set the lastRequest property
-    $this->lastRequest = $url . '?private_token=' . $this->token;
+    $this->lastRequest = $this->host . $url . (str_contains($url, '?') ? '&' : '?') . 'private_token=' . $this->token;
     // Make the curl request
     $response = X::curl($this->lastRequest, null, []);
     // Check if the response is a JSON string and convert it
@@ -96,10 +99,10 @@ class GitLab
   {
     // Reset lastError property
     $this->setLastError('', false);
-    // Check if an error message is present
-    if (\is_object($data) && !empty($data->message)) {
+    // Check if an error is present
+    if (X::lastCurlCode() !== 200) {
       // Set the error to lastError property and throw exception
-      $this->setLastError($data->message);
+      $this->setLastError(\is_object($data) && !empty($data->message) ? $data->message : $data);
       return true;
     }
     return false;
