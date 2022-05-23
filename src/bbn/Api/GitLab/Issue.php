@@ -48,4 +48,15 @@ trait Issue
   }
 
 
+  /**
+   * Gets a specific issue
+   * @param int $id The issue ID
+   * @return array
+   */
+  public function getIssue(int $id): array
+  {
+    return $this->request($this->issueURL . $id);
+  }
+
+
 }

@@ -423,12 +423,12 @@ class User extends Models\Cls\Basic
       // Creating the session's variables if they don't exist yet
       $this->_init_session();
 
-      /*
+      // CLI user
       if (x::isCli() && isset($params['id'])) {
         $this->id = $params['id'];
         $this->auth = true;
       }
-      */
+
       // The user logs in
       if ($this->isLoginRequest($params)) {
         /** @todo separate credentials and salt checking */
