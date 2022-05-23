@@ -21,6 +21,7 @@ class GitLab
   use GitLab\Project;
   use GitLab\Branch;
   use GitLab\Issue;
+  use GitLab\Note;
 
   /** @var string The access token */
   protected $token;
@@ -38,14 +39,14 @@ class GitLab
    * Constructor.
    * @param array $cfg
    */
-  public function __construct(array $cfg)
+  public function __construct(string $accessToken, string $host = '')
   {
-    if (empty($cfg['token'])) {
+    if (empty($accessToken)) {
       throw new \Error(_('The access token is mandatory'));
     }
 
-    $this->token = $cfg['token'];
-    $host        = !empty(\trim($cfg['host'])) ? \trim($cfg['host']) : 'localhost';
+    $this->token = $accessToken;
+    $host        = !empty(\trim($host)) ? \trim($host) : 'localhost';
     $this->host  = $host . (\str_ends_with($host, '/') ? '' : '/') . 'api/v4/';
   }
 
@@ -79,6 +80,7 @@ class GitLab
   {
     // Set the lastRequest property
     $this->lastRequest = $this->host . $url . (str_contains($url, '?') ? '&' : '?') . 'private_token=' . $this->token;
+    //die(var_dump($this->lastRequest));
     // Make the curl request
     $response = X::curl($this->lastRequest, null, []);
     // Check if the response is a JSON string and convert it
@@ -102,7 +104,8 @@ class GitLab
     // Check if an error is present
     if (X::lastCurlCode() !== 200) {
       // Set the error to lastError property and throw exception
-      $this->setLastError(\is_object($data) && !empty($data->message) ? $data->message : $data);
+      $err = \is_object($data) ? (!empty($data->error) ? $data->error : (!empty($data->message) ? $data->message : $data)) : $data;
+      $this->setLastError($err);
       return true;
     }
     return false;
@@ -110,16 +113,16 @@ class GitLab
 
   /**
    * Sets the lastError property with the last request error
-   * @param string $message The error message
+   * @param string $error The error message
    * @param bool $exc True if you want throw the exception
    */
-  private function setLastError(string $message, bool $exc = true)
+  private function setLastError($error, bool $exc = true)
   {
     // Set the error message to lastError property
-    $this->lastError = $message;
+    $this->lastError = $error;
     if ($exc) {
       // Throw exception
-      throw new \Exception($message);
+      throw new \Exception(\is_object($error) ? json_encode($error) : $error);
     }
   }
 

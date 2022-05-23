@@ -125,7 +125,7 @@ trait Project
    */
   public function getIssues($project): array
   {
-    return $this->request($this->projectURL . $project . '/issues');
+    return $this->request($this->projectURL . $project . '/' . $this->issueURL . '?scoper=all');
   }
 
 
@@ -136,7 +136,7 @@ trait Project
    */
   public function getClosedIssues($project): array
   {
-    return $this->request($this->projectURL . $project . '/issues?state=closed');
+    return $this->request($this->projectURL . $project . '/' . $this->issueURL . '?scoper=all&state=closed');
   }
 
 
@@ -147,7 +147,20 @@ trait Project
    */
   public function getOpenedIssues($project): array
   {
-    return $this->request($this->projectURL . $project . '/issues?state=opened');
+    return $this->request($this->projectURL . $project . '/' . $this->issueURL . '?scoper=all&state=opened');
+  }
+
+
+  /**
+   * Gets the notes list of a specific issue of the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int $issue The issue ID
+   * @param string $sort The sorting direction 'asc' or 'desc'
+   * @return array
+   */
+  public function getIssueNotes($project, int $issue, string $sort = 'asc'): array
+  {
+    return $this->request($this->projectURL . $project . '/' . $this->issueURL . $issue . '/' . $this->noteURL . '?sort=' . $sort);
   }
 
 
