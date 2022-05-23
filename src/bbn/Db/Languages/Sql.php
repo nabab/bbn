@@ -8,6 +8,7 @@ use bbn\Db\SqlEngines;
 use bbn\Db\SqlFormatters;
 use bbn\Str;
 use bbn\X;
+use Exception;
 use PHPSQLParser\PHPSQLParser;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
@@ -1529,6 +1530,50 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     return $st;
   }
+
+
+  /**
+   * Returns true if the given table exists
+   *
+   * @param string $table
+   * @param string $database. or currently selected if none
+   * @return boolean
+   */
+  public function tableExists(string $table, string $database = ''): bool
+  {
+    $q = "SHOW tables ";
+    if ($database) {
+      $q .= "FROM " . $this->escape($database) . " ";
+    }
+
+    return (bool)$this->getOne($q . "LIKE ?", $table);
+  }
+
+
+  /**
+   * Drops a table
+   *
+   * @param string $table
+   * @param string $database. or currently selected if none
+   * @return boolean
+   */
+  public function dropTable(string $table, string $database = ''): bool
+  {
+    $tfn = $this->tableFullName(($database ? $database . '.' : '') . $table, true);
+    if (!$tfn) {
+      throw new Exception(X::_("Invalid table name to drop"));
+    }
+
+    if (!$this->tableExists($table, $database)) {
+      throw new Exception(X::_("The table %s does not exist", $table));
+    }
+
+    $this->query("DROP table $tfn");
+    return !$this->tableExists($table, $database);
+
+  }
+
+
 
   /**
    * @param string $table

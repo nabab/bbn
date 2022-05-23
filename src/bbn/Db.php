@@ -3186,6 +3186,19 @@ class Db implements Db\Actions
 
 
   /**
+   * Returns true if the given table exists
+   *
+   * @param string $table
+   * @param string $database. or currently selected if none
+   * @return boolean
+   */
+  public function tableExists(string $table, string $database = ''): bool
+  {
+    return $this->language->tableExists($table, $database);
+  }
+
+
+  /**
    * Drops the given database
    *
    * @param string $database
@@ -3194,6 +3207,18 @@ class Db implements Db\Actions
   public function dropDatabase(string $database): bool
   {
     return $this->language->dropDatabase($database);
+  }
+
+
+  /**
+   * Drops the given table, in the current database if none given
+   *
+   * @param string $database
+   * @return bool
+   */
+  public function dropTable(string $table, string $database = ''): bool
+  {
+    return $this->language->dropTable($table, $database);
   }
 
 

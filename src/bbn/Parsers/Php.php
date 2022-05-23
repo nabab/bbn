@@ -145,11 +145,14 @@ class Php extends bbn\Models\Cls\Basic
    * @param string $path
    * @return array|null
    */
-  public function analyzeClass(string $cls, string $path = ''): ?array
+  public function analyzeClass(string $cls, string $path = '', $level = 'public'): ?array
   {
     $rc = new \ReflectionClass($cls);
     if (!empty($cls) && is_object($rc)) {
       $constructor = $rc->getConstructor();
+      if ($level) {
+        
+      }
       $methods     = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
       $props       = $rc->getProperties(\ReflectionMethod::IS_PUBLIC);
       $statprops   = $rc->getStaticProperties();

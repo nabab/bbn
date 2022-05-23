@@ -242,6 +242,15 @@ interface Engines
   public function dropDatabase(string $database): bool;
 
   /**
+   * Drops a table
+   *
+   * @param string $table
+   * @param string $database or currently selected
+   * @return bool
+   */
+  public function dropTable(string $table, string $database = ''): bool;
+
+  /**
    * Gets the size of a database
    *
    * @param string $database

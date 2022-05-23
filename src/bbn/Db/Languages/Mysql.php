@@ -4,6 +4,8 @@
  */
 namespace bbn\Db\Languages;
 
+use Exception;
+use PDO;
 use bbn;
 use bbn\Str;
 use bbn\X;
@@ -46,12 +48,12 @@ class Mysql extends Sql
    * Constructor
    *
    * @param array $cfg
-   * @throws \Exception
+   * @throws Exception
    */
   public function __construct(array $cfg)
   {
     if (!\extension_loaded('pdo_mysql')) {
-      throw new \Exception(X::_("The MySQL driver for PDO is not installed..."));
+      throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
     $cfg = $this->getConnection($cfg);
@@ -63,8 +65,8 @@ class Mysql extends Sql
       $this->username = $cfg['user'] ?? null;
       $this->connection_code = $cfg['code_host'];
 
-      $this->pdo = new \PDO(...$cfg['args']);
-      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->pdo = new PDO(...$cfg['args']);
+      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $this->cfg = $cfg;
       $this->setHash($cfg['args']);
 
@@ -78,12 +80,12 @@ class Mysql extends Sql
 
       unset($cfg['pass']);
     }
-    catch (\PDOException $e) {
+    catch (PDOException $e) {
       $err = X::_("Impossible to create the connection") .
         " $cfg[engine] ".X::_("to")." {$this->host} "
         . X::_("with the following error") . " " . $e->getMessage();
         X::log($cfg);
-      throw new \Exception($err);
+      throw new Exception($err);
     }
   }
 
@@ -96,7 +98,7 @@ class Mysql extends Sql
   {
     if (!X::hasProps($cfg, ['host', 'db'])) {
       if (!defined('BBN_DB_HOST')) {
-        throw new \Exception(X::_("No DB host defined"));
+        throw new Exception(X::_("No DB host defined"));
       }
 
       $cfg = [
@@ -134,7 +136,7 @@ class Mysql extends Sql
         . 'port=' . $cfg['port'],
       $cfg['user'],
       $cfg['pass'],
-      [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
     ];
 
     return $cfg;
@@ -224,18 +226,18 @@ class Mysql extends Sql
    *
    * @param string $database
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function dropDatabase(string $database): bool
   {
     if ($this->check()) {
       if (!Str::checkName($database)) {
-        throw new \Exception(X::_("Wrong database name") . " $database");
+        throw new Exception(X::_("Wrong database name") . " $database");
       }
 
       try {
         $this->rawQuery("DROP DATABASE `$database`");
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         return false;
       }
     }
@@ -251,7 +253,7 @@ class Mysql extends Sql
    * @param string $pass
    * @param string|null $db
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function createUser(string $user, string $pass, string $db = null): bool
   {
@@ -282,7 +284,7 @@ MYSQL
    *
    * @param string $user
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function deleteUser(string $user): bool
   {
@@ -300,7 +302,7 @@ MYSQL
    * @param string $user
    * @param string $host
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getUsers(string $user = '', string $host = ''): ?array
   {
@@ -386,7 +388,7 @@ MYSQL
    * @param string $database
    * @param string $type
    * @return int
-   * @throws \Exception
+   * @throws Exception
    */
   public function dbSize(string $database = '', string $type = ''): int
   {
@@ -422,7 +424,7 @@ MYSQL
    * @param string $table
    * @param string $type
    * @return int
-   * @throws \Exception
+   * @throws Exception
    */
   public function tableSize(string $table, string $type = ''): int
   {
@@ -431,7 +433,7 @@ MYSQL
       $row = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
 
       if (!$row) {
-        throw new \Exception(X::_('Table ') . $table . X::_(' Not found'));
+        throw new Exception(X::_('Table ') . $table . X::_(' Not found'));
       }
 
       if (!$type || (strtolower($type) === 'index')) {
@@ -453,7 +455,7 @@ MYSQL
    * @param string $table
    * @param string $database
    * @return mixed
-   * @throws \Exception
+   * @throws Exception
    */
   public function status(string $table = '', string $database = '')
   {
@@ -572,7 +574,7 @@ MYSQL
    * ```
    *
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getDatabases(): ?array
   {
@@ -586,7 +588,7 @@ MYSQL
         function ($a) {
           return $a['Database'];
         }, array_filter(
-          $this->fetchAllResults($r, \PDO::FETCH_ASSOC), function ($a) {
+          $this->fetchAllResults($r, PDO::FETCH_ASSOC), function ($a) {
           return ($a['Database'] === 'information_schema') || ($a['Database'] === 'mysql') ? false : 1;
         }
         )
@@ -637,7 +639,7 @@ MYSQL
 
     $t2 = [];
     if (($r = $this->rawQuery("SHOW TABLES FROM `$database`"))
-      && ($t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM))
+      && ($t1 = $this->fetchAllResults($r, PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];
@@ -896,7 +898,7 @@ MYSQL
     if (($table = $this->tableFullName($table, true))
       && ($r = $this->rawQuery("SHOW CREATE TABLE $table"))
     ) {
-      return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
+      return $r->fetch(PDO::FETCH_ASSOC)['Create Table'];
     }
 
     return '';
@@ -906,7 +908,7 @@ MYSQL
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateTable(string $table, array $model = null): string
   {
@@ -935,7 +937,7 @@ MYSQL
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateKeys(string $table, array $model = null): string
   {
@@ -981,7 +983,7 @@ MYSQL
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreate(string $table, array $model = null): string
   {
@@ -1089,12 +1091,12 @@ MYSQL
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterTable(string $table, array $cfg): string
   {
     if (empty($cfg['fields'])) {
-      throw new \Exception(X::_('Fields are not specified'));
+      throw new Exception(X::_('Fields are not specified'));
     }
 
     if ($this->check() && Str::checkName($table)) {
@@ -1137,7 +1139,7 @@ MYSQL
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterColumn(string $table, array $cfg): string
   {
@@ -1239,7 +1241,7 @@ MYSQL
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterKey(string $table, array $cfg): string
   {
@@ -1292,11 +1294,11 @@ MYSQL
     }
 
     if (!$cfg) {
-      throw new \Exception(X::_("If the table does not exist a configuration should be provided"));
+      throw new Exception(X::_("If the table does not exist a configuration should be provided"));
     }
 
     if (!$cfg['fields'][$column]) {
-      throw new \Exception(X::_("The column is not part of the table's structure"));
+      throw new Exception(X::_("The column is not part of the table's structure"));
     }
 
     $st  = 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
@@ -1315,7 +1317,7 @@ MYSQL
    * @param bool $unique
    * @param null $length
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function createIndex(string $table, $column, bool $unique = false, $length = null): bool
   {
@@ -1373,7 +1375,7 @@ MYSQL
    * @param string $column
    * @param array $col
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function createColumn(string $table, string $column, array $col): bool
   {
@@ -1397,7 +1399,7 @@ MYSQL
    * @param array $col
    * @param bool $include_col_name
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   protected function getColumnDefinitionStatement(string $name, array $col, bool $include_col_name = true): string
   {
@@ -1408,7 +1410,7 @@ MYSQL
     }
 
     if (empty($col['type'])) {
-      throw new \Exception(X::_('Column type is not provided'));
+      throw new Exception(X::_('Column type is not provided'));
     }
 
     if (!in_array($col['type'], self::$types)) {
@@ -1416,7 +1418,7 @@ MYSQL
         $st .= self::$interoperability[$col['type']];
       }
       else {
-        throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
+        throw new Exception(X::_("Impossible to recognize the column type")." $col[type]");
       }
     }
     else {
@@ -1425,7 +1427,7 @@ MYSQL
 
     if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
       if (empty($col['extra'])) {
-        throw new \Exception(X::_("Extra field is required for")." {$col['type']}");
+        throw new Exception(X::_("Extra field is required for")." {$col['type']}");
       }
 
       $st .= ' (' . $col['extra'] . ')';
@@ -1451,16 +1453,19 @@ MYSQL
 
     if (!empty($col['virtual'])) {
       $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
-    } elseif (array_key_exists('default', $col)) {
-      $st .= ' DEFAULT ';
-      if (($col['default'] === 'NULL')
-        || Str::isNumber($col['default'])
-        || strpos($col['default'], '(')
-        || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
-      ) {
-        $st .= (string)$col['default'];
-      } else {
-        $st .= "'" . trim($col['default'], "'") . "'";
+    }
+    elseif (array_key_exists('default', $col)) {
+      if (!empty($col['defaultExpression'])) {
+        $st .= ' DEFAULT ';
+        if ($col['default'] === null) {
+          $st .= ' NULL';
+        }
+        else {
+          $st .= (string)$col['default'];
+        }
+      }
+      elseif (!empty($col['default'])) {
+        $st .= " DEFAULT '" . Str::escapeQuotes(trim($col['default'], "'")) . "'";
       }
     }
 

@@ -103,7 +103,10 @@ class Database extends bbn\Models\Cls\Cache
           case 'mysql':
             if (strpos($cfg['code'], '@')) {
               $bits = bbn\X::split($cfg['code'], '@');
-              if ((count($bits) === 2) && ($password = $this->getPassword($id_host))) {
+              if (count($bits) === 2) {
+                if (!($password = $this->getPassword($id_host))) {
+                  throw new \Exception(X::_("No password for %s", $cfg['code']));
+                }
                 $db_cfg = [
                   'engine' => 'mysql',
                   'user' => $bits[0],
