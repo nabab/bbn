@@ -267,6 +267,50 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
 
   /**
+   * Returns the list of operators in the current language
+   *
+   * @return array
+   */
+  public function getOperators(): array
+  {
+    return self::$operators;
+  }
+
+
+  /**
+   * Returns the list of all types
+   *
+   * @return array
+   */
+  public function getTypes(): array
+  {
+    return self::$types;
+  }
+
+
+  /**
+   * Returns the list of numeric types in the current language
+   *
+   * @return array
+   */
+  public function getNumericTypes(): array
+  {
+    return self::$numeric_types;
+  }
+
+
+  /**
+   * Returns the list of date types in the current language
+   *
+   * @return array
+   */
+  public function getDateTypes(): array
+  {
+    return self::$date_types;
+  }
+
+
+  /**
    * Closes the connection definitely, making the object unusable.
    */
   public function close()

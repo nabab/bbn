@@ -3305,6 +3305,55 @@ class Db implements Db\Actions
 
 
   /**
+   * Creates a simplified array for options from a table model
+   *
+   * @param [type] $table_name
+   * @param string $database
+   * @return array
+   */
+  public function export4Option($table_name, $database = ''): array
+  {
+    if ($database) {
+      $table_name = $database . '.' . $table_name; 
+    }
+
+    $structure = $this->modelize($table_name);
+    foreach ($structure['keys'] as $k => &$m) {
+      unset($m['ref_db'], $m['constraint']);
+      if (empty($m['ref_table'])) {
+        unset($m['ref_table'], $m['ref_column'], $m['delete'], $m['update']);
+      }
+    }
+    foreach ($structure['fields'] as $k => &$f) {
+      unset($f['position']);
+      if (!in_array($f['type'], ['decimal', 'float', 'double'])) {
+        unset($f['decimals']);
+      }
+      if (!in_array($f['type'], $this->language->getNumericTypes())) {
+        unset($f['signed']);
+      }
+      if (empty($f['defaultExpression']) && is_null($f['default'])) {
+        unset($f['default'], $f['defaultExpression']);
+      }
+      if (empty($f['extra'])) {
+        unset($f['extra']);
+      }
+      if (empty($f['key'])) {
+        unset($f['key']);
+      }
+      if (empty($f['virtual'])) {
+        unset($f['virtual']);
+      }
+      if (empty($f['generation'])) {
+        unset($f['generation']);
+      }
+    }
+
+    return $structure;
+  }
+
+
+  /**
    * Throws ans exception if language class method does not exist.
    *
    * @param string $method
